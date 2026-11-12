@@ -242,6 +242,37 @@ def check_pages(meta, built):
         err("v3/index.html (language chooser) missing")
 
 
+def check_pwa():
+    manifest_path = V3 / "manifest.webmanifest"
+    manifest = load(manifest_path)
+    if manifest is None:
+        return
+    for key in ("name", "short_name", "start_url", "scope", "display", "icons"):
+        if not manifest.get(key):
+            err("manifest.webmanifest: missing '%s'" % key)
+    for icon in manifest.get("icons", []):
+        if not (V3 / icon.get("src", "")).is_file():
+            err("manifest.webmanifest: missing icon %s" % icon.get("src"))
+    for path in ("service-worker.js", "precache-manifest.js", "shared/pwa.js"):
+        if not (V3 / path).is_file():
+            err("%s: missing PWA file" % path)
+    precache_path = V3 / "precache-manifest.js"
+    if precache_path.is_file():
+        text = precache_path.read_text(encoding="utf-8")
+        revision = re.search(r"self\.PRECACHE_REVISION\s*=\s*(\"[^\"]+\")", text)
+        urls = re.search(r"self\.PRECACHE_URLS\s*=\s*(\[.*\]);", text, re.S)
+        if not revision or not urls:
+            err("precache-manifest.js: invalid format")
+        else:
+            try:
+                files = json.loads(urls.group(1))
+                for url in files:
+                    if url != "./" and not (V3 / url).is_file():
+                        err("precache-manifest.js: missing %s" % url)
+            except json.JSONDecodeError as e:
+                err("precache-manifest.js: invalid URL list (%s)" % e)
+
+
 def selftest(meta, built):
     js = find_js()
     if not js:
@@ -294,6 +325,7 @@ def main():
         return 1
     built = check_content(meta, ui)
     check_pages(meta, built)
+    check_pwa()
     selftest(meta, built)
     for w in warnings:
         print("WARN ", w)
