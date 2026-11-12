@@ -1,0 +1,545 @@
+{
+ "title": "Services and Logs",
+ "lead": "Manage services with systemd and systemctl, write a simple unit file, and find the cause of problems in the journal and in /var/log.",
+ "objectives": [
+  "You check, start, stop and enable services with systemctl and know the difference between start and enable.",
+  "You know the service names on RHEL/Rocky and Debian/Ubuntu (sshd/ssh, httpd/apache2, firewalld/ufw).",
+  "You read a unit file ([Unit], [Service], [Install]) and create a custom unit with daemon-reload.",
+  "You read logs with journalctl and with classic files in /var/log, and you know logrotate and the persistent journal."
+ ],
+ "sections": [
+  {
+   "id": "systemctl",
+   "title": "systemd and systemctl",
+   "body": [
+    "**systemd** is the first process (PID 1) of almost every modern distribution and manages **units**. The most common types are `service` (a daemon such as sshd), `target` (a group of units, like a run level) and `timer` (a scheduled job, modern cron alternative).",
+    "`systemctl` is the control tool. **start** runs a service **now**, **enable** only makes it start **at boot**. They are independent: a service can be running but disabled, or enabled but stopped. `enable --now` does both at once.",
+    "`reload` makes a service re-read its configuration without a restart (not every service supports it); `restart` stops and starts it. The state commands `status`, `is-active` and `is-enabled` only read and are always safe.",
+    "Changing a service needs root, so use `sudo`. All systemctl commands are real-VM only; the built-in terminal cannot run them, so in the simulator you only write the command down."
+   ],
+   "commands": [
+    {
+     "cmd": "systemctl status",
+     "what": "Shows state, PID, boot setting and the last log lines of a unit.",
+     "where": "First step with every service problem.",
+     "why": "One command tells you whether it runs, whether it is enabled and what its last messages were.",
+     "example": "systemctl status sshd --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl start / stop",
+     "what": "Starts or stops a service now; the boot setting does not change.",
+     "where": "When testing a service or freeing a port.",
+     "why": "Immediate effect without a reboot.",
+     "example": "sudo systemctl start chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl restart / reload",
+     "what": "restart stops and starts the service; reload only re-reads the configuration.",
+     "where": "After editing a config file.",
+     "why": "reload keeps connections alive; restart is the fallback.",
+     "example": "sudo systemctl reload chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl enable / disable",
+     "what": "Turns the start at boot on or off; the running state does not change.",
+     "where": "For services that must always be available.",
+     "why": "After a reboot the service comes up again without you.",
+     "example": "sudo systemctl enable chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl enable --now",
+     "what": "Enables the service for boot and starts it right away.",
+     "where": "When installing a new service.",
+     "why": "Two steps in one; the most common form.",
+     "example": "sudo systemctl enable --now chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl is-active / is-enabled",
+     "what": "Prints only active/inactive or enabled/disabled; the exit code is usable in scripts.",
+     "where": "In scripts and quick checks.",
+     "why": "Short answer, easy to test.",
+     "example": "systemctl is-active sshd && systemctl is-enabled sshd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl list-units --failed",
+     "what": "Lists all units that are in failed state.",
+     "where": "After a boot or when something is wrong with the system.",
+     "why": "A fast overview of what is broken.",
+     "example": "systemctl list-units --failed --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl mask",
+     "what": "Links the unit to /dev/null so it cannot be started at all, even by dependencies.",
+     "where": "When a service must never run.",
+     "why": "Stronger than disable; undo with `unmask`.",
+     "example": "sudo systemctl mask cups.service",
+     "nosim": true
+    }
+   ],
+   "tip": "In `systemctl status` the line `Loaded:` shows enabled/disabled, the line `Active:` shows the running state.",
+   "warn": "Never run stop, disable or mask on a service you do not know. Stopping the wrong service can take a machine offline.",
+   "danger": "**Never stop, disable or mask sshd or the network service on a remote VM.** You cut your own connection and cannot reconnect. In this module only read ssh/cron/chronyd state."
+  },
+  {
+   "id": "names",
+   "title": "Service names on different distributions",
+   "body": [
+    "The same software has different unit names on different families. On RHEL/Rocky/Alma the SSH service is `sshd`, on Debian/Ubuntu it is `ssh` (an alias `sshd` often works too). The web server is `httpd` on RHEL and `apache2` on Debian/Ubuntu. The firewall is `firewalld` on RHEL and `ufw` on Ubuntu.",
+    "The cron service is `crond` on RHEL and `cron` on Debian/Ubuntu; the time service is `chronyd` (RHEL) or `chrony`/`systemd-timesyncd` (Ubuntu). If a name is not found, search with `list-unit-files`. `/etc/os-release` tells you which family you are on."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/os-release",
+     "what": "Shows the distribution name and version.",
+     "where": "Before you use a service or log name.",
+     "why": "ID and ID_LIKE tell you whether you are on the RHEL or the Debian family.",
+     "example": "cat /etc/os-release"
+    },
+    {
+     "cmd": "systemctl list-units --type=service",
+     "what": "Lists the currently loaded services with their state.",
+     "where": "When you want to know what runs on the machine.",
+     "why": "You see real names instead of guessing.",
+     "example": "systemctl list-units --type=service --state=running --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl list-unit-files",
+     "what": "Lists all installed unit files with their boot setting.",
+     "where": "When a name is unknown or a service is not loaded yet.",
+     "why": "Also finds stopped and disabled services.",
+     "example": "systemctl list-unit-files --type=service --no-pager | grep -E 'ssh|cron|chrony'",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl list-timers",
+     "what": "Lists timer units with next and last run.",
+     "where": "When looking for scheduled jobs of systemd.",
+     "why": "Timers replace many cron jobs.",
+     "example": "systemctl list-timers --no-pager",
+     "nosim": true
+    }
+   ],
+   "tip": "Names that are common on one family may not exist on the other. Use `ssh` or `sshd` with tab completion: `systemctl status ssh<TAB>`."
+  },
+  {
+   "id": "unitfile",
+   "title": "Unit files and a custom service",
+   "body": [
+    "A service is described in a **unit file** with three parts. `[Unit]` has the description and ordering, `[Service]` says what is run (`ExecStart=` with the **full path**) and how (`Restart=on-failure` restarts it after a crash), `[Install]` says where it is hooked in when enabled (`WantedBy=multi-user.target`).",
+    "Packages place their units in `/usr/lib/systemd/system` (on Debian also `/lib/systemd/system`). **Do not edit those.** Your own units and overrides go to `/etc/systemd/system`, which has priority.",
+    "After every new or changed unit file run `sudo systemctl daemon-reload`, so systemd re-reads the files. Without it you get a warning or the old version keeps running. Minimal example:",
+    "`[Unit]` `Description=Linux Lab demo` — `[Service]` `ExecStart=/usr/bin/sleep 3600` `Restart=on-failure` — `[Install]` `WantedBy=multi-user.target`. The VM exercises build exactly this unit as `linux-lab-demo.service` and remove it again."
+   ],
+   "commands": [
+    {
+     "cmd": "systemctl cat",
+     "what": "Prints the unit file including drop-in overrides.",
+     "where": "When you want to see what a service really runs.",
+     "why": "Shows ExecStart and the file path without searching.",
+     "example": "systemctl cat sshd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl edit",
+     "what": "Creates a drop-in override in /etc/systemd/system without touching the original.",
+     "where": "When changing a packaged service.",
+     "why": "Survives package updates; daemon-reload happens automatically.",
+     "example": "sudo systemctl edit chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemd-analyze verify",
+     "what": "Checks a unit file for syntax errors.",
+     "where": "Before you start a new unit.",
+     "why": "Finds typos like Exec_Start or a relative path.",
+     "example": "systemd-analyze verify /etc/systemd/system/linux-lab-demo.service",
+     "nosim": true
+    },
+    {
+     "cmd": "systemd-analyze blame",
+     "what": "Lists units by the time they needed during boot.",
+     "where": "When the boot is slow.",
+     "why": "Shows the slowest units at the top.",
+     "example": "systemd-analyze blame --no-pager | head -n 10",
+     "nosim": true
+    }
+   ],
+   "tip": "Typical unit errors: `ExecStart=sleep 3600` (relative path, needs `/usr/bin/sleep`), a typo in a key name, a missing `[Install]` (then `enable` says there is no installation config).",
+   "warn": "Do not copy unit files into /usr/lib/systemd/system and do not delete units of the system. Work only with your own `linux-lab-demo.service` in /etc/systemd/system."
+  },
+  {
+   "id": "journal",
+   "title": "journalctl and the kernel log",
+   "body": [
+    "systemd collects all messages in the **journal**. `journalctl` reads it. Combine filters: `-u` for a unit, `-b` for the current boot, `-p err` for the priority error and worse, `--since` for time, `-n 50` for the last 50 lines, `-f` to follow live (end with Ctrl+C).",
+    "`journalctl -xe` jumps to the end with extra explanations; it is what systemctl suggests after a failed start. In scripts and when pasting output use `--no-pager`.",
+    "By default the journal may be kept only in memory (`/run/log/journal`) and is lost at reboot. For a **persistent journal** create `/var/log/journal` (or set `Storage=persistent` in `/etc/systemd/journald.conf`) and restart journald. On Ubuntu it is persistent already; on many RHEL systems it is not.",
+    "`journalctl --disk-usage` shows how much space the journal uses. `dmesg` prints the kernel ring buffer (hardware, drivers, disk errors); on some systems it needs `sudo`."
+   ],
+   "commands": [
+    {
+     "cmd": "journalctl -u",
+     "what": "Shows the log of one unit.",
+     "where": "When a service does not start or behaves wrongly.",
+     "why": "Only the messages of this service, not the whole system.",
+     "example": "journalctl -u sshd --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -f",
+     "what": "Follows new log lines live.",
+     "where": "While you restart a service or reproduce an error.",
+     "why": "You see the reaction immediately; leave with Ctrl+C.",
+     "example": "journalctl -u sshd -f",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -b",
+     "what": "Shows only the current boot (`-b -1` the previous one).",
+     "where": "After a reboot or crash.",
+     "why": "Cuts out old noise.",
+     "example": "journalctl -b --no-pager | tail -n 20",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -p err",
+     "what": "Filters by priority: err and everything worse.",
+     "where": "For a quick list of real problems.",
+     "why": "Hides info and debug messages.",
+     "example": "journalctl -p err -b --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl --since",
+     "what": "Shows entries from a point in time (`--until` for the end).",
+     "where": "When you know roughly when it happened.",
+     "why": "Keeps output small.",
+     "example": "journalctl --since \"1 hour ago\" --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -n 50 --no-pager",
+     "what": "Prints the last 50 lines without the pager.",
+     "where": "For quick checks and for pasting into tickets.",
+     "why": "No scrolling in less, easy to copy.",
+     "example": "journalctl -n 50 --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -xe",
+     "what": "Opens the end of the journal with explanations.",
+     "where": "Right after a failed start.",
+     "why": "systemd itself suggests it in the error message.",
+     "example": "journalctl -xe --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl --disk-usage",
+     "what": "Shows the disk space used by the journal.",
+     "where": "When /var fills up.",
+     "why": "Read-only and safe.",
+     "example": "journalctl --disk-usage",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl --vacuum-time",
+     "what": "Deletes journal entries older than the given time.",
+     "where": "When the journal uses too much disk space.",
+     "why": "Frees space, but the old logs are gone for good.",
+     "example": "sudo journalctl --vacuum-time=2weeks",
+     "nosim": true
+    },
+    {
+     "cmd": "dmesg",
+     "what": "Prints the kernel messages.",
+     "where": "For disk, USB, network card or memory problems.",
+     "why": "The kernel reports hardware issues here first.",
+     "example": "sudo dmesg | tail -n 20",
+     "nosim": true
+    }
+   ],
+   "tip": "Combine filters: `journalctl -u sshd -p err --since \"1 hour ago\" --no-pager`.",
+   "warn": "`--vacuum-time` and `--vacuum-size` delete logs permanently. Do not run them on a VM whose logs you still need for an investigation."
+  },
+  {
+   "id": "classic",
+   "title": "Classic log files, rsyslog and logrotate",
+   "body": [
+    "Besides the journal there are text logs in `/var/log`, written mostly by **rsyslog**. The names differ: on RHEL/Rocky `/var/log/messages` (general) and `/var/log/secure` (login and sudo); on Debian/Ubuntu `/var/log/syslog` and `/var/log/auth.log`. These files are readable only by root or the `adm` group, so use `sudo`.",
+    "Typical tools: `tail -f` follows a file, `grep -i error` searches it, `less` scrolls through it (`/word` searches, `q` quits). Combine them: `sudo grep -i error /var/log/messages | tail -n 20`.",
+    "**logrotate** keeps logs from growing forever: it renames, compresses and deletes old files by rules in `/etc/logrotate.conf` and `/etc/logrotate.d/`. A rule has the log path and options like `weekly`, `rotate 4` (keep 4 old copies), `compress`, `missingok`, `notifempty`. It is started daily by a timer or cron.",
+    "The simulator has the files of a RHEL machine, so you can practise reading logs here."
+   ],
+   "commands": [
+    {
+     "cmd": "ls /var/log",
+     "what": "Lists the log files and folders.",
+     "where": "To find out which logs exist.",
+     "why": "File names differ by distribution.",
+     "example": "ls /var/log"
+    },
+    {
+     "cmd": "sudo cat /var/log/secure",
+     "what": "Reads a log that only root may read (Ubuntu: `/var/log/auth.log`).",
+     "where": "When you investigate logins and sudo.",
+     "why": "Shows who logged in and who failed.",
+     "example": "sudo cat /var/log/secure"
+    },
+    {
+     "cmd": "tail -f",
+     "what": "Shows the end of a file and follows new lines.",
+     "where": "While a service is running or being tested.",
+     "why": "Live view; leave with Ctrl+C.",
+     "example": "sudo tail -f /var/log/messages",
+     "nosim": true
+    },
+    {
+     "cmd": "grep -i",
+     "what": "Searches lines case-insensitively; `-c` counts them.",
+     "where": "To find errors in a big log.",
+     "why": "Reduces thousands of lines to the relevant ones.",
+     "example": "grep -i error /var/log/messages"
+    },
+    {
+     "cmd": "less",
+     "what": "Shows a file page by page; `/word` searches, `q` quits.",
+     "where": "For long logs.",
+     "why": "Scrolling without flooding the terminal.",
+     "example": "less /var/log/messages"
+    },
+    {
+     "cmd": "logrotate -d",
+     "what": "Debug mode: shows what logrotate would do without doing it.",
+     "where": "After writing a new rule in /etc/logrotate.d.",
+     "why": "Tests the rule safely.",
+     "example": "sudo logrotate -d /etc/logrotate.conf",
+     "nosim": true
+    }
+   ],
+   "tip": "To count the errors: `grep -ci error /var/log/messages`. To see only the last lines of a long search: add `| tail -n 5`.",
+   "warn": "Never delete or truncate a log file with `rm` or `> file` while a service writes to it; let logrotate do it. Deleting evidence also makes later troubleshooting impossible."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "List the log files of the machine with `ls /var/log`.",
+   "hint": "Look for `messages` and `secure`."
+  },
+  "t02": {
+   "text": "You cannot run systemctl here, so write the command you would use on a VM to show the state of sshd into a file: `echo \"systemctl status sshd\" > ~/answer_status.txt`.",
+   "hint": "The file is checked for `systemctl status sshd` (or `ssh`)."
+  },
+  "t03": {
+   "text": "Find the error lines in the general log with `grep -i error /var/log/messages`.",
+   "hint": "`-i` ignores upper/lower case, so ERROR is found too."
+  },
+  "t04": {
+   "text": "Count how many lines contain `error` (ignore case) with `grep -ci error /var/log/messages`.",
+   "hint": "`-c` prints the number instead of the lines."
+  },
+  "t05": {
+   "text": "Read the login log, which only root may read: `sudo cat /var/log/secure`.",
+   "hint": "Without sudo you get Permission denied; `student` is in the wheel group."
+  },
+  "t06": {
+   "text": "The file `~/lab/systemctl_status.txt` is saved output of `systemctl status`. Show its `Loaded` line with `grep Loaded ~/lab/systemctl_status.txt`. Is the service enabled?",
+   "hint": "In the `Loaded:` line look for `enabled` or `disabled`."
+  },
+  "t07": {
+   "text": "`~/lab/failed_units.txt` is a saved `systemctl list-units --failed`. Write only the unit names into `~/lab/failed_names.txt`: `cut -d\" \" -f1 ~/lab/failed_units.txt | grep service > ~/lab/failed_names.txt`.",
+   "hint": "`cut -d\" \" -f1` takes the first column, `grep service` drops the header and the summary line."
+  },
+  "t08": {
+   "text": "Write the journalctl command for the last 50 lines of the sshd log without pager into `~/answer_journal.txt`, e.g. `echo 'journalctl -u sshd -n 50 --no-pager' > ~/answer_journal.txt`.",
+   "hint": "`-u` unit, `-n 50` last 50 lines, `--no-pager` no less."
+  },
+  "t09": {
+   "text": "`~/lab/logrotate_demo.conf` is a logrotate rule. Show the `rotate` line with `grep rotate ~/lab/logrotate_demo.conf`. How many old copies are kept?",
+   "hint": "`rotate 4` means four old copies; `weekly` means a weekly rotation."
+  },
+  "t10": {
+   "text": "Predict: which messages are the last two lines of `/var/log/messages`? Guess first, then check with `tail -n 2 /var/log/messages`.",
+   "hint": "`tail -n 2` prints the last two lines; the newest entry is at the bottom."
+  },
+  "t11": {
+   "text": "Predict: how many lines of `~/lab/journal_sample.txt` contain the word `Failed` (case-sensitive, so FAILURE does not count)? Guess first, then verify with `grep -c Failed ~/lab/journal_sample.txt`.",
+   "hint": "Read the file first with `cat ~/lab/journal_sample.txt` if you want to count by eye."
+  },
+  "t12": {
+   "text": "Predict: who owns `/var/log/secure` and who may read it? Check with `ls -l /var/log/secure`.",
+   "hint": "Mode `-rw-------` means only the owner (root) can read and write."
+  },
+  "t13": {
+   "text": "Debug: `~/lab/broken1.service` would not start, because the key is misspelled and the command has no full path. Rewrite the file (for example with `printf` and `>`) so that it has `ExecStart=/usr/bin/sleep 3600`.",
+   "hint": "`cat ~/lab/broken1.service` shows the error; the key must be `ExecStart`, the path `/usr/bin/sleep`."
+  },
+  "t14": {
+   "text": "Debug: `systemctl enable` would complain about `~/lab/broken2.service` because it has no `[Install]` section. Append `[Install]` and `WantedBy=multi-user.target` with `printf` and `>>`.",
+   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`."
+  },
+  "t15": {
+   "text": "Mini project: create `~/lab/linux-lab-demo.service` with `[Unit]` (Description), `[Service]` (`ExecStart=/usr/bin/sleep 3600`) and `[Install]` (`WantedBy=multi-user.target`). Then write the three VM steps (copy to `/etc/systemd/system/`, `daemon-reload`, `enable --now linux-lab-demo.service`) into `~/lab/install_steps.txt`, one per line.",
+   "hint": "Use `printf` with `\\n` for line breaks. The steps file only contains text; nothing is installed."
+  },
+  "t16": {
+   "text": "Challenge: build an incident report `~/lab/incident.txt`. First write all error lines of `/var/log/messages` (case-insensitive) into it, then append the content of `/var/log/secure`. The report needs at least 4 lines.",
+   "hint": "`grep -i error ... > file`, then `sudo cat ... >> file` (the redirect is done by your own shell, so the file in your home is fine)."
+  },
+  "t17": {
+   "text": "TICKET #5610 — A customer reports that the web server does not come up after a reboot. Write the three commands you would run on a RHEL VM into `~/ticket_5610.txt`, one per line: show the state (`systemctl status httpd`), read its log (`journalctl -u httpd -n 50 --no-pager`) and enable and start it (`sudo systemctl enable --now httpd`).",
+   "hint": "Use one `printf` with `\\n` between the lines. On Ubuntu the name would be `apache2`."
+  }
+ },
+ "vm": {
+  "intro": "These tasks run on your own VM. Most are read-only. Task 4 creates a harmless unit that runs `sleep 3600`. **Take a snapshot first** and never stop or change sshd or the network service on a remote VM. Use `sshd`, `crond`, `chronyd` on RHEL/Rocky and `ssh`, `cron`, `chrony` on Ubuntu.",
+  "tasks": {
+   "v01": {
+    "title": "Read service state",
+    "text": "Check ssh, cron and your time service without changing anything. Paste the output.",
+    "blocks": [
+      {
+       "cmd": "# Rocky/RHEL\nsystemctl status sshd --no-pager\nsystemctl is-active crond chronyd\nsystemctl is-enabled sshd\n# Ubuntu\nsystemctl status ssh --no-pager\nsystemctl is-active cron\nsystemctl is-enabled ssh",
+       "expected": "● sshd.service - OpenSSH server daemon\n     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; ...)\n     Active: active (running) since ...\nactive\nactive\nenabled"
+      },
+      {
+       "cmd": "systemctl list-units --failed --no-pager",
+       "expected": "0 loaded units listed."
+      }
+    ],
+    "differs": [
+      "`Unit sshd.service could not be found` on Ubuntu: use `ssh` instead of `sshd`.",
+      "If `chronyd` is not found, your system uses `systemd-timesyncd` (Ubuntu); try `systemctl status systemd-timesyncd`.",
+      "Failed units in the list are not an error of this exercise; just note them."
+    ]
+   },
+   "v02": {
+    "title": "Read the journal",
+    "text": "Read the journal with filters and check how much space it uses. Paste the output.",
+    "blocks": [
+      {
+       "cmd": "journalctl -b -n 10 --no-pager\njournalctl -p err -b --no-pager | tail -n 5\njournalctl --since \"1 hour ago\" --no-pager | wc -l\njournalctl --disk-usage",
+       "expected": "... linux-lab systemd[1]: Started ...\n1234\nArchived and active journals take up 48.0M in the file system."
+      }
+    ],
+    "differs": [
+      "`Permission denied` or a hint about the `systemd-journal` group: run the commands with `sudo`.",
+      "`-- No entries --` for `-p err` is good news: there were no errors.",
+      "If the journal only has the current boot, it is not persistent yet (see `ls /var/log/journal`)."
+    ]
+   },
+   "v03": {
+    "title": "Classic logs and dmesg",
+    "text": "Read the end of the general and the login log, then the kernel log. Use the file names of your family.",
+    "blocks": [
+      {
+       "cmd": "# Rocky/RHEL\nsudo tail -n 5 /var/log/messages\nsudo tail -n 5 /var/log/secure\n# Ubuntu\nsudo tail -n 5 /var/log/syslog\nsudo tail -n 5 /var/log/auth.log\n# both\nsudo dmesg | tail -n 5\nls /etc/logrotate.d",
+       "expected": "Nov 12 10:01:02 linux-lab systemd[1]: ...\nNov 12 10:02:11 linux-lab sudo[2101]: student : TTY=pts/0 ; ...\n[ 12.345678] ..."
+      }
+    ],
+    "differs": [
+      "`No such file or directory` for syslog/messages: the other family's file name, or rsyslog is not installed. The journal has the same data.",
+      "On Ubuntu, `dmesg` without sudo may be blocked; use `sudo dmesg`."
+    ]
+   },
+   "v04": {
+    "title": "Create your own service",
+    "text": "Create `linux-lab-demo.service`, load it, start it and look at its state and log. **Snapshot first.** The unit only runs `sleep 3600`.",
+    "blocks": [
+      {
+       "cmd": "sudo tee /etc/systemd/system/linux-lab-demo.service > /dev/null <<'EOF'\n[Unit]\nDescription=Linux Lab demo\n\n[Service]\nExecStart=/usr/bin/sleep 3600\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\nEOF\nsudo systemctl daemon-reload\nsudo systemctl start linux-lab-demo.service\nsystemctl status linux-lab-demo.service --no-pager\nsystemctl is-enabled linux-lab-demo.service\njournalctl -u linux-lab-demo.service -n 5 --no-pager",
+       "expected": "● linux-lab-demo.service - Linux Lab demo\n     Loaded: loaded (/etc/systemd/system/linux-lab-demo.service; disabled; ...)\n     Active: active (running) since ...\ndisabled\n... systemd[1]: Started Linux Lab demo."
+      }
+    ],
+    "differs": [
+      "`Failed to start ... No such file or directory`: check the path with `which sleep`; on some systems it is `/bin/sleep`.",
+      "`is-enabled` says `disabled` because you used start only; that is the difference between start and enable.",
+      "If `sudo` is missing the heredoc, copy the file in two steps: write it in your home and `sudo cp` it to /etc/systemd/system/."
+    ]
+   },
+   "v05": {
+    "title": "Remove your service again",
+    "text": "Stop and remove only `linux-lab-demo.service`, then check that systemd no longer knows it. Do not touch any other unit.",
+    "blocks": [
+      {
+       "cmd": "sudo systemctl stop linux-lab-demo.service\nsudo rm /etc/systemd/system/linux-lab-demo.service\nsudo systemctl daemon-reload\nsystemctl status linux-lab-demo.service --no-pager",
+       "expected": "Unit linux-lab-demo.service could not be found."
+      }
+    ],
+    "differs": [
+      "If you also ran `enable`, run `sudo systemctl disable linux-lab-demo.service` before the `rm`.",
+      "`Unit ... not found` or `inactive (dead)` both mean the service is gone or not running.",
+      "Check the file name in `rm` twice: it must be exactly the demo file."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "What is the difference between `systemctl start` and `systemctl enable`?",
+   "options": [
+    "They are identical",
+    "start runs it now, enable makes it start at boot",
+    "enable runs it now, start makes it start at boot",
+    "start installs the package, enable removes it"
+   ],
+   "explain": "start acts now, enable only changes the boot setting. `enable --now` does both."
+  },
+  "q2": {
+   "q": "Which pair is the web server service on (RHEL, Ubuntu)?",
+   "options": [
+    "apache2, httpd",
+    "nginx, httpd",
+    "httpd, apache2",
+    "httpd, ssh"
+   ],
+   "explain": "RHEL/Rocky use `httpd`, Debian/Ubuntu use `apache2`. The same applies to sshd/ssh and firewalld/ufw."
+  },
+  "q3": {
+   "q": "Which command shows only errors of the current boot?",
+   "options": [
+    "journalctl -b -p err",
+    "journalctl -f",
+    "journalctl --vacuum-time=1d",
+    "systemctl status -b"
+   ],
+   "explain": "`-b` limits to the current boot, `-p err` to priority error and worse."
+  },
+  "q4": {
+   "q": "You created /etc/systemd/system/linux-lab-demo.service. What do you do first?",
+   "options": [
+    "Reboot the machine",
+    "Mask the unit",
+    "Delete the files in /usr/lib/systemd/system",
+    "Run systemctl daemon-reload"
+   ],
+   "explain": "daemon-reload makes systemd read the new or changed unit file."
+  }
+ },
+ "summary": [
+  "`start`/`stop` act now, `enable`/`disable` act at boot, `enable --now` does both.",
+  "Names differ: sshd/ssh, httpd/apache2, firewalld/ufw, crond/cron; check with `/etc/os-release`.",
+  "A unit has `[Unit]`, `[Service]` (`ExecStart` with full path, `Restart=`), `[Install]`; own units go to `/etc/systemd/system` followed by `daemon-reload`.",
+  "`journalctl -u`, `-b`, `-p err`, `--since`, `-n 50 --no-pager`, `-f`, `-xe` find the cause; `--disk-usage` shows the size.",
+  "Classic logs: RHEL `messages`/`secure`, Debian/Ubuntu `syslog`/`auth.log`; logrotate rotates them by `/etc/logrotate.d` rules.",
+  "Never stop sshd on a remote VM; never delete or vacuum logs you still need."
+ ],
+ "glossary": [
+  {"term": "systemd", "meaning": "The init system (PID 1) that starts and supervises services."},
+  {"term": "unit", "meaning": "An object managed by systemd: service, target, timer, mount and more."},
+  {"term": "target", "meaning": "A group of units that describes a system state, e.g. multi-user.target."},
+  {"term": "timer", "meaning": "A unit that starts another unit on a schedule; alternative to cron."},
+  {"term": "daemon-reload", "meaning": "Makes systemd re-read unit files after you changed them."},
+  {"term": "mask", "meaning": "Links a unit to /dev/null so that it cannot be started."},
+  {"term": "journal", "meaning": "systemd's binary log database, read with journalctl."},
+  {"term": "rsyslog", "meaning": "The classic syslog daemon that writes text logs to /var/log."},
+  {"term": "logrotate", "meaning": "Tool that rotates, compresses and deletes old log files by rules."}
+ ]
+}

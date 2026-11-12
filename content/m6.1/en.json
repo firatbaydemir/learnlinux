@@ -1,0 +1,462 @@
+{
+ "title": "Network Basics — ip, ss, DNS, Ports",
+ "lead": "Read your network identity: address, gateway, port and name. Almost every command in this module is read-only.",
+ "objectives": [
+  "You read the IP address, prefix and default gateway with `ip a` and `ip r`.",
+  "You see which service listens on which port and interface with `ss -tulpn`.",
+  "You know the name resolution chain: `/etc/hosts` → `/etc/resolv.conf` → DNS server.",
+  "You read the firewall (firewalld / ufw) first and change it without locking yourself out.",
+  "You diagnose \"no internet\" layer by layer (address → gateway → IP → name)."
+ ],
+ "sections": [
+  {
+   "id": "addr",
+   "title": "Address and routing: ip a, ip r",
+   "body": [
+    "Every network interface (`eth0`, `ens3`, `enp0s3`, `lo`) has an **IP address** and a **prefix**. `192.168.1.42/24` means: the first 24 bits are the network, the rest identifies the host (`/24` = `255.255.255.0`). `lo` is the loopback interface (`127.0.0.1`): the machine itself, it never leaves the host.",
+    "If the destination is not on the local network, the packet goes to the **default gateway**. The line `default via 192.168.1.1` in `ip r` tells you which. Use the modern `ip` command instead of the old `ifconfig` and `route`; it exists on Rocky/Alma and Ubuntu/Debian alike.",
+    "Interface names vary by distribution and VM; your output may show `ens3` or `enp0s3` instead of `eth0`."
+   ],
+   "commands": [
+    {
+     "cmd": "ip a",
+     "what": "Lists all interfaces with their IP addresses and state (UP/DOWN).",
+     "where": "To learn the machine's address or verify an interface is up.",
+     "why": "First stop in network trouble; without an address nothing above it works.",
+     "example": "ip a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip -br a",
+     "what": "Shows the same information as a short one-line-per-interface table.",
+     "where": "For a quick look at which interface has which address.",
+     "why": "Saves you from reading long output; it fits on the screen.",
+     "example": "ip -br a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip r",
+     "what": "Shows the routing table; the `default via` line is the gateway.",
+     "where": "When investigating why you cannot reach outside networks.",
+     "why": "Without a default route no packet leaves the local network.",
+     "example": "ip r",
+     "nosim": true
+    },
+    {
+     "cmd": "grep default",
+     "what": "Filters lines by text; here it finds the gateway in saved route output.",
+     "where": "When you want a single line out of long output.",
+     "why": "The same filtering works on `ss` output; in the simulator you practise with sample files.",
+     "example": "grep default ~/net/routes.txt"
+    }
+   ],
+   "tip": "Chain it with cutting: `grep default ~/net/routes.txt | cut -d' ' -f3` returns just the gateway address.",
+   "warn": "Changing an interface address by hand with `ip addr add/del` can cut your connection (including SSH) instantly. In this module we only read."
+  },
+  {
+   "id": "ports",
+   "title": "Ports and listening services: ss",
+   "body": [
+    "The IP address selects the machine, the **port** selects the service on it: `22` SSH, `80` HTTP, `443` HTTPS, `53` DNS. A running service **listens** (LISTEN) on a specific address and port.",
+    "`ss -tulpn` letters: `t` TCP, `u` UDP, `l` listening only, `p` process name, `n` numeric output (no name lookup). You need `sudo` to see process names.",
+    "**Watch the local address:** `0.0.0.0:22` means reachable on every interface. `127.0.0.1:5432` is reachable only from the machine itself. A database listening on `0.0.0.0` may be exposed to the network, which is a security finding.",
+    "`ss` replaced the old `netstat -tulpn`; the options are nearly the same."
+   ],
+   "commands": [
+    {
+     "cmd": "ss -tulpn",
+     "what": "Lists listening TCP/UDP sockets with ports and processes.",
+     "where": "To answer \"is the service really listening, and on which address?\"",
+     "why": "A service may look running yet listen on the wrong address, so connections fail.",
+     "example": "sudo ss -tulpn",
+     "nosim": true
+    },
+    {
+     "cmd": "ss -tln",
+     "what": "Shows only TCP listeners, without process info (no sudo needed).",
+     "where": "For quick checks or in scripts.",
+     "why": "Short and unprivileged; enough to see whether a port is open.",
+     "example": "ss -tln | grep 8080",
+     "nosim": true
+    },
+    {
+     "cmd": "curl -I",
+     "what": "Fetches only the response headers of a web server.",
+     "where": "To test whether the service really answers over HTTP.",
+     "why": "A port can be open while the application does not answer; a code like `200` or `301` shows it does.",
+     "example": "curl -I http://127.0.0.1:8080",
+     "nosim": true
+    }
+   ],
+   "tip": "Filter `ss` output: `ss -tln | grep LISTEN | wc -l` counts how many TCP ports listen.",
+   "warn": "Do not port-scan servers you do not own. It is unethical and noticeable; work on `127.0.0.1` of your own VM."
+  },
+  {
+   "id": "dns",
+   "title": "Name resolution: hosts, resolv.conf, DNS",
+   "body": [
+    "A name (`example.com`) is turned into an IP in this order: first `/etc/hosts` is checked, then the **DNS server** listed in `/etc/resolv.conf` is asked (the order is set by the `hosts:` line in `/etc/nsswitch.conf`).",
+    "`/etc/hosts` holds local, hand-written mappings: `192.168.1.50 intranet.lab`. Great for tests, but it only affects that machine.",
+    "`/etc/resolv.conf` is usually generated by NetworkManager or systemd-resolved; hand edits can be overwritten on reboot. On Ubuntu you often see `127.0.0.53` in it; `resolvectl status` shows the real server.",
+    "**Key distinction:** if `ping 1.1.1.1` works but `ping example.com` does not, your network is fine and the problem is DNS."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/hosts",
+     "what": "Shows local name-to-address mappings.",
+     "where": "When a name goes to an unexpected address.",
+     "why": "`/etc/hosts` is read before DNS; a wrong line overrides all resolution.",
+     "example": "cat /etc/hosts"
+    },
+    {
+     "cmd": "cat /etc/resolv.conf",
+     "what": "Shows the DNS servers (`nameserver`) and search domain (`search`) in use.",
+     "where": "First file to check when names do not resolve.",
+     "why": "A wrong or unreachable `nameserver` line breaks all name resolution.",
+     "example": "cat /etc/resolv.conf"
+    },
+    {
+     "cmd": "getent hosts",
+     "what": "Resolves a name the way the system really does (hosts + DNS).",
+     "where": "To test what applications will see.",
+     "why": "It also honours `/etc/hosts`, so it is more accurate than tools that only query DNS.",
+     "example": "getent hosts localhost",
+     "nosim": true
+    },
+    {
+     "cmd": "resolvectl status",
+     "what": "Shows per-interface DNS servers on systemd-resolved systems.",
+     "where": "On Ubuntu and newer Rocky/Alma when `resolv.conf` does not tell enough.",
+     "why": "Reveals the real DNS server behind `127.0.0.53`.",
+     "example": "resolvectl status",
+     "nosim": true
+    }
+   ],
+   "tip": "Back up before changing: `sudo cp /etc/hosts /etc/hosts.bak`.",
+   "warn": "One wrong `nameserver` line breaks all name resolution. On a production machine configure DNS via NetworkManager (`nmcli`) or netplan instead of editing `/etc/resolv.conf`."
+  },
+  {
+   "id": "firewall",
+   "title": "Firewall: firewalld and ufw",
+   "body": [
+    "Even if a service listens, the **firewall** may block the port. Rocky/Alma/RHEL use `firewalld` (`firewall-cmd`), Ubuntu/Debian use `ufw`.",
+    "In firewalld changes are **runtime** by default: effective immediately but lost on reload or reboot. To make them permanent add `--permanent` and run `--reload`. ufw rules are permanent automatically.",
+    "**Read** first: `firewall-cmd --list-all` or `ufw status verbose`. Then change.",
+    "SELinux (Rocky) and AppArmor (Ubuntu) are a separate layer; opening the port does not always mean the service may use it, but that is outside this module."
+   ],
+   "commands": [
+    {
+     "cmd": "firewall-cmd --list-all",
+     "what": "Shows allowed services and ports of the active zone.",
+     "where": "On Rocky/Alma/RHEL when a port is not reachable from outside.",
+     "why": "You see at a glance which services or ports are allowed; read-only and safe.",
+     "example": "sudo firewall-cmd --list-all",
+     "nosim": true
+    },
+    {
+     "cmd": "firewall-cmd --add-port",
+     "what": "Opens a port; without `--permanent` it is runtime only.",
+     "where": "When you must expose a service to the outside.",
+     "why": "Try at runtime first and make permanent once it works; mistakes disappear with a reload.",
+     "example": "sudo firewall-cmd --add-port=8080/tcp --timeout=300",
+     "nosim": true
+    },
+    {
+     "cmd": "ufw status verbose",
+     "what": "Shows the firewall state and rules on Ubuntu/Debian.",
+     "where": "When auditing rules on an Ubuntu server.",
+     "why": "`inactive` means the firewall is off; `active` shows the default policy.",
+     "example": "sudo ufw status verbose",
+     "nosim": true
+    }
+   ],
+   "tip": "On Rocky a rule added with `--timeout=300` disappears after 5 minutes; if you make a mistake it heals itself.",
+   "warn": "When changing the firewall over SSH keep a second SSH session open and use `--timeout` first. Before `ufw enable` allow SSH with `sudo ufw allow 22/tcp`.",
+   "danger": "Applying a rule remotely that closes the SSH port or sets the default policy to `deny` locks you out. Take a VM snapshot first (module 0.2) and keep console access ready."
+  },
+  {
+   "id": "diagnose",
+   "title": "Diagnosis ladder: bottom to top",
+   "body": [
+    "Solve \"no internet\" **layer by layer**; the first failing step is where the problem is: (1) is the interface UP with an address? (2) does a ping to the gateway work? (3) does a ping to an outside IP (`1.1.1.1`) work? (4) does the name resolve? (5) does the service listen and does the firewall allow it?",
+    "`ping` uses ICMP; some networks block ICMP, so a failed ping does not always mean no connectivity. Also try the real service with `curl -I`.",
+    "Constant `ping` needlessly burdens the target; limit the count with `-c 3`."
+   ],
+   "commands": [
+    {
+     "cmd": "ping -c 3",
+     "what": "Sends 3 ICMP packets to the target and measures the reply time.",
+     "where": "To test gateway, outside IP and name separately.",
+     "why": "Shows which layer is broken, one at a time.",
+     "example": "ping -c 3 1.1.1.1",
+     "nosim": true
+    },
+    {
+     "cmd": "cut -d",
+     "what": "Splits a line into fields by a delimiter and takes the field you want.",
+     "where": "To pull one value such as address, port or prefix out of output.",
+     "why": "You pass the value into a file or the next command without copying by hand.",
+     "example": "echo 192.168.1.42/24 | cut -d/ -f2"
+    },
+    {
+     "cmd": "sort -n | uniq",
+     "what": "Sorts lines numerically and removes duplicates.",
+     "where": "When producing a clean list of listening ports.",
+     "why": "Gives a tidy, duplicate-free list for reports and comparison.",
+     "example": "sort -n ~/net/ports.txt | uniq"
+    }
+   ],
+   "tip": "Write your findings into a report: `hostname > ~/net/report.txt`, then append with `>>`. It makes pasting into a support ticket easy."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Read the sample route file: `cat ~/net/routes.txt`. Which line names the gateway?",
+   "hint": "The `default via ...` line."
+  },
+  "t02": {
+   "text": "Show only the listening (LISTEN) lines of `~/net/ss.txt`.",
+   "hint": "`grep LISTEN ~/net/ss.txt`"
+  },
+  "t03": {
+   "text": "Read the local name mappings with `cat /etc/hosts`.",
+   "hint": "Look for the `localhost` line."
+  },
+  "t04": {
+   "text": "Find the default route with `grep default ~/net/routes.txt`. What is the gateway address?",
+   "hint": "The address after the word `via`."
+  },
+  "t05": {
+   "text": "Write only the gateway address into `~/net/gateway.txt`.",
+   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; field 3 is the gateway."
+  },
+  "t06": {
+   "text": "Write the number of listening (LISTEN) lines into `~/net/listen_count.txt`.",
+   "hint": "A pipeline like `grep LISTEN ... | wc -l > file`."
+  },
+  "t07": {
+   "text": "Write the externally exposed listeners (LISTEN lines that are not `127.0.0.1`) into `~/net/exposed.txt`.",
+   "hint": "Pipe two `grep`s together; use `-v 127.0.0.1` in the second."
+  },
+  "t08": {
+   "text": "Predict: which process listens on port 8080? Then verify with `grep 8080 ~/net/ss.txt`.",
+   "hint": "Look at the `users:((...))` part at the end of the line."
+  },
+  "t09": {
+   "text": "Predict: which address and prefix does `eth0` carry? Verify with `grep 192 ~/net/ipa.txt`.",
+   "hint": "The `inet` line has the form `address/prefix`."
+  },
+  "t10": {
+   "text": "Predict: what does `echo 192.168.1.42/24 | cut -d/ -f2` print? Run it and check.",
+   "hint": "The field after the `/` character: the prefix length."
+  },
+  "t11": {
+   "text": "Debug: the `nameserver` in `~/net/resolv.conf` is invalid. Rewrite the file so it has two lines: `nameserver 192.168.1.1` and `nameserver 1.1.1.1`.",
+   "hint": "`printf 'line1\\nline2\\n' > file` writes two lines; look at the error with `cat` first."
+  },
+  "t12": {
+   "text": "Debug: the script `~/net/check_ports.sh` does not run. Find the cause, fix it and run the script.",
+   "hint": "Check permissions with `ls -l`; `chmod 755`, then `~/net/check_ports.sh`."
+  },
+  "t13": {
+   "text": "Mini report: write the host name, the gateway address and the number of listening services (3 lines, in that order) into `~/net/report.txt`.",
+   "hint": "Use `>` in the first command and `>>` in the following ones; `hostname` gives the host name."
+  },
+  "t14": {
+   "text": "Hard: from the LISTEN lines of `ss.txt` write only the port numbers, numerically sorted and without duplicates, into `~/net/ports.txt` (one port per line).",
+   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file`"
+  },
+  "t15": {
+   "text": "Hard: write the firewalld plan for opening 8080/tcp permanently into `~/net/fw_plan.txt` as two lines: first the command containing `--permanent --add-port=8080/tcp`, then `firewall-cmd --reload`. (You write the plan, you do not run it.)",
+   "hint": "`echo 'command' > file`, use `>>` for the second line. Use quotes."
+  },
+  "t16": {
+   "text": "Ticket: Users cannot reach the name `intranet.lab`. The internal server's address is `192.168.1.50`. Add this mapping to `~/net/hosts` (do not delete existing lines).",
+   "hint": "`echo '192.168.1.50 intranet.lab' >> ~/net/hosts`"
+  },
+  "t17": {
+   "text": "Ticket: A security audit wants proof that PostgreSQL (port 5432) listens only on the local address. Save the relevant `ss.txt` line into `~/net/audit.txt`.",
+   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; the line must contain `127.0.0.1:5432`."
+  }
+ },
+ "vm": {
+  "intro": "These steps run on your own VM and only read. Outputs are specific to you; IPs and interface names may differ. If a command is missing, install `sudo dnf install iproute bind-utils` on Rocky or `sudo apt install iproute2 dnsutils` on Ubuntu.",
+  "tasks": {
+   "v01": {
+    "title": "Address and gateway",
+    "text": "Read your interfaces and route and paste the output.",
+    "blocks": [
+     {
+      "cmd": "ip -br a\nip r",
+      "expected": "lo      UNKNOWN  127.0.0.1/8\nens3    UP       192.168.1.42/24\ndefault via 192.168.1.1 dev ens3 proto dhcp metric 100\n192.168.1.0/24 dev ens3 proto kernel scope link src 192.168.1.42"
+     }
+    ],
+    "differs": [
+     "The interface may be called `eth0`, `ens3` or `enp0s3`; what matters is the address and the `default via` line.",
+     "If there is no `default` line the machine has no gateway; check the VM's network mode (NAT/Bridge)."
+    ]
+   },
+   "v02": {
+    "title": "Listening services",
+    "text": "List which services listen and find SSH.",
+    "blocks": [
+     {
+      "cmd": "sudo ss -tulpn\nss -tln",
+      "expected": "Netid State  Local Address:Port Process\ntcp   LISTEN 0.0.0.0:22         users:((\"sshd\",pid=812,fd=3))\n..."
+     }
+    ],
+    "differs": [
+     "Without `sudo` the process name (`Process` column) stays empty.",
+     "If `ss` is missing install `iproute`/`iproute2`; if there is no `LISTEN` line the service is not running."
+    ]
+   },
+   "v03": {
+    "title": "Name resolution chain",
+    "text": "Read hosts and resolv.conf, then resolve a name the way the system does.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/hosts\ncat /etc/resolv.conf\nresolvectl status | head -n 15\ngetent hosts localhost",
+      "expected": "127.0.0.1 localhost\nnameserver 127.0.0.53\n...\n::1             localhost"
+     }
+    ],
+    "differs": [
+     "If `resolvectl` is missing (old or minimal system) skip that line; `resolv.conf` is enough.",
+     "Seeing `nameserver 127.0.0.53` on Ubuntu is normal; the real server is listed in `resolvectl status`."
+    ]
+   },
+   "v04": {
+    "title": "Diagnosis ladder",
+    "text": "Ping the gateway, an outside IP and a name, 2 packets each. Replace `192.168.1.1` with your own gateway.",
+    "blocks": [
+     {
+      "cmd": "ping -c 2 192.168.1.1\nping -c 2 1.1.1.1\nping -c 2 example.com",
+      "expected": "2 packets transmitted, 2 received, 0% packet loss"
+     }
+    ],
+    "differs": [
+     "If the IP answers but the name does not, the problem is DNS (`/etc/resolv.conf`).",
+     "If none answer, check address/gateway with `ip a` and `ip r` first; some networks block ICMP, so also try `curl -I https://example.com`."
+    ]
+   },
+   "v05": {
+    "title": "Create your own listener and see it",
+    "text": "Start a temporary web server on `127.0.0.1` only, see it with `ss`, test it with `curl`, then stop it.",
+    "blocks": [
+     {
+      "cmd": "python3 -m http.server 8080 --bind 127.0.0.1 &\nsleep 1\nss -tln | grep 8080\ncurl -I http://127.0.0.1:8080\nkill %1",
+      "expected": "LISTEN 0 5 127.0.0.1:8080 0.0.0.0:*\nHTTP/1.0 200 OK"
+     }
+    ],
+    "differs": [
+     "If `python3` is missing it needs installing; you can skip and paste your `ss -tln` output instead.",
+     "If the port is busy use `8081`. When done, verify with `jobs` that no background job remains."
+    ]
+   },
+   "v06": {
+    "title": "Read the firewall (do not change it)",
+    "text": "Read your distribution's firewall state. Add no rule for now. Before changing rules take a VM snapshot (module 0.2) and keep a second SSH session open.",
+    "blocks": [
+     {
+      "cmd": "# Rocky / Alma / RHEL\nsudo firewall-cmd --state\nsudo firewall-cmd --list-all\n# Ubuntu / Debian\nsudo ufw status verbose",
+      "expected": "running\npublic (active)\n  services: cockpit dhcpv6-client ssh\n# or: Status: inactive"
+     }
+    ],
+    "differs": [
+     "The command that does not belong to your distribution prints `command not found`; that is normal, run the other one.",
+     "`not running` or `inactive` means the firewall is off; you do not need to change that in this lab."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Which command shows the default gateway?",
+   "options": [
+    "`ip a`",
+    "`ip r`",
+    "`ss -tulpn`",
+    "`cat /etc/hosts`"
+   ],
+   "explain": "`ip r` shows the routing table; the `default via ...` line is the gateway. `ip a` shows addresses, `ss` listening ports, `/etc/hosts` name mappings."
+  },
+  "q2": {
+   "q": "In `ss -tulpn` output a database listens on `127.0.0.1:5432`. Who can connect to it?",
+   "options": [
+    "Everyone on the network",
+    "Only those with a firewall rule",
+    "Only the machine itself",
+    "Nobody"
+   ],
+   "explain": "`127.0.0.1` is the loopback address; the service is reachable locally only. Exposed to the outside is `0.0.0.0` or an external interface address."
+  },
+  "q3": {
+   "q": "In which order is a name usually resolved?",
+   "options": [
+    "First `/etc/hosts`, then the DNS server in `resolv.conf`",
+    "First the DNS server, then `/etc/hosts`",
+    "Only the DNS server",
+    "First the gateway, then `/etc/hosts`"
+   ],
+   "explain": "The `hosts:` line in `nsswitch.conf` sets the order; by default the file (`/etc/hosts`) comes first, then DNS."
+  },
+  "q4": {
+   "q": "What happens if you run `firewall-cmd --add-port=8080/tcp` without `--permanent`?",
+   "options": [
+    "The rule stays forever",
+    "The rule only applies after a reboot",
+    "The command is rejected",
+    "The rule applies immediately but is lost on reload or reboot"
+   ],
+   "explain": "The default is the runtime configuration: effective at once, not persistent. To make it permanent you need `--permanent` and `--reload`."
+  }
+ },
+ "summary": [
+  "`ip a` shows addresses, `ip r` the routes and the default gateway.",
+  "`ss -tulpn` shows listening services; `127.0.0.1` is local only, `0.0.0.0` is every interface.",
+  "Name resolution: `/etc/hosts` → `/etc/resolv.conf` → DNS server.",
+  "Read the firewall first; in firewalld separate runtime from permanent, and over SSH use `--timeout` and a second session.",
+  "Diagnosis: address → gateway → outside IP → name → service and firewall."
+ ],
+ "glossary": [
+  {
+   "term": "IP address",
+   "meaning": "The address of an interface on the network, e.g. 192.168.1.42."
+  },
+  {
+   "term": "prefix / subnet mask",
+   "meaning": "Separates the network and host part of an address; /24 = 255.255.255.0."
+  },
+  {
+   "term": "gateway",
+   "meaning": "The router address to which packets for destinations outside the local network are sent."
+  },
+  {
+   "term": "loopback",
+   "meaning": "The machine itself: the `lo` interface, 127.0.0.1."
+  },
+  {
+   "term": "port",
+   "meaning": "A number that selects a service on a machine; 22 SSH, 80 HTTP, 443 HTTPS."
+  },
+  {
+   "term": "LISTEN",
+   "meaning": "A service waiting for connections on a specific address and port."
+  },
+  {
+   "term": "DNS",
+   "meaning": "The system that translates names into IP addresses."
+  },
+  {
+   "term": "nameserver",
+   "meaning": "A DNS server defined in `/etc/resolv.conf`."
+  },
+  {
+   "term": "runtime / permanent",
+   "meaning": "Temporary (until reload) and persistent configuration in firewalld."
+  },
+  {
+   "term": "ICMP / ping",
+   "meaning": "A simple network protocol that measures reachability and latency."
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "id": "6.3",
+ "level": 6,
+ "setup": {
+  "dirs": ["/home/student/fw"],
+  "files": {
+   "/home/student/fw/public.txt": "public (active)\n  target: default\n  interfaces: eth0\n  services: ssh dhcpv6-client\n  ports:\n",
+   "/home/student/fw/active.txt": "public: eth0\ntrusted: lo\ndrop: eth1\n",
+   "/home/student/fw/history.txt": "firewall-cmd --add-service=http\nfirewall-cmd --permanent --add-service=https\nfirewall-cmd --permanent --add-port=8080/tcp\nfirewall-cmd --reload\n",
+   "/home/student/fw/ss.txt": "LISTEN 0 128 0.0.0.0:22 users:(sshd)\nLISTEN 0 511 0.0.0.0:80 users:(nginx)\nLISTEN 0 128 127.0.0.1:5432 users:(postgres)\nLISTEN 0 128 0.0.0.0:8080 users:(app)\nESTAB 0 0 10.0.0.5:22 10.0.0.9:50122\n",
+   "/home/student/fw/blocked.log": "10:01 DROP 203.0.113.7 22\n10:02 DROP 198.51.100.9 23\n10:03 DROP 203.0.113.7 22\n10:04 DROP 192.0.2.44 3389\n10:05 DROP 203.0.113.7 22\n10:06 DROP 198.51.100.9 22\n10:07 DROP 203.0.113.7 22\n",
+   "/home/student/fw/broken.sh": "firewall-cmd --add-service=htp\n",
+   "/home/student/fw/ufw-setup.sh": "ufw enable\nufw allow OpenSSH\n",
+   "/home/student/fw/ufw-status.txt": "Status: active\n\nTo                         Action      From\n--                         ------      ----\n22/tcp                     ALLOW       Anywhere\n80/tcp                     ALLOW       Anywhere\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cwd": "~/fw"}, "solution": ["cd ~/fw"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^cat \\S*public\\.txt$", "ok": true}, "solution": ["cat public.txt"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^grep -?\\w* ?\\S*ssh \\S*public\\.txt$", "out": "dhcpv6"}, "solution": ["grep ssh public.txt"]},
+  {"id": "t04", "kind": "guided", "diff": 2, "check": {"contains": ["~/fw/test_http.sh", "firewall-cmd --add-service=http --timeout=\\d+"]}, "solution": ["echo \"firewall-cmd --add-service=http --timeout=60\" > test_http.sh"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"contains": ["~/fw/perm_http.sh", "firewall-cmd --permanent --add-service=http"]}, "solution": ["echo \"firewall-cmd --permanent --add-service=http\" > perm_http.sh"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": [{"contains": ["~/fw/perm_http.sh", "firewall-cmd --permanent --add-service=http"]}, {"contains": ["~/fw/perm_http.sh", "firewall-cmd --reload"]}], "solution": ["echo \"firewall-cmd --reload\" >> perm_http.sh"]},
+  {"id": "t07", "kind": "predict", "diff": 2, "check": {"cmd": "^grep -c LISTEN \\S*ss\\.txt$", "out": "4"}, "solution": ["grep -c LISTEN ss.txt"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"cmd": "^cut -d ?\\S* -f ?1 \\S*active\\.txt", "out": "drop\\s+public\\s+trusted"}, "solution": ["cut -d: -f1 active.txt | sort"]},
+  {"id": "t09", "kind": "debug", "diff": 2, "check": {"contains": ["~/fw/broken.sh", "--permanent --add-service=http\\b"]}, "solution": ["echo \"firewall-cmd --permanent --add-service=http\" > broken.sh"]},
+  {"id": "t10", "kind": "debug", "diff": 3, "check": {"contains": ["~/fw/ufw-setup.sh", "ufw allow OpenSSH[\\s\\S]*ufw enable"]}, "solution": ["echo \"ufw allow OpenSSH\" > ufw-setup.sh", "echo \"ufw enable\" >> ufw-setup.sh"]},
+  {"id": "t11", "kind": "mini", "diff": 2, "check": [{"contains": ["~/fw/web.sh", "--permanent --add-service=http\\b"]}, {"contains": ["~/fw/web.sh", "--permanent --add-service=https"]}, {"contains": ["~/fw/web.sh", "firewall-cmd --reload"]}], "solution": ["echo \"firewall-cmd --permanent --add-service=http\" > web.sh", "echo \"firewall-cmd --permanent --add-service=https\" >> web.sh", "echo \"firewall-cmd --reload\" >> web.sh"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [{"cmd": "uniq -c", "ok": true}, {"contains": ["~/fw/top.txt", "203\\.0\\.113\\.7"]}], "solution": ["cut -d' ' -f3 blocked.log | sort | uniq -c | sort -rn | head -n 1 > top.txt"]},
+  {"id": "t13", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/fw/rich.sh", "--add-rich-rule"]}, {"contains": ["~/fw/rich.sh", "192\\.168\\.1\\.0/24"]}, {"contains": ["~/fw/rich.sh", "5432"]}, {"contains": ["~/fw/rich.sh", "accept"]}], "solution": ["echo \"firewall-cmd --add-rich-rule='rule family=\\\"ipv4\\\" source address=\\\"192.168.1.0/24\\\" port port=\\\"5432\\\" protocol=\\\"tcp\\\" accept' --timeout=60\" > rich.sh"]},
+  {"id": "t14", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/fw/fix.sh", "--permanent --add-port=8080/tcp"]}, {"contains": ["~/fw/fix.sh", "firewall-cmd --reload"]}], "solution": ["echo \"firewall-cmd --permanent --add-port=8080/tcp\" > fix.sh", "echo \"firewall-cmd --reload\" >> fix.sh"]},
+  {"id": "t15", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/fw/ufw.sh", "ufw allow OpenSSH[\\s\\S]*ufw enable"]}, {"contains": ["~/fw/ufw.sh", "ufw allow (80/tcp|80|http)\\b"]}], "solution": ["echo \"ufw allow OpenSSH\" > ufw.sh", "echo \"ufw allow 80/tcp\" >> ufw.sh", "echo \"ufw enable\" >> ufw.sh"]},
+  {"id": "t16", "kind": "predict", "diff": 2, "check": {"cmd": "^grep -c permanent \\S*history\\.txt$", "out": "2"}, "solution": ["grep -c permanent history.txt"]},
+  {"id": "t17", "kind": "guided", "diff": 1, "check": {"cmd": "^grep -i allow \\S*ufw-status\\.txt$", "out": "22/tcp"}, "solution": ["grep -i allow ufw-status.txt"]},
+  {"id": "t18", "kind": "guided", "diff": 2, "check": {"contains": ["~/fw/port.sh", "--add-port=9090/tcp"]}, "solution": ["echo \"firewall-cmd --add-port=9090/tcp --timeout=60\" > port.sh"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "running"},
+  {"id": "v02", "expect": "http"},
+  {"id": "v03", "expect": "http"},
+  {"id": "v04", "expect": "8080"},
+  {"id": "v05", "expect": "OpenSSH|22|Status|inactive|active"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

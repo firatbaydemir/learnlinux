@@ -1,0 +1,186 @@
+{
+ "title": "Terminalde gezinme: pwd, ls, cd",
+ "lead": "Nerede olduğunu gör, çevreni tanı, hedefe git: `pwd`, `ls` ve `cd` ile dosya sisteminde güvenle dolaş.",
+ "objectives": [
+  "`pwd` ile bulunduğun dizini görür, prompt'taki `~` işaretinin ev dizini olduğunu bilirsin.",
+  "`ls` ve seçenekleriyle (`-l`, `-a`, `-h`) dizin içeriğini listeler, gizli dosyaları bulursun.",
+  "`cd` ile `~`, `-`, `..` ve `.` kısayollarını kullanarak dizinler arasında gezinirsin.",
+  "Mutlak ve göreli yol farkını bilir, `ls -l` çıktısındaki sütunları okursun ve Tab ile tamamlama kullanırsın."
+ ],
+ "sections": [
+  {
+   "id": "where",
+   "title": "Neredeyim? pwd ve ev dizini",
+   "body": [
+    "Linux'ta her şey tek bir ağaçta toplanır; kökü `/` işaretidir. Terminalde her zaman bu ağaçta bir **çalışma dizinin** (current working directory) vardır. Komutların çoğu, aksi söylenmedikçe orada çalışır.",
+    "`pwd` (print working directory) bulunduğun dizini **tam yol** olarak yazar. Yanlış dizinde çalıştırılan bir komut veri kaybına yol açabilir; bu yüzden özellikle silmeden veya kopyalamadan önce `pwd` ile bak.",
+    "Giriş yaptığında `/home/student` gibi **ev dizinine** (home) düşersin. Kısaca `~` yazılır; prompt'taki `~` da budur."
+   ],
+   "commands": [
+    {"cmd": "pwd", "what": "Bulunduğun dizini tam yol olarak gösterir.", "where": "Her işlemden önce, özellikle silme ve kopyalamadan önce.", "why": "Yanlış dizinde yanlış işlem yapmanı önler.", "example": "pwd"},
+    {"cmd": "echo ~", "what": "`~` kısayolunun açılımını, yani ev dizininin tam yolunu yazar.", "where": "Ev dizininin yolunu öğrenmek istediğinde.", "why": "`~` kabuk tarafından açılır; komutlar gerçek yolu görür.", "example": "echo ~"}
+   ],
+   "tip": "Prompt'taki `~` ev dizinindesin demektir; başka dizinde `Documents` gibi sadece son klasör adı görünür."
+  },
+  {
+   "id": "ls",
+   "title": "İçinde ne var? ls",
+   "body": [
+    "`ls` bulunduğun dizinin içeriğini listeler. Yola bir dizin verirsen oraya girmeden onu listeler: `ls /etc`. Önce gör, sonra karar ver.",
+    "Seçenekler `-` ile başlar ve birleştirilebilir: `-l` ayrıntılı liste, `-a` gizli dosyalar dahil, `-h` boyutları insan okuyabilir (K, M, G) yazar. `ls -lah` üçünü birden verir."
+   ],
+   "commands": [
+    {"cmd": "ls", "what": "Bulunduğun dizindeki dosya ve klasörleri listeler.", "where": "Bir dizine girince veya bir şeyin var olup olmadığına bakarken.", "why": "Ne olduğunu bilmediğin yerde işlem yapmak tehlikelidir.", "example": "ls"},
+    {"cmd": "ls /etc", "what": "Verilen dizinin içeriğini, oraya girmeden listeler.", "where": "Başka bir dizine bakmak için.", "why": "Çalışma dizinini değiştirmeden bakarsın.", "example": "ls /etc"},
+    {"cmd": "ls -a", "what": "Adı noktayla başlayan gizli dosyaları da gösterir.", "where": "Ayar dosyalarını ararken.", "why": "Gizli dosyalar normal `ls` çıktısında görünmez.", "example": "ls -a"},
+    {"cmd": "ls -lh", "what": "Ayrıntılı liste; boyutları K/M/G olarak yazar.", "where": "Dosya boyutlarına bakarken.", "why": "Bayt sayısını okumaktan kolaydır.", "example": "ls -lh ~"}
+   ],
+   "tip": "Bol dosyalı dizinde `ls` sonucu uzun gelirse `ls -l | head` ile ilk satırlara bak."
+  },
+  {
+   "id": "cd",
+   "title": "Hedefe git: cd",
+   "body": [
+    "`cd` (change directory) çalışma dizinini değiştirir. Başarılıysa hiçbir şey yazmaz; sonucu prompt'tan veya `pwd` ile görürsün. Dizin yoksa hata alırsın.",
+    "Kısayollar: `cd` (argümansız) ve `cd ~` ev dizinine götürür, `cd ..` bir üst dizine çıkar, `cd -` bir önceki dizine döner. `.` ise bulunduğun dizindir; `cd .` yerinde kalır.",
+    "Büyük/küçük harf önemlidir: `Documents` ile `documents` farklı adlardır. Adda boşluk varsa tırnak kullan: `cd \"My Files\"`."
+   ],
+   "commands": [
+    {"cmd": "cd Documents", "what": "Bulunduğun dizindeki `Documents` klasörüne girer.", "where": "Alt klasöre inerken.", "why": "Göreli yol: bulunduğun yerden başlar.", "example": "cd Documents"},
+    {"cmd": "cd ..", "what": "Bir üst dizine çıkar.", "where": "Klasörden çıkarken.", "why": "`..` her dizinde üst dizini gösterir.", "example": "cd .."},
+    {"cmd": "cd ~", "what": "Ev dizinine gider.", "where": "Kaybolduğunda.", "why": "Nerede olursan ol işe yarar.", "example": "cd ~"},
+    {"cmd": "cd -", "what": "Bir önceki dizine döner ve yolunu yazar.", "where": "İki dizin arasında gidip gelirken.", "why": "Uzun yolları yeniden yazmaktan kurtarır.", "example": "cd -"},
+    {"cmd": "cd", "what": "Argümansız yazılırsa ev dizinine gider.", "where": "Hızlıca eve dönmek için.", "why": "`cd ~` ile aynıdır, daha kısa.", "example": "cd"}
+   ],
+   "tip": "Kaybolursan `cd` yaz, sonra `pwd` ile kontrol et: yeniden ev dizinindesin."
+  },
+  {
+   "id": "paths",
+   "title": "Mutlak ve göreli yol",
+   "body": [
+    "**Mutlak yol** `/` ile başlar ve kökten itibaren tam adrestir: `/usr/bin`. Nerede olduğundan bağımsız hep aynı yere gider. `~/Documents` de mutlak sayılır, çünkü `~` tam yola açılır.",
+    "**Göreli yol** `/` ile başlamaz ve bulunduğun dizinden hesaplanır: `Documents`, `../Downloads`, `./notes.txt`. Aynı yazım farklı dizinlerde farklı yere gider.",
+    "`..` üst dizin, `.` bulunduğun dizindir; zincirlenebilirler: `cd ../..` iki üst dizine çıkar. `/usr/bin` içindeyken `cd ../..` seni `/` köküne götürür."
+   ],
+   "commands": [
+    {"cmd": "cd /usr/bin", "what": "Mutlak yolla doğrudan `/usr/bin` dizinine gider.", "where": "Nerede olduğundan bağımsız hedefe giderken.", "why": "Sonuç hep aynıdır.", "example": "cd /usr/bin"},
+    {"cmd": "cd ../..", "what": "İki üst dizine çıkar.", "where": "Derin klasörden hızlı çıkarken.", "why": "Göreli yolda `..` zincirlenebilir.", "example": "cd ../.."}
+   ],
+   "tip": "Emin değilsen mutlak yol yaz; kısa mesafede göreli yol daha hızlıdır."
+  },
+  {
+   "id": "hidden",
+   "title": "Gizli dosyalar",
+   "body": [
+    "Adı **nokta ile başlayan** dosya ve klasörler gizlidir: `.bashrc`, `.profile`, `.config`. Normal `ls` bunları göstermez, `ls -a` gösterir. Ayarlar genelde bu dosyalarda tutulur.",
+    "`ls -a` çıktısında iki özel girdi görürsün: `.` (bulunduğun dizin) ve `..` (üst dizin). Bunlar gerçek dosya değil, her dizinde bulunan kısayollardır."
+   ],
+   "commands": [
+    {"cmd": "ls -a ~", "what": "Ev dizinindeki gizli dosyalar dahil her şeyi listeler.", "where": "Ayar dosyalarını ararken.", "why": "`.bashrc` gibi dosyalar yalnızca böyle görünür.", "example": "ls -a ~"},
+    {"cmd": "ls -A", "what": "Gizli dosyaları `.` ve `..` olmadan gösterir.", "where": "Daha temiz bir liste için (gerçek VM'de).", "why": "`-a` ile aynı, ama iki kısayol girdisi yok.", "example": "ls -A ~", "nosim": true}
+   ],
+   "warn": "`.bashrc` ve `.profile` gibi ayar dosyalarını silme veya bozma; kabuk ortamın bozulabilir."
+  },
+  {
+   "id": "longlist",
+   "title": "ls -l çıktısını okumak",
+   "body": [
+    "`ls -l` her dosya için bir satır verir. Örnek: `-rw-r--r-- 1 student student 35 Nov 12 10:32 notes.txt`. Soldan sağa:",
+    "**1. karakter:** tür. `-` normal dosya, `d` dizin, `l` sembolik bağ. **Sonraki 9 karakter:** izinler (`rw-r--r--`: sahip okur/yazar, grup ve diğerleri okur). **Sayı:** bağ sayısı. **İki ad:** sahip kullanıcı ve grup. **Sayı:** bayt cinsinden boyut. **Tarih:** son değişiklik. **Son:** ad.",
+    "En üstteki `total` satırı diskte kullanılan blok toplamıdır. İzinlerin ayrıntısını sonraki modüllerde göreceksin."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Tür, izin, sahip, boyut, tarih ve adı gösteren ayrıntılı liste.", "where": "Bir dosyanın sahibine veya iznine bakarken.", "why": "Dosya hakkında tüm temel bilgi tek satırda.", "example": "ls -l"},
+    {"cmd": "ls -ld ~", "what": "Bir dizinin kendisini (içeriğini değil) ayrıntılı gösterir.", "where": "Dizinin iznini veya sahibini kontrol ederken.", "why": "`-d` olmadan `ls` dizinin içine bakar.", "example": "ls -ld ~"}
+   ],
+   "tip": "Satır `d` ile başlıyorsa klasör, `-` ile başlıyorsa dosyadır."
+  },
+  {
+   "id": "tab",
+   "title": "Tab ile tamamlama",
+   "body": [
+    "Terminalde uzun adları elle yazma: adın ilk harflerini yaz ve **Tab** tuşuna bas. Tek eşleşme varsa kabuk adı tamamlar. Birden çok eşleşme varsa Tab'a **iki kez** bas; seçenekler listelenir.",
+    "Hem komutlar hem dosya ve klasör adları için çalışır. Hız kazandırır ve yazım hatasını önler: Tab tamamlamıyorsa o ad yoktur ya da yanlış dizindesin.",
+    "Ek kısayol: **↑/↓** tuşları önceki komutları getirir. Bu özellikler gerçek bir kabukta (VM'inde) çalışır."
+   ],
+   "commands": [
+    {"cmd": "cd Doc + Tab", "what": "`Doc` yazıp Tab'a basınca `Documents/` olarak tamamlanır.", "where": "Her komutta, dosya ve klasör adı yazarken.", "why": "Daha az yazar, hata yapmazsın.", "example": "cd Doc", "nosim": true}
+   ],
+   "tip": "Alışkanlık edin: adı baştan sona yazmadan önce Tab'a bas."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`pwd` ile bulunduğun dizini göster.", "hint": "Çıktı `/` ile başlayan tam yoldur."},
+  "t02": {"text": "`ls` ile ev dizininin içeriğini listele.", "hint": "Argümansız `ls` bulunduğun dizine bakar."},
+  "t03": {"text": "`cd Documents` ile `Documents` klasörüne gir.", "hint": "Prompt'ta dizin adı değişmeli."},
+  "t04": {"text": "`ls -l` ile ayrıntılı listele.", "hint": "`-l` küçük L harfidir."},
+  "t05": {"text": "`ls -a` ile gizli dosyalar dahil listele.", "hint": "`.hidden_notes.txt` görünmeli."},
+  "t06": {"text": "Mutlak yolla `~/projects/website` dizinine git.", "hint": "`cd ~/projects/website`."},
+  "t07": {"text": "Göreli yolla `css` alt klasörüne gir.", "hint": "Zaten `website` içindesin: `cd css`."},
+  "t08": {"text": "`css` içindeyken `..` kullanarak kardeş klasör `images` dizinine geç.", "hint": "Önce bir yukarı, sonra aşağı: `cd ../images`."},
+  "t09": {"text": "`cd -` ile bir önceki dizine dön.", "hint": "Tire karakterini unutma."},
+  "t10": {"text": "Argümansız `cd` ile ev dizinine dön.", "hint": "`cd` veya `cd ~`."},
+  "t11": {"text": "Tahmin et: `/usr/bin` içindeki bir komutla `cd /usr/bin/../..` yazarsan nereye varırsın? Önce düşün, sonra komutu çalıştır ve `pwd` ile doğrula.", "hint": "Her `..` bir üst dizine çıkar: `/usr/bin` → `/usr` → `/`."},
+  "t12": {"text": "Tahmin et: `/etc/hostname` dosyasının türü, sahibi ve izinleri ne? `ls -l /etc/hostname` ile doğrula.", "hint": "İlk karakter `-` ise normal dosyadır; sahibi `root` olur."},
+  "t13": {"text": "Hata ayıkla: Bir arkadaşın `cd ~/downloads` yazıp `No such file or directory` alıyor. Doğru adla `Downloads` klasörüne git.", "hint": "Linux'ta büyük/küçük harf önemlidir: `Downloads`."},
+  "t14": {"text": "Mini proje: `~/projects/website/css` dizinine git, içeriğini listele, sonra iki üst dizine çıkarak `~/projects` içinde bitir.", "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."},
+  "t15": {"text": "Zor görev: Gizli dosyalar dahil, hem `~/Documents` hem de `~/projects/website` içeriğini tek bir `ls` komutuyla listele.", "hint": "`ls` birden çok yol alabilir; `-a` ile birlikte kullan."},
+  "t16": {"text": "TICKET #1101 — Bir meslektaşın `website` projesindeki `images` klasörünün tam yolunu istiyor. Klasöre git, `pwd` ile yolu göster, sonra ev dizinine dön.", "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."}
+ },
+ "vm": {
+  "intro": "Bu görevleri kendi VM'inde (Ubuntu, Rocky, Alma veya WSL) çalıştır. Hepsi salt okunurdur; hiçbir şeyi değiştirmez.",
+  "tasks": {
+   "v01": {
+    "title": "Neredeyim?",
+    "text": "Terminali aç; bulunduğun dizini ve ev dizininin yolunu yazdır, çıktıyı yapıştır.",
+    "blocks": [{"cmd": "pwd\necho ~", "expected": "/home/student\n/home/student"}],
+    "differs": ["Kullanıcı adın `student` değilse yolda kendi adın görünür; normaldir.", "Çıktı `/root` ise root olarak çalışıyorsun; normal kullanıcıya geç."]
+   },
+   "v02": {
+    "title": "Gizli dosyaları bul",
+    "text": "Ev dizininde gizli dosyalar dahil listele ve `.bashrc` dosyasını bul.",
+    "blocks": [{"cmd": "ls -a ~", "expected": ".  ..  .bash_logout  .bashrc  .profile  Desktop  Documents ..."}],
+    "differs": ["Çok sayıda gizli klasör (`.cache`, `.config`) görebilirsin; normal.", "WSL'de `.bashrc` yine ev dizinindedir; `~` altında aradığından emin ol."]
+   },
+   "v03": {
+    "title": "Mutlak, göreli ve cd -",
+    "text": "Mutlak yolla `/var/log` dizinine git, `..` ile üste çık, `cd -` ile geri dön ve yolları yazdır.",
+    "blocks": [{"cmd": "cd /var/log\npwd\ncd ..\npwd\ncd -\ncd /etc\npwd", "expected": "/var/log\n/var\n/var/log\n/etc"}],
+    "differs": ["`cd -` kendi başına önceki yolu da yazar; fazladan bir satır görmen normaldir.", "`/var/log` yoksa (çok minimal imaj) `cd /usr/bin` ile dene."]
+   },
+   "v04": {
+    "title": "ls -l oku",
+    "text": "`/etc/passwd` dosyasını ayrıntılı listele; tür, izin, sahip ve boyutu oku.",
+    "blocks": [{"cmd": "ls -l /etc/passwd", "expected": "-rw-r--r-- 1 root root 1234 Nov 12 10:32 /etc/passwd"}],
+    "differs": ["İzinlerin sonunda `.` veya `+` varsa (SELinux/ACL) normaldir.", "Boyut ve tarih sistemine göre değişir."]
+   },
+   "v05": {
+    "title": "Tab ile tamamlama",
+    "text": "`cd Doc` yaz ve Enter'a basmadan Tab'a bas; `Documents/` olarak tamamlanmalı. Sonra `cd ~/` yazıp Tab'a iki kez bas ve listeyi gör. Yaptıysan \"Yaptım\" de.",
+    "blocks": [{"cmd": "cd Doc<Tab>"}],
+    "differs": ["Tamamlanmıyorsa `Documents` klasörü yoktur veya ev dizininde değilsin; `pwd` ile kontrol et.", "Bazı minimal sistemlerde tamamlama için `bash-completion` paketi gerekir."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "`pwd` komutu ne yapar?", "options": ["Dosyaları listeler", "Bulunduğun dizini tam yol olarak gösterir", "Dizin değiştirir", "Parolayı değiştirir"], "explain": "`pwd` (print working directory) çalışma dizinini yazar."},
+  "q2": {"q": "`cd ..` ne yapar?", "options": ["Ev dizinine gider", "Yerinde kalır", "Bir üst dizine çıkar", "Önceki dizine döner"], "explain": "`..` üst dizindir; ev için `cd ~`, önceki için `cd -` kullanılır."},
+  "q3": {"q": "Gizli dosyaları görmek için hangisi kullanılır?", "options": ["ls -a", "ls -l", "ls -h", "ls -r"], "explain": "Adı noktayla başlayan dosyaları `-a` gösterir."},
+  "q4": {"q": "`ls -l` çıktısında satır `d` ile başlıyorsa bu ne demektir?", "options": ["Silinmiş dosya", "Çalıştırılabilir dosya", "Sembolik bağ", "Dizin"], "explain": "İlk karakter türü gösterir: `d` dizin, `-` dosya, `l` sembolik bağ."}
+ },
+ "summary": [
+  "`pwd` nerede olduğunu, `ls` neyin olduğunu, `cd` nereye gideceğini söyler.",
+  "`~` ev dizini, `..` üst dizin, `.` bulunduğun dizin, `cd -` önceki dizindir.",
+  "Mutlak yol `/` ile başlar; göreli yol bulunduğun dizinden hesaplanır.",
+  "`ls -a` gizli dosyaları, `ls -l` tür, izin, sahip, boyut ve tarihi gösterir.",
+  "Tab ile tamamla; büyük/küçük harfe dikkat et."
+ ],
+ "glossary": [
+  {"term": "çalışma dizini", "meaning": "Komutların varsayılan olarak çalıştığı, şu an bulunduğun dizin."},
+  {"term": "ev dizini (home)", "meaning": "Kullanıcıya ait dizin; `~` ile kısaltılır, örneğin `/home/student`."},
+  {"term": "mutlak yol", "meaning": "`/` kökünden başlayan tam adres."},
+  {"term": "göreli yol", "meaning": "Bulunduğun dizinden başlayan yol."},
+  {"term": "gizli dosya", "meaning": "Adı noktayla başlayan, `ls -a` ile görünen dosya."},
+  {"term": "Tab tamamlama", "meaning": "Adın başını yazıp Tab'a basarak kabuğa tamamlatma."}
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "id": "2.5",
+ "level": 2,
+ "setup": {
+  "dirs": ["/home/student/info"],
+  "files": {
+   "/home/student/info/data.txt": "alpha\nbeta\ngamma\n",
+   "/home/student/info/picture.jpg": "just plain text, not an image\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^stat \\S*data\\.txt$", "ok": true}, "solution": ["stat ~/info/data.txt"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls -\\w*l\\w*( \\S+)?$", "ok": true}, "solution": ["ls -l ~/info"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^basename \\S*data\\.txt$", "ok": true}, "solution": ["basename ~/info/data.txt"]},
+  {"id": "t04", "kind": "warmup", "diff": 1, "check": {"cmd": "^dirname \\S*data\\.txt$", "ok": true}, "solution": ["dirname ~/info/data.txt"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^ls (-[a-z]*l[a-z]*h|-[a-z]*h[a-z]*l)[a-z]*( \\S+)?$", "ok": true}, "solution": ["ls -lh ~/info"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": [{"cmd": "^wc -c \\S*data\\.txt$", "ok": true}, {"out": "\\b17\\b", "of": "^wc -c"}], "solution": ["wc -c ~/info/data.txt"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": [{"cmd": "^wc -l \\S*data\\.txt$", "ok": true}, {"out": "\\b3\\b", "of": "^wc -l"}], "solution": ["wc -l ~/info/data.txt"]},
+  {"id": "t08", "kind": "guided", "diff": 2, "check": {"exists": "~/info/link.txt", "type": "l", "link": true}, "solution": ["ln -s data.txt ~/info/link.txt"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "link\\.txt -> data\\.txt", "of": "^ls -\\w*l"}, "solution": ["ls -l ~/info"]},
+  {"id": "t10", "kind": "guided", "diff": 2, "check": {"out": "symbolic link", "of": "^stat \\S*link\\.txt$"}, "solution": ["stat ~/info/link.txt"]},
+  {"id": "t11", "kind": "predict", "diff": 2, "check": {"out": "drwx", "of": "^ls -\\w*d\\w* "}, "solution": ["ls -ld ~/info"]},
+  {"id": "t12", "kind": "predict", "diff": 2, "check": {"cmd": "^stat \\S*missing\\.txt$", "ok": false}, "solution": ["stat ~/info/missing.txt"]},
+  {"id": "t13", "kind": "predict", "diff": 3, "check": {"cmd": "^cat \\S*broken$", "ok": false}, "solution": ["ln -s nothing.txt ~/broken", "cat ~/broken"]},
+  {"id": "t14", "kind": "debug", "diff": 2, "check": [{"exists": "~/info/picture.txt", "type": "f"}, {"absent": "~/info/picture.jpg"}], "solution": ["mv ~/info/picture.jpg ~/info/picture.txt"]},
+  {"id": "t15", "kind": "mini", "diff": 2, "check": [{"exists": "~/inventory/v1.txt", "type": "f"}, {"contains": ["~/inventory/v1.txt", "version1"]}, {"exists": "~/inventory/current", "type": "l", "link": true}, {"cmd": "^ls -\\w*l\\w* \\S*inventory$", "ok": true}], "solution": ["mkdir ~/inventory", "echo version1 > ~/inventory/v1.txt", "ln -s v1.txt ~/inventory/current", "ls -l ~/inventory"]},
+  {"id": "t16", "kind": "challenge", "diff": 3, "check": [{"seq": ["^ln -s \\S+ \\S*shortcut$", "^ls -\\w*l\\w* \\S*shortcut$", "^stat \\S*shortcut$", "^rm \\S*shortcut$"], "ok": true}, {"absent": "~/shortcut"}, {"exists": "~/info/data.txt", "type": "f"}], "solution": ["ln -s ~/info/data.txt ~/shortcut", "ls -l ~/shortcut", "stat ~/shortcut", "rm ~/shortcut"]},
+  {"id": "t17", "kind": "ticket", "diff": 3, "check": [{"exists": "~/size.txt", "type": "f"}, {"contains": ["~/size.txt", "17"]}], "solution": ["wc -c ~/info/data.txt > ~/size.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*directory)(?=[\\s\\S]*(text|ELF))"},
+  {"id": "v02", "expect": "text"},
+  {"id": "v03", "expect": "(?=[\\s\\S]*size)(?=[\\s\\S]*modify)"},
+  {"id": "v04", "expect": "->"},
+  {"id": "v05", "expect": null}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

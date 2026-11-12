@@ -1,0 +1,46 @@
+{
+ "id": "1.3",
+ "level": 1,
+ "setup": {
+  "dirs": ["/home/student/Projects/web"],
+  "files": {
+   "/home/student/Projects/web/todo.txt": "fix menu\nadd footer\n",
+   "/home/student/Projects/web/page.html": "<h1>Hello</h1>\n"
+  },
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^man ls$", "ok": true}, "solution": ["man ls"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls --help$", "ok": true}, "solution": ["ls --help"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"out": "builtin", "of": "^type cd$"}, "solution": ["type cd"]},
+  {"id": "t04", "kind": "warmup", "diff": 1, "check": {"out": "/usr/bin/ls", "of": "^which ls$"}, "solution": ["which ls"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^man cat$", "ok": true}, "solution": ["man cat"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cmd": "^help$", "ok": true}, "solution": ["help"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": {"out": "notes\\.txt", "of": "^find \\S+ -name \\S*txt\\S*$"}, "solution": ["find . -name \"*.txt\""]},
+  {"id": "t08", "kind": "guided", "diff": 2, "check": {"cmd": "^history$", "ok": true}, "solution": ["history"]},
+  {"id": "t09", "kind": "guided", "diff": 2, "check": {"cmd": "^man ls \\| head", "ok": true}, "solution": ["man ls | head -n 3"]},
+  {"id": "t10", "kind": "predict", "diff": 2, "check": {"out": "127", "of": "^nosuchcmd; echo \\$\\?$"}, "solution": ["nosuchcmd; echo $?"]},
+  {"id": "t11", "kind": "predict", "diff": 2, "check": {"out": "^\\s*6\\s*$", "of": "^find ~ -type d \\| wc -l$"}, "solution": ["find ~ -type d | wc -l"]},
+  {"id": "t12", "kind": "debug", "diff": 2, "check": {"cmd": "^man mkdir$", "ok": true}, "solution": ["man mkdirr", "man mkdir"]},
+  {"id": "t13", "kind": "mini", "diff": 2, "check": {"contains": ["~/path.txt", "Projects/web/todo\\.txt"]}, "solution": ["find ~ -name todo.txt > ~/path.txt"]},
+  {"id": "t14", "kind": "challenge", "diff": 3, "check": [{"cmd": "^find \\S+ -name \\S*txt\\S* \\| wc -l > \\S*count\\.txt$", "ok": true}, {"contains": ["~/count.txt", "^[4-7]\\s*$"]}], "solution": ["find ~ -name \"*.txt\" | wc -l > ~/count.txt"]},
+  {"id": "t15", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/ls_path.txt", "/usr/bin/ls"]}, {"contains": ["~/cd_type.txt", "builtin"]}], "solution": ["which ls > ~/ls_path.txt", "type cd > ~/cd_type.txt"]},
+  {"id": "t16", "kind": "ticket", "diff": 3, "check": [{"cmd": "^history > \\S*hist\\.txt$", "ok": true}, {"contains": ["~/hist.txt", "which"]}], "solution": ["which ls", "history > ~/hist.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "LS\\(1\\)|NAME|ls"},
+  {"id": "v02", "expect": "Usage|ls"},
+  {"id": "v03", "expect": "builtin"},
+  {"id": "v04", "expect": null},
+  {"id": "v05", "expect": "ls|list"},
+  {"id": "v06", "expect": "127"},
+  {"id": "v07", "expect": "history"},
+  {"id": "v08", "expect": "passwd"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

@@ -1,0 +1,403 @@
+{
+ "title": "Özel İzinler",
+ "lead": "Setuid, setgid ve sticky bit: normal rwx izinlerinin yetmediği yerlerde (passwd, ortak takım klasörü, /tmp) ne işe yaradıklarını gerçek VM'inde dene, sonra simülatörde pekiştir.",
+ "objectives": [
+  "setuid (4), setgid (2) ve sticky (1) bitlerini ve sekizlik izindeki baştaki rakamı tanırsın.",
+  "`ls -l` çıktısında `s`, `S`, `t`, `T` harflerini doğru okursun.",
+  "Takım klasörü için `2775` tarifini kurar, yeni dosyaların grubunun neden korunduğunu açıklarsın.",
+  "`/tmp` gibi ortak yazılabilir klasörleri sticky bit (`1777`) ile korursun.",
+  "setuid'in neden tehlikeli olduğunu bilir, sistemdeki setuid dosyalarını `find` ile denetlersin."
+ ],
+ "sections": [
+  {
+   "id": "bits",
+   "title": "Üç özel bit ve sekizlik gösterim",
+   "body": [
+    "Normal izinler üç hane (`755`) ile yazılır. Dört haneli yazımda **baştaki rakam** özel bitleri taşır: `4` = setuid, `2` = setgid, `1` = sticky. Toplanabilirler: `3` = setgid + sticky, `6` = setuid + setgid. Baştaki sıfır (`0755`) 'özel bit yok' demektir.",
+    "`ls -l` bu bitleri x konumunda gösterir: sahip x yerinde `s` (setuid), grup x yerinde `s` (setgid), diğerleri x yerinde `t` (sticky). Altta x izni **yoksa** harf büyür: `S` veya `T`. Büyük harf 'bit açık ama çalıştırma izni yok' demektir; çoğu zaman bir yanlışlık işaretidir.",
+    "Özel bitlerin anlamı dosya ve klasörde farklıdır: setuid ve setgid dosyada 'sahibinin/grubun yetkisiyle çalıştır', setgid ve sticky klasörde 'grubu miras bırak' ve 'silmeyi sınırla' demektir."
+   ],
+   "commands": [
+    {
+     "cmd": "stat",
+     "what": "İzni hem dört haneli sekizlik hem de harfli olarak gösterir.",
+     "where": "Özel bitleri doğrularken.",
+     "why": "`Access: (2775/drwxrwsr-x)` satırı iki gösterimi yan yana verir.",
+     "example": "stat prog_c"
+    },
+    {
+     "cmd": "ls -ld",
+     "what": "Klasörün kendisinin iznini gösterir (içeriğini değil).",
+     "where": "Takım klasörünü veya `/tmp` iznini kontrol ederken.",
+     "why": "`-d` olmadan klasörün içi listelenir, kendi izni görünmez.",
+     "example": "ls -ld /tmp"
+    },
+    {
+     "cmd": "chmod 4755",
+     "what": "Dört haneli sekizlik izin atar; baştaki rakam özel bittir.",
+     "where": "Özel biti tek seferde, diğer izinlerle birlikte ayarlarken.",
+     "why": "Sonucu tam olarak bilirsin; ama dosyada eski özel biti de sıfırlar.",
+     "example": "chmod 4755 prog_a"
+    }
+   ],
+   "tip": "Özel bitleri sembolik yazmak daha güvenlidir: `chmod g+s team` yalnızca setgid ekler, diğer izinlere dokunmaz.",
+   "warn": "Dosyada üç haneli `chmod 755 notes.txt` özel bitleri **siler**. Klasörde ise GNU `chmod` setgid/setuid'i korur; silmek için `chmod g-s team` veya beş haneli `chmod 00755` gerekir. Emin olmak için sonra `ls -ld` ile bak."
+  },
+  {
+   "id": "setuid",
+   "title": "setuid: sahibin yetkisiyle çalıştır",
+   "body": [
+    "Çalıştırılabilir bir dosyada **setuid** (`4000`) varsa, program onu başlatan kişinin değil **dosya sahibinin** yetkisiyle çalışır. En bilinen örnek `/usr/bin/passwd`: sahibi root'tur, `-rwsr-xr-x` görünür. Sıradan kullanıcı kendi parolasını değiştirebilir, çünkü program root yetkisiyle `/etc/shadow` dosyasını güncelleyebilir. `sudo` ve `mount` da aynı mantıkla çalışır.",
+    "Bu güç risklidir. Root'a ait bir setuid programdaki küçük bir hata (veya setuid'li bir kabuk/editör/yorumlayıcı) herkese root yetkisi verir. Bu yüzden setuid dosyalarını bilmek ve düzenli denetlemek gerekir.",
+    "İki not: Linux çekirdeği **kabuk betiklerinde** (`#!/bin/bash`) setuid'i yok sayar; betiğe `chmod u+s` yazmak root yetkisi vermez, sadece yanıltır. Ayrıca `nosuid` seçeneğiyle bağlanan dosya sistemlerinde (ör. çoğu USB, `/tmp` bölümü) setuid hiç çalışmaz."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod u+s",
+     "what": "Sahibin x konumuna setuid ekler (`s`).",
+     "where": "Gerçek sistemde nadiren, derlenmiş ve denetlenmiş programlar için.",
+     "why": "Normal kullanıcıya belirli bir işi yetkili yapmanın (çok dikkatli kullanılan) yolu.",
+     "example": "chmod u+s backup.sh"
+    },
+    {
+     "cmd": "ls -l /usr/bin/passwd",
+     "what": "Gerçek bir setuid programının iznini gösterir: `-rwsr-xr-x root root`.",
+     "where": "setuid'in nasıl göründüğünü öğrenirken.",
+     "why": "Sahibin x konumundaki `s` harfi setuid'dir.",
+     "example": "ls -l /usr/bin/passwd",
+     "nosim": true
+    },
+    {
+     "cmd": "find / -perm -4000 -type f 2>/dev/null",
+     "what": "Sistemdeki tüm setuid dosyalarını listeler (`-perm -4000` = bu bit açık olsun).",
+     "where": "Güvenlik denetiminde ve sertleştirmede.",
+     "why": "Beklenmeyen bir setuid dosyası saldırı belirtisi olabilir.",
+     "example": "find / -perm -4000 -type f 2>/dev/null",
+     "nosim": true
+    }
+   ],
+   "tip": "Listede `passwd`, `sudo`, `mount`, `su` gibi tanıdık adlar normaldir. Tanımadığın veya `/home`, `/tmp` altındaki bir setuid dosya inceleme gerektirir.",
+   "danger": "Gerçek sistemde asla `chmod u+s /bin/bash` (veya vim, python, find, cp gibi bir program) yapma. Bu, her kullanıcıya root kabuğu verir ve klasik bir yetki yükseltme yöntemidir. Yalnızca kendi izole deneme VM'inde, snapshot aldıktan sonra ve işin bitince geri alarak dene."
+  },
+  {
+   "id": "setgid",
+   "title": "setgid: grubu miras bırakan takım klasörü",
+   "body": [
+    "Dosyada **setgid** (`2000`) program grup yetkisiyle çalışır; pratikte asıl kullanımı **klasörde**dir. Setgid'li bir klasörde oluşturulan her yeni dosya ve alt klasör, oluşturanın birincil grubunu değil **klasörün grubunu** alır. Yeni alt klasörler setgid bitini de miras alır, böylece kural ağaç boyunca sürer.",
+    "Bunsuz sorun şu: alice `devs` klasörüne dosya koyar, dosya grubu `alice` olur ve takım arkadaşı bob dosyayı değiştiremez. Setgid ile dosya grubu hep `devs` kalır. Üyelerin grup dosyasını **yazabilmesi** için ayrıca `umask 002` gerekir; `022` ile yeni dosya `rw-r--r--` olur ve grup yazamaz.",
+    "Simülatör setgid'in grup mirasını uygulamaz; yalnızca biti ayarlar ve `ls -l` ile `stat` çıktısında gösterir. Gerçek davranışı VM görevinde kendi gözünle göreceksin."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod g+s",
+     "what": "Grubun x konumuna setgid ekler (`s`).",
+     "where": "Mevcut bir klasörü takım klasörüne çevirirken.",
+     "why": "Diğer izinlere dokunmadan yalnızca grup mirasını açar.",
+     "example": "chmod g+s team"
+    },
+    {
+     "cmd": "chmod 2775",
+     "what": "Setgid + `rwxrwxr-x` verir: sahip ve grup tam yetkili, diğerleri okur.",
+     "where": "Takım klasörü kurarken.",
+     "why": "Tek komutla standart takım klasörü izni.",
+     "example": "chmod 2775 team"
+    },
+    {
+     "cmd": "umask 002",
+     "what": "Bu kabukta yeni dosyaların grup yazma iznini açık bırakır.",
+     "where": "Takım klasöründe çalışmadan önce.",
+     "why": "Setgid grubu doğru yapar, umask ise grubun dosyayı yazabilmesini sağlar.",
+     "example": "umask 002"
+    }
+   ],
+   "tip": "Klasörde `rwxrwsr-x` görürsen: grup `s` (x var + setgid), tamam. `rwxrwSr-x` görürsen grubun x izni yok; klasöre giremez, düzelt.",
+   "warn": "`umask` yalnızca o kabuğu etkiler. Kalıcı yapmak için kullanıcı profiline (ör. `~/.bashrc`) eklenir; sistem genelinde ise ayrı bir yapılandırmadır."
+  },
+  {
+   "id": "sticky",
+   "title": "sticky bit: ortak klasörde silmeyi sınırla",
+   "body": [
+    "Herkesin yazabildiği bir klasörde (`777`) herkes **başkasının dosyasını da silebilir veya yeniden adlandırabilir**, çünkü silme izni dosyanın değil klasörün yazma iznine bağlıdır. **Sticky bit** (`1000`) bunu değiştirir: yalnızca dosyanın sahibi, klasörün sahibi veya root silebilir/yeniden adlandırabilir.",
+    "Klasik örnek `/tmp`: mod `1777`, görünüm `drwxrwxrwt`. Herkes dosya oluşturur, ama kimse başkasınınkini silemez. Sticky bit **klasörde** anlamlıdır; modern Linux'ta dosyadaki sticky bitinin etkisi yoktur.",
+    "Simülatör sticky silme korumasını uygulamaz; bitin ayarlanıp `t` olarak göründüğünü kontrol edersin. Gerçek korumayı VM'de alice ve bob ile deneyeceksin."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod +t",
+     "what": "Klasöre sticky bit ekler; diğerlerinin x konumunda `t` görünür.",
+     "where": "Ortak yazılabilir bırakma/paylaşım klasörlerinde.",
+     "why": "Kullanıcıların birbirinin dosyasını silmesini engeller.",
+     "example": "chmod +t inbox"
+    },
+    {
+     "cmd": "chmod 1777",
+     "what": "Sticky + `rwxrwxrwx`: `/tmp` ile aynı mod.",
+     "where": "Herkesin dosya bırakabildiği klasör kurarken.",
+     "why": "Tek komutla standart ortak klasör izni.",
+     "example": "chmod 1777 drop"
+    }
+   ],
+   "tip": "Büyük `T` (`drwxrwx--T`) 'sticky açık, ama diğerlerinin x izni yok' demektir. Gizli takım klasörü için `1770` bilerek bu şekilde olabilir."
+  },
+  {
+   "id": "recipe",
+   "title": "Tarif: takım klasörü ve sonraki adım",
+   "body": [
+    "Gerçek bir takım klasörü şu adımlarla kurulur: (1) klasörü oluştur, (2) grubunu `devs` yap, (3) `2775` (başkaları okumasın istiyorsan `2770`) ver, (4) üyeler `umask 002` ile çalışsın. Klasörü root oluşturduğu için `sudo` gerekir.",
+    "Hem setgid hem sticky isteyen klasörler için `3775` / `3770` kullanılır: yeni dosyalar gruba aittir ve üyeler birbirinin dosyasını silemez.",
+    "Yine de bu yöntemin sınırı var: yeni dosya izinleri umask'a bağlıdır ve kullanıcı başına farklı kural yazamazsın. Bunun için **varsayılan ACL**'ler vardır (`setfacl -d`); sonraki modüllerin konusu. Şimdilik bil ki setgid klasörü ACL'siz takım çalışmasının temelidir."
+   ],
+   "commands": [
+    {
+     "cmd": "sudo mkdir /srv/project",
+     "what": "Sistem altında paylaşılan klasörü root yetkisiyle oluşturur.",
+     "where": "Takım için kalıcı çalışma alanı açarken.",
+     "why": "`/srv` normal kullanıcıya yazılamaz; sudo gerekir.",
+     "example": "sudo mkdir /srv/project",
+     "nosim": true
+    },
+    {
+     "cmd": "sudo chgrp devs",
+     "what": "Klasörün grubunu `devs` yapar.",
+     "where": "İzni takıma vermeden önce.",
+     "why": "Setgid'in miras bırakacağı grup bu olur.",
+     "example": "sudo chgrp devs team"
+    },
+    {
+     "cmd": "chmod 2775",
+     "what": "Takım klasörü iznini tamamlar.",
+     "where": "Grubu ayarladıktan sonra, kullanıma açmadan önce.",
+     "why": "Grup yazar ve yeni dosyalar `devs` grubunu alır.",
+     "example": "chmod 2775 team"
+    }
+   ],
+   "warn": "Önce grup, sonra izin: grubu `devs` yapmadan `2775` vermek yanlış grubu miras bıraktırır. Sonunda `ls -ld` ile `drwxrwsr-x ... devs` görmelisin."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`ls -ld /tmp` ile `/tmp` klasörünün iznine bak. Sonda hangi harf var?",
+   "hint": "`drwxrwxrwt`: sondaki `t` sticky bittir."
+  },
+  "t02": {
+   "text": "`backup.sh` dosyasına tek komutla setuid ekle: `chmod u+s backup.sh`.",
+   "hint": "755 + setuid = 4755; `ls -l backup.sh` ile `rws` gör."
+  },
+  "t03": {
+   "text": "Adım adım: `team` klasörünün grubunu `sudo chgrp devs team` ile `devs` yap, sonra `chmod 2775 team` ver ve `ls -ld team` ile doğrula.",
+   "hint": "Beklenen: `drwxrwsr-x student devs`."
+  },
+  "t04": {
+   "text": "Adım adım: `drop` klasörünün iznini `ls -ld drop` ile gör, `chmod 1777 drop` ile sticky yap, tekrar `ls -ld drop` çalıştır.",
+   "hint": "Önce `drwxr-xr-x`, sonra `drwxrwxrwt` olmalı."
+  },
+  "t05": {
+   "text": "Tahmin et: `prog_a` dosyasının modu 4755. `ls -l prog_a` çıktısında sahip izni nasıl görünür? Önce tahmin et, sonra çalıştır.",
+   "hint": "x izni var ve setuid açık: küçük harf `s`."
+  },
+  "t06": {
+   "text": "Tahmin et: `prog_b` dosyasının modu 4644. Sahip izni nasıl görünür? `ls -l prog_b` ile doğrula.",
+   "hint": "Sahipte x yok ama setuid açık: büyük `S`."
+  },
+  "t07": {
+   "text": "Tahmin et: `prog_c` modu 2755. `stat prog_c` komutundaki `Access:` satırı ne gösterir?",
+   "hint": "Baştaki 2 = setgid; harfli gösterimde grup x yerinde `s`."
+  },
+  "t08": {
+   "text": "Hata ayıkla: `legacy/tool.sh` kabuk betiğinde biri setuid bırakmış (4755). Betikte çekirdek bunu yok sayar ama denetimde sorun çıkarır. Normal `755` moduna döndür.",
+   "hint": "`ls -l legacy/tool.sh` ile `rws` gör, sonra `chmod 755 legacy/tool.sh`."
+  },
+  "t09": {
+   "text": "Hata ayıkla: `inbox` klasörü `777`, kullanıcılar birbirinin dosyasını siliyor. Klasörü `1777` yapacak şekilde düzelt (mevcut izinlere dokunmadan).",
+   "hint": "`chmod +t inbox` yalnızca sticky ekler."
+  },
+  "t10": {
+   "text": "Mini proje: `proj` klasörünün grubunu `devs` yap, `2770` ver (başkaları giremesin), `umask 002` çalıştır ve `proj/plan.txt` dosyasını `touch` ile oluştur.",
+   "hint": "Sıra: `sudo chgrp devs proj`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
+  },
+  "t11": {
+   "text": "Mini proje: `upload` klasörünü oluştur, `1777` yap, içine `a.txt` koy ve dosyayı `sudo chown alice:devs upload/a.txt` ile alice'e ver. (Gerçekte bob bunu silemezdi.)",
+   "hint": "Sıra: `mkdir`, `chmod 1777`, `touch`, `sudo chown`."
+  },
+  "t12": {
+   "text": "Meydan okuma: `release` klasörü şöyle olsun: grubu `devs`, setgid açık, sahip `rwx`, grup `r-x`, diğerleri hiçbir şey.",
+   "hint": "Sekizlik: özel 2, sahip 7, grup 5, diğer 0."
+  },
+  "t13": {
+   "text": "Meydan okuma: `audit` klasöründeki üç betikten hangilerinde özel bit var? Bulup hepsini düz `755` yap.",
+   "hint": "`ls -l audit` ile `s` ara. `chmod 755` özel bitleri de siler."
+  },
+  "t14": {
+   "text": "TICKET #4501 — Finans ekibi `finance` klasörünü paylaşıyor. Dosyalar hep `devs` grubuna ait olmalı, grup yazabilmeli, başkası giremesin. Ayrıca `finance/2026` alt klasörünü aç.",
+   "hint": "Grup `devs`, mod `2770`: yeni dosyalar `devs` grubunu alır, diğerleri giremez."
+  },
+  "t15": {
+   "text": "TICKET #4502 — Geliştirici `bin/deploy.sh` betiğine 'root gibi çalışsın' diye setuid vermiş. Betikte setuid çalışmaz ve risklidir. Setuid'i kaldır, grubu `devs` yap ve mod `750` olsun.",
+   "hint": "`chmod 750` özel biti de siler. Gerçekte yetki için `sudo` kuralı kullanılır."
+  },
+  "t16": {
+   "text": "TICKET #4503 — `dropbox` adında yeni bir klasör gerek: grubu `devs`, yeni dosyalar gruba ait, üyeler birbirinin dosyasını silemesin, diğerleri giremesin. İçine `README.txt` dosyası koy ve içinde `uploads only` yazsın.",
+   "hint": "setgid + sticky = 3, sonra `770`: `3770`. `echo uploads only > dropbox/README.txt`."
+  }
+ },
+ "vm": {
+  "intro": "Kendi Ubuntu/Rocky/Alma VM'inde çalış. Görevler `/srv` altında ve `alice`, `bob` adlı geçici kullanıcılarla çalışır; **önce VM snapshot'ı al**. İlk iki görev salt okunurdur, 3–5. görevler sistemde kullanıcı ve klasör oluşturur; son görevde temizlik var. Sırayla yap (3 → 4 → 5).",
+  "tasks": {
+   "v01": {
+    "title": "Özel bitleri gör",
+    "text": "`/tmp` ve gerçek setuid programlarının izinlerine bak; çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ls -ld /tmp\nls -l /usr/bin/passwd /usr/bin/sudo\nstat -c '%a %A %n' /tmp /usr/bin/passwd",
+      "expected": "drwxrwxrwt 15 root root 4096 ... /tmp\n-rwsr-xr-x 1 root root ... /usr/bin/passwd\n-rwsr-xr-x 1 root root ... /usr/bin/sudo\n1777 drwxrwxrwt /tmp\n4755 -rwsr-xr-x /usr/bin/passwd"
+     }
+    ],
+    "differs": [
+     "`/usr/bin/sudo` yoksa (`No such file`) `sudo` kurulu değildir; sorun değil, `passwd` yeterli.",
+     "Bazı dağıtımlarda `/tmp` başka bir yerde bağlıdır; mod yine `1777` olmalıdır.",
+     "`ls: cannot access` görürsen `which passwd` ile gerçek yolunu bul."
+    ]
+   },
+   "v02": {
+    "title": "Sistemdeki setuid dosyaları bul",
+    "text": "Tüm setuid dosyalarını listele ve kaç tane olduğuna bak.",
+    "blocks": [
+     {
+      "cmd": "find / -xdev -perm -4000 -type f 2>/dev/null | head -20\nfind / -xdev -perm -4000 -type f 2>/dev/null | wc -l",
+      "expected": "/usr/bin/passwd\n/usr/bin/sudo\n/usr/bin/mount\n...\n12"
+     }
+    ],
+    "differs": [
+     "Liste dağıtıma göre farklıdır; `passwd`, `mount` veya `su` görmen yeterli.",
+     "`find` yavaşsa bekle; `-xdev` yalnızca ana dosya sistemini tarar, bu yüzden hızlıdır.",
+     "Tanımadığın bir yol görürsen aklında tut; gerçek denetimde bu incelenir."
+    ]
+   },
+   "v03": {
+    "title": "setgid klasörü gerçekten dene",
+    "text": "Kullanıcı ve grubu oluştur, biri setgid'li ve biri düz iki klasör aç; alice her ikisine dosya yazsın ve grupları karşılaştır.",
+    "blocks": [
+     {
+      "cmd": "# SNAPSHOT AL! Geçici kullanıcılar ve /srv klasörleri oluşturulur\ngetent group devs || sudo groupadd devs\nsudo useradd -m -G devs alice\nsudo useradd -m -G devs bob\nsudo mkdir -p /srv/project /srv/plain\nsudo chgrp devs /srv/project /srv/plain\nsudo chmod 2775 /srv/project\nsudo chmod 0775 /srv/plain\nsudo -u alice touch /srv/project/a.txt /srv/plain/b.txt\nls -ld /srv/project /srv/plain\nls -l /srv/project /srv/plain",
+      "expected": "drwxrwsr-x 2 root devs ... /srv/project\ndrwxrwxr-x 2 root devs ... /srv/plain\n/srv/project:\n-rw-r--r-- 1 alice devs ... a.txt\n/srv/plain:\n-rw-r--r-- 1 alice alice ... b.txt"
+     }
+    ],
+    "differs": [
+     "`useradd: user 'alice' already exists` görürsen kullanıcı zaten var; `sudo usermod -aG devs alice` ile gruba ekle ve devam et.",
+     "`/srv/plain` içindeki dosyanın grubu `alice`, `/srv/project` içindekinin `devs` olmalı. Tersi ise `ls -ld` ile `s` harfini kontrol et.",
+     "Rocky/Alma'da `sudo -u alice` çalışmazsa `sudo` kurulu ve kullanıcın `wheel` üyesi mi kontrol et."
+    ]
+   },
+   "v04": {
+    "title": "Sticky bit ile silme koruması",
+    "text": "Önce sticky'li klasörde bob'un alice'in dosyasını silmesini dene (engellenmeli), sonra sticky'siz klasörde dene (silebilir).",
+    "blocks": [
+     {
+      "cmd": "sudo mkdir /srv/pub\nsudo chmod 1777 /srv/pub\nsudo -u alice touch /srv/pub/alice.txt\nsudo -u bob rm -f /srv/pub/alice.txt\nls -l /srv/pub\nsudo chmod 777 /srv/pub\nsudo -u bob rm -f /srv/pub/alice.txt\nls -l /srv/pub",
+      "expected": "rm: cannot remove '/srv/pub/alice.txt': Operation not permitted\n-rw-r--r-- 1 alice alice ... alice.txt\n(sticky kaldırıldıktan sonra) total 0"
+     }
+    ],
+    "differs": [
+     "Hata mesajı sistem diline göre çevrilmiş olabilir (`Vorgang nicht zulässig`, `İşleme izin verilmiyor`).",
+     "Dosya ilk denemede silindiyse `ls -ld /srv/pub` ile `t` harfini kontrol et; `1777` verildi mi?",
+     "`rm -f` kullanıyoruz ki 'write-protected' onay sorusu çıkmasın."
+    ]
+   },
+   "v05": {
+    "title": "setuid'i güvenle gör ve temizle",
+    "text": "Zararsız `id` programının kopyasına setuid ver ve etkisini gör. Sonra tüm geçici kaynakları sil.",
+    "blocks": [
+     {
+      "cmd": "# SADECE kendi deneme VM'inde. Asla bash/vim/python ile yapma!\nsudo cp /usr/bin/id /srv/idtest\nsudo chmod u+s /srv/idtest\nls -l /srv/idtest\n/srv/idtest",
+      "expected": "-rwsr-xr-x 1 root root ... /srv/idtest\nuid=1000(youruser) gid=1000(youruser) euid=0(root) groups=..."
+     },
+     {
+      "cmd": "# Temizlik\nsudo rm -f /srv/idtest\nsudo rm -rf /srv/project /srv/plain /srv/pub\nsudo userdel -r alice\nsudo userdel -r bob\nls /srv",
+      "expected": "(boş çıktı veya yalnızca eski içerik)"
+     }
+    ],
+    "differs": [
+     "`euid=0(root)` yoksa `/srv` bölümü `nosuid` bağlı olabilir; `mount | grep nosuid` ile bak veya `/usr/local/bin` dene.",
+     "`userdel` posta kutusu uyarısı verebilir; zararsızdır.",
+     "`devs` grubunu yalnızca sen oluşturduysan `sudo groupdel devs` ile sil."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Takım klasöründe yeni dosyaların klasörün grubunu almasını hangi bit sağlar?",
+   "options": [
+    "setuid (4)",
+    "setgid (2)",
+    "sticky (1)",
+    "umask 077"
+   ],
+   "explain": "Klasördeki setgid, yeni dosya ve alt klasörlere klasörün grubunu miras bırakır; `2775` tipik takım modudur."
+  },
+  "q2": {
+   "q": "`/tmp` klasörü `1777` modunda. Baştaki `1` ne işe yarar?",
+   "options": [
+    "Klasörü salt okunur yapar",
+    "Dosyalara root yetkisi verir",
+    "Yalnızca dosya sahibi, klasör sahibi veya root silebilir",
+    "Dosyaları otomatik şifreler"
+   ],
+   "explain": "Sticky bit herkesin yazabildiği klasörde başkasının dosyasını silmeyi/yeniden adlandırmayı engeller."
+  },
+  "q3": {
+   "q": "`ls -l` çıktısında `-rwSr--r--` görürsen ne demektir?",
+   "options": [
+    "setuid açık ama sahipte çalıştırma izni yok",
+    "setgid açık ve grup çalıştırabilir",
+    "Dosya sticky bitli",
+    "Dosya şifreli"
+   ],
+   "explain": "Büyük `S`, bitin açık olduğunu ama altındaki x izninin bulunmadığını gösterir; genelde yanlış ayardır."
+  },
+  "q4": {
+   "q": "Sistemdeki tüm setuid dosyalarını hangi komut listeler?",
+   "options": [
+    "`ls -l /etc/setuid`",
+    "`chmod -R u+s /`",
+    "`find / -perm 4755 -name suid`",
+    "`find / -perm -4000 -type f 2>/dev/null`"
+   ],
+   "explain": "`-perm -4000` setuid biti açık olanları bulur; `2>/dev/null` yetki hatalarını gizler."
+  }
+ },
+ "summary": [
+  "Dört haneli izinde baştaki rakam: setuid `4`, setgid `2`, sticky `1`; toplanabilir.",
+  "`s`/`t` harfi x konumunda, büyük `S`/`T` x yok demektir.",
+  "setuid dosyayı sahibinin yetkisiyle çalıştırır (`passwd`); betiklerde çekirdek yok sayar; root'a ait yanlış setuid ciddi güvenlik açığıdır.",
+  "setgid klasör: yeni dosyalar klasörün grubunu alır; takım klasörü tarifi `chgrp devs` + `chmod 2775` + `umask 002`.",
+  "sticky klasör (`/tmp`, `1777`): yalnızca sahip veya root siler.",
+  "Setuid dosyalarını `find / -perm -4000 -type f 2>/dev/null` ile düzenli denetle."
+ ],
+ "glossary": [
+  {
+   "term": "setuid",
+   "meaning": "Çalıştırılabilir dosyada program sahibinin yetkisiyle çalışır; sekizlik `4000`."
+  },
+  {
+   "term": "setgid",
+   "meaning": "Dosyada grup yetkisiyle çalıştırır; klasörde yeni öğelere grubu miras bırakır; `2000`."
+  },
+  {
+   "term": "sticky bit",
+   "meaning": "Klasörde yalnızca dosya/klasör sahibi veya root'un silmesine izin verir; `1000`."
+  },
+  {
+   "term": "yetki yükseltme",
+   "meaning": "Normal kullanıcının izinsiz olarak root gibi yetki kazanması."
+  },
+  {
+   "term": "umask",
+   "meaning": "Yeni dosyalardan çıkarılacak izin bitlerini belirleyen maske."
+  },
+  {
+   "term": "nosuid",
+   "meaning": "Dosya sistemi bağlama seçeneği; o bölümde setuid/setgid yok sayılır."
+  }
+ ]
+}

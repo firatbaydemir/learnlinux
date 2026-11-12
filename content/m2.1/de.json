@@ -1,0 +1,380 @@
+{
+ "title": "Linux-Verzeichnisbaum",
+ "lead": "In Linux hat alles seinen festen Platz: Konfiguration, Logs, Benutzerdateien und Programme. Lerne, wo du welche Datei suchen musst.",
+ "objectives": [
+  "Du erklärst, dass es in Linux kein C: oder D: gibt und alles unter dem einen Wurzelverzeichnis `/` hängt.",
+  "Du unterscheidest die Aufgaben von `/etc`, `/home`, `/root`, `/var/log`, `/usr`, `/bin`, `/dev`, `/tmp`, `/proc` und `/opt`.",
+  "Du bewegst dich mit `ls`, `cd` und `cat` sicher durchs System und erstellst den \"Ausweis\" eines Servers."
+ ],
+ "sections": [
+  {
+   "id": "root",
+   "title": "Die Wurzel des Baums: /",
+   "body": [
+    "Unter Windows gibt es Laufwerke wie `C:` und `D:`. Linux kennt nur **einen** Baum, dessen Wurzel `/` heißt (root directory). Auch eine neue Platte oder ein USB-Stick wird an einem Ast dieses Baums **eingehängt** (mount).",
+    "Wo was liegt, regelt der Standard **FHS** (Filesystem Hierarchy Standard). Deshalb findest du Konfigurationsdateien unter Ubuntu und Rocky am selben Ort. Das Wurzelverzeichnis siehst du mit `ls /`; dabei änderst du nichts.",
+    "Kurzer Überblick: `/etc` Konfiguration, `/home` Benutzer, `/var` veränderliche Daten (Logs), `/usr` Programme, `/tmp` temporäre Dateien, `/proc` und `/sys` virtuelle Kernel-Dateien, `/dev` Geräte."
+   ],
+   "commands": [
+    {
+     "cmd": "ls /",
+     "what": "Listet die Ordner im Wurzelverzeichnis auf.",
+     "where": "Wenn du ein System zum ersten Mal betrittst.",
+     "why": "Du lernst die Hauptäste des Baums kennen.",
+     "example": "ls /"
+    },
+    {
+     "cmd": "cd /",
+     "what": "Wechselt ins Wurzelverzeichnis.",
+     "where": "Als Ausgangspunkt für absolute Pfade.",
+     "why": "Pfade, die mit `/` beginnen, funktionieren von überall aus.",
+     "example": "cd /"
+    },
+    {
+     "cmd": "pwd",
+     "what": "Zeigt den vollständigen Pfad des aktuellen Ordners.",
+     "where": "Nach dem Navigieren, um sicher zu sein, wo du bist.",
+     "why": "Verhindert Aktionen im falschen Verzeichnis.",
+     "example": "pwd"
+    }
+   ],
+   "tip": "Ein Pfad mit `/` am Anfang ist **absolut** (`/etc/hostname`); ohne `/` beginnt er im aktuellen Ordner."
+  },
+  {
+   "id": "config",
+   "title": "Konfiguration und Benutzer: /etc, /home, /root",
+   "body": [
+    "`/etc` enthält die **Konfigurationsdateien** von System und Programmen: `/etc/passwd` (Benutzer), `/etc/hostname` (Rechnername), `/etc/fstab` (Datenträger), `/etc/os-release` (Distribution). Es sind Textdateien, du liest sie mit `cat`.",
+    "Persönliche Dateien normaler Benutzer liegen unter `/home/<benutzer>`, zum Beispiel `/home/student`. Das Home des Administrators `root` ist `/root`; nur root darf dort hinein, andere erhalten `Permission denied`.",
+    "`/etc/shadow` speichert Passwort-Hashes und ist nur für root lesbar. `cat /etc/shadow` als normaler Benutzer schlägt fehl; das ist kein Defekt, sondern Schutz."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/os-release",
+     "what": "Zeigt Name und Version der Distribution.",
+     "where": "Um herauszufinden, welches Linux läuft; auf jeder Distribution am selben Pfad.",
+     "why": "Du wählst danach die passenden Befehle.",
+     "example": "cat /etc/os-release"
+    },
+    {
+     "cmd": "cat /etc/hostname",
+     "what": "Zeigt den Namen des Rechners.",
+     "where": "Bei mehreren Servern, um den richtigen zu bestätigen.",
+     "why": "Verringert das Risiko, auf dem falschen Server zu arbeiten.",
+     "example": "cat /etc/hostname"
+    },
+    {
+     "cmd": "ls /home",
+     "what": "Listet die Home-Verzeichnisse der normalen Benutzer.",
+     "where": "Um schnell zu sehen, welche Benutzer existieren.",
+     "why": "Du erkennst, wo Benutzerdaten liegen.",
+     "example": "ls /home"
+    }
+   ],
+   "tip": "Mache vor jeder Änderung an einer Konfigurationsdatei ein Backup; in diesem Modul liest du nur."
+  },
+  {
+   "id": "variable",
+   "title": "Logs und virtuelle Dateien: /var, /proc, /sys",
+   "body": [
+    "`/var` enthält Daten, die sich im Betrieb **verändern**. Am wichtigsten ist `/var/log`: hier liegen System- und Dienstprotokolle. Auf RHEL, Rocky und Alma ist das Hauptlog `/var/log/messages`, unter Ubuntu `/var/log/syslog`. Suche Logs nicht in `/etc`: Konfiguration liegt in `/etc`, Logs in `/var/log`.",
+    "`/proc` und `/sys` sind keine echten Dateien auf der Platte. Der Kernel erzeugt sie im RAM. Die Zahlen in `ls /proc` sind Nummern laufender Prozesse (PID). `cat /proc/cpuinfo` zeigt live die CPU-Daten, `cat /proc/meminfo` den Speicher.",
+    "Nutze diese Dateien nur zum **Lesen**. Darin herumzustöbern oder zu schreiben ist keine sichere Gewohnheit."
+   ],
+   "commands": [
+    {
+     "cmd": "ls /var/log",
+     "what": "Listet die Logdateien auf.",
+     "where": "Bei der Fehlersuche als erster Anlaufpunkt.",
+     "why": "Du verfolgst die Spur eines Problems in den Logs.",
+     "example": "ls /var/log"
+    },
+    {
+     "cmd": "cat /proc/cpuinfo",
+     "what": "Liest die CPU-Informationen vom Kernel.",
+     "where": "Bei Hardware- und Ressourcenchecks.",
+     "why": "Als virtuelle Datei ist sie immer aktuell.",
+     "example": "cat /proc/cpuinfo"
+    },
+    {
+     "cmd": "find",
+     "what": "Sucht unterhalb eines Ordners Dateien nach Namen.",
+     "where": "Wenn du nicht weißt, in welchem Ordner eine Datei liegt.",
+     "why": "Statt zu raten, findest du den genauen Pfad.",
+     "example": "find /etc -name sshd_config"
+    }
+   ],
+   "tip": "Heißt die Datei `messages` oder `syslog`? Das hängt von der Distribution ab; schau zuerst mit `ls /var/log` nach.",
+   "danger": "In Dateien unter `/proc` und `/sys` zu schreiben oder `/proc/kcore` mit `cat` zu öffnen, kann das System instabil machen. Lies nur bekannte Dateien wie `cpuinfo`, `meminfo` oder `version`."
+  },
+  {
+   "id": "programs",
+   "title": "Programme und Geräte: /usr, /bin, /dev, /tmp, /opt",
+   "body": [
+    "`/usr` ist die große Bibliothek installierter Programme. Die meisten Befehle liegen in `/usr/bin`. Auf modernen Distributionen ist `/bin` kein eigener Ordner, sondern ein **symbolischer Link** (Symlink) auf `/usr/bin`: `ls -ld /bin` zeigt `bin -> usr/bin`.",
+    "`/dev` enthält Gerätedateien: `/dev/sda` ist eine Platte, `/dev/null` ein \"schwarzes Loch\", das alles verschluckt. In `ls -l` beginnen solche Zeilen mit `c` (Zeichengerät) oder `b` (Blockgerät).",
+    "`/tmp` ist für temporäre Dateien und wird beim Neustart meist geleert. `/opt` ist für Software von Drittanbietern, `/srv` für Daten, die der Server ausliefert. Findest du eine Anwendung nicht, schau nacheinander in `/opt`, `/usr/local` und `/etc`."
+   ],
+   "commands": [
+    {
+     "cmd": "ls -ld /bin",
+     "what": "Zeigt den Eintrag `/bin` selbst; das Link-Ziel erscheint nach `->`.",
+     "where": "Um zu erkennen, ob ein Pfad ein Ordner oder ein Link ist.",
+     "why": "Erklärt, warum der Baum je nach Distribution anders aussieht.",
+     "example": "ls -ld /bin"
+    },
+    {
+     "cmd": "ls -l /dev/null",
+     "what": "Zeigt Typ und Rechte einer Gerätedatei.",
+     "where": "Wenn du untersuchst, wie Hardware als Datei erscheint.",
+     "why": "Du siehst, dass in Linux alles eine Datei ist.",
+     "example": "ls -l /dev/null"
+    },
+    {
+     "cmd": "ls /opt",
+     "what": "Listet das Verzeichnis für Drittanbieter-Software.",
+     "where": "Wenn du eine manuell installierte Anwendung suchst.",
+     "why": "Software außerhalb des Paketmanagers liegt oft hier.",
+     "example": "ls /opt"
+    }
+   ],
+   "tip": "Wo ein Befehl liegt, verrät dir zum Beispiel `which ls`.",
+   "warn": "`/tmp` ist für alle zugänglich. Speichere dort keine Geheimnisse wie Passwörter und lies den Pfad zweimal, bevor du dort `rm -r` benutzt."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Wechsle ins Wurzelverzeichnis: `cd /`.",
+   "hint": "Tippe nur einen Schrägstrich."
+  },
+  "t02": {
+   "text": "Liste den Konfigurationsordner auf: `ls /etc`.",
+   "hint": "Du siehst Dateien wie `passwd` und `hostname`."
+  },
+  "t03": {
+   "text": "Lies die Distributionsinfo: `cat /etc/os-release`.",
+   "hint": "Die Zeile `VERSION_ID` nennt die Version."
+  },
+  "t04": {
+   "text": "Liste das Log-Verzeichnis auf: `ls /var/log`.",
+   "hint": "In dieser virtuellen Maschine gibt es eine Datei `messages`."
+  },
+  "t05": {
+   "text": "Liste die Home-Verzeichnisse der Benutzer auf: `ls /home`.",
+   "hint": "`student` und `alice` sollten erscheinen."
+  },
+  "t06": {
+   "text": "Lies den Rechnernamen: `cat /etc/hostname`.",
+   "hint": "Die Ausgabe sollte `linux-lab` sein."
+  },
+  "t07": {
+   "text": "Lies die CPU-Informationen aus der virtuellen Datei: `cat /proc/cpuinfo`.",
+   "hint": "Die Datei belegt keinen Platz; der Kernel erzeugt sie."
+  },
+  "t08": {
+   "text": "Vorhersage: Ist `/bin` ein Ordner oder ein Link? Prüfe mit `ls -ld /bin`.",
+   "hint": "Suche das Zeichen `->` in der Ausgabe; der Pfeil zeigt einen Symlink."
+  },
+  "t09": {
+   "text": "Vorhersage: Darf ein normaler Benutzer die Passwort-Hashes lesen? Probiere `cat /etc/shadow`.",
+   "hint": "Erwartet wird `Permission denied`; der Schutz ist gewollt."
+  },
+  "t10": {
+   "text": "Vorhersage: Was meldet `ls /root` einem normalen Benutzer? Probiere es aus.",
+   "hint": "`/root` ist nur das Home von root."
+  },
+  "t11": {
+   "text": "Fehlersuche: Ein Benutzer wollte Logs ansehen, tippte `cd /etc/log` und erhielt `No such file or directory`. Wechsle in das richtige Verzeichnis.",
+   "hint": "Logs liegen nicht unter `/etc`, sondern unter `/var`."
+  },
+  "t12": {
+   "text": "Mini-Projekt: Baue unter `~/mini-root` einen kleinen FHS-Baum. Lege mit einem `mkdir -p` die Ordner `etc`, `var/log` und `tmp` an, erstelle mit `touch` die Datei `etc/app.conf` und schreibe mit `echo started > ~/mini-root/var/log/app.log` eine Logzeile.",
+   "hint": "Klammern: `~/mini-root/{etc,var/log,tmp}`; in die Logdatei schreibst du per Umleitung `>`."
+  },
+  "t13": {
+   "text": "Challenge: Schreibe den Server-Ausweis in `~/idcard.txt`: Rechnername (`/etc/hostname`), Benutzer (`ls /home`) und Distributionsname (Zeile `PRETTY_NAME`). Nutze beim ersten `>`, bei den anderen `>>`.",
+   "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` hängt die Distributionszeile an."
+  },
+  "t14": {
+   "text": "Challenge: Du kennst den Pfad von `sshd_config` nicht. Suche sie unter `/etc` nach Namen: `find /etc -name sshd_config`.",
+   "hint": "`-name` erwartet den Dateinamen; der Pfad liegt unter `/etc/ssh/`."
+  },
+  "t15": {
+   "text": "TICKET #2410 — \"Die Shop-Anwendung (`shopapp`) meldet Fehler, wir finden weder Installationsort noch Logs.\" Die Drittanbieter-Software liegt unter `/opt`. Finde die Zeile mit `ERROR` in ihrer Logdatei und speichere sie in `~/ticket-2410.txt`.",
+   "hint": "Erst `ls /opt`, dann `ls /opt/shopapp/logs`; danach `grep ERROR ... > ~/ticket-2410.txt`."
+  }
+ },
+ "vm": {
+  "intro": "In diesem Abschnitt liest du nur; kein Befehl verändert Systemdateien. Ausgaben können je nach Distribution (Ubuntu / Rocky / Alma / WSL) leicht abweichen; das ist normal.",
+  "tasks": {
+   "v01": {
+    "title": "Das Wurzelverzeichnis erkunden",
+    "text": "Liste den Inhalt des Wurzelverzeichnisses auf und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "ls /",
+      "expected": "bin  boot  dev  etc  home  lib  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"
+     }
+    ],
+    "differs": [
+     "Anzahl und Reihenfolge der Ordner hängen von der Distribution ab; `etc`, `var` und `usr` müssen vorkommen.",
+     "Ist die Ausgabe einspaltig, vergrößere das Terminal; der Inhalt ist derselbe."
+    ]
+   },
+   "v02": {
+    "title": "Auf welcher Distribution bin ich?",
+    "text": "Lies die Distributionsinfo und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\n..."
+     }
+    ],
+    "differs": [
+     "Unter Ubuntu siehst du `NAME=\"Ubuntu\"` und `ID=ubuntu`; die Zeilen unterscheiden sich, aber `NAME=` und `ID=` gibt es immer.",
+     "Fehlt die Datei, ist das System sehr alt; probiere `cat /etc/issue`."
+    ]
+   },
+   "v03": {
+    "title": "Ist /bin wirklich ein Link?",
+    "text": "Liste `/` ausführlich auf und suche die Zeile `bin`.",
+    "blocks": [
+     {
+      "cmd": "ls -l / | grep ' bin'",
+      "expected": "lrwxrwxrwx. 1 root root 7 ... bin -> usr/bin"
+     }
+    ],
+    "differs": [
+     "Ist die Ausgabe leer, probiere `ls -ld /bin`; auf sehr alten Distributionen ist `/bin` ein echter Ordner.",
+     "Beginnt die Zeile mit `l`, ist es ein symbolischer Link."
+    ]
+   },
+   "v04": {
+    "title": "Virtuelle Dateien: /proc",
+    "text": "Lies die ersten Zeilen der CPU-Infos des Kernels.",
+    "blocks": [
+     {
+      "cmd": "head -n 5 /proc/cpuinfo\nls /proc | head -n 10",
+      "expected": "processor\t: 0\nvendor_id\t: GenuineIntel\n...\n1\n10\n..."
+     }
+    ],
+    "differs": [
+     "Auf ARM-CPUs (UTM auf Apple Silicon) sind die Felder anders; die Zeile `processor` erscheint trotzdem.",
+     "Unter WSL kann der Inhalt von `/proc` etwas eingeschränkt sein."
+    ]
+   },
+   "v05": {
+    "title": "Das Log-Verzeichnis ansehen",
+    "text": "Liste die Logdateien auf und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "ls /var/log",
+      "expected": "anaconda  audit  dnf.log  messages  secure  wtmp ..."
+     }
+    ],
+    "differs": [
+     "Unter Ubuntu siehst du `syslog` und `auth.log`, unter Rocky `messages` und `secure`.",
+     "Manche Dateien brauchen zum Lesen `sudo`; zum Auflisten nicht."
+    ]
+   },
+   "v06": {
+    "title": "Eine Datei im temporären Ordner",
+    "text": "Lege in `/tmp` eine Testdatei an, sieh sie dir an und lösche sie sofort. Das Löschen einer einzelnen Datei ist ungefährlich.",
+    "blocks": [
+     {
+      "cmd": "echo test > /tmp/lab-test.txt\nls -l /tmp/lab-test.txt\nrm /tmp/lab-test.txt",
+      "expected": "-rw-r--r--. 1 student student 5 ... /tmp/lab-test.txt"
+     }
+    ],
+    "differs": [
+     "Bei einem Tippfehler im Namen meldet `rm` \"No such file\"; der Name muss `lab-test.txt` sein.",
+     "Benutze bei `rm` weder `-r` noch Platzhalter (`*`)."
+    ]
+   },
+   "v07": {
+    "title": "Eine Gerätedatei",
+    "text": "Liste `/dev/null` ausführlich auf und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "ls -l /dev/null",
+      "expected": "crw-rw-rw-. 1 root root 1, 3 ... /dev/null"
+     }
+    ],
+    "differs": [
+     "Beginnt die Zeile mit `c`, ist es ein Zeichengerät; abweichende Rechtebuchstaben sind unproblematisch.",
+     "Fehlt die Datei, bist du eventuell in einem Container; in einer normalen VM gibt es sie immer."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "In welchem Verzeichnis suchst du Systemlogs?",
+   "options": [
+    "/etc",
+    "/home",
+    "/var/log",
+    "/proc"
+   ],
+   "explain": "Logs sind ständig wachsende Daten und liegen unter `/var/log`. `/etc` ist für Konfigurationsdateien."
+  },
+  "q2": {
+   "q": "Warum ist `/proc` ein \"virtuelles\" Verzeichnis?",
+   "options": [
+    "Weil nur root es sehen darf",
+    "Es sind keine echten Dateien auf der Platte; der Kernel erzeugt die Infos im RAM",
+    "Weil die Dateien verschlüsselt sind",
+    "Weil es aus dem Internet geladen wird"
+   ],
+   "explain": "`/proc` und `/sys` sind eine Live-Schnittstelle des Kernels und belegen keinen Plattenplatz."
+  },
+  "q3": {
+   "q": "In welchem Verzeichnis liegen die Konfigurationsdateien von System und Programmen?",
+   "options": [
+    "/etc",
+    "/tmp",
+    "/dev",
+    "/opt"
+   ],
+   "explain": "`/etc` ist der Standardort für Konfigurationsdateien (`passwd`, `hostname`, `fstab` ...)."
+  },
+  "q4": {
+   "q": "Wo liegen die persönlichen Dateien von `student` und wo die von `root`?",
+   "options": [
+    "`/root` und `/home`",
+    "`/etc/student` und `/etc/root`",
+    "Beide unter `/home`",
+    "`/home/student` und `/root`"
+   ],
+   "explain": "Normale Benutzer liegen unter `/home/<name>`; das Home von root ist separat `/root`."
+  }
+ },
+ "summary": [
+  "Linux hat einen einzigen Baum; die Wurzel ist `/` und alles hängt darunter.",
+  "`/etc` Konfiguration, `/var/log` Logs, `/home` und `/root` Home-Verzeichnisse, `/usr` Programme.",
+  "`/proc` und `/sys` sind virtuelle Kernel-Dateien; `/dev` ist für Geräte, `/tmp` für Temporäres, `/opt` für Drittanbieter-Software.",
+  "Überlege bei der Suche zuerst, wofür ein Verzeichnis gedacht ist, und prüfe dann mit `ls`, `cat` und `find`."
+ ],
+ "glossary": [
+  {
+   "term": "FHS",
+   "meaning": "Filesystem Hierarchy Standard: legt fest, wofür welches Verzeichnis gedacht ist."
+  },
+  {
+   "term": "Wurzelverzeichnis",
+   "meaning": "Die Spitze des Baums, `/`; alle Pfade verzweigen von hier."
+  },
+  {
+   "term": "absoluter Pfad",
+   "meaning": "Ein vollständiger Pfad, der mit `/` beginnt und vom aktuellen Ort unabhängig ist."
+  },
+  {
+   "term": "symbolischer Link",
+   "meaning": "Spezielle Datei, die auf einen anderen Pfad zeigt; in `ls -l` mit `->` sichtbar."
+  },
+  {
+   "term": "PID",
+   "meaning": "Numerische Kennung jedes laufenden Prozesses; erscheint als Ordnername unter `/proc`."
+  }
+ ]
+}

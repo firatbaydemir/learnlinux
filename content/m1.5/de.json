@@ -1,0 +1,552 @@
+{
+ "title": "Shell-Werkzeuge und Umgebung",
+ "lead": "Nutze die Shell zu deinem Vorteil: Historie, Vervollständigung, Tastenkürzel, Quoting, Variablen, PATH, Platzhalter und Befehlsersetzung.",
+ "objectives": [
+  "Du verwendest alte Befehle mit history, !! und Ctrl+R wieder.",
+  "Du arbeitest schnell mit Tab-Vervollständigung und den Kürzeln Ctrl+C/L/A/E.",
+  "Du kennst den Unterschied zwischen doppelten und einfachen Anführungszeichen und dem Backslash.",
+  "Du definierst Variablen, gibst sie mit export weiter und liest und erweiterst PATH.",
+  "Du kürzt Befehle mit Platzhaltern (*, ?, []), Klammererweiterung und $() ab."
+ ],
+ "sections": [
+  {
+   "id": "history",
+   "title": "Befehlshistorie",
+   "body": [
+    "Die Shell merkt sich, was du eingibst. `history` zeigt eine nummerierte Liste; `history 5` nur die letzten 5 Befehle. Die Pfeiltaste nach oben (↑) holt den vorherigen Befehl zurück.",
+    "`!!` führt den vorherigen Befehl erneut aus. Typisch ist `sudo !!`, das ein vergessenes `sudo` ergänzt. `Ctrl+R` **durchsucht** die Historie: Tippe ein paar Buchstaben, der passende alte Befehl erscheint, mit Enter führst du ihn aus."
+   ],
+   "commands": [
+    {
+     "cmd": "history",
+     "what": "Listet die ausgeführten Befehle mit Nummern auf.",
+     "where": "Wenn du einen langen Befehl von gestern brauchst.",
+     "why": "Spart Tipparbeit und zeigt, was du getan hast.",
+     "example": "history"
+    },
+    {
+     "cmd": "history 5",
+     "what": "Zeigt nur die letzten 5 Befehle.",
+     "where": "Wenn ein kurzer Überblick reicht.",
+     "why": "Du versinkst nicht in einer langen Liste.",
+     "example": "history 5"
+    },
+    {
+     "cmd": "!!",
+     "what": "Führt den vorherigen Befehl unverändert erneut aus.",
+     "where": "Etwa `sudo !!` nach einem Rechtefehler.",
+     "why": "Derselbe Befehl muss nicht neu getippt werden.",
+     "example": "echo hello",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+R",
+     "what": "Sucht rückwärts in der Historie.",
+     "where": "Um einen sehr alten, langen Befehl zu finden.",
+     "why": "Viel schneller als mit der Pfeiltaste zu blättern.",
+     "example": "history",
+     "nosim": true
+    }
+   ],
+   "tip": "Nach Ctrl+R springst du mit erneutem Ctrl+R zum nächstälteren Treffer."
+  },
+  {
+   "id": "shortcuts",
+   "title": "Tab-Vervollständigung und Tastenkürzel",
+   "body": [
+    "Die Taste `Tab` vervollständigt Befehls-, Datei- und Ordnernamen. Bei einem Treffer wird ergänzt; bei mehreren listet zweimal Tab die Optionen auf. Das spart Zeit und verhindert Tippfehler.",
+    "Ein paar Kürzel machen die halbe tägliche Arbeit aus: `Ctrl+C` bricht einen laufenden Befehl ab, `Ctrl+L` leert den Bildschirm (wie `clear`), `Ctrl+A` springt an den Zeilenanfang, `Ctrl+E` ans Zeilenende. Mit `alias` gibst du langen Befehlen einen Kurznamen."
+   ],
+   "commands": [
+    {
+     "cmd": "Tab",
+     "what": "Vervollständigt den getippten Namen oder listet Optionen.",
+     "where": "Bei langen Datei- und Ordnernamen.",
+     "why": "Tempo und Genauigkeit.",
+     "example": "ls Doc",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+C",
+     "what": "Unterbricht den laufenden Befehl (sendet SIGINT).",
+     "where": "Bei einem hängenden oder endlosen Befehl.",
+     "why": "Du verlässt den Befehl, ohne das Terminal zu schließen.",
+     "example": "sleep 100",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+A / Ctrl+E",
+     "what": "Setzt den Cursor an den Anfang / das Ende der Zeile.",
+     "where": "Beim Bearbeiten eines langen Befehls.",
+     "why": "Schneller als Schritt für Schritt mit den Pfeiltasten.",
+     "example": "ls -l Documents",
+     "nosim": true
+    },
+    {
+     "cmd": "clear",
+     "what": "Leert den Bildschirm; Ctrl+L tut dasselbe.",
+     "where": "Wenn der Bildschirm unübersichtlich wird.",
+     "why": "Hält die Ausgabe lesbar.",
+     "example": "clear"
+    },
+    {
+     "cmd": "alias",
+     "what": "Gibt einem Befehl einen Kurznamen.",
+     "where": "Für Befehle, die du oft tippst.",
+     "why": "Weniger Tipparbeit. Dauerhaft wird es durch einen Eintrag in `~/.bashrc`.",
+     "example": "alias ll='ls -l'",
+     "nosim": true
+    }
+   ],
+   "tip": "Tippe lange Dateinamen nie komplett: Anfangsbuchstaben eingeben und Tab drücken."
+  },
+  {
+   "id": "quoting",
+   "title": "Anführungszeichen und Escapen",
+   "body": [
+    "Bevor ein Befehl läuft, interpretiert die Shell Sonderzeichen. Anführungszeichen steuern das. In **doppelten Anführungszeichen** werden `$variable` und `$(befehl)` ersetzt. In **einfachen** bleibt alles wörtlich. Ein **Backslash** (`\\`) hebt die Sonderbedeutung genau eines Zeichens auf.",
+    "Dateinamen mit Leerzeichen brauchen ebenfalls Anführungszeichen: `cat \"my notes.txt\"`. Ohne sie sieht die Shell zwei getrennte Argumente."
+   ],
+   "commands": [
+    {
+     "cmd": "echo \"...\"",
+     "what": "Doppelte Anführungszeichen: Variablen werden ersetzt, Leerzeichen bleiben.",
+     "where": "Meldungen mit Variablen.",
+     "why": "Flexibel und sicher.",
+     "example": "echo \"Hello $USER\""
+    },
+    {
+     "cmd": "echo '...'",
+     "what": "Einfache Anführungszeichen: nichts wird ersetzt, Text bleibt wörtlich.",
+     "where": "Festem Text, der `$` enthält.",
+     "why": "Verhindert, dass die Shell eingreift.",
+     "example": "echo 'Hello $USER'"
+    },
+    {
+     "cmd": "\\",
+     "what": "Hebt die Sonderbedeutung des nächsten Zeichens auf.",
+     "where": "Zum Schützen eines einzelnen `$` oder Leerzeichens.",
+     "why": "Kurze Alternative zu Anführungszeichen.",
+     "example": "echo \\$HOME"
+    }
+   ],
+   "tip": "Im Zweifel setze Variablen in doppelte Anführungszeichen: `\"$FILE\"` funktioniert auch bei Namen mit Leerzeichen."
+  },
+  {
+   "id": "variables",
+   "title": "Variablen und export",
+   "body": [
+    "Eine Variable definierst du mit `NAME=alice`; **keine Leerzeichen um das Gleichheitszeichen**. Lesen kannst du sie mit `$NAME`. Eine so definierte Variable existiert nur in dieser Shell.",
+    "Damit auch gestartete Programme sie sehen, nutze `export NAME=alice`. `env` zeigt alle exportierten **Umgebungsvariablen** (`HOME`, `USER`, `PATH`, `SHELL`...). Mit `export` gemachte Änderungen gehen beim Schließen des Terminals verloren; dauerhaft werden sie durch einen Eintrag in `~/.bashrc`."
+   ],
+   "commands": [
+    {
+     "cmd": "NAME=alice",
+     "what": "Definiert eine Shell-Variable (ohne Leerzeichen).",
+     "where": "Werte, die du wiederverwendest.",
+     "why": "Du tippst denselben Wert nicht neu.",
+     "example": "NAME=alice"
+    },
+    {
+     "cmd": "echo $NAME",
+     "what": "Gibt den Wert der Variable aus.",
+     "where": "Beim Prüfen eines Werts.",
+     "why": "Bestätigt, was die Shell sieht.",
+     "example": "echo $HOME"
+    },
+    {
+     "cmd": "export",
+     "what": "Gibt die Variable an Kindprogramme weiter.",
+     "where": "Einstellungen, die Programme lesen.",
+     "why": "Ohne export bleibt die Variable nur in dieser Shell.",
+     "example": "export GREETING=hello"
+    },
+    {
+     "cmd": "env",
+     "what": "Listet die Umgebungsvariablen auf.",
+     "where": "Beim Untersuchen und Debuggen der Umgebung.",
+     "why": "Zeigt, welche Einstellung aktiv ist.",
+     "example": "env | grep GREETING"
+    },
+    {
+     "cmd": "unset",
+     "what": "Entfernt eine Variable.",
+     "where": "Wenn du eine Variable nicht mehr brauchst.",
+     "why": "Hält die Umgebung sauber.",
+     "example": "unset GREETING",
+     "nosim": true
+    }
+   ],
+   "tip": "Schreibe nicht `NAME = alice` (mit Leerzeichen): Die Shell sucht dann einen Befehl namens `NAME` und scheitert."
+  },
+  {
+   "id": "path",
+   "title": "PATH: Wo Befehle gefunden werden",
+   "body": [
+    "Wenn du einen Befehl eintippst, durchsucht die Shell der Reihe nach die Ordner in der Variable `PATH`. Die Ordner sind durch `:` getrennt. `which ls` zeigt den gefundenen Pfad, `type ls` die Art des Befehls (Programm, Builtin).",
+    "Um einen Ordner mit eigenen Werkzeugen aufzunehmen, hänge ihn an `PATH` an. Behalte den alten Wert: `export PATH=$PATH:~/bin`. Schreibst du nur `PATH=~/bin`, wird nicht einmal mehr `ls` gefunden."
+   ],
+   "commands": [
+    {
+     "cmd": "echo $PATH",
+     "what": "Zeigt die Suchordner.",
+     "where": "Erste Anlaufstelle bei 'command not found'.",
+     "why": "Du siehst, warum ein Befehl nicht gefunden wird.",
+     "example": "echo $PATH"
+    },
+    {
+     "cmd": "which",
+     "what": "Zeigt den vollständigen Pfad eines Befehls.",
+     "where": "Um herauszufinden, welches Programm läuft.",
+     "why": "Verhindert Verwechslungen bei gleichnamigen Programmen.",
+     "example": "which ls"
+    },
+    {
+     "cmd": "type",
+     "what": "Sagt, ob ein Befehl ein Programm oder ein Builtin ist.",
+     "where": "Bei Builtins wie `cd`.",
+     "why": "Erklärt Unterschiede im Verhalten.",
+     "example": "type cd"
+    },
+    {
+     "cmd": "export PATH=$PATH:~/bin",
+     "what": "Fügt `~/bin` dem Suchpfad hinzu.",
+     "where": "Um eigene Skripte per Namen aufzurufen.",
+     "why": "Du musst nicht jedes Mal den vollen Pfad tippen.",
+     "example": "export PATH=$PATH:~/bin"
+    }
+   ],
+   "warn": "Weise nie etwas wie `PATH=/new/dir` zu, das den alten Wert verwirft; kein Befehl, auch `ls` nicht, wird dann gefunden. Zur Rettung Terminal schließen und neu öffnen.",
+   "tip": "Für Dauerhaftigkeit füge dieselbe `export`-Zeile in `~/.bashrc` ein."
+  },
+  {
+   "id": "globbing",
+   "title": "Platzhalter (Globbing)",
+   "body": [
+    "Platzhalter werden von der **Shell** aufgelöst, nicht vom Befehl. `*` steht für beliebig viel (auch nichts), `?` für genau ein Zeichen, `[abc]` für eines der Zeichen in den Klammern. Bei `ls *.txt` wandelt die Shell das Muster zuerst in Dateinamen um und übergibt sie dann an `ls`.",
+    "Passt nichts, lässt die Shell das Muster unverändert. Teste das Muster vor Löschbefehlen mit `echo`: `echo *.log`."
+   ],
+   "commands": [
+    {
+     "cmd": "*",
+     "what": "Beliebige Zeichenfolge.",
+     "where": "Dateien gleichen Typs auswählen.",
+     "why": "Viele Dateien mit einem Befehl.",
+     "example": "echo lab/*.txt"
+    },
+    {
+     "cmd": "?",
+     "what": "Genau ein Zeichen.",
+     "where": "Namen fester Länge.",
+     "why": "Trifft enger als `*`.",
+     "example": "echo lab/?.txt"
+    },
+    {
+     "cmd": "[ ]",
+     "what": "Eines der Zeichen in den Klammern.",
+     "where": "Wenige bestimmte Dateien auswählen.",
+     "why": "Volle Kontrolle.",
+     "example": "echo lab/[ab].txt"
+    }
+   ],
+   "warn": "`rm *` löscht alle Dateien im aktuellen Ordner. Prüfe zuerst mit `echo *`, was passt, und führe dann `rm` aus.",
+   "tip": "Versteckte Dateien (mit `.` am Anfang) werden von `*` nicht erfasst."
+  },
+  {
+   "id": "expansion",
+   "title": "Klammererweiterung und Befehlsersetzung",
+   "body": [
+    "Die Klammererweiterung (Brace Expansion) erzeugt Text: `file{1,2,3}.txt` wird zu drei Namen, `f{1..3}` zu `f1 f2 f3`. Die Dateien müssen nicht existieren, daher ist sie ideal für `touch` und `mkdir` in Serie.",
+    "`$(befehl)` führt den Befehl aus und setzt seine **Ausgabe** ein: `echo \"Today: $(date)\"`. Die Ausgabe kannst du auch in einer Variable speichern: `USERNAME=$(whoami)`."
+   ],
+   "commands": [
+    {
+     "cmd": "{a,b,c}",
+     "what": "Vervielfacht eine kommagetrennte Liste.",
+     "where": "Viele Dateien und Ordner anlegen.",
+     "why": "Drei Dateien in einer Zeile.",
+     "example": "touch ~/lab/file{1,2,3}.txt"
+    },
+    {
+     "cmd": "{1..3}",
+     "what": "Erzeugt einen Zahlen- oder Buchstabenbereich.",
+     "where": "Nummerierte Namen.",
+     "why": "Kein Handtippen nötig.",
+     "example": "echo f{1..3}"
+    },
+    {
+     "cmd": "$(...)",
+     "what": "Setzt die Ausgabe eines Befehls in einen anderen ein.",
+     "where": "Dynamische Werte wie Datum, Benutzer, Hostname.",
+     "why": "Du nutzt den aktuellen Wert statt fester Texte.",
+     "example": "echo \"User: $(whoami)\""
+    }
+   ],
+   "tip": "Die alte Form `` `befehl` `` funktioniert auch, aber `$()` ist verschachtelt viel lesbarer."
+  },
+  {
+   "id": "output",
+   "title": "echo, printf und Exit-Code",
+   "body": [
+    "`echo` gibt Text und Variablen aus. Für formatierte Ausgabe nutze `printf`: `%s` steht für Text, `%d` für eine Zahl, `\\n` für einen Zeilenumbruch. `printf` hängt nicht automatisch einen Zeilenumbruch an.",
+    "Jeder Befehl hinterlässt einen **Exit-Code**: `0` bedeutet Erfolg, alles andere einen Fehler. Den letzten liest du mit `$?`. In Skripten prüfst du damit den Erfolg."
+   ],
+   "commands": [
+    {
+     "cmd": "echo",
+     "what": "Gibt Text oder den Wert einer Variable aus.",
+     "where": "Meldungen und schnelle Kontrollen.",
+     "why": "Das einfachste Ausgabewerkzeug.",
+     "example": "echo \"Hello Linux\""
+    },
+    {
+     "cmd": "printf",
+     "what": "Erzeugt formatierte Ausgabe.",
+     "where": "Ausgerichtete Ausgabe oder genaue Kontrolle über Zeilenumbrüche.",
+     "why": "Berechenbarer als echo.",
+     "example": "printf \"Name: %s\\n\" alice"
+    },
+    {
+     "cmd": "echo $?",
+     "what": "Gibt den Exit-Code des letzten Befehls aus.",
+     "where": "Um zu erkennen, ob ein Befehl erfolgreich war.",
+     "why": "`0` ist Erfolg, alles andere ein Fehler.",
+     "example": "echo $?"
+    }
+   ]
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Gib mit `echo \"Hello Linux\"` eine Meldung aus.",
+   "hint": "Setze den Text in doppelte Anführungszeichen."
+  },
+  "t02": {
+   "text": "Zeige die Befehlshistorie an.",
+   "hint": "Tippe `history`."
+  },
+  "t03": {
+   "text": "Gib die Variable `HOME`, die dein Home-Verzeichnis enthält, mit `echo` aus.",
+   "hint": "Setze `$` vor die Variable: `echo $HOME`."
+  },
+  "t04": {
+   "text": "Exportiere die Variable `GREETING=hello` mit `export` und finde sie dann mit `grep` in der `env`-Ausgabe.",
+   "hint": "`export GREETING=hello`, danach `env | grep GREETING`."
+  },
+  "t05": {
+   "text": "Liste die `.txt`-Dateien im Ordner `lab` mit einem Platzhalter auf: Führe `echo lab/*.txt` aus.",
+   "hint": "`*` passt auf jeden Namen; vergiss die Endung `.txt` nicht."
+  },
+  "t06": {
+   "text": "Lege mit Klammererweiterung `file1.txt`, `file2.txt` und `file3.txt` in `lab` mit einem Befehl an.",
+   "hint": "`touch ~/lab/file{1,2,3}.txt`."
+  },
+  "t07": {
+   "text": "Erstelle den Ordner `~/bin` und füge ihn zu `PATH` hinzu, ohne den alten Wert zu verlieren.",
+   "hint": "`mkdir ~/bin`, dann `export PATH=$PATH:~/bin`."
+  },
+  "t08": {
+   "text": "Vorhersage: Was gibt `echo '$HOME'` aus? Führe die Variante mit einfachen Anführungszeichen aus und prüfe.",
+   "hint": "In einfachen Anführungszeichen werden Variablen nicht ersetzt."
+  },
+  "t09": {
+   "text": "Vorhersage: Was gibt `echo \"User: $(whoami)\"` aus? Führe es aus und prüfe.",
+   "hint": "Die Ausgabe des Befehls in `$()` wird eingesetzt."
+  },
+  "t10": {
+   "text": "Vorhersage: Was gibt `echo f{1..3}` aus? Führe es aus und prüfe.",
+   "hint": "Die Klammererweiterung erzeugt drei durch Leerzeichen getrennte Wörter."
+  },
+  "t11": {
+   "text": "Debugging: In deinem Home-Ordner liegt eine Datei `my notes.txt`, und `cat my notes.txt` scheitert. Zeige den Inhalt mit der richtigen Schreibweise an.",
+   "hint": "Setze den Namen in Anführungszeichen: `cat \"my notes.txt\"`."
+  },
+  "t12": {
+   "text": "Mini-Projekt: Erstelle den Ordner `~/projects`, lege darin `a.txt` und `b.txt` mit einem Befehl an und schreibe dann die Ausgabe von `$(whoami)` in `owner.txt`.",
+   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt`."
+  },
+  "t13": {
+   "text": "Challenge: Schreibe genau `host: linux-lab user: student` in `~/info.txt`. Erzeuge die Werte mit `$(hostname)` und `$(whoami)`.",
+   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt`."
+  },
+  "t14": {
+   "text": "Ticket: Das Team möchte die Skripte in `~/tools` per Namen aufrufen. Füge den Ordner in dieser Sitzung zu `PATH` hinzu und hänge die Einstellung ans Ende von `~/.bashrc` an, damit sie dauerhaft gilt.",
+   "hint": "`export PATH=$PATH:~/tools`, dann dieselbe Zeile in einfachen Anführungszeichen mit `>>` an `~/.bashrc` anhängen."
+  },
+  "t15": {
+   "text": "Gib mit `printf` die Zeile `Name: alice` aus; nutze `%s` und `\\n`.",
+   "hint": "`printf \"Name: %s\\n\" alice`."
+  },
+  "t16": {
+   "text": "Liste eine nicht vorhandene Datei auf (`ls nofile`) und zeige danach den Exit-Code mit `echo $?` an.",
+   "hint": "Nach einem Fehler ist `$?` eine Zahl ungleich null."
+  }
+ },
+ "vm": {
+  "intro": "Führe die folgenden Befehle auf deiner eigenen VM aus (Ubuntu, Rocky, Alma oder WSL). Die Befehle in diesem Modul sind harmlos; erweitere `PATH` trotzdem mit `export` und überschreibe es nie mit `PATH=`.",
+  "tasks": {
+   "v01": {
+    "title": "Historie erkunden",
+    "text": "Führe ein paar Befehle aus und zeige dann die letzten Zeilen der Historie. Probiere danach `!!` und `Ctrl+R`.",
+    "blocks": [
+     {
+      "cmd": "echo one\necho two\nhistory | tail -n 5",
+      "expected": "  101  echo one\n  102  echo two\n  103  history | tail -n 5"
+     },
+     {
+      "cmd": "# Drücke Ctrl+R, tippe 'echo', drücke Enter; danach:\n!!"
+     }
+    ],
+    "differs": [
+     "Die Nummern unterscheiden sich je nach deiner Historie; die Reihenfolge der Zeilen zählt.",
+     "Funktioniert `!!` nicht, prüfe mit `echo $SHELL`, ob du in Bash bist."
+    ]
+   },
+   "v02": {
+    "title": "Variable und export",
+    "text": "Definiere eine Variable, exportiere sie und prüfe, ob eine Kind-Shell sie sieht.",
+    "blocks": [
+     {
+      "cmd": "MYVAR=hello\nbash -c 'echo \"child: [$MYVAR]\"'\nexport MYVAR\nbash -c 'echo \"child: [$MYVAR]\"'\nenv | grep MYVAR",
+      "expected": "child: []\nchild: [hello]\nMYVAR=hello"
+     }
+    ],
+    "differs": [
+     "Ist die erste Zeile nicht `child: []`, wurde `MYVAR` schon früher exportiert; öffne das Terminal neu.",
+     "Kopiere beim Einfügen alle drei Zeilen der Ausgabe."
+    ]
+   },
+   "v03": {
+    "title": "Quoting-Unterschied",
+    "text": "Gib denselben Text mit doppelten und einfachen Anführungszeichen aus und sieh den Unterschied.",
+    "blocks": [
+     {
+      "cmd": "echo \"Hello $USER\"\necho 'Hello $USER'\necho Hello \\$USER",
+      "expected": "Hello student\nHello $USER\nHello $USER"
+     }
+    ],
+    "differs": [
+     "Heißt dein Benutzer nicht `student`, erscheint dein eigener Name; das ist normal.",
+     "Ist `$USER` leer, probiere `echo $LOGNAME`."
+    ]
+   },
+   "v04": {
+    "title": "Platzhalter und Klammern",
+    "text": "Lege in einem sicheren Ordner Dateien mit Klammererweiterung an und treffe sie mit Platzhaltern.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab\ntouch ~/lab/{a,b,c}.txt ~/lab/d.log\necho ~/lab/*.txt\necho ~/lab/?.log\necho ~/lab/[ab].txt",
+      "expected": "/home/student/lab/a.txt /home/student/lab/b.txt /home/student/lab/c.txt\n/home/student/lab/d.log\n/home/student/lab/a.txt /home/student/lab/b.txt"
+     }
+    ],
+    "differs": [
+     "Ist dein Home nicht `/home/student`, sieht der Pfad anders aus; die Dateinamen müssen gleich sein.",
+     "Unter `WSL` ist `~` dein Linux-Home, nicht die Windows-Seite."
+    ]
+   },
+   "v05": {
+    "title": "Eigenes Werkzeug in PATH aufnehmen",
+    "text": "Schreibe ein winziges Skript, füge seinen Ordner zu `PATH` hinzu und rufe es per Namen auf.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/tools\nprintf '#!/bin/bash\\necho tool works\\n' > ~/tools/hello\nchmod +x ~/tools/hello\nexport PATH=$PATH:~/tools\nhello\nwhich hello",
+      "expected": "tool works\n/home/student/tools/hello"
+     }
+    ],
+    "differs": [
+     "Bei `command not found` prüfe mit `echo $PATH`, ob der Pfad `tools` ergänzt wurde.",
+     "Bei `Permission denied` führe `chmod +x ~/tools/hello` erneut aus."
+    ]
+   },
+   "v06": {
+    "title": "Tastenkürzel ausprobieren",
+    "text": "Tippe `sleep 100` und brich mit `Ctrl+C` ab. Tippe dann einen langen Befehl und bewege dich mit `Ctrl+A` und `Ctrl+E` in der Zeile, leere den Bildschirm mit `Ctrl+L`. Tippe `~/Doc` und vervollständige mit Tab. Wenn du fertig bist, drücke \"Erledigt\".",
+    "blocks": [
+     {
+      "cmd": "sleep 100\n# Ctrl+C\nls ~/Doc\n# Tab"
+     }
+    ],
+    "differs": [
+     "Fängt dein Terminal Ctrl+L ab, tippe stattdessen `clear`.",
+     "Passiert bei Tab nichts, drücke es zweimal; bei mehreren Treffern werden sie aufgelistet."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Was macht `!!`?",
+   "options": [
+    "Löscht die Historie",
+    "Listet die Historie auf",
+    "Führt den vorherigen Befehl erneut aus",
+    "Schließt die Shell"
+   ],
+   "explain": "`!!` wird durch den vorherigen Befehl ersetzt; `sudo !!` ist sehr verbreitet."
+  },
+  "q2": {
+   "q": "Was gibt `echo '$HOME'` aus?",
+   "options": [
+    "/home/student",
+    "$HOME",
+    "Eine leere Zeile",
+    "Einen Fehler"
+   ],
+   "explain": "In einfachen Anführungszeichen werden Variablen nicht ersetzt; der Text erscheint unverändert."
+  },
+  "q3": {
+   "q": "Welcher Befehl macht eine Variable für Kindprogramme sichtbar?",
+   "options": [
+    "export",
+    "unset",
+    "echo",
+    "history"
+   ],
+   "explain": "`export` legt die Variable in die Umgebung; `env` zeigt sie dann an."
+  },
+  "q4": {
+   "q": "Wie lautet die Ausgabe von `echo f{1..3}`?",
+   "options": [
+    "f{1..3}",
+    "f",
+    "f1f2f3",
+    "f1 f2 f3"
+   ],
+   "explain": "Die Shell führt die Klammererweiterung aus und erzeugt drei getrennte Wörter."
+  }
+ },
+ "summary": [
+  "`history`, `!!` und `Ctrl+R` lassen dich Befehle wiederverwenden.",
+  "`Tab` vervollständigt; `Ctrl+C` bricht ab, `Ctrl+L` leert, `Ctrl+A/E` bewegen in der Zeile.",
+  "`$` wird in doppelten Anführungszeichen ersetzt, in einfachen nicht, `\\` schützt ein Zeichen.",
+  "`NAME=value` ohne Leerzeichen; Kindprogramme brauchen `export`.",
+  "`PATH` enthält die Ordner für die Befehlssuche; erweitere es mit `export PATH=$PATH:...`.",
+  "`*`, `?`, `[]` sind Platzhalter; `{a,b}` ist Klammererweiterung; `$()` setzt Befehlsausgabe ein."
+ ],
+ "glossary": [
+  {
+   "term": "history",
+   "meaning": "Die Liste der Befehle, die sich die Shell merkt."
+  },
+  {
+   "term": "environment variable",
+   "meaning": "Eine Variable mit Einstellungen für Shell und Kindprogramme (HOME, PATH, USER)."
+  },
+  {
+   "term": "PATH",
+   "meaning": "Eine mit `:` getrennte Liste von Ordnern für die Befehlssuche."
+  },
+  {
+   "term": "globbing",
+   "meaning": "Auflösung von Mustern wie `*`, `?`, `[]` zu Dateinamen."
+  },
+  {
+   "term": "command substitution",
+   "meaning": "Ersetzen von `$(befehl)` durch die Ausgabe des Befehls."
+  },
+  {
+   "term": "exit code",
+   "meaning": "Die Zahl, die ein Befehl hinterlässt; `0` ist Erfolg, alles andere ein Fehler."
+  }
+ ]
+}

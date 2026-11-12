@@ -1,0 +1,41 @@
+{
+ "id": "4.1",
+ "level": 4,
+ "setup": {
+  "files": {
+   "/home/student/Documents/accounts.txt": "alice:x:1001:1001:Alice:/home/alice:/sbin/nologin\nbob:x:1002:1002:Bob:/home/bob:/bin/bash\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^whoami$", "ok": true}, "solution": ["whoami"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^id$", "ok": true}, "solution": ["id"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^groups$", "ok": true}, "solution": ["groups"]},
+  {"id": "t04", "kind": "guided", "diff": 1, "check": {"cmd": "^id alice$", "ok": true}, "solution": ["id alice"]},
+  {"id": "t05", "kind": "guided", "diff": 1, "check": {"cmd": "^cat /etc/passwd$", "ok": true}, "solution": ["cat /etc/passwd"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cmd": "^grep (-w )?student /etc/passwd$", "ok": true}, "solution": ["grep student /etc/passwd"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": {"cmd": "^cut\\s+-d\\s*['\"]?:['\"]?\\s+-f\\s*1\\s+/etc/passwd$", "ok": true}, "solution": ["cut -d: -f1 /etc/passwd"]},
+  {"id": "t08", "kind": "guided", "diff": 2, "check": {"cmd": "^wc -l (< ?)?/etc/passwd$", "ok": true}, "solution": ["wc -l /etc/passwd"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "\\b5\\b", "of": "wc -l /etc/group"}, "solution": ["wc -l /etc/group"]},
+  {"id": "t10", "kind": "predict", "diff": 2, "check": {"cmd": "^cat /etc/shadow$", "ok": false}, "solution": ["cat /etc/shadow"]},
+  {"id": "t11", "kind": "predict", "diff": 2, "check": {"cmd": "^id bob$", "ok": false}, "solution": ["id bob"]},
+  {"id": "t12", "kind": "debug", "diff": 2, "check": {"contains": ["~/alice_shell.txt", "nologin"]}, "solution": ["grep alice ~/Documents/accounts.txt | cut -d: -f7 > ~/alice_shell.txt"]},
+  {"id": "t13", "kind": "mini", "diff": 2, "check": [{"contains": ["~/shell_users.txt", "alice"]}, {"contains": ["~/shell_users.txt", "student"]}, {"linesMin": ["~/shell_users.txt", 3]}], "solution": ["grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt"]},
+  {"id": "t14", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/me.txt", "student"]}, {"contains": ["~/me.txt", "uid=1000"]}, {"contains": ["~/me.txt", "wheel"]}], "solution": ["whoami > ~/me.txt", "id >> ~/me.txt"]},
+  {"id": "t15", "kind": "challenge", "diff": 3, "check": {"contains": ["~/nologin_count.txt", "4"]}, "solution": ["grep -c nologin /etc/passwd > ~/nologin_count.txt"]},
+  {"id": "t16", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/alice_info.txt", "uid=1001"]}, {"contains": ["~/alice_info.txt", "devs"]}], "solution": ["id alice > ~/alice_info.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "load average|pts/|tty|:0"},
+  {"id": "v02", "expect": "wtmp begins|reboot|pts/|tty"},
+  {"id": "v03", "expect": null},
+  {"id": "v04", "expect": "student:\\S*:\\d+:\\d+:.*:/home/student:"},
+  {"id": "v05", "expect": "uid=\\d+\\(\\S+\\)\\s+gid=\\d+"},
+  {"id": "v06", "expect": "root:/\\S+"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 1},
+  {"id": "q3", "answer": 1},
+  {"id": "q4", "answer": 0}
+ ]
+}

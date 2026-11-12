@@ -1,0 +1,125 @@
+{
+ "title": "Disk ve ağ sağlığı",
+ "lead": "Sunucu yavaşladığında ilk iki bakılacak yer: disk doluluğu ve ağ. df, du, free, uptime, ip, ping ve ss ile hızlı bir sağlık kontrolü yap.",
+ "objectives": [
+  "`df -h` ile hangi bölümün dolduğunu, `du` ile hangi klasörün yer kapladığını bulursun.",
+  "`free -h` ve `uptime` ile bellek ve yük durumunu okursun.",
+  "`ip`, `ping` ve `ss` ile ağ sorununu katman katman daraltırsın.",
+  "Sağlık çıktısını dosyaya kaydeder, destek biletine ekleyecek rapor hazırlarsın."
+ ],
+ "sections": [
+  {
+   "id": "disk",
+   "title": "Disk doluluğu: df ve du",
+   "body": [
+    "Disk %100 dolarsa yazma işlemleri `No space left on device` hatasıyla başarısız olur; servisler ve loglar durur. Bu yüzden önce **hangi bölüm** dolu diye bakarsın: `df -h`. Sütunlar: `Size` toplam, `Used` kullanılan, `Avail` boş, `Use%` doluluk, `Mounted on` bağlama noktası.",
+    "Bölümü bulduktan sonra **hangi klasör** yer kapladığını `du` ile ararsın. `du -sh folder` toplamı, `du -h --max-depth=1 folder | sort -h` ise alt klasörleri küçükten büyüğe sıralar. Bazen alan boş görünür ama dosya yaratılamaz: inode tükenmiştir, `df -i` ile kontrol et."
+   ],
+   "commands": [
+    {"cmd": "df -h", "what": "Bölümlerin boyut ve doluluğunu okunur birimlerle gösterir.", "where": "Yavaşlama veya 'disk full' hatasında ilk komut.", "why": "Sorunun hangi bağlama noktasında olduğunu tek bakışta verir.", "example": "df -h"},
+    {"cmd": "du -sh", "what": "Bir klasörün toplam boyutunu gösterir.", "where": "df'te dolu bölümü bulduktan sonra.", "why": "Suçlu klasörü daraltmanı sağlar.", "example": "du -sh /var/log", "nosim": true},
+    {"cmd": "du --max-depth=1", "what": "Bir seviye alt klasörlerin boyutunu listeler; sort -h ile sıralanır.", "where": "En büyük klasörü ararken.", "why": "Tüm ağacı gezmeden hedefe iner.", "example": "du -h --max-depth=1 /var | sort -h", "nosim": true},
+    {"cmd": "df -i", "what": "Dosya sayısı (inode) doluluğunu gösterir.", "where": "Alan var ama dosya oluşmuyorsa.", "why": "Milyonlarca küçük dosya inode'u bitirebilir.", "example": "df -i", "nosim": true}
+   ],
+   "tip": "`df` bölümü, `du` klasörü bulur. Önce df, sonra du: sırayı karıştırma.",
+   "warn": "Silmeden önce dosyanın ne olduğunu `ls -l` ile kontrol et. Çalışan servisin log dosyasını silmek yerine boşaltmak (`: > file`) gerekebilir; emin değilsen sistem yöneticine sor."
+  },
+  {
+   "id": "mem",
+   "title": "Bellek ve yük: free ve uptime",
+   "body": [
+    "`free -h` RAM ve swap kullanımını gösterir. Dikkat edilecek sütun `available`: yeni uygulamalara gerçekten verilebilecek bellek. `free` küçük görünse de önbellek (`buff/cache`) gerektiğinde serbest bırakılır, panik yapma.",
+    "`uptime` sistemin ne kadardır açık olduğunu ve **load average** değerlerini (1, 5, 15 dakika) verir. Yük değeri CPU çekirdek sayını sürekli aşıyorsa sistem sıraya girmiş iş taşıyordur."
+   ],
+   "commands": [
+    {"cmd": "free -h", "what": "RAM ve swap kullanımını okunur birimlerle gösterir.", "where": "Bellek sıkıntısından şüphelenince.", "why": "available değeri gerçek boş belleği söyler.", "example": "free -h"},
+    {"cmd": "uptime", "what": "Çalışma süresi, kullanıcı sayısı ve yük ortalamasını gösterir.", "where": "Sunucu yavaşsa hızlı kontrol için.", "why": "Yük ortalaması anlık değil, trend verir.", "example": "uptime"}
+   ],
+   "tip": "Çıktıyı raporlamak için `df -h > report.txt`, ekleme için `>>` kullan."
+  },
+  {
+   "id": "net",
+   "title": "Ağ: ip, ping ve ss",
+   "body": [
+    "Ağ sorununu aşağıdan yukarı daralt: 1) Arayüz ayakta mı ve IP var mı? `ip -br a`. 2) Varsayılan yol (gateway) var mı? `ip route`. 3) Gateway'e ulaşılıyor mu? `ping -c 3 <gateway>`. 4) İnternet IP'sine? `ping -c 3 1.1.1.1`. 5) İsim çözümü? `ping -c 3 example.com`.",
+    "IP'ye ping gider ama isme gitmezse sorun **DNS**'tedir (`/etc/resolv.conf`). Hiçbir şey gitmiyorsa kablo/VM ağ ayarı veya gateway'e bak. `ss -tuln` makinenin hangi portlarda dinlediğini gösterir (örn. SSH için 22)."
+   ],
+   "commands": [
+    {"cmd": "ip -br a", "what": "Arayüzleri, durumlarını ve IP adreslerini kısa listeler.", "where": "Ağ sorununda ilk adım.", "why": "IP yoksa üst katmanlara bakmanın anlamı yoktur.", "example": "ip -br a", "nosim": true},
+    {"cmd": "ip route", "what": "Yönlendirme tablosunu ve varsayılan gateway'i gösterir.", "where": "Dışarıya çıkılamıyorsa.", "why": "default via satırı yoksa trafik çıkamaz.", "example": "ip route", "nosim": true},
+    {"cmd": "ping -c 3", "what": "Hedefe 3 deneme paketi gönderir; kayıp ve gecikmeyi raporlar.", "where": "Bağlantı ve DNS testinde.", "why": "-c olmadan ping sonsuza kadar sürer.", "example": "ping -c 3 1.1.1.1", "nosim": true},
+    {"cmd": "ss -tuln", "what": "Dinleyen TCP/UDP portlarını sayısal listeler.", "where": "Servisin portta dinleyip dinlemediğini görmek için.", "why": "'Bağlanamıyorum' sorununda servis tarafını kontrol eder.", "example": "ss -tuln", "nosim": true}
+   ],
+   "danger": "Uzak bir sunucuda `ip link set eth0 down` gibi komutlar SSH bağlantını keser ve sunucuya erişemez hale gelirsin. Ağ ayarını değiştirmeden önce konsol erişimin olduğundan emin ol."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`df -h` ile bölümlerin doluluğuna bak.", "hint": "-h okunabilir birim (G, M) verir."},
+  "t02": {"text": "`free -h` ile bellek durumunu göster.", "hint": "available sütununa bak."},
+  "t03": {"text": "`uptime` ile yük ortalamasını göster.", "hint": "Üç sayı: 1, 5, 15 dakika."},
+  "t04": {"text": "Örnek rapor `~/reports/df_sample.txt` dosyasını `cat` ile oku ve Use% sütununu bul.", "hint": "`cat ~/reports/df_sample.txt`"},
+  "t05": {"text": "`df -h` çıktısını `>` ile `~/disk_report.txt` dosyasına kaydet.", "hint": "`df -h > ~/disk_report.txt`. Tek `>` dosyanın üzerine yazar."},
+  "t06": {"text": "`free -h` çıktısını aynı dosyanın sonuna ekle (`>>`).", "hint": "`>>` ekler, `>` üzerine yazar; yanlış yaparsan t05'i tekrarla."},
+  "t07": {"text": "`uptime` çıktısını da `~/disk_report.txt` dosyasına ekle.", "hint": "Yine `>>` kullan."},
+  "t08": {"text": "Tahmin et: `~/reports/df_sample.txt` içinde 95% geçen satır hangi bağlama noktası? Sonra `grep 95% ~/reports/df_sample.txt` ile doğrula.", "hint": "Satırın sonundaki Mounted on sütunu."},
+  "t09": {"text": "Tahmin et: `~/reports/ping_sample.txt` ağ hakkında ne söylüyor? `grep loss ~/reports/ping_sample.txt` ile kayıp oranını gör.", "hint": "100% packet loss hedefe hiç ulaşılamadığı anlamına gelir."},
+  "t10": {"text": "Tahmin et: `~/reports/ip_sample.txt` içinde eth0 arayüzünün IP'si ne? `grep eth0 ~/reports/ip_sample.txt` ile doğrula.", "hint": "Satırdaki /24 ağ maskesidir, IP değil."},
+  "t11": {"text": "Disk şişiyor. `ls -l ~/logs` ile bak; eski hata ayıklama logu `old_debug.log` gereksiz, onu sil ama `app.log` dosyasına dokunma.", "hint": "`rm ~/logs/old_debug.log`. Silmeden önce ls ile doğru ismi kontrol et."},
+  "t12": {"text": "Mini proje: `~/health.txt` raporu hazırla. İçinde sırayla `== disk ==` başlığı, `df -h` çıktısı, `== memory ==` başlığı ve `free -h` çıktısı olsun.", "hint": "İlk satır `echo \"== disk ==\" > ~/health.txt`, sonrakiler `>>`."},
+  "t13": {"text": "Meydan okuma: `~/reports/df_sample.txt` içinden yalnızca %95 dolu satırı `~/alert.txt` dosyasına, bu satırların sayısını `~/alert_count.txt` dosyasına yaz.", "hint": "`grep` satırı süzer, `grep -c` sayar; her ikisini `>` ile yönlendir."},
+  "t14": {"text": "Ticket: \"Uygulama 'No space left on device' hatası veriyor.\" `~/reports/df_sample.txt` içinden dolu bağlama noktasını bul ve adını `~/full_mount.txt` dosyasına yaz. Ayrıca gereksiz `~/logs/core.dump` dosyasını sil.", "hint": "Dolu olan 95% satırıdır. Mount noktası `/var`: `echo /var > ~/full_mount.txt`."}
+ },
+ "vm": {
+  "intro": "Bu bölümdeki komutlar yalnızca okuma yapar; VM'inde güvenle çalıştırabilirsin. Çıktını yapıştır, otomatik kontrol edelim.",
+  "tasks": {
+   "v01": {
+    "title": "Disk doluluğu",
+    "text": "`df -h` çalıştır ve çıktını yapıştır. Kök (`/`) bölümünün doluluk yüzdesini not et.",
+    "blocks": [{"cmd": "df -h\ndf -i /", "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        19G  4.1G   14G  23% /"}],
+    "differs": ["Bölüm adı `/dev/vda1`, `/dev/mapper/...` veya `/dev/nvme0n1p2` olabilir; önemli olan Use% sütunu.", "Çok sayıda `tmpfs`/`loop` satırı normaldir (Ubuntu snap); `/` satırına odaklan."]
+   },
+   "v02": {
+    "title": "Alan avı",
+    "text": "Ev dizininin ve /var altındaki klasörlerin boyutlarını sırala. En büyük 5 satırı yapıştır.",
+    "blocks": [{"cmd": "du -sh ~\nsudo du -xh /var --max-depth=1 2>/dev/null | sort -h | tail -5", "expected": "120M\t/var/cache\n1.1G\t/var/lib\n1.4G\t/var"}],
+    "differs": ["`sort -h` yoksa (çok eski sistem) `sort -n` kullan ve `du -k` yaz.", "sudo parola isterse VM kullanıcı parolanı gir; yazarken ekranda görünmez."]
+   },
+   "v03": {
+    "title": "IP ve yönlendirme",
+    "text": "Arayüzlerini ve varsayılan gateway'ini göster; çıktıyı yapıştır.",
+    "blocks": [{"cmd": "ip -br a\nip route", "expected": "lo      UNKNOWN  127.0.0.1/8\nenp0s3  UP       10.0.2.15/24\ndefault via 10.0.2.2 dev enp0s3"}],
+    "differs": ["Arayüz adı `eth0`, `enp0s3` veya `ens160` olabilir.", "VirtualBox NAT'ta IP genelde 10.0.2.15'tir; köprülü (bridged) ağda router'ın bloğundan gelir.", "IP hiç yoksa VM ağ kartının 'bağlı' olduğunu ve NAT/Bridged seçildiğini kontrol et."]
+   },
+   "v04": {
+    "title": "Bağlantı ve DNS testi",
+    "text": "Önce IP'ye, sonra isme ping at. İkisinin de çıktısını yapıştır.",
+    "blocks": [{"cmd": "ping -c 3 1.1.1.1\nping -c 3 example.com", "expected": "3 packets transmitted, 3 received, 0% packet loss"}],
+    "differs": ["IP'ye gidip isme gitmiyorsa DNS sorunudur; `cat /etc/resolv.conf` ile bak.", "Bazı ağlar ICMP'yi engeller; ping başarısız olsa bile web açılıyorsa sorun ping'dedir."]
+   },
+   "v05": {
+    "title": "Dinleyen portlar",
+    "text": "Makinenin dinlediği portları listele ve çıktıyı yapıştır.",
+    "blocks": [{"cmd": "ss -tuln", "expected": "tcp   LISTEN  0  128  0.0.0.0:22  0.0.0.0:*"}],
+    "differs": ["SSH kurulu değilse 22 görünmez; bu modül için sorun değil.", "`ss` yoksa eski sistemlerde `netstat -tuln` dene."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Hangi bölümün dolduğunu görmek için hangi komutu kullanırsın?", "options": ["du -sh", "df -h", "free -h", "uptime"], "explain": "`df` bölümlerin doluluğunu, `du` klasör boyutlarını gösterir."},
+  "q2": {"q": "`/var` bölümü %95 dolu. En çok yer kaplayan alt klasörü nasıl bulursun?", "options": ["ping -c 3 /var", "df -i", "du -h --max-depth=1 /var | sort -h", "ip route"], "explain": "du alt klasör boyutlarını verir, sort -h küçükten büyüğe dizer."},
+  "q3": {"q": "`ping 1.1.1.1` çalışıyor, `ping example.com` çalışmıyor. En olası sorun?", "options": ["DNS (isim çözümü)", "Kablo çıkık", "Disk dolu", "RAM yetersiz"], "explain": "IP'ye ulaşım var, isim çözümü yok: DNS ayarına bak."},
+  "q4": {"q": "Makinenin hangi portlarda dinlediğini hangi komut gösterir?", "options": ["ip -br a", "ping -c 3", "df -h", "ss -tuln"], "explain": "`ss -tuln` dinleyen TCP/UDP portlarını sayısal listeler."}
+ },
+ "summary": [
+  "`df -h` hangi bölüm, `du -sh` / `du --max-depth=1` hangi klasör dolu sorusunu yanıtlar.",
+  "`free -h` içinde `available`, `uptime` içinde load average önemlidir.",
+  "Ağ sorununu aşağıdan yukarı daralt: `ip -br a`, `ip route`, ping IP, ping isim.",
+  "Çıktıları `>` ve `>>` ile rapora çevir; silmeden önce `ls -l` ile kontrol et."
+ ],
+ "glossary": [
+  {"term": "inode", "meaning": "Dosya hakkında bilgi tutan kayıt; sayısı sınırlıdır."},
+  {"term": "load average", "meaning": "1, 5 ve 15 dakikalık ortalama çalışmaya hazır iş sayısı."},
+  {"term": "gateway", "meaning": "Yerel ağdan dışarıya çıkış kapısı (genelde router)."},
+  {"term": "DNS", "meaning": "İsimleri IP adreslerine çeviren sistem."}
+ ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "2.9",
+  "level": 2,
+  "setup": {
+    "dirs": ["/home/student/disklab", "/home/student/reports"],
+    "files": {
+      "/home/student/disklab/lsblk.txt": "NAME   SIZE TYPE MOUNTPOINTS\nsda     40G disk\n├─sda1   1G part /boot\n└─sda2  39G part /\nsdb     20G disk\n",
+      "/home/student/disklab/lsblk-f.txt": "NAME FSTYPE UUID MOUNTPOINTS\nsda\n└─sda2 xfs 1111-2222 /\nsdb\n",
+      "/home/student/disklab/fstab.sample": "UUID=1111-2222 / xfs defaults 0 0\nUUID=aaaa-bbbb /data ext4 nofail 0 2\n",
+      "/home/student/disklab/fstab.tmp": "UUID=aaaa-bbbb /data ext4 defaults 0 2\n"
+    }
+  },
+  "tasks": [
+    {"id":"t01","kind":"warmup","diff":1,"check":{"cmd":"^ls ~/disklab$","ok":true},"solution":["ls ~/disklab"]},
+    {"id":"t02","kind":"warmup","diff":1,"check":{"cmd":"^df -h$","ok":true},"solution":["df -h"]},
+    {"id":"t03","kind":"guided","diff":1,"check":{"out":"sdb","of":"^cat ~/disklab/lsblk.txt$"},"solution":["cat ~/disklab/lsblk.txt"]},
+    {"id":"t04","kind":"guided","diff":2,"check":{"exists":"~/disklab/archive","type":"d"},"solution":["mkdir -p ~/disklab/archive"]},
+    {"id":"t05","kind":"predict","diff":2,"check":{"out":"aaaa-bbbb","of":"^grep data ~/disklab/fstab.sample$"},"solution":["grep data ~/disklab/fstab.sample"]},
+    {"id":"t06","kind":"debug","diff":2,"check":{"absent":"~/disklab/fstab.tmp"},"solution":["rm ~/disklab/fstab.tmp"]},
+    {"id":"t07","kind":"mini","diff":2,"check":[{"contains":["~/disklab/mount-plan.txt","/data"]},{"contains":["~/disklab/mount-plan.txt","nofail"]}],"solution":["echo \"UUID=aaaa-bbbb /data ext4 nofail 0 2\" > ~/disklab/mount-plan.txt"]},
+    {"id":"t08","kind":"challenge","diff":3,"check":[{"exists":"~/disklab/fstab.backup","type":"f"},{"contains":["~/disklab/fstab.backup","/"]}],"solution":["cp ~/disklab/fstab.sample ~/disklab/fstab.backup"]},
+    {"id":"t09","kind":"ticket","diff":3,"check":[{"contains":["~/reports/disk-ticket.txt","lsblk"]},{"contains":["~/reports/disk-ticket.txt","df -hT"]}],"solution":["echo \"Check lsblk and df -hT before changing a disk.\" > ~/reports/disk-ticket.txt"]}
+  ],
+  "vm": [
+    {"id":"v01","expect":"NAME|Filesystem"},
+    {"id":"v02","expect":"Mounted on|/"},
+    {"id":"v03","expect":"SOURCE|/dev/|UUID"}
+  ],
+  "quiz": [
+    {"id":"q1","answer":1},
+    {"id":"q2","answer":2},
+    {"id":"q3","answer":0},
+    {"id":"q4","answer":3}
+  ]
+}

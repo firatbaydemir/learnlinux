@@ -1,0 +1,457 @@
+{
+ "title": "Comparison: diff, cmp, comm, patch",
+ "lead": "Compare two files, two directories and two lists, read the difference, create and apply patches, and use exit codes in scripts.",
+ "objectives": [
+  "You read `diff` output (normal and `-u` unified), including `@@` hunks and `+`/`-` lines.",
+  "You compare directories and files quickly with `diff -r`, `diff -q`, `cmp` and `sha256sum -c`.",
+  "You find differences between sorted lists with `comm`, and common or unique lines with `sort | uniq -d/-u`.",
+  "You create patches with `diff -u`, apply them with `patch`, undo them with `-R`, and check exit codes (0/1/2)."
+ ],
+ "sections": [
+  {
+   "id": "diff",
+   "title": "diff: line-by-line differences",
+   "body": [
+    "`diff old new` compares two text files line by line and prints the changes needed to turn the old file into the new one. In normal output you see a command line such as `2c2` (line 2 changed); `<` marks lines from the first file, `>` lines from the second.",
+    "In practice the **unified** format (`-u`) is the standard: `---` is the first file, `+++` the second; the hunk `@@ -1,3 +1,4 @@` means three lines starting at line 1 in the first file and four lines starting at line 1 in the second. Lines starting with `-` exist only in the old file, lines with `+` only in the new one; lines starting with a space are context. Git and patch tools use this format.",
+    "**Exit code:** `0` files identical, `1` differences found, `2` trouble (file missing, unreadable). So `diff` reports 'failure' when it finds differences; that is not an error. In the simulator `diff`, `cmp`, `comm` and `patch` do not run; try them on your own VM. Here the simulator only checks that you typed the command, plus the prepared files."
+   ],
+   "commands": [
+    {
+     "cmd": "diff",
+     "what": "Shows the difference between two files in normal format (with `<` and `>` lines).",
+     "where": "When comparing two versions of a configuration file.",
+     "why": "You see what changed without reading the whole file.",
+     "example": "diff v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -u",
+     "what": "Unified format: `---`/`+++` header, `@@` hunks and `+`/`-` lines.",
+     "where": "When sharing changes, in code review, when creating patches.",
+     "why": "Context lines make clear where the change is.",
+     "example": "diff -u v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -q",
+     "what": "Prints only 'Files ... differ', or nothing.",
+     "where": "When only 'same or not' matters; in scripts.",
+     "why": "No long output, the exit code is still 0/1.",
+     "example": "diff -q v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -y",
+     "what": "Shows two columns side by side; differences marked with `|`, `<`, `>`.",
+     "where": "When comparing short files by eye.",
+     "why": "You see both versions next to each other.",
+     "example": "diff -y v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -w",
+     "what": "Ignores whitespace differences (indentation, trailing spaces).",
+     "where": "For files that were only reformatted.",
+     "why": "Noise disappears, real content differences remain.",
+     "example": "diff -w v1.txt v2.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Which file is 'old' and which is 'new'? Order matters: `diff old new`. Swap them and `+` and `-` swap too.",
+   "warn": "Files created on Windows carry `\\r` (CRLF) at each line end, so every line looks different. Clean up with `tr -d '\\r' < win.txt > fixed.txt` or use `diff --strip-trailing-cr`."
+  },
+  {
+   "id": "dirs",
+   "title": "Comparing directories",
+   "body": [
+    "`diff -r dir_a dir_b` compares two directory trees recursively. For files that exist in only one directory it prints `Only in dir_a: extra.txt`; for files with different content it prints the diff. With `-q` (or `-rq`) you see only which files differ; ideal for checking a backup with many files.",
+    "You can also compare the output of two commands: `diff <(sort a.txt) <(sort b.txt)` (process substitution, a **bash** feature) hands the outputs over like temporary files. It does not work in plain `sh`."
+   ],
+   "commands": [
+    {
+     "cmd": "diff -r",
+     "what": "Compares two directories including subdirectories.",
+     "where": "When comparing two project versions or a backup.",
+     "why": "Missing, extra and changed files in one go.",
+     "example": "diff -r dir_a dir_b",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -rq",
+     "what": "Lists only files that differ or exist on one side only.",
+     "where": "For backup verification, in large trees.",
+     "why": "A short overview; look at single files in detail afterwards.",
+     "example": "diff -rq dir_a dir_b",
+     "nosim": true
+    },
+    {
+     "cmd": "diff <( )",
+     "what": "Compares the output of two commands like files (bash).",
+     "where": "For sorted lists or comparing two environments.",
+     "why": "No intermediate files needed.",
+     "example": "diff <(sort list_a.txt) <(sort list_b.txt)",
+     "nosim": true
+    }
+   ],
+   "tip": "Direction does not matter, but for readability always write the 'reference' directory first."
+  },
+  {
+   "id": "bytes",
+   "title": "cmp and checksums",
+   "body": [
+    "`cmp` compares files **byte by byte** and reports the byte and line number of the first difference. For binary files `diff` only says 'Binary files differ'; `cmp` shows the exact position. `cmp -s` prints nothing, only the exit code (0 same, 1 different, 2 trouble). In scripts: `if cmp -s a b; then echo same; fi`.",
+    "If the files are on different machines you cannot compare them directly; compute a **checksum**. `sha256sum notes.txt` produces a hash; identical content gives an identical hash. `sha256sum -c sums.txt` recomputes stored hashes and prints `OK` or `FAILED`. This is how you verify a download is intact. `md5sum` is outdated; use `sha256sum` for security."
+   ],
+   "commands": [
+    {
+     "cmd": "cmp",
+     "what": "Compares two files byte by byte and reports the position of the first difference.",
+     "where": "For binary files and to verify copies.",
+     "why": "Gives a definite answer even for non-text files.",
+     "example": "cmp v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cmp -s",
+     "what": "Silent comparison; the result is only in the exit code.",
+     "where": "In scripts as an `if` condition.",
+     "why": "Decides 'same?' without output.",
+     "example": "cmp -s v1.txt v1.bak; echo $?",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum",
+     "what": "Computes the SHA-256 hash of a file.",
+     "where": "For verifying downloads and backups.",
+     "why": "You compare contents without having the files side by side.",
+     "example": "sha256sum v1.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum -c",
+     "what": "Checks a hash list; prints `OK` or `FAILED` per file.",
+     "where": "For ISO images or backups.",
+     "why": "Shows automatically whether anything is corrupted or changed.",
+     "example": "sha256sum -c sums.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "See the exit code with `echo $?` right after the command; if another command runs in between, the value is gone."
+  },
+  {
+   "id": "lists",
+   "title": "Comparing lists: comm, uniq",
+   "body": [
+    "`comm a b` shows two **sorted** files in three columns: column 1 only in a, column 2 only in b, column 3 in both. `-1`, `-2`, `-3` hide that column: `comm -12` = common lines, `comm -23` = only in a, `comm -13` = only in b.",
+    "**Pitfall:** if the input is not sorted, `comm` gives wrong results and warns 'file 2 is not in sorted order'. Sort first: `sort list_b.txt > sorted_b.txt`.",
+    "Without `comm`, `sort a b | uniq -d` gives lines present in both lists (duplicated ones) and `sort a b | uniq -u` gives lines that appear only once. Each list should be free of duplicates itself, otherwise the counting breaks. Both commands also work in the simulator."
+   ],
+   "commands": [
+    {
+     "cmd": "comm",
+     "what": "Compares two sorted files in three columns.",
+     "where": "When comparing user, package or IP lists.",
+     "why": "Separates common and unique lines in one command.",
+     "example": "comm list_a.txt sorted_b.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "comm -12",
+     "what": "Shows only lines present in both files.",
+     "where": "When you need the intersection.",
+     "why": "Hides columns 1 and 2, the common one remains.",
+     "example": "comm -12 list_a.txt sorted_b.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "comm -23",
+     "what": "Shows only lines present in the first file.",
+     "where": "For the question 'I have it, you don't'.",
+     "why": "Finds missing or surplus entries.",
+     "example": "comm -23 list_a.txt sorted_b.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "sort | uniq -d",
+     "what": "From merged sorted lines, prints the duplicated (common) ones.",
+     "where": "Without `comm`, or for a quick intersection.",
+     "why": "Works everywhere with standard tools.",
+     "example": "sort list_a.txt list_b.txt | uniq -d"
+    },
+    {
+     "cmd": "sort | uniq -u",
+     "what": "Prints only lines that occur exactly once (symmetric difference).",
+     "where": "When looking for lines that are in only one of the lists.",
+     "why": "Eliminates the common lines.",
+     "example": "sort list_a.txt list_b.txt | uniq -u"
+    }
+   ],
+   "tip": "Rule of thumb: always `sort` before `comm`; and use the same locale (`LC_ALL=C`) afterwards, otherwise the sort order may not match."
+  },
+  {
+   "id": "patch",
+   "title": "Create and apply patches: patch",
+   "body": [
+    "`diff -u old new > change.patch` writes the difference to a file. Someone else applies it with `patch` to their old copy: `patch work.txt < change.patch`. For directory trees you create `diff -ruN old/ new/ > all.patch`; when applying, `-p1` strips the first path component (`old/`), `-p0` uses paths unchanged.",
+    "Before applying, try `patch --dry-run < change.patch`: it changes nothing and tells you whether the hunks fit. On failures a `.rej` file is created. `patch -R < change.patch` undoes the patch.",
+    "A patch relies on context lines; if the file was changed elsewhere in the meantime, applying can fail or shift (`fuzz`)."
+   ],
+   "commands": [
+    {
+     "cmd": "diff -u > file.patch",
+     "what": "Writes the difference in unified format to a patch file.",
+     "where": "To hand a change to someone else.",
+     "why": "Only the changed lines are transported, not the whole file.",
+     "example": "diff -u v1.txt v2.txt > change.patch",
+     "nosim": true
+    },
+    {
+     "cmd": "patch",
+     "what": "Applies the changes in a patch file to a file.",
+     "where": "When working a received patch into your copy.",
+     "why": "Applies only the difference instead of replacing the whole file.",
+     "example": "patch work.txt < change.patch",
+     "nosim": true
+    },
+    {
+     "cmd": "patch --dry-run",
+     "what": "Tests the patch without actually applying it.",
+     "where": "Before patching important files.",
+     "why": "You spot mismatches without changing anything.",
+     "example": "patch --dry-run work.txt < change.patch",
+     "nosim": true
+    },
+    {
+     "cmd": "patch -R",
+     "what": "Reverses the patch (undoes it).",
+     "where": "When an applied patch causes problems.",
+     "why": "Restores the state before the patch.",
+     "example": "patch -R work.txt < change.patch",
+     "nosim": true
+    }
+   ],
+   "tip": "If the patch is for a directory tree, run it from the project root and try `--dry-run` first.",
+   "warn": "`patch` modifies files in place. For important files make a backup first with `cp work.txt work.txt.orig`, and on your VM take a snapshot first.",
+   "danger": "Do not apply patches to the root directory (`/`) or system configuration; work only in your practice folder. A wrong `-p` value changes the wrong files."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Compare `v1.txt` and `v2.txt` with `diff v1.txt v2.txt`.",
+   "hint": "The simulator has no diff; typing the command is enough. You will see the real output on your VM."
+  },
+  "t02": {
+   "text": "Compare the same files in unified format: `diff -u v1.txt v2.txt`.",
+   "hint": "`-u` means unified; the output contains `@@` hunks."
+  },
+  "t03": {
+   "text": "Compare byte by byte with `cmp v1.txt v2.txt`.",
+   "hint": "cmp reports the byte and line number of the first difference."
+  },
+  "t04": {
+   "text": "Copy `v1.txt` with `cp v1.txt v1.bak` and verify they are identical with `diff -q v1.txt v1.bak`.",
+   "hint": "If identical, `diff -q` prints nothing and the exit code is 0."
+  },
+  "t05": {
+   "text": "Compare the directories `dir_a` and `dir_b` with `diff -rq dir_a dir_b`.",
+   "hint": "`-r` recursive, `-q` short summary. `-r dir_a dir_b` is accepted too."
+  },
+  "t06": {
+   "text": "`list_b.txt` is not sorted. For `comm`, create a sorted copy with `sort list_b.txt > sorted_b.txt`.",
+   "hint": "The redirect `>` writes the sorted output into a new file."
+  },
+  "t07": {
+   "text": "Use `comm -12 list_a.txt sorted_b.txt` to show the lines present in both lists.",
+   "hint": "`-12` hides columns 1 and 2; the common column remains."
+  },
+  "t08": {
+   "text": "Predict, then run: `sort list_a.txt list_b.txt | uniq -d`. Which names appear?",
+   "hint": "`uniq -d` prints only lines that occur more than once."
+  },
+  "t09": {
+   "text": "Predict, then run: `sort list_a.txt list_b.txt | uniq -u`. Which names appear?",
+   "hint": "`-u` prints only lines that occur once: names that are in only one of the two lists."
+  },
+  "t10": {
+   "text": "Predict: what does `grep -q debug v1.txt ; echo $?` print? Run it to check.",
+   "hint": "`grep -q` returns 0 if found, 1 if not; `v1.txt` contains no debug."
+  },
+  "t11": {
+   "text": "Debug: `win.txt` looks different on every line because it has Windows line endings (`\\r`). Create a clean copy with `tr -d '\\r' < win.txt > fixed.txt`.",
+   "hint": "`tr -d` deletes the given character; redirect input with `<`, output with `>`."
+  },
+  "t12": {
+   "text": "Mini project: copy with `cp v1.txt work.txt`, create a patch with `diff -u v1.txt v2.txt > change.patch`, then apply it with `patch work.txt < change.patch`.",
+   "hint": "Three commands in order; diff and patch do not run in the simulator, try them on your VM."
+  },
+  "t13": {
+   "text": "Challenge: write only the names that are in `list_a.txt` (not in `list_b.txt`) to the file `only_a.txt`. Without `comm`; hint: pass `list_b.txt` twice.",
+   "hint": "`sort list_a.txt list_b.txt list_b.txt | uniq -u > only_a.txt`: names from b occur at least twice, names only in a occur once."
+  },
+  "t14": {
+   "text": "Copy with `cp v1.txt same.txt`, run `cmp -s v1.txt same.txt` and type `echo $?` right after.",
+   "hint": "In one line this also works: `cmp -s v1.txt same.txt ; echo $?`."
+  },
+  "t15": {
+   "text": "Predict, then run: `cut -d= -f1 v1.txt`. Which keys are listed?",
+   "hint": "`-d=` is the delimiter, `-f1` the first field: everything before the `=`."
+  },
+  "t16": {
+   "text": "TICKET #3701 — Change review: back up `v2.txt` as `v2.bak`, save the difference to `v1.txt` with `diff -u v1.txt v2.txt > review.patch`, and write `review done` into `report.txt`.",
+   "hint": "Three steps: `cp`, `diff -u ... > review.patch`, `echo review done > report.txt`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "With which exit code does `diff a b` end when the files differ?",
+   "options": [
+    "0",
+    "1",
+    "2",
+    "127"
+   ],
+   "explain": "0 identical, 1 differences, 2 trouble. A difference is not an error, but it is not zero either."
+  },
+  "q2": {
+   "q": "What does `comm` need from its input files to work correctly?",
+   "options": [
+    "That they are sorted",
+    "Root privileges",
+    "The same size",
+    "That they are binary"
+   ],
+   "explain": "comm expects sorted input; otherwise the result is wrong. Apply `sort` first."
+  },
+  "q3": {
+   "q": "What does a line starting with `+` mean in unified diff output?",
+   "options": [
+    "The line existed only in the old file",
+    "The line is a comment",
+    "The line is only in the new file (added)",
+    "The line was moved elsewhere"
+   ],
+   "explain": "`-` was removed from the old file, `+` added to the new one; lines starting with a space are context."
+  },
+  "q4": {
+   "q": "Which command undoes an applied patch?",
+   "options": [
+    "diff -R change.patch",
+    "patch -u change.patch",
+    "cmp -r change.patch",
+    "patch -R < change.patch"
+   ],
+   "explain": "`patch -R` reverses the patch; the patch file is read from standard input."
+  }
+ },
+ "summary": [
+  "`diff -u old new` shows the change; exit code 0 same, 1 different, 2 trouble.",
+  "`diff -rq` checks directories, `cmp` compares bytes, `sha256sum -c` verifies content integrity.",
+  "`comm` works only on sorted input; alternatives: `sort | uniq -d` (common) and `uniq -u` (unique).",
+  "Create a patch with `diff -u > change.patch`, test with `patch --dry-run`, apply with `patch`, undo with `patch -R`.",
+  "Pitfalls: unsorted `comm`, CRLF line endings, `diff` on binary files."
+ ],
+ "glossary": [
+  {
+   "term": "hunk",
+   "meaning": "A change block in unified diff that starts with `@@` and includes context lines."
+  },
+  {
+   "term": "unified diff",
+   "meaning": "The `diff -u` format: `---`/`+++` header, `@@` hunks, `+`/`-` lines."
+  },
+  {
+   "term": "patch",
+   "meaning": "A file holding diff output; the `patch` command applies it to files."
+  },
+  {
+   "term": "exit code",
+   "meaning": "A command's final status, read with `$?`. For diff: 0 same, 1 different, 2 trouble."
+  },
+  {
+   "term": "checksum",
+   "meaning": "A hash value computed from content; if the content changes, the value changes."
+  },
+  {
+   "term": "CRLF",
+   "meaning": "Windows line ending (`\\r\\n`); Linux uses only `\\n`."
+  }
+ ],
+ "vm": {
+  "intro": "Run the following commands on your own VM in the `~/lab` folder. They only create files in this practice folder and do not touch system settings.",
+  "tasks": {
+   "v01": {
+    "title": "diff: normal and unified",
+    "text": "Create two small files and see the difference in both formats. Paste the unified output.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab && cd ~/lab\nprintf 'port=80\\nhost=linux-lab\\nmode=prod\\n' > v1.txt\nprintf 'port=8080\\nhost=linux-lab\\nmode=prod\\ndebug=on\\n' > v2.txt\ndiff v1.txt v2.txt\ndiff -u v1.txt v2.txt",
+      "expected": "1c1\n< port=80\n---\n> port=8080\n3a4\n> debug=on\n--- v1.txt\t2026-11-12 10:00:00\n+++ v2.txt\t2026-11-12 10:00:01\n@@ -1,3 +1,4 @@\n-port=80\n+port=8080\n host=linux-lab\n mode=prod\n+debug=on"
+     }
+    ],
+    "differs": [
+     "Date and time will differ; what matters are the `@@`, `-` and `+` lines.",
+     "If there is no output, the files are identical; re-check the `printf` lines."
+    ]
+   },
+   "v02": {
+    "title": "Exit codes",
+    "text": "See `diff -q`, `cmp -s` and the exit codes. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ndiff -q v1.txt v2.txt; echo \"exit=$?\"\ncp v1.txt same.txt\ncmp -s v1.txt same.txt; echo \"exit=$?\"\ndiff v1.txt missing.txt; echo \"exit=$?\"",
+      "expected": "Files v1.txt and v2.txt differ\nexit=1\nexit=0\ndiff: missing.txt: No such file or directory\nexit=2"
+     }
+    ],
+    "differs": [
+     "If your system language differs, the message may be translated; the `exit=` values must match.",
+     "If you see `exit=0` on the first line, `v2.txt` was not created; run v01 again."
+    ]
+   },
+   "v03": {
+    "title": "comm and uniq",
+    "text": "Compare two name lists. First see the warning for unsorted `comm`, then the right way.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nprintf 'alice\\nbob\\ncarol\\ndave\\n' > list_a.txt\nprintf 'erin\\nbob\\ncarol\\n' > list_b.txt\ncomm -12 list_a.txt list_b.txt\nsort list_b.txt > sorted_b.txt\ncomm -12 list_a.txt sorted_b.txt\ncomm -23 list_a.txt sorted_b.txt\nsort list_a.txt list_b.txt | uniq -d\ndiff <(sort list_a.txt) <(sort list_b.txt)",
+      "expected": "comm: file 2 is not in sorted order\nbob\ncarol\nalice\ndave\nbob\ncarol\n1d0\n< alice\n..."
+     }
+    ],
+    "differs": [
+     "With unsorted input the `comm` warning may not appear or the output may be incomplete; the result is undefined, so always `sort` first.",
+     "If `diff <(...)` gives a `syntax error`, your shell is not bash; type `bash` and try again."
+    ]
+   },
+   "v04": {
+    "title": "Create, test, apply and undo a patch",
+    "text": "Turn a copy of `v1.txt` into `v2.txt` with a patch and undo it. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ndiff -u v1.txt v2.txt > change.patch\ncp v1.txt work.txt\npatch --dry-run work.txt < change.patch\npatch work.txt < change.patch\ncat work.txt\npatch -R work.txt < change.patch\ncat work.txt",
+      "expected": "checking file work.txt\npatching file work.txt\nport=8080\nhost=linux-lab\nmode=prod\ndebug=on\npatching file work.txt\nport=80\nhost=linux-lab\nmode=prod"
+     }
+    ],
+    "differs": [
+     "If you see `patch: command not found`: on Ubuntu `sudo apt install patch`, on Rocky/Alma `sudo dnf install patch`.",
+     "If `--dry-run` is not supported (very old version), skip that line.",
+     "If you see `Hunk #1 FAILED`, `work.txt` is not identical to `v1.txt`; start over with `cp v1.txt work.txt`."
+    ]
+   },
+   "v05": {
+    "title": "Checksums",
+    "text": "Compute hashes, then modify a file and catch the corruption with `sha256sum -c`. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nsha256sum v1.txt same.txt\nsha256sum v1.txt > sums.txt\nsha256sum -c sums.txt\necho 'x' >> v1.txt\nsha256sum -c sums.txt",
+      "expected": "<64 hex characters>  v1.txt\n<64 hex characters>  same.txt\nv1.txt: OK\nv1.txt: FAILED\nsha256sum: WARNING: 1 computed checksum did NOT match"
+     }
+    ],
+    "differs": [
+     "The first two hashes must be identical (`v1.txt` and `same.txt` have the same content).",
+     "On a non-English system the warning text may be translated; `OK` and `FAILED` stay the same.",
+     "If `same.txt` is missing, run the step from v02."
+    ]
+   }
+  }
+ }
+}

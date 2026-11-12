@@ -1,0 +1,457 @@
+{
+ "title": "Karşılaştırma: diff, cmp, comm, patch",
+ "lead": "İki dosyayı, iki dizini ve iki listeyi karşılaştır; farkı oku, yama (patch) üret ve uygula, çıkış kodlarını betiklerde kullan.",
+ "objectives": [
+  "`diff` çıktısını (normal ve `-u` unified) okur, `@@` bloklarını ve `+`/`-` satırlarını yorumlarsın.",
+  "`diff -r`, `diff -q`, `cmp` ve `sha256sum -c` ile dizinleri ve dosyaları hızlıca karşılaştırırsın.",
+  "`comm` ile sıralı listeleri, `sort | uniq -d/-u` ile ortak ve tekil satırları bulursun.",
+  "`diff -u` ile yama üretir, `patch` ile uygular ve `-R` ile geri alırsın; çıkış kodlarına (0/1/2) bakarsın."
+ ],
+ "sections": [
+  {
+   "id": "diff",
+   "title": "diff: satır satır fark",
+   "body": [
+    "`diff old new` iki metin dosyasını satır satır karşılaştırır ve eskiyi yeniye çevirmek için gereken değişiklikleri yazar. Normal çıktıda `2c2` gibi bir komut satırı görürsün (2. satır değişti), `<` ilk dosyadan, `>` ikinci dosyadan gelen satırdır.",
+    "Pratikte **unified** biçim (`-u`) daha çok kullanılır: `---` ilk, `+++` ikinci dosyadır; `@@ -1,3 +1,4 @@` bloğu (hunk) ilk dosyada 1. satırdan 3 satır, ikincide 1. satırdan 4 satır demektir. `-` ile başlayan satır yalnızca eskide, `+` ile başlayan yalnızca yenide vardır; boşlukla başlayan satırlar bağlamdır. Git ve yama sistemleri bu biçimi kullanır.",
+    "**Çıkış kodu:** `0` dosyalar aynı, `1` fark var, `2` hata (dosya yok, okunamadı). Yani `diff` farkı bulduğunda 'başarısız' sayılır; bu hata değildir. Bu simülatörde `diff`, `cmp`, `comm` ve `patch` çalışmaz; komutları kendi VM'inde dene, simülatör burada yalnızca komutu yazdığını ve dosya hazırlığını denetler."
+   ],
+   "commands": [
+    {
+     "cmd": "diff",
+     "what": "İki dosyanın farkını normal biçimde (`<` ve `>` satırlarıyla) gösterir.",
+     "where": "Yapılandırma dosyasının iki sürümünü karşılaştırırken.",
+     "why": "Neyin değiştiğini tüm dosyayı okumadan görürsün.",
+     "example": "diff v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -u",
+     "what": "Unified biçim: `---`/`+++` başlıkları, `@@` blokları ve `+`/`-` satırları.",
+     "where": "Değişikliği paylaşırken, kod incelemede, yama üretirken.",
+     "why": "Bağlam satırları sayesinde değişikliğin nerede olduğu net olur.",
+     "example": "diff -u v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -q",
+     "what": "Yalnızca 'Files ... differ' der veya hiçbir şey yazmaz.",
+     "where": "Aynı mı değil mi sorusu yeterliyken; betiklerde.",
+     "why": "Uzun fark çıktısı üretmez, çıkış kodu yine 0/1 olur.",
+     "example": "diff -q v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -y",
+     "what": "Yan yana iki sütun gösterir; farklı satırları `|`, `<`, `>` ile işaretler.",
+     "where": "Kısa dosyaları gözle karşılaştırırken.",
+     "why": "Değişikliği iki sürümün yan yana hâlinde görürsün.",
+     "example": "diff -y v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -w",
+     "what": "Boşluk farklarını (girinti, sondaki boşluk) yok sayar.",
+     "where": "Biçimlendirme değişmiş ama içerik aynı olabilecek dosyalarda.",
+     "why": "Gürültüyü atar, gerçek içerik farkı kalır.",
+     "example": "diff -w v1.txt v2.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Hangisi 'eski', hangisi 'yeni'? Sıra önemlidir: `diff old new`. Sırayı değiştirirsen `+` ve `-` yer değiştirir.",
+   "warn": "Windows'ta oluşmuş dosyalar satır sonunda `\\r` (CRLF) taşır; her satır farklı görünür. `tr -d '\\r' < win.txt > fixed.txt` ile temizle ya da `diff --strip-trailing-cr` kullan."
+  },
+  {
+   "id": "dirs",
+   "title": "Dizinleri karşılaştırma",
+   "body": [
+    "`diff -r dir_a dir_b` iki dizin ağacını özyinelemeli karşılaştırır. Yalnızca birinde olan dosya için `Only in dir_a: extra.txt` satırı, içeriği farklı dosyalar için fark çıktısı verir. `-q` (veya `-rq`) ile sadece hangi dosyaların farklı olduğunu görürsün; çok dosyalı yedek denetiminde en kullanışlısı budur.",
+    "Komut çıktısını başka bir komutun çıktısıyla da kıyaslayabilirsin: `diff <(sort a.txt) <(sort b.txt)` yazımı (process substitution, **bash** özelliği) iki komutun çıktısını geçici dosya gibi verir. Basit `sh` ile çalışmaz."
+   ],
+   "commands": [
+    {
+     "cmd": "diff -r",
+     "what": "İki dizini alt dizinleriyle birlikte karşılaştırır.",
+     "where": "Proje klasörünün iki sürümünü veya yedeği kıyaslarken.",
+     "why": "Eksik, fazla ve değişmiş dosyaları tek seferde görürsün.",
+     "example": "diff -r dir_a dir_b",
+     "nosim": true
+    },
+    {
+     "cmd": "diff -rq",
+     "what": "Yalnızca farklı olan veya tek tarafta bulunan dosyaları listeler.",
+     "where": "Yedek doğrularken, büyük ağaçlarda.",
+     "why": "Kısa özet verir; ayrıntıya sonra tek dosya için bakarsın.",
+     "example": "diff -rq dir_a dir_b",
+     "nosim": true
+    },
+    {
+     "cmd": "diff <( )",
+     "what": "İki komutun çıktısını dosya gibi karşılaştırır (bash).",
+     "where": "Sıralanmış listeleri veya iki ortamın çıktısını kıyaslarken.",
+     "why": "Ara dosya oluşturmadan karşılaştırırsın.",
+     "example": "diff <(sort list_a.txt) <(sort list_b.txt)",
+     "nosim": true
+    }
+   ],
+   "tip": "Yön önemli değil ama okuma kolaylığı için hep 'referans' dizini ilk yaz."
+  },
+  {
+   "id": "bytes",
+   "title": "cmp ve sağlama toplamı",
+   "body": [
+    "`cmp` dosyaları **bayt bayt** karşılaştırır; ilk farkın bayt ve satır numarasını söyler. İkili (binary) dosyalarda `diff` yalnızca 'Binary files differ' der; `cmp` ise tam yeri gösterir. `cmp -s` hiçbir şey yazmaz, yalnızca çıkış kodu verir (0 aynı, 1 farklı, 2 hata). Betikte `if cmp -s a b; then echo aynı; fi` kalıbıyla kullanılır.",
+    "Dosyalar farklı makinelerdeyse içeriği doğrudan kıyaslayamazsın; **sağlama toplamı** (checksum) hesapla. `sha256sum notes.txt` bir özet üretir; aynı içerik aynı özeti verir. `sha256sum -c sums.txt` kayıtlı özetleri yeniden hesaplayıp `OK` veya `FAILED` yazar. İndirilen dosyanın bozulmadığını bu şekilde doğrularsın. `md5sum` eskidir; güvenlik için `sha256sum` kullan."
+   ],
+   "commands": [
+    {
+     "cmd": "cmp",
+     "what": "İki dosyayı bayt bayt karşılaştırır, ilk farkın konumunu yazar.",
+     "where": "İkili dosyalarda ve kopya doğrulamada.",
+     "why": "Metin olmayan dosyalarda da kesin sonuç verir.",
+     "example": "cmp v1.txt v2.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cmp -s",
+     "what": "Sessiz karşılaştırma; sonuç yalnızca çıkış kodundadır.",
+     "where": "Betiklerde `if` koşulu olarak.",
+     "why": "Çıktı üretmeden 'aynı mı?' kararı verir.",
+     "example": "cmp -s v1.txt v1.bak; echo $?",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum",
+     "what": "Dosyanın SHA-256 özetini hesaplar.",
+     "where": "İndirme ve yedek doğrulamada.",
+     "why": "İki dosyayı yan yana tutmadan içeriklerini karşılaştırabilirsin.",
+     "example": "sha256sum v1.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum -c",
+     "what": "Kayıtlı özet listesini denetler; her dosya için `OK` veya `FAILED` yazar.",
+     "where": "Dağıtım ISO'su veya yedek doğrularken.",
+     "why": "Bozulma veya değişiklik olup olmadığını otomatik gösterir.",
+     "example": "sha256sum -c sums.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Çıkış kodunu görmek için komuttan hemen sonra `echo $?` yaz; araya başka komut girerse değer kaybolur."
+  },
+  {
+   "id": "lists",
+   "title": "Listeleri karşılaştırma: comm, uniq",
+   "body": [
+    "`comm a b` **sıralı** iki dosyayı üç sütunda gösterir: 1. sütun yalnızca a'da, 2. yalnızca b'de, 3. her ikisinde olan satırlar. `-1`, `-2`, `-3` ilgili sütunu gizler: `comm -12` ortak satırlar, `comm -23` yalnızca a'dakiler, `comm -13` yalnızca b'dekiler demektir.",
+    "**Tuzak:** girdi sıralı değilse `comm` yanlış sonuç verir ve 'file 2 is not in sorted order' uyarısı yazar. Önce `sort` uygula: `sort list_b.txt > sorted_b.txt`.",
+    "`comm` yoksa `sort a b | uniq -d` her iki listede de bulunan (tekrarlanan) satırları, `sort a b | uniq -u` yalnızca bir kez geçenleri verir. Listelerin her biri kendi içinde tekrarsız olmalı; aksi hâlde tekrar sayımı bozulur. Bu iki komut simülatörde de çalışır."
+   ],
+   "commands": [
+    {
+     "cmd": "comm",
+     "what": "Sıralı iki dosyayı üç sütunda karşılaştırır.",
+     "where": "Kullanıcı, paket veya IP listelerini kıyaslarken.",
+     "why": "Ortak ve tekil satırları tek komutta ayırır.",
+     "example": "comm list_a.txt sorted_b.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "comm -12",
+     "what": "Yalnızca iki dosyada da bulunan satırları gösterir.",
+     "where": "Kesişim gerektiğinde.",
+     "why": "1. ve 2. sütunları gizler, ortak olan kalır.",
+     "example": "comm -12 list_a.txt sorted_b.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "comm -23",
+     "what": "Yalnızca ilk dosyada olan satırları gösterir.",
+     "where": "'Bende var, sende yok' sorgusunda.",
+     "why": "Eksik veya fazla kayıtları bulur.",
+     "example": "comm -23 list_a.txt sorted_b.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "sort | uniq -d",
+     "what": "Birleştirilmiş sıralı satırlardan tekrarlananları (ortak olanları) yazar.",
+     "where": "`comm` yokken veya hızlı kesişimde.",
+     "why": "Her yerde bulunan temel araçlarla çalışır.",
+     "example": "sort list_a.txt list_b.txt | uniq -d"
+    },
+    {
+     "cmd": "sort | uniq -u",
+     "what": "Yalnızca bir kez geçen satırları yazar (simetrik fark).",
+     "where": "İki listede yalnızca birinde olanları ararken.",
+     "why": "Ortak olanları eler.",
+     "example": "sort list_a.txt list_b.txt | uniq -u"
+    }
+   ],
+   "tip": "Hızlı kural: `comm` için önce `sort`; sıralamadan sonra bile aynı yerel ayar (`LC_ALL=C`) kullan, yoksa sıralama uyuşmayabilir."
+  },
+  {
+   "id": "patch",
+   "title": "Yama üret ve uygula: patch",
+   "body": [
+    "`diff -u old new > change.patch` farkı dosyaya yazar. Başkası bu dosyayı `patch` ile uygulayarak kendi eski kopyasını yeniye çevirir: `patch work.txt < change.patch`. Dizin ağaçları için `diff -ruN old/ new/ > all.patch` üretilir; uygularken `-p1` yol başındaki ilk bileşeni (`old/`) atar, `-p0` yolları olduğu gibi kullanır.",
+    "Uygulamadan önce `patch --dry-run < change.patch` ile denemek iyi alışkanlıktır: hiçbir şeyi değiştirmez, hunk'ların uyup uymadığını söyler. Hata olursa `.rej` dosyası oluşur. `patch -R < change.patch` yamayı geri alır.",
+    "Yama bağlam satırlarına dayanır; dosya o arada başka yerden değiştiyse uygulama reddedilebilir veya kayar (`fuzz`)."
+   ],
+   "commands": [
+    {
+     "cmd": "diff -u > file.patch",
+     "what": "Farkı unified biçimde bir yama dosyasına yazar.",
+     "where": "Değişikliği başkasına göndermek için.",
+     "why": "Yalnızca değişen satırlar taşınır; dosyanın tamamı değil.",
+     "example": "diff -u v1.txt v2.txt > change.patch",
+     "nosim": true
+    },
+    {
+     "cmd": "patch",
+     "what": "Yama dosyasındaki değişiklikleri dosyaya uygular.",
+     "where": "Aldığın yamayı kopyana işlerken.",
+     "why": "Dosyanın tamamını değiştirmeden yalnızca farkı uygular.",
+     "example": "patch work.txt < change.patch",
+     "nosim": true
+    },
+    {
+     "cmd": "patch --dry-run",
+     "what": "Yamayı gerçekten uygulamadan dener.",
+     "where": "Önemli bir dosyada yama uygulamadan önce.",
+     "why": "Uyumsuzluğu değişiklik yapmadan yakalarsın.",
+     "example": "patch --dry-run work.txt < change.patch",
+     "nosim": true
+    },
+    {
+     "cmd": "patch -R",
+     "what": "Yamayı tersine çevirir (geri alır).",
+     "where": "Uygulanan yama sorun çıkardığında.",
+     "why": "Dosyayı yama öncesi hâline getirir.",
+     "example": "patch -R work.txt < change.patch",
+     "nosim": true
+    }
+   ],
+   "tip": "Yama bir dizin ağacı içinse proje kökünde çalıştır ve önce `--dry-run` dene.",
+   "warn": "`patch` dosyaları yerinde değiştirir. Önemli dosyalarda önce `cp work.txt work.txt.orig` ile yedek al, VM'inde de önce snapshot al.",
+   "danger": "Kök dizin (`/`) veya sistem yapılandırması üzerinde yama uygulama; yalnızca kendi deneme klasöründe çalış. Yanlış `-p` değeri yanlış dosyaları değiştirir."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`v1.txt` ve `v2.txt` dosyalarını `diff v1.txt v2.txt` ile karşılaştır.",
+   "hint": "Simülatörde diff yoktur; komutu yazman yeterli, gerçek çıktıyı VM'inde göreceksin."
+  },
+  "t02": {
+   "text": "Aynı iki dosyayı unified biçimde karşılaştır: `diff -u v1.txt v2.txt`.",
+   "hint": "`-u` unified demektir; çıktıda `@@` blokları olur."
+  },
+  "t03": {
+   "text": "`cmp v1.txt v2.txt` ile bayt bayt karşılaştır.",
+   "hint": "cmp ilk farkın bayt ve satır numarasını yazar."
+  },
+  "t04": {
+   "text": "`v1.txt` dosyasını `cp v1.txt v1.bak` ile kopyala, sonra `diff -q v1.txt v1.bak` ile aynı olduklarını doğrula.",
+   "hint": "Aynıysa `diff -q` hiçbir şey yazmaz ve çıkış kodu 0'dır."
+  },
+  "t05": {
+   "text": "`dir_a` ve `dir_b` dizinlerini `diff -rq dir_a dir_b` ile karşılaştır.",
+   "hint": "`-r` özyinelemeli, `-q` kısa özet. `-r dir_a dir_b` de kabul edilir."
+  },
+  "t06": {
+   "text": "`list_b.txt` sıralı değil. `comm` için `sort list_b.txt > sorted_b.txt` ile sıralı kopyasını oluştur.",
+   "hint": "Yönlendirme `>` sıralı çıktıyı yeni dosyaya yazar."
+  },
+  "t07": {
+   "text": "`comm -12 list_a.txt sorted_b.txt` ile iki listede ortak olan satırları iste.",
+   "hint": "`-12` birinci ve ikinci sütunu gizler; ortak sütun kalır."
+  },
+  "t08": {
+   "text": "Tahmin et, sonra çalıştır: `sort list_a.txt list_b.txt | uniq -d`. Hangi isimler çıkar?",
+   "hint": "`uniq -d` yalnızca birden fazla geçen satırı yazar."
+  },
+  "t09": {
+   "text": "Tahmin et, sonra çalıştır: `sort list_a.txt list_b.txt | uniq -u`. Hangi isimler çıkar?",
+   "hint": "`-u` yalnızca bir kez geçenleri yazar: iki listeden yalnızca birinde olanlar."
+  },
+  "t10": {
+   "text": "Tahmin et: `grep -q debug v1.txt ; echo $?` ne yazar? Çalıştırıp doğrula.",
+   "hint": "`grep -q` bulursa 0, bulamazsa 1 verir; `v1.txt` içinde debug yok."
+  },
+  "t11": {
+   "text": "Hata ayıkla: `win.txt` her satırda farklı görünüyor çünkü Windows satır sonu (`\\r`) taşıyor. `tr -d '\\r' < win.txt > fixed.txt` ile temiz kopya üret.",
+   "hint": "`tr -d` verilen karakteri siler; girdi `<`, çıktı `>` ile yönlendirilir."
+  },
+  "t12": {
+   "text": "Mini proje: `cp v1.txt work.txt` ile kopya yap, `diff -u v1.txt v2.txt > change.patch` ile yama üret, sonra `patch work.txt < change.patch` ile uygula.",
+   "hint": "Üç komut sırayla yazılmalı; diff ve patch simülatörde çalışmaz, VM'inde dene."
+  },
+  "t13": {
+   "text": "Meydan okuma: yalnızca `list_a.txt` içinde olan isimleri (`list_b.txt`'de olmayanları) `only_a.txt` dosyasına yaz. `comm` kullanma; ipucu: `list_b.txt`'yi iki kez ver.",
+   "hint": "`sort list_a.txt list_b.txt list_b.txt | uniq -u > only_a.txt`: b'dekiler en az iki kez geçer, a'ya özgüler bir kez."
+  },
+  "t14": {
+   "text": "`cp v1.txt same.txt` ile kopya yap, `cmp -s v1.txt same.txt` çalıştır ve hemen ardından `echo $?` yaz.",
+   "hint": "Tek satırda `cmp -s v1.txt same.txt ; echo $?` da olur."
+  },
+  "t15": {
+   "text": "Tahmin et, sonra çalıştır: `cut -d= -f1 v1.txt`. Hangi anahtarlar listelenir?",
+   "hint": "`-d=` ayraç, `-f1` birinci alan: `=` işaretinden öncesi."
+  },
+  "t16": {
+   "text": "TICKET #3701 — Değişiklik incelemesi: `v2.txt` için `v2.bak` yedeğini al, `v1.txt` ile farkı `diff -u v1.txt v2.txt > review.patch` olarak kaydet ve `report.txt` dosyasına `review done` yaz.",
+   "hint": "Üç adım: `cp`, `diff -u ... > review.patch`, `echo review done > report.txt`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`diff a b` iki dosya farklıysa hangi çıkış koduyla biter?",
+   "options": [
+    "0",
+    "1",
+    "2",
+    "127"
+   ],
+   "explain": "0 aynı, 1 fark var, 2 hata. Fark bulmak hata değildir ama sıfır da değildir."
+  },
+  "q2": {
+   "q": "`comm` doğru çalışmak için girdi dosyalarında neye ihtiyaç duyar?",
+   "options": [
+    "Sıralı olmalarına",
+    "Root yetkisine",
+    "Aynı boyutta olmalarına",
+    "İkili (binary) olmalarına"
+   ],
+   "explain": "comm sıralı girdi bekler; sırasızsa yanlış sonuç verir. Önce `sort` uygula."
+  },
+  "q3": {
+   "q": "Unified diff çıktısında `+` ile başlayan satır ne anlama gelir?",
+   "options": [
+    "Satır yalnızca eski dosyada vardı",
+    "Satır bir yorumdur",
+    "Satır yalnızca yeni dosyada var (eklendi)",
+    "Satır başka yere taşındı"
+   ],
+   "explain": "`-` eski dosyadan silinen, `+` yeni dosyaya eklenen satırdır; boşlukla başlayanlar bağlamdır."
+  },
+  "q4": {
+   "q": "Uygulanmış bir yamayı geri almak için hangi komut kullanılır?",
+   "options": [
+    "diff -R change.patch",
+    "patch -u change.patch",
+    "cmp -r change.patch",
+    "patch -R < change.patch"
+   ],
+   "explain": "`patch -R` yamayı tersine çevirir; yama dosyası standart girdiden okunur."
+  }
+ },
+ "summary": [
+  "`diff -u old new` değişikliği gösterir; çıkış kodu 0 aynı, 1 fark, 2 hata.",
+  "`diff -rq` dizinleri, `cmp` bayt düzeyinde, `sha256sum -c` içerik bütünlüğünü denetler.",
+  "`comm` yalnızca sıralı girdide çalışır; alternatif `sort | uniq -d` (ortak) ve `uniq -u` (tekil).",
+  "`diff -u > change.patch` ile yama üret, `patch --dry-run` ile dene, `patch` ile uygula, `patch -R` ile geri al.",
+  "Tuzaklar: sırasız `comm`, CRLF satır sonları, ikili dosyalarda `diff`."
+ ],
+ "glossary": [
+  {
+   "term": "hunk",
+   "meaning": "Unified diff içinde `@@` ile başlayan, bağlam satırlarıyla birlikte tek bir değişiklik bloğu."
+  },
+  {
+   "term": "unified diff",
+   "meaning": "`diff -u` biçimi: `---`/`+++` başlıkları, `@@` blokları, `+`/`-` satırları."
+  },
+  {
+   "term": "yama (patch)",
+   "meaning": "Bir diff çıktısını taşıyan dosya; `patch` komutu onu dosyalara uygular."
+  },
+  {
+   "term": "çıkış kodu",
+   "meaning": "Komutun bitiş durumu; `$?` ile okunur. diff için 0 aynı, 1 farklı, 2 hata."
+  },
+  {
+   "term": "sağlama toplamı (checksum)",
+   "meaning": "İçerikten hesaplanan özet değer; içerik değişirse özet de değişir."
+  },
+  {
+   "term": "CRLF",
+   "meaning": "Windows satır sonu (`\\r\\n`); Linux yalnızca `\\n` kullanır."
+  }
+ ],
+ "vm": {
+  "intro": "Aşağıdaki komutları kendi VM'inde `~/lab` klasöründe çalıştır. Hepsi yalnızca bu deneme klasöründe dosya oluşturur; sistem ayarlarına dokunmaz.",
+  "tasks": {
+   "v01": {
+    "title": "diff: normal ve unified",
+    "text": "İki küçük dosya oluştur ve farkı iki biçimde gör. Unified çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab && cd ~/lab\nprintf 'port=80\\nhost=linux-lab\\nmode=prod\\n' > v1.txt\nprintf 'port=8080\\nhost=linux-lab\\nmode=prod\\ndebug=on\\n' > v2.txt\ndiff v1.txt v2.txt\ndiff -u v1.txt v2.txt",
+      "expected": "1c1\n< port=80\n---\n> port=8080\n3a4\n> debug=on\n--- v1.txt\t2026-11-12 10:00:00\n+++ v2.txt\t2026-11-12 10:00:01\n@@ -1,3 +1,4 @@\n-port=80\n+port=8080\n host=linux-lab\n mode=prod\n+debug=on"
+     }
+    ],
+    "differs": [
+     "Tarih ve saatler farklı olacak; önemli olan `@@`, `-` ve `+` satırlarıdır.",
+     "Hiç çıktı yoksa dosyalar aynıdır; `printf` satırlarını tekrar kontrol et."
+    ]
+   },
+   "v02": {
+    "title": "Çıkış kodları",
+    "text": "`diff -q`, `cmp -s` ve çıkış kodlarını gör. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ndiff -q v1.txt v2.txt; echo \"exit=$?\"\ncp v1.txt same.txt\ncmp -s v1.txt same.txt; echo \"exit=$?\"\ndiff v1.txt missing.txt; echo \"exit=$?\"",
+      "expected": "Files v1.txt and v2.txt differ\nexit=1\nexit=0\ndiff: missing.txt: No such file or directory\nexit=2"
+     }
+    ],
+    "differs": [
+     "Sistemin dili farklıysa mesaj çevrilmiş olabilir; `exit=` değerleri aynı olmalı.",
+     "İlk satırda `exit=0` görürsen `v2.txt` oluşmamıştır; v01'i tekrar çalıştır."
+    ]
+   },
+   "v03": {
+    "title": "comm ve uniq",
+    "text": "İki isim listesini karşılaştır. Önce sırasız `comm` uyarısını gör, sonra doğru yolu uygula.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nprintf 'alice\\nbob\\ncarol\\ndave\\n' > list_a.txt\nprintf 'erin\\nbob\\ncarol\\n' > list_b.txt\ncomm -12 list_a.txt list_b.txt\nsort list_b.txt > sorted_b.txt\ncomm -12 list_a.txt sorted_b.txt\ncomm -23 list_a.txt sorted_b.txt\nsort list_a.txt list_b.txt | uniq -d\ndiff <(sort list_a.txt) <(sort list_b.txt)",
+      "expected": "comm: file 2 is not in sorted order\nbob\ncarol\nalice\ndave\nbob\ncarol\n1d0\n< alice\n..."
+     }
+    ],
+    "differs": [
+     "Sırasız girdide `comm` uyarısı çıkmayabilir veya çıktı eksik olabilir; sonuç tanımsızdır, bu yüzden her zaman önce `sort` kullan.",
+     "`diff <(...)` satırı `syntax error` verirse kabuğun bash değildir; `bash` yazıp tekrar dene."
+    ]
+   },
+   "v04": {
+    "title": "Yama üret, dene, uygula, geri al",
+    "text": "`v1.txt` kopyasını yama ile `v2.txt` hâline getir ve geri al. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ndiff -u v1.txt v2.txt > change.patch\ncp v1.txt work.txt\npatch --dry-run work.txt < change.patch\npatch work.txt < change.patch\ncat work.txt\npatch -R work.txt < change.patch\ncat work.txt",
+      "expected": "checking file work.txt\npatching file work.txt\nport=8080\nhost=linux-lab\nmode=prod\ndebug=on\npatching file work.txt\nport=80\nhost=linux-lab\nmode=prod"
+     }
+    ],
+    "differs": [
+     "`patch: command not found` görürsen: Ubuntu'da `sudo apt install patch`, Rocky/Alma'da `sudo dnf install patch`.",
+     "`--dry-run` desteklenmezse (çok eski sürüm) o satırı atla.",
+     "`Hunk #1 FAILED` görürsen `work.txt`, `v1.txt` ile aynı değildir; `cp v1.txt work.txt` ile yeniden başla."
+    ]
+   },
+   "v05": {
+    "title": "Sağlama toplamı",
+    "text": "Özet hesapla, sonra dosyayı değiştirip `sha256sum -c` ile bozulmayı yakala. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nsha256sum v1.txt same.txt\nsha256sum v1.txt > sums.txt\nsha256sum -c sums.txt\necho 'x' >> v1.txt\nsha256sum -c sums.txt",
+      "expected": "<64 hex karakter>  v1.txt\n<64 hex karakter>  same.txt\nv1.txt: OK\nv1.txt: FAILED\nsha256sum: WARNING: 1 computed checksum did NOT match"
+     }
+    ],
+    "differs": [
+     "İlk iki özet birbirinin aynı olmalı (`v1.txt` ve `same.txt` aynı içerik).",
+     "Türkçe/Almanca sistemde uyarı metni çevrilmiş olabilir; `OK` ve `FAILED` sözcükleri değişmez.",
+     "`same.txt` yoksa v02 adımını çalıştır."
+    ]
+   }
+  }
+ }
+}

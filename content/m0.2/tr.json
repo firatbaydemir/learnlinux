@@ -1,0 +1,344 @@
+{
+ "title": "Kendi Linux VM'ini kurmak",
+ "lead": "VirtualBox, UTM veya WSL içine Rocky/Alma Linux ya da Ubuntu kur, indirmeyi doğrula, snapshot al ve SSH ile bağlan.",
+ "objectives": [
+  "Bilgisayarına uygun aracı seçersin (VirtualBox, UTM veya WSL).",
+  "Kurmadan önce ISO'yu SHA-256 sağlama toplamıyla doğrularsın.",
+  "VM oluşturur, snapshot alır ve SSH ile bağlanırsın."
+ ],
+ "sections": [
+  {
+   "id": "why",
+   "title": "Neden kendi VM'in?",
+   "body": [
+    "Gerçek beceri **gerçek Linux**'ta kazanılır. Sanal makine (VM), bilgisayarının içindeki tam bir bilgisayardır: bozabilir, yeniden kurabilirsin; gerçek sistemine hiçbir şey olmaz.",
+    "Donanımına uygun aracı seç: **VirtualBox** (Windows, Intel Mac, Linux), **UTM** (Apple Silicon Mac, ARM64 ISO gerekir) veya **WSL 2** (Windows 10/11, en hızlı başlangıç, yalnızca Ubuntu). Dağıtım olarak şirketlerde kullanılan RHEL ailesinden **Rocky Linux 9 / AlmaLinux 9** ve isteğe bağlı **Ubuntu 24.04 LTS** öneriyoruz."
+   ],
+   "tip": "Her VM için 2 CPU çekirdeği, 4 GB RAM ve 25 GB disk planla."
+  },
+  {
+   "id": "iso",
+   "title": "ISO'yu indir ve doğrula",
+   "body": [
+    "ISO'yu yalnızca dağıtımın resmi sitesinden indir (rockylinux.org, almalinux.org, ubuntu.com). ISO'nun yanında bir **sağlama toplamı** (SHA-256) yayımlanır. Kendi dosyanın toplamını hesapla ve karşılaştır: tek karakter farklıysa dosya bozuk veya değiştirilmiştir, yeniden indir."
+   ],
+   "commands": [
+    {
+     "cmd": "sha256sum (Linux/macOS: shasum -a 256)",
+     "what": "Dosyanın SHA-256 sağlama toplamını hesaplar.",
+     "where": "İndirme sonrası ana bilgisayarında.",
+     "why": "ISO'nun eksiksiz ve değiştirilmemiş olduğunu kanıtlar.",
+     "example": "sha256sum Rocky-9-latest-x86_64-minimal.iso",
+     "nosim": true
+    },
+    {
+     "cmd": "Get-FileHash (Windows PowerShell)",
+     "what": "Windows'ta aynı sağlama toplamı.",
+     "where": "Windows ana bilgisayarda PowerShell.",
+     "why": "Windows'ta sha256sum yoktur.",
+     "example": "Get-FileHash .\\Rocky-9-latest-x86_64-minimal.iso -Algorithm SHA256",
+     "nosim": true
+    }
+   ],
+   "warn": "Sağlama toplamı uyuşmayan ISO ile, kurucu açılsa bile asla kurulum yapma."
+  },
+  {
+   "id": "create",
+   "title": "VM oluştur ve kur",
+   "body": [
+    "VirtualBox/UTM'de yeni VM oluştur, ISO'yu bağla; 2 CPU, 4 GB RAM ve 25 GB disk ver. Başlat ve kurucuyu izle: dili seç, diski seç (otomatik bölümleme yeterli), root parolası belirle, **normal bir kullanıcı oluştur ve \"yönetici\" kutusunu işaretle** (kullanıcıyı `wheel`/`sudo` grubuna ekler).",
+    "Önce **Minimal** kurulumu seç; araçları sonra kendin eklersin. Yeniden başlatmadan sonra ISO'yu çıkar ve normal kullanıcınla giriş yap. `cat /etc/os-release` ile hangi sistemi kurduğunu gör.",
+    "**WSL**'de bu tek komuttur (yönetici PowerShell): `wsl --install -d Ubuntu-24.04`. Yeniden başlat ve istenince kullanıcı adını oluştur."
+   ],
+   "tip": "Boşluksuz, kısa ve küçük harfli bir kullanıcı adı seç; çok yazacaksın."
+  },
+  {
+   "id": "snapshot",
+   "title": "Snapshot: geri al düğmen",
+   "body": [
+    "**Snapshot**, VM'in tüm durumunu kaydeder. İlk başarılı açılıştan hemen sonra ve her riskli denemeden önce `clean-install` adlı bir tane al. Bir şeyi bozarsan snapshot'ı saniyeler içinde geri yüklersin.",
+    "VirtualBox'ta: Makine ▸ Anlık görüntü al; UTM'de VM'i klonla veya QEMU snapshot seçeneğini kullan. WSL için yedek dışa aktar: `wsl --export Ubuntu-24.04 yedek.tar`."
+   ],
+   "danger": "Snapshot gerçek dosyalarının yedeği değildir; ana bilgisayar diski bozulursa snapshot'lar da gider."
+  },
+  {
+   "id": "network",
+   "title": "Ağ temelleri",
+   "body": [
+    "**NAT** (varsayılan) VM'in internete çıkmasını sağlar ama ağından gizler; erişmek için port yönlendirme kullan. **Bridged** VM'i kendi IP adresiyle yerel ağına koyar. **Host-only** yalnızca VM ile bilgisayarını bağlar.",
+    "Öğrenmek için port yönlendirmeli NAT (ana makine 2222 → konuk 22) veya bridged ikisi de uygundur. VM içinde adresini `ip -brief a` ile gör."
+   ],
+   "commands": [
+    {
+     "cmd": "ip -brief a",
+     "what": "Arayüzleri durum ve IP adresiyle gösterir.",
+     "where": "VM içinde.",
+     "why": "SSH ile bağlanmak için IP adresi gerekir.",
+     "example": "ip -brief a",
+     "nosim": true
+    }
+   ]
+  },
+  {
+   "id": "ssh",
+   "title": "SSH ile bağlan",
+   "body": [
+    "VM penceresi kullanışsızdır. Bunun yerine ana makinenin terminalinden **SSH** ile bağlan: kopyala/yapıştır çalışır ve gerçekte sunucular böyle yönetilir. Önce VM'de SSH servisinin çalıştığından emin ol (Rocky/Alma'da `sudo systemctl enable --now sshd`, Ubuntu'da `ssh`).",
+    "Sonra ana makineden: `ssh kullanici@IP` (bridged) veya `ssh -p 2222 kullanici@127.0.0.1` (port yönlendirmeli NAT). Sunucu anahtarını `yes` ile kabul et."
+   ],
+   "commands": [
+    {
+     "cmd": "ssh user@host",
+     "what": "Güvenli uzak kabuk açar.",
+     "where": "Ana makineden VM'e veya herhangi bir sunucuya.",
+     "why": "Linux yönetiminin standart yoludur.",
+     "example": "ssh student@192.168.1.50",
+     "nosim": true
+    },
+    {
+     "cmd": "ssh-keygen -t ed25519",
+     "what": "Parolasız giriş için anahtar çifti üretir.",
+     "where": "Ana makinede bir kez.",
+     "why": "Parolalardan daha güvenli ve rahattır.",
+     "example": "ssh-keygen -t ed25519",
+     "nosim": true
+    },
+    {
+     "cmd": "ssh-copy-id user@host",
+     "what": "Açık anahtarını VM'e kurar.",
+     "where": "ssh-keygen sonrası.",
+     "why": "Sonraki girişlerde parola gerekmez.",
+     "example": "ssh-copy-id student@192.168.1.50",
+     "nosim": true
+    }
+   ],
+   "tip": "SSH çalışınca bir snapshot al — dönmek için en iyi durumdur."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Isınma: simülatörde `cat /etc/os-release` ile kurulu bir sistemin kendini nasıl tanıttığını oku.",
+   "hint": "Dosya adında tire var."
+  },
+  "t02": {
+   "text": "Isınma: `id` çalıştır; kullanıcını, uid'ni ve gruplarını gör (`wheel` yönetici demektir).",
+   "hint": "Sadece `id`."
+  },
+  "t03": {
+   "text": "Adım adım: `hostname`, sonra `uname -r` çalıştır — her kurulumdan sonra not edilecek ilk bilgiler.",
+   "hint": "İki ayrı komut."
+  },
+  "t04": {
+   "text": "Tahmin et: `sudo whoami` ne yazdırır? Düşün, sonra çalıştır.",
+   "hint": "sudo komutu root olarak çalıştırır."
+  },
+  "t05": {
+   "text": "Hata ayıkla: `cat /etc/os_release` başarısız olur. Çalıştır, hatayı oku, sonra doğru komutu çalıştır.",
+   "hint": "Alt çizgi ile tire farkı; `ls /etc` yardımcı olur."
+  },
+  "t06": {
+   "text": "Mini proje: dağıtım adı satırını `grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt` ile `~/vm-summary.txt` dosyasına kaydet.",
+   "hint": "`>` çıktıyı dosyaya yazar."
+  },
+  "t07": {
+   "text": "Meydan okuma: tek `mkdir -p` komutuyla `~/vm-lab/snapshots` ve `~/vm-lab/notes` klasörlerini oluştur.",
+   "hint": "Brace açılımı: `~/vm-lab/{snapshots,notes}`."
+  },
+  "t08": {
+   "text": "TICKET #3001 — Laboratuvar VM raporu istiyor: makine adı, çekirdek sürümü ve kullanıcı adını (bu sırayla) `~/vm-report.txt` dosyasına satır satır yaz.",
+   "hint": "İlk komutta `>`, sonraki ikisinde `>>`."
+  }
+ },
+ "vm": {
+  "intro": "Bu modülün ana yolu budur: adımları kendi bilgisayarında uygula. \"Yaptım\" de veya çıktı yapıştırıp kontrol ettir.",
+  "tasks": {
+   "v01": {
+    "title": "ISO'yu indir",
+    "text": "Rocky Linux 9 veya AlmaLinux 9 (minimal ISO; Apple Silicon için ARM64) ya da Ubuntu 24.04 indir ve yayımlanan SHA-256 değerini not al.",
+    "blocks": [],
+    "differs": [
+     "Apple Silicon için aarch64/arm64 ISO gerekir; x86_64 UTM'de doğal olarak açılmaz."
+    ]
+   },
+   "v02": {
+    "title": "Sağlama toplamını doğrula",
+    "text": "ISO'nun SHA-256 değerini hesapla ve çıktıyı yapıştır. Yayımlanan değerle elle karşılaştır.",
+    "blocks": [
+     {
+      "cmd": "sha256sum Rocky-9-latest-x86_64-minimal.iso",
+      "expected": "3f2b...c9a1  Rocky-9-latest-x86_64-minimal.iso"
+     },
+     {
+      "cmd": "shasum -a 256 Rocky-9-latest-aarch64-minimal.iso",
+      "expected": "(macOS) 64 onaltılı karakter ve dosya adı"
+     }
+    ],
+    "differs": [
+     "64 onaltılı karakter beklenir; daha kısa çıktı komutun başarısız olduğu anlamına gelir.",
+     "Windows: `Get-FileHash dosya.iso -Algorithm SHA256` tablo yazdırır; Hash sütununu yapıştır.",
+     "Yayımlanan değerden farklı mı? Dosyayı sil ve yeniden indir."
+    ]
+   },
+   "v03": {
+    "title": "VM'i oluştur ve kur",
+    "text": "VM'i oluştur (2 CPU, 4 GB RAM, 25 GB disk), sistemi kur, yönetici kullanıcı oluştur ve giriş ekranına kadar başlat.",
+    "blocks": [],
+    "differs": [
+     "Açılış döngüsü veya \"no bootable medium\": ISO'nun bağlı olduğunu ve önyükleme sırasının optik sürücüyle başladığını kontrol et.",
+     "Windows'ta VirtualBox: BIOS'ta sanallaştırmayı (VT-x/AMD-V) aç ve Hyper-V çakışmalarını kapat."
+    ]
+   },
+   "v04": {
+    "title": "İlk giriş",
+    "text": "Kullanıcınla giriş yap ve hangi sistemi kurduğunu göster. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\""
+     }
+    ],
+    "differs": [
+     "Ubuntu'da `NAME=\"Ubuntu\"` görünür; bu ders için ikisi de uygundur.",
+     "WSL'de de dosya vardır; metin aynıdır."
+    ]
+   },
+   "v05": {
+    "title": "Snapshot al",
+    "text": "`sudo poweroff` ile düzgün kapat, `clean-install` adlı snapshot al, sonra VM'i yeniden başlat.",
+    "blocks": [
+     {
+      "cmd": "sudo poweroff",
+      "expected": "(VM penceresi kapanır)"
+     }
+    ],
+    "differs": [
+     "Snapshot gri mi? Önce VM'i kapat (VirtualBox'ta düğme makine araçlarındadır)."
+    ]
+   },
+   "v06": {
+    "title": "IP adresini bul",
+    "text": "Arayüzlerini göster ve çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ip -brief a",
+      "expected": "lo     UNKNOWN  127.0.0.1/8\nenp0s3 UP       10.0.2.15/24"
+     }
+    ],
+    "differs": [
+     "`10.0.2.15` NAT demektir; ana makineden erişmek için port yönlendirme kuralını kullan.",
+     "enp0s3'te IPv4 yok mu? `nmcli device` çalıştır ve arayüzü bağla veya VM ağ adaptörünün açık olduğunu kontrol et."
+    ]
+   },
+   "v07": {
+    "title": "SSH ile bağlan",
+    "text": "Ana makine terminalinden VM'e bağlan ve aşağıdaki komutu çalıştır. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ssh student@192.168.1.50",
+      "expected": "(VM üzerinde bir prompt alırsın)"
+     },
+     {
+      "cmd": "echo $SSH_CONNECTION",
+      "expected": "192.168.1.10 51234 192.168.1.50 22"
+     }
+    ],
+    "differs": [
+     "`Connection refused`: sshd çalışmıyor (`sudo systemctl enable --now sshd`).",
+     "`Connection timed out`: yanlış IP veya (NAT'ta) port yönlendirme kuralı yok.",
+     "`Permission denied`: yanlış kullanıcı adı veya parola."
+    ]
+   },
+   "v08": {
+    "title": "Sistemi güncelle",
+    "text": "Sistemi güncelle, yeniden başlat ve güncelleme hatasız bittiyse \"Yaptım\" de.",
+    "blocks": [
+     {
+      "cmd": "sudo dnf -y update   # Rocky/Alma",
+      "expected": "Complete!"
+     },
+     {
+      "cmd": "sudo apt update && sudo apt -y upgrade   # Ubuntu",
+      "expected": "(E: hatası yok)"
+     }
+    ],
+    "differs": [
+     "`Could not resolve host`: VM'in interneti yok; ağ adaptörünü kontrol et."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Eşleşen bir SHA-256 sağlama toplamı ne anlatır?",
+   "options": [
+    "ISO en yeni sürümdür",
+    "Dosya eksiksiz ve değiştirilmemiştir",
+    "ISO ücretsizdir",
+    "VM daha hızlı açılır"
+   ],
+   "explain": "Sağlama toplamı bir parmak izidir; aynı izler dosyanın yayımlananla aynı olduğunu gösterir."
+  },
+  "q2": {
+   "q": "Hangi ağ modu VM'i yerel ağdan gizler ama internete çıkarır?",
+   "options": [
+    "Bridged",
+    "Host-only",
+    "NAT",
+    "Hiçbiri"
+   ],
+   "explain": "NAT ana bilgisayar bağlantısını paylaşır; VM'e erişmek için port yönlendirme kullan."
+  },
+  "q3": {
+   "q": "Snapshot ne zaman alınmalı?",
+   "options": [
+    "Riskli bir denemeden önce",
+    "Asla; disk israfı",
+    "Yalnızca VM silindikten sonra",
+    "Yalnızca WSL'de"
+   ],
+   "explain": "Snapshot hızlı bir geri dönüş noktasıdır; pişman olabileceğin değişikliklerden önce al."
+  },
+  "q4": {
+   "q": "Apple Silicon Mac'te olağan tercih hangisidir?",
+   "options": [
+    "x86 ISO ile VirtualBox",
+    "WSL 2",
+    "Windows Hyper-V",
+    "ARM64 ISO ile UTM"
+   ],
+   "explain": "Apple Silicon ARM'dır; UTM ARM64 konukları doğal çalıştırır."
+  }
+ },
+ "summary": [
+  "VM, tamamen kontrol edebildiğin güvenli ve harcanabilir bir Linux'tur.",
+  "Kurmadan önce ISO sağlama toplamını her zaman doğrula.",
+  "Temiz kurulumdan sonra ve deneylerden önce snapshot al.",
+  "Ana bilgisayar terminalinden SSH ile çalışmak profesyonel yoldur."
+ ],
+ "glossary": [
+  {
+   "term": "VM",
+   "meaning": "Sanal makine: yazılımla taklit edilen tam bir bilgisayar."
+  },
+  {
+   "term": "ISO",
+   "meaning": "Kurulum ortamının disk kalıbı dosyası."
+  },
+  {
+   "term": "sağlama toplamı (checksum)",
+   "meaning": "Dosyanın bozulup bozulmadığını anlamak için parmak izi."
+  },
+  {
+   "term": "snapshot",
+   "meaning": "VM'in geri dönülebilir kayıtlı durumu."
+  },
+  {
+   "term": "SSH",
+   "meaning": "Secure Shell: şifreli uzak terminal protokolü."
+  },
+  {
+   "term": "NAT",
+   "meaning": "Ağ adresi çevirisi: VM ana bilgisayarın bağlantısını paylaşır."
+  }
+ ]
+}

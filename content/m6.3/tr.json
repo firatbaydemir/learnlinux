@@ -1,0 +1,185 @@
+{
+ "title": "firewalld — Zone, Servis, Port",
+ "lead": "Dinlemek erişilebilir olmak değildir: firewalld'yi okumayı, kuralları güvenle değiştirmeyi (runtime ve permanent) ve Debian/Ubuntu karşılığı ufw'yi öğren.",
+ "objectives": [
+  "firewalld'nin çalışıp çalışmadığını kontrol eder, varsayılan ve etkin zone'ları okursun.",
+  "Runtime ile `--permanent` farkını ve `--reload`'un ne yaptığını açıklarsın.",
+  "Servis ve port açıp kapatır, kuralları `--timeout` ile güvenle denersin.",
+  "Tek bir kaynak ağ için basit bir rich rule yazarsın.",
+  "Ubuntu'da ufw kullanır ve etkinleştirmeden önce her zaman SSH'a izin verirsin."
+ ],
+ "sections": [
+  {
+   "id": "concepts",
+   "title": "Zone, servis, port",
+   "body": [
+    "`ss` ile bir programın dinlediğini görürsün. Başkalarının ona ulaşıp ulaşamayacağı aradaki güvenlik duvarına bağlıdır. **firewalld** (Rocky/Alma/RHEL/Fedora) her ağ arayüzünü bir **zone**'a bağlar: kendi izinli servis ve port listesi olan bir güven seviyesi. Genelde varsayılan `public`'tir; `trusted` her şeye izin verir, `drop` her şeyi sessizce düşürür.",
+    "**Servis**, önceden tanımlı bir settir (`ssh` = 22/tcp, `http` = 80/tcp, `https` = 443/tcp). **Port** ise `8080/tcp` gibi açık bir numaradır. Varsa servis, standart dışı numaralar için port kullan.",
+    "Değiştirmeden önce her zaman oku: önce durum, sonra zone, sonra tüm liste."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --state", "what": "running veya not running yazar.", "where": "Rocky/Alma VM'inde ilk kontrol olarak.", "why": "Servis durmuşsa diğer firewall-cmd komutları çalışmaz.", "example": "sudo firewall-cmd --state", "nosim": true},
+    {"cmd": "firewall-cmd --get-default-zone", "what": "Yeni arayüzlerin kullandığı zone'u gösterir.", "where": "Kural eklemeden önce.", "why": "`--zone` yazmazsan kural varsayılan zone'a gider.", "example": "sudo firewall-cmd --get-default-zone", "nosim": true},
+    {"cmd": "firewall-cmd --get-active-zones", "what": "Şu an arayüzü veya kaynağı olan zone'ları listeler.", "where": "Trafiğini gerçekte hangi zone'un yönettiğini merak ettiğinde.", "why": "Varsayılan zone ile arayüzün etkin zone'u farklı olabilir.", "example": "sudo firewall-cmd --get-active-zones", "nosim": true},
+    {"cmd": "firewall-cmd --list-all", "what": "Bir zone'un servis, port, rich rule ve arayüzlerini gösterir.", "where": "Her değişiklikten önce ve sonra.", "why": "Önce doğrula, değiştir, tekrar doğrula.", "example": "sudo firewall-cmd --list-all", "nosim": true}
+   ],
+   "tip": "`--list-all` runtime durumunu gösterir. Diskte kayıtlı olanı görmek için `--permanent` ekle."
+  },
+  {
+   "id": "runtime",
+   "title": "Runtime ve permanent, --reload, --timeout",
+   "body": [
+    "firewalld'nin iki yapılandırması vardır. **Runtime** şu an geçerlidir; `--reload` veya yeniden başlatmada kaybolur. **Permanent** diske yazılır ve yeniden başlatmaya dayanır, ama tek başına `--permanent` çalışan güvenlik duvarını **değiştirmez**.",
+    "Güvenli akış: önce `--timeout` ile runtime'da dene, kontrol et, sonra kalıcı yaz ve `--reload` çalıştır. `--reload` kalıcı yapılandırmayı uygular ve **yalnızca runtime'daki kuralları siler**.",
+    "Runtime'da çalışan bir kuralı saklamak istersen `firewall-cmd --runtime-to-permanent` kullan."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --add-service=http --timeout=60", "what": "60 saniye sonra kendiliğinden kalkan bir runtime kuralı ekler.", "where": "Testlerde, özellikle SSH üzerinden.", "why": "Hata yaparsan kendiliğinden düzelir.", "example": "sudo firewall-cmd --add-service=http --timeout=60", "nosim": true},
+    {"cmd": "firewall-cmd --permanent --add-service=http", "what": "Kuralı yalnızca diske yazar; henüz etkin değildir.", "where": "Yeniden başlatmaya dayanması gereken kurallar için.", "why": "Runtime ve permanent ayrı listelerdir.", "example": "sudo firewall-cmd --permanent --add-service=http", "nosim": true},
+    {"cmd": "firewall-cmd --reload", "what": "Kalıcı yapılandırmayı runtime'a yükler.", "where": "`--permanent` değişikliklerinden sonra.", "why": "Kalıcı kuralları etkinleştirir; yalnızca runtime'daki kurallar silinir.", "example": "sudo firewall-cmd --reload", "nosim": true},
+    {"cmd": "firewall-cmd --runtime-to-permanent", "what": "Mevcut runtime kurallarını kalıcı olarak kaydeder.", "where": "Bir kuralı test edip çalıştığını gördükten sonra.", "why": "Kuralı iki kez yazmana gerek kalmaz.", "example": "sudo firewall-cmd --runtime-to-permanent", "nosim": true}
+   ],
+   "warn": "Önce VM snapshot'ı al (modül 0.2). Uzak makinede güvenlik duvarını değiştirirken **ikinci bir SSH oturumu açık tut**.",
+   "danger": "SSH kilitlenmesi: etkin zone'dan `ssh` servisini asla kaldırma, zone'u `drop` yapma ve SSH üzerinden `--panic-on` çalıştırma. Oturum hemen kopar ve yalnızca VM konsolundan girebilirsin. `--timeout` ile test et, `--list-all` ile doğrula; sıra: doğrula, değiştir, doğrula."
+  },
+  {
+   "id": "ports",
+   "title": "Port ve servis açıp kapatmak",
+   "body": [
+    "8080 portundaki bir web uygulaması için `--add-port=8080/tcp` kullan. Tekrar kapatmak için `--remove-port` veya `--remove-service`. Unutma: her `--permanent` değişikliği `--reload` ister.",
+    "Güvenlik duvarındaki bir port programı başlatmaz. Bir şeyin dinlediğini `ss` ile kontrol et. SELinux'lu Rocky/Alma'da standart dışı port için ayrıca etiket gerekebilir (modül 6.2)."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --get-services", "what": "Tanımlı tüm servis adlarını listeler.", "where": "Doğru servis adını bulmak için.", "why": "Servis, çıplak numaradan daha anlaşılırdır.", "example": "sudo firewall-cmd --get-services", "nosim": true},
+    {"cmd": "firewall-cmd --permanent --add-port=8080/tcp", "what": "8080/tcp'yi kalıcı olarak açar (reload'dan sonra).", "where": "Standart dışı portlu uygulamalar için.", "why": "Servisler yalnızca standart portları kapsar.", "example": "sudo firewall-cmd --permanent --add-port=8080/tcp", "nosim": true},
+    {"cmd": "firewall-cmd --list-ports", "what": "Açıkça açılmış portları listeler.", "where": "Port değişikliğini doğrularken.", "why": "Kuralın runtime'da etkin olduğunu doğrular.", "example": "sudo firewall-cmd --list-ports", "nosim": true},
+    {"cmd": "firewall-cmd --permanent --remove-port=8080/tcp", "what": "Port kuralını kalıcı yapılandırmadan kaldırır.", "where": "Uygulama kaldırıldığında.", "why": "Artık gerekmeyen açık portlar risktir.", "example": "sudo firewall-cmd --permanent --remove-port=8080/tcp", "nosim": true}
+   ],
+   "tip": "Komutları önce küçük bir betiğe yaz ve çalıştırmadan iki kez oku."
+  },
+  {
+   "id": "rich",
+   "title": "Rich rule (kısaca)",
+   "body": [
+    "**Rich rule** koşul ekler: kaynak adres, port, protokol ve eylem (`accept`, `reject`, `drop`). Örnek: PostgreSQL'e (5432) yalnızca `192.168.1.0/24` ağından izin ver.",
+    "Tüm kuralı tek tırnak içine, içindeki değerleri çift tırnak içine al. Test sırasında `--timeout` ekle."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --add-rich-rule", "what": "Koşullu bir kural ekler.", "where": "Bir port yalnızca tek ağa açık olacaksa.", "why": "Portu herkese açmaktan daha hassastır.", "example": "sudo firewall-cmd --add-rich-rule='rule family=\"ipv4\" source address=\"192.168.1.0/24\" port port=\"5432\" protocol=\"tcp\" accept' --timeout=60", "nosim": true},
+    {"cmd": "firewall-cmd --list-rich-rules", "what": "Zone'un rich rule'larını gösterir.", "where": "Doğrulamak veya denetlemek için.", "why": "Rich rule'lar `--list-services` içinde görünmez.", "example": "sudo firewall-cmd --list-rich-rules", "nosim": true},
+    {"cmd": "firewall-cmd --remove-rich-rule", "what": "Rich rule'u kaldırır; birebir aynı metni ver.", "where": "İstisna artık gerekmediğinde.", "why": "Kural kümesini küçük tutar.", "example": "sudo firewall-cmd --remove-rich-rule='rule family=\"ipv4\" source address=\"192.168.1.0/24\" port port=\"5432\" protocol=\"tcp\" accept'", "nosim": true}
+   ],
+   "warn": "Kendi yönetim ağın için `reject` veya `drop` kuralı SSH oturumunu kesebilir. `--timeout` kullan ve ikinci oturumu açık tut."
+  },
+  {
+   "id": "ufw",
+   "title": "Debian/Ubuntu: ufw",
+   "body": [
+    "Ubuntu **ufw** (Uncomplicated Firewall) kullanır. Genelde kuruludur ama **kapalıdır**. Altın kural: **önce SSH'a izin ver, sonra etkinleştir**. Varsayılan `deny incoming` iken SSH kuralı olmadan `ufw enable` seni dışarıda bırakır.",
+    "`OpenSSH` bir uygulama profilidir, 22/tcp ile aynıdır. Kurallar hemen etkindir ve kalıcıdır; runtime/permanent ayrımı yoktur."
+   ],
+   "commands": [
+    {"cmd": "ufw allow OpenSSH", "what": "SSH'a (22/tcp) izin verir.", "where": "İlk `ufw enable`'dan önce.", "why": "Kendini dışarıda bırakmanı önler.", "example": "sudo ufw allow OpenSSH", "nosim": true},
+    {"cmd": "ufw enable", "what": "Güvenlik duvarını açar ve yeniden başlatmada da açık tutar.", "where": "Yalnızca SSH'a izin verdikten sonra.", "why": "Varsayılan politika gelen trafiği engeller.", "example": "sudo ufw enable", "nosim": true},
+    {"cmd": "ufw status verbose", "what": "Durumu, varsayılan politikayı ve kuralları gösterir.", "where": "Her değişiklikten sonra.", "why": "22/tcp'nin ALLOW olduğunu doğrula.", "example": "sudo ufw status verbose", "nosim": true},
+    {"cmd": "ufw delete allow 80/tcp", "what": "Bir allow kuralını siler.", "where": "Bir port artık gerekmediğinde.", "why": "Açıkta kalan yüzeyi küçük tutar.", "example": "sudo ufw delete allow 80/tcp", "nosim": true}
+   ],
+   "danger": "SSH üzerindeyken `ufw allow OpenSSH` (veya `ufw allow 22/tcp`) yapmadan asla `ufw enable` çalıştırma. SSH portun 22 değilse o porta izin ver. Önce VM snapshot'ı al."
+  },
+  {
+   "id": "analyze",
+   "title": "Dinleyen portları ve logları okumak",
+   "body": [
+    "Bir şey açmadan önce gerçekte neyin dinlediğini bul: VM'de `ss -tulpn`. Simülatörde `~/fw` içindeki örnek dosyalarla çalışırsın: `ss.txt` sahte bir `ss` çıktısı, `blocked.log` sahte bir güvenlik duvarı logudur.",
+    "`grep`, `cut`, `sort` ve `uniq -c` ile sayabilir ve sıralayabilirsin. Gerçek loglarda da aynı yöntemi kullanırsın."
+   ],
+   "commands": [
+    {"cmd": "ss -tulpn", "what": "Dinleyen TCP/UDP soketlerini süreçle birlikte listeler.", "where": "Hangi portların kullanıldığını görmek için.", "why": "Dinleyicisi olmayan açık port anlamsızdır.", "example": "sudo ss -tulpn", "nosim": true},
+    {"cmd": "grep -c", "what": "Eşleşen satırları sayar.", "where": "Dinleyicileri veya olayları saymak için.", "why": "Kaydırmak yerine hızlı bir sayı verir.", "example": "grep -c LISTEN ~/fw/ss.txt"},
+    {"cmd": "cut | sort | uniq -c", "what": "Bir sütunu çıkarır ve aynı değerleri sayar.", "where": "Engellenen kaynak adresleri sıralamak için.", "why": "En gürültülü kaynağı bir bakışta gösterir.", "example": "cut -d' ' -f3 ~/fw/blocked.log | sort | uniq -c | sort -rn"},
+    {"cmd": "grep -i", "what": "Büyük/küçük harf ayırmadan satır bulur.", "where": "ufw durum dosyasındaki ALLOW kurallarını okumak için.", "why": "Tam yazımı bilmen gerekmez.", "example": "grep -i allow ~/fw/ufw-status.txt"}
+   ],
+   "tip": "`~/fw` içindeki örnek betikler yalnızca metin dosyalarıdır. Gerçek bir güvenlik duvarına karşı çalıştırılmaz."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`cd ~/fw` ile alıştırma klasörüne geç.", "hint": "Prompt yeni dizini gösterir."},
+  "t02": {"text": "`cat public.txt` ile sahte zone çıktısını göster.", "hint": "`services:` satırına bak."},
+  "t03": {"text": "`grep ssh public.txt` ile servis satırını bul.", "hint": "Çıktıda dhcpv6-client de vardır."},
+  "t04": {"text": "`test_http.sh` dosyasına güvenli bir test komutu yaz: `firewall-cmd --add-service=http --timeout=60`. `echo \"...\" > test_http.sh` kullan.", "hint": "`--timeout` kuralın kendiliğinden kalkmasını sağlar."},
+  "t05": {"text": "`echo` ile `perm_http.sh` dosyasına `firewall-cmd --permanent --add-service=http` yaz.", "hint": "Dosyayı oluşturmak için tek `>` kullan."},
+  "t06": {"text": "`perm_http.sh` dosyasına `firewall-cmd --reload` satırını ekle (kalıcı kurallar reload ister).", "hint": "`>` değil, `>>` ile ekle."},
+  "t07": {"text": "Tahmin et, sonra kontrol et: `ss.txt` içinde kaç dinleyen soket var? `grep -c LISTEN ss.txt` çalıştır.", "hint": "ESTAB satırları LISTEN değildir."},
+  "t08": {"text": "`cut -d: -f1 active.txt | sort` çıktısını tahmin et (sıralı zone adları), sonra çalıştır.", "hint": "İki nokta üst üsteden önceki alan zone'dur."},
+  "t09": {"text": "`broken.sh` içinde yazım hatası var ve `--permanent` unutulmuş. Dosya `firewall-cmd --permanent --add-service=http` içerecek şekilde düzelt.", "hint": "Dosyanın üzerine `echo \"...\" > broken.sh` ile yaz."},
+  "t10": {"text": "`ufw-setup.sh` SSH'a izin vermeden ufw'yi açıyor — kilitlenme! Önce `ufw allow OpenSSH`, sonra `ufw enable` gelecek şekilde yeniden yaz.", "hint": "İlk satır `>`, ikinci satır `>>` ile."},
+  "t11": {"text": "Mini proje: `web.sh` dosyasına üç satır yaz: kalıcı `http`, kalıcı `https`, sonra `firewall-cmd --reload`.", "hint": "Bir kez `>`, iki kez `>>` kullan."},
+  "t12": {"text": "Meydan okuma: `blocked.log` içindeki en gürültülü engellenen kaynağı bul. 3. sütunu al, sırala, `uniq -c` ile say, sırala, ilk satırı alıp `top.txt` dosyasına kaydet.", "hint": "`cut -d' ' -f3`, `sort`, `uniq -c`, `sort -rn`, `head -n 1`."},
+  "t13": {"text": "Meydan okuma: `rich.sh` dosyasına bir rich rule yaz: `firewall-cmd --add-rich-rule=...` yalnızca `192.168.1.0/24` ağından tcp 5432 portunu kabul etsin.", "hint": "Kuralı tek tırnağa al; çift tırnaklı `echo` içinde iç çift tırnakları kaçır."},
+  "t14": {"text": "Ticket: 8080 portundaki uygulamaya dışarıdan erişilemiyor ve yeniden başlatmaya dayanmalı. `fix.sh` dosyasına `8080/tcp` için kalıcı port kuralını ve reload'u yaz. ssh'a dokunma.", "hint": "İki satır: `--permanent --add-port=8080/tcp` ve `--reload`."},
+  "t15": {"text": "Ticket: Yeni bir Ubuntu sunucusunda SSH ve web erişimi gerekiyor, sonra güvenlik duvarı açılacak. `ufw.sh` yaz: OpenSSH'a izin ver, 80/tcp'ye izin ver, sonra etkinleştir — kilitlenmeye karşı güvenli sırayla.", "hint": "`ufw enable` son satır olmalı."},
+  "t16": {"text": "Tahmin et: `history.txt` içinde kaç satırda `permanent` geçiyor? Sonra `grep -c permanent history.txt` ile doğrula.", "hint": "Bir komut yalnızca runtime'dı."},
+  "t17": {"text": "`grep -i allow ufw-status.txt` ile ufw kurallarını oku. 22/tcp izinli mi?", "hint": "İlk sütuna bak."},
+  "t18": {"text": "`port.sh` dosyasına 9090 portu için runtime testi yaz: `firewall-cmd --add-port=9090/tcp --timeout=60`.", "hint": "Servisteki kalıbın aynısı."}
+ },
+ "vm": {
+  "intro": "v01–v04 için Rocky/Alma VM'i, v05 için Ubuntu VM'i kullan. Önce snapshot al (modül 0.2); VM konsolundan çalış veya ikinci bir SSH oturumu açık tut.",
+  "tasks": {
+   "v01": {
+    "title": "Güvenlik duvarı durumunu oku",
+    "text": "firewalld'nin çalıştığını kontrol et, varsayılan zone'u ve tam listeyi oku. Çıktıyı yapıştır.",
+    "blocks": [{"cmd": "sudo firewall-cmd --state\nsudo firewall-cmd --get-default-zone\nsudo firewall-cmd --get-active-zones\nsudo firewall-cmd --list-all", "expected": "running\npublic\npublic\n  interfaces: enp0s3\npublic (active)\n  services: cockpit dhcpv6-client ssh\n  ports:"}],
+    "differs": ["`not running` yazıyorsa: `sudo systemctl enable --now firewalld`.", "Ubuntu'da firewalld genelde kurulu değildir; ufw kullan (v05).", "Zone veya arayüz adın farklı olabilir (`enp0s3`, `ens160`)."]
+   },
+   "v02": {
+    "title": "Zaman aşımlı runtime kuralı",
+    "text": "http'yi 120 saniyeliğine ekle, servisleri listele, bekle, tekrar listele. Kural kendiliğinden kalkar.",
+    "blocks": [{"cmd": "sudo firewall-cmd --add-service=http --timeout=120\nsudo firewall-cmd --list-services", "expected": "success\ncockpit dhcpv6-client http ssh"}],
+    "differs": ["`ssh` listede kalmalı; yoksa hemen geri ekle: `sudo firewall-cmd --add-service=ssh`.", "120 saniye sonra `http` tekrar kaybolur."]
+   },
+   "v03": {
+    "title": "Permanent ve runtime",
+    "text": "http'yi kalıcı yaz; `--reload` öncesi ve sonrası kalıcı ve runtime listelerini karşılaştır.",
+    "blocks": [{"cmd": "sudo firewall-cmd --permanent --add-service=http\nsudo firewall-cmd --list-services --permanent\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-services", "expected": "success\ncockpit dhcpv6-client http ssh\nsuccess\ncockpit dhcpv6-client http ssh"}],
+    "differs": ["`--reload` sonrası runtime listesi kalıcı listeyle aynı olur.", "`--reload` olmadan runtime listesinde `http` olmazdı (v02 hâlâ etkin değilse)."]
+   },
+   "v04": {
+    "title": "Port aç ve kapat",
+    "text": "8080/tcp'yi kalıcı aç, reload yap ve kontrol et. Sonra tekrar kaldır ve reload yap.",
+    "blocks": [{"cmd": "sudo firewall-cmd --permanent --add-port=8080/tcp\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-ports\nsudo firewall-cmd --permanent --remove-port=8080/tcp\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-ports", "expected": "success\nsuccess\n8080/tcp\nsuccess\nsuccess\n"}],
+    "differs": ["Son `--list-ports` çıktısı boş olmalı."]
+   },
+   "v05": {
+    "title": "Ubuntu: önce SSH ile ufw",
+    "text": "Ubuntu'da önce SSH'a izin ver, sonra ufw'yi etkinleştir ve durumu oku. Durum çıktısını yapıştır.",
+    "blocks": [{"cmd": "sudo ufw allow OpenSSH\nsudo ufw enable\nsudo ufw status verbose", "expected": "Status: active\nDefault: deny (incoming), allow (outgoing)\n\nTo            Action      From\n22/tcp        ALLOW IN    Anywhere"}],
+    "differs": ["ufw `Command may disrupt existing ssh connections` diye sorabilir — SSH izinli olduğu için sorun yok.", "ufw bulunamazsa: `sudo apt install ufw`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "`firewall-cmd --permanent --add-service=http` tek başına ne yapar?", "options": ["http'yi hemen ve kalıcı olarak açar", "Kuralı diske yazar, `--reload` sonrası etkin olur", "http'yi 60 saniyeliğine açar", "http'yi runtime'dan kaldırır"], "explain": "`--permanent` yalnızca saklanan yapılandırmayı değiştirir. Çalışan güvenlik duvarı `--reload` sonrası değişir."},
+  "q2": {"q": "Yeni bir Ubuntu sunucusuna SSH ile bağlısın. `ufw enable`'dan önce ne gelmeli?", "options": ["`ufw reset`", "`ufw deny 22`", "`ufw allow OpenSSH`", "`ufw delete 1`"], "explain": "ufw varsayılan olarak gelen trafiği engeller. SSH kuralı olmadan kendini dışarıda bırakırsın."},
+  "q3": {"q": "`--add-service` ile `--timeout=60` ne yapar?", "options": ["Runtime kuralı 60 saniye sonra kalkar", "Kural 60 gün kalıcı olur", "Eklemeden önce 60 saniye bekler", "Bağlantıları dakikada 60 ile sınırlar"], "explain": "Timeout'lu kurallar yalnızca runtime'dadır ve kendiliğinden kalkar — testler için güvenlik ağı."},
+  "q4": {"q": "`firewall-cmd --reload` yalnızca runtime'daki kurallara ne yapar?", "options": ["Kalıcı olurlar", "Korunurlar", "Tüm trafiği engellerler", "Silinirler"], "explain": "`--reload` kalıcı yapılandırmayı yükler ve yalnızca runtime'daki değişiklikleri atar."}
+ },
+ "summary": [
+  "firewalld arayüzleri zone'lara ayırır; `--list-all` bir zone'un neye izin verdiğini gösterir.",
+  "Runtime şu an etkindir; `--permanent` saklanır ve `--reload` ister; `--reload` yalnızca runtime'daki kuralları siler.",
+  "`--timeout` ile test et, önce ve sonra doğrula, ikinci SSH oturumu ve snapshot hazır olsun.",
+  "Standart portlar için servis, diğerleri için `--add-port`; rich rule bir kuralı kaynak ağa sınırlar.",
+  "Ubuntu'da: önce `ufw allow OpenSSH`, sonra `ufw enable`."
+ ],
+ "glossary": [
+  {"term": "zone", "meaning": "Kendi izinli servis ve portlarına sahip güven seviyesi; her arayüz bir zone'a aittir."},
+  {"term": "servis", "meaning": "Önceden tanımlı firewalld port seti, örneğin http = 80/tcp."},
+  {"term": "port", "meaning": "Açık bir numara ve protokol, örneğin 8080/tcp."},
+  {"term": "runtime", "meaning": "Şu an geçerli yapılandırma; reload veya yeniden başlatmada kaybolur."},
+  {"term": "permanent", "meaning": "Diskte saklanan yapılandırma; `--reload` veya yeniden başlatmayla uygulanır."},
+  {"term": "--reload", "meaning": "Kalıcı yapılandırmayı yükler ve yalnızca runtime'daki kuralları atar."},
+  {"term": "--timeout", "meaning": "Bir runtime kuralının belirli süre sonra kendiliğinden kalkmasını sağlar."},
+  {"term": "rich rule", "meaning": "Kaynak, port, protokol ve eylem içeren koşullu kural."},
+  {"term": "ufw", "meaning": "Uncomplicated Firewall, Ubuntu'nun varsayılan arayüzü."},
+  {"term": "kilitlenme", "meaning": "Güvenlik duvarı değişikliği yüzünden kendi SSH erişimini kaybetmek."}
+ ]
+}

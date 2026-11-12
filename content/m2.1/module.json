@@ -1,0 +1,158 @@
+{
+ "id": "2.1",
+ "level": 2,
+ "setup": {
+  "dirs": [
+   "/opt/shopapp/bin",
+   "/opt/shopapp/logs"
+  ],
+  "files": {
+   "/opt/shopapp/bin/shopapp": "#!/bin/bash\necho shopapp\n",
+   "/opt/shopapp/logs/app.log": "INFO: started\nERROR: db timeout\nINFO: retry ok\n"
+  }
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^cd /$", "ok": true},
+   "solution": ["cd /"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"out": "passwd", "of": "^ls /etc/?$"},
+   "solution": ["ls /etc"]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"out": "VERSION_ID", "of": "^cat /etc/os-release$"},
+   "solution": ["cat /etc/os-release"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "messages", "of": "^ls /var/log/?$"},
+   "solution": ["ls /var/log"]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "alice", "of": "^ls /home/?$"},
+   "solution": ["ls /home"]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "linux-lab", "of": "^cat /etc/hostname$"},
+   "solution": ["cat /etc/hostname"]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "model name", "of": "^cat /proc/cpuinfo$"},
+   "solution": ["cat /proc/cpuinfo"]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "->", "of": "^ls -ld? /bin$"},
+   "solution": ["ls -ld /bin"]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^cat /etc/shadow$", "ok": false},
+   "solution": ["cat /etc/shadow"]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^ls /root/?$", "ok": false},
+   "solution": ["ls /root"]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"cmd": "^cd /var/log$", "ok": true},
+   "solution": ["cd /var/log"]
+  },
+  {
+   "id": "t12",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"exists": "~/mini-root/etc", "type": "d"},
+    {"exists": "~/mini-root/var/log", "type": "d"},
+    {"exists": "~/mini-root/tmp", "type": "d"},
+    {"exists": "~/mini-root/etc/app.conf", "type": "f"},
+    {"contains": ["/home/student/mini-root/var/log/app.log", "started"]}
+   ],
+   "solution": [
+    "mkdir -p ~/mini-root/{etc,var/log,tmp}",
+    "touch ~/mini-root/etc/app.conf",
+    "echo started > ~/mini-root/var/log/app.log"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"contains": ["/home/student/idcard.txt", "linux-lab"]},
+    {"contains": ["/home/student/idcard.txt", "alice"]},
+    {"contains": ["/home/student/idcard.txt", "Red Hat"]}
+   ],
+   "solution": [
+    "cat /etc/hostname > ~/idcard.txt",
+    "ls /home >> ~/idcard.txt",
+    "grep PRETTY_NAME /etc/os-release >> ~/idcard.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {"out": "/etc/ssh/sshd_config", "of": "^find /etc -name \\S*sshd_config\\S*$"},
+   "solution": ["find /etc -name sshd_config"]
+  },
+  {
+   "id": "t15",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"contains": ["/home/student/ticket-2410.txt", "db timeout"]}
+   ],
+   "solution": [
+    "grep ERROR /opt/shopapp/logs/app.log > ~/ticket-2410.txt"
+   ]
+  }
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*etc)(?=[\\s\\S]*var)(?=[\\s\\S]*usr)"},
+  {"id": "v02", "expect": "NAME=|ID="},
+  {"id": "v03", "expect": "bin\\s*->\\s*(\\./)?usr/bin"},
+  {"id": "v04", "expect": "processor|model name|cpu"},
+  {"id": "v05", "expect": "messages|syslog|journal|auth|secure|dnf|apt|dpkg|wtmp"},
+  {"id": "v06", "expect": "lab-test\\.txt"},
+  {"id": "v07", "expect": "crw-rw-rw-|null"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 2},
+  {"id": "q2", "answer": 1},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

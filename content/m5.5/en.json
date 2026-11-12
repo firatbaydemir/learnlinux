@@ -1,0 +1,84 @@
+{
+  "title": "Package Management",
+  "lead": "Search, install, update, and remove software with your distribution's package manager; distinguish repositories from the installed package database.",
+  "objectives": [
+    "You know Debian-family systems use apt/dpkg and RHEL-family systems use dnf/rpm.",
+    "You can search, inspect, install, update, and remove packages.",
+    "You review changes before installation and protect critical packages."
+  ],
+  "sections": [
+    {
+      "id": "families",
+      "title": "Distributions and package tools",
+      "body": [
+        "Package managers download software from signed repositories, resolve dependencies, and update the installed package database. Ubuntu and Debian use `apt` as the high-level tool and `dpkg` for lower-level queries; Rocky, Alma, and Fedora use `dnf` and `rpm`.",
+        "The package name for the same software can vary by distribution: Apache HTTP Server is usually `httpd` on the RHEL family and `apache2` on the Debian family. Identify the distribution and correct package name first."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/os-release", "what": "Shows the distribution name, version, and identifier.", "where": "Before choosing a package command or service name.", "why": "It confirms whether the system is in the Debian or RHEL family.", "example": "cat /etc/os-release"},
+        {"cmd": "apt search / dnf search", "what": "Searches configured repositories by package name or description.", "where": "When you are unsure of the package name.", "why": "It reduces the chance of installing the wrong package.", "example": "dnf search nginx", "nosim": true}
+      ],
+      "tip": "Choose `apt` or `dnf` for the system family; do not assume the same command is available everywhere."
+    },
+    {
+      "id": "install",
+      "title": "Search, install, and update",
+      "body": [
+        "Before installing, inspect the package description and source. `apt update` refreshes package lists on Debian-family systems; it does not upgrade packages by itself. `dnf check-update` checks whether updates are available.",
+        "Installing packages and system updates requires administrator privileges. Read the confirmation prompt to see which packages will be installed, removed, or updated. Cancel if critical, unexpected changes are listed."
+      ],
+      "commands": [
+        {"cmd": "sudo apt install package / sudo dnf install package", "what": "Installs a repository package and its required dependencies.", "where": "After verifying the package name and source.", "why": "It keeps the package database consistent instead of placing downloaded files manually.", "example": "sudo dnf install cowsay", "nosim": true},
+        {"cmd": "sudo apt update / sudo dnf check-update", "what": "Refreshes repository package information or checks for updates.", "where": "Before Debian-family installations or when checking for updates.", "why": "The package manager uses current repository information.", "example": "sudo apt update", "nosim": true}
+      ],
+      "tip": "`apt update` refreshes package lists; use `apt upgrade` separately to upgrade installed packages."
+    },
+    {
+      "id": "remove",
+      "title": "Remove and verify packages",
+      "body": [
+        "`apt remove` and `dnf remove` may affect dependencies when removing a package. `apt purge` also removes package configuration; `autoremove` finds dependencies that are no longer needed. Review the proposed removals carefully.",
+        "`dpkg -l` or `rpm -qa` lists installed packages. These lower-level tools are useful for queries, not installation; use `apt` or `dnf` to install or remove packages."
+      ],
+      "commands": [
+        {"cmd": "sudo apt remove / sudo dnf remove", "what": "Removes a package through the package manager.", "where": "When a test package is no longer needed.", "why": "It updates the package database and dependencies in a controlled way.", "example": "sudo apt remove cowsay", "nosim": true},
+        {"cmd": "dpkg -l / rpm -qa", "what": "Queries the list of installed packages.", "where": "When verifying whether a package is installed.", "why": "It reports the installation state from the package database.", "example": "rpm -qa | grep cowsay", "nosim": true}
+      ],
+      "warn": "Installing or removing packages changes the system. Practise only in your own VM; do not remove critical packages such as `kernel`, `systemd`, SSH, or networking tools. Review the confirmation list."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Find the high-level package manager for the RHEL family in the package notes.", "hint": "The line from `grep RHEL ~/lab/package_notes.txt` contains `dnf`."},
+    "t02": {"text": "Find the high-level package manager for Ubuntu/Debian.", "hint": "The line from `grep Ubuntu ~/lab/package_notes.txt` contains `apt`."},
+    "t03": {"text": "Predict how many lines contain `package`, then verify with `grep -c`.", "hint": "`grep -c package ~/lab/package_notes.txt`"},
+    "t04": {"text": "Write in `~/lab/install_plan.txt` that Ubuntu/Debian should refresh repository lists before installing.", "hint": "Record the command `sudo apt update`."},
+    "t05": {"text": "Add the `cowsay` installation command for both the RHEL and Debian families to your plan.", "hint": "`sudo dnf install cowsay` and `sudo apt install cowsay`."},
+    "t06": {"text": "Write a cleanup plan reminding you to review `autoremove` suggestions before removing a test package.", "hint": "Save the note in `~/lab/cleanup_plan.txt`."},
+    "t07": {"text": "For ticket #5501, note that you should identify the distribution and that the web package is named `httpd` or `apache2` depending on the family.", "hint": "Write the note to `~/lab/ticket_5501.txt`."}
+  },
+  "vm": {
+    "intro": "Installing and removing packages changes your system. Work only in your own test VM, never on a production system, and always read confirmation prompts.",
+    "tasks": {
+      "v01": {"title": "Identify the distribution", "text": "Check the distribution identifier and which package tools are available.", "blocks": [{"cmd": "cat /etc/os-release\ncommand -v apt\ndnf --version", "expected": "The ID= line identifies the distribution; apt or dnf is available for your family."}], "differs": ["You may not have both package managers; use the one for your distribution.", "ID or ID_LIKE helps identify the distribution family."]},
+      "v02": {"title": "Inspect a package before installing", "text": "First display information about the `cowsay` package. Run only the command appropriate for your distribution.", "blocks": [{"cmd": "apt-cache policy cowsay", "expected": "Candidate or package version"}, {"cmd": "dnf info cowsay", "expected": "Available Packages or package information"}], "differs": ["Use apt-cache on Debian/Ubuntu and dnf on Rocky/Alma/Fedora.", "If the package is not found, package lists may be stale or an enabled repository may not contain it."]},
+      "v03": {"title": "Install a test package", "text": "Install the small `cowsay` package only in your own test VM, using the command for your distribution. Review the changes in the confirmation prompt.", "blocks": [{"cmd": "sudo apt install cowsay", "expected": "Setting up cowsay or installation complete"}, {"cmd": "sudo dnf install cowsay", "expected": "Complete! or Installed: cowsay"}], "differs": ["Run only one block: apt for Debian/Ubuntu, dnf for the RHEL family.", "If the package cannot be found, check the repository and package name before proceeding."]},
+      "v04": {"title": "Remove the test package", "text": "After the test, remove `cowsay` with the same package manager and verify the result. Review the proposed removals before confirming.", "blocks": [{"cmd": "sudo apt remove cowsay", "expected": "Removing cowsay or cowsay was removed"}, {"cmd": "sudo dnf remove cowsay", "expected": "Removing: cowsay or Complete!"}], "differs": ["Use only the command for the distribution family where you installed the package.", "If unexpected important packages are listed, do not confirm; cancel with `n`."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "Which high-level package tool is commonly used on Ubuntu and Debian?", "options": ["apt", "dnf", "rpm", "systemctl"], "explain": "`apt` manages repositories and package installations on Debian-family systems."},
+    "q2": {"q": "What is the usual Apache HTTP Server package name on the RHEL family?", "options": ["apache2", "nginx", "httpd", "openssh"], "explain": "It is usually httpd on the RHEL family and apache2 on the Debian family."},
+    "q3": {"q": "What does `apt update` do?", "options": ["Upgrades the kernel", "Refreshes package repository lists", "Removes all packages", "Reboots the system"], "explain": "apt update refreshes local repository indexes; use apt upgrade to upgrade installed packages."},
+    "q4": {"q": "What should you do at an installation confirmation prompt?", "options": ["Always confirm", "Ignore critical packages", "Press Enter without reading the output", "Review packages to be added or removed"], "explain": "Dependency resolution can change other packages; review the list before proceeding."}
+  },
+  "summary": [
+    "Ubuntu/Debian: apt/dpkg; Rocky/Alma/Fedora: dnf/rpm. Verify your distribution and package names first.",
+    "`apt update` refreshes package lists; installation and upgrades are separate operations.",
+    "Review proposed changes before removal and `autoremove`; protect critical system packages."
+  ],
+  "glossary": [
+    {"term": "repository", "meaning": "A software source where a distribution publishes packages and package information."},
+    {"term": "dependency", "meaning": "Another package required for a package to install or run."},
+    {"term": "package manager", "meaning": "A tool that installs, updates, and removes packages and their dependencies."}
+  ]
+}

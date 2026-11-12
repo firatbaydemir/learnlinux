@@ -1,0 +1,179 @@
+{
+ "title": "Komut başarısı: $?, &&, || ve hata mesajları",
+ "lead": "Çıktının olmaması hata demek değildir. Her komut bir çıkış durumu (exit status) bırakır; bu modülde onu okumayı, komutları buna göre zincirlemeyi ve hata mesajlarını anlamayı öğrenirsin.",
+ "objectives": [
+  "`echo $?` ile son komutun çıkış durumunu okur ve 0 / sıfırdan farklı ayrımını yaparsın.",
+  "`true`, `false`, `&&`, `||` ve `;` ile komutları koşullu zincirlersin.",
+  "stdout ile stderr farkını bilir, `2>` ile hataları ayırırsın.",
+  "`Permission denied`, `No such file or directory`, `command not found` mesajlarını okur ve nedenini bulursun.",
+  "`test` ve `[ ]` ile dosya/sayı/metin koşullarını sınarsın."
+ ],
+ "sections": [
+  {
+   "id": "status",
+   "title": "Çıkış durumu: $?",
+   "body": [
+    "Her komut bittiğinde bir **çıkış durumu** (exit status) üretir. **0 = başarılı**, 0 dışındaki her sayı = başarısız. Sessiz bir komut (örneğin `mkdir`) başarılı da olabilir, başarısız da; emin olmak için `echo $?` yaz.",
+    "Yaygın kodlar: `1` genel hata, `2` yanlış kullanım veya bulunamayan yol (`ls`), `126` çalıştırma izni yok, `127` komut bulunamadı, `130` Ctrl+C ile kesildi.",
+    "Dikkat: `$?` her komuttan sonra ezilir. Hemen arkasından yazdığın `echo $?` kendi sonucunu (0) bırakır; kodu **ilgili komutun hemen ardından** oku."
+   ],
+   "commands": [
+    {"cmd": "echo $?", "what": "Son komutun çıkış durumunu yazdırır.", "where": "Çıktısı olmayan komutların sonucunu kontrol ederken.", "why": "Komutun gerçekten çalışıp çalışmadığını sayıyla gösterir.", "example": "pwd; echo $?"},
+    {"cmd": "true", "what": "Hiçbir şey yapmaz, her zaman 0 ile biter.", "where": "Zincir ve döngü denemelerinde, 'başarılı' bir komut gerektiğinde.", "why": "Başarı durumunu kolayca üretir.", "example": "true; echo $?"},
+    {"cmd": "false", "what": "Hiçbir şey yapmaz, her zaman 1 ile biter.", "where": "Hata yolunu denerken.", "why": "Başarısızlık durumunu kolayca üretir.", "example": "false; echo $?"}
+   ],
+   "tip": "Bir komutun çıktısı olmaması hata değildir. Çoğu Unix komutu başarıda sessizdir."
+  },
+  {
+   "id": "chain",
+   "title": "Zincirleme: &&, || ve ;",
+   "body": [
+    "`A && B`: B yalnızca A **başarılıysa** (0) çalışır. `A || B`: B yalnızca A **başarısızsa** çalışır. `A ; B`: B her durumda çalışır.",
+    "Klasik kalıp: `mkdir lab && cd lab` (klasör oluştuysa içine gir). `A && B || C` kalıbı bir 'if/else' gibi davranır; ama B başarısız olursa C de çalışır, bu yüzden basit durumlar için kullan."
+   ],
+   "commands": [
+    {"cmd": "&&", "what": "Soldaki başarılıysa sağdakini çalıştırır.", "where": "Birbirine bağımlı adımlarda.", "why": "Hatalı bir adımdan sonra yanlış devam etmeyi önler.", "example": "mkdir lab && cd lab"},
+    {"cmd": "||", "what": "Soldaki başarısızsa sağdakini çalıştırır.", "where": "Hata mesajı veya yedek plan için.", "why": "Başarısızlığa otomatik tepki verir.", "example": "cd /nonexistent || echo failed"},
+    {"cmd": ";", "what": "Komutları başarıya bakmadan sırayla çalıştırır.", "where": "Bağımsız komutları tek satırda yazarken.", "why": "Sıra korunur, sonuç umursanmaz.", "example": "pwd; whoami; hostname"}
+   ],
+   "warn": "`rm -r old_project && ...` gibi zincirlerde `;` kullanırsan önceki adım başarısız olsa bile yıkıcı komut çalışır. Yıkıcı adımları `&&` ile bağla."
+  },
+  {
+   "id": "streams",
+   "title": "stdout ve stderr",
+   "body": [
+    "Her komutun iki çıktı kanalı vardır: **stdout** (kanal 1, normal çıktı) ve **stderr** (kanal 2, hata mesajları). İkisi de ekranda görünür, ama ayrı yönlendirilebilir.",
+    "`>` yalnızca stdout'u dosyaya alır; hata ekranda kalır. `2>` hataları dosyaya alır. `2>/dev/null` hataları çöpe atar. `2>&1` stderr'i stdout'un gittiği yere gönderir. Dikkat: yönlendirme **çıkış durumunu değiştirmez**; hata gizlense de komut yine başarısızdır."
+   ],
+   "commands": [
+    {"cmd": "2>", "what": "Hata mesajlarını (stderr) dosyaya yazar.", "where": "Hataları sonradan incelemek için.", "why": "Normal çıktıyı hatalardan ayırır.", "example": "ls /nonexistent 2> errors.txt"},
+    {"cmd": "2>/dev/null", "what": "Hata mesajlarını atar.", "where": "Beklenen, önemsiz hataları susturmak için.", "why": "Çıktıyı temiz tutar; ama gerçek sorunları da gizler.", "example": "ls /nonexistent 2>/dev/null; echo $?"},
+    {"cmd": "2>&1", "what": "stderr'i stdout ile aynı yere yönlendirir.", "where": "Hem çıktıyı hem hatayı tek dosyada/boru hattında toplarken.", "why": "Tam kaydı tek yerde tutar.", "example": "ls ~ /nonexistent > all.txt 2>&1"}
+   ]
+  },
+  {
+   "id": "errors",
+   "title": "Hata mesajlarını okumak",
+   "body": [
+    "Hata mesajı genelde `program: argüman: neden` biçimindedir. İlk kelime hatayı veren programdır, ikincisi sorunlu yoldur, sonuncusu nedendir.",
+    "**No such file or directory**: yol yok veya yazım hatası var; `ls` ve `pwd` ile nerede olduğunu kontrol et. **Permission denied**: yol var ama iznin yok; `ls -l` ile izinlere bak. **command not found** (kod 127): komut adı yanlış ya da kurulu değil; `type` / `which` ile kontrol et. **Is a directory**: dosya bekleyen komuta klasör verdin."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Dosya izinlerini ve sahibini gösterir.", "where": "Permission denied hatasının nedenini ararken.", "why": "Hangi izin eksik, görürsün.", "example": "ls -l locked.txt"},
+    {"cmd": "type", "what": "Bir adın komut, yerleşik veya takma ad olduğunu söyler.", "where": "command not found hatasında.", "why": "Komutun var olup olmadığını gösterir.", "example": "type ls"}
+   ],
+   "danger": "Permission denied gördüğünde refleks olarak `sudo` veya `chmod 777` yazma. Önce nedenini anla; gereksiz geniş izinler güvenlik açığıdır."
+  },
+  {
+   "id": "test",
+   "title": "Koşul sınama: test ve [ ]",
+   "body": [
+    "`test` (ve eşdeğeri `[ ... ]`) bir koşulu sınar, çıktı vermez; sonucu yalnızca çıkış durumuyla bildirir: doğruysa 0, yanlışsa 1. Bu yüzden `&&` / `||` ile çok iyi uyum sağlar.",
+    "Sık kullanılanlar: `-f` düzenli dosya mı, `-d` klasör mü, `-e` var mı, `-r`/`-w`/`-x` okunur/yazılır/çalıştırılır mı, `-z` metin boş mu. Sayılar için `-eq -ne -gt -lt`, metin için `=` ve `!=`. `[ ]` içinde köşeli parantezlerin iç kenarlarında **boşluk** şarttır."
+   ],
+   "commands": [
+    {"cmd": "test -f", "what": "Yol var ve düzenli dosya ise başarılı olur.", "where": "Dosya varlığını denetlerken.", "why": "Dosya yokken komutu çalıştırıp hata almazsın.", "example": "test -f notes.txt && echo yes"},
+    {"cmd": "[ -d ]", "what": "Yol bir klasörse başarılı olur.", "where": "Klasör yoksa oluşturmak gibi durumlarda.", "why": "Koşullu işlem yapmanı sağlar.", "example": "[ -d Documents ] && echo dir"},
+    {"cmd": "[ -gt ]", "what": "Sayıları karşılaştırır (-eq -ne -gt -lt).", "where": "Sayısal kontrollerde.", "why": "Sayısal koşulları çıkış durumuna çevirir.", "example": "[ 3 -gt 2 ] && echo gt"}
+   ],
+   "tip": "Klasik kalıp: `test -d backup || mkdir backup`. Klasör yoksa oluşturur, varsa dokunmaz."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Önce `pwd` çalıştır, hemen ardından `echo $?` ile çıkış durumunu oku.", "hint": "İki ayrı satır yaz; kod 0 olmalı."},
+  "t02": {"text": "Var olmayan bir yolu listele: `ls /nonexistent` ve hata mesajını oku.", "hint": "Hata mesajı stderr'e gider; ekranda görünür."},
+  "t03": {"text": "`false` çalıştır, sonra `echo $?` ile durumunu oku. Kaç çıktı?", "hint": "`false` her zaman başarısız olur."},
+  "t04": {"text": "Tek satırda `mkdir lab && cd lab` yazıp klasörü oluştur ve içine gir.", "hint": "`&&` ikinci komutu yalnızca ilki başarılıysa çalıştırır."},
+  "t05": {"text": "`cd /nonexistent || echo failed` yaz; neden `failed` yazıldığını düşün.", "hint": "`cd` başarısız olunca `||` sağ tarafı çalıştırır."},
+  "t06": {"text": "Tahmin et: `cat missing.txt; echo $?` ne yazar ve kod kaç olur? Sonra çalıştırıp doğrula.", "hint": "`cat` bulamayınca hata verir ve 1 ile çıkar."},
+  "t07": {"text": "Tahmin et: `test -f notes.txt && echo yes || echo no` ne yazar? Çalıştırıp doğrula.", "hint": "`notes.txt` home'da var ve düzenli dosya."},
+  "t08": {"text": "`cat locked.txt` 'Permission denied' veriyor. Nedenini anla, `chmod` ile düzelt ve dosyayı oku.", "hint": "Kendine okuma izni ver: `chmod u+r locked.txt`."},
+  "t09": {"text": "`cp notes.txt backup/` hata veriyor çünkü `backup` yok. Zincirle: klasörü oluştur ve dosyayı kopyala.", "hint": "`mkdir backup && cp notes.txt backup/`."},
+  "t10": {"text": "Mini proje: (1) `ls /nonexistent` hatasını `errors.txt` dosyasına al, (2) `ls ~` çıktısını `files.txt` dosyasına yaz, (3) son komutun durumunu `echo $?` ile oku.", "hint": "Hata için `2>`, çıktı için `>` kullan."},
+  "t11": {"text": "Mini proje: tek satırda `project` klasörünü oluştur, içine gir, `main.txt` dosyasını yarat ve sonda `built` yaz.", "hint": "Dört komutu `&&` ile bağla; `mkdir -p project` kullanabilirsin."},
+  "t12": {"text": "Zorlu görev: `backup` klasörü yoksa oluştur; `notes.txt` dosyasını oraya kopyala; kopyalama başarılıysa `status.txt` içine `saved`, başarısızsa `failed` yaz.", "hint": "`test -d backup || mkdir backup` ve `cp ... && echo saved > status.txt || echo failed > status.txt`."},
+  "t13": {"text": "Zorlu görev: `notes.txt` içinde `hello` geçiyor mu? Tek satırda sınayıp `found` veya `missing` yazdır; grep'in kendi çıktısını `/dev/null`'a at.", "hint": "`grep hello notes.txt > /dev/null && echo found || echo missing`."},
+  "t14": {"text": "Ticket: Bir çalışan 'raporumu okuyamıyorum' diyor ve `cat Documents/raport.txt` komutunu denemiş. Doğru adı `ls Documents` ile bul, dosyayı `cat` ile oku ve çıkış durumunu `exit.txt` dosyasına yaz.", "hint": "Doğru ad `report.txt`. `cat Documents/report.txt; echo $? > exit.txt`."}
+ },
+ "vm": {
+  "intro": "Aşağıdaki komutları kendi VM'inde (Ubuntu/Rocky/Alma veya WSL) çalıştır; yalnızca güvenli, okuma amaçlı komutlar kullanıyoruz. Çıktıyı yapıştır, kontrol et.",
+  "tasks": {
+   "v01": {
+    "title": "Başarı ve başarısızlık kodu",
+    "text": "Biri başarılı, biri başarısız iki komut çalıştır ve her birinin ardından kodu oku. Tüm çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "ls /\necho $?\nls /nonexistent\necho $?", "expected": "bin  boot  dev  etc ...\n0\nls: cannot access '/nonexistent': No such file or directory\n2"}
+    ],
+    "differs": [
+     "Başarısız `ls` kodu 2'dir (GNU ls); diğer komutlarda 1 görebilirsin, sorun değil, 0 olmaması önemli.",
+     "Mesaj yerelleştirilmişse dilin farklı olabilir; kod aynıdır."
+    ]
+   },
+   "v02": {
+    "title": "command not found: 127",
+    "text": "Var olmayan bir komut çalıştır ve çıkış durumunu oku.",
+    "blocks": [
+     {"cmd": "nonexistentcmd\necho $?", "expected": "bash: nonexistentcmd: command not found\n127"}
+    ],
+    "differs": [
+     "Ubuntu bazen 'Command not found' ile paket önerir; kod yine 127'dir.",
+     "`echo $?` iki kez yazarsan ikincisi 0 olur; yalnızca hemen ilk komutun ardından oku."
+    ]
+   },
+   "v03": {
+    "title": "&& ve || davranışı",
+    "text": "Zincirleri dene ve hangi tarafın çalıştığını gör.",
+    "blocks": [
+     {"cmd": "true && echo ok\nfalse && echo never\nfalse || echo fallback\ntrue ; echo always", "expected": "ok\nfallback\nalways"}
+    ],
+    "differs": [
+     "`never` görünüyorsa `&&` yerine `;` yazmış olabilirsin.",
+     "Hiçbir şey yazmıyorsa tırnak veya boşluk hatası ara."
+    ]
+   },
+   "v04": {
+    "title": "Permission denied",
+    "text": "Normal kullanıcı olarak okuyamadığın bir dosyayı aç, hatayı ve durumu yapıştır (okuma amaçlıdır, bir şey değişmez).",
+    "blocks": [
+     {"cmd": "cat /etc/shadow\necho $?", "expected": "cat: /etc/shadow: Permission denied\n1"}
+    ],
+    "differs": [
+     "root olarak çalışıyorsan dosya açılır; normal kullanıcıya geç (`su - student` veya yeni kullanıcı).",
+     "Eski sistemlerde `/etc/shadow` yerine `/etc/sudoers` deneyebilirsin."
+    ]
+   },
+   "v05": {
+    "title": "test ile koşul",
+    "text": "Dosya ve klasör koşullarını sına. Sonucu `yes` / `no` olarak yapıştır.",
+    "blocks": [
+     {"cmd": "test -d /etc && echo yes || echo no\ntest -f /etc/nonexistent && echo yes || echo no", "expected": "yes\nno"}
+    ],
+    "differs": [
+     "İkisi de `yes` ise `-f` yerine `-e` yazmış olabilirsin.",
+     "`[ -d /etc ]` yazarken `[` ve `]` çevresindeki boşlukları unutma."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Başarılı biten bir komutun çıkış durumu nedir?", "options": ["1", "0", "127", "255"], "explain": "0 başarıyı, sıfırdan farklı her değer bir başarısızlığı gösterir."},
+  "q2": {"q": "`A && B` satırında B ne zaman çalışır?", "options": ["Her zaman", "Yalnızca A başarısız olursa", "Yalnızca A başarılı olursa (0)", "Hiçbir zaman"], "explain": "`&&` 'VE' gibi davranır; B yalnızca A 0 ile biterse çalışır."},
+  "q3": {"q": "Çıkış durumu 127 neyi gösterir?", "options": ["Komut bulunamadı", "İzin reddedildi", "Ctrl+C ile kesildi", "Dosya bulunamadı"], "explain": "127 = command not found. İzin sorunu 126, Ctrl+C ise 130'dur."},
+  "q4": {"q": "`ls /nonexistent 2>/dev/null; echo $?` ne yapar?", "options": ["Hata mesajını gösterir, 0 yazar", "Klasörü oluşturur", "Hiçbir şey yazmaz", "Hata mesajını gizler ama durum sıfırdan farklı kalır"], "explain": "`2>/dev/null` yalnızca mesajı atar; komut yine başarısızdır ve `$?` 0 olmaz."}
+ },
+ "summary": [
+  "Çıkış durumu: 0 başarılı, diğerleri hata. `echo $?` ile hemen oku.",
+  "`&&` başarıda, `||` başarısızlıkta, `;` her durumda devam eder.",
+  "stdout `>` ile, stderr `2>` ile yönlendirilir; yönlendirme çıkış durumunu değiştirmez.",
+  "Hata mesajı: program, yol, neden. 127 = komut yok, Permission denied = izin yok.",
+  "`test` ve `[ ]` koşulları çıkış durumuna çevirir."
+ ],
+ "glossary": [
+  {"term": "exit status", "meaning": "Bir komutun bitince bıraktığı sayı; 0 = başarı."},
+  {"term": "stdout", "meaning": "Standart çıktı (kanal 1); normal sonuçlar."},
+  {"term": "stderr", "meaning": "Standart hata (kanal 2); hata mesajları."},
+  {"term": "&&", "meaning": "Soldaki başarılıysa sağdakini çalıştıran operatör."},
+  {"term": "||", "meaning": "Soldaki başarısızsa sağdakini çalıştıran operatör."},
+  {"term": "/dev/null", "meaning": "Yazılanı yutan özel dosya."}
+ ]
+}

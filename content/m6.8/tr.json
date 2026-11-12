@@ -1,0 +1,225 @@
+{
+ "title": "Bitirme Projesi — Küçük Şirket Sunucusu",
+ "lead": "Öğrendiklerini tek sunucuda birleştir: kullanıcılar, ortak dizin, web sitesi, güvenlik duvarı, yedek, zamanlayıcı ve doğrulanmış bir teslim raporu.",
+ "objectives": [
+  "Önce tüm sunucuyu planlar, bir şeyi değiştirmeden önce VM anlık görüntüsü (snapshot) alırsın.",
+  "alice, bob, carol kullanıcılarını, staff ve admins gruplarını ve setgid'li ortak dizin /srv/company'yi kurarsın.",
+  "nginx ile site yayınlar, doğru etiketler (SELinux) veya AppArmor'u kontrol eder, SSH'ten kopmadan 80/443 portlarını açarsın.",
+  "Yedeği bir betik ve systemd zamanlayıcısı ile otomatikleştirirsin.",
+  "Her adımı kontrol listesiyle doğrular ve teslim raporu yazarsın."
+ ],
+ "sections": [
+  {
+   "id": "plan",
+   "title": "1. Önce plan ve güvenlik",
+   "body": [
+    "Hedef: `linux-lab` adlı küçük bir şirket sunucusu. Üç kişi çalışıyor: **alice** (yönetici), **bob** ve **carol**. Her şey `/srv/company` altında: `shared` (ekip dosyaları), `admin` (yalnızca yöneticiler), `web` (site), `backup` ve `scripts`.",
+    "**VM'de çalış, asla üretim makinesinde değil.** Bu proje kullanıcı oluşturur, izinleri, SELinux etiketlerini, güvenlik duvarı kurallarını ve systemd birimlerini değiştirir. Başlamadan önce **snapshot** al (modül 0.2). Bir adım bozulursa saniyeler içinde geri dönersin.",
+    "Yerleşik terminal `useradd`, `nginx`, `firewall-cmd` veya `systemctl` çalıştıramaz. Bu yüzden simülatör görevleri projenin **dosyalarını** (izin ağacı, betik, birim dosyaları, rapor) `~/srv/company` altında yeniden kurar; VM görevleri ise gerçek işi `/srv/company` içinde yapar.",
+    "Çalışma sırası: 1) plan + snapshot, 2) kullanıcılar ve dizinler, 3) web, 4) güvenlik duvarı, 5) yedek + zamanlayıcı, 6) doğrulama + rapor. RHEL/Rocky ile Debian/Ubuntu yalnızca birkaç komutta ayrılır; ikisi de gösterilir."
+   ],
+   "commands": [
+    {"cmd": "cat /etc/os-release", "what": "Dağıtım adını ve sürümünü gösterir.", "where": "dnf mi apt mi kullanacağını seçmeden önce.", "why": "Rehberin hangi varyantının geçerli olduğunu söyler.", "example": "cat /etc/os-release"},
+    {"cmd": "getenforce", "what": "SELinux modunu yazar: Enforcing, Permissive veya Disabled.", "where": "RHEL, Rocky, Alma, Fedora.", "why": "Web etiketini denemeden önce modu bilmelisin; Enforcing kalsın.", "example": "getenforce", "nosim": true},
+    {"cmd": "sudo aa-status", "what": "Hangi AppArmor profillerinin hangi modda yüklü olduğunu gösterir.", "where": "Debian ve Ubuntu.", "why": "Ubuntu SELinux yerine AppArmor kullanır; burada yalnızca kontrol edersin.", "example": "sudo aa-status", "nosim": true},
+    {"cmd": "id", "what": "Kullanıcı kimliğini ve grup üyeliklerini gösterir.", "where": "Ortak dizini kimin kullanabileceğini kontrol ederken.", "why": "Grup üyeliği `/srv/company/shared` erişimini belirler.", "example": "id student"}
+   ],
+   "warn": "Şimdi bir VM snapshot'ı al ve adını `before-company-project` koy. Bu projeyi başkalarının kullandığı gerçek bir sunucuda çalıştırma.",
+   "tip": "Çalışırken bir not dosyası tut. Çalıştırdığın her komut daha sonra teslim raporunda bir satır olur."
+  },
+  {
+   "id": "users",
+   "title": "2. Kullanıcılar, gruplar ve ortak dizin",
+   "body": [
+    "`staff` (alice, bob, carol) ve `admins` (yalnızca alice) gruplarını oluştur. Kullanıcılar için `useradd -m -G` kullan. Kullanıcı silmek bu projenin parçası **değil** (`userdel -r` ev dizinlerini de siler).",
+    "Ortak dizin iki şeye ihtiyaç duyar. **Setgid** (`chmod 2770`) yeni dosyaların dizinin grubunu (`staff`) devralmasını sağlar; böylece bob, carol'ın dosyasını düzenleyebilir. `770` modu diğer herkesi dışarıda tutar. İsteğe bağlı olarak **varsayılan ACL** (`setfacl -d -m g:staff:rwx`) sıkı bir umask'ta bile yeni dosyaları grup için yazılabilir yapar.",
+    "En az yetki ilkesi: `web` `755` (nginx okuyabilmeli), `scripts` `750`, `backup` `700`. Simülatörde aynı modları `~/srv/company` üzerinde `chmod` ile çalışırsın; normal kullanıcı orada `chgrp` yapamaz, grup kısmı yalnızca VM'dedir."
+   ],
+   "commands": [
+    {"cmd": "sudo useradd -m -s /bin/bash -G staff alice", "what": "Ev dizini, kabuk ve ek grupla kullanıcı oluşturur.", "where": "alice, bob, carol için birer kez.", "why": "Kendi ev dizinleri olan gerçek hesaplar.", "example": "sudo useradd -m -s /bin/bash -G staff alice", "nosim": true},
+    {"cmd": "sudo chgrp staff /srv/company/shared", "what": "Dizinin sahibi olan grubu ayarlar.", "where": "shared ve admin dizinlerinde.", "why": "Setgid'in yeni dosyalara aktardığı şey grup sahipliğidir.", "example": "sudo chgrp staff /srv/company/shared", "nosim": true},
+    {"cmd": "chmod 2770", "what": "Sahip ve grup için rwx, diğerleri için hiçbir şey, ayrıca setgid biti ayarlar.", "where": "shared ve admin dizinlerinde.", "why": "Yeni dosyalar grubu devralır; dışarıdakiler erişemez.", "example": "chmod 2770 ~/srv/company/shared"},
+    {"cmd": "sudo setfacl -d -m g:staff:rwx", "what": "Dizindeki yeni dosyaların devralacağı varsayılan ACL koyar.", "where": "shared dizininde (paket `acl`).", "why": "Kullanıcının umask'ı 077 olsa bile grup yazabilir kalır.", "example": "sudo setfacl -d -m g:staff:rwx /srv/company/shared", "nosim": true},
+    {"cmd": "ls -ld", "what": "İçeriği değil, dizinin kendisini gösterir.", "where": "Modu ve grubu doğrularken.", "why": "`drwxrws---` setgid'in açık olduğunu gösterir (`s` harfi).", "example": "ls -ld ~/srv/company/shared"}
+   ],
+   "tip": "`drwxr-S---` içindeki büyük `S`, setgid'in açık ama grubun çalıştırma (x) bitinin olmadığı anlamına gelir; modu düzelt.",
+   "warn": "İzin sorunlarını asla `chmod 777` ile çözme. Herkes dosyaları değiştirebilir veya silebilir."
+  },
+  {
+   "id": "web",
+   "title": "3. nginx ile web sitesi, SELinux ve AppArmor",
+   "body": [
+    "nginx'i kur ve `/srv/company/web` dizinini sunmasını sağla. `/etc/nginx/conf.d/company.conf` içine `company.local` adlı bir sunucu bloğu ekliyoruz (iki ailede de çalışır) ve varsayılan site karışmasın diye `Host:` başlığıyla test ediyoruz.",
+    "**RHEL/Rocky:** SELinux her dosyayı etiketler. `/srv` altındaki yeni dizin genel bir etiket alır; Unix izinleri doğru olsa bile nginx **403 Forbidden** alır. Çözüm doğru etikettir: `semanage fcontext` kuralı saklar, `restorecon` uygular. Kestirme olarak `setenforce 0` kullanma; bu tüm sistemin korumasını kapatır.",
+    "**Debian/Ubuntu:** ayarlanacak etiket yok. AppArmor etkindir ama nginx normalde bir profille kısıtlanmaz; yalnızca `aa-status` ile durumu kontrol edersin. Orada 403 normal bir izin sorunudur (`/srv`'ye kadar dizin modlarını kontrol et)."
+   ],
+   "commands": [
+    {"cmd": "sudo dnf install -y nginx", "what": "nginx kurar (RHEL, Rocky, Alma). Ubuntu'da `sudo apt install -y nginx` kullan.", "where": "Web bölümünün ilk adımı.", "why": "Paket yöneticisi dosyaları ve bağımlılıkları halleder.", "example": "sudo dnf install -y nginx", "nosim": true},
+    {"cmd": "sudo semanage fcontext -a -t httpd_sys_content_t \"/srv/company/web(/.*)?\"", "what": "Kural saklar: web altındaki dosyalar web-içeriği etiketini alır.", "where": "RHEL ailesi (paket `policycoreutils-python-utils`).", "why": "Etiket yeniden etiketlemeden sonra da kalır; `chcon` kalmaz.", "example": "sudo semanage fcontext -a -t httpd_sys_content_t \"/srv/company/web(/.*)?\"", "nosim": true},
+    {"cmd": "sudo restorecon -Rv /srv/company/web", "what": "Saklanan etiket kuralını mevcut dosyalara uygular.", "where": "`semanage fcontext`'ten hemen sonra.", "why": "Bunsuz kural vardır ama dosyalar eski etiketi korur.", "example": "sudo restorecon -Rv /srv/company/web", "nosim": true},
+    {"cmd": "ls -Zd /srv/company/web", "what": "Dizinin SELinux etiketini gösterir.", "where": "Etiketi doğrularken.", "why": "`httpd_sys_content_t` görmek istersin.", "example": "ls -Zd /srv/company/web", "nosim": true},
+    {"cmd": "sudo nginx -t", "what": "nginx yapılandırmasını yeniden başlatmadan test eder.", "where": "Her başlatma veya yeniden yüklemeden önce.", "why": "Bir yazım hatası siteyi çökertebilir.", "example": "sudo nginx -t", "nosim": true}
+   ],
+   "tip": "SELinux'un neyi engellediğini görmek için: `sudo ausearch -m avc -ts recent`. Bir şeyi değiştirmeden önce kaydı oku.",
+   "warn": "`setenforce 0` olsa olsa bir teşhis aracıdır, çözüm değil. Bunun yerine dosyaları etiketle."
+  },
+  {
+   "id": "firewall",
+   "title": "4. Güvenlik duvarı: 80 ve 443 açık, SSH korunur",
+   "body": [
+    "RHEL/Rocky **firewalld**, Ubuntu **ufw** kullanır. SSH ile bağlıyken ikisi de seni kendi sunucundan dışarıda bırakabilir. Kurallar: SSH açık kalsın, önce **runtime** (geçici) kuralla test et, testten sonra **kalıcı** yap.",
+    "firewalld: `--permanent` olmayan kurallar yeniden yüklemede veya yeniden başlatmada kaybolur; `--timeout=300` ile kendiliğinden silinir. ufw: kurallar hemen kaydedilir, bu yüzden `ufw enable`'dan **önce** SSH'i izin ver.",
+    "Güvenlik duvarını değiştirirken her zaman **ikinci bir SSH oturumu açık** tut (veya VM konsolu). Yeni kurallar seni dışarıda bırakırsa açık oturum veya konsol çalışmaya devam eder."
+   ],
+   "commands": [
+    {"cmd": "sudo firewall-cmd --list-services", "what": "Etkin bölgede izinli servisleri listeler.", "where": "Her değişiklikten önce ve sonra.", "why": "`ssh`'ın hâlâ orada olduğunu doğrular.", "example": "sudo firewall-cmd --list-services", "nosim": true},
+    {"cmd": "sudo firewall-cmd --permanent --add-service={http,https}", "what": "80 ve 443 portları için kalıcı kural saklar.", "where": "Runtime testi çalıştıktan sonra.", "why": "Yeniden yüklemeyi ve yeniden başlatmayı atlatır; `--reload` ile uygulanır.", "example": "sudo firewall-cmd --permanent --add-service={http,https}", "nosim": true},
+    {"cmd": "sudo ufw allow OpenSSH", "what": "ufw'de SSH'e (port 22) izin verir.", "where": "Ubuntu, her zaman `ufw enable`'dan önce.", "why": "Güvenlik duvarı açılırken kopmayı önler.", "example": "sudo ufw allow OpenSSH", "nosim": true},
+    {"cmd": "sudo ufw allow 80/tcp", "what": "HTTP'ye izin verir; HTTPS için `443/tcp` ile tekrarla.", "where": "Ubuntu web sunucusu.", "why": "Yalnızca sitenin ihtiyaç duyduğu portları açar.", "example": "sudo ufw allow 80/tcp", "nosim": true},
+    {"cmd": "ss -tulpn", "what": "Dinleyen TCP/UDP portlarını süreçle birlikte listeler.", "where": "Sunucunun gerçekte ne sunduğunu görmek için.", "why": "Beklenmeyen her port raporun için bir bulgudur.", "example": "ss -tulpn", "nosim": true}
+   ],
+   "danger": "SSH ile bağlıyken `ssh` servisini asla kaldırma veya 22 portunu engelleme. `firewall-cmd --reload` veya `ufw enable`'dan **önce** `--list-services` ya da `ufw status` ile ssh'ı kontrol et. Dışarıda kalırsan VM konsolunu kullan, gerekirse snapshot'ı geri yükle.",
+   "tip": "`ss` çıktısını simülatörde çalış: ev dizinindeki audit dosyaları `grep` ve `cut` ile inceleyebileceğin örnek bir liste içerir."
+  },
+  {
+   "id": "backup",
+   "title": "5. Yedek betiği ve systemd zamanlayıcısı",
+   "body": [
+    "Yedek kısa bir betiktir (modül 6.5/6.6): `shared`, `web` ve `admin` için tarihli bir `tar.gz` arşivi `/srv/company/backup` içine yazar ve 7 günden eski arşivleri siler. Gerçek hayatta ikinci disk veya uzak kopya daha iyidir; proje için yerel klasör yeterli.",
+    "Betiği systemd çalıştırır: `Type=oneshot` bir `.service` neyin çalışacağını, bir `.timer` ne zaman çalışacağını (`OnCalendar=`, `Persistent=true`) tanımlar. Servisi değil **zamanlayıcıyı** etkinleştir. Birim dosyalarını oluşturduktan veya değiştirdikten sonra `systemctl daemon-reload` çalıştır.",
+    "RHEL/Rocky'de `/srv/company/scripts` içindeki betik genel etiket taşır ve systemd çalıştırmayı reddedebilir (durum 203/EXEC). Web dizininde yaptığın gibi `semanage fcontext` ve `restorecon` ile ona `bin_t` etiketini ver."
+   ],
+   "commands": [
+    {"cmd": "tar -czf", "what": "Sıkıştırılmış arşiv oluşturur.", "where": "Yedek betiğinde.", "why": "Yedek başına tarihli tek dosya saklaması ve geri yüklemesi kolaydır.", "example": "tar -czf /srv/company/backup/company-test.tar.gz -C /srv/company shared web admin", "nosim": true},
+    {"cmd": "systemctl daemon-reload", "what": "systemd'nin yeni veya değişmiş birim dosyalarını okumasını sağlar.", "where": "Servis ve zamanlayıcıyı yazdıktan sonra.", "why": "Aksi hâlde systemd yeni birimleri tanımaz.", "example": "sudo systemctl daemon-reload", "nosim": true},
+    {"cmd": "systemctl enable --now company-backup.timer", "what": "Zamanlayıcıyı açılışta etkinleştirir ve hemen başlatır.", "where": "daemon-reload'dan sonra bir kez.", "why": "Yedek sen uğraşmadan her gece çalışır.", "example": "sudo systemctl enable --now company-backup.timer", "nosim": true},
+    {"cmd": "systemctl list-timers", "what": "Zamanlayıcıları sonraki ve son çalışma zamanıyla gösterir.", "where": "Takvimi doğrularken.", "why": "Sonraki yedeğin ne zaman çalışacağını görürsün.", "example": "systemctl list-timers company-backup.timer --no-pager", "nosim": true},
+    {"cmd": "chmod 755 backup.sh", "what": "Betiği çalıştırılabilir yapar.", "where": "Her betik oluşturduğunda.", "why": "x biti olmadan servis betiği başlatamaz.", "example": "chmod 755 ~/srv/company/scripts/backup.sh"}
+   ],
+   "danger": "`find ... -delete` geri alınamaz. Satırı önce `-delete` yerine `-print` ile dene ve yalnızca `/srv/company/backup` üzerinde çalıştır.",
+   "tip": "Zamanlayıcıyı beklemeden önce servisi `sudo systemctl start company-backup.service` ile elle bir kez çalıştır ve `ls -l /srv/company/backup` çıktısına bak."
+  },
+  {
+   "id": "verify",
+   "title": "6. Doğrulama kontrol listesi ve teslim raporu",
+   "body": [
+    "Bir sunucu ancak **kanıtın** olduğunda bitmiştir. Kontrol listesini gez: kullanıcılar ve gruplar, setgid'li ortak dizin, site 200 yanıtı veriyor, SELinux etiketi veya AppArmor durumu, güvenlik duvarında ssh/80/443 var, zamanlayıcı etkin, yedek dosyası var, yedek dizini `700`.",
+    "Küçük bir betik her kontrol için `OK:` veya `FAIL:` yazar; sonuç okunması ve yapıştırılması kolay olur. **Teslim raporu** `/srv/company/REPORT.txt` host adını, tarihi, doğrulama çıktısını ve dinleyen portları içerir. Teslim ettiğin budur.",
+    "Bir satır FAIL diyorsa ilgili bölüme dön ve düzelt. Başarısızlığı gizlemek için raporu elle düzenleme."
+   ],
+   "commands": [
+    {"cmd": "getent group staff", "what": "Grup kaydını üyeleriyle gösterir.", "where": "Grup üyeliğini kanıtlamak için.", "why": "Gerçek kullanıcı veritabanından okur.", "example": "getent group staff", "nosim": true},
+    {"cmd": "stat -c '%A %U:%G %n' /srv/company/shared", "what": "İzinleri, sahibi ve grubu tek satırda yazar.", "where": "Kontrollerde ve raporda.", "why": "Modun `drwxrws---` olduğunun kısa kanıtı.", "example": "stat -c '%A %U:%G %n' /srv/company/shared", "nosim": true},
+    {"cmd": "curl -I", "what": "Yalnızca HTTP başlıklarını getirir.", "where": "Web sitesini yerel olarak test etmek için.", "why": "`200 OK`, nginx'in yerel isteğe yanıt verdiğini ve içerik izin/etiketlerinin erişime izin verdiğini gösterir; dış güvenlik duvarını ayrıca kural listesiyle ve mümkünse başka bir makineden test et.", "example": "curl -I -H 'Host: company.local' http://localhost", "nosim": true},
+    {"cmd": "wc -l", "what": "Satırları sayar.", "where": "Raporun boş olmadığını kontrol etmek için.", "why": "Rapor gerçek içerik taşımalı.", "example": "wc -l ~/srv/company/REPORT.txt"}
+   ],
+   "tip": "Kontrol listesini yeniden başlatmadan sonra da çalıştır. Bir sonraki yeniden başlatmaya kadar çalışan servis bitmiş sayılmaz."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Proje kökünü ev dizininde oluştur: `mkdir -p ~/srv/company` (VM'de bu `/srv/company` olur).", "hint": "`-p` eksik üst dizin `srv`'yi de oluşturur."},
+  "t02": {"text": "`~/srv/company` içinde `shared`, `admin`, `web`, `backup` ve `scripts` olmak üzere beş alt dizini tek `mkdir` komutuyla oluştur.", "hint": "Süslü parantez açılımı: `mkdir ~/srv/company/{shared,admin,web,backup,scripts}`."},
+  "t03": {"text": "Proje çalışması için sıkı bir umask ayarla: `umask 027`.", "hint": "027, yeni dosyalarda diğerlerinin tüm haklarını ve grubun yazma hakkını kaldırır."},
+  "t04": {"text": "Ortak dizine `2770` modunu ver (setgid, sahip ve grup için rwx, diğerleri için hiçbir şey).", "hint": "`chmod 2770 ~/srv/company/shared`."},
+  "t05": {"text": "`web` dizinini herkes için okunabilir (`755`), `backup` dizinini özel (`700`) yap.", "hint": "Her dizin için bir `chmod` komutu, toplam iki."},
+  "t06": {"text": "Site sayfasını yaz: `<h1>Small Company</h1>` metnini `~/srv/company/web/index.html` dosyasına koy.", "hint": "`echo \"...\" > file` kullan; `<` ve `>` karakterleri yüzünden metni tırnağa al."},
+  "t07": {"text": "nginx sunucu bloğunu `~/srv/company/company.conf` dosyasına yaz: `server {`, `listen 80;`, `server_name company.local;`, `root /srv/company/web;` ve `}` satırları.", "hint": "`\\n` ile `printf` birden çok satırı tek seferde yazar; metni tek tırnak içine al."},
+  "t08": {"text": "Tahmin et: `ls -ld ~/srv/company/shared` hangi izin dizesini gösterecek? Bir kenara yaz, sonra komutu çalıştır.", "hint": "`s` grup `x`'inin yerini alır: `drwxrws---`."},
+  "t09": {"text": "Tahmin et: `~/audit/group.txt` içinde `admins` grubunun üyeleri kimler? Doğrulamak için `grep admins ~/audit/group.txt | cut -d: -f4` çalıştır.", "hint": "Grup dosyasının 4. alanı üye listesidir."},
+  "t10": {"text": "Tahmin et: `~/audit/ss.txt` içinde kaç satır `LISTEN` içeriyor? `grep -c LISTEN ~/audit/ss.txt` ile kontrol et.", "hint": "UDP satırında `LISTEN` değil `UNCONN` yazar."},
+  "t11": {"text": "Hata ayıkla: `~/srv/site` içindeki deneme sitesi nginx'te 403 verirdi. Dizinin modu `700`, `index.html` modu `600`. Bunları `755` ve `644` olarak düzelt.", "hint": "`ls -ld ~/srv/site` ve `ls -l ~/srv/site` ile kontrol et."},
+  "t12": {"text": "Hata ayıkla: `~/srv/broken/backup.sh` Permission denied hatası veriyor. Düzelt ve çalıştır; sonunda `~/srv/broken/out/notes.bak` var olsun.", "hint": "Betiğin x bitine ihtiyacı var: `chmod 755`, sonra yoluyla çalıştır."},
+  "t13": {"text": "Mini proje: `~/srv/company/scripts/backup.sh` dosyasını `#!/bin/bash` satırı ve `~/srv/company/web/index.html` dosyasını `~/srv/company/backup/index.html.bak` olarak kopyalayan bir `cp` satırıyla yaz. Çalıştırılabilir yap ve çalıştır.", "hint": "Dosya için `printf`, `chmod 755`, sonra `~/srv/company/scripts/backup.sh`."},
+  "t14": {"text": "Mini proje: `~/srv/company/scripts` içine `company-backup.service` (`Type=oneshot`, `ExecStart=/srv/company/scripts/backup.sh`) ve `company-backup.timer` (`[Timer]`, `OnCalendar=*-*-* 02:00:00`, `Persistent=true`, `[Install]`, `WantedBy=timers.target`) birim dosyalarını yaz.", "hint": "`\\n` ile iki `printf` komutu; serviste `[Unit]` ve `[Service]`, zamanlayıcıda `[Unit]`, `[Timer]` ve `[Install]` olmalı."},
+  "t15": {"text": "Meydan okuma: güvenlik duvarı planını `~/srv/company/firewall-plan.txt` dosyasına güvenli sırayla, satır başına bir komut olacak şekilde yaz: önce ssh için `firewall-cmd --permanent --add-service=`, sonra http, sonra https ve en son `firewall-cmd --reload`.", "hint": "Dosyayı `>` ile başlat, satırları `>>` ile ekle. SSH ilk sırada olmalı."},
+  "t16": {"text": "Meydan okuma: en az 8 satırlık teslim raporunu `~/srv/company/REPORT.txt` dosyasına yaz: başlık, host adı (`$(hostname)` kullan), tarih, kullanıcılar alice bob carol, gruplar staff admins, ortak dizin, web portları 80 ve 443, backup.", "hint": "`echo \"...\" > file` ile başla, satırları `>>` ile ekle. `echo \"Host: $(hostname)\"` host adını doldurur."},
+  "t17": {"text": "Ticket: Denetçi sunucunun beklenmeyen portlarda dinleyebileceğini söylüyor. `~/audit/ss.txt` dosyasını kullan ve portu 22, 80 veya 443 olmayan tüm satırları `~/audit/unexpected.txt` dosyasına yaz.", "hint": "`grep -v -E ':(22|80|443) ' file > result`; kapanış parantezinden sonraki boşluk önemli."},
+  "t18": {"text": "Ticket: Yönetim ekip listesini istiyor. `~/audit/passwd.txt` dosyasından gerçek kullanıcıların (ev dizini `/home/` altında olanlar) adlarını sıralı ve satır başına bir tane olacak şekilde `~/audit/team.txt` dosyasına yaz.", "hint": "`grep /home/ file | cut -d: -f1 | sort > ~/audit/team.txt`."}
+ },
+ "vm": {
+  "intro": "Gerçek projeyi VM'inde bu sırayla yap. Önce snapshot al: bir şey ters giderse geri dönersin. Görev isterse çıktıyı yapıştır. RHEL veya Ubuntu için işaretli komutlarda yalnızca kendi varyantını çalıştır.",
+  "tasks": {
+   "v01": {
+    "title": "Snapshot ve başlangıç durumu",
+    "text": "VM programında `before-company-project` adlı bir VM snapshot'ı al (modül 0.2). Sonra sistemi kontrol et ve çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "grep -E '^(ID|PRETTY_NAME)=' /etc/os-release\n# RHEL / Rocky / Alma:\ngetenforce\n# Debian / Ubuntu:\nsudo aa-status | head -n 3", "expected": "ID=rocky\nPRETTY_NAME=\"Rocky Linux 9.4 (Blue Onyx)\"\nEnforcing"}
+    ],
+    "differs": ["Ubuntu'da `getenforce: command not found` normaldir; `aa-status` satırını kullan.", "SELinux Permissive veya Disabled diyorsa notlarına yaz; devam et ama modu `setenforce` ile değiştirme."]
+   },
+   "v02": {
+    "title": "Kullanıcılar, gruplar, ortak dizin",
+    "text": "Grupları, kullanıcıları ve setgid'li dizin ağacını oluştur. Sonra kanıtla ve çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "sudo groupadd staff\nsudo groupadd admins\nfor u in alice bob carol; do sudo useradd -m -s /bin/bash -G staff $u; done\nsudo usermod -aG admins alice\nsudo mkdir -p /srv/company/{shared,admin,web,backup,scripts}\nsudo chgrp staff /srv/company/shared\nsudo chgrp admins /srv/company/admin\nsudo chmod 2770 /srv/company/shared /srv/company/admin\nsudo chmod 755 /srv/company/web\nsudo chmod 750 /srv/company/scripts\nsudo chmod 700 /srv/company/backup"},
+     {"cmd": "sudo -u bob touch /srv/company/shared/from_bob.txt\nls -ld /srv/company/shared\nls -l /srv/company/shared\ngetent group staff\nid alice\nsudo -u carol ls /srv/company/admin", "expected": "drwxrws--- 2 root staff 4096 ... /srv/company/shared\n-rw-r--r-- 1 bob staff 0 ... from_bob.txt\nstaff:x:1002:alice,bob,carol\nuid=1001(alice) gid=1001(alice) groups=1001(alice),1002(staff),1003(admins)\nls: cannot open directory '/srv/company/admin': Permission denied"}
+    ],
+    "differs": ["Grup kimlikleri sistemler arasında farklıdır; yalnızca adlar eşleşmeli.", "`from_bob.txt` dosyasının grubu `staff` yerine `bob` ise setgid biti eksiktir: `chmod 2770`'i tekrarla.", "İsteğe bağlı varsayılan ACL (önce `acl` paketini kur): `sudo setfacl -d -m g:staff:rwx /srv/company/shared`."]
+   },
+   "v03": {
+    "title": "Doğru etiketli web sitesi",
+    "text": "nginx'i kur, sunucu bloğunu ve sayfayı ekle, test et, etiketi düzelt (RHEL) veya AppArmor'u kontrol et (Ubuntu) ve son curl çıktısını yapıştır.",
+    "blocks": [
+     {"cmd": "# RHEL / Rocky / Alma:\nsudo dnf install -y nginx policycoreutils-python-utils\n# Debian / Ubuntu:\nsudo apt install -y nginx"},
+     {"cmd": "echo '<h1>Small Company</h1>' | sudo tee /srv/company/web/index.html\nsudo tee /etc/nginx/conf.d/company.conf <<'EOF'\nserver {\n    listen 80;\n    server_name company.local;\n    root /srv/company/web;\n}\nEOF\nsudo nginx -t\nsudo systemctl enable --now nginx\ncurl -sI -H 'Host: company.local' http://localhost | head -n 1", "expected": "HTTP/1.1 403 Forbidden   (RHEL before the label fix)\nHTTP/1.1 200 OK          (Ubuntu)"},
+     {"cmd": "# RHEL / Rocky / Alma only:\nls -Zd /srv/company/web\nsudo semanage fcontext -a -t httpd_sys_content_t \"/srv/company/web(/.*)?\"\nsudo restorecon -Rv /srv/company/web\nls -Zd /srv/company/web\n# Debian / Ubuntu only:\nsudo aa-status | grep -i nginx\n# both:\ncurl -sI -H 'Host: company.local' http://localhost | head -n 1\ncurl -s -H 'Host: company.local' http://localhost", "expected": "unconfined_u:object_r:default_t:s0 /srv/company/web\n... httpd_sys_content_t ...\nHTTP/1.1 200 OK\n<h1>Small Company</h1>"}
+    ],
+    "differs": ["RHEL'de etiket düzeltmesinden sonra 403: `ls -Zd`'yi tekrar kontrol et ve `/srv` ile `/srv/company` modlarına bak (diğerleri için `x` gerekir).", "`semanage: command not found`: `policycoreutils-python-utils` paketini kur.", "Connection refused: `sudo systemctl status nginx`; 80 portunu başka bir servis kullanıyor olabilir (`ss -tulpn`)."]
+   },
+   "v04": {
+    "title": "Kopmadan güvenlik duvarı",
+    "text": "İkinci bir SSH oturumunu veya konsolu açık tut. SSH'i kaybetmeden web portlarına izin ver, sonra kural listesini yapıştır.",
+    "blocks": [
+     {"cmd": "# RHEL / Rocky / Alma (firewalld):\nsudo firewall-cmd --list-services\nsudo firewall-cmd --add-service={http,https} --timeout=300\ncurl -sI http://localhost | head -n 1\nsudo firewall-cmd --permanent --add-service={http,https}\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-services", "expected": "cockpit dhcpv6-client http https ssh"},
+     {"cmd": "# Debian / Ubuntu (ufw): SSH FIRST!\nsudo ufw allow OpenSSH\nsudo ufw allow 80/tcp\nsudo ufw allow 443/tcp\nsudo ufw enable\nsudo ufw status", "expected": "Status: active\nOpenSSH                    ALLOW       Anywhere\n80/tcp                     ALLOW       Anywhere\n443/tcp                    ALLOW       Anywhere"}
+    ],
+    "differs": ["RHEL'de listede `ssh` yoksa hemen ekle: `sudo firewall-cmd --permanent --add-service=ssh` ve reload.", "Rocky'de `ufw: command not found` sorun değil; orada firewalld kullanırsın.", "Dışarıda mı kaldın? VM konsolunu kullan veya snapshot'ı geri yükle."]
+   },
+   "v05": {
+    "title": "Yedek betiği ve zamanlayıcı",
+    "text": "Yedek betiğini ve systemd birimlerini oluştur, zamanlayıcıyı etkinleştir, elle bir yedek çalıştır ve zamanlayıcı listesini yapıştır.",
+    "blocks": [
+     {"cmd": "sudo tee /srv/company/scripts/backup.sh >/dev/null <<'EOF'\n#!/bin/bash\nset -euo pipefail\nDEST=/srv/company/backup\ntar -czf \"$DEST/company-$(date +%F_%H%M).tar.gz\" -C /srv/company shared web admin\nfind \"$DEST\" -name 'company-*.tar.gz' -mtime +7 -delete\nEOF\nsudo chmod 750 /srv/company/scripts/backup.sh"},
+     {"cmd": "sudo tee /etc/systemd/system/company-backup.service >/dev/null <<'EOF'\n[Unit]\nDescription=Company backup\n\n[Service]\nType=oneshot\nExecStart=/srv/company/scripts/backup.sh\nEOF\nsudo tee /etc/systemd/system/company-backup.timer >/dev/null <<'EOF'\n[Unit]\nDescription=Daily company backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\nEOF"},
+     {"cmd": "# RHEL / Rocky / Alma only (script label):\nsudo semanage fcontext -a -t bin_t \"/srv/company/scripts(/.*)?\"\nsudo restorecon -Rv /srv/company/scripts\n# both:\nsudo systemd-analyze verify /etc/systemd/system/company-backup.service\nsudo systemctl daemon-reload\nsudo systemctl enable --now company-backup.timer\nsudo systemctl start company-backup.service\nsudo ls -l /srv/company/backup\nsystemctl list-timers company-backup.timer --no-pager", "expected": "-rw-r--r-- 1 root root 2048 ... company-2026-11-12_0215.tar.gz\nNEXT                        LEFT   LAST PASSED UNIT                 ACTIVATES\nFri 2026-11-13 02:00:00 CET 23h    -    -      company-backup.timer company-backup.service"}
+    ],
+    "differs": ["`systemctl status company-backup.service` içinde `status=203/EXEC`: RHEL'de `bin_t` etiketini ayarla (bu bloğun ilk satırları) ve x bitini kontrol et.", "`find ... -delete` satırını başka dizinlerde deneme; şüphedeysen `-delete` yerine `-print` yaz.", "Zamanlayıcı listede yoksa büyük olasılıkla `daemon-reload` unuttun."]
+   },
+   "v06": {
+    "title": "Doğrulama kontrol listesi ve teslim raporu",
+    "text": "Kontrol listesi betiğini yaz, root olarak çalıştır ve teslim raporunu oluştur. Tüm satırlar OK demeli. Verify çıktısını yapıştır.",
+    "blocks": [
+     {"cmd": "sudo tee /srv/company/scripts/verify.sh >/dev/null <<'EOF'\n#!/bin/bash\nset -o pipefail\nchk() { local label=$1; shift; if \"$@\" >/dev/null 2>&1; then echo \"OK: $label\"; else echo \"FAIL: $label\"; fi; }\nstaff_ok() { id -nG alice | grep -qw staff && id -nG bob | grep -qw staff && id -nG carol | grep -qw staff; }\nsite_ok() { curl -fsS -H 'Host: company.local' http://localhost | grep -q Company; }\nselinux_ok() { if ! command -v getenforce >/dev/null 2>&1 || [ \"$(getenforce)\" = Disabled ]; then return 0; fi; ls -Zd /srv/company/web | grep -q httpd_sys_content_t; }\nfirewall_ok() {\n  if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then\n    local services\n    services=$(firewall-cmd --list-services) || return 1\n    for service in ssh http https; do [[ \" $services \" == *\" $service \"* ]] || return 1; done\n  elif command -v ufw >/dev/null 2>&1; then\n    local status\n    status=$(ufw status) || return 1\n    grep -q '^Status: active' <<<\"$status\" && grep -Eq '^OpenSSH[[:space:]]+ALLOW' <<<\"$status\" && grep -Eq '^80/tcp[[:space:]]+ALLOW' <<<\"$status\" && grep -Eq '^443/tcp[[:space:]]+ALLOW' <<<\"$status\"\n  else\n    return 1\n  fi\n}\nbackup_ok() { compgen -G '/srv/company/backup/company-*.tar.gz' >/dev/null; }\nbackup_mode_ok() { [[ $(stat -c %a /srv/company/backup) == 700 ]]; }\nchk \"alice bob carol are in staff\" staff_ok\nchk \"shared has setgid\" test -g /srv/company/shared\nchk \"site answers with Small Company\" site_ok\nchk \"nginx enabled\" systemctl is-enabled --quiet nginx\nchk \"web label (SELinux) or no SELinux\" selinux_ok\nchk \"firewall allows SSH, HTTP and HTTPS\" firewall_ok\nchk \"timer enabled\" systemctl is-enabled --quiet company-backup.timer\nchk \"backup archive exists\" backup_ok\nchk \"backup dir is 700\" backup_mode_ok\nEOF\nsudo bash /srv/company/scripts/verify.sh", "expected": "OK: alice bob carol are in staff\nOK: shared has setgid\nOK: site answers with Small Company\nOK: nginx enabled\nOK: web label (SELinux) or no SELinux\nOK: firewall allows SSH, HTTP and HTTPS\nOK: timer enabled\nOK: backup archive exists\nOK: backup dir is 700"},
+     {"cmd": "{ echo \"Company server delivery report\"; echo \"Host: $(hostname)\"; echo \"Date: $(date)\"; echo \"--- verification ---\"; sudo bash /srv/company/scripts/verify.sh; echo \"--- listening ports ---\"; ss -tulpn; } | sudo tee /srv/company/REPORT.txt\nwc -l /srv/company/REPORT.txt"}
+    ],
+    "differs": ["Herhangi bir `FAIL:` satırı: ilgili bölüme dön, düzelt ve betiği yeniden çalıştır.", "`[ ... = 700 ]` satırı `$(stat` öncesindeki ters eğik çizgiyi tam yazıldığı gibi ister; yoksa kabuk onu erken açar.", "Son olarak yeniden başlat ve verify betiğini tekrar çalıştır: her şey hâlâ OK olmalı."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Rocky Linux'ta mod 755 olmasına rağmen nginx /srv/company/web içindeki dosyalar için 403 veriyor. En olası neden nedir?", "options": ["nginx kurulu değil", "Dosyalar yanlış SELinux etiketi taşıyor (httpd_sys_content_t değil)", "80 portu güvenlik duvarında kapalı", "staff grubu eksik"], "explain": "Kapalı port 403 değil zaman aşımı verir. /srv altındaki genel etiket nginx'i engeller; setenforce 0 ile değil semanage fcontext ve restorecon ile düzelt."},
+  "q2": {"q": "Bir Ubuntu sunucusuna SSH ile bağlısın. ufw'yi açmanın güvenli yolu hangisi?", "options": ["Önce ufw enable, sonra kural ekle", "Sunucuyu yeniden başlat ve umut et", "Önce ufw allow OpenSSH, sonra ufw enable", "SSH'i kapat ve konsolu kullan"], "explain": "ufw kuralları hemen etkin olur. İzinli bir SSH kuralı olmadan güvenlik duvarını açmak oturumunu keser."},
+  "q3": {"q": "Ortak dizine neden 2770 modu (setgid) verilir?", "options": ["Yeni dosyalar staff grubunu devralır, ekip birbirinin dosyalarında çalışabilir", "Herkes dosyaları okuyabilir", "Dosyalar şifrelenir", "Yalnızca root yazabilir"], "explain": "Dizindeki setgid biti grubunu yeni dosyalara aktarır. 770 diğerlerini dışarıda tutar."},
+  "q4": {"q": "company-backup.service ve company-backup.timer dosyalarını oluşturdun. Gece yedeğinin çalışması için ne yapmalısın?", "options": ["Yeniden başlat, başka bir şey yapma", "Birim dosyalarına chmod 777", "Hiçbir şey, systemd kendiliğinden bulur", "systemctl daemon-reload, sonra systemctl enable --now company-backup.timer"], "explain": "systemd birim dosyalarını yeniden okumalı (daemon-reload) ve zamanlayıcı birimi etkinleştirilip başlatılmalı; servisi zamanlayıcı başlatır."}
+ },
+ "summary": [
+  "Önce plan yap, VM snapshot'ı al, yalnızca test VM'inde çalış.",
+  "Ortak dizin: grup staff, mod 2770 (setgid); başka yerde en az yetki: web 755, scripts 750, backup 700.",
+  "RHEL'de nginx httpd_sys_content_t etiketine ihtiyaç duyar (semanage fcontext + restorecon); Ubuntu'da AppArmor'u kontrol edersin.",
+  "Güvenlik duvarı: ssh kalsın, runtime kurallar veya --timeout ile test et, ikinci oturumu açık tut; ufw'de enable'dan önce allow OpenSSH.",
+  "Yedek: betik + service (oneshot) + timer; daemon-reload, zamanlayıcıyı enable --now; RHEL'de betiği bin_t etiketle.",
+  "Kanıt olarak kontrol listesi (OK/FAIL) ve teslim raporu dosyasıyla bitir."
+ ],
+ "glossary": [
+  {"term": "snapshot (anlık görüntü)", "meaning": "Bir adım ters giderse dönebileceğin, VM'in kaydedilmiş durumu."},
+  {"term": "setgid (dizinde)", "meaning": "Yeni dosyalar oluşturanın birincil grubu yerine dizinin grubunu devralır."},
+  {"term": "varsayılan ACL", "meaning": "Bir dizinde, yeni dosyaların devraldığı erişim kuralı."},
+  {"term": "SELinux etiketi", "meaning": "Dosyalardaki güvenlik bağlamı (örneğin httpd_sys_content_t); bir sürecin neye erişebileceğini belirler."},
+  {"term": "semanage fcontext", "meaning": "Kalıcı dosya etiketi kuralı saklar; restorecon onu uygular."},
+  {"term": "AppArmor", "meaning": "Debian/Ubuntu'nun yol tabanlı güvenlik sistemi; aa-status ile kontrol edilir."},
+  {"term": "firewalld / ufw", "meaning": "RHEL ailesi ve Ubuntu sistemlerinin güvenlik duvarı arayüzleri."},
+  {"term": "runtime ve kalıcı", "meaning": "Runtime kurallar yeniden yüklemede veya yeniden başlatmada kaybolur; kalıcı kurallar saklanır."},
+  {"term": "systemd timer", "meaning": "Bir servisi takvime göre başlatan birim (OnCalendar=)."},
+  {"term": "teslim raporu", "meaning": "Bitmiş sunucuyu ve doğrulama sonuçlarını belgeleyen dosya."}
+ ]
+}

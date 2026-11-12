@@ -1,0 +1,428 @@
+{
+ "title": "Kaynak İzleme",
+ "lead": "uptime, free, df, top ve diğer araçlarla CPU, yük, bellek ve diski oku; sistemi neyin yavaşlattığını bul.",
+ "objectives": [
+  "Yük ortalamasını (load average) CPU çekirdek sayısına (nproc) göre okursun.",
+  "Boş (free) ile kullanılabilir (available) belleği ayırt eder, buff/cache'i anlarsın.",
+  "df ve du ile disk kullanımını kontrol eder, büyük klasörleri bulursun.",
+  "top, htop ve ps ile en çok CPU ve bellek tüketen süreçleri bulursun."
+ ],
+ "sections": [
+  {
+   "id": "load",
+   "title": "Yük ve CPU: uptime, nproc, lscpu",
+   "body": [
+    "Sunucu yavaşladığında önce **load average** değerine bak. `uptime` üç sayı gösterir: son **1, 5 ve 15 dakikanın** ortalama yükü. Aynı değerler `/proc/loadavg` dosyasındadır.",
+    "Tek başına bir yük sayısı bir şey ifade etmez. Onu **çekirdek sayısına göre** oku (`nproc`). 4 çekirdekli makinede 4.0 yük tam kullanım, 8.0 ise süreçlerin sırada beklediği (doygunluk) anlamına gelir. Pratik kural: yük çekirdek sayısının altındaysa sorun yok, üstündeyse aşırı yüklü.",
+    "Üç değeri karşılaştır: 1 dk değeri 15 dk değerinden büyükse yük şu an artıyor; küçükse yük azalıyor."
+   ],
+   "commands": [
+    {
+     "cmd": "uptime",
+     "what": "Saati, sistemin ne zamandır açık olduğunu, oturum açan kullanıcıları ve yük ortalamasını (1, 5, 15 dk) gösterir.",
+     "where": "Yavaşlayan bir sunucuya ilk bakışta.",
+     "why": "Tek satırda makinenin meşgul olup olmadığını ve yönünü görürsün.",
+     "example": "uptime"
+    },
+    {
+     "cmd": "nproc",
+     "what": "Kullanılabilir CPU çekirdek (thread) sayısını yazar.",
+     "where": "Yükü değerlendirmek için uptime ile birlikte.",
+     "why": "8 çekirdekte 4.0 yük normaldir, 2 çekirdekte doygunluktur.",
+     "example": "nproc",
+     "nosim": true
+    },
+    {
+     "cmd": "lscpu",
+     "what": "CPU ayrıntılarını gösterir: model, soket, çekirdek, thread, MHz.",
+     "where": "VM'in veya sunucunun gerçekte hangi donanıma sahip olduğunu öğrenmek için.",
+     "why": "Kaç çekirdeğin olduğunu ve sanal olup olmadığını doğrular.",
+     "example": "lscpu",
+     "nosim": true
+    },
+    {
+     "cmd": "cat /proc/loadavg",
+     "what": "Ham yük verisi: üç yük değeri, çalışan/toplam görev ve son PID.",
+     "where": "Betiklerde veya uptime kurulu değilse.",
+     "why": "uptime ve top'un okuduğu kaynak budur.",
+     "example": "cat /proc/loadavg",
+     "nosim": true
+    }
+   ],
+   "tip": "Hızlı kontrol: ilk yük değerini `nproc` değerine böl; 1'in üstündeyse CPU doygundur."
+  },
+  {
+   "id": "memory",
+   "title": "Bellek: free, /proc/meminfo, vmstat",
+   "body": [
+    "`free -h` RAM ve swap'i okunabilir birimlerle gösterir. Küçük **free** değerinden korkma: Linux kullanılmayan RAM'i önbellek (**buff/cache**) olarak kullanır ve programlar isteyince geri verir.",
+    "Önemli sütun **available**: yeni programların swap'e düşmeden alabileceği belleğin tahminidir. Düşük *available* ve yoğun swap kullanımı gerçek bellek yetersizliği demektir. Ayrıntılar `/proc/meminfo` içinde (`MemTotal`, `MemFree`, `MemAvailable`).",
+    "`vmstat` bellek, swap, I/O ve CPU'yu tek tabloda gösterir. `si`/`so` (swap giriş/çıkış) uzun süre sıfırın üstündeyse ve `wa` (I/O bekleme) yüksekse bu bir uyarıdır."
+   ],
+   "commands": [
+    {
+     "cmd": "free -h",
+     "what": "RAM ve swap için toplam, used, free, shared, buff/cache ve available değerlerini okunabilir birimlerle gösterir.",
+     "where": "Sistem yavaşken ve RAM'in dolduğundan şüphelenirken.",
+     "why": "free yerine available'a bakmak yanlış alarmı önler.",
+     "example": "free -h"
+    },
+    {
+     "cmd": "cat /proc/meminfo",
+     "what": "Çekirdeğin ayrıntılı bellek istatistiklerini yazar.",
+     "where": "Betikler için veya MemAvailable, SwapFree gibi kesin değerler gerektiğinde.",
+     "why": "free'nin arkasındaki kaynak budur.",
+     "example": "grep MemAvailable /proc/meminfo",
+     "nosim": true
+    },
+    {
+     "cmd": "vmstat 1 5",
+     "what": "Her saniye bir CPU, bellek, swap ve I/O satırı yazar, toplam beş kez.",
+     "where": "Tek bir anlık görüntü yerine birkaç saniyelik eğilimi görmek için.",
+     "why": "top'un ilk bakışta gizlediği swap (si/so) ve I/O beklemeyi (wa) gösterir.",
+     "example": "vmstat 1 5",
+     "nosim": true
+    }
+   ],
+   "tip": "`vmstat` çıktısının ilk satırını yok say; açılıştan beri ortalamadır. Sonraki satırlar canlıdır."
+  },
+  {
+   "id": "disk",
+   "title": "Disk: df, du, iostat",
+   "body": [
+    "Dolu disk garip hatalara yol açar: servisler çöker, loglar yazılamaz. `df -h` dosya sistemi başına kullanımı, `du` ise yeri hangi klasörün tuttuğunu gösterir.",
+    "Akış: `df -h` dolu dosya sistemini bulur, sonra `du -sh /var/*` veya `du -h /var | sort -h | tail` büyük klasörleri bulur. `sort -h` 4K, 12M, 3G gibi boyutları anlar.",
+    "`iostat` **sysstat** paketinden gelir ve disk etkinliğini gösterir. Yüksek `%util` ve `await` darboğazın disk olduğunu gösterir."
+   ],
+   "commands": [
+    {
+     "cmd": "df -h",
+     "what": "Bağlı her dosya sistemi için boyut, kullanılan, boş ve yüzdeyi gösterir.",
+     "where": "'No space left on device' hatasında ilk kontrol olarak.",
+     "why": "Hangi bağlama noktasının dolmak üzere olduğunu (Use%) görürsün.",
+     "example": "df -h"
+    },
+    {
+     "cmd": "du -sh",
+     "what": "Bir klasörün toplam boyutunu gösterir (-s özet, -h okunabilir).",
+     "where": "Ev dizinin veya /var/log gibi tek bir klasörü ölçmek için.",
+     "why": "'Bu ne kadar yer tutuyor?' sorusunu tek satırda yanıtlar.",
+     "example": "du -sh ~/Documents",
+     "nosim": true
+    },
+    {
+     "cmd": "du -h | sort -h",
+     "what": "Tüm alt klasörlerin boyutlarını küçükten büyüğe sıralı listeler.",
+     "where": "En büyük klasörleri bulmak için; ilk beşi için `| tail -n 5` ekle.",
+     "why": "Yer harcayan klasörü hızla bulur.",
+     "example": "du -h /var/log | sort -h | tail -n 5",
+     "nosim": true
+    },
+    {
+     "cmd": "iostat -x 1 3",
+     "what": "Her saniye genişletilmiş disk istatistikleri, üç kez (sysstat paketi gerekir).",
+     "where": "Sistem yavaş ama CPU ve RAM normal görünürken.",
+     "why": "Diskin doygun olup olmadığını (%util, await) gösterir.",
+     "example": "iostat -x 1 3",
+     "nosim": true
+    }
+   ],
+   "tip": "sysstat kurulumu: Ubuntu/Debian `sudo apt install sysstat`, Rocky/Alma `sudo dnf install sysstat`.",
+   "warn": "`/` üzerinde `du` dakikalarca sürebilir ve diski yorar. Tek bir klasörle sınırla, örneğin `du -h /var | sort -h | tail`."
+  },
+  {
+   "id": "procs",
+   "title": "Süreçler: top, htop, ps",
+   "body": [
+    "`top` terminalin canlı görev yöneticisidir. Üst kısım yükü, görevleri, CPU ve belleği; altı süreç listesini gösterir. `top` içinde: `P` CPU'ya, `M` belleğe göre sıralar, `q` çıkar.",
+    "`htop` renkli ve kolay sürümdür. Varsayılan olarak kurulu değildir. Ubuntu/Debian: `sudo apt install htop`. Rocky/Alma'da **EPEL** deposundadır: önce `sudo dnf install epel-release`, sonra `sudo dnf install htop`.",
+    "Betikler ve loglar için batch modu kullan: `top -b -n 1` bir anlık görüntü yazıp çıkar. `ps aux --sort=-%mem | head` en çok bellek tüketenleri, `--sort=-%cpu` en çok CPU tüketenleri listeler (eksi azalan sıra demektir)."
+   ],
+   "commands": [
+    {
+     "cmd": "top",
+     "what": "Yük, CPU, bellek ve süreçlerin canlı görünümü; 3 saniyede bir yenilenir.",
+     "where": "Kaynakları şu an kimin kullandığını görmek için.",
+     "why": "Sorunlu sürecin PID'sini bulur.",
+     "example": "top",
+     "nosim": true
+    },
+    {
+     "cmd": "top -b -n 1",
+     "what": "Batch modu: bir anlık görüntü yazar ve çıkar.",
+     "where": "Betiklerde, ticket'larda ve head veya grep'e pipe ederken.",
+     "why": "Çıktıyı kaydedebilir veya süzebilirsin, örneğin `top -b -n 1 | head -n 15`.",
+     "example": "top -b -n 1 | head -n 15",
+     "nosim": true
+    },
+    {
+     "cmd": "htop",
+     "what": "Renkli, çubuklu ve fare destekli etkileşimli süreç görüntüleyici.",
+     "where": "Sunucularda ve VM'lerde günlük çalışmada.",
+     "why": "top'tan daha okunaklı ve sıralaması kolay.",
+     "example": "htop",
+     "nosim": true
+    },
+    {
+     "cmd": "ps aux --sort=-%mem | head",
+     "what": "Süreçleri bellek kullanımına göre, en yüksek önce, ilk 10 satır olarak listeler.",
+     "where": "RAM dolmak üzereyken suçluyu ararken.",
+     "why": "Kullanıcı, PID, %CPU, %MEM ve komutu kopyalanabilir listede gösterir.",
+     "example": "ps aux --sort=-%mem | head",
+     "nosim": true
+    },
+    {
+     "cmd": "ps aux --sort=-%cpu | head",
+     "what": "Süreçleri CPU kullanımına göre, en yüksek önce listeler.",
+     "where": "Yük yüksekken.",
+     "why": "Etkileşimli ekran olmadan CPU tüketicisini bulur.",
+     "example": "ps aux --sort=-%cpu | head",
+     "nosim": true
+    }
+   ],
+   "tip": "`top` içinde `1` her çekirdeği ayrı gösterir, `c` tam komut satırını gösterir."
+  },
+  {
+   "id": "triage",
+   "title": "Teşhis: sabit bir sıra",
+   "body": [
+    "Ticket'ta 'sunucu yavaş' yazıyorsa her seferinde aynı sırayı izle: **1.** `uptime` ve `nproc` (yük ve çekirdek), **2.** `free -h` (available bellek, swap), **3.** `df -h` (dolu disk), **4.** `top` veya `ps aux --sort=-%cpu | head` (suçlu kim), **5.** `vmstat 1 5` / `iostat -x` (swap veya disk darboğazı).",
+    "Karar ver: yüksek yük ve yüksek `us` CPU, CPU sorunudur. Yüksek yük, düşük CPU ama yüksek `wa` disk veya ağ I/O sorunudur. Düşük available bellek ve swap hareketi RAM sorunudur.",
+    "VM'inde denemek için yüke ihtiyacın var. Zaman sınırı kullan: `timeout 30 yes > /dev/null &` 30 saniye sonra duran tek bir CPU tüketicisi başlatır. VM bölümüne bak."
+   ],
+   "tip": "Bir şeyi değiştirmeden önce sayıları not al. 'Yük 2 çekirdekte 4.5, python3 %85 CPU kullanıyor' cevabı 'yavaş' cevabından çok daha değerlidir.",
+   "warn": "`yes > /dev/null &` veya `stress-ng` gibi yük üreticileri durdurulana kadar çalışır. Her zaman `timeout` kullan ve sonra `pkill yes` ile temizle.",
+   "danger": "Üretim sunucusunda asla yük üretici başlatma veya süreç sonlandırma. Yalnızca kendi VM'inde dene ve önce snapshot al."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`uptime` ile açık kalma süresini ve yük ortalamasını göster.",
+   "hint": "'load average:' sonrasındaki üç sayı 1, 5 ve 15 dakikadır."
+  },
+  "t02": {
+   "text": "`free -h` ile belleği okunabilir birimlerle göster. `available` sütununu bul.",
+   "hint": "-h insan tarafından okunabilir demektir."
+  },
+  "t03": {
+   "text": "`df -h` ile tüm dosya sistemlerinin disk kullanımını göster.",
+   "hint": "Use% sütununa bak."
+  },
+  "t04": {
+   "text": "`which free` ile `free` programının nerede durduğunu bul.",
+   "hint": "Genellikle /usr/bin/free."
+  },
+  "t05": {
+   "text": "`~/lab/loadavg.txt` dosyası `/proc/loadavg` kopyasıdır. `cat ~/lab/loadavg.txt` ile göster.",
+   "hint": "İlk üç sayı 1, 5 ve 15 dakikalık yüktür."
+  },
+  "t06": {
+   "text": "Makinenin çekirdek sayısı `~/lab/cores.txt` içinde. `cat ~/lab/cores.txt` ile oku, 1 dakikalık yük 4.52 ile karşılaştır ve kararını (`overloaded` veya `ok`) `echo` ile `~/lab/load_verdict.txt` dosyasına yaz.",
+   "hint": "2 çekirdekte 4.52 yük çekirdek sayısının üstündedir: `echo overloaded > ~/lab/load_verdict.txt`."
+  },
+  "t07": {
+   "text": "`grep MemAvailable ~/lab/meminfo.txt` ile `~/lab/meminfo.txt` içindeki `MemAvailable` satırını bul.",
+   "hint": "Önemli olan MemFree değil, MemAvailable sayısıdır."
+  },
+  "t08": {
+   "text": "`grep Cpu ~/lab/top_snapshot.txt` ile `~/lab/top_snapshot.txt` içindeki CPU satırını göster.",
+   "hint": "`us` kullanıcı zamanı, `wa` I/O bekleme, `id` boştur."
+  },
+  "t09": {
+   "text": "Tahmin et: `free -h | grep Mem` `available` sütununda hangi değeri gösterecek? Önce düşün, sonra çalıştır.",
+   "hint": "Mem satırının son sütununa bak."
+  },
+  "t10": {
+   "text": "Tahmin et: `grep -c java ~/lab/ps_snapshot.txt` kaç yazar? Önce düşün, sonra çalıştır.",
+   "hint": "-c eşleşen satırları sayar."
+  },
+  "t11": {
+   "text": "Tahmin et: `cut -d ' ' -f 1 ~/lab/loadavg.txt` ne yazar? Önce düşün, sonra çalıştır.",
+   "hint": "-d ayırıcıyı belirler, -f 1 ilk alandır."
+  },
+  "t12": {
+   "text": "Anlık görüntüdeki en çok CPU tüketenleri bul: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 3`. İlk süreç hangisi?",
+   "hint": "-k3 %CPU sütunudur, -n sayısal, -r azalan sıra."
+  },
+  "t13": {
+   "text": "Mini: `~/lab/ps_snapshot.txt` içindeki en çok bellek tüketen 2 süreci `~/lab/top_mem.txt` dosyasına kaydet. `sort -k4 -nr` ile 4. sütuna göre sırala, `head -n 2` ile iki satır al ve `>` ile yönlendir.",
+   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt`"
+  },
+  "t14": {
+   "text": "Debug: `~/lab/monitor_cmds.txt` yanlış komutlar listeliyor (`nprocs` diye komut yok ve `free -m` okunabilir değil). Dosyayı `printf` ile yeniden yaz: her satırda bir tane olmak üzere `cores: nproc`, `memory: free -h` ve `disk: df -h` içersin.",
+   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt`"
+  },
+  "t15": {
+   "text": "Mini: `~/lab/du_report.txt` boyutları KB olarak içerir. En büyük 3 kaydı `sort -nr`, `head -n 3` ve `>` ile `~/lab/biggest.txt` dosyasına kaydet.",
+   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt`"
+  },
+  "t16": {
+   "text": "Challenge: `~/lab/report.txt` dosyasını üç parçadan kur: `~/lab/loadavg.txt` içindeki 1 dakikalık yük (`cut` kullan), `~/lab/meminfo.txt` içindeki `MemAvailable` satırı (`grep` kullan, `>>` ile ekle) ve kararın `overloaded` (`echo` kullan, ekle).",
+   "hint": "İlk komut `>`, diğerleri `>>` kullanır; böylece hiçbir şey ezilmez."
+  },
+  "t17": {
+   "text": "TICKET #5201 — linux-lab sunucusu çok yavaş. `~/lab/top_snapshot.txt` içinde `top -b -n 1` çıktısı var. En yüksek CPU kullanan süreci bul ve adını ile kullanıcısını `~/lab/culprit.txt` dosyasına yaz.",
+   "hint": "`head -n 9 ~/lab/top_snapshot.txt` ile ilk süreç satırına bak, sonra `echo \"name user\" > ~/lab/culprit.txt`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Yeni programların gerçekte ne kadar RAM alabileceğini hangi bellek değeri söyler?",
+   "options": [
+    "free",
+    "shared",
+    "available",
+    "buff/cache"
+   ],
+   "explain": "free yalnızca kullanılmayan RAM'dir. Linux RAM'i önbellek olarak da kullanır; available geri verebileceği kısmı da içerir, doğru değer odur."
+  },
+  "q2": {
+   "q": "4 çekirdekli bir makinede 1 dakikalık yük 8.0. Bu ne demektir?",
+   "options": [
+    "Her şey yolunda",
+    "CPU doygun: süreçler sırada bekliyor",
+    "Disk dolu",
+    "Sistem yeni açıldı"
+   ],
+   "explain": "Yük çekirdek sayısına göre okunur. 4 çekirdekte yük 8, çekirdeğin iki katı çalışmaya hazır görev demektir."
+  },
+  "q3": {
+   "q": "Rocky Linux'ta htop nasıl kurulur?",
+   "options": [
+    "sudo apt install htop",
+    "doğrudan sudo dnf install htop, her zaman çalışır",
+    "sudo yum remove htop",
+    "sudo dnf install epel-release, sonra sudo dnf install htop"
+   ],
+   "explain": "RHEL ailesinde htop EPEL deposundadır, önce EPEL'i etkinleştir. apt Debian/Ubuntu içindir."
+  },
+  "q4": {
+   "q": "En çok bellek tüketenleri hangi komut listeler?",
+   "options": [
+    "ps aux --sort=-%mem | head",
+    "df -h",
+    "uptime",
+    "nproc"
+   ],
+   "explain": "ps ile --sort=-%mem belleğe göre azalan sıralar; head ilk satırları gösterir."
+  }
+ },
+ "summary": [
+  "Yük ortalamasını (1/5/15 dk) `nproc`'a göre oku; çekirdek sayısının üstündeki yük doygunluk demektir.",
+  "`free -h`: free'ye değil available'a bak; buff/cache yeniden kullanılabilir.",
+  "`df -h` dolu dosya sistemini, `du -sh` ve `du -h | sort -h` büyük klasörleri bulur.",
+  "`top`, `htop` (Rocky/Alma'da EPEL), `top -b -n 1` ve `ps aux --sort=-%mem | head` suçluyu bulur.",
+  "`vmstat` ve `iostat` (sysstat) swap ve disk darboğazlarını ortaya çıkarır.",
+  "Yükü yalnızca kendi VM'inde, `timeout` ile ve snapshot'tan sonra dene."
+ ],
+ "glossary": [
+  {
+   "term": "load average",
+   "meaning": "1, 5 ve 15 dakika boyunca çalışan veya CPU/I-O bekleyen ortalama görev sayısı."
+  },
+  {
+   "term": "saturation (doygunluk)",
+   "meaning": "Yük çekirdek sayısından yüksektir; iş sırada bekler."
+  },
+  {
+   "term": "buff/cache",
+   "meaning": "Dosya önbellekleri için kullanılan RAM; çekirdek gerekince serbest bırakır."
+  },
+  {
+   "term": "available",
+   "meaning": "Yeni programların swap'e düşmeden kullanabileceği belleğin tahmini."
+  },
+  {
+   "term": "swap",
+   "meaning": "RAM'in acil uzantısı olarak kullanılan disk alanı; yavaştır."
+  },
+  {
+   "term": "EPEL",
+   "meaning": "Extra Packages for Enterprise Linux: RHEL, Rocky ve Alma için ek depo."
+  },
+  {
+   "term": "I/O wait (wa)",
+   "meaning": "CPU'nun disk veya ağı beklediği zaman payı."
+  }
+ ],
+ "vm": {
+  "intro": "Bunları kendi VM'inde çalıştır (Ubuntu, Rocky, Alma veya WSL). İzleme komutları zararsızdır; yalnızca son görev yük oluşturur. Ondan önce snapshot al.",
+  "tasks": {
+   "v01": {
+    "title": "Yük ve çekirdekler",
+    "text": "Yük ortalamasını ve çekirdek sayısını göster. 1 dakikalık yük çekirdek sayısının altında mı? `uptime` çıktısını yapıştır.",
+    "blocks": [
+     {
+      "cmd": "uptime\nnproc\ncat /proc/loadavg\nlscpu | head -n 12",
+      "expected": " 10:25:01 up 3 days,  2:30,  1 user,  load average: 0.08, 0.03, 0.01\n2\n0.08 0.03 0.01 1/245 12345"
+     }
+    ],
+    "differs": [
+     "Sayılar farklı olacak; yalnızca biçim önemli.",
+     "WSL'de `uptime` çok kısa bir süre gösterebilir. Bu normaldir."
+    ]
+   },
+   "v02": {
+    "title": "Bellek: free ve available",
+    "text": "Belleğe bak. free ve available sütunlarını karşılaştır. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "free -h\ngrep -E 'MemTotal|MemFree|MemAvailable' /proc/meminfo",
+      "expected": "              total        used        free      shared  buff/cache   available\nMem:          3.8Gi       612Mi       2.4Gi        12Mi       860Mi       3.0Gi\nSwap:         2.0Gi          0B       2.0Gi\nMemTotal:        3980000 kB\nMemFree:         2500000 kB\nMemAvailable:    3100000 kB"
+     }
+    ],
+    "differs": [
+     "Swap yoksa Swap satırı 0B gösterir; sorun değil.",
+     "Eski sistemlerde `available` sütunu olmayabilir; /proc/meminfo içindeki MemAvailable'ı kullan."
+    ]
+   },
+   "v03": {
+    "title": "Disk kullanımı",
+    "text": "Dosya sistemi kullanımını ve `/var` altındaki en büyük beş klasörü bul. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "df -h\ndu -sh ~\nsudo du -h /var 2>/dev/null | sort -h | tail -n 5",
+      "expected": "Filesystem           Size  Used Avail Use% Mounted on\n/dev/mapper/rhel-root  20G  4.1G   16G  21% /\n..."
+     }
+    ],
+    "differs": [
+     "Aygıt adları farklıdır (/dev/sda1, /dev/vda2, /dev/mapper/...).",
+     "WSL'de /mnt/c gibi ek bağlamalar görürsün; yok say."
+    ]
+   },
+   "v04": {
+    "title": "vmstat, iostat ve htop",
+    "text": "Araçları kur ve kısa bir ölçüm yap. Debian/Ubuntu: `sudo apt install sysstat htop`. Rocky/Alma: htop için EPEL gerekir, önce `sudo dnf install epel-release`.",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu / Debian\nsudo apt install -y sysstat htop\n# Rocky / Alma\nsudo dnf install -y epel-release\nsudo dnf install -y sysstat htop",
+      "expected": "Complete! (veya: Setting up htop ...)"
+     },
+     {
+      "cmd": "vmstat 1 5\niostat -x 1 3",
+      "expected": "procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----\n r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st"
+     }
+    ],
+    "differs": [
+     "Yalnızca dağıtımına ait bloğu çalıştır; diğeri hata verir.",
+     "`iostat` bulunamazsa sysstat kurulu değildir.",
+     "htop'tan çıkmak için `q` bas."
+    ]
+   },
+   "v05": {
+    "title": "Yük oluştur ve suçluyu bul",
+    "text": "Uyarı: bu görev CPU'nu yükler. Önce VM snapshot'ı al ve yalnızca kendi VM'inde yap. `timeout` yükü 30 saniye sonra durdurur. Başlat, top'ta izle, ps ile bul ve temizle. Sonunda `pgrep yes` hiçbir şey yazmıyorsa \"Yaptım\"a bas.",
+    "blocks": [
+     {
+      "cmd": "timeout 30 yes > /dev/null &\nsleep 5\nuptime\ntop -b -n 1 | head -n 12\nps aux --sort=-%cpu | head -n 5\npkill yes\nsleep 1\npgrep yes",
+      "expected": "... `yes` süreci en üstte yaklaşık %100 CPU gösterir ...\n(son komut çıktı vermez)"
+     }
+    ],
+    "differs": [
+     "Birden çok çekirdekte tek bir `yes` bir çekirdeğin yalnızca %100'ünü kullanır, yük yavaş artar.",
+     "`pgrep yes` hâlâ bir PID yazıyorsa `pkill yes` komutunu tekrar çalıştır."
+    ]
+   }
+  }
+ }
+}

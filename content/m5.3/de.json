@@ -1,0 +1,85 @@
+{
+  "title": "Prozesskontrolle",
+  "lead": "Beende Prozesse sicher mit Signalen, ziele per PID oder Name und passe die CPU-Priorität an.",
+  "objectives": [
+    "Du erklärst, dass `kill` Signale sendet, und kennst den Unterschied zwischen SIGTERM und SIGKILL.",
+    "Du prüfst PID und Kommandozeile, bevor du einen Prozess adressierst.",
+    "Du kennst `pkill`, `nice`, `renice` und ihre Berechtigungsgrenzen."
+  ],
+  "sections": [
+    {
+      "id": "signals",
+      "title": "Signale: kill, SIGTERM und SIGKILL",
+      "body": [
+        "`kill PID` sendet standardmäßig **SIGTERM (15)**. Der Prozess erhält die Gelegenheit, sauber zu beenden und Daten zu speichern. Reagiert er nicht, ist **SIGKILL (9)** das letzte Mittel; der Prozess kann es weder abfangen noch ignorieren.",
+        "`kill` sendet ein Signal und bedeutet nicht immer „töten“. Prüfe die PID und den Prozessnamen zuerst mit `ps` oder `pgrep`. Vor allem `kill -9` und das Ansprechen mehrerer Prozesse können Datenverlust verursachen."
+      ],
+      "commands": [
+        {"cmd": "kill -TERM PID", "what": "Sendet SIGTERM an die angegebene PID.", "where": "Beim kontrollierten Beenden einer Anwendung.", "why": "Der Prozess kann aufräumen und Daten speichern.", "example": "kill -TERM 2210", "nosim": true},
+        {"cmd": "kill -KILL PID", "what": "Beendet den Prozess sofort durch den Kernel.", "where": "Nur als letztes Mittel, wenn SIGTERM nicht wirkt.", "why": "Der Prozess kann das Signal nicht abfangen; ungespeicherte Arbeit kann verloren gehen.", "example": "kill -KILL 2210", "nosim": true}
+      ],
+      "tip": "Schreibe den Signalnamen ausdrücklich: `kill -TERM PID`. Prüfe danach mit `ps -p PID`, ob der Prozess beendet wurde.",
+      "warn": "Sende auf einem Produktionsserver oder mit einem Prozessmanager kein Signal, ohne die PID zu prüfen. Ziele niemals auf PID 1 oder unbekannte Systemprozesse."
+    },
+    {
+      "id": "target",
+      "title": "Prozesse finden und per Namen ansprechen",
+      "body": [
+        "`ps` zeigt eine Momentaufnahme der Prozesse; `pgrep` sucht PIDs anhand des Namens. `pkill` sendet Signale an passende Prozesse. Prüfe zuerst `pgrep -a`, denn eine Namenssuche kann mehr Prozesse treffen als erwartet.",
+        "`pkill -TERM -x worker` spricht nur Prozesse mit exakt diesem Namen an. Für eine Suche in der ganzen Kommandozeile gibt es `-f`; dabei besteht ein höheres Risiko für zu breite Treffer."
+      ],
+      "commands": [
+        {"cmd": "pgrep -a -x worker", "what": "Listet PID und Befehl für Prozesse mit exakt dem Namen worker auf.", "where": "Vor dem Senden eines Signals zur Zielprüfung.", "why": "Verringert das Risiko, die falsche PID oder einen ähnlich benannten Prozess zu treffen.", "example": "pgrep -a -x sleep", "nosim": true},
+        {"cmd": "pkill -TERM -x worker", "what": "Sendet SIGTERM an Prozesse mit exakt dem Namen worker.", "where": "Beim kontrollierten Beenden einer bestätigten Prozessgruppe.", "why": "Sendet eine höfliche Beendigungsanforderung, ohne jede PID einzeln einzugeben.", "example": "pkill -TERM -x sleep", "nosim": true}
+      ],
+      "tip": "Führe vor `pkill` dasselbe Suchmuster mit `pgrep -a` aus und prüfe die Treffer.",
+      "danger": "`pkill -f` gleicht beliebige Teile der Kommandozeile ab. Verwende es nicht mit einem kurzen oder allgemeinen Muster."
+    },
+    {
+      "id": "priority",
+      "title": "CPU-Priorität: nice und renice",
+      "body": [
+        "Der Nice-Wert reicht von **-20 bis 19**: Ein höherer Wert bedeutet einen niedrigeren CPU-Vorrang. Normale Benutzer können die Priorität eigener Prozesse senken; zum Erhöhen sind meist Administratorrechte erforderlich.",
+        "`nice` startet einen neuen Befehl mit einem Wert; `renice` ändert den Wert eines laufenden Prozesses. Das beeinflusst die CPU-Planung, begrenzt aber weder Speicher noch CPU-Zeit."
+      ],
+      "commands": [
+        {"cmd": "nice -n 10 command", "what": "Startet einen neuen Befehl mit dem Nice-Wert 10.", "where": "Für Hintergrundaufgaben wie Sicherungen.", "why": "Interaktive Aufgaben erhalten leichter CPU-Zeit.", "example": "nice -n 10 sleep 60", "nosim": true},
+        {"cmd": "renice 10 -p PID", "what": "Setzt den Nice-Wert eines laufenden Prozesses auf 10.", "where": "Beim Senken der Priorität einer laufenden Hintergrundaufgabe.", "why": "Ändert die CPU-Priorität ohne Neustart des Prozesses.", "example": "renice 10 -p 2210", "nosim": true}
+      ],
+      "tip": "Nice-Wert und Prozessstatus sind verschieden: Prüfe sie getrennt mit `ps -o pid,ni,stat,comm -p PID`."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Finde mit `grep` die Prozesse des Benutzers alice in `~/lab/ps_snapshot.txt`.", "hint": "Die Datei beginnt mit der Spalte `USER`; probiere `grep alice ~/lab/ps_snapshot.txt`."},
+    "t02": {"text": "Finde die PID des `python3`-Prozesses in der Momentaufnahme.", "hint": "In der Zeile von `grep python3 ~/lab/ps_snapshot.txt` ist das zweite Feld die PID."},
+    "t03": {"text": "Schätze: In wie vielen Zeilen steht `python3`? Prüfe danach mit `grep -c`.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` zählt passende Zeilen."},
+    "t04": {"text": "Speichere einen sicheren Beendigungsplan in `~/lab/term_plan.txt`: Verwende `kill -TERM` für PID 2210.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt`"},
+    "t05": {"text": "Schreibe ein Beispiel in `~/lab/priority_plan.txt`, das eine Sicherung mit niedrigerer CPU-Priorität startet.", "hint": "Verwende die Form `nice -n 10 ./backup.sh`."},
+    "t06": {"text": "Ergänze PID-Prüfung und eine Wartezeit nach SIGTERM; erwähne SIGKILL nur als letztes Mittel.", "hint": "Speichere den Plan in `~/lab/escalation_plan.txt`."},
+    "t07": {"text": "Erstelle für Ticket #5301 eine kurze Notiz: PID 2210 ist `python3`; zuerst soll SIGTERM versucht werden.", "hint": "Schreibe die Notiz nach `~/lab/ticket_5301.txt`."}
+  },
+  "vm": {
+    "intro": "Führe diese Befehle nur in deiner Test-VM aus. Sende kein Signal an eine beliebige PID; prüfe Prozessname und PID.",
+    "tasks": {
+      "v01": {"title": "Kontrollierten Prozess starten", "text": "Starte einen kurzlebigen Testprozess, notiere seine PID und prüfe sie mit `ps`. Beende ihn anschließend.", "blocks": [{"cmd": "sleep 300 &\necho $!\nps -o pid,ni,comm -p $!", "expected": "PID und der Prozess sleep sind sichtbar."}], "differs": ["Die Shell kann zusätzlich die Auftragsnummer ausgeben; die PID steht in der Zeile von `echo $!`.", "Die PID kann abweichen; erwarte keine feste Zahl."]},
+      "v02": {"title": "Zuerst SIGTERM senden", "text": "Verwende die echte PID des gerade gestarteten Testprozesses. Sende SIGTERM, warte kurz und prüfe, ob er beendet wurde.", "blocks": [{"cmd": "kill -TERM PID\nsleep 1\nps -p PID || echo 'process stopped'", "expected": "process stopped"}], "differs": ["Ersetze PID durch die Zahl aus v01; führe nicht das Wort `PID` unverändert aus.", "Wenn der Prozess noch sichtbar ist, prüfe die PID; sende keinem anderen Prozess ein Signal."]},
+      "v03": {"title": "Nice-Wert prüfen", "text": "Starte einen Testprozess mit niedriger Priorität, lies den NI-Wert in `ps` ab und beende anschließend deinen Prozess.", "blocks": [{"cmd": "nice -n 10 sleep 60 &\nps -o pid,ni,comm -p $!\nkill -TERM $!", "expected": "In der Spalte NI steht 10 und als Befehl erscheint sleep."}], "differs": ["Die Spaltenüberschriften können je nach `ps`-Version anders ausgerichtet sein; der NI-Wert soll 10 sein.", "Beende nur die PID, die deine Shell gerade gestartet hat."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "Welches Signal sendet `kill PID` standardmäßig?", "options": ["SIGKILL", "SIGTERM", "SIGSTOP", "SIGHUP"], "explain": "SIGTERM ist das Standardsignal und bittet den Prozess um ein sauberes Ende."},
+    "q2": {"q": "Wann sollte SIGKILL verwendet werden?", "options": ["Bei jedem Programmende", "Ohne die PID zu prüfen", "Als letztes Mittel, wenn SIGTERM nicht wirkt", "Zum Ändern des Nice-Werts"], "explain": "SIGKILL kann nicht abgefangen werden und lässt keine Zeit für Aufräumarbeiten; nutze es nur als letztes Mittel."},
+    "q3": {"q": "Was bedeutet ein Nice-Wert von 10 statt 0?", "options": ["Niedrigere CPU-Priorität", "Der Prozess wird zwingend angehalten", "Die Speichergrenze steigt", "Der Prozess wird root"], "explain": "Ein höherer Nice-Wert bedeutet eine niedrigere CPU-Priorität."},
+    "q4": {"q": "Was solltest du vor `pkill` tun?", "options": ["PID 1 ausprobieren", "SIGKILL senden", "`pkill -f` mit einem breiten Muster nutzen", "Treffer mit `pgrep -a` prüfen"], "explain": "Die Trefferliste bestätigt das Ziel und macht mögliche Nebenwirkungen sichtbar."}
+  },
+  "summary": [
+    "`kill` sendet standardmäßig SIGTERM; SIGKILL ist das letzte Mittel.",
+    "Prüfe PID und Befehl mit `ps` oder `pgrep -a`, bevor du ein Signal sendest.",
+    "`nice` ändert die Priorität beim Start, `renice` bei laufenden Prozessen; höherer Nice-Wert bedeutet niedrigere Priorität."
+  ],
+  "glossary": [
+    {"term": "signal", "meaning": "Eine Steuerbenachrichtigung, die der Kernel an einen Prozess sendet."},
+    {"term": "PID", "meaning": "Die eindeutige Prozesskennung eines laufenden Prozesses."},
+    {"term": "nice", "meaning": "Wert, der die relative Priorität eines Prozesses bei der CPU-Planung beeinflusst."}
+  ]
+}

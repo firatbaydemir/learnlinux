@@ -1,0 +1,113 @@
+{
+ "title": "Streams: stdin, stdout, stderr",
+ "lead": "Jeder Linux-Befehl hat drei Standardkanäle: Eingabe, Ausgabe und Fehler. Wer sie versteht, versteht Umleitung und Pipes.",
+ "objectives": [
+  "Du unterscheidest stdin (0), stdout (1) und stderr (2).",
+  "Du leitest Ausgabe und Fehler mit `>`, `>>` und `2>` in Dateien um.",
+  "Du führst Kanäle mit `2>&1` zusammen oder verwirfst sie mit `/dev/null`."
+ ],
+ "sections": [
+  {
+   "id": "streams",
+   "title": "Die drei Standardkanäle",
+   "body": [
+    "Ein laufendes Programm hat drei offene Kanäle: **stdin** (0) liest Eingaben, **stdout** (1) schreibt das normale Ergebnis, **stderr** (2) schreibt Fehlermeldungen. Standardmäßig kommt die Eingabe von der Tastatur, Ausgabe und Fehler gehen auf den Bildschirm.",
+    "Weil beide auf demselben Bildschirm landen, wirken sie vermischt, sind aber getrennte Kanäle. Diese Trennung erlaubt dir, Fehler in eine eigene Datei zu schreiben."
+   ],
+   "commands": [
+    {"cmd": "echo", "what": "Schreibt Text nach stdout.", "where": "Für Tests und einfache Ausgaben.", "why": "Das einfachste stdout-Beispiel.", "example": "echo hello"},
+    {"cmd": "cat", "what": "Schreibt eine Datei nach stdout.", "where": "Um Dateiinhalte zu sehen.", "why": "Liest eine Datei und speist den Kanal.", "example": "cat lab/names.txt"},
+    {"cmd": "ls", "what": "Bei einem nicht vorhandenen Pfad geht die Fehlermeldung nach stderr.", "where": "Um den Fehlerkanal zu sehen.", "why": "Die Meldung erscheint auf dem Bildschirm, ist aber nicht auf stdout.", "example": "ls lab/missing.txt"}
+   ],
+   "tip": "Kanalnummern: 0 = Eingabe, 1 = Ausgabe, 2 = Fehler. Du brauchst sie bei Umleitungen."
+  },
+  {
+   "id": "redirect",
+   "title": "In Dateien umleiten",
+   "body": [
+    "`>` schreibt stdout in eine Datei und **leert** sie vorher. `>>` **hängt an**. `2>` leitet nur stderr um. `<` übergibt eine Datei als stdin.",
+    "Sollen Ausgabe und Fehler in dieselbe Datei, schreibe `> file 2>&1`: Zuerst geht stdout in die Datei, dann wird stderr dorthin geleitet, wohin stdout zeigt. Die Reihenfolge zählt. `/dev/null` ist eine Spezialdatei, die alles Geschriebene verwirft."
+   ],
+   "commands": [
+    {"cmd": ">", "what": "Schreibt stdout in eine Datei; eine vorhandene wird geleert.", "where": "Um Ausgaben zu speichern.", "why": "Du behältst das Ergebnis für später.", "example": "echo hello > out.txt"},
+    {"cmd": ">>", "what": "Hängt stdout ans Dateiende an.", "where": "Beim Führen von Logs.", "why": "Der alte Inhalt bleibt erhalten.", "example": "echo world >> out.txt"},
+    {"cmd": "2>", "what": "Schreibt nur Fehlermeldungen in eine Datei.", "where": "Um Fehler getrennt zu sammeln.", "why": "Die Ausgabe bleibt am Bildschirm, Fehler werden gespeichert.", "example": "ls lab/missing.txt 2> errors.txt"},
+    {"cmd": "<", "what": "Macht eine Datei zur Eingabe des Befehls.", "where": "Bei Befehlen, die Eingaben lesen.", "why": "Liest aus einer Datei statt von der Tastatur.", "example": "cat < lab/names.txt"},
+    {"cmd": "2>&1", "what": "Leitet stderr dorthin, wohin stdout zeigt.", "where": "Um alles in einer Datei zu sammeln.", "why": "Ausgabe und Fehler werden zusammen gespeichert.", "example": "ls lab missing_dir > all.txt 2>&1"},
+    {"cmd": "2>/dev/null", "what": "Verwirft Fehler.", "where": "Um harmlose Fehler zu unterdrücken.", "why": "Hält den Bildschirm sauber.", "example": "ls lab missing_dir 2>/dev/null"}
+   ],
+   "tip": "Gute Gewohnheit: Überlege zuerst, ob `>>` oder `>` nötig ist. Ein falsches `>` löscht eine vorhandene Datei stillschweigend.",
+   "warn": "`>` leert die Zieldatei, bevor der Befehl läuft. `sort file > file` zerstört den Inhalt der Datei."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Schreibe Text auf den Bildschirm (stdout) mit `echo hello`.", "hint": "Die Ausgabe erscheint direkt am Bildschirm."},
+  "t02": {"text": "Gib den Dateiinhalt mit `cat lab/names.txt` nach stdout aus.", "hint": "Du solltest drei Namen sehen."},
+  "t03": {"text": "Liste den nicht vorhandenen Pfad `lab/missing.txt` mit `ls` und lies die Fehlermeldung.", "hint": "Diese Meldung kommt von stderr."},
+  "t04": {"text": "Schreibe den Text mit `echo hello > out.txt` in die Datei `out.txt`.", "hint": "Du siehst keine Ausgabe; prüfe mit `cat out.txt`."},
+  "t05": {"text": "Hänge mit `echo world >> out.txt` eine zweite Zeile an dieselbe Datei an.", "hint": "`>>` hängt an, `>` überschreibt."},
+  "t06": {"text": "Leite den Fehler mit `ls lab/missing.txt 2> errors.txt` nach `errors.txt` um.", "hint": "Der Fehler erscheint nicht mehr am Bildschirm."},
+  "t07": {"text": "Übergib die Datei mit `cat < lab/names.txt` als stdin.", "hint": "`<` liest die Eingabe aus einer Datei."},
+  "t08": {"text": "Vorhersage: Erscheint bei `ls lab/missing.txt > result.txt` der Fehler am Bildschirm? Ist `result.txt` gefüllt? Führe es aus und prüfe.", "hint": "`>` leitet nur stdout um; der Fehler liegt auf stderr."},
+  "t09": {"text": "Vorhersage: Was gibt `cat lab/names.txt | wc -l` aus? Führe es aus und prüfe.", "hint": "`wc -l` zählt Zeilen; wie viele Zeilen hat die Datei?"},
+  "t10": {"text": "Fehlersuche: `ls lab missing_dir > all.txt` zeigt den Fehler am Bildschirm, in `all.txt` landet er nicht. Sorge dafür, dass `all.txt` Liste und Fehler enthält.", "hint": "Hänge `2>&1` ans Ende des Befehls."},
+  "t11": {"text": "Mini-Projekt: Baue `build.log`. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. Die Datei muss 3 Zeilen haben.", "hint": "Der erste nutzt `>`, die anderen `>>` und `2>>`."},
+  "t12": {"text": "Herausforderung: Verwirf die Fehler von `ls lab missing_dir` nach `/dev/null` und speichere die normale Ausgabe in `found.txt`.", "hint": "Zwei Umleitungen: `2>/dev/null` und `> found.txt`."},
+  "t13": {"text": "Ticket: Der Prüfer möchte die Anzahl der Benutzer aus `lab/names.txt` in `~/count.txt` (nur die Zahl).", "hint": "`wc -l < file` gibt die Anzahl ohne Dateinamen aus; speichere mit `>`."}
+ },
+ "vm": {
+  "intro": "Diese Befehle laufen im Home-Verzeichnis deiner VM und schreiben nur Dateien, die du selbst anlegst; benutze trotzdem keinen Namen einer wichtigen Datei.",
+  "tasks": {
+   "v01": {
+    "title": "Ausgabe und Fehler trennen",
+    "text": "Liste eine vorhandene Datei und einen fehlenden Pfad; schreibe Ausgabe und Fehler in getrennte Dateien und zeige beide an.",
+    "blocks": [
+     {"cmd": "ls /etc/hostname /nonexistent > out.txt 2> err.txt\ncat out.txt err.txt", "expected": "/etc/hostname\nls: cannot access '/nonexistent': No such file or directory"}
+    ],
+    "differs": [
+     "Der Fehlertext variiert je nach Distribution und Sprache; `nonexistent` muss vorkommen.",
+     "Ist `out.txt` leer, gibt es `/etc/hostname` auf deinem System nicht; nimm `/etc/hosts`."
+    ]
+   },
+   "v02": {
+    "title": "Überschreiben und anhängen",
+    "text": "Lege mit `>` eine Datei an, hänge mit `>>` eine Zeile an und zeige das Ergebnis.",
+    "blocks": [
+     {"cmd": "echo \"line one\" > ~/streams.txt\necho \"line two\" >> ~/streams.txt\ncat ~/streams.txt", "expected": "line one\nline two"}
+    ],
+    "differs": [
+     "Erscheint nur `line two`, hast du in beiden Befehlen `>` benutzt."
+    ]
+   },
+   "v03": {
+    "title": "Fehler unterdrücken",
+    "text": "Liste ein Verzeichnis, das du als normaler Benutzer nicht lesen darfst, zusammen mit einer Datei; verwirf die Fehler nach `/dev/null`.",
+    "blocks": [
+     {"cmd": "ls /root /etc/hostname 2>/dev/null", "expected": "/etc/hostname"}
+    ],
+    "differs": [
+     "Fehlt `hostname`, gibt es die Datei nicht; solange keine Fehlermeldung am Bildschirm erscheint, hat es funktioniert."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Welche Kanalnummer hat stderr?", "options": ["1", "2", "0", "3"], "explain": "0 = stdin, 1 = stdout, 2 = stderr."},
+  "q2": {"q": "Was macht `echo x > file`, wenn die Datei schon existiert?", "options": ["Hängt an", "Gibt einen Fehler aus", "Leert sie und überschreibt sie", "Fragt nach Bestätigung"], "explain": "`>` leert die Datei; zum Anhängen nimmst du `>>`."},
+  "q3": {"q": "Welcher Befehl speichert Fehler in einer Datei und lässt die normale Ausgabe am Bildschirm?", "options": ["`ls x 2> err.txt`", "`ls x > err.txt`", "`ls x >> err.txt`", "`ls x | err.txt`"], "explain": "`2>` leitet nur stderr um."},
+  "q4": {"q": "Wofür ist `/dev/null` da?", "options": ["Speichert Logs", "Ist die Tastatureingabe", "Ein temporäres Verzeichnis", "Verwirft alles, was hineingeschrieben wird"], "explain": "`/dev/null` ist ein schwarzes Loch: Was du hineinschreibst, verschwindet."}
+ },
+ "summary": [
+  "Drei Kanäle: stdin (0), stdout (1), stderr (2).",
+  "`>` überschreibt, `>>` hängt an, `2>` leitet Fehler um, `<` liefert Eingaben.",
+  "`2>&1` führt Fehler und Ausgabe zusammen; bei `> file 2>&1` zählt die Reihenfolge.",
+  "`/dev/null` verwirft Daten."
+ ],
+ "glossary": [
+  {"term": "stdin", "meaning": "Standardeingabe, Kanal 0; standardmäßig die Tastatur."},
+  {"term": "stdout", "meaning": "Standardausgabe, Kanal 1; standardmäßig der Bildschirm."},
+  {"term": "stderr", "meaning": "Standardfehlerausgabe, Kanal 2; Fehlermeldungen."},
+  {"term": "Umleitung", "meaning": "Einen Kanal mit einer Datei oder einem anderen Kanal verbinden."},
+  {"term": "/dev/null", "meaning": "Spezialdatei, die Geschriebenes verwirft."}
+ ]
+}

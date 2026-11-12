@@ -1,0 +1,390 @@
+{
+ "title": "İzin Temelleri",
+ "lead": "`ls -l` çıktısını oku, `chmod`, `chown` ve `umask` ile dosya ve klasör izinlerini doğru yönet.",
+ "objectives": [
+  "`ls -l` çıktısındaki tür karakterini, üç izin üçlüsünü, sahibi ve grubu okursun.",
+  "r, w, x izinlerinin dosyada ve klasörde farklı anlamlar taşıdığını açıklarsın.",
+  "Bir dosyayı silmenin dosyanın değil, **üst klasörün** w+x iznine bağlı olduğunu bilirsin.",
+  "`chmod` ile sekizlik ve sembolik izin verir, `chown`/`chgrp` ile sahibi değiştirirsin.",
+  "`umask` değerinin çıkarma değil, bit maskesi olduğunu hesaplayarak gösterirsin."
+ ],
+ "sections": [
+  {
+   "id": "read",
+   "title": "ls -l çıktısını okumak",
+   "body": [
+    "`ls -l` her dosya için bir satır verir: `-rw-r----- 1 student devs 120 Nov 12 10:00 report.txt`. İlk karakter **türü** gösterir: `-` dosya, `d` klasör, `l` sembolik bağ. Sonraki dokuz karakter üç üçlüdür: **sahip (u)**, **grup (g)**, **diğerleri (o)**. Her üçlü `rwx` sırasıyla okuma, yazma, çalıştırma; yoksa `-` yazar.",
+    "Sayıdan sonra gelen iki isim sahibi ve grubu verir (`student devs`); aradaki `1` sabit bağ sayısıdır. Sistem seni sırayla kontrol eder: sahipsen yalnızca sahip üçlüsü, değilsen ama grup üyesiysen grup üçlüsü, ikisi de değilse diğerleri üçlüsü geçerlidir. **root** ve uygun yeteneklere sahip süreçler klasik DAC izinlerini çoğunlukla aşabilir; SELinux veya salt okunur bağlama gibi başka denetimler yine de erişimi engelleyebilir.",
+    "Hangi gruplara üye olduğunu `id` gösterir. Yeni bir grup üyeliği ancak yeniden oturum açınca (veya `newgrp` ile) sürecine yansır."
+   ],
+   "commands": [
+    {
+     "cmd": "ls -l",
+     "what": "Dosyaları tür, izin, sahip, grup, boyut ve tarihle listeler.",
+     "where": "İzin sorunlarında ilk bakılacak yer.",
+     "why": "Kimin neyi yapabildiğini tek bakışta gösterir.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "ls -ld",
+     "what": "Klasörün kendi iznini gösterir (içindekileri değil).",
+     "where": "Klasör izinlerini kontrol ederken.",
+     "why": "`ls -l shared` içeriği listeler; klasörün kendisi için `-d` gerekir.",
+     "example": "ls -ld shared"
+    },
+    {
+     "cmd": "stat",
+     "what": "Dosya ayrıntılarını gösterir; izin hem sekizlik hem sembolik yazılır.",
+     "where": "Sekizlik değeri doğrulamak istediğinde.",
+     "why": "`ls -l` ile sekizlik arasında çeviri yapmana gerek kalmaz.",
+     "example": "stat secret.txt"
+    },
+    {
+     "cmd": "id",
+     "what": "Kullanıcı ve grup kimliklerini gösterir.",
+     "where": "'Neden erişemiyorum?' sorusunda.",
+     "why": "Hangi üçlünün sana uygulandığını belirler.",
+     "example": "id"
+    }
+   ],
+   "tip": "İzin dizesini üçer üçer böl: `rw- r-- ---` yani sahip okur-yazar, grup okur, diğerleri hiçbir şey."
+  },
+  {
+   "id": "meaning",
+   "title": "r, w, x: dosyada ve klasörde",
+   "body": [
+    "**Dosyada:** `r` içeriği okur, `w` içeriği değiştirir, `x` dosyayı program olarak çalıştırır. Yeni dosyalar **asla çalıştırılabilir** oluşmaz; `./script.sh` için önce `chmod +x` gerekir.",
+    "**Klasörde:** `r` içindeki isimleri listeler, `x` klasöre girmeyi ve içindeki ada erişmeyi sağlar (`cd`, `cat vault/data.txt`), `w` içinde dosya oluşturmayı, silmeyi ve yeniden adlandırmayı sağlar. `w` tek başına işe yaramaz; **w ile birlikte x gerekir**. Bir yola erişmek için yolun üzerindeki **her klasörde x** gerekir.",
+    "**Önemli kural:** bir dosyayı silmek veya taşımak için dosyanın kendi izni değil, **üst klasörün w+x izni** gerekir. Dosyanın izni yalnızca içeriği okumayı ve yazmayı belirler. Bu yüzden `555` klasördeki `644` dosya silinemez, `777` dosya ise `555` klasörde yine silinemez."
+   ],
+   "commands": [
+    {
+     "cmd": "cat",
+     "what": "Dosya içeriğini okur; dosyada r ve yoldaki klasörlerde x ister.",
+     "where": "Okuma iznini denerken.",
+     "why": "Yetkisiz okuma `Permission denied` ile durur.",
+     "example": "cat secret.txt"
+    },
+    {
+     "cmd": "rm",
+     "what": "Dosyayı siler; başarı üst klasörün w+x iznine bağlıdır.",
+     "where": "Silme hatasını anlarken.",
+     "why": "Dosya izni değil klasör izni belirleyicidir.",
+     "example": "rm locked/old.txt"
+    },
+    {
+     "cmd": "cd",
+     "what": "Klasöre girer; klasörde x ister.",
+     "where": "Erişim sorunlarında.",
+     "why": "x olmayan klasöre girilemez.",
+     "example": "cd vault"
+    }
+   ],
+   "tip": "'Silemiyorum' dediğinde dosyaya değil, `ls -ld .` ile **klasöre** bak.",
+   "warn": "`chmod -R 777` bir çözüm değildir. Herkese yazma ve çalıştırma izni verir, sorunun nedenini gizler ve güvenlik açığı açar. Önce `ls -l` ve `id` ile gerçek nedeni bul."
+  },
+  {
+   "id": "chmod",
+   "title": "chmod: izinleri değiştirmek",
+   "body": [
+    "Sekizlik gösterimde **r=4, w=2, x=1** değerleri toplanır: `7`=rwx, `6`=rw-, `5`=r-x, `4`=r--, `0`=---. Üç rakam sırayla sahip, grup, diğerleri içindir. Yaygın değerler: `644` (normal dosya), `755` (program ve klasör), `600` (özel dosya), `700` (özel klasör), `664` ve `775` (grup çalışması).",
+    "Sembolik gösterimde kim (`u`, `g`, `o`, `a`), işlem (`+`, `-`, `=`) ve izin (`r`, `w`, `x`) yazılır: `chmod g+w,o-rx shared`. **Büyük `X`** yalnızca klasörlere ve zaten çalıştırılabilir dosyalara x verir; `chmod -R u=rwX,go=rX data` klasörleri 755, önceden çalıştırılabilir olmayan dosyaları 644 yapar ve mevcut çalıştırılabilir dosyaların x bitlerini korur.",
+    "Yalnızca dosyanın **sahibi** (veya root) izin değiştirebilir; başkasının dosyasında `Operation not permitted` alırsın."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod 640",
+     "what": "Sekizlik izin atar: sahip rw-, grup r--, diğerleri ---.",
+     "where": "İzni tek seferde belirlerken.",
+     "why": "Sonuç açık ve tekrarlanabilirdir.",
+     "example": "chmod 640 notes.txt"
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Çalıştırma izni ekler.",
+     "where": "Betiği çalıştırılabilir yaparken.",
+     "why": "Diğer izinlere dokunmadan yalnızca x ekler (umask'a göre).",
+     "example": "chmod +x script.sh"
+    },
+    {
+     "cmd": "chmod g+w,o-rx",
+     "what": "Sembolik: gruba yazma ekler, diğerlerinden okuma ve çalıştırmayı alır.",
+     "where": "Küçük düzeltmelerde.",
+     "why": "Yalnızca belirtilen bitleri değiştirir.",
+     "example": "chmod g+w,o-rx shared"
+    },
+    {
+     "cmd": "chmod -R u=rwX,go=rX",
+     "what": "Ağacı özyinelemeli düzeltir: dosyalar 644, klasörler 755.",
+     "where": "Toplu düzeltmede.",
+     "why": "`X` sayesinde dosyalara gereksiz x vermezsin.",
+     "example": "chmod -R u=rwX,go=rX data"
+    }
+   ],
+   "tip": "Önce `ls -l` ile hedefi gör, `-R` kullanıyorsan yol sonuna dikkat et.",
+   "danger": "`chmod -R` komutunu `/` veya `~` üzerinde yanlış değerle çalıştırmak sistemi veya ev dizinini bozar (ör. sshd özel anahtar izinleri, sudo). VM'de denemeden önce **snapshot** al ve yalnızca deneme klasöründe çalış."
+  },
+  {
+   "id": "owner",
+   "title": "chown ve chgrp: sahip ve grup",
+   "body": [
+    "Her dosyanın bir sahibi ve bir grubu vardır. **Sahibi yalnızca root değiştirebilir** (`sudo chown`). Sıradan kullanıcı kendi dosyasının grubunu ancak üyesi olduğu bir gruba çevirebilir; simülatörde bunun için `sudo chgrp` kullanırız.",
+    "`chown alice:devs report.txt` sahibi ve grubu birlikte ayarlar. Takım çalışması için tipik düzen: dosya grubu `devs`, izin `660` veya klasör `770`; yalnızca `devs` üyeleri erişir. Daha ince kurallar (kullanıcı başına izin) ACL ile yapılır (`getfacl`/`setfacl`); bu sonraki modüllerde işlenir."
+   ],
+   "commands": [
+    {
+     "cmd": "sudo chown",
+     "what": "Sahibini (ve istersen grubunu) değiştirir.",
+     "where": "Dosyayı başka kullanıcıya devrederken.",
+     "why": "Yalnızca root yapabilir.",
+     "example": "sudo chown alice:devs report.txt"
+    },
+    {
+     "cmd": "sudo chgrp",
+     "what": "Yalnızca grubu değiştirir.",
+     "where": "Ortak klasör için grup atarken.",
+     "why": "Sahibi korur, grup erişimini ayarlar.",
+     "example": "sudo chgrp devs team.txt"
+    }
+   ],
+   "tip": "Gerçek sistemde `chown -R` ile de dikkatli ol; önce yolu `ls -ld` ile doğrula."
+  },
+  {
+   "id": "umask",
+   "title": "umask: varsayılan izinler",
+   "body": [
+    "Yeni dosya `666` ile, yeni klasör `777` ile **başlar**; `umask` bu izinlerden bit **maskeleyerek** düşürür: **yeni izin = taban & ~umask**. Bu çıkarma değildir. Örnekler (dosya, taban 666): umask `022` → `644`; `027` → `640`; `077` → `600`; `002` → `664`.",
+    "Fark ancak umask'ta taban dışı bitler olunca görünür: `025` için `666 & ~025 = 642`, çıkarma `641` derdi (yanlış). `001` için sonuç `666`, çıkarma `665` verirdi. Dosyada x biti tabanda olmadığı için dosyalar asla çalıştırılabilir doğmaz.",
+    "`umask` **sürece özeldir**: yalnızca o kabukta ve ondan başlayan programlarda geçerlidir. Kalıcı yapmak için `~/.bashrc` (kullanıcı) veya `/etc/profile` (sistem) içine yazılır."
+   ],
+   "commands": [
+    {
+     "cmd": "umask",
+     "what": "Geçerli maskeyi sekizlik gösterir (ör. `0022`).",
+     "where": "Yeni dosya izinlerini anlamak için.",
+     "why": "Dosyaların neden 644 doğduğunu açıklar.",
+     "example": "umask"
+    },
+    {
+     "cmd": "umask -S",
+     "what": "Maskeyi sembolik gösterir: `u=rwx,g=rx,o=rx`.",
+     "where": "İzin biçimini okumak istediğinde.",
+     "why": "İzin verilen bitleri doğrudan gösterir.",
+     "example": "umask -S",
+     "nosim": true
+    },
+    {
+     "cmd": "umask 027",
+     "what": "Bu kabuk için maskeyi ayarlar: yeni dosya 640, klasör 750.",
+     "where": "Grup dışına kapalı çalışırken.",
+     "why": "Sonraki tüm yeni dosyaları etkiler.",
+     "example": "umask 027"
+    }
+   ],
+   "tip": "Ortak proje klasörlerinde `umask 002` kullan: yeni dosyalar `664`, klasörler `775` olur."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`ls -l` ile `lab` klasöründeki dosyaların izinlerini listele.",
+   "hint": "Satırın başındaki 10 karakteri oku: tür + üç üçlü."
+  },
+  "t02": {
+   "text": "`script.sh` dosyasını `chmod +x script.sh` ile çalıştırılabilir yap.",
+   "hint": "Sonra `ls -l script.sh` ile x bitlerini gör."
+  },
+  "t03": {
+   "text": "`umask` komutuyla geçerli maskeyi göster.",
+   "hint": "Varsayılan çıktı `0022`."
+  },
+  "t04": {
+   "text": "`notes.txt` için sahip rw-, grup r--, diğerleri --- olacak şekilde `chmod 640 notes.txt` çalıştır.",
+   "hint": "6=rw-, 4=r--, 0=---."
+  },
+  "t05": {
+   "text": "`shared` klasörünün modunu sembolik olarak `770` yap: gruba yazma ekle, diğerlerinden okuma ve çalıştırmayı al (`chmod g+w,o-rx shared`).",
+   "hint": "İki işlem virgülle ayrılır, boşluk yok."
+  },
+  "t06": {
+   "text": "`team.txt` dosyasının sahibini `sudo chown alice team.txt` ile `alice` yap.",
+   "hint": "Sahibi yalnızca root değiştirebilir, `sudo` gerekir."
+  },
+  "t07": {
+   "text": "`team.txt` dosyasının grubunu `sudo chgrp devs team.txt` ile `devs` yap.",
+   "hint": "`ls -l team.txt` çıktısı `alice devs` göstermeli."
+  },
+  "t08": {
+   "text": "`umask 027` ayarla, sonra `touch new.txt` ile dosya oluştur. Dosya hangi izinle doğar?",
+   "hint": "666 & ~027 = 640."
+  },
+  "t09": {
+   "text": "Tahmin et: `locked` klasörü `555`, içindeki `old.txt` `644`. `rm locked/old.txt` çalışır mı? Çalıştırarak doğrula.",
+   "hint": "Silme için üst klasörde w gerekir; `ls -ld locked` ile bak."
+  },
+  "t10": {
+   "text": "Tahmin et: `umask 025` ayarlayıp `touch predict.txt` yaparsan izin ne olur? Önce hesapla (666 & ~025), sonra çalıştırıp `ls -l predict.txt` ile doğrula.",
+   "hint": "Çıkarma 641 verir; doğru maske hesabı 642."
+  },
+  "t11": {
+   "text": "Tahmin et: `./deploy.sh` çalışır mı? Çalıştırarak doğrula.",
+   "hint": "Dosya 644 ve x biti yok: `Permission denied` beklenir."
+  },
+  "t12": {
+   "text": "Hata ayıkla: `locked/old.txt` silinemiyor. Sorunu düzeltip dosyayı sil.",
+   "hint": "Dosyaya değil klasöre bak: `chmod u+w locked`, sonra `rm`."
+  },
+  "t13": {
+   "text": "Hata ayıkla: `cat vault/data.txt` başarısız oluyor. Düzeltip dosyayı oku.",
+   "hint": "`vault` klasörü `600`: x yok, içine girilemez. `chmod u+x vault`."
+  },
+  "t14": {
+   "text": "Mini proje: `team` klasörü ve içinde `plan.txt` oluştur; klasör `770`, dosya `660` olsun; klasörün grubunu `sudo chgrp devs team` ile `devs` yap.",
+   "hint": "Sıra: `mkdir`, `touch`, iki `chmod`, bir `chgrp`."
+  },
+  "t15": {
+   "text": "Meydan okuma: `data` ağacındaki her şey `777`. Klasörleri `755`, dosyaları `644` yap (`data/a.txt`, `data/sub/b.txt`).",
+   "hint": "Büyük `X` kullan: `chmod -R u=rwX,go=rX data`."
+  },
+  "t16": {
+   "text": "TICKET #4401 — Alice `report.txt` dosyasını düzenleyecek, `devs` grubu da yazabilecek, başkaları erişmeyecek. Sahibi `alice`, grubu `devs`, modu `660` yap.",
+   "hint": "Önce `chmod 660`, sonra `sudo chown alice:devs`; sahip değişince artık sen chmod yapamazsın."
+  },
+  "t17": {
+   "text": "TICKET #4402 — `shared` klasöründe ekip yeni dosyalar açıyor ve grup yazamıyor. `umask 002` ayarla ve `touch shared/log.txt` ile `664` dosya oluştur.",
+   "hint": "666 & ~002 = 664."
+  }
+ },
+ "vm": {
+  "intro": "Kendi VM'inde `~/permlab` deneme klasöründe çalış. Komutları sırayla yapıştır, çıktıyı bu sayfaya yapıştır. Yıkıcı adımlardan önce snapshot al.",
+  "tasks": {
+   "v01": {
+    "title": "İzinleri oku",
+    "text": "Sistem dosyalarının izin dizesini oku ve kimliğini kontrol et.",
+    "blocks": [
+     {
+      "cmd": "ls -l /etc/passwd /etc/shadow /usr/bin/passwd\nls -ld /tmp /home\nid",
+      "expected": "-rw-r--r-- 1 root root  2345 Nov 12 10:00 /etc/passwd\n-rw-r----- 1 root shadow 1234 Nov 12 10:00 /etc/shadow\n-rwsr-xr-x 1 root root 59976 Nov 12 10:00 /usr/bin/passwd\ndrwxrwxrwt 15 root root 4096 Nov 12 10:00 /tmp"
+     }
+    ],
+    "differs": [
+     "Rocky/Alma'da `/etc/shadow` izni `----------` olabilir; bu normaldir (root bypass).",
+     "`s` (setuid) ve `t` (sticky) özel bitleridir; şimdilik yalnızca 'x benzeri' olarak not et."
+    ]
+   },
+   "v02": {
+    "title": "chmod ile deneme",
+    "text": "Deneme klasörü ve dosyası oluştur, izni `640` yap ve sonucu göster.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/permlab\ncd ~/permlab\ntouch notes.txt\nchmod 640 notes.txt\nls -l notes.txt\nstat -c '%a %A %U:%G' notes.txt",
+      "expected": "-rw-r----- 1 student student 0 Nov 12 10:00 notes.txt\n640 -rw-r----- student:student"
+     }
+    ],
+    "differs": [
+     "`stat -c` yalnızca GNU stat'te vardır; macOS/BSD'de çalışmaz, yok sayabilirsin.",
+     "Kullanıcı adın `student` değilse kendi adın görünür; sorun değil."
+    ]
+   },
+   "v03": {
+    "title": "Silme klasör iznine bağlı",
+    "text": "Klasörü `555` yap, içindeki dosyayı silmeyi dene, sonra klasör iznini geri ver.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\nmkdir locked\ntouch locked/old.txt\nchmod 555 locked\nrm locked/old.txt\nls -ld locked\nchmod 755 locked\nrm locked/old.txt\nls locked",
+      "expected": "rm: cannot remove 'locked/old.txt': Permission denied\ndr-xr-xr-x 2 student student 4096 Nov 12 10:00 locked"
+     }
+    ],
+    "differs": [
+     "root olarak çalışıyorsan silme başarılı olur, çünkü root izinleri atlar; normal kullanıcıyla dene.",
+     "Mesaj sisteminde çevrilmiş olabilir (`Erişim engellendi`, `Zugriff verweigert`)."
+    ]
+   },
+   "v04": {
+    "title": "umask etkisi",
+    "text": "Maskeyi `027` yap ve yeni dosya ile klasörün izinlerini gör. Not: bu değişiklik yalnızca bu terminal oturumunu etkiler.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\numask\numask 027\ntouch f027.txt\nmkdir d027\nls -ld f027.txt d027\numask 022",
+      "expected": "0022\n-rw-r----- 1 student student 0 Nov 12 10:00 f027.txt\ndrwxr-x--- 2 student student 4096 Nov 12 10:00 d027"
+     }
+    ],
+    "differs": [
+     "Başlangıç umask'ın `0002` olabilir (Ubuntu'da kullanıcıya özel grup varsa); bu normaldir.",
+     "Yeni bir terminal açınca umask eski değerine döner: süreç başına geçerlidir."
+    ]
+   },
+   "v05": {
+    "title": "chown ve temizlik",
+    "text": "Dosyanın sahibini root yap, sonra klasörü sil: üst klasörde yazma izni olduğundan root'a ait dosya da silinir.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\ntouch owned.txt\nsudo chown root:root owned.txt\nls -l owned.txt\ncd ~\nrm -r ~/permlab\nls ~/permlab",
+      "expected": "-rw-r--r-- 1 root root 0 Nov 12 10:00 owned.txt\nls: cannot access '/home/student/permlab': No such file or directory"
+     }
+    ],
+    "differs": [
+     "`sudo` parola isterse kendi parolanı yaz.",
+     "`rm: remove write-protected regular file?` diye sorarsa `y` yaz: root'a ait dosyayı silmek klasör iznine bağlıdır, dosya iznine değil.",
+     "`rm -r` yolunu dikkatle yaz; `/` veya `~` üzerinde asla deneme."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`notes.txt` dosyasını silmek için hangi izin gerekir?",
+   "options": [
+    "Dosyada w",
+    "Üst klasörde w ve x",
+    "Dosyada r",
+    "Yalnızca dosya sahibi olmak"
+   ],
+   "explain": "Silme klasör girdisini kaldırır; bu yüzden üst klasörde w+x gerekir. Dosyanın kendi izni belirleyici değildir."
+  },
+  "q2": {
+   "q": "`umask 027` iken yeni dosya hangi izinle oluşur?",
+   "options": [
+    "750",
+    "600",
+    "640",
+    "027"
+   ],
+   "explain": "666 & ~027 = 640. Klasör için 777 & ~027 = 750."
+  },
+  "q3": {
+   "q": "Klasörde `x` izni ne sağlar?",
+   "options": [
+    "İçine girmeyi ve içindeki adlara erişmeyi",
+    "İçindeki dosyaları çalıştırmayı",
+    "Klasörü silmeyi",
+    "İçindeki isimleri listelemeyi"
+   ],
+   "explain": "Klasörde x geçiş iznidir (`cd`, yoldan geçme). Listeleme r ile yapılır."
+  },
+  "q4": {
+   "q": "Bir 'Permission denied' hatasını `chmod -R 777` ile çözmek neden yanlıştır?",
+   "options": [
+    "Komut zaten çalışmaz",
+    "Yalnızca root kullanabilir",
+    "Sahibi değiştirir",
+    "Herkese tam yetki verir ve gerçek nedeni gizler"
+   ],
+   "explain": "777 herkese okuma, yazma ve çalıştırma verir; güvenliği bozar. Önce `ls -l` ve `id` ile nedeni bul, gereken en az izni ver."
+  }
+ },
+ "summary": [
+  "`ls -l`: tür karakteri + sahip/grup/diğerleri üçlüleri; r=4, w=2, x=1.",
+  "Klasörde r=listele, w=oluştur/sil/adlandır (x ile), x=gir/eriş; dosya silme üst klasörün w+x iznine bağlıdır.",
+  "`chmod` sekizlik (`640`) veya sembolik (`g+w`, `u=rwX`) çalışır; `chown` sadece root'tadır.",
+  "umask çıkarma değil maskedir: yeni izin = taban & ~umask (dosya 666, klasör 777).",
+  "`chmod -R 777` çözüm değildir; en az yetki ilkesini uygula."
+ ],
+ "glossary": [
+  {"term": "izin üçlüsü", "meaning": "Sahip, grup ve diğerleri için ayrı rwx kümesi."},
+  {"term": "sekizlik mod", "meaning": "r=4, w=2, x=1 toplamıyla yazılan izin, ör. 644."},
+  {"term": "umask", "meaning": "Yeni dosya ve klasörlerden hangi izin bitlerinin kapatılacağını belirleyen bit maskesi."},
+  {"term": "sahip (owner)", "meaning": "Dosyanın kullanıcı kimliği; izin değiştirebilir."},
+  {"term": "grup", "meaning": "Aynı izinleri paylaşan kullanıcı topluluğu, ör. devs."},
+  {"term": "geçiş izni", "meaning": "Klasördeki x biti; yoldan geçmeye ve ada erişmeye izin verir."}
+ ]
+}

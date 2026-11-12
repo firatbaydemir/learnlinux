@@ -1,0 +1,146 @@
+{
+ "title": "Switching identity: su, sudo, and sudoers",
+ "lead": "Learn when and how to use root privileges: prefer one-command sudo and manage its policy safely with visudo.",
+ "objectives": [
+  "Explain that root has UID 0, the difference between `su -` and `sudo`, and which password each command asks for.",
+  "Run one administrative command with `sudo` and inspect your permissions with `sudo -l`.",
+  "Open a full root login shell with `sudo -i`, close it with `exit`, and avoid staying root unnecessarily.",
+  "Know that `/etc/sudoers` defines privilege policy and must only be edited with `visudo`."
+ ],
+ "sections": [
+  {
+   "id": "identity",
+   "title": "Who is root? su and sudo",
+   "body": [
+    "On Linux, **root** is the superuser with UID 0. Root can manage system files and other accounts; a wrong command can cause serious damage. Stay in your normal account for everyday work and use administrator privileges only when needed.",
+    "`su - USER` switches to the target account and asks for that account's password. `su -` switches to root, but root password login may be disabled on systems such as Ubuntu. The `-` loads the target user's login environment (for example, `HOME` and profile).",
+    "`sudo COMMAND` lets an authorized user authenticate with their own password and run only the specified command as another user, usually root. A sudo rule can also be configured not to ask for a password. Running one command with sudo is safer than keeping a root session open."
+   ],
+   "commands": [
+    {"cmd": "whoami", "what": "Shows the current effective user name.", "where": "When checking which account will run a command.", "why": "Prevents acting as the wrong user, especially after changing privileges.", "example": "whoami"},
+    {"cmd": "id", "what": "Shows the UID, primary GID, and group memberships.", "where": "When checking which group grants sudo access.", "why": "Verifies user and group identities together.", "example": "id"},
+    {"cmd": "su -", "what": "Opens root's login session; it requires the root password.", "where": "Only when the root account is enabled and a longer admin session is truly needed.", "why": "Loads the login environment; every command in the session runs as root.", "example": "su -", "nosim": true},
+    {"cmd": "sudo COMMAND", "what": "Runs one permitted command as another user.", "where": "When a specific administrative action is needed from a normal account.", "why": "Keeps both the privilege and its scope limited.", "example": "sudo whoami"},
+    {"cmd": "exit", "what": "Leaves an open su or sudo login session.", "where": "When the administrative work is finished.", "why": "Avoids staying in a root shell longer than necessary.", "example": "exit"}
+   ],
+   "tip": "No characters appear while typing a password at the terminal; that is expected. Enter your own password only at a trusted sudo prompt."
+  },
+  {
+   "id": "sudo",
+   "title": "One command and administrator sessions",
+   "body": [
+    "`sudo whoami` prints `root`; plain `whoami` prints your own account. Sudo elevates only that command, so your shell remains a normal user when the command ends.",
+    "`sudo -l` lists the commands your account may run. `sudo -u USER COMMAND` runs one command as a specified user when the policy allows it. The rules depend on the distribution and organization; membership in `wheel` is common on Rocky/Alma and `sudo` on Ubuntu/Debian.",
+    "`sudo -i` opens root's login shell; `whoami` then prints root and `HOME` is `/root`. `sudo -s` opens a root shell that keeps more of the current environment. Both are full, high-risk sessions: keep them short and use `exit` to leave. Sudo may cache authentication for a while; `sudo -k` invalidates that cache."
+   ],
+   "commands": [
+    {"cmd": "sudo -l", "what": "Lists the commands and rules available to your account through sudo.", "where": "Before investigating your permissions or an access error.", "why": "Shows the machine's actual policy rather than assumptions.", "example": "sudo -l"},
+    {"cmd": "sudo -u USER", "what": "Runs one command as the specified user.", "where": "When checking how a service or job behaves under another account.", "why": "Tests the target account's permissions without opening a root session.", "example": "sudo -u nobody id", "nosim": true},
+    {"cmd": "sudo -i", "what": "Opens an administrator shell with root's login environment.", "where": "For a brief, controlled session that needs several admin commands.", "why": "Loads root's HOME and startup environment.", "example": "sudo -i", "nosim": true},
+    {"cmd": "sudo -k", "what": "Invalidates the cached sudo authentication.", "where": "When leaving a shared terminal or requiring authentication again immediately.", "why": "Prevents a previous authentication from being reused by subsequent commands.", "example": "sudo -k", "nosim": true}
+   ],
+   "warn": "A forgotten command inside `sudo -i` still runs as root. Prefer `sudo COMMAND` for short tasks; after leaving a root shell, use `whoami` to verify you returned to your normal account."
+  },
+  {
+   "id": "policy",
+   "title": "sudoers: manage privilege policy safely",
+   "body": [
+    "`/etc/sudoers` and files in `/etc/sudoers.d/` define who may run which commands as which target users. Never edit these files directly with `nano`, `vim`, or `echo`: a single syntax error can break all sudo access.",
+    "Use `sudo visudo` to inspect and edit the policy. To open a separate rule file, use `sudo visudo -f /etc/sudoers.d/NAME`; `visudo` checks the syntax before saving. For example, `alice ALL=(root) /usr/bin/systemctl restart nginx` permits only that command.",
+    "`NOPASSWD` removes the password prompt, for example `alice ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx`. Use it only when truly needed, with the full command path and a narrow scope. Granting unrestricted access with `ALL` or opening a general-purpose shell without a password is not a safe rule. Check the result with `sudo -l`."
+   ],
+   "commands": [
+    {"cmd": "sudo visudo", "what": "Edits sudo policy with locking and syntax validation.", "where": "When adding or changing a sudoers rule.", "why": "Reduces the risk of saving a malformed file and breaking sudo access.", "example": "sudo visudo", "nosim": true},
+    {"cmd": "sudo visudo -f", "what": "Safely edits the specified sudoers file.", "where": "When creating a separate sudoers.d rule supported by the distribution.", "why": "Keeps rules separate from the main file and validates their syntax.", "example": "sudo visudo -f /etc/sudoers.d/alice", "nosim": true},
+    {"cmd": "sudo visudo -c", "what": "Checks the syntax of sudoers files.", "where": "After verifying a policy change.", "why": "Confirms that the file can be read and parsed.", "example": "sudo visudo -c", "nosim": true},
+    {"cmd": "sudo -l", "what": "Shows the active sudo rules.", "where": "When checking whether a policy change applies to a user.", "why": "Lets you compare the written rule with the effective permissions.", "example": "sudo -l"}
+   ],
+   "danger": "`NOPASSWD: ALL` lets a user run every command without a password. Limit the rule to the required user, exact command path, and necessary arguments; write it with `visudo` and verify it with `sudo -l`."
+  },
+  {
+   "id": "workflow",
+   "title": "A safe administrator workflow",
+   "body": [
+    "First verify the target and its impact from your normal account; when elevated access is required, run only the necessary command with sudo. If it fails, do not blindly add `sudo`: inspect `id`, `sudo -l`, and the file permissions.",
+    "When the work is done, leave any root session with `exit`. Never put passwords in command history, edit sudoers directly, or run an unfamiliar command as root. On a real VM, take a snapshot before changing system policy."
+   ],
+   "commands": [
+    {"cmd": "sudo -l", "what": "Verifies the scope of your permissions before acting.", "where": "Before starting an administrative task.", "why": "Helps catch a missing or overly broad rule.", "example": "sudo -l"},
+    {"cmd": "sudo whoami", "what": "Safely verifies that a command runs as root.", "where": "When learning how sudo behaves.", "why": "Shows that the privilege switch applies only to the command.", "example": "sudo whoami"},
+    {"cmd": "sudo visudo -c", "what": "Checks the syntax of the sudoers configuration.", "where": "After a policy change.", "why": "Catches a broken rule before it is relied upon.", "example": "sudo visudo -c", "nosim": true}
+   ],
+   "tip": "Apply least privilege: grant no more than the required user, target account, command, and arguments."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Show your current account with `whoami`.", "hint": "If you are not root, your own user name appears."},
+  "t02": {"text": "Inspect your UID and group memberships with `id`.", "hint": "Find the `uid=`, `gid=`, and `groups=` fields."},
+  "t03": {"text": "Run `sudo whoami` and verify that the command runs as root.", "hint": "If sudo permits it, the output is `root`."},
+  "t04": {"text": "Run `sudo id` and observe that the UID and groups differ from your normal account.", "hint": "An effective UID of 0 identifies root."},
+  "t05": {"text": "Show the owner and permissions of root's home directory with `sudo ls -ld /root`.", "hint": "`-d` lists the directory itself; sudo allows you to inspect another user's directory."},
+  "t06": {"text": "Read the permissions of the sudo policy file with `sudo ls -l /etc/sudoers`; do not change its contents.", "hint": "This task only lists file metadata."},
+  "t07": {"text": "Predict: what will `whoami` print in your normal account? Run it to check.", "hint": "Without sudo, it prints your own user name."},
+  "t08": {"text": "Predict: what will `sudo whoami` print? Run it to check.", "hint": "If permitted, the command runs as root."},
+  "t09": {"text": "Debug: `~/sudoers.bad` contains a dangerous rule granting everyone every command without a password. Replace the file with this narrowly scoped example: `student ALL=(root) /usr/bin/systemctl restart nginx`. This is only a draft; do not copy it into the real sudoers file.", "hint": "Use `echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad`."},
+  "t10": {"text": "Mini project: write these commands in order to `~/admin_runbook.txt`: list permissions, check nginx status, and clear the password cache: `sudo -l`, `sudo systemctl status nginx`, `sudo -k`.", "hint": "Use `>` for the first line and `>>` for the rest."},
+  "t11": {"text": "Challenge: write a rule allowing only an nginx restart to `~/sudoers_rule.txt`: `alice ALL=(root) /usr/bin/systemctl restart nginx`.", "hint": "This is a draft; applying it requires `sudo visudo -f`."},
+  "t12": {"text": "Challenge: write the steps to check permissions and then restart the permitted service, in order, in `~/service_plan.txt`.", "hint": "Write `sudo -l` followed by `sudo systemctl restart nginx`."},
+  "t13": {"text": "TICKET #4310: A new rule file is needed for Alice. Without changing any real file, write the safe edit command into `~/ticket_4310.txt`.", "hint": "Use `sudo visudo -f /etc/sudoers.d/alice`."},
+  "t14": {"text": "TICKET #4311: Alice should be able to restart nginx without a password for this one operation only. Write the visudo command followed by the narrowly scoped rule into `~/ticket_4311.txt`. Do not apply this draft to a real system.", "hint": "Use `NOPASSWD` for `/usr/bin/systemctl restart nginx` only, not `NOPASSWD: ALL`."}
+ },
+ "vm": {
+  "intro": "This section inspects privilege policy on a real system; it does not change configuration. Take a VM snapshot if possible. Enter your password only at the terminal's sudo prompt.",
+  "tasks": {
+   "v01": {
+    "title": "Inspect your normal identity",
+    "text": "Show your normal account and group memberships with `id`.",
+    "blocks": [{"cmd": "id", "expected": "uid=1000(student) gid=1000(student) groups=1000(student)"}],
+    "differs": ["User names and UIDs vary by distribution; your own values are expected.", "Ubuntu commonly uses the `sudo` group; Rocky/Alma commonly use `wheel`."]
+   },
+   "v02": {
+    "title": "Use sudo for one command",
+    "text": "Run `sudo whoami` and verify that the effective user is root.",
+    "blocks": [{"cmd": "sudo whoami", "expected": "root"}],
+    "differs": ["No characters appear while typing the password; that is expected.", "A `not in the sudoers file` error means your account has not been granted permission; ask an administrator."]
+   },
+   "v03": {
+    "title": "Verify the effective UID",
+    "text": "Run `sudo id -u` to verify that the privileged command runs with UID 0.",
+    "blocks": [{"cmd": "sudo id -u", "expected": "0"}],
+    "differs": ["`id -u` prints the effective UID as a number; root's UID is 0.", "If the command is denied, inspect permissions with `sudo -l`."]
+   },
+   "v04": {
+    "title": "Read your sudo permissions",
+    "text": "List commands permitted for your account with `sudo -l`; do not change any rules.",
+    "blocks": [{"cmd": "sudo -l", "expected": "User student may run the following commands"}],
+    "differs": ["The user name and rules vary by distribution.", "If the output includes `NOPASSWD`, note which exact command it covers; do not change the rule."]
+   },
+   "v05": {
+    "title": "Check sudoers syntax",
+    "text": "Run `sudo visudo -c` to verify that the current sudo configuration parses. This command does not edit the files.",
+    "blocks": [{"cmd": "sudo visudo -c", "expected": "/etc/sudoers: parsed OK"}],
+    "differs": ["A distribution may also check included files; expect a `parsed OK`-style line for each file.", "If an error appears, do not edit the file directly; report it to the system administrator."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What is the main difference between `sudo COMMAND` and `su -`?", "options": ["Both always require the root password", "`sudo` runs one permitted command; `su -` opens the target account's login session", "`su -` only reads files", "`sudo` permanently turns the user into root"], "explain": "`sudo` grants privilege for a command; `su -` switches to another account's login shell."},
+  "q2": {"q": "Why use `visudo` to edit the sudo policy file?", "options": ["It encrypts the file", "It creates the root account", "It checks syntax and reduces the chance of saving a broken rule", "It adds all users to the sudo group"], "explain": "`visudo` locks the file while editing and checks its syntax before saving."},
+  "q3": {"q": "Which sudo rule follows least privilege?", "options": ["Grant one user only the exact command they need", "Give everyone `NOPASSWD: ALL`", "Share the root password with the team", "Run every command in a permanent root shell"], "explain": "Limit access to the right user and required command; avoid broad `ALL` rules."},
+  "q4": {"q": "If `su -` rejects the root password on Ubuntu, what is a likely explanation?", "options": ["Linux has no root account", "sudo is always disabled", "The terminal does not support root sessions", "The root account may be locked for password login; an authorized user should use `sudo`"], "explain": "Ubuntu installations often lock the root account; an authorized user uses sudo for administration."}
+ },
+ "summary": [
+  "Root has UID 0. `su -` opens the target account's login session; `sudo COMMAND` runs one permitted command with elevated privileges.",
+  "`sudo -l` shows actual permissions; `sudo -i` opens a full root login shell and should be closed with `exit` when finished.",
+  "Edit sudoers policy only with `visudo` and validate its syntax with `visudo -c`.",
+  "Keep `NOPASSWD` and especially `ALL` rules narrow; grant only the required user, command, and arguments."
+ ],
+ "glossary": [
+  {"term": "root", "meaning": "The account with UID 0 and system-wide administrative privileges."},
+  {"term": "sudo", "meaning": "A tool that lets an authorized user run a specific command as another user."},
+  {"term": "su", "meaning": "A tool for switching the current session to another user account."},
+  {"term": "sudoers", "meaning": "The policy defining sudo permissions by user, target account, and command."},
+  {"term": "visudo", "meaning": "A tool that edits sudoers files with locking and syntax validation."},
+  {"term": "NOPASSWD", "meaning": "A sudo rule option that removes the password prompt for specified commands."}
+ ]
+}

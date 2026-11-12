@@ -1,0 +1,344 @@
+{
+ "title": "Deine eigene Linux-VM einrichten",
+ "lead": "Installiere Rocky/Alma Linux oder Ubuntu in VirtualBox, UTM oder WSL, prüfe den Download, erstelle einen Snapshot und verbinde dich per SSH.",
+ "objectives": [
+  "Du wählst das passende Werkzeug für deinen Rechner (VirtualBox, UTM oder WSL).",
+  "Du prüfst die ISO vor der Installation mit einer SHA-256-Prüfsumme.",
+  "Du erstellst eine VM, legst einen Snapshot an und verbindest dich per SSH."
+ ],
+ "sections": [
+  {
+   "id": "why",
+   "title": "Warum eine eigene VM?",
+   "body": [
+    "Echte Fähigkeiten entstehen auf **echtem Linux**. Eine virtuelle Maschine (VM) ist ein kompletter Computer im Computer: Du kannst sie kaputt machen und neu installieren, dein echtes System bleibt unberührt.",
+    "Wähle das Werkzeug passend zur Hardware: **VirtualBox** (Windows, Intel-Mac, Linux), **UTM** (Apple-Silicon-Macs, ARM64-ISO nötig) oder **WSL 2** (Windows 10/11, schnellster Start, nur Ubuntu). Als Distributionen empfehlen wir **Rocky Linux 9 / AlmaLinux 9** (RHEL-Familie, in Firmen verbreitet) und optional **Ubuntu 24.04 LTS**."
+   ],
+   "tip": "Plane pro VM 2 CPU-Kerne, 4 GB RAM und 25 GB Festplatte ein."
+  },
+  {
+   "id": "iso",
+   "title": "ISO herunterladen und prüfen",
+   "body": [
+    "Lade die ISO nur von der offiziellen Seite der Distribution herunter (rockylinux.org, almalinux.org, ubuntu.com). Neben der ISO steht eine **Prüfsumme** (SHA-256). Berechne die Prüfsumme deiner Datei und vergleiche: Unterscheidet sich ein Zeichen, ist die Datei beschädigt oder manipuliert — lade sie neu."
+   ],
+   "commands": [
+    {
+     "cmd": "sha256sum (Linux/macOS: shasum -a 256)",
+     "what": "Berechnet die SHA-256-Prüfsumme einer Datei.",
+     "where": "Auf dem Host nach dem Download.",
+     "why": "Beweist, dass die ISO vollständig und unverändert ist.",
+     "example": "sha256sum Rocky-9-latest-x86_64-minimal.iso",
+     "nosim": true
+    },
+    {
+     "cmd": "Get-FileHash (Windows PowerShell)",
+     "what": "Dieselbe Prüfsumme unter Windows.",
+     "where": "PowerShell auf Windows-Hosts.",
+     "why": "Windows hat kein sha256sum.",
+     "example": "Get-FileHash .\\Rocky-9-latest-x86_64-minimal.iso -Algorithm SHA256",
+     "nosim": true
+    }
+   ],
+   "warn": "Installiere niemals von einer ISO mit abweichender Prüfsumme, auch wenn der Installer startet."
+  },
+  {
+   "id": "create",
+   "title": "VM erstellen und installieren",
+   "body": [
+    "Lege in VirtualBox/UTM eine neue VM an, binde die ISO ein und gib ihr 2 CPUs, 4 GB RAM und 25 GB Festplatte. Starte sie und folge dem Installer: Sprache wählen, Festplatte wählen (automatische Partitionierung genügt), Root-Passwort setzen, **einen normalen Benutzer anlegen und „Administrator“ ankreuzen** (fügt ihn der Gruppe `wheel`/`sudo` hinzu).",
+    "Wähle zuerst die **Minimal**-Installation; Werkzeuge ergänzt du selbst. Entferne nach dem Neustart die ISO und melde dich mit deinem normalen Benutzer an. Mit `cat /etc/os-release` siehst du, welches System du gebaut hast.",
+    "Unter **WSL** genügt ein Befehl in der Administrator-PowerShell: `wsl --install -d Ubuntu-24.04`. Starte neu und lege auf Nachfrage deinen Benutzernamen an."
+   ],
+   "tip": "Wähle einen kurzen Benutzernamen in Kleinbuchstaben ohne Leerzeichen; du tippst ihn oft."
+  },
+  {
+   "id": "snapshot",
+   "title": "Snapshots: dein Rückgängig-Knopf",
+   "body": [
+    "Ein **Snapshot** speichert den kompletten Zustand der VM. Lege direkt nach dem ersten erfolgreichen Start und vor jedem riskanten Experiment einen namens `clean-install` an. Geht etwas kaputt, stellst du ihn in Sekunden wieder her.",
+    "In VirtualBox: Maschine ▸ Snapshot erstellen; in UTM die VM klonen oder die QEMU-Snapshot-Option nutzen. Für WSL exportierst du ein Backup: `wsl --export Ubuntu-24.04 backup.tar`."
+   ],
+   "danger": "Ein Snapshot ist kein Backup deiner echten Dateien; fällt die Host-Platte aus, sind die Snapshots mit weg."
+  },
+  {
+   "id": "network",
+   "title": "Netzwerkgrundlagen",
+   "body": [
+    "**NAT** (Standard) erlaubt der VM Internetzugang, versteckt sie aber im Netz; nutze Portweiterleitung, um sie zu erreichen. **Bridged** stellt die VM mit eigener IP-Adresse in dein LAN. **Host-only** verbindet nur VM und Rechner.",
+    "Zum Lernen sind NAT mit Portweiterleitung (Host-Port 2222 → Gast-Port 22) oder Bridged beide geeignet. In der VM siehst du deine Adresse mit `ip -brief a`."
+   ],
+   "commands": [
+    {
+     "cmd": "ip -brief a",
+     "what": "Zeigt Schnittstellen mit Status und IP-Adresse.",
+     "where": "In der VM.",
+     "why": "Für die SSH-Verbindung brauchst du die IP-Adresse.",
+     "example": "ip -brief a",
+     "nosim": true
+    }
+   ]
+  },
+  {
+   "id": "ssh",
+   "title": "Mit SSH verbinden",
+   "body": [
+    "Das VM-Fenster ist unhandlich. Verbinde dich stattdessen vom Host-Terminal per **SSH**: Kopieren/Einfügen funktioniert, und so werden echte Server verwaltet. Stelle zuerst sicher, dass der SSH-Dienst in der VM läuft (`sudo systemctl enable --now sshd` bei Rocky/Alma, `ssh` bei Ubuntu).",
+    "Dann vom Host: `ssh benutzer@IP` (Bridged) oder `ssh -p 2222 benutzer@127.0.0.1` (NAT mit Portweiterleitung). Bestätige den Host-Schlüssel mit `yes`."
+   ],
+   "commands": [
+    {
+     "cmd": "ssh user@host",
+     "what": "Öffnet eine sichere Remote-Shell.",
+     "where": "Vom Host zur VM oder zu jedem Server.",
+     "why": "Standardweg zur Linux-Administration.",
+     "example": "ssh student@192.168.1.50",
+     "nosim": true
+    },
+    {
+     "cmd": "ssh-keygen -t ed25519",
+     "what": "Erzeugt ein Schlüsselpaar für Login ohne Passwort.",
+     "where": "Einmal auf dem Host.",
+     "why": "Sicherer und bequemer als Passwörter.",
+     "example": "ssh-keygen -t ed25519",
+     "nosim": true
+    },
+    {
+     "cmd": "ssh-copy-id user@host",
+     "what": "Installiert deinen öffentlichen Schlüssel in der VM.",
+     "where": "Nach ssh-keygen.",
+     "why": "Weitere Logins brauchen kein Passwort.",
+     "example": "ssh-copy-id student@192.168.1.50",
+     "nosim": true
+    }
+   ],
+   "tip": "Lege einen Snapshot an, sobald SSH funktioniert — der beste Zustand zum Zurückkehren."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Aufwärmen: Lies im Simulator `cat /etc/os-release`, um zu sehen, wie sich ein installiertes System vorstellt.",
+   "hint": "Der Dateiname hat einen Bindestrich."
+  },
+  "t02": {
+   "text": "Aufwärmen: Führe `id` aus und sieh Benutzer, UID und Gruppen (`wheel` heißt Administrator).",
+   "hint": "Einfach `id`."
+  },
+  "t03": {
+   "text": "Geführt: Führe `hostname` und dann `uname -r` aus — die ersten Fakten nach jeder Installation.",
+   "hint": "Zwei getrennte Befehle."
+  },
+  "t04": {
+   "text": "Vorhersagen: Was gibt `sudo whoami` aus? Überlege, dann führe es aus.",
+   "hint": "sudo führt den Befehl als root aus."
+  },
+  "t05": {
+   "text": "Fehler finden: `cat /etc/os_release` schlägt fehl. Führe es aus, lies den Fehler, dann den richtigen Befehl.",
+   "hint": "Unterstrich statt Bindestrich; `ls /etc` hilft."
+  },
+  "t06": {
+   "text": "Mini-Projekt: Speichere die Zeile mit dem Distributionsnamen mit `grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt` in `~/vm-summary.txt`.",
+   "hint": "`>` schreibt die Ausgabe in eine Datei."
+  },
+  "t07": {
+   "text": "Herausforderung: Lege mit einem `mkdir -p` die Ordner `~/vm-lab/snapshots` und `~/vm-lab/notes` an.",
+   "hint": "Brace-Expansion: `~/vm-lab/{snapshots,notes}`."
+  },
+  "t08": {
+   "text": "TICKET #3001 — Das Labor braucht einen VM-Bericht: Schreibe Rechnername, Kernel-Version und Benutzername (in dieser Reihenfolge) zeilenweise in `~/vm-report.txt`.",
+   "hint": "Erster Befehl mit `>`, die nächsten zwei mit `>>`."
+  }
+ },
+ "vm": {
+  "intro": "Das ist der Hauptweg dieses Moduls: Arbeite die Schritte auf deinem Rechner durch. Setze „Erledigt“ oder füge eine Ausgabe zur Prüfung ein.",
+  "tasks": {
+   "v01": {
+    "title": "ISO herunterladen",
+    "text": "Lade Rocky Linux 9 oder AlmaLinux 9 (Minimal-ISO; ARM64 für Apple Silicon) oder Ubuntu 24.04 herunter und notiere die veröffentlichte SHA-256-Prüfsumme.",
+    "blocks": [],
+    "differs": [
+     "Apple Silicon braucht die aarch64/arm64-ISO; x86_64 startet in UTM nicht nativ."
+    ]
+   },
+   "v02": {
+    "title": "Prüfsumme verifizieren",
+    "text": "Berechne die SHA-256 deiner ISO und füge die Ausgabe ein. Vergleiche sie von Hand mit dem veröffentlichten Wert.",
+    "blocks": [
+     {
+      "cmd": "sha256sum Rocky-9-latest-x86_64-minimal.iso",
+      "expected": "3f2b...c9a1  Rocky-9-latest-x86_64-minimal.iso"
+     },
+     {
+      "cmd": "shasum -a 256 Rocky-9-latest-aarch64-minimal.iso",
+      "expected": "(macOS) 64 Hex-Zeichen gefolgt vom Dateinamen"
+     }
+    ],
+    "differs": [
+     "Erwartet werden 64 Hexadezimalzeichen; eine kürzere Ausgabe heißt, der Befehl ist fehlgeschlagen.",
+     "Windows: `Get-FileHash datei.iso -Algorithm SHA256` gibt eine Tabelle aus; füge die Spalte Hash ein.",
+     "Weicht sie vom veröffentlichten Wert ab? Datei löschen und neu laden."
+    ]
+   },
+   "v03": {
+    "title": "VM erstellen und installieren",
+    "text": "Erstelle die VM (2 CPU, 4 GB RAM, 25 GB Platte), installiere das System, lege einen Administrator-Benutzer an und starte bis zum Login.",
+    "blocks": [],
+    "differs": [
+     "Bootschleife oder „no bootable medium“: Prüfe, ob die ISO eingelegt ist und das optische Laufwerk zuerst bootet.",
+     "VirtualBox unter Windows: Aktiviere Virtualisierung (VT-x/AMD-V) im BIOS und beseitige Hyper-V-Konflikte."
+    ]
+   },
+   "v04": {
+    "title": "Erster Login",
+    "text": "Melde dich mit deinem Benutzer an und zeige, welches System du installiert hast. Füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\""
+     }
+    ],
+    "differs": [
+     "Unter Ubuntu erscheint `NAME=\"Ubuntu\"`; beides passt zu diesem Kurs.",
+     "Auch unter WSL existiert die Datei; der Text ist gleich."
+    ]
+   },
+   "v05": {
+    "title": "Snapshot anlegen",
+    "text": "Fahre mit `sudo poweroff` sauber herunter, lege einen Snapshot namens `clean-install` an und starte die VM wieder.",
+    "blocks": [
+     {
+      "cmd": "sudo poweroff",
+      "expected": "(das VM-Fenster schließt sich)"
+     }
+    ],
+    "differs": [
+     "Snapshot ausgegraut? Fahre die VM zuerst herunter (in VirtualBox liegt die Schaltfläche in den Maschinenwerkzeugen)."
+    ]
+   },
+   "v06": {
+    "title": "IP-Adresse finden",
+    "text": "Zeige deine Schnittstellen und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "ip -brief a",
+      "expected": "lo     UNKNOWN  127.0.0.1/8\nenp0s3 UP       10.0.2.15/24"
+     }
+    ],
+    "differs": [
+     "`10.0.2.15` bedeutet NAT; nutze die Portweiterleitung, um vom Host zuzugreifen.",
+     "Keine IPv4 auf enp0s3? Führe `nmcli device` aus und verbinde die Schnittstelle oder prüfe, ob der VM-Netzwerkadapter aktiv ist."
+    ]
+   },
+   "v07": {
+    "title": "Per SSH verbinden",
+    "text": "Verbinde dich vom Host-Terminal zur VM und führe den Befehl unten aus. Füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "ssh student@192.168.1.50",
+      "expected": "(du erhältst einen Prompt in der VM)"
+     },
+     {
+      "cmd": "echo $SSH_CONNECTION",
+      "expected": "192.168.1.10 51234 192.168.1.50 22"
+     }
+    ],
+    "differs": [
+     "`Connection refused`: sshd läuft nicht (`sudo systemctl enable --now sshd`).",
+     "`Connection timed out`: falsche IP oder (bei NAT) keine Portweiterleitung.",
+     "`Permission denied`: falscher Benutzername oder Passwort."
+    ]
+   },
+   "v08": {
+    "title": "System aktualisieren",
+    "text": "Aktualisiere das System, starte neu und bestätige mit „Erledigt“, wenn das Update fehlerfrei durchlief.",
+    "blocks": [
+     {
+      "cmd": "sudo dnf -y update   # Rocky/Alma",
+      "expected": "Complete!"
+     },
+     {
+      "cmd": "sudo apt update && sudo apt -y upgrade   # Ubuntu",
+      "expected": "(keine E:-Fehler)"
+     }
+    ],
+    "differs": [
+     "`Could not resolve host`: Die VM hat kein Internet; prüfe den Netzwerkadapter."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Was sagt eine übereinstimmende SHA-256-Prüfsumme aus?",
+   "options": [
+    "Die ISO ist die neueste Version",
+    "Die Datei ist vollständig und unverändert",
+    "Die ISO ist kostenlos",
+    "Die VM startet schneller"
+   ],
+   "explain": "Eine Prüfsumme ist ein Fingerabdruck; gleiche Fingerabdrücke bedeuten, dass die Datei mit der veröffentlichten identisch ist."
+  },
+  "q2": {
+   "q": "Welcher Netzwerkmodus versteckt die VM im LAN, erlaubt aber Internet?",
+   "options": [
+    "Bridged",
+    "Host-only",
+    "NAT",
+    "Keiner"
+   ],
+   "explain": "NAT teilt die Verbindung des Hosts; für den Zugriff auf die VM nutzt du Portweiterleitung."
+  },
+  "q3": {
+   "q": "Wann solltest du einen Snapshot anlegen?",
+   "options": [
+    "Vor einem riskanten Experiment",
+    "Nie; er verschwendet Platz",
+    "Nur nach dem Löschen der VM",
+    "Nur unter WSL"
+   ],
+   "explain": "Ein Snapshot ist ein schneller Rücksprungpunkt; leg ihn vor Änderungen an, die du bereuen könntest."
+  },
+  "q4": {
+   "q": "Welches Werkzeug ist auf einem Apple-Silicon-Mac üblich?",
+   "options": [
+    "VirtualBox mit x86-ISO",
+    "WSL 2",
+    "Windows Hyper-V",
+    "UTM mit ARM64-ISO"
+   ],
+   "explain": "Apple Silicon ist ARM; UTM führt ARM64-Gäste nativ aus."
+  }
+ },
+ "summary": [
+  "Eine VM ist ein sicheres, wegwerfbares Linux unter deiner vollen Kontrolle.",
+  "Prüfe vor der Installation immer die ISO-Prüfsumme.",
+  "Snapshot nach sauberer Installation und vor Experimenten.",
+  "SSH vom Host-Terminal ist die professionelle Arbeitsweise."
+ ],
+ "glossary": [
+  {
+   "term": "VM",
+   "meaning": "Virtuelle Maschine: ein vollständiger, per Software simulierter Computer."
+  },
+  {
+   "term": "ISO",
+   "meaning": "Abbilddatei eines Installationsmediums."
+  },
+  {
+   "term": "Prüfsumme",
+   "meaning": "Fingerabdruck einer Datei zur Erkennung von Beschädigung oder Manipulation."
+  },
+  {
+   "term": "Snapshot",
+   "meaning": "Gespeicherter Zustand einer VM, zu dem du zurückkehren kannst."
+  },
+  {
+   "term": "SSH",
+   "meaning": "Secure Shell: verschlüsseltes Protokoll für Remote-Terminals."
+  },
+  {
+   "term": "NAT",
+   "meaning": "Netzwerkadressübersetzung: Die VM teilt sich die Verbindung des Hosts."
+  }
+ ]
+}

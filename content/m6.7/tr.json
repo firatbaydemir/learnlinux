@@ -1,0 +1,196 @@
+{
+ "title": "systemd Timer — Cron'un Modern Alternatifi",
+ "lead": "İşi zamanla; sistem senin yerine çalıştırsın. Bir service ve bir timer yazacak, zaman ifadesini doğrulayacak, çalışmayı journalctl ile izleyecek ve cron ile karşılaştıracaksın.",
+ "objectives": [
+  "`.service` dosyasını (`Type=oneshot`, `ExecStart`) ve `.timer` dosyasını (`OnCalendar`, `Persistent=true`) yazarsın.",
+  "`systemd-analyze calendar` ile zaman ifadesini çalıştırmadan önce doğrularsın.",
+  "`daemon-reload`, `enable --now`, `list-timers` ve `journalctl -u` ile timer'ı kurar ve izlersin.",
+  "Cron satırını (`30 2 * * *`) okur ve eşdeğer timer'ı yazarsın.",
+  "Kullanıcı timer'larını (`systemctl --user`) ve cron/timer seçim kararını bilirsin."
+ ],
+ "sections": [
+  {
+   "id": "why",
+   "title": "Neden timer? Cron ile karşılaştırma",
+   "body": [
+    "Bir script'i elle çalıştırmak kolay; asıl otomasyon onu **doğru zamanda** çalıştırmaktır. Klasik yol **cron**: tek satırda beş zaman alanı ve komut. Modern yol **systemd timer**: iki dosya, biri **ne** çalışacağını (`backup.service`), diğeri **ne zaman** çalışacağını (`backup.timer`) anlatır.",
+    "Cron satırı: `30 2 * * * /home/student/bin/backup.sh` = her gün 02:30. Alanlar: dakika, saat, ayın günü, ay, haftanın günü. Timer'ın artısı: çıktı **journal**'a gider (`journalctl -u`), `Persistent=true` ile kaçan çalışma açılışta telafi edilir, `RandomizedDelaySec` ile yük dağıtılır, `systemctl list-timers` ile sıradaki çalışma görünür.",
+    "Bu modülde simülatörde dosyaları yazar ve içeriğini kontrol edersin; `systemctl` ve `journalctl` yalnızca gerçek VM'de çalışır. Cron'un artısı ise basitliği: tek satır, her yerde var."
+   ],
+   "commands": [
+    {"cmd": "crontab -e", "what": "Kendi cron tablonu editörde açar.", "where": "Basit, tek satırlık zamanlı işler için.", "why": "Karşılaştırma noktası: timer'a geçmeden önce eski işi tanırsın.", "example": "crontab -e", "nosim": true},
+    {"cmd": "crontab -l", "what": "Mevcut cron satırlarını listeler.", "where": "Taşınacak işleri envanterlerken.", "why": "Hangi işlerin timer'a çevrileceğini görürsün.", "example": "crontab -l", "nosim": true},
+    {"cmd": "printf (cron line)", "what": "Bir cron satırını dosyaya yazar: `dakika saat gün ay haftagünü komut`.", "where": "Cron sözdizimini denemek ve dosyada saklamak için.", "why": "Alanları doğru sırayla yazmayı alıştırırsın.", "example": "printf '30 2 * * * /home/student/bin/backup.sh\\n' > backup.cron"},
+    {"cmd": "systemctl list-timers", "what": "Aktif timer'ları, sonraki ve son çalışma zamanlarıyla listeler.", "where": "Timer'ın gerçekten zamanlandığını doğrularken.", "why": "Sessizce çalışmayan timer'ı hemen yakalarsın.", "example": "systemctl list-timers --all", "nosim": true}
+   ],
+   "tip": "Basit, tek seferlik kullanıcı işi için cron yeterli. Log, bağımlılık, telafi ve izleme istiyorsan timer seç."
+  },
+  {
+   "id": "service",
+   "title": "Service birimi: ne çalışacak?",
+   "body": [
+    "Service dosyası komutu tanımlar. Zamanlanan işler için **`Type=oneshot`** kullanılır: komut çalışır, biter. `ExecStart` içinde **mutlak yol** zorunludur; `backup.sh` değil `/usr/local/bin/backup.sh` yaz.",
+    "Sistem birimleri `/etc/systemd/system/` altına yazılır (root gerekir). Simülatörde yazamazsın; orada `~/units/` klasörünü kullanırsın, kopyalanacak içerik aynıdır. Önce script'i çalıştırılabilir yap: `chmod +x`.",
+    "Önemli: `.service` içine `[Install]` koymak gerekmez; zamanlama timer'a aittir. Elle sınamak için `sudo systemctl start backup.service` yeterlidir."
+   ],
+   "commands": [
+    {"cmd": "printf > backup.service", "what": "Service birimini satır satır yazar.", "where": "Sim'de `~/units/`, VM'de `/etc/systemd/system/` altında.", "why": "Şablon dosyayı elle yazmadan, yeniden üretilebilir şekilde oluşturursun.", "example": "printf '[Unit]\\nDescription=Nightly backup\\n\\n[Service]\\nType=oneshot\\nExecStart=/home/student/bin/backup.sh\\n' > backup.service"},
+    {"cmd": "cat", "what": "Yazdığın dosyanın içeriğini gösterir.", "where": "Her yazma işleminden sonra.", "why": "Yazım hatasını (`Type=oneshot`, yol) daha başlamadan görürsün.", "example": "cat backup.service"},
+    {"cmd": "chmod +x", "what": "Script'e çalıştırma izni verir.", "where": "`ExecStart` ile çağrılan her script için.", "why": "İzin yoksa servis `203/EXEC` hatasıyla başlamaz.", "example": "chmod +x backup.sh"},
+    {"cmd": "systemd-analyze verify", "what": "Birim dosyasının sözdizimini ve yollarını denetler.", "where": "`daemon-reload` öncesinde.", "why": "Hatalı yolu ve yazım hatasını çalıştırmadan yakalar.", "example": "systemd-analyze verify /etc/systemd/system/backup.service", "nosim": true}
+   ],
+   "tip": "Birimi önce `sudo systemctl start backup.service` ile elle çalıştır; çalışırsa zamanlamak güvenlidir.",
+   "warn": "RHEL/Rocky'de (SELinux) servis `/home` altındaki script'i çalıştıramayabilir (`203/EXEC`, `Permission denied`). Script'i `/usr/local/bin` altına koy; Debian/Ubuntu'da (AppArmor) bu sorun nadirdir ama aynı yol önerilir."
+  },
+  {
+   "id": "timer",
+   "title": "Timer birimi: ne zaman çalışacak?",
+   "body": [
+    "Timer dosyası `[Timer]` bölümünde zamanı, `[Install]` bölümünde `WantedBy=timers.target` satırını içerir. Dosya adı service ile eşleşir: `backup.timer` → `backup.service`.",
+    "**`OnCalendar=`** takvim zamanıdır: `*-*-* 02:30:00` her gün 02:30, `Mon *-*-* 08:00:00` her pazartesi 08:00, `hourly`, `daily`, `weekly` kısayollardır. **`OnBootSec=`** açılıştan sonra, **`OnUnitActiveSec=`** son çalışmadan sonra bekler.",
+    "**`Persistent=true`**: makine kapalıyken kaçan çalışma bir sonraki açılışta hemen yapılır. **`RandomizedDelaySec=`** başlangıcı rastgele geciktirir; çok sayıda makine aynı anda yüklenmesin diye."
+   ],
+   "commands": [
+    {"cmd": "OnCalendar=", "what": "Takvim tabanlı zamanı tanımlar.", "where": "Her gece, her hafta gibi saatli işlerde.", "why": "Cron'un beş alanının okunaklı karşılığıdır.", "example": "printf '[Timer]\\nOnCalendar=*-*-* 02:30:00\\n' | cat"},
+    {"cmd": "OnBootSec= / OnUnitActiveSec=", "what": "Açılıştan veya son çalışmadan itibaren göreli süre bekler.", "where": "\"Açılıştan 10 dk sonra, sonra her saat\" gibi işlerde.", "why": "Takvimi olmayan, aralık tabanlı işleri çözer.", "example": "printf '[Timer]\\nOnBootSec=10min\\nOnUnitActiveSec=1h\\n' | cat"},
+    {"cmd": "Persistent=true", "what": "Kaçan çalışmayı bir sonraki açılışta telafi eder.", "where": "Dizüstü, VM veya gece kapanan makinelerde.", "why": "Anacron benzeri güvence sağlar; cron'da yoktur.", "example": "printf '[Timer]\\nOnCalendar=daily\\nPersistent=true\\n' | cat"},
+    {"cmd": "RandomizedDelaySec=", "what": "Başlangıca rastgele bir gecikme ekler.", "where": "Aynı saatte çalışan çok sayıda sunucuda.", "why": "Ortak depo/ağ üzerinde ani yük yığılmasını önler.", "example": "printf '[Timer]\\nOnCalendar=daily\\nRandomizedDelaySec=5min\\n' | cat"},
+    {"cmd": "systemd-analyze calendar", "what": "Zaman ifadesini yorumlar, bir sonraki çalışmayı gösterir.", "where": "Timer yazmadan önce ve sonra.", "why": "Yanlış ifade sessizce hiç çalışmaz; burada hemen görürsün.", "example": "systemd-analyze calendar \"Mon *-*-* 08:00:00\"", "nosim": true}
+   ],
+   "tip": "`Mon,Fri *-*-* 08:00` gibi listeler ve `*-*-* *:00/15:00` (her 15 dk) kullanılabilir; hepsini önce `systemd-analyze calendar` ile sına."
+  },
+  {
+   "id": "manage",
+   "title": "Kur, başlat, izle",
+   "body": [
+    "Sıra sabit: dosyaları yaz → `systemd-analyze verify` ve `calendar` → `sudo systemctl daemon-reload` → servisi elle `start` et ve `journalctl` ile bak → **timer'ı** `enable --now` et → `list-timers` ile doğrula.",
+    "`enable --now` **timer'a** uygulanır (`backup.timer`), service'e değil. Yeni dosya veya değişiklikten sonra `daemon-reload` unutulursa systemd eski halini kullanır.",
+    "Çıktıyı `journalctl -u backup.service` ile okursun; `-f` canlı izler, `--since today` günü süzer. Başarısız çalışmada `Failed with result` satırı görünür."
+   ],
+   "commands": [
+    {"cmd": "sudo systemctl daemon-reload", "what": "Birim dosyalarını yeniden okutur.", "where": "Her yeni/değişen .service ve .timer sonrası.", "why": "Olmazsa systemd eski veya hiç dosya görmez.", "example": "sudo systemctl daemon-reload", "nosim": true},
+    {"cmd": "sudo systemctl start backup.service", "what": "Servisi hemen, bir kez çalıştırır.", "where": "Timer'ı açmadan önce işin kendisini sınamak için.", "why": "Hata varsa timer'ı beklemeden bulursun.", "example": "sudo systemctl start backup.service", "nosim": true},
+    {"cmd": "sudo systemctl enable --now backup.timer", "what": "Timer'ı hem açılışa ekler hem hemen başlatır.", "where": "Her kalıcı timer için.", "why": "Reboot sonrası da çalışır.", "example": "sudo systemctl enable --now backup.timer", "nosim": true},
+    {"cmd": "systemctl list-timers", "what": "Sıradaki ve son çalışmaları gösterir.", "where": "Kurulumdan sonra ve sorun gidermede.", "why": "NEXT sütunu timer'ın gerçekten zamanlandığını kanıtlar.", "example": "systemctl list-timers backup.timer", "nosim": true},
+    {"cmd": "journalctl -u", "what": "Bir birimin günlük kayıtlarını gösterir.", "where": "Başarılı ve başarısız çalışmaları okurken.", "why": "Cron'un posta kutusu yerine tek, aranabilir kayıt.", "example": "journalctl -u backup.service --since today", "nosim": true}
+   ],
+   "warn": "Root yetkisiyle çalışan servis, silme/taşıma yapan bir script'te büyük zarar verir. Önce script'i `echo` ile kuru çalıştır, yolu doğrula, sonra zamanla. Yanlış `OnCalendar` hata vermez; sadece çalışmaz.",
+   "danger": "SSH ile bağlıyken `systemctl` ile `sshd` veya ağ servislerini durdurma/devre dışı bırakma; kilitlenirsin. Timer denemelerini yalnızca kendi birimlerinle yap ve önemli değişikliklerden önce VM snapshot'ı al (Modül 0.2)."
+  },
+  {
+   "id": "user",
+   "title": "Kullanıcı timer'ları ve geçiş kararı",
+   "body": [
+    "Root olmadan da zamanlama yapabilirsin: **kullanıcı birimleri** `~/.config/systemd/user/` altına yazılır ve `systemctl --user` ile yönetilir (`sudo` yok). Oturum kapanınca durur; kapanmasın istersen `loginctl enable-linger student` kullan.",
+    "Geçiş kararı: tek satırlık, çıktısı önemsiz iş → **cron**. Log, bağımlılık (ağ gelince çalış), telafi (`Persistent`), rastgele gecikme veya kaynak sınırı gerekiyorsa → **timer**. İkisi birlikte çalışabilir; taşırken eski cron satırını yorum yap, yeni timer'ı doğrula, sonra sil.",
+    "Debian/Ubuntu'da paketler çoğu zaman cron yerine timer getirir (`apt-daily.timer`); RHEL/Rocky'de `dnf-makecache.timer` gibi. `systemctl list-timers --all` hazır örneklerle doludur."
+   ],
+   "commands": [
+    {"cmd": "mkdir -p ~/.config/systemd/user", "what": "Kullanıcı birimleri klasörünü oluşturur.", "where": "İlk kullanıcı timer'ından önce.", "why": "systemd kullanıcı birimlerini burada arar.", "example": "mkdir -p ~/.config/systemd/user"},
+    {"cmd": "systemctl --user daemon-reload", "what": "Kullanıcı birimlerini yeniden okutur.", "where": "Kullanıcı dosyalarını yazdıktan sonra.", "why": "`sudo` gerekmeden aynı akışı izlersin.", "example": "systemctl --user daemon-reload", "nosim": true},
+    {"cmd": "systemctl --user enable --now notes.timer", "what": "Kullanıcı timer'ını açar ve başlatır.", "where": "Kendi evindeki kişisel işler için.", "why": "Root yetkisi gerekmez, risk küçüktür.", "example": "systemctl --user enable --now notes.timer", "nosim": true},
+    {"cmd": "loginctl enable-linger", "what": "Oturum kapalıyken de kullanıcı birimlerini çalışır tutar.", "where": "Sunucuda kullanıcı timer'ı arka planda sürmeli ise.", "why": "Aksi halde çıkış yapınca timer durur.", "example": "sudo loginctl enable-linger student", "nosim": true}
+   ],
+   "tip": "Kullanıcı timer'ı denemek için en güvenli yerdir: hata yaparsan sistem değil sadece kendi hesabın etkilenir."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`~/bin` ve `~/units` klasörlerini tek komutla oluştur: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` birden çok yol alabilir."},
+  "t02": {"text": "Cron örnek dosyasını oku: `cat ~/sample/crontab.txt`. Üç iş satırı var.", "hint": "Satırlar: dakika saat gün ay haftagünü komut."},
+  "t03": {"text": "`~/bin/backup.sh` dosyasını `printf` ile yaz: ilk satır `#!/bin/bash`, ikinci satır `echo backup done`.", "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"},
+  "t04": {"text": "`~/bin/backup.sh` script'ini çalıştırılabilir yap (mod 755).", "hint": "`chmod 755 ~/bin/backup.sh` veya `chmod +x`."},
+  "t05": {"text": "`~/units/backup.service` yaz: `[Service]` bölümünde `Type=oneshot` ve `ExecStart=/home/student/bin/backup.sh` olsun.", "hint": "Satırları `\\n` ile ayırıp tek `printf` kullan; sonuna `> ~/units/backup.service` ekle."},
+  "t06": {"text": "`~/units/backup.timer` yaz: `[Timer]` altında `OnCalendar=*-*-* 02:30:00` ve `Persistent=true`, `[Install]` altında `WantedBy=timers.target`.", "hint": "Sim'de `*` için tek tırnak kullan; böylece kabuk genişletmez."},
+  "t07": {"text": "Tahmin et: `~/sample/list-timers.txt` içinde `timer` geçen kaç satır var? Sonra `grep -c timer ~/sample/list-timers.txt` ile doğrula.", "hint": "Başlık satırında küçük harfli `timer` yok; iki timer satırı var."},
+  "t08": {"text": "Tahmin et: `~/sample/analyze.txt` içindeki `Next elapse` satırı hangi zamanı gösterir? `grep 'Next elapse' ~/sample/analyze.txt` ile bak.", "hint": "İfade pazartesi 08:00'dı; sonraki pazartesiyi bul."},
+  "t09": {"text": "Hata ayıkla: `~/broken/broken.timer` çalışmaz. `OnCalender` yazım hatası var ve `[Install]` bölümü eksik. Dosyayı `OnCalendar=daily`, `Persistent=true` ve `WantedBy=timers.target` ile yeniden yaz.", "hint": "Önce `cat ~/broken/broken.timer`. Yazım: Calen**d**ar."},
+  "t10": {"text": "Hata ayıkla: `~/broken/report.service` içindeki `ExecStart=report.sh` göreli yol; systemd kabul etmez. `ExecStart=/home/student/bin/report.sh` olacak şekilde dosyayı yeniden yaz (`Type=oneshot` kalsın).", "hint": "`cat` ile mevcut satırları gör, sonra `printf ... > ~/broken/report.service`."},
+  "t11": {"text": "Mini proje (kullanıcı timer'ı): `~/.config/systemd/user` klasörünü oluştur. `notes.service` içinde `ExecStart=/usr/bin/touch /home/student/notes.txt`, `notes.timer` içinde `OnCalendar=hourly` ve `WantedBy=timers.target` olsun.", "hint": "Üç komut: `mkdir -p`, bir `printf` service için, bir `printf` timer için."},
+  "t12": {"text": "Mini proje (cron karşılaştırma): `~/units/backup.cron` dosyasına iki cron satırı yaz: `30 2 * * * /home/student/bin/backup.sh` ve `0 8 * * 1 /home/student/bin/report.sh`.", "hint": "İlk satır için `>`, ikincisi için `>>` kullan."},
+  "t13": {"text": "Meydan okuma: `cleanup` işi için `~/units/cleanup.service` (`ExecStart=/home/student/bin/cleanup.sh`, `Type=oneshot`) ve `~/units/cleanup.timer` yaz. Timer: açılıştan 10 dakika sonra (`OnBootSec=10min`), sonra her saat (`OnUnitActiveSec=1h`), 5 dakikaya kadar rastgele gecikme (`RandomizedDelaySec=5min`), `WantedBy=timers.target`.", "hint": "Takvim değil, aralık tabanlı bir timer: `OnCalendar` kullanma."},
+  "t14": {"text": "Ticket: \"Gece yedeği birkaç gündür sessizce başarısız oluyor.\" `~/sample/journal.txt` içindeki yalnızca `Failed` satırlarını `~/units/failed.txt` dosyasına yaz.", "hint": "`grep Failed ... > ...`"},
+  "t15": {"text": "Ticket: \"Haftalık rapor her pazartesi 08:00'de çalışmalı; makine kapalıysa açılınca yine çalışsın.\" `~/units/report.timer` yaz (`OnCalendar`, kaçanı telafi eden ayar, `WantedBy=timers.target`).", "hint": "Pazartesi 08:00 = `Mon *-*-* 08:00:00`; telafi = `Persistent=true`."},
+  "t16": {"text": "`wc -l ~/sample/journal.txt` ile günlük örneğinin kaç satır olduğunu say.", "hint": "Çıktının başındaki sayıya bak."}
+ },
+ "vm": {
+  "intro": "Kendi VM'inde (Ubuntu veya Rocky/Alma) sırayla ilerle. Önce **snapshot al** (Modül 0.2). Birimleri `/etc/systemd/system/` altına yazarsın; sadece kendi `backup.*` dosyalarına dokun. Hata olursa `sudo systemctl disable --now backup.timer` ile durdur.",
+  "tasks": {
+   "v01": {
+    "title": "Script ve service yaz",
+    "text": "Önce script'i `/usr/local/bin` altına koy, sonra service dosyasını yaz ve içeriğini göster. SELinux nedeniyle script'i `/usr/local/bin` altında tut.",
+    "blocks": [
+     {"cmd": "sudo tee /usr/local/bin/backup.sh > /dev/null <<'EOF'\n#!/bin/bash\necho \"backup done\"\nEOF\nsudo chmod 755 /usr/local/bin/backup.sh", "expected": "(çıktı yok)"},
+     {"cmd": "sudo tee /etc/systemd/system/backup.service > /dev/null <<'EOF'\n[Unit]\nDescription=Nightly backup\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/backup.sh\nEOF\ncat /etc/systemd/system/backup.service", "expected": "[Unit]\nDescription=Nightly backup\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/backup.sh"}
+    ],
+    "differs": ["`Permission denied` alırsan `sudo` unutulmuştur; `tee` önünde `sudo` olmalı.", "Heredoc (`<<'EOF'`) sonunda `EOF` satırı tek başına ve satır başında olmalı."]
+   },
+   "v02": {
+    "title": "Timer yaz",
+    "text": "Her gece 02:30'da çalışan, kaçanı telafi eden bir timer yaz ve içeriğini yapıştır.",
+    "blocks": [
+     {"cmd": "sudo tee /etc/systemd/system/backup.timer > /dev/null <<'EOF'\n[Unit]\nDescription=Run backup nightly\n\n[Timer]\nOnCalendar=*-*-* 02:30:00\nPersistent=true\nRandomizedDelaySec=5min\n\n[Install]\nWantedBy=timers.target\nEOF\ncat /etc/systemd/system/backup.timer", "expected": "[Timer]\nOnCalendar=*-*-* 02:30:00\nPersistent=true\n..."}
+    ],
+    "differs": ["Dosya adı `backup.timer` olmalı; service ile aynı ad, farklı uzantı.", "Tırnaklı heredoc (`'EOF'`) `*` işaretinin genişletilmesini engeller."]
+   },
+   "v03": {
+    "title": "Doğrula",
+    "text": "Zaman ifadesini ve birim dosyalarını çalıştırmadan doğrula; çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "systemd-analyze calendar \"*-*-* 02:30:00\"\nsystemd-analyze verify /etc/systemd/system/backup.service /etc/systemd/system/backup.timer", "expected": "Normalized form: *-*-* 02:30:00\n    Next elapse: Fri 2026-11-13 02:30:00 CET\n(verify: genelde çıktı yok = sorun yok)"}
+    ],
+    "differs": ["`verify` hiçbir şey yazmıyorsa sorun yoktur.", "Eski sürümlerde `Next elapse` metni biraz farklı olabilir; `Normalized form` satırı yine görünür."]
+   },
+   "v04": {
+    "title": "Kur ve zamanla",
+    "text": "`daemon-reload` yap, timer'ı etkinleştir ve zamanlandığını `list-timers` ile gör. Çıktıda `backup.timer` yer almalı.",
+    "blocks": [
+     {"cmd": "sudo systemctl daemon-reload\nsudo systemctl enable --now backup.timer\nsystemctl list-timers backup.timer", "expected": "NEXT                        LEFT     LAST PASSED UNIT         ACTIVATES\nFri 2026-11-13 02:30:00 CET 16h left n/a  n/a    backup.timer backup.service"}
+    ],
+    "differs": ["`Unit backup.timer not found` görürsen `daemon-reload` yapmadın veya dosya adı/yolu yanlış.", "`RandomizedDelaySec` nedeniyle NEXT zamanı 02:30'dan birkaç dakika sonra olabilir."]
+   },
+   "v05": {
+    "title": "Elle çalıştır, günlüğü oku",
+    "text": "Servisi bir kez elle başlat ve günlüğünde `backup done` satırını bul.",
+    "blocks": [
+     {"cmd": "sudo systemctl start backup.service\njournalctl -u backup.service --no-pager -n 10", "expected": "systemd[1]: Starting backup.service - Nightly backup...\nbackup.sh[1234]: backup done\nsystemd[1]: backup.service: Succeeded."}
+    ],
+    "differs": ["Rocky/RHEL'de son satır `Deactivated successfully.` olabilir; sorun değil.", "`Failed with result 'exit-code'` görürsen script yolu veya izni hatalıdır (`chmod 755`, SELinux için `ls -Z`)."]
+   },
+   "v06": {
+    "title": "Kullanıcı timer'ı ve temizlik",
+    "text": "`sudo` olmadan bir kullanıcı timer'ı kur, listede gör; sonra hem onu hem sistem timer'ını durdur. Son komutlar `null` doğrulamalı; hata yoksa \"Yaptım\" de.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/.config/systemd/user\nprintf '[Service]\\nType=oneshot\\nExecStart=/usr/bin/touch %h/notes.txt\\n' > ~/.config/systemd/user/notes.service\nprintf '[Timer]\\nOnCalendar=hourly\\n\\n[Install]\\nWantedBy=timers.target\\n' > ~/.config/systemd/user/notes.timer\nsystemctl --user daemon-reload\nsystemctl --user enable --now notes.timer\nsystemctl --user list-timers", "expected": "NEXT ... UNIT        ACTIVATES\n... notes.timer notes.service"},
+     {"cmd": "systemctl --user disable --now notes.timer\nsudo systemctl disable --now backup.timer", "expected": "Removed ...notes.timer symlink"}
+    ],
+    "differs": ["`Failed to connect to bus` ise `sudo su` ile değil, normal oturumunda çalıştır; `--user` root olmayan oturum ister.", "`%h` birimde ev dizini anlamına gelir; kabukta genişlemesin diye `printf` tek tırnak içinde."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Hangi dosya bir işin **ne zaman** çalışacağını tanımlar?", "options": ["`backup.service`", "`backup.timer`", "`multi-user.target`", "`/etc/fstab`"], "explain": "Timer 'ne zaman'ı, service 'ne'yi tanımlar; adları eşleşir."},
+  "q2": {"q": "`Persistent=true` ne yapar?", "options": ["İşi rastgele geciktirir", "Timer'ı reboot'ta siler", "Makine kapalıyken kaçan çalışmayı açılışta telafi eder", "İşi root yerine kullanıcıyla çalıştırır"], "explain": "Persistent, son çalışma zamanını diske yazar; kaçan çalışma açılışta yapılır."},
+  "q3": {"q": "Yeni bir `.timer` dosyası yazdın. `enable --now` öncesinde ne yapmalısın?", "options": ["`sudo systemctl daemon-reload`", "`reboot`", "`crontab -e`", "Hiçbir şey, systemd otomatik görür"], "explain": "systemd birim dosyalarını önbelleğe alır; değişiklikten sonra `daemon-reload` şarttır."},
+  "q4": {"q": "Bir servisin çıktısını ve hata satırlarını nereden okursun?", "options": ["`/var/spool/cron/` içinden", "`crontab -l` ile", "Yalnızca `systemctl status` yeterlidir", "`journalctl -u backup.service`"], "explain": "systemd çıktıyı journal'a yazar; `-u` birime göre süzer."}
+ },
+ "summary": [
+  "Timer iki dosyadır: `.service` ne çalışacağını, `.timer` ne zaman çalışacağını tanımlar.",
+  "`Type=oneshot` ve mutlak `ExecStart` yolu zamanlanan işlerin standardıdır.",
+  "`OnCalendar` takvimi, `OnBootSec`/`OnUnitActiveSec` aralığı; `Persistent=true` kaçanı telafi eder.",
+  "Sıra: dosya → `systemd-analyze calendar/verify` → `daemon-reload` → elle `start` → `enable --now` → `list-timers`.",
+  "Çıktı `journalctl -u` ile okunur; cron satırı `30 2 * * *` = her gün 02:30.",
+  "Kullanıcı timer'ları `~/.config/systemd/user` ve `systemctl --user` ile root'suz çalışır."
+ ],
+ "glossary": [
+  {"term": "timer unit", "meaning": "Bir service'i belirli zamanda başlatan `.timer` birimi."},
+  {"term": "service unit", "meaning": "Çalıştırılacak komutu tanımlayan `.service` birimi."},
+  {"term": "oneshot", "meaning": "`Type=oneshot`: komut çalışıp biter; zamanlanan işler için uygundur."},
+  {"term": "OnCalendar", "meaning": "Takvim tabanlı zaman ifadesi, örn. `*-*-* 02:30:00`."},
+  {"term": "Persistent", "meaning": "`Persistent=true`: kaçan çalışmayı bir sonraki açılışta telafi eder."},
+  {"term": "RandomizedDelaySec", "meaning": "Başlangıca rastgele gecikme ekleyerek yük yığılmasını önler."},
+  {"term": "daemon-reload", "meaning": "systemd'nin birim dosyalarını yeniden okumasını sağlar."},
+  {"term": "journal", "meaning": "systemd'nin günlük deposu; `journalctl` ile okunur."},
+  {"term": "cron", "meaning": "Klasik zamanlayıcı; `crontab` satırlarında beş zaman alanı kullanır."},
+  {"term": "linger", "meaning": "`loginctl enable-linger`: oturum kapalıyken kullanıcı birimlerini çalışır tutar."}
+ ]
+}

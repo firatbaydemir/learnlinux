@@ -1,0 +1,182 @@
+{
+ "id": "5.6",
+ "level": 5,
+ "setup": {
+  "dirs": [
+   "/home/student/lab"
+  ],
+  "files": {
+   "/home/student/lab/systemctl_status.txt": "● sshd.service - OpenSSH server daemon\n     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: enabled)\n     Active: active (running) since Thu 2026-11-12 08:00:01 CET; 2h 17min ago\n   Main PID: 801 (sshd)\n",
+   "/home/student/lab/failed_units.txt": "UNIT            LOAD   ACTIVE SUB    DESCRIPTION\nhttpd.service   loaded failed failed The Apache HTTP Server\nbackup.service  loaded failed failed Nightly backup job\n2 loaded units listed.\n",
+   "/home/student/lab/journal_sample.txt": "Nov 12 09:00:01 linux-lab systemd[1]: Started Daily Cleanup.\nNov 12 09:00:05 linux-lab httpd[950]: ERROR: cannot bind to port 80\nNov 12 09:00:06 linux-lab systemd[1]: httpd.service: Main process exited, code=exited, status=1/FAILURE\nNov 12 09:00:06 linux-lab systemd[1]: httpd.service: Failed with result 'exit-code'.\nNov 12 09:00:07 linux-lab systemd[1]: Failed to start The Apache HTTP Server.\nNov 12 09:00:08 linux-lab systemd[1]: httpd.service: Scheduled restart job, restart counter is at 1.\nNov 12 09:00:08 linux-lab systemd[1]: Stopped The Apache HTTP Server.\nNov 12 09:00:09 linux-lab systemd[1]: Starting The Apache HTTP Server...\nNov 12 09:00:09 linux-lab httpd[960]: ERROR: cannot bind to port 80\nNov 12 09:00:10 linux-lab sshd[801]: Accepted publickey for student from 192.168.1.10\n",
+   "/home/student/lab/logrotate_demo.conf": "/var/log/linux-lab/app.log {\n    weekly\n    rotate 4\n    compress\n    missingok\n    notifempty\n}\n",
+   "/home/student/lab/broken1.service": "[Unit]\nDescription=Linux Lab demo\n\n[Service]\nExec_Start=sleep 3600\n\n[Install]\nWantedBy=multi-user.target\n",
+   "/home/student/lab/broken2.service": "[Unit]\nDescription=Linux Lab demo\n\n[Service]\nExecStart=/usr/bin/sleep 3600\n"
+  },
+  "modes": [],
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"out": "messages", "of": "^ls /var/log/?$"},
+   "solution": ["ls /var/log"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"contains": ["~/answer_status.txt", "systemctl status (sshd|ssh)\\b"]},
+   "solution": ["echo \"systemctl status sshd\" > ~/answer_status.txt"]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"out": "cannot bind to port 80", "of": "^grep -\\w*i\\w* error /var/log/messages$"},
+   "solution": ["grep -i error /var/log/messages"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "\\b3\\b", "of": "grep -\\w*c\\w* (-\\w+ )?error|error \\S+ \\| wc -l"},
+   "solution": ["grep -ci error /var/log/messages"]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "Failed password", "of": "^sudo \\w+ (-\\w+ )?(\\S+ )?/var/log/secure$"},
+   "solution": ["sudo cat /var/log/secure"]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "enabled", "of": "^grep (-\\w+ )?[Ll]oaded \\S*systemctl_status\\.txt$"},
+   "solution": ["grep Loaded ~/lab/systemctl_status.txt"]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/lab/failed_names.txt", "httpd\\.service"]},
+    {"contains": ["~/lab/failed_names.txt", "backup\\.service"]}
+   ],
+   "solution": ["cut -d\" \" -f1 ~/lab/failed_units.txt | grep service > ~/lab/failed_names.txt"]
+  },
+  {
+   "id": "t08",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"contains": ["~/answer_journal.txt", "journalctl(?=.*-u (sshd|ssh)\\b)(?=.*-n ?50)"]},
+   "solution": ["echo 'journalctl -u sshd -n 50 --no-pager' > ~/answer_journal.txt"]
+  },
+  {
+   "id": "t09",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"out": "rotate 4", "of": "^grep (-\\w+ )?rotate \\S*logrotate_demo\\.conf$"},
+   "solution": ["grep rotate ~/lab/logrotate_demo.conf"]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "Reloading", "of": "^tail -n ?2 /var/log/messages$"},
+   "solution": ["tail -n 2 /var/log/messages"]
+  },
+  {
+   "id": "t11",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "\\b2\\b", "of": "^grep -c Failed \\S*journal_sample\\.txt$"},
+   "solution": ["grep -c Failed ~/lab/journal_sample.txt"]
+  },
+  {
+   "id": "t12",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "-rw-------", "of": "^ls -l /var/log/secure$"},
+   "solution": ["ls -l /var/log/secure"]
+  },
+  {
+   "id": "t13",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"contains": ["~/lab/broken1.service", "ExecStart=/usr/bin/sleep 3600"]},
+   "solution": ["printf \"[Unit]\\nDescription=Linux Lab demo\\n\\n[Service]\\nExecStart=/usr/bin/sleep 3600\\n\\n[Install]\\nWantedBy=multi-user.target\\n\" > ~/lab/broken1.service"]
+  },
+  {
+   "id": "t14",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"contains": ["~/lab/broken2.service", "WantedBy=multi-user\\.target"]},
+   "solution": ["printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service"]
+  },
+  {
+   "id": "t15",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/lab/linux-lab-demo.service", "\\[Unit\\]"]},
+    {"contains": ["~/lab/linux-lab-demo.service", "\\[Service\\]"]},
+    {"contains": ["~/lab/linux-lab-demo.service", "ExecStart=/usr/bin/sleep 3600"]},
+    {"contains": ["~/lab/linux-lab-demo.service", "\\[Install\\]"]},
+    {"contains": ["~/lab/linux-lab-demo.service", "WantedBy=multi-user\\.target"]},
+    {"contains": ["~/lab/install_steps.txt", "/etc/systemd/system"]},
+    {"contains": ["~/lab/install_steps.txt", "daemon-reload"]},
+    {"contains": ["~/lab/install_steps.txt", "enable --now linux-lab-demo"]}
+   ],
+   "solution": [
+    "printf \"[Unit]\\nDescription=Linux Lab demo\\n\\n[Service]\\nExecStart=/usr/bin/sleep 3600\\n\\n[Install]\\nWantedBy=multi-user.target\\n\" > ~/lab/linux-lab-demo.service",
+    "printf \"sudo cp linux-lab-demo.service /etc/systemd/system/\\nsudo systemctl daemon-reload\\nsudo systemctl enable --now linux-lab-demo.service\\n\" > ~/lab/install_steps.txt"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/lab/incident.txt", "cannot bind to port 80"]},
+    {"contains": ["~/lab/incident.txt", "PAM: Authentication failure"]},
+    {"contains": ["~/lab/incident.txt", "Failed password"]},
+    {"linesMin": ["~/lab/incident.txt", 4]}
+   ],
+   "solution": [
+    "grep -i error /var/log/messages > ~/lab/incident.txt",
+    "sudo cat /var/log/secure >> ~/lab/incident.txt"
+   ]
+  },
+  {
+   "id": "t17",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/ticket_5610.txt", "systemctl status (httpd|apache2)"]},
+    {"contains": ["~/ticket_5610.txt", "journalctl(?=.*-u (httpd|apache2))"]},
+    {"contains": ["~/ticket_5610.txt", "systemctl enable --now (httpd|apache2)"]}
+   ],
+   "solution": [
+    "printf \"systemctl status httpd\\njournalctl -u httpd -n 50 --no-pager\\nsudo systemctl enable --now httpd\\n\" > ~/ticket_5610.txt"
+   ]
+  }
+ ],
+ "vm": [
+  {"id": "v01", "expect": "Active:|active|enabled|running"},
+  {"id": "v02", "expect": "take up|journals|byte|\\d+(\\.\\d+)?\\s?[KMG]"},
+  {"id": "v03", "expect": "\\d\\d:\\d\\d:\\d\\d"},
+  {"id": "v04", "expect": "active \\(running\\)|linux-lab-demo"},
+  {"id": "v05", "expect": "not.?found|could not be found|inactive|dead"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

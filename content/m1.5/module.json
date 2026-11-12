@@ -1,0 +1,336 @@
+{
+ "id": "1.5",
+ "level": 1,
+ "setup": {
+  "dirs": [
+   "/home/student/lab",
+   "/home/student/tools"
+  ],
+  "files": {
+   "/home/student/lab/a.txt": "a\n",
+   "/home/student/lab/b.txt": "b\n",
+   "/home/student/lab/c.log": "log\n",
+   "/home/student/my notes.txt": "buy milk\n"
+  },
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^echo \"?Hello Linux\"?$",
+    "ok": true
+   },
+   "solution": [
+    "echo \"Hello Linux\""
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^history( \\d+)?$",
+    "ok": true
+   },
+   "solution": [
+    "history"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": [
+    {
+     "cmd": "^echo \\$HOME$",
+     "ok": true
+    },
+    {
+     "out": "/home/student",
+     "of": "^echo \\$HOME$"
+    }
+   ],
+   "solution": [
+    "echo $HOME"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^export GREETING=hello$",
+     "ok": true
+    },
+    {
+     "seq": [
+      "^export GREETING=hello$",
+      "^env \\| grep GREETING$"
+     ],
+     "ok": true
+    }
+   ],
+   "solution": [
+    "export GREETING=hello",
+    "env | grep GREETING"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^echo (~/)?lab/\\*\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "echo lab/*.txt"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/file1.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/file2.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/file3.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "touch ~/lab/file{1,2,3}.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/bin",
+     "type": "d"
+    },
+    {
+     "cmd": "^export PATH=\\$PATH:(~|/home/student)/bin$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "mkdir ~/bin",
+    "export PATH=$PATH:~/bin"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "cmd": "^echo '\\$HOME'$",
+    "ok": true
+   },
+   "solution": [
+    "echo '$HOME'"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "User: student",
+    "of": "^echo \"User: \\$\\(whoami\\)\"$"
+   },
+   "solution": [
+    "echo \"User: $(whoami)\""
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "f1 f2 f3",
+    "of": "^echo f\\{1\\.\\.3\\}$"
+   },
+   "solution": [
+    "echo f{1..3}"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "out": "buy milk",
+    "of": "^cat .*my.*notes\\.txt\"?$"
+   },
+   "solution": [
+    "cat \"my notes.txt\""
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/projects",
+     "type": "d"
+    },
+    {
+     "exists": "~/projects/a.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/projects/b.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/projects/owner.txt",
+      "student"
+     ]
+    },
+    {
+     "cmd": "\\$\\(whoami\\)|\\$USER",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "mkdir ~/projects",
+    "touch ~/projects/{a,b}.txt",
+    "echo \"$(whoami)\" > ~/projects/owner.txt"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "contains": [
+      "~/info.txt",
+      "host: linux-lab user: student"
+     ]
+    },
+    {
+     "cmd": "^echo .*\\$\\(hostname\\).*> ?(~|/home/student)/info\\.txt$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "contains": [
+      "~/.bashrc",
+      "export PATH=.*tools"
+     ]
+    },
+    {
+     "cmd": "^export PATH=\\$PATH:(~|/home/student)/tools$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "export PATH=$PATH:~/tools",
+    "echo 'export PATH=$PATH:~/tools' >> ~/.bashrc"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "Name: alice",
+    "of": "^printf '?\"?Name: %s\\\\n\"?'? alice$"
+   },
+   "solution": [
+    "printf \"Name: %s\\n\" alice"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^echo \\$\\?$",
+     "ok": true
+    },
+    {
+     "seq": [
+      "^ls nofile$",
+      "^echo \\$\\?$"
+     ]
+    }
+   ],
+   "solution": [
+    "ls nofile",
+    "echo $?"
+   ]
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "\\d+\\s+\\S+"
+  },
+  {
+   "id": "v02",
+   "expect": "MYVAR=hello(?=[\\s\\S]*child: hello)"
+  },
+  {
+   "id": "v03",
+   "expect": "Hello \\$USER"
+  },
+  {
+   "id": "v04",
+   "expect": "(?=[\\s\\S]*a\\.txt)(?=[\\s\\S]*b\\.txt)"
+  },
+  {
+   "id": "v05",
+   "expect": "tool works"
+  },
+  {
+   "id": "v06",
+   "expect": null
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 2
+  },
+  {
+   "id": "q2",
+   "answer": 1
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ]
+}

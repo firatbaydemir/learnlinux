@@ -1,0 +1,125 @@
+{
+ "title": "Disk and network health",
+ "lead": "When a server slows down, check two things first: disk usage and the network. Do a quick health check with df, du, free, uptime, ip, ping and ss.",
+ "objectives": [
+  "Find which partition is full with `df -h` and which folder takes the space with `du`.",
+  "Read memory and load with `free -h` and `uptime`.",
+  "Narrow down a network problem layer by layer with `ip`, `ping` and `ss`.",
+  "Save health output to a file and prepare a report for a support ticket."
+ ],
+ "sections": [
+  {
+   "id": "disk",
+   "title": "Disk usage: df and du",
+   "body": [
+    "When a disk hits 100%, writes fail with `No space left on device`; services and logs stop. So first ask **which partition** is full: `df -h`. Columns: `Size` total, `Used`, `Avail` free, `Use%` percentage, `Mounted on` the mount point.",
+    "Once you know the partition, find **which folder** uses the space with `du`. `du -sh folder` gives a total; `du -h --max-depth=1 folder | sort -h` lists subfolders from small to large. Sometimes space looks free but files cannot be created: inodes ran out, check with `df -i`."
+   ],
+   "commands": [
+    {"cmd": "df -h", "what": "Shows size and usage of partitions in readable units.", "where": "First command on slowness or 'disk full' errors.", "why": "Shows at a glance which mount point has the problem.", "example": "df -h"},
+    {"cmd": "du -sh", "what": "Shows the total size of a folder.", "where": "After df shows the full partition.", "why": "Narrows down the culprit folder.", "example": "du -sh /var/log", "nosim": true},
+    {"cmd": "du --max-depth=1", "what": "Lists sizes of folders one level down; sort with sort -h.", "where": "When hunting the biggest folder.", "why": "Drills down without walking the whole tree.", "example": "du -h --max-depth=1 /var | sort -h", "nosim": true},
+    {"cmd": "df -i", "what": "Shows inode (file count) usage.", "where": "Space is free but files cannot be created.", "why": "Millions of tiny files can exhaust inodes.", "example": "df -i", "nosim": true}
+   ],
+   "tip": "`df` finds the partition, `du` finds the folder. Do df first, then du.",
+   "warn": "Check what a file is with `ls -l` before deleting. For a log of a running service, truncating it (`: > file`) is often better than deleting; if unsure, ask your administrator."
+  },
+  {
+   "id": "mem",
+   "title": "Memory and load: free and uptime",
+   "body": [
+    "`free -h` shows RAM and swap. Watch the `available` column: memory that can really be given to new programs. Even if `free` looks small, cache (`buff/cache`) is released when needed, so do not panic.",
+    "`uptime` shows how long the system has been up and the **load average** (1, 5, 15 minutes). If load constantly exceeds your CPU core count, work is queuing up."
+   ],
+   "commands": [
+    {"cmd": "free -h", "what": "Shows RAM and swap usage in readable units.", "where": "When you suspect memory pressure.", "why": "available tells the real free memory.", "example": "free -h"},
+    {"cmd": "uptime", "what": "Shows uptime, user count and load average.", "where": "Quick check on a slow server.", "why": "Load average shows a trend, not a snapshot.", "example": "uptime"}
+   ],
+   "tip": "To make a report, use `df -h > report.txt`, and `>>` to append."
+  },
+  {
+   "id": "net",
+   "title": "Network: ip, ping and ss",
+   "body": [
+    "Narrow a network problem from the bottom up: 1) Is the interface up and does it have an IP? `ip -br a`. 2) Is there a default route (gateway)? `ip route`. 3) Is the gateway reachable? `ping -c 3 <gateway>`. 4) An internet IP? `ping -c 3 1.1.1.1`. 5) Name resolution? `ping -c 3 example.com`.",
+    "If ping works for an IP but not for a name, the problem is **DNS** (`/etc/resolv.conf`). If nothing works, check the cable, VM network setting or gateway. `ss -tuln` shows which ports the machine listens on (e.g. 22 for SSH)."
+   ],
+   "commands": [
+    {"cmd": "ip -br a", "what": "Lists interfaces, their state and IP addresses briefly.", "where": "First step in a network problem.", "why": "Without an IP there is no point checking higher layers.", "example": "ip -br a", "nosim": true},
+    {"cmd": "ip route", "what": "Shows the routing table and default gateway.", "where": "When you cannot reach the outside.", "why": "Without a default via line, traffic cannot leave.", "example": "ip route", "nosim": true},
+    {"cmd": "ping -c 3", "what": "Sends 3 test packets to a target; reports loss and latency.", "where": "Testing connectivity and DNS.", "why": "Without -c, ping runs forever.", "example": "ping -c 3 1.1.1.1", "nosim": true},
+    {"cmd": "ss -tuln", "what": "Lists listening TCP/UDP ports numerically.", "where": "To see if a service listens on its port.", "why": "Checks the server side of 'I cannot connect'.", "example": "ss -tuln", "nosim": true}
+   ],
+   "danger": "On a remote server, commands like `ip link set eth0 down` cut your SSH connection and lock you out. Make sure you have console access before changing network settings."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Look at partition usage with `df -h`.", "hint": "-h gives readable units (G, M)."},
+  "t02": {"text": "Show memory status with `free -h`.", "hint": "Look at the available column."},
+  "t03": {"text": "Show the load average with `uptime`.", "hint": "Three numbers: 1, 5, 15 minutes."},
+  "t04": {"text": "Read the sample report `~/reports/df_sample.txt` with `cat` and find the Use% column.", "hint": "`cat ~/reports/df_sample.txt`"},
+  "t05": {"text": "Save the output of `df -h` to `~/disk_report.txt` with `>`.", "hint": "`df -h > ~/disk_report.txt`. A single `>` overwrites the file."},
+  "t06": {"text": "Append the output of `free -h` to the same file (`>>`).", "hint": "`>>` appends, `>` overwrites; if you overwrote it, repeat t05."},
+  "t07": {"text": "Append the output of `uptime` to `~/disk_report.txt` too.", "hint": "Use `>>` again."},
+  "t08": {"text": "Predict: which mount point is the line with 95% in `~/reports/df_sample.txt`? Then verify with `grep 95% ~/reports/df_sample.txt`.", "hint": "The Mounted on column at the end of the line."},
+  "t09": {"text": "Predict: what does `~/reports/ping_sample.txt` say about the network? See the loss rate with `grep loss ~/reports/ping_sample.txt`.", "hint": "100% packet loss means the target was never reached."},
+  "t10": {"text": "Predict: what is the IP of interface eth0 in `~/reports/ip_sample.txt`? Verify with `grep eth0 ~/reports/ip_sample.txt`.", "hint": "The /24 is the netmask, not part of the IP."},
+  "t11": {"text": "The disk is bloating. Look with `ls -l ~/logs`; the old debug log `old_debug.log` is useless, delete it but do not touch `app.log`.", "hint": "`rm ~/logs/old_debug.log`. Check the exact name with ls before deleting."},
+  "t12": {"text": "Mini project: build the report `~/health.txt`. It should contain, in order, the heading `== disk ==`, the `df -h` output, the heading `== memory ==` and the `free -h` output.", "hint": "First line `echo \"== disk ==\" > ~/health.txt`, the rest with `>>`."},
+  "t13": {"text": "Challenge: from `~/reports/df_sample.txt` write only the 95% line to `~/alert.txt` and the number of such lines to `~/alert_count.txt`.", "hint": "`grep` filters the line, `grep -c` counts; redirect both with `>`."},
+  "t14": {"text": "Ticket: \"The application throws 'No space left on device'.\" Find the full mount point in `~/reports/df_sample.txt` and write its name to `~/full_mount.txt`. Also delete the useless `~/logs/core.dump`.", "hint": "The full one is the 95% line. The mount point is `/var`: `echo /var > ~/full_mount.txt`."}
+ },
+ "vm": {
+  "intro": "The commands here only read information, so they are safe on your VM. Paste the output and we will check it automatically.",
+  "tasks": {
+   "v01": {
+    "title": "Disk usage",
+    "text": "Run `df -h` and paste the output. Note the usage percentage of the root (`/`) partition.",
+    "blocks": [{"cmd": "df -h\ndf -i /", "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        19G  4.1G   14G  23% /"}],
+    "differs": ["The partition may be `/dev/vda1`, `/dev/mapper/...` or `/dev/nvme0n1p2`; the Use% column is what matters.", "Many `tmpfs`/`loop` lines are normal (Ubuntu snap); focus on the `/` line."]
+   },
+   "v02": {
+    "title": "Space hunt",
+    "text": "Sort the sizes of your home directory and of the folders under /var. Paste the largest 5 lines.",
+    "blocks": [{"cmd": "du -sh ~\nsudo du -xh /var --max-depth=1 2>/dev/null | sort -h | tail -5", "expected": "120M\t/var/cache\n1.1G\t/var/lib\n1.4G\t/var"}],
+    "differs": ["If `sort -h` is missing (very old system) use `sort -n` and `du -k`.", "If sudo asks for a password, enter your VM user password; it is not shown while typing."]
+   },
+   "v03": {
+    "title": "IP and routing",
+    "text": "Show your interfaces and default gateway; paste the output.",
+    "blocks": [{"cmd": "ip -br a\nip route", "expected": "lo      UNKNOWN  127.0.0.1/8\nenp0s3  UP       10.0.2.15/24\ndefault via 10.0.2.2 dev enp0s3"}],
+    "differs": ["The interface name may be `eth0`, `enp0s3` or `ens160`.", "On VirtualBox NAT the IP is usually 10.0.2.15; with bridged networking it comes from your router's range.", "If there is no IP at all, check that the VM network card is connected and set to NAT/Bridged."]
+   },
+   "v04": {
+    "title": "Connectivity and DNS test",
+    "text": "Ping an IP first, then a name. Paste both outputs.",
+    "blocks": [{"cmd": "ping -c 3 1.1.1.1\nping -c 3 example.com", "expected": "3 packets transmitted, 3 received, 0% packet loss"}],
+    "differs": ["If the IP works but the name does not, it is a DNS problem; look at `cat /etc/resolv.conf`.", "Some networks block ICMP; if ping fails but the web works, the problem is ping itself."]
+   },
+   "v05": {
+    "title": "Listening ports",
+    "text": "List the ports your machine listens on and paste the output.",
+    "blocks": [{"cmd": "ss -tuln", "expected": "tcp   LISTEN  0  128  0.0.0.0:22  0.0.0.0:*"}],
+    "differs": ["If SSH is not installed, 22 will not appear; that is fine for this module.", "If `ss` is missing, try `netstat -tuln` on old systems."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Which command shows which partition is full?", "options": ["du -sh", "df -h", "free -h", "uptime"], "explain": "`df` shows partition usage, `du` shows folder sizes."},
+  "q2": {"q": "`/var` is 95% full. How do you find the biggest subfolder?", "options": ["ping -c 3 /var", "df -i", "du -h --max-depth=1 /var | sort -h", "ip route"], "explain": "du gives subfolder sizes, sort -h orders them small to large."},
+  "q3": {"q": "`ping 1.1.1.1` works but `ping example.com` does not. Most likely problem?", "options": ["DNS (name resolution)", "Unplugged cable", "Disk full", "Not enough RAM"], "explain": "The IP is reachable but names are not resolved: check DNS settings."},
+  "q4": {"q": "Which command shows the ports the machine listens on?", "options": ["ip -br a", "ping -c 3", "df -h", "ss -tuln"], "explain": "`ss -tuln` lists listening TCP/UDP ports numerically."}
+ },
+ "summary": [
+  "`df -h` answers which partition, `du -sh` / `du --max-depth=1` which folder is full.",
+  "In `free -h` watch `available`; in `uptime` the load average.",
+  "Narrow network problems bottom-up: `ip -br a`, `ip route`, ping an IP, ping a name.",
+  "Turn output into a report with `>` and `>>`; check with `ls -l` before deleting."
+ ],
+ "glossary": [
+  {"term": "inode", "meaning": "A record holding information about a file; their number is limited."},
+  {"term": "load average", "meaning": "Average number of runnable jobs over 1, 5 and 15 minutes."},
+  {"term": "gateway", "meaning": "The exit from the local network to the outside (usually the router)."},
+  {"term": "DNS", "meaning": "The system that translates names into IP addresses."}
+ ]
+}

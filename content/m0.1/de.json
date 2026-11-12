@@ -1,0 +1,141 @@
+{
+ "title": "Was ist Linux? — Kernel, Distribution, Philosophie",
+ "lead": "Verstehe, was Linux wirklich ist: ein Kernel, die Distributionen darum herum und die Ideen, die die Kommandozeile so mächtig machen.",
+ "objectives": [
+  "Du kannst den Unterschied zwischen Kernel, Distribution und Shell erklären.",
+  "Du kennst die zwei großen Distributionsfamilien (Debian und RHEL) und ihre Paketwerkzeuge.",
+  "Du findest Kernel-Version, Distribution und Architektur mit `uname` und `/etc/os-release`.",
+  "Du kennst das Prinzip \"Alles ist eine Datei\" und den Zweck der wichtigsten Verzeichnisse auf oberster Ebene."
+ ],
+ "sections": [
+  {
+   "id": "kernel",
+   "title": "Kernel, Distribution und Shell",
+   "body": [
+    "**Linux** ist streng genommen nur der **Kernel**: der Kern, der mit der Hardware spricht, Prozesse plant und den Speicher verwaltet. Linus Torvalds hat ihn 1991 begonnen. Allein ist der Kernel nicht nutzbar — du brauchst Werkzeuge, Bibliotheken und eine Möglichkeit, Befehle einzugeben.",
+    "Eine **Distribution** (Distro) bündelt den Kernel mit den GNU-Werkzeugen, einem Paketmanager, einem Installer und Voreinstellungen. Ubuntu, Debian, Fedora, Rocky Linux und AlmaLinux sind Distributionen. Die **Shell** (meist `bash`) ist das Programm, das deine Befehle liest und den Kernel bittet, sie auszuführen.",
+    "Zwei Quellen verraten dir, was du betreibst: `uname` meldet Kernel und Architektur, `/etc/os-release` meldet die Distribution. Du brauchst beides, wenn du um Hilfe bittest oder Dokumentation liest."
+   ],
+   "commands": [
+    {"cmd": "uname -r", "what": "Gibt das Kernel-Release aus.", "where": "Beim Prüfen der Kernel-Version für Support oder Fehlerberichte.", "why": "Die Kernel-Version bestimmt, welche Hardware und Funktionen du hast.", "example": "uname -r"},
+    {"cmd": "uname -a", "what": "Gibt alle Systeminformationen in einer Zeile aus.", "where": "Wenn du Systemdetails in ein Ticket einfügst.", "why": "Zeigt Hostname, Kernel und Architektur auf einmal.", "example": "uname -a"},
+    {"cmd": "uname -m", "what": "Gibt die Maschinenarchitektur aus (x86_64, aarch64, ...).", "where": "Vor dem Herunterladen von Software oder einer ISO.", "why": "Pakete werden pro Architektur gebaut.", "example": "uname -m"},
+    {"cmd": "cat /etc/os-release", "what": "Zeigt Name und Version der Distribution.", "where": "Auf jeder modernen Distribution.", "why": "Eine Standarddatei, gleiches Format auf Ubuntu, Rocky, Alma und anderen.", "example": "cat /etc/os-release"}
+   ],
+   "tip": "Kernel und Distribution werden getrennt versioniert: Ubuntu 24.04 liefert Kernel 6.8, Rocky Linux 9 liefert 5.14 mit vielen Backports."
+  },
+  {
+   "id": "family",
+   "title": "Distributionsfamilien und Lizenzen",
+   "body": [
+    "Distributionen gruppieren sich in **Familien**. Die **Debian-Familie** (Debian, Ubuntu, Mint) nutzt `.deb`-Pakete und `apt`. Die **RHEL-Familie** (Red Hat Enterprise Linux, Rocky, AlmaLinux, Fedora) nutzt `.rpm`-Pakete und `dnf`. Die Befehle dieses Kurses funktionieren auf beiden; nur die Paketverwaltung unterscheidet sich.",
+    "Der Linux-Kernel wird unter GPL-2.0-only veröffentlicht; Werkzeuge und Anwendungen einer Distribution können andere Lizenzen haben. Diese Offenheit ermöglicht viele Distributionen; Enterprise-Anbieter können neben Software auch Support und Dienstleistungen anbieten. Die Zeile `ID_LIKE` in `/etc/os-release` verrät die Familie: Rocky meldet `rhel fedora`, Ubuntu meldet `debian`.",
+    "In diesem Kurs ist dein Referenzsystem eine **Rocky/Alma-Linux**-VM, Ubuntu ist eine gleichwertige Alternative. Nutze, was du in Modul 0.2 installiert hast."
+   ],
+   "commands": [
+    {"cmd": "grep ID_LIKE /etc/os-release", "what": "Zeigt nur die Familienzeile der Release-Datei.", "where": "Wenn du unsicher bist, ob du apt oder dnf nutzen sollst.", "why": "Macht aus einer langen Datei die eine Information, die du brauchst.", "example": "grep ID_LIKE /etc/os-release"}
+   ],
+   "tip": "Enthält `ID_LIKE` den Wert `debian`, nutze `apt`; enthält es `rhel` oder `fedora`, nutze `dnf`."
+  },
+  {
+   "id": "philosophy",
+   "title": "Philosophie und Verzeichnisbaum",
+   "body": [
+    "Unix-Denken in vier Zeilen: **Alles ist eine Datei** (Platten, Geräte und Prozesse erscheinen als Pfade), **kleine Werkzeuge erledigen eine Aufgabe gut**, Werkzeuge werden mit **Pipes kombiniert**, und Konfiguration ist **Klartext**, den du lesen und bearbeiten kannst.",
+    "Alle Dateien liegen in **einem Baum**, der bei `/` (Wurzelverzeichnis) beginnt. Es gibt keine Laufwerksbuchstaben. `/etc` enthält die Konfiguration, `/home` die Dateien der Benutzer, `/var` veränderliche Daten wie Logs, `/usr` Programme und Bibliotheken, `/tmp` temporäre Dateien, `/dev` Geräte, `/proc` Live-Informationen des Kernels. Auf modernen Systemen ist `/bin` nur ein Link auf `/usr/bin`.",
+    "Ein normaler Benutzer arbeitet im Home-Verzeichnis `/home/student`. Das Administratorkonto heißt **root**; du lernst es in späteren Modulen vorsichtig kennen."
+   ],
+   "commands": [
+    {"cmd": "ls /", "what": "Listet die oberste Ebene des Verzeichnisbaums auf.", "where": "Zur Orientierung auf einem unbekannten System.", "why": "Zeigt die oben beschriebenen Standardverzeichnisse.", "example": "ls /"},
+    {"cmd": "ls /etc", "what": "Listet das Konfigurationsverzeichnis auf.", "where": "Wenn du eine Systemeinstellung suchst.", "why": "Fast jede Systemkonfiguration ist hier eine Textdatei.", "example": "ls /etc"},
+    {"cmd": "cat /etc/shells", "what": "Listet die auf dem System installierten Shells auf.", "where": "Wenn du wissen willst, welche Shell-Programme existieren.", "why": "Zeigt, dass die Shell nur ein austauschbares Programm ist.", "example": "cat /etc/shells"}
+   ],
+   "tip": "Ist etwas konfigurierbar, schau zuerst in `/etc` und lies dann die Datei — sie ist Text."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Zeige das Kernel-Release mit `uname -r` an.", "hint": "-r steht für release."},
+  "t02": {"text": "Zeige die Distributionsinformationen mit `cat /etc/os-release` an.", "hint": "Achte auf die Zeilen `NAME` und `ID_LIKE`."},
+  "t03": {"text": "Zeige alle Systeminformationen mit `uname -a` an.", "hint": "-a steht für all."},
+  "t04": {"text": "Liste die oberste Ebene des Verzeichnisbaums mit `ls /` auf.", "hint": "Finde `etc`, `home`, `usr`, `var` in der Ausgabe."},
+  "t05": {"text": "Liste das Konfigurationsverzeichnis mit `ls /etc` auf.", "hint": "Das sind überwiegend Textdateien."},
+  "t06": {"text": "Zeige die installierten Shells mit `cat /etc/shells` an.", "hint": "`/bin/bash` sollte aufgeführt sein."},
+  "t07": {"text": "Vorhersage: Welche Architektur gibt `uname -m` auf diesem System aus? Führe es dann aus.", "hint": "Die meisten PCs und VMs nutzen x86_64."},
+  "t08": {"text": "Vorhersage: Was enthält `cat /etc/hostname`? Führe es zur Kontrolle aus.", "hint": "Der Standard-Hostname ist `linux-lab`."},
+  "t09": {"text": "Vorhersage: Was gibt `echo $SHELL` aus? Führe es zur Kontrolle aus.", "hint": "Es ist der vollständige Pfad zu deinem Shell-Programm."},
+  "t10": {"text": "Fehlersuche: `~/distro.txt` enthält fälschlich `ID=windows`. Überschreibe die Datei so, dass sie `ID=linux` enthält.", "hint": "`echo ID=linux > ~/distro.txt` ersetzt den Inhalt; prüfe mit `cat`."},
+  "t11": {"text": "Mini-Projekt: Erstelle den Ordner `~/about_linux`. Speichere das Kernel-Release in `~/about_linux/kernel.txt` und den Inhalt von `/etc/os-release` in `~/about_linux/distro.txt`.", "hint": "`uname -r > file` schreibt die Ausgabe eines Befehls in eine Datei."},
+  "t12": {"text": "Challenge: Erstelle `~/system_report.txt` mit drei Zeilen: Hostname, Kernel-Release und dein Benutzername.", "hint": "`>` erzeugt die Datei, `>>` hängt an. Befehle: `hostname`, `uname -r`, `whoami`."},
+  "t13": {"text": "Ticket: \"Ein Kollege fragt, zu welcher Distributionsfamilie dieser Server gehört. Speichere die `ID_LIKE`-Zeile der Release-Datei in `~/ticket_answer.txt`.\"", "hint": "Kombiniere `grep` für die Zeile mit `>` für die Datei."}
+ },
+ "vm": {
+  "intro": "Diese Befehle sind harmlos und nur lesend. Führe sie im Terminal deiner VM (Rocky/Alma oder Ubuntu) aus und vergleiche.",
+  "tasks": {
+   "v01": {
+    "title": "Dein System identifizieren",
+    "text": "Zeige Kernel-Release und Distribution an und füge beide Ausgaben ein.",
+    "blocks": [
+     {"cmd": "uname -r\ncat /etc/os-release", "expected": "5.14.0-427.el9.x86_64\nNAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\nID_LIKE=\"rhel centos fedora\"\n..."}
+    ],
+    "differs": [
+     "Auf Ubuntu siehst du `NAME=\"Ubuntu\"` und einen Kernel wie `6.8.0-...-generic` — das ist korrekt.",
+     "Unter WSL enthält der Kernel-Name `microsoft-standard-WSL2`."
+    ]
+   },
+   "v02": {
+    "title": "Durch den Verzeichnisbaum wandern",
+    "text": "Liste die oberste Ebene und das Konfigurationsverzeichnis auf und füge die Ausgabe des ersten Befehls ein.",
+    "blocks": [
+     {"cmd": "ls /\nls /etc | head -n 15", "expected": "afs  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+    ],
+    "differs": [
+     "Die genaue Liste variiert je nach Distribution, aber `etc`, `home`, `usr` und `var` müssen vorhanden sein.",
+     "`bin` erscheint auf modernen Systemen als Link auf `usr/bin`; prüfe mit `ls -ld /bin`."
+    ]
+   },
+   "v03": {
+    "title": "Prozess 1 kennenlernen",
+    "text": "Jedes System startet einen ersten Prozess. Finde seinen Namen heraus.",
+    "blocks": [
+     {"cmd": "ps -p 1 -o comm=", "expected": "systemd"}
+    ],
+    "differs": [
+     "In manchen Containern siehst du `bash` oder `init`; auf einer normalen VM ist es `systemd`.",
+     "Fehlt `ps`, führe stattdessen `cat /proc/1/comm` aus."
+    ]
+   },
+   "v04": {
+    "title": "Link und Familie prüfen",
+    "text": "Prüfe, dass `/bin` ein Link ist, und entscheide, ob dein System apt oder dnf nutzt.",
+    "blocks": [
+     {"cmd": "ls -ld /bin\ngrep ID_LIKE /etc/os-release\nwhich apt dnf", "expected": "lrwxrwxrwx. 1 root root 7 ... /bin -> usr/bin"}
+    ],
+    "differs": [
+     "`which` gibt nur das vorhandene Werkzeug aus: `apt` auf Ubuntu, `dnf` auf Rocky/Alma.",
+     "Gibt `which` für beide nichts aus, probiere `command -v dnf` oder installiere zuerst `which`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Was ist der Linux-Kernel?", "options": ["Ein vollständiges Betriebssystem mit Desktop", "Der Kern, der Hardware, Speicher und Prozesse verwaltet", "Ein Texteditor", "Ein Paketmanager"], "explain": "Linux bedeutet streng genommen den Kernel. Eine Distribution ergänzt Werkzeuge, Pakete und einen Installer."},
+  "q2": {"q": "Welches Paketwerkzeug gehört zur Rocky-Linux-/RHEL-Familie?", "options": ["apt", "pacman", "nur zypper", "dnf"], "explain": "RHEL-Systeme nutzen rpm-Pakete, die von dnf verwaltet werden; Debian und Ubuntu nutzen apt."},
+  "q3": {"q": "Welche Datei zeigt Name und Version der Distribution?", "options": ["/etc/os-release", "/etc/hostname", "/proc/cpuinfo", "/var/log/messages"], "explain": "`/etc/os-release` ist die Standarddatei auf allen modernen Distributionen."},
+  "q4": {"q": "Was bedeutet \"Alles ist eine Datei\"?", "options": ["Jede Datei ist ein Programm", "Es gibt keine Verzeichnisse", "Geräte, Prozesse und Einstellungen sind über Pfade erreichbar und werden mit denselben Werkzeugen gelesen", "Dateien können nicht gelöscht werden"], "explain": "Platten erscheinen unter `/dev` und Prozesse unter `/proc`; dieselben Werkzeuge wie `cat` und `ls` funktionieren darauf."}
+ },
+ "summary": [
+  "Linux ist der Kernel; eine Distribution ergänzt Werkzeuge, Pakete und Installer; die Shell liest deine Befehle.",
+  "Die Debian-Familie nutzt `apt`, die RHEL-Familie `dnf`; `ID_LIKE` in `/etc/os-release` verrät, welche.",
+  "`uname -r`, `uname -m` und `cat /etc/os-release` identifizieren jedes System.",
+  "Ein Baum ab `/`: `/etc` Konfiguration, `/home` Benutzer, `/var` Daten, `/usr` Programme.",
+  "Unix-Philosophie: Alles ist eine Datei, kleine Werkzeuge, Konfiguration in Klartext."
+ ],
+ "glossary": [
+  {"term": "kernel", "meaning": "Der Kern des Betriebssystems, der Hardware, Speicher und Prozesse steuert."},
+  {"term": "distribution", "meaning": "Ein vollständiges System: Kernel plus Werkzeuge, Pakete, Installer und Voreinstellungen."},
+  {"term": "shell", "meaning": "Das Programm, das deine Befehle liest und ausführt, meist bash."},
+  {"term": "package manager", "meaning": "Das Werkzeug, das Software installiert und aktualisiert: apt oder dnf."},
+  {"term": "root directory", "meaning": "Die Spitze des Dateibaums, geschrieben `/`."},
+  {"term": "GPL", "meaning": "Eine Familie freier Softwarelizenzen; der Linux-Kernel ist unter GPL-2.0-only lizenziert."}
+ ]
+}

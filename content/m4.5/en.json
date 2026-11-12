@@ -1,0 +1,403 @@
+{
+ "title": "Special Permissions",
+ "lead": "Setuid, setgid and the sticky bit: what they do where plain rwx permissions are not enough (passwd, shared team folders, /tmp). Try them on your own VM, then reinforce in the simulator.",
+ "objectives": [
+  "You recognise the setuid (4), setgid (2) and sticky (1) bits and the leading digit in an octal mode.",
+  "You read the letters `s`, `S`, `t`, `T` in `ls -l` output correctly.",
+  "You build a team folder with `2775` and explain why new files keep the group.",
+  "You protect shared writable folders such as `/tmp` with the sticky bit (`1777`).",
+  "You know why setuid is dangerous and audit setuid files with `find`."
+ ],
+ "sections": [
+  {
+   "id": "bits",
+   "title": "The three special bits and octal notation",
+   "body": [
+    "Normal permissions are written with three digits (`755`). In the four-digit form the **leading digit** carries the special bits: `4` = setuid, `2` = setgid, `1` = sticky. They add up: `3` = setgid + sticky, `6` = setuid + setgid. A leading zero (`0755`) means no special bit.",
+    "`ls -l` shows the bits in the x position: `s` in the owner slot (setuid), `s` in the group slot (setgid), `t` in the others slot (sticky). If the x permission underneath is **missing**, the letter becomes uppercase: `S` or `T`. An uppercase letter means 'bit set, but not executable', which is usually a mistake.",
+    "The meaning differs for files and directories: setuid and setgid on a file mean 'run with the owner's/group's privileges'; setgid and sticky on a directory mean 'inherit the group' and 'restrict deletion'."
+   ],
+   "commands": [
+    {
+     "cmd": "stat",
+     "what": "Shows the mode as four-digit octal and as letters.",
+     "where": "When verifying special bits.",
+     "why": "The line `Access: (2775/drwxrwsr-x)` gives both notations side by side.",
+     "example": "stat prog_c"
+    },
+    {
+     "cmd": "ls -ld",
+     "what": "Shows the permissions of the directory itself (not its contents).",
+     "where": "When checking a team folder or `/tmp`.",
+     "why": "Without `-d` it lists the contents instead of the directory's own mode.",
+     "example": "ls -ld /tmp"
+    },
+    {
+     "cmd": "chmod 4755",
+     "what": "Sets a four-digit octal mode; the leading digit is the special bit.",
+     "where": "When you want to set a special bit together with the other permissions.",
+     "why": "You know the exact result, but old special bits are overwritten too.",
+     "example": "chmod 4755 prog_a"
+    }
+   ],
+   "tip": "Symbolic mode is safer: `chmod g+s team` only adds setgid and leaves the other permissions alone.",
+   "warn": "On files, a three-digit `chmod 755 notes.txt` **clears** the special bits. On directories GNU `chmod` keeps setuid/setgid; to remove them use `chmod g-s team` or the five-digit `chmod 00755`. Check with `ls -ld` afterwards."
+  },
+  {
+   "id": "setuid",
+   "title": "setuid: run with the owner's privileges",
+   "body": [
+    "When an executable file has **setuid** (`4000`), the program runs with the privileges of the **file owner**, not the person who starts it. The best-known example is `/usr/bin/passwd`: owned by root, shown as `-rwsr-xr-x`. An ordinary user can change their own password because the program, running as root, may update `/etc/shadow`. `sudo` and `mount` work on the same principle.",
+    "This power is risky. A small bug in a setuid-root program (or a setuid shell, editor or interpreter) hands root to everyone. That is why you must know your setuid files and audit them regularly.",
+    "Two notes: the Linux kernel **ignores** setuid on **shell scripts** (`#!/bin/bash`); `chmod u+s` on a script does not grant root, it only misleads. Also, setuid does nothing on file systems mounted with `nosuid` (e.g. many USB sticks, or a separate `/tmp` partition)."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod u+s",
+     "what": "Adds setuid in the owner x slot (`s`).",
+     "where": "Rarely on real systems, only for audited, compiled programs.",
+     "why": "A (very carefully used) way to let normal users perform one privileged task.",
+     "example": "chmod u+s backup.sh"
+    },
+    {
+     "cmd": "ls -l /usr/bin/passwd",
+     "what": "Shows the mode of a real setuid program: `-rwsr-xr-x root root`.",
+     "where": "To see what setuid looks like.",
+     "why": "The `s` in the owner x slot is setuid.",
+     "example": "ls -l /usr/bin/passwd",
+     "nosim": true
+    },
+    {
+     "cmd": "find / -perm -4000 -type f 2>/dev/null",
+     "what": "Lists all setuid files on the system (`-perm -4000` = this bit is set).",
+     "where": "During security audits and hardening.",
+     "why": "An unexpected setuid file can be a sign of compromise.",
+     "example": "find / -perm -4000 -type f 2>/dev/null",
+     "nosim": true
+    }
+   ],
+   "tip": "Familiar names like `passwd`, `sudo`, `mount`, `su` are normal. An unknown setuid file, or one under `/home` or `/tmp`, needs investigation.",
+   "danger": "Never run `chmod u+s /bin/bash` (or on vim, python, find, cp) on a real system. It gives every user a root shell and is a classic privilege escalation. At most try it on your isolated test VM, after a snapshot, and undo it afterwards."
+  },
+  {
+   "id": "setgid",
+   "title": "setgid: a team folder that inherits the group",
+   "body": [
+    "On files, **setgid** (`2000`) runs the program with the group's privileges; in practice its main use is on **directories**. In a directory with setgid, every new file and subdirectory gets the **directory's group** instead of the creator's primary group. New subdirectories inherit the setgid bit too, so the rule holds across the whole tree.",
+    "Without it: alice drops a file into the `devs` folder, the file belongs to group `alice`, and teammate bob cannot edit it. With setgid the group stays `devs`. For members to be able to **write** group files you also need `umask 002`; with `022` a new file is `rw-r--r--` and the group cannot write.",
+    "The simulator does not implement group inheritance; it only sets the bit and shows it in `ls -l` and `stat`. You will see the real behaviour in the VM task."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod g+s",
+     "what": "Adds setgid in the group x slot (`s`).",
+     "where": "To turn an existing folder into a team folder.",
+     "why": "Switches on group inheritance without touching other permissions.",
+     "example": "chmod g+s team"
+    },
+    {
+     "cmd": "chmod 2775",
+     "what": "setgid + `rwxrwxr-x`: owner and group full, others read.",
+     "where": "When setting up a team folder.",
+     "why": "The standard team-folder mode in one command.",
+     "example": "chmod 2775 team"
+    },
+    {
+     "cmd": "umask 002",
+     "what": "Keeps the group write bit on new files in this shell.",
+     "where": "Before you work in the team folder.",
+     "why": "setgid gives the right group, umask lets the group write.",
+     "example": "umask 002"
+    }
+   ],
+   "tip": "On a directory, `rwxrwsr-x` is fine: group `s` (x present + setgid). With `rwxrwSr-x` the group lacks x and cannot enter the folder; fix it.",
+   "warn": "`umask` only affects the current shell. To make it permanent add it to the user profile (e.g. `~/.bashrc`); system-wide it is a separate configuration."
+  },
+  {
+   "id": "sticky",
+   "title": "Sticky bit: restrict deletion in shared folders",
+   "body": [
+    "In a folder everyone can write to (`777`), **anyone can delete or rename other people's files**, because the right to delete depends on the write permission of the directory, not of the file. The **sticky bit** (`1000`) changes that: only the file owner, the directory owner or root may delete or rename.",
+    "The classic example is `/tmp`: mode `1777`, shown as `drwxrwxrwt`. Everyone creates files, but nobody deletes someone else's. Sticky matters on **directories**; on files it has no effect on modern Linux.",
+    "The simulator does not enforce the deletion protection; you check that the bit is set and appears as `t`. You will try the real protection in the VM with alice and bob."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod +t",
+     "what": "Sets the sticky bit on a directory; `t` appears in the others x slot.",
+     "where": "On shared, world-writable drop or exchange folders.",
+     "why": "Stops users from deleting each other's files.",
+     "example": "chmod +t inbox"
+    },
+    {
+     "cmd": "chmod 1777",
+     "what": "Sticky + `rwxrwxrwx`: the same mode as `/tmp`.",
+     "where": "When creating a folder everyone may drop files into.",
+     "why": "The standard shared-folder mode in one command.",
+     "example": "chmod 1777 drop"
+    }
+   ],
+   "tip": "An uppercase `T` (`drwxrwx--T`) means sticky is set but others lack x. For a private team folder `1770` can look like this on purpose."
+  },
+  {
+   "id": "recipe",
+   "title": "Recipe: team folder and what comes next",
+   "body": [
+    "A real team folder is built like this: (1) create the folder, (2) set its group to `devs`, (3) set `2775` (`2770` if outsiders must not read), (4) members work with `umask 002`. Because root creates the folder, you need `sudo`.",
+    "If you also want sticky, use `3775` / `3770`: new files belong to the group, and members cannot delete each other's files.",
+    "The method has limits: permissions of new files depend on the umask, and you cannot write per-user rules. That is what **default ACLs** (`setfacl -d`) are for, a topic of later modules. For now remember that a setgid folder is the foundation of teamwork without ACLs."
+   ],
+   "commands": [
+    {
+     "cmd": "sudo mkdir /srv/project",
+     "what": "Creates the shared folder under `/srv` with root privileges.",
+     "where": "When setting up a permanent team workspace.",
+     "why": "A normal user cannot write to `/srv`; sudo is required.",
+     "example": "sudo mkdir /srv/project",
+     "nosim": true
+    },
+    {
+     "cmd": "sudo chgrp devs",
+     "what": "Sets the folder's group to `devs`.",
+     "where": "Before giving the team permissions.",
+     "why": "This is the group setgid will pass on.",
+     "example": "sudo chgrp devs team"
+    },
+    {
+     "cmd": "chmod 2775",
+     "what": "Completes the team folder's permissions.",
+     "where": "After setting the group, before opening it for use.",
+     "why": "The group can write and new files get the group `devs`.",
+     "example": "chmod 2775 team"
+    }
+   ],
+   "warn": "Group first, then mode: setting `2775` before the group is `devs` makes the wrong group inherited. At the end `ls -ld` should show `drwxrwsr-x ... devs`."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Look at the permissions of `/tmp` with `ls -ld /tmp`. Which letter is at the end?",
+   "hint": "`drwxrwxrwt`: the final `t` is the sticky bit."
+  },
+  "t02": {
+   "text": "Add setuid to `backup.sh` with one command: `chmod u+s backup.sh`.",
+   "hint": "755 + setuid = 4755; see the `rws` with `ls -l backup.sh`."
+  },
+  "t03": {
+   "text": "Step by step: set the group of `team` to `devs` with `sudo chgrp devs team`, then apply `chmod 2775 team` and verify with `ls -ld team`.",
+   "hint": "Expected: `drwxrwsr-x student devs`."
+  },
+  "t04": {
+   "text": "Step by step: look at `drop` with `ls -ld drop`, make it sticky with `chmod 1777 drop`, and run `ls -ld drop` again.",
+   "hint": "First `drwxr-xr-x`, then `drwxrwxrwt`."
+  },
+  "t05": {
+   "text": "Predict: `prog_a` has mode 4755. How do the owner permissions look in `ls -l prog_a`? Guess first, then run it.",
+   "hint": "x present and setuid set: lowercase `s`."
+  },
+  "t06": {
+   "text": "Predict: `prog_b` has mode 4644. How do the owner permissions look? Verify with `ls -l prog_b`.",
+   "hint": "Owner has no x but setuid is set: uppercase `S`."
+  },
+  "t07": {
+   "text": "Predict: `prog_c` has mode 2755. What does the `Access:` line of `stat prog_c` show?",
+   "hint": "Leading 2 = setgid; in letters the group x slot shows `s`."
+  },
+  "t08": {
+   "text": "Debug: someone left setuid (4755) on the shell script `legacy/tool.sh`. The kernel ignores it on scripts, but it fails an audit. Return it to the normal mode `755`.",
+   "hint": "See `rws` with `ls -l legacy/tool.sh`, then `chmod 755 legacy/tool.sh`."
+  },
+  "t09": {
+   "text": "Debug: the folder `inbox` is `777` and users delete each other's files. Fix it to `1777` without touching the existing permissions.",
+   "hint": "`chmod +t inbox` adds only sticky."
+  },
+  "t10": {
+   "text": "Mini project: set the group of `proj` to `devs`, apply `2770` (outsiders locked out), run `umask 002` and create `proj/plan.txt` with `touch`.",
+   "hint": "Order: `sudo chgrp devs proj`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
+  },
+  "t11": {
+   "text": "Mini project: create the folder `upload`, set `1777`, put `a.txt` inside and give the file to alice with `sudo chown alice:devs upload/a.txt`. (In reality bob could not delete it.)",
+   "hint": "Order: `mkdir`, `chmod 1777`, `touch`, `sudo chown`."
+  },
+  "t12": {
+   "text": "Challenge: make the folder `release` look like this: group `devs`, setgid set, owner `rwx`, group `r-x`, others nothing.",
+   "hint": "Octal: special 2, owner 7, group 5, others 0."
+  },
+  "t13": {
+   "text": "Challenge: which of the three scripts in the folder `audit` have a special bit? Find them and make all of them plain `755`.",
+   "hint": "Look for `s` with `ls -l audit`. `chmod 755` also clears special bits."
+  },
+  "t14": {
+   "text": "TICKET #4501 — The finance team shares the folder `finance`. Files must always belong to group `devs`, the group must be able to write, and outsiders must not get in. Also create the subfolder `finance/2026`.",
+   "hint": "Group `devs`, mode `2770`: new files get `devs`, others have no access."
+  },
+  "t15": {
+   "text": "TICKET #4502 — A developer gave `bin/deploy.sh` setuid so it 'runs as root'. Setuid does not work on scripts and is risky. Remove setuid, set the group `devs` and the mode `750`.",
+   "hint": "`chmod 750` clears the special bit as well. In practice you grant privileges with a `sudo` rule."
+  },
+  "t16": {
+   "text": "TICKET #4503 — A new folder `dropbox` is needed: group `devs`, new files belong to the group, members must not delete each other's files, outsiders cannot enter. Put a `README.txt` inside containing the text `uploads only`.",
+   "hint": "setgid + sticky = 3, then `770`: `3770`. `echo uploads only > dropbox/README.txt`."
+  }
+ },
+ "vm": {
+  "intro": "Work on your own Ubuntu/Rocky/Alma VM. The tasks use `/srv` and the temporary users `alice` and `bob`; **take a VM snapshot first**. The first two tasks are read-only, tasks 3–5 create users and folders on the system, and the last one cleans up. Do them in order (3 → 4 → 5).",
+  "tasks": {
+   "v01": {
+    "title": "See the special bits",
+    "text": "Look at the permissions of `/tmp` and of real setuid programs and paste the output.",
+    "blocks": [
+     {
+      "cmd": "ls -ld /tmp\nls -l /usr/bin/passwd /usr/bin/sudo\nstat -c '%a %A %n' /tmp /usr/bin/passwd",
+      "expected": "drwxrwxrwt 15 root root 4096 ... /tmp\n-rwsr-xr-x 1 root root ... /usr/bin/passwd\n-rwsr-xr-x 1 root root ... /usr/bin/sudo\n1777 drwxrwxrwt /tmp\n4755 -rwsr-xr-x /usr/bin/passwd"
+     }
+    ],
+    "differs": [
+     "If `/usr/bin/sudo` is missing (`No such file`), `sudo` is not installed; no problem, `passwd` is enough.",
+     "On some distributions `/tmp` is mounted separately; the mode should still be `1777`.",
+     "If you see `ls: cannot access`, find the real path with `which passwd`."
+    ]
+   },
+   "v02": {
+    "title": "Find setuid files on the system",
+    "text": "List all setuid files and see how many there are.",
+    "blocks": [
+     {
+      "cmd": "find / -xdev -perm -4000 -type f 2>/dev/null | head -20\nfind / -xdev -perm -4000 -type f 2>/dev/null | wc -l",
+      "expected": "/usr/bin/passwd\n/usr/bin/sudo\n/usr/bin/mount\n...\n12"
+     }
+    ],
+    "differs": [
+     "The list depends on the distribution; seeing `passwd`, `mount` or `su` is enough.",
+     "If `find` is slow, wait; `-xdev` scans only the main file system, so it is fast.",
+     "If you see a path you do not recognise, remember it; in a real audit it would be investigated."
+    ]
+   },
+   "v03": {
+    "title": "Try a setgid folder for real",
+    "text": "Create the users and group, make one folder with setgid and one without; alice writes into both, then compare the groups.",
+    "blocks": [
+     {
+      "cmd": "# TAKE A SNAPSHOT! Temporary users and /srv folders are created\ngetent group devs || sudo groupadd devs\nsudo useradd -m -G devs alice\nsudo useradd -m -G devs bob\nsudo mkdir -p /srv/project /srv/plain\nsudo chgrp devs /srv/project /srv/plain\nsudo chmod 2775 /srv/project\nsudo chmod 0775 /srv/plain\nsudo -u alice touch /srv/project/a.txt /srv/plain/b.txt\nls -ld /srv/project /srv/plain\nls -l /srv/project /srv/plain",
+      "expected": "drwxrwsr-x 2 root devs ... /srv/project\ndrwxrwxr-x 2 root devs ... /srv/plain\n/srv/project:\n-rw-r--r-- 1 alice devs ... a.txt\n/srv/plain:\n-rw-r--r-- 1 alice alice ... b.txt"
+     }
+    ],
+    "differs": [
+     "If you see `useradd: user 'alice' already exists`, the user exists; add it to the group with `sudo usermod -aG devs alice` and continue.",
+     "The file in `/srv/plain` should have group `alice`, the one in `/srv/project` group `devs`. If it is the other way round, check the `s` with `ls -ld`.",
+     "If `sudo -u alice` fails on Rocky/Alma, check that `sudo` is installed and your user is in `wheel`."
+    ]
+   },
+   "v04": {
+    "title": "Deletion protection with the sticky bit",
+    "text": "First try, in the sticky folder, to let bob delete alice's file (must fail), then in the folder without sticky (works).",
+    "blocks": [
+     {
+      "cmd": "sudo mkdir /srv/pub\nsudo chmod 1777 /srv/pub\nsudo -u alice touch /srv/pub/alice.txt\nsudo -u bob rm -f /srv/pub/alice.txt\nls -l /srv/pub\nsudo chmod 777 /srv/pub\nsudo -u bob rm -f /srv/pub/alice.txt\nls -l /srv/pub",
+      "expected": "rm: cannot remove '/srv/pub/alice.txt': Operation not permitted\n-rw-r--r-- 1 alice alice ... alice.txt\n(after removing sticky) total 0"
+     }
+    ],
+    "differs": [
+     "The error message may be translated (`Vorgang nicht zulässig`, `İşleme izin verilmiyor`).",
+     "If the file was deleted on the first try, check the `t` with `ls -ld /srv/pub`; was `1777` set?",
+     "We use `rm -f` so the 'write-protected' confirmation prompt does not appear."
+    ]
+   },
+   "v05": {
+    "title": "See setuid safely and clean up",
+    "text": "Give setuid to a copy of the harmless `id` program and see the effect. Then delete all temporary resources.",
+    "blocks": [
+     {
+      "cmd": "# ONLY on your own test VM. Never with bash/vim/python!\nsudo cp /usr/bin/id /srv/idtest\nsudo chmod u+s /srv/idtest\nls -l /srv/idtest\n/srv/idtest",
+      "expected": "-rwsr-xr-x 1 root root ... /srv/idtest\nuid=1000(youruser) gid=1000(youruser) euid=0(root) groups=..."
+     },
+     {
+      "cmd": "# Cleanup\nsudo rm -f /srv/idtest\nsudo rm -rf /srv/project /srv/plain /srv/pub\nsudo userdel -r alice\nsudo userdel -r bob\nls /srv",
+      "expected": "(empty output or only older content)"
+     }
+    ],
+    "differs": [
+     "If `euid=0(root)` is missing, `/srv` may be mounted `nosuid`; check with `mount | grep nosuid` or try `/usr/local/bin`.",
+     "`userdel` may print a mail spool warning; it is harmless.",
+     "Delete the group `devs` with `sudo groupdel devs` only if you created it yourself."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Which bit makes new files in a team folder get the folder's group?",
+   "options": [
+    "setuid (4)",
+    "setgid (2)",
+    "sticky (1)",
+    "umask 077"
+   ],
+   "explain": "setgid on a directory passes the directory's group to new files and subdirectories; `2775` is the typical team mode."
+  },
+  "q2": {
+   "q": "`/tmp` has mode `1777`. What is the leading `1` for?",
+   "options": [
+    "Makes the folder read-only",
+    "Gives files root privileges",
+    "Only the file owner, directory owner or root may delete",
+    "Encrypts files automatically"
+   ],
+   "explain": "The sticky bit prevents deleting or renaming other people's files in a world-writable folder."
+  },
+  "q3": {
+   "q": "`ls -l` shows `-rwSr--r--`. What does it mean?",
+   "options": [
+    "setuid is set but the owner has no execute permission",
+    "setgid is set and the group can execute",
+    "The file has the sticky bit",
+    "The file is encrypted"
+   ],
+   "explain": "An uppercase `S` means the bit is set but the underlying x permission is missing; usually a misconfiguration."
+  },
+  "q4": {
+   "q": "Which command lists all setuid files on the system?",
+   "options": [
+    "`ls -l /etc/setuid`",
+    "`chmod -R u+s /`",
+    "`find / -perm 4755 -name suid`",
+    "`find / -perm -4000 -type f 2>/dev/null`"
+   ],
+   "explain": "`-perm -4000` finds files with the setuid bit set; `2>/dev/null` hides permission errors."
+  }
+ },
+ "summary": [
+  "In four-digit modes the leading digit is: setuid `4`, setgid `2`, sticky `1`; they add up.",
+  "`s`/`t` in the x slot, uppercase `S`/`T` means x is missing.",
+  "setuid runs a file with the owner's privileges (`passwd`); the kernel ignores it on scripts; a wrong setuid-root is a serious vulnerability.",
+  "setgid folder: new files get the folder's group; team recipe `chgrp devs` + `chmod 2775` + `umask 002`.",
+  "Sticky folder (`/tmp`, `1777`): only the owner or root deletes.",
+  "Audit setuid files regularly with `find / -perm -4000 -type f 2>/dev/null`."
+ ],
+ "glossary": [
+  {
+   "term": "setuid",
+   "meaning": "On executables, the program runs with the owner's privileges; octal `4000`."
+  },
+  {
+   "term": "setgid",
+   "meaning": "On files, run with group privileges; on directories, pass the group to new entries; `2000`."
+  },
+  {
+   "term": "sticky bit",
+   "meaning": "On directories, only the file/directory owner or root may delete; `1000`."
+  },
+  {
+   "term": "privilege escalation",
+   "meaning": "A normal user gaining root-like privileges without permission."
+  },
+  {
+   "term": "umask",
+   "meaning": "A mask that decides which permission bits are removed from new files."
+  },
+  {
+   "term": "nosuid",
+   "meaning": "Mount option; setuid/setgid are ignored on that file system."
+  }
+ ]
+}

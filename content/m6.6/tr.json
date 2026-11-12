@@ -1,0 +1,466 @@
+{
+ "title": "Bash Script 2 — Döngü, Fonksiyon, Tuzaklar",
+ "lead": "Aynı işi yüz kez yazma: döngü, case ve fonksiyon kur, geçici dosyaları trap ile temizle ve tırnak tuzaklarına düşmeden güvenli script yaz.",
+ "objectives": [
+  "`for` ve `while` ile tekrar eden işleri yazarsın.",
+  "Bir dosyayı `while IFS= read -r` ile satır satır, güvenle okursun.",
+  "`case` ile argüman ve menü yönlendirirsin; fonksiyon ve `local` ile kodu bölersin.",
+  "`mktemp` ve `trap` ile temizlik yaparsın; `\"${DIR:?}\"` ile boş değişken felaketini önlersin.",
+  "`shellcheck`, `bash -n` ve `bash -x` ile script'teki hataları bulursun."
+ ],
+ "sections": [
+  {
+   "id": "loops",
+   "title": "Döngüler: for ve while",
+   "body": [
+    "Bir script yalnızca sırayla çalışan komutlar değildir. Aynı işi birden çok sunucu veya dosya için yapacaksan **döngü** kullanırsın. `for` bir listedeki her öğe için, `while` bir koşul doğru kaldıkça çalışır.",
+    "Liste kaynağı güvenli olmalı: dosya deseni (`./*.txt`), sabit liste veya `\"$@\"` kullan. `$(ls)` çıktısını döngüye verme; boşluklu adlar parçalanır.",
+    "**Not:** Yerleşik simülatör döngüleri çalıştıramaz; döngüleri script dosyasına yazar, asıl çalıştırmayı VM'inde yaparsın."
+   ],
+   "commands": [
+    {
+     "cmd": "for",
+     "what": "Listedeki her öğe için komutları bir kez çalıştırır.",
+     "where": "Birkaç sunucuda aynı kontrolü yaparken veya bir dizindeki dosyaları işlerken.",
+     "why": "Tekrar eden kodu kısaltır, hata payını azaltır.",
+     "example": "for i in 1 2 3; do echo \"n=$i\"; done",
+     "nosim": true
+    },
+    {
+     "cmd": "while",
+     "what": "Koşul doğru olduğu sürece komutları tekrarlar.",
+     "where": "Bir şey olana kadar beklerken veya dosya okurken.",
+     "why": "Kaç tur olacağını önceden bilmen gerekmez.",
+     "example": "while [ -e /tmp/lock ]; do sleep 1; done",
+     "nosim": true
+    },
+    {
+     "cmd": "echo {1..5}",
+     "what": "Brace expansion: 1 2 3 4 5 üretir (aralıkta boşluk olmamalı).",
+     "where": "Sayı aralığı veya adlandırılmış dosya serisi gerektiğinde.",
+     "why": "Döngüsüz kısa liste üretir; `for i in {1..5}` ile birlikte kullanılır.",
+     "example": "echo {1..5}"
+    },
+    {
+     "cmd": "break / continue",
+     "what": "`break` döngüyü bitirir, `continue` sıradaki tura atlar.",
+     "where": "Boş satırı atlarken veya aranan öğe bulununca çıkarken.",
+     "why": "Gereksiz işi ve iç içe `if` karmaşasını önler.",
+     "example": "[ -n \"$line\" ] || continue",
+     "nosim": true
+    }
+   ],
+   "tip": "Dosya deseni eşleşmezse `./*.txt` olduğu gibi kalır. Döngü gövdesinin başına `[ -e \"$f\" ] || continue` koy."
+  },
+  {
+   "id": "readfile",
+   "title": "Dosyayı satır satır okumak",
+   "body": [
+    "Satır satır okumanın doğru kalıbı `while IFS= read -r line; do ... done < file` biçimidir. `IFS=` baştaki ve sondaki boşlukları korur, `-r` ters eğik çizgileri yorumlamaz.",
+    "`for line in $(cat file)` yazma: satırlar boşluktan bölünür, her kelime ayrı tur olur. Yönlendirme `done < ~/lab/servers.txt` dosyayı döngünün girdisi yapar."
+   ],
+   "commands": [
+    {
+     "cmd": "while IFS= read -r",
+     "what": "Girdiyi satır satır okur, her satırı değişkene koyar.",
+     "where": "Sunucu listesi, log veya CSV dosyalarını işlerken.",
+     "why": "Boşluk ve ters eğik çizgi bozulmadan güvenli okur.",
+     "example": "while IFS= read -r host; do echo \"$host\"; done < servers.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "done < file",
+     "what": "Döngünün girdisini bir dosyaya yönlendirir.",
+     "where": "`while read` bloğunun son satırında.",
+     "why": "Boru (`cat | while`) alt kabukta çalışır; değişkenler döngüden sonra kaybolur, yönlendirme kaybolmaz.",
+     "example": "done < ~/lab/servers.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "wc -l",
+     "what": "Satır sayısını verir.",
+     "where": "Döngü kaç tur dönecek diye bakarken.",
+     "why": "Beklentini gerçek sayıyla karşılaştırırsın.",
+     "example": "wc -l ~/lab/servers.txt"
+    }
+   ],
+   "warn": "Son satırı `\\n` ile bitmeyen dosyada `read` son satırı atlayabilir. Gerekirse `|| [ -n \"$host\" ]` ekle."
+  },
+  {
+   "id": "case",
+   "title": "case ile yönlendirme",
+   "body": [
+    "`case` bir değeri desenlerle karşılaştırır: uzun `if/elif` zincirinden çok daha okunaklıdır. Her kol `desen)` ile başlar, `;;` ile biter; `*)` hiçbiri uymazsa çalışır. Blok `esac` ile kapanır.",
+    "Tipik kullanım: `./menu.sh start` gibi ilk argümanı (`$1`) yönlendirmek veya bir sunucu adının ön ekine göre davranmak."
+   ],
+   "commands": [
+    {
+     "cmd": "case ... esac",
+     "what": "Bir değeri desenlere göre dallandırır.",
+     "where": "Servis scriptlerinde (start/stop/status) ve menülerde.",
+     "why": "Okunaklı; bilinmeyen girdiyi `*)` ile yakalarsın.",
+     "example": "case \"$1\" in start) echo go ;; *) echo usage ;; esac",
+     "nosim": true
+    },
+    {
+     "cmd": "$1  $@  $#",
+     "what": "Birinci argüman, tüm argümanlar ve argüman sayısı.",
+     "where": "Script'e dışarıdan değer verirken.",
+     "why": "Script yeniden kullanılabilir olur; `\"$@\"` boşluklu argümanları korur.",
+     "example": "echo \"first: $1, count: $#\"",
+     "nosim": true
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Script'e çalıştırma izni verir.",
+     "where": "`./menu.sh` ile çalıştırmadan önce.",
+     "why": "İzin yoksa `Permission denied` alırsın.",
+     "example": "chmod +x ~/scripts/menu.sh"
+    }
+   ],
+   "tip": "Birden çok deseni `start|restart)` gibi `|` ile birleştirebilirsin."
+  },
+  {
+   "id": "functions",
+   "title": "Fonksiyon, local ve diziler",
+   "body": [
+    "**Fonksiyon** tekrarlanan kodu adlandırır: `name() { ...; }`. Bash'te değişkenler varsayılan olarak **global**'dir; fonksiyon içinde `local` kullanmazsan dışarıdaki değişkeni ezersin.",
+    "`return` yalnızca 0–255 çıkış kodu döndürür. Metin döndürmek için `echo` kullan ve `$(fonksiyon)` ile yakala. **Dizi** birkaç değeri tek adda toplar; döngüde her zaman `\"${arr[@]}\"` yaz, böylece boşluklu öğeler bozulmaz."
+   ],
+   "commands": [
+    {
+     "cmd": "name() { ...; }",
+     "what": "Bir kod bloğuna ad verir; sonra ad yazarak çağırırsın.",
+     "where": "Aynı kontrolü script'in farklı yerlerinde çalıştırırken.",
+     "why": "Kodu böler, tekrarı bitirir, test etmeyi kolaylaştırır.",
+     "example": "log() { echo \"[log] $1\"; }",
+     "nosim": true
+    },
+    {
+     "cmd": "local",
+     "what": "Değişkeni yalnızca fonksiyonun içine sınırlar.",
+     "where": "Fonksiyonda geçici değişken kullanırken.",
+     "why": "Dışarıdaki aynı adlı değişkeni yanlışlıkla ezmezsin.",
+     "example": "local msg=$1",
+     "nosim": true
+    },
+    {
+     "cmd": "arr=(a b c)",
+     "what": "Üç öğeli bir dizi tanımlar.",
+     "where": "Sunucu veya seçenek listesi tutarken.",
+     "why": "Liste tek değişkende durur; `${#arr[@]}` ile eleman sayısını alırsın.",
+     "example": "hosts=(web01 web02 db01)",
+     "nosim": true
+    },
+    {
+     "cmd": "\"${arr[@]}\"",
+     "what": "Dizinin her öğesini ayrı, tırnaklı kelime olarak açar.",
+     "where": "Dizi üzerinde `for` döngüsü kurarken.",
+     "why": "Boşluklu öğeler parçalanmaz.",
+     "example": "for h in \"${hosts[@]}\"; do echo \"$h\"; done",
+     "nosim": true
+    }
+   ],
+   "tip": "Diziler yalnızca Bash'tedir; `sh` (dash) bilmez. Script'in başına `#!/usr/bin/env bash` yaz."
+  },
+  {
+   "id": "cleanup",
+   "title": "Güvenli script: set, mktemp, trap",
+   "body": [
+    "Geçici dosyayı sabit adla değil `mktemp` ile oluştur: ad benzersiz ve tahmin edilemez olur. `trap ... EXIT` ile script nasıl biterse bitsin (hata, Ctrl+C, normal) temizlik fonksiyonu çalışır; `kill -9` bunun dışındadır.",
+    "`set -euo pipefail` script'i sıkılaştırır: hata alınca durur (`-e`), tanımsız değişkende durur (`-u`), boru hattındaki hatayı gizlemez (`pipefail`)."
+   ],
+   "commands": [
+    {
+     "cmd": "mktemp -d",
+     "what": "Benzersiz adlı geçici bir dizin oluşturur ve yolunu yazar.",
+     "where": "Script ara dosyalar tutarken.",
+     "why": "Çakışmayı ve tahmin edilebilir ad saldırılarını önler.",
+     "example": "tmp=$(mktemp -d)",
+     "nosim": true
+    },
+    {
+     "cmd": "trap cleanup EXIT",
+     "what": "Script biterken `cleanup` fonksiyonunu çalıştırır.",
+     "where": "Geçici dizin, kilit dosyası veya bağlantı varken.",
+     "why": "Hata olsa bile ortalık temizlenir.",
+     "example": "trap cleanup EXIT",
+     "nosim": true
+    },
+    {
+     "cmd": "set -euo pipefail",
+     "what": "Hata, tanımsız değişken ve boru hattı hatasında script'i durdurur.",
+     "where": "Script'in ilk satırlarında.",
+     "why": "Sessizce yanlış devam etmek yerine hemen durursun.",
+     "example": "set -euo pipefail",
+     "nosim": true
+    }
+   ],
+   "danger": "`trap` içinde de silme yapıyorsan aynı kural geçerli: `rm -rf \"${tmp:?}\"` yaz. `tmp` boşsa `rm -rf $tmp/` aslında `rm -rf /` olur. Önce `echo rm -rf \"$tmp\"` ile deneme yap."
+  },
+  {
+   "id": "pitfalls",
+   "title": "Tuzaklar ve hata ayıklama",
+   "body": [
+    "En sık hata **tırnaksız değişken**: `touch $F` ve `F=\"my notes.txt\"` iki ayrı dosya (`my` ve `notes.txt`) yaratır. Kural: değişkeni her zaman `\"$F\"` biçiminde tırnakla.",
+    "En tehlikeli satır `rm -rf $DIR/*`: `DIR` boşsa komut `rm -rf /*` olur. `\"${DIR:?}\"` boş veya tanımsız değerde script'i hata ile durdurur. Silmeden önce `echo` ile yolu göster.",
+    "Hata ayıklama: `bash -n` çalıştırmadan söz dizimini denetler, `bash -x` her komutu `+` önekiyle gösterir, `shellcheck` yaygın tuzakları bulur."
+   ],
+   "commands": [
+    {
+     "cmd": "\"$var\"",
+     "what": "Değişkeni tırnakla; kelime bölme ve glob açılımı olmaz.",
+     "where": "Her değişken kullanımında.",
+     "why": "Boşluklu dosya adları tek parça kalır.",
+     "example": "touch \"$F\""
+    },
+    {
+     "cmd": "\"${DIR:?}\"",
+     "what": "`DIR` boş veya tanımsızsa hata verip script'i durdurur.",
+     "where": "`rm -rf` ve benzeri yıkıcı komutlarda.",
+     "why": "Boş değişkenin `/` yolunu silmesini önler.",
+     "example": "rm -rf \"${DIR:?}/\"*",
+     "nosim": true
+    },
+    {
+     "cmd": "shellcheck",
+     "what": "Script'i statik analizle tarar, tuzakları kodla (SC2086) bildirir.",
+     "where": "Script yazdıktan sonra, commit'ten önce.",
+     "why": "Tırnaksız değişken ve benzeri hataları çalıştırmadan yakalar.",
+     "example": "shellcheck ~/scripts/bad.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -n",
+     "what": "Script'i çalıştırmadan yalnızca söz dizimini denetler.",
+     "where": "Eksik `done`, `fi` veya `esac` şüphesinde.",
+     "why": "Güvenlidir; hiçbir komut çalışmaz.",
+     "example": "bash -n ~/scripts/loop.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -x",
+     "what": "Her komutu açılımlarıyla birlikte `+` önekiyle ekrana yazar.",
+     "where": "Script beklenmedik davranınca.",
+     "why": "Değişkenlerin gerçekte ne olduğunu görürsün.",
+     "example": "bash -x ~/scripts/loop.sh",
+     "nosim": true
+    }
+   ],
+   "tip": "Yıkıcı bir komutu önce başına `echo` koyarak çalıştır: `echo rm -rf \"$DIR\"`. Çıktı doğruysa `echo`'yu kaldır.",
+   "warn": "ShellCheck Ubuntu/Debian'da `sudo apt install shellcheck`, Rocky/Alma'da EPEL ile `sudo dnf install epel-release` ardından `sudo dnf install ShellCheck` ile kurulur."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`~/scripts/loop.sh` dosyasını `printf` ile oluştur; ilk satırı `#!/usr/bin/env bash` olsun (yönlendirme `>`).",
+   "hint": "`printf '#!/usr/bin/env bash\\n' > ~/scripts/loop.sh` — sonundaki `\\n` satır sonudur."
+  },
+  "t02": {
+   "text": "`~/lab/servers.txt` içinde kaç sunucu var? `wc -l` ile say; bir döngü kaç tur dönecek, tahmin et.",
+   "hint": "`wc -l ~/lab/servers.txt` satır sayısını verir."
+  },
+  "t03": {
+   "text": "`loop.sh` dosyasına `>>` ile (ezmeden) bir `for i in 1 2 3; do ... done` döngüsü ekle: `printf` ile üç satır yaz.",
+   "hint": "Tek tırnak içinde `$i` kabuk tarafından açılmaz. Satır sonları için `\\n` kullan."
+  },
+  "t04": {
+   "text": "`loop.sh` dosyasını çalıştırılabilir yap (izin 755).",
+   "hint": "`chmod 755 ~/scripts/loop.sh` veya `chmod +x`; `ls -l` ile `-rwxr-xr-x` gör."
+  },
+  "t05": {
+   "text": "`~/scripts/readlines.sh` yaz: `while IFS= read -r host; do ... done < ~/lab/servers.txt` kalıbıyla her sunucuyu `echo` ile yazdırsın.",
+   "hint": "Tek bir `printf` ile dört satır yaz; son satır `done < ~/lab/servers.txt` olsun."
+  },
+  "t06": {
+   "text": "`F=\"my notes.txt\"` değişkenini tanımla ve `touch \"$F\"` ile tırnaklı dosyayı oluştur. Tırnaksız yazsaydın ne olurdu?",
+   "hint": "İki ayrı komut: önce atama, sonra `touch \"$F\"`. `ls` ile kontrol et."
+  },
+  "t07": {
+   "text": "`~/scripts/arr.sh` yaz: `hosts=(web01 web02 db01)` dizisini tanımlasın ve `for h in \"${hosts[@]}\"; do ... done` ile yazdırsın.",
+   "hint": "Tek tırnaklı `printf` içinde `\"${hosts[@]}\"` olduğu gibi yazılır."
+  },
+  "t08": {
+   "text": "`./scripts/count.sh | wc -l` komutunu çalıştırmadan önce çıktıyı tahmin et: kaç satır yazar? Sonra çalıştırıp doğrula.",
+   "hint": "Script üç `echo` satırı içerir; `cat scripts/count.sh` ile bak."
+  },
+  "t09": {
+   "text": "`DIR=` ile boş değişken tanımla, sonra `echo \"rm -rf $DIR/\"` çalıştır. Hangi yolu silerdi? Tahmin et, sonra doğrula.",
+   "hint": "Boş `$DIR` yok olur; geriye `/` kalır. İşte bu yüzden `\"${DIR:?}\"` yazılır."
+  },
+  "t10": {
+   "text": "`~/scripts/hello.sh` çalışmıyor (`Permission denied`). Düzelt ve çalıştır.",
+   "hint": "`ls -l ~/scripts` izinlere bakar; `chmod +x` ekler; sonra `~/scripts/hello.sh`."
+  },
+  "t11": {
+   "text": "`~/scripts/clean.sh` içindeki `rm -rf $DIR/*` satırı tehlikeli. Dosyayı yeniden yaz: `DIR=/home/student/tmpwork` kalsın, silme satırı `\"${DIR:?}/\"*` kullansın.",
+   "hint": "`cat ~/scripts/clean.sh` ile bak; sonra `printf` ile üç satırı yeniden yaz."
+  },
+  "t12": {
+   "text": "`~/scripts/list_files.sh` içinde `for f in $(ls *.txt)` var; boşluklu adları parçalar. Dosyayı glob ile yeniden yaz: `for f in ./*.txt; do`.",
+   "hint": "`cat` ile içeriğe bak. `printf` ile dört satırı yeniden yaz; `$f` tek tırnak içinde kalsın."
+  },
+  "t13": {
+   "text": "`~/scripts/menu.sh` oluştur: `case \"$1\" in` ile `start)`, `stop)` ve `*)` kolları olsun, `esac` ile bitsin; sonra çalıştırılabilir yap.",
+   "hint": "Bir `printf` ile dosyayı yaz, ardından `chmod 755`. Her kol `;;` ile biter."
+  },
+  "t14": {
+   "text": "`~/scripts/safe.sh` yaz: `mktemp -d` ile geçici dizin, `cleanup()` fonksiyonu, `trap cleanup EXIT` ve içinde `local` kullanan bir `log()` fonksiyonu olsun.",
+   "hint": "Önce `tmp=$(mktemp -d)`, sonra `cleanup() { rm -rf \"${tmp:?}\"; }` kalıbı, en sonda `trap cleanup EXIT`."
+  },
+  "t15": {
+   "text": "`~/lab/app.log` içinde hangi sunucular `ERROR` verdi? Benzersiz ve sıralı sunucu adlarını `~/lab/failed_hosts.txt` dosyasına yaz.",
+   "hint": "`grep ERROR`, sonra `cut -d' ' -f4`, `sort -u`; çıktıyı `>` ile dosyaya yönlendir."
+  },
+  "t16": {
+   "text": "Ticket: Gece temizlik script'i bir sunucuda beklenenden fazlasını sildi, çünkü değişken boştu. `~/scripts/cleanup.sh` yaz: `set -euo pipefail`, `DIR=/home/student/tmpwork`, çıkışta `trap`, silmede `\"${DIR:?}/\"*`; çalıştırılabilir olsun.",
+   "hint": "Beş satırlık bir `printf`; sonra `chmod 755`. `trap \"echo cleanup done\" EXIT` yeterli."
+  },
+  "t17": {
+   "text": "Ticket: Ekip `~/lab/servers.txt` içindeki her sunucuyu kontrol eden bir script istiyor. `~/scripts/check_all.sh` yaz: `local` kullanan `check_host()` fonksiyonu, `while IFS= read -r host; do` döngüsü, `done < ~/lab/servers.txt`; çalıştırılabilir olsun.",
+   "hint": "Önce fonksiyon, sonra döngü; boş satırı `[ -n \"$host\" ] || continue` ile atla; en son `chmod 755`."
+  }
+ },
+ "vm": {
+  "intro": "Bu görevleri kendi VM'inde (Ubuntu, Rocky/Alma veya WSL) yap. Her şey `~/scripts` altında geçer; sistem dosyalarına dokunma. `rm` içeren bir deneme yapacaksan önce VM snapshot'ı al (Modül 0.2) ve silme komutunun başına `echo` koy.",
+  "tasks": {
+   "v01": {
+    "title": "İlk döngü ve bash -n",
+    "text": "Bir `for` döngüsü yaz, önce `bash -n` ile söz dizimini denetle, sonra çalıştır. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/scripts && cd ~/scripts\nprintf '#!/usr/bin/env bash\\nfor i in 1 2 3; do\\n  echo \"n=$i\"\\ndone\\n' > loop.sh\nchmod +x loop.sh\nbash -n loop.sh && ./loop.sh",
+      "expected": "n=1\nn=2\nn=3"
+     }
+    ],
+    "differs": [
+     "`bash -n` hata yazarsa `cat loop.sh` ile `do` ve `done` satırlarını kontrol et.",
+     "`Permission denied` görürsen `chmod +x loop.sh` komutunu çalıştırmayı unutmuşsun."
+    ]
+   },
+   "v02": {
+    "title": "Dosyayı okuyan döngü ve case",
+    "text": "Sunucu listesini satır satır oku, her ada göre `case` ile bir rol yazdır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\nprintf 'web01\\nweb02\\ndb01\\ncache01\\nmail01\\n' > servers.txt\ncat > readlines.sh <<'EOF'\n#!/usr/bin/env bash\nwhile IFS= read -r host; do\n  case \"$host\" in\n    web*) echo \"$host: web\" ;;\n    db*) echo \"$host: database\" ;;\n    *) echo \"$host: other\" ;;\n  esac\ndone < servers.txt\nEOF\nbash readlines.sh",
+      "expected": "web01: web\nweb02: web\ndb01: database\ncache01: other\nmail01: other"
+     }
+    ],
+    "differs": [
+     "Çıktı boşsa `servers.txt` dosyasının aynı dizinde olduğunu kontrol et (`ls`).",
+     "Hepsi `other` yazıyorsa `case` desenlerinde (`web*)`) yazım hatası vardır."
+    ]
+   },
+   "v03": {
+    "title": "Fonksiyon, local, mktemp, trap",
+    "text": "Geçici dizin oluşturan ve çıkışta temizleyen bir script çalıştır. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\ncat > safe.sh <<'EOF'\n#!/usr/bin/env bash\nset -euo pipefail\ntmp=$(mktemp -d)\ncleanup() {\n  rm -rf \"${tmp:?}\"\n  echo \"cleanup: removed $tmp\"\n}\ntrap cleanup EXIT\nlog() {\n  local msg=$1\n  echo \"work in $tmp: $msg\"\n}\nlog \"hello\"\nEOF\nbash safe.sh",
+      "expected": "work in /tmp/tmp.Ab12Cd: hello\ncleanup: removed /tmp/tmp.Ab12Cd"
+     }
+    ],
+    "differs": [
+     "Dizin adı her çalıştırmada farklıdır; önemli olan iki satırın da görünmesidir.",
+     "`cleanup` satırı yoksa `trap cleanup EXIT` satırının fonksiyondan sonra geldiğini kontrol et."
+    ]
+   },
+   "v04": {
+    "title": "shellcheck ile tuzak yakalamak",
+    "text": "ShellCheck kur ve tırnaksız değişken içeren bir script'i tara. Uyarıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu/Debian\nsudo apt install -y shellcheck\n# Rocky/Alma (needs EPEL)\nsudo dnf install -y epel-release && sudo dnf install -y ShellCheck",
+      "expected": "..."
+     },
+     {
+      "cmd": "cd ~/scripts\nprintf '#!/usr/bin/env bash\\nF=\"my notes.txt\"\\ntouch $F\\n' > bad.sh\nshellcheck bad.sh",
+      "expected": "In bad.sh line 3:\ntouch $F\n      ^-- SC2086 (info): Double quote to prevent globbing and word splitting."
+     }
+    ],
+    "differs": [
+     "Kurulum başarısızsa Rocky'de `epel-release` kurulu mu diye `dnf repolist` ile bak.",
+     "ShellCheck sürümüne göre mesaj biraz değişir; `SC2086` kodunu aramak yeterli."
+    ]
+   },
+   "v05": {
+    "title": "bash -x ve güvenli deneme",
+    "text": "`bash -x` ile script'in her adımını izle; sonra boş `DIR` ile `rm` komutunu yalnızca `echo` ile dene (gerçek silme yok).",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\nbash -x loop.sh 2>&1 | head -8\nDIR=\"\"\necho rm -rf $DIR/*",
+      "expected": "+ for i in 1 2 3\n+ echo n=1\nn=1\n...\nrm -rf /bin /boot /etc ..."
+     }
+    ],
+    "differs": [
+     "`+` ile başlayan satırlar `bash -x` izidir; ek `+` düzeyleri iç içe komutları gösterir.",
+     "Sonuncu satır `echo` olduğu için hiçbir şey silinmez; yalnızca boş değişkenin `/*` olarak açıldığını gösterir."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`rm -rf $DIR/*` satırında `DIR` boşsa ne olur ve hangi yazım korur?",
+   "options": [
+    "Hiçbir şey olmaz; `rm -i` ekle",
+    "Yalnızca ev dizini silinir; `sudo` kullan",
+    "`/*` silinmeye çalışılır; `\"${DIR:?}\"` yazmak korur",
+    "Hata verir; `chmod 000` yeterlidir"
+   ],
+   "explain": "Boş değişken yok olur ve komut `rm -rf /*` olur. `${DIR:?}` boş değerde script'i durdurur."
+  },
+  "q2": {
+   "q": "Bir dosyayı satır satır güvenle okumanın doğru kalıbı hangisi?",
+   "options": [
+    "`for l in $(cat file); do ... done`",
+    "`while IFS= read -r l; do ... done < file`",
+    "`cat file | for l; do ... done`",
+    "`ls file | read l`"
+   ],
+   "explain": "`for` + `$(cat)` satırları kelimelere böler. `while IFS= read -r` satırı olduğu gibi okur."
+  },
+  "q3": {
+   "q": "Fonksiyonda `local x=1` ne yapar?",
+   "options": [
+    "`x` değişkenini sabit yapar",
+    "`x` değişkenini alt süreçlere aktarır",
+    "`x` değişkenini tüm sistemde tanımlar",
+    "`x` değişkenini yalnızca fonksiyon içinde geçerli kılar"
+   ],
+   "explain": "`local` kapsamı fonksiyonla sınırlar; dışarıdaki aynı adlı değişken ezilmez."
+  },
+  "q4": {
+   "q": "`trap cleanup EXIT` ne zaman çalışır?",
+   "options": [
+    "Script nasıl biterse bitsin (hata dahil); `kill -9` hariç",
+    "Yalnızca Ctrl+C ile",
+    "Script'in ilk satırından önce",
+    "Yalnızca `cleanup` 0 döndürürse"
+   ],
+   "explain": "EXIT tuzağı normal çıkışta, hatada ve çoğu sinyalde çalışır; SIGKILL yakalanamaz."
+  }
+ },
+ "summary": [
+  "`for` listedeki her öğe için, `while` koşul doğru kaldıkça çalışır; kaynağı güvenli seç.",
+  "Dosyayı `while IFS= read -r line; do ... done < file` ile oku, `$(cat)` ile değil.",
+  "`case ... esac` argümanları ve menüleri okunaklı yönlendirir; `*)` varsayılan koldur.",
+  "Fonksiyonda `local` kullan; diziyi `\"${arr[@]}\"` ile dolaş.",
+  "`mktemp` ile geçici dosya oluştur, `trap cleanup EXIT` ile temizle.",
+  "Her değişkeni tırnakla; silmede `\"${DIR:?}\"` yaz ve önce `echo` ile dene.",
+  "`bash -n`, `bash -x` ve `shellcheck` hataları çalıştırmadan veya adım adım gösterir."
+ ],
+ "glossary": [
+  {"term": "döngü (loop)", "meaning": "Bir komut bloğunu tekrar tekrar çalıştıran yapı: `for`, `while`."},
+  {"term": "kelime bölme (word splitting)", "meaning": "Tırnaksız değişkenin boşluklardan parçalanması."},
+  {"term": "IFS", "meaning": "Kabuğun kelimeleri ayırmakta kullandığı karakterler (alan ayırıcı)."},
+  {"term": "case", "meaning": "Bir değeri desenlerle karşılaştıran çok yollu dallanma."},
+  {"term": "local", "meaning": "Değişkeni fonksiyonla sınırlayan anahtar kelime."},
+  {"term": "dizi (array)", "meaning": "Birden çok değeri tek adda tutan Bash değişkeni."},
+  {"term": "trap", "meaning": "Bir sinyal veya çıkışta çalışacak komutu tanımlar."},
+  {"term": "mktemp", "meaning": "Benzersiz adlı geçici dosya veya dizin oluşturur."},
+  {"term": "shellcheck", "meaning": "Kabuk script'leri için statik analiz aracı."},
+  {"term": "bash -x", "meaning": "Her komutu çalıştırmadan önce açılımlarıyla yazan izleme kipi."}
+ ]
+}

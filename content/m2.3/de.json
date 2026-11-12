@@ -1,0 +1,262 @@
+{
+ "title": "Dateien und Ordner erstellen und löschen",
+ "lead": "Baue mit mkdir, touch, rmdir und rm in einem sicheren Übungsbereich Dateistrukturen auf und räume sie wieder ab.",
+ "objectives": [
+  "Du legst mit mkdir und mkdir -p Ordner und verschachtelte Strukturen an.",
+  "Du erzeugst mit touch leere Dateien, mehrere auf einmal per Brace-Expansion.",
+  "Du kennst den Unterschied zwischen rmdir und rm -r und prüfst vor dem Löschen."
+ ],
+ "sections": [
+  {
+   "id": "create",
+   "title": "Erstellen: mkdir und touch",
+   "body": [
+    "Lege zuerst einen sicheren **Übungsbereich** an: den Ordner `practice` im Home-Verzeichnis. Fehler betreffen dann nur ihn. Als normaler Benutzer darfst du in Systemverzeichnisse wie `/etc` nicht schreiben — das ist ein Schutzmechanismus.",
+    "`mkdir` erzeugt Ordner, `touch` leere Dateien. Die Brace-Expansion erzeugt mehrere Namen: `touch {a,b,c}.txt` legt `a.txt b.txt c.txt` an."
+   ],
+   "commands": [
+    {
+     "cmd": "mkdir",
+     "what": "Legt einen neuen Ordner an.",
+     "where": "Für Projekte, Backups oder Übungsbereiche.",
+     "why": "Hält Dateien geordnet.",
+     "example": "mkdir practice"
+    },
+    {
+     "cmd": "mkdir -p",
+     "what": "Legt fehlende Zwischenordner mit an; kein Fehler, wenn der Ordner existiert.",
+     "where": "Beim Aufbau verschachtelter Strukturen.",
+     "why": "Ein Befehl baut den ganzen Baum.",
+     "example": "mkdir -p project/src/code"
+    },
+    {
+     "cmd": "touch",
+     "what": "Erstellt eine leere Datei oder aktualisiert den Zeitstempel.",
+     "where": "Wenn du schnell eine leere Datei brauchst.",
+     "why": "Ausgangspunkt für Skripte und Testdateien.",
+     "example": "touch file1.txt"
+    },
+    {
+     "cmd": "ls -R",
+     "what": "Listet den Baum samt Unterordnern.",
+     "where": "Zum Überprüfen der Struktur.",
+     "why": "Du siehst, was beim Löschen oder Verschieben betroffen ist.",
+     "example": "ls -R project"
+    }
+   ],
+   "tip": "Prüfe das Ergebnis nach jeder Aktion mit ls."
+  },
+  {
+   "id": "delete",
+   "title": "Löschen: rm und rmdir",
+   "body": [
+    "Unter Linux gibt es **keinen Papierkorb**: Mit `rm` gelöschte Dateien sind weg. Prüfe deshalb mit `ls`, was du löschst.",
+    "`rmdir` löscht nur **leere** Ordner; bei gefüllten gibt es einen Fehler und schützt dich. Um samt Inhalt zu löschen, brauchst du `rm -r`. Wendest du `rm` ohne `-r` auf einen Ordner an, kommt „Is a directory“. In diesem Simulator werden gefährliche Befehle wie `rm -rf /` abgelehnt."
+   ],
+   "commands": [
+    {
+     "cmd": "rm",
+     "what": "Löscht Dateien (nicht rückgängig zu machen).",
+     "where": "Beim Aufräumen überflüssiger Dateien.",
+     "why": "Für Platz und Ordnung — aber mit Vorsicht.",
+     "example": "rm delete_me.txt"
+    },
+    {
+     "cmd": "rmdir",
+     "what": "Löscht nur leere Ordner.",
+     "where": "Beim Entfernen leerer Ordner.",
+     "why": "Verhindert, dass du versehentlich einen gefüllten Ordner löschst.",
+     "example": "rmdir project"
+    },
+    {
+     "cmd": "rm -r",
+     "what": "Löscht einen Ordner samt Inhalt.",
+     "where": "Beim Entfernen gefüllter Ordner.",
+     "why": "Räumt den Baum mit einem Befehl ab; erst nach Kontrolle nutzen.",
+     "example": "rm -r project"
+    }
+   ],
+   "tip": "Gewöhne dir an: erst `ls -R ordner`, dann `rm -r ordner`.",
+   "warn": "Lies vor ENTER noch einmal genau, welchen Ordner `rm -r` löscht. Im falschen Verzeichnis zerstört es dein ganzes Projekt.",
+   "danger": "Tippe auf einem echten System niemals `rm -rf /` oder `rm -rf ~`. Das führt zu unwiderruflichem Datenverlust; nur der Simulator lehnt es hier ab."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Lege im Home-Verzeichnis mit `mkdir practice` einen Übungsordner an.",
+   "hint": "Stelle vorher mit `cd ~` sicher, dass du im Home-Verzeichnis bist."
+  },
+  "t02": {
+   "text": "Wechsle mit `cd practice` in den Ordner.",
+   "hint": "Das Verzeichnis im Prompt ändert sich."
+  },
+  "t03": {
+   "text": "Erstelle mit `touch file1.txt` eine leere Datei.",
+   "hint": "Prüfe mit ls -l."
+  },
+  "t04": {
+   "text": "Lege mit `mkdir folder1` einen Unterordner an.",
+   "hint": "In der ls -l-Ausgabe beginnt die Zeile mit d."
+  },
+  "t05": {
+   "text": "Baue mit `mkdir -p project/src/code` die verschachtelte Struktur in einem Befehl auf.",
+   "hint": "-p legt auch die Zwischenordner an."
+  },
+  "t06": {
+   "text": "Liste mit `ls -R project` die Struktur samt Unterordnern auf.",
+   "hint": "-R als Großbuchstabe."
+  },
+  "t07": {
+   "text": "Erstelle mit `touch {a,b,c}.txt` drei Dateien in einem Befehl.",
+   "hint": "In den geschweiften Klammern mit Komma trennen, ohne Leerzeichen."
+  },
+  "t08": {
+   "text": "Erstelle `delete_me.txt` mit `touch` und lösche sie dann mit `rm`.",
+   "hint": "Zwei Befehle; prüfe am Ende mit ls, dass sie weg ist."
+  },
+  "t09": {
+   "text": "Versuche, den gefüllten Ordner mit `rmdir project` zu löschen. Gab es einen Fehler? Warum?",
+   "hint": "rmdir löscht nur leere Ordner."
+  },
+  "t10": {
+   "text": "Lösche den Ordner mit `rm -r project` samt Inhalt.",
+   "hint": "Schau vorher mit ls -R proje hinein."
+  },
+  "t11": {
+   "text": "Wende `rm folder1` ohne `-r` auf den Ordner an und lies die Fehlermeldung.",
+   "hint": "Erwartet wird „Is a directory“."
+  },
+  "t12": {
+   "text": "Herausforderung: `mkdir -p ~/practice/final_project`, darin `touch report.txt`, eine Ebene höher `ls -R final_project`, dann `rm -r final_project`.",
+   "hint": "Wechsle zum Anlegen der Datei mit `cd ~/practice/final_project` hinein und mit `cd ..` wieder hinaus."
+  },
+  "t13": {
+   "text": "Versuche als normaler Benutzer, in einem Systemverzeichnis einen Ordner anzulegen: `mkdir /etc/practice`. Was passiert?",
+   "hint": "Erwartet wird Permission denied; Systemverzeichnisse sind geschützt."
+  },
+  "t14": {
+   "text": "Fehler finden: Der Ordner `~/old_project` lässt sich nicht löschen (`rmdir` meldet einen Fehler). Entferne ihn samt Inhalt.",
+   "hint": "Er enthält Dateien; `rmdir` reicht nicht, du brauchst `rm -r`."
+  },
+  "t15": {
+   "text": "Mini-Projekt: Lege unter `~/web` die Ordner `css`, `js`, `img` mit einem `mkdir -p` und die Datei `index.html` mit `touch` an.",
+   "hint": "Brace: `~/web/{css,js,img}`."
+  },
+  "t16": {
+   "text": "TICKET #2310 — Die Buchhaltung erwartet in `~/archive/2026/q1` die Dateien `jan.txt`, `feb.txt`, `mar.txt`. Baue die Struktur auf.",
+   "hint": "Ordner mit `mkdir -p`, Dateien mit `touch` und Brace."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Was gilt für eine mit `rm` gelöschte Datei?",
+   "options": [
+    "Sie landet im Papierkorb",
+    "Sie wird 30 Tage aufbewahrt",
+    "Sie ist nicht wiederherstellbar",
+    "Sie wird nur versteckt"
+   ],
+   "explain": "Auf der Kommandozeile gibt es keinen Papierkorb; Löschen ist endgültig."
+  },
+  "q2": {
+   "q": "Was bewirkt `-p` bei `mkdir -p a/b/c`?",
+   "options": [
+    "Fragt nach einem Passwort",
+    "Legt fehlende Zwischenordner mit an",
+    "Versteckt den Ordner",
+    "Macht den Ordner schreibgeschützt"
+   ],
+   "explain": "-p (parents) baut den ganzen Pfad auf einmal auf und meldet keinen Fehler, wenn der Ordner schon existiert."
+  },
+  "q3": {
+   "q": "Was passiert bei `rmdir` auf einen gefüllten Ordner?",
+   "options": [
+    "Fehlermeldung, der Ordner bleibt",
+    "Der Ordner wird samt Inhalt gelöscht",
+    "Der Ordner wird geleert",
+    "Der Ordner wird verschoben"
+   ],
+   "explain": "rmdir löscht nur leere Ordner. Für gefüllte Ordner nutzt man `rm -r`."
+  },
+  "q4": {
+   "q": "Mit welchem Befehl erstellt man am häufigsten eine leere Datei?",
+   "options": [
+    "mkdir",
+    "rm",
+    "ls",
+    "touch"
+   ],
+   "explain": "`touch datei` erstellt eine leere Datei oder aktualisiert den Zeitstempel."
+  }
+ },
+ "summary": [
+  "`mkdir` erstellt Ordner, `mkdir -p` verschachtelte Ordner, `touch` leere Dateien.",
+  "Mit `touch {a,b,c}.txt` erzeugt die Brace-Expansion mehrere Dateien.",
+  "`rmdir` löscht nur leere, `rm -r` auch gefüllte Ordner; es gibt keinen Papierkorb.",
+  "Prüfe vor und nach jeder Aktion mit `ls`."
+ ],
+ "glossary": [
+  {
+   "term": "Verzeichnis / Ordner",
+   "meaning": "Struktur, die Dateien enthält; derselbe Begriff."
+  },
+  {
+   "term": "rekursiv",
+   "meaning": "Eine Operation inklusive Unterordnern; -r oder -R."
+  },
+  {
+   "term": "Brace-Expansion",
+   "meaning": "Die Shell wandelt Muster wie {a,b,c} in mehrere Wörter um."
+  },
+  {
+   "term": "Zeitstempel",
+   "meaning": "Zeitpunkt der letzten Änderung einer Datei."
+  }
+ ],
+ "vm": {
+  "intro": "Lege in deiner VM zuerst einen sicheren Übungsordner an; probiere `rm -r` nie dort, wo echte Daten liegen.",
+  "tasks": {
+   "v01": {
+    "title": "Projektbaum aufbauen",
+    "text": "Baue im Übungsordner eine verschachtelte Struktur und füge die Ausgabe von `ls -R` ein.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/practice/project/{src,test}\ntouch ~/practice/project/src/main.c\nls -R ~/practice",
+      "expected": "/home/student/practice:\nproject\n\n/home/student/practice/project:\nsrc  test\n..."
+     }
+    ],
+    "differs": [
+     "Die Reihenfolge von `ls -R` kann abweichen; `src` und `test` müssen auftauchen.",
+     "Leere Ordner werden in der `ls -R`-Ausgabe durch eine Leerzeile getrennt."
+    ]
+   },
+   "v02": {
+    "title": "Den Schutz sehen",
+    "text": "Versuche als normaler Benutzer, in einem Systemverzeichnis einen Ordner anzulegen, und füge die Fehlermeldung ein.",
+    "blocks": [
+     {
+      "cmd": "mkdir /etc/practice",
+      "expected": "mkdir: cannot create directory ‘/etc/practice’: Permission denied"
+     }
+    ],
+    "differs": [
+     "Bei deutscher Systemsprache kann die Meldung übersetzt sein („Keine Berechtigung“).",
+     "Entsteht der Ordner doch, arbeitest du als root; nimm einen normalen Benutzer und lösche ihn mit `sudo rmdir /etc/practice`."
+    ]
+   },
+   "v03": {
+    "title": "Aufräumen",
+    "text": "Schau erst hinein und lösche dann den Übungsordner. Bei fehlerfreiem Ablauf bestätige mit „Erledigt“.",
+    "blocks": [
+     {
+      "cmd": "ls -R ~/practice\nrm -r ~/practice\nls ~/practice",
+      "expected": "ls: cannot access '/home/student/practice': No such file or directory"
+     }
+    ],
+    "differs": [
+     "Siehst du `rm: cannot remove ... Is a directory`, fehlt `-r`."
+    ]
+   }
+  }
+ }
+}

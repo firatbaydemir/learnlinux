@@ -1,0 +1,102 @@
+{
+ "title": "Yönlendirme ve Pipe",
+ "lead": "Pipe, bir komutun çıktısını sıradaki komutun girdisine bağlar. Küçük araçları birleştirerek büyük sorunları çözersin.",
+ "objectives": [
+  "`|` ile komutları pipeline'a zincirlersin.",
+  "`wc`, `sort` ve `uniq` ile sayar, sıralar ve tekrarları kaldırırsın.",
+  "Pipe ile yönlendirmeyi birleştirir, `tee` ile akışı ikiye ayırırsın."
+ ],
+ "sections": [
+  {
+   "id": "pipe",
+   "title": "Pipe: komut | komut",
+   "body": [
+    "`|` soldaki komutun **stdout**'unu sağdaki komutun **stdin**'ine bağlar. Aradaki veri diske yazılmaz. Her araç tek bir iş yapar; pipe onları birleştirir.",
+    "Pipe'tan yalnızca stdout geçer. Hata mesajları (stderr) ekrana gitmeye devam eder; geçmesini istersen pipe'tan önce `2>&1` ekle."
+   ],
+   "commands": [
+    {"cmd": "wc -l", "what": "Satırları sayar.", "where": "Sonuçları saymak için pipeline'ın sonunda.", "why": "'Kaç tane?' sorusunu yanıtlar.", "example": "cat logs/app.log | wc -l"},
+    {"cmd": "grep", "what": "Yalnızca desenle eşleşen satırları tutar.", "where": "Log ve listeleri süzmek için.", "why": "Büyük akışı ilgili satırlara indirir.", "example": "grep ERROR logs/app.log | wc -l"},
+    {"cmd": "head / tail", "what": "İlk / son satırları gösterir.", "where": "Sonucun başını veya sonunu görmek için.", "why": "Çıktıyı kısa tutar.", "example": "sort -n data/nums.txt | tail -n 1"}
+   ],
+   "tip": "Pipeline'ı adım adım kur: ilk komutu çalıştır, çıktıyı kontrol et, sonra bir `|` daha ekle."
+  },
+  {
+   "id": "sortuniq",
+   "title": "sort, uniq ve tee",
+   "body": [
+    "`uniq` yalnızca **ardışık** tekrarları birleştirir; bu yüzden neredeyse her zaman önce `sort` çalıştırılır. `uniq -c` her satırın önüne sayısını yazar; `sort -rn` bu sayıya göre sıralar.",
+    "`sort` varsayılan olarak metin sıralar, bu yüzden `10`, `9`'dan önce gelir. Sayılar için `sort -n` kullan. `tee file` akışı hem dosyaya yazar **hem de** devam ettirir, T bağlantısı gibi."
+   ],
+   "commands": [
+    {"cmd": "sort", "what": "Satırları sıralar; `-n` sayısal, `-r` ters, `-u` tekrarsız.", "where": "`uniq`'ten önce veya değerleri sıralamak için.", "why": "Benzer satırları yan yana getirir.", "example": "sort data/fruits.txt"},
+    {"cmd": "uniq -c", "what": "Ardışık tekrarları birleştirir ve sayar.", "where": "Sıklık tablosu çıkarmak için.", "why": "Her satırın kaç kez geçtiğini gösterir.", "example": "sort data/fruits.txt | uniq -c"},
+    {"cmd": "tee", "what": "Akışı dosyaya kaydeder ve aynı zamanda devam ettirir.", "where": "Pipeline'ın ara sonucunu saklamak için.", "why": "Veriyi hem görür hem saklarsın.", "example": "grep ERROR logs/app.log | tee all_errors.txt | wc -l"}
+   ],
+   "tip": "Klasik sıralama: `sort | uniq -c | sort -rn`.",
+   "warn": "`sort` olmadan `uniq`, yan yana olmayan tekrarları bırakır."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`cat logs/app.log | wc -l` ile `logs/app.log` satırlarını say.", "hint": "Pipe dosya içeriğini `wc -l`'ye verir."},
+  "t02": {"text": "`sort` ile `data/fruits.txt` dosyasını alfabetik sırala.", "hint": "Aynı satırlar yan yana görünür."},
+  "t03": {"text": "`ls -1 data | wc -l` ile `data` klasöründe kaç öğe olduğunu say.", "hint": "`-1` her adı ayrı satıra yazar; `wc -l` satırları sayar."},
+  "t04": {"text": "`grep ERROR logs/app.log | wc -l` ile logdaki ERROR satırlarını say.", "hint": "grep süzer, `wc -l` sayar."},
+  "t05": {"text": "`sort data/fruits.txt | uniq` ile tekrarları kaldır.", "hint": "Önce sırala ki tekrarlar yan yana gelsin."},
+  "t06": {"text": "`sort data/fruits.txt | uniq -c` ile her meyveyi say.", "hint": "Öndeki sayı adettir."},
+  "t07": {"text": "`grep ERROR logs/app.log > errors.txt` ile tüm ERROR satırlarını `errors.txt` dosyasına kaydet.", "hint": "`cat errors.txt` ile kontrol et."},
+  "t08": {"text": "Tahmin et: `sort data/nums.txt | head -n 1` ilk satırı `2` mi `10` mu verir? Çalıştırıp doğrula.", "hint": "Düz `sort` sayıları değil metni karşılaştırır."},
+  "t09": {"text": "Tahmin et: `sort -n data/nums.txt | tail -n 1` hangi sayıyı yazar? Çalıştırıp doğrula.", "hint": "`-n` sayısal sıralar; son satır en büyüktür."},
+  "t10": {"text": "Hata ayıklama: `uniq data/unsorted.txt` hâlâ tekrarları gösteriyor. Tekil satırları (`a`, `b`) `~/unique.txt` dosyasına yaz.", "hint": "`sort data/unsorted.txt | uniq > unique.txt`."},
+  "t11": {"text": "Mini proje: logdaki ERROR satırlarını sayıp sıralayan `report.txt` raporunu üret: `grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt`.", "hint": "Dört aşama: süz, sırala, say, sırala; sonra yönlendir."},
+  "t12": {"text": "Meydan okuma: tek pipeline ile tüm ERROR satırlarını `all_errors.txt`'ye kaydet ve kaç tane olduğunu da yazdır (`tee` kullan).", "hint": "`grep ... | tee all_errors.txt | wc -l`."},
+  "t13": {"text": "Ticket: Yönetim, `data/access.txt` içinde kaç farklı kullanıcı olduğunu öğrenmek istiyor. Yalnızca sayıyı `~/users_count.txt` dosyasına yaz.", "hint": "`sort | uniq | wc -l`, sonra `>` ile yönlendir."}
+ },
+ "vm": {
+  "intro": "VM'inde bu pipeline'lar yalnızca okur; yazılan tek dosyalar home dizininde senin oluşturduklarındır.",
+  "tasks": {
+   "v01": {
+    "title": "Pipe ile say",
+    "text": "`/etc` içinde kaç öğe olduğunu say ve sayıyı yapıştır.",
+    "blocks": [{"cmd": "ls /etc | wc -l", "expected": "187"}],
+    "differs": ["Sayı sistemine göre değişir; herhangi bir sayı doğrudur."]
+   },
+   "v02": {
+    "title": "Kullanıcıları çıkar ve sırala",
+    "text": "`/etc/passwd` ilk alanını al, sırala ve ilk beş adı göster.",
+    "blocks": [{"cmd": "cut -d: -f1 /etc/passwd | sort | head -n 5", "expected": "_apt\nbackup\nbin\ndaemon\ngames"}],
+    "differs": ["Adlar dağıtıma göre değişir; yalnızca alfabetik sıra önemlidir. `root` var mı diye `| grep root` ile bakabilirsin."]
+   },
+   "v03": {
+    "title": "Sıklık tablosu",
+    "text": "`/etc/passwd` içinde hangi login shell'lerin kullanıldığını say ve sırala.",
+    "blocks": [{"cmd": "cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn", "expected": "     24 /usr/sbin/nologin\n      3 /bin/bash\n      1 /bin/sync"}],
+    "differs": ["Sayılar ve shell'ler sistemine göre değişir.", "Tek satır görüyorsan `uniq -c`'den önce `sort` olduğundan emin ol."]
+   },
+   "v04": {
+    "title": "tee ile kopya tut",
+    "text": "Bir listeyi sayarken `tee` ile dosyaya kaydet ve dosyayı kontrol et. Çalıştıysa \"Yaptım\"a bas.",
+    "blocks": [{"cmd": "ls /etc | tee ~/etc_list.txt | wc -l\nhead -n 3 ~/etc_list.txt"}],
+    "differs": ["`etc_list.txt` boşsa `tee`'den sonra `~/etc_list.txt` yazdığından emin ol."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Pipe `|` neyi bağlar?", "options": ["Soldaki komutun stdout'unu sağdaki komutun stdin'ine", "Bir dosyayı bir komuta", "stderr'i stdout'a", "İki dosyayı"], "explain": "Pipe soldaki stdout'u sağdaki stdin'e verir."},
+  "q2": {"q": "`uniq`'ten önce neden `sort` kullanılır?", "options": ["`uniq` dosya ister", "`sort` hızlandırır", "`uniq` yalnızca sayılarla çalışır", "`uniq` yalnızca ardışık tekrarları birleştirir"], "explain": "Sıralama aynı satırları yan yana getirir."},
+  "q3": {"q": "Pipeline'da `tee out.txt` ne yapar?", "options": ["Akışı siler", "Akışı dosyaya yazar ve devam ettirir", "Yalnızca hataları gösterir", "Akışı sıralar"], "explain": "`tee` akışı T parçası gibi ikiye ayırır."},
+  "q4": {"q": "Satır başına bir sayı içeren dosyadaki en büyük sayıyı hangi komut yazar?", "options": ["`sort file | head -n 1`", "`sort -r file | tail -n 1`", "`sort -n file | tail -n 1`", "`uniq -c file`"], "explain": "`sort -n` sayısal sıralar; son satır en büyüğüdür."}
+ },
+ "summary": [
+  "`cmd1 | cmd2` cmd1'in stdout'unu cmd2'ye stdin olarak verir.",
+  "`sort | uniq -c | sort -rn` sıklık sıralaması çıkarır.",
+  "`sort -n` sayısal, düz `sort` metin olarak sıralar.",
+  "`tee` akışı devam ettirirken dosyaya da yazar."
+ ],
+ "glossary": [
+  {"term": "pipe", "meaning": "Bir komutun çıktısını başka komutun girdisine bağlar."},
+  {"term": "pipeline", "meaning": "Pipe'larla bağlanmış komut zinciri."},
+  {"term": "filtre", "meaning": "stdin'i okuyup değiştirilmiş akışı stdout'a yazan komut."},
+  {"term": "tee", "meaning": "Akışı hem dosyaya hem stdout'a yazar."}
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "id": "3.1",
+ "level": 3,
+ "setup": {
+  "dirs": ["/home/student/lab"],
+  "files": {
+   "/home/student/lab/names.txt": "alice\nbob\ncarol\n"
+  },
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^echo hello$", "out": "hello"}, "solution": ["echo hello"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^cat (~/|/home/student/)?lab/names\\.txt$", "ok": true}, "solution": ["cat lab/names.txt"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls \\S*missing\\.txt$", "ok": false}, "solution": ["ls lab/missing.txt"]},
+  {"id": "t04", "kind": "guided", "diff": 1, "check": {"contains": ["~/out.txt", "hello"]}, "solution": ["echo hello > out.txt"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": [{"linesMin": ["~/out.txt", 2]}, {"contains": ["~/out.txt", "world"]}], "solution": ["echo world >> out.txt"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"contains": ["~/errors.txt", "missing\\.txt"]}, "solution": ["ls lab/missing.txt 2> errors.txt"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": {"cmd": "^cat < \\S*names\\.txt$", "ok": true, "out": "carol"}, "solution": ["cat < lab/names.txt"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": [{"cmd": "^ls \\S*missing\\.txt > result\\.txt$"}, {"exists": "~/result.txt", "type": "f"}], "solution": ["ls lab/missing.txt > result.txt"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"cmd": "^cat \\S*names\\.txt \\| wc -l$", "out": "3"}, "solution": ["cat lab/names.txt | wc -l"]},
+  {"id": "t10", "kind": "debug", "diff": 2, "check": [{"contains": ["~/all.txt", "names\\.txt"]}, {"contains": ["~/all.txt", "missing_dir"]}], "solution": ["ls lab missing_dir > all.txt 2>&1"]},
+  {"id": "t11", "kind": "mini", "diff": 2, "check": [{"linesMin": ["~/build.log", 3]}, {"contains": ["~/build.log", "start"]}, {"contains": ["~/build.log", "names\\.txt"]}, {"contains": ["~/build.log", "nothing"]}], "solution": ["echo start > build.log", "ls lab >> build.log", "ls nothing 2>> build.log"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [{"cmd": "2> ?/dev/null"}, {"contains": ["~/found.txt", "names\\.txt"]}], "solution": ["ls lab missing_dir 2>/dev/null > found.txt"]},
+  {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/count.txt", "3"]}, "solution": ["wc -l < lab/names.txt > count.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*hostname)(?=[\\s\\S]*nonexistent)"},
+  {"id": "v02", "expect": "line one[\\s\\S]*line two"},
+  {"id": "v03", "expect": "hostname"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

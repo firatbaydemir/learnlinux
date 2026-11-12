@@ -1,0 +1,466 @@
+{
+ "title": "Bash-Skript 2 — Schleifen, Funktionen, Fallstricke",
+ "lead": "Erledige dieselbe Arbeit nicht hundertmal: Baue Schleifen, case und Funktionen, räume temporäre Dateien mit trap auf und schreibe sichere Skripte ohne Quoting-Fallen.",
+ "objectives": [
+  "Du schreibst wiederholte Arbeit mit `for` und `while`.",
+  "Du liest eine Datei mit `while IFS= read -r` sicher Zeile für Zeile.",
+  "Du steuerst Argumente und Menüs mit `case` und gliederst Code mit Funktionen und `local`.",
+  "Du räumst mit `mktemp` und `trap` auf und verhinderst mit `\"${DIR:?}\"` die Katastrophe durch leere Variablen.",
+  "Du findest Fehler mit `shellcheck`, `bash -n` und `bash -x`."
+ ],
+ "sections": [
+  {
+   "id": "loops",
+   "title": "Schleifen: for und while",
+   "body": [
+    "Ein Skript ist mehr als Befehle der Reihe nach. Willst du dieselbe Arbeit für mehrere Server oder Dateien erledigen, nimmst du eine **Schleife**. `for` läuft für jedes Element einer Liste, `while` solange eine Bedingung wahr bleibt.",
+    "Die Quelle der Liste muss sicher sein: Dateimuster (`./*.txt`), feste Listen oder `\"$@\"`. Gib niemals die Ausgabe von `$(ls)` an eine Schleife; Namen mit Leerzeichen werden zerlegt.",
+    "**Hinweis:** Der eingebaute Simulator führt keine Schleifen aus; du schreibst sie in Skriptdateien und führst sie in deiner VM aus."
+   ],
+   "commands": [
+    {
+     "cmd": "for",
+     "what": "Führt die Befehle einmal für jedes Element der Liste aus.",
+     "where": "Wenn du dieselbe Prüfung auf mehreren Servern machst oder Dateien eines Ordners verarbeitest.",
+     "why": "Kürzt wiederholten Code und senkt die Fehlerquote.",
+     "example": "for i in 1 2 3; do echo \"n=$i\"; done",
+     "nosim": true
+    },
+    {
+     "cmd": "while",
+     "what": "Wiederholt die Befehle, solange die Bedingung wahr ist.",
+     "where": "Beim Warten auf ein Ereignis oder beim Lesen von Dateien.",
+     "why": "Du musst die Rundenzahl nicht vorher kennen.",
+     "example": "while [ -e /tmp/lock ]; do sleep 1; done",
+     "nosim": true
+    },
+    {
+     "cmd": "echo {1..5}",
+     "what": "Brace Expansion: erzeugt 1 2 3 4 5 (im Bereich keine Leerzeichen).",
+     "where": "Für Zahlenbereiche oder nummerierte Dateireihen.",
+     "why": "Erzeugt kurze Listen ohne Schleife; wird auch in `for i in {1..5}` genutzt.",
+     "example": "echo {1..5}"
+    },
+    {
+     "cmd": "break / continue",
+     "what": "`break` beendet die Schleife, `continue` springt zur nächsten Runde.",
+     "where": "Beim Überspringen leerer Zeilen oder wenn das Gesuchte gefunden ist.",
+     "why": "Vermeidet unnötige Arbeit und verschachtelte `if`.",
+     "example": "[ -n \"$line\" ] || continue",
+     "nosim": true
+    }
+   ],
+   "tip": "Passt ein Dateimuster auf nichts, bleibt `./*.txt` wörtlich stehen. Setze `[ -e \"$f\" ] || continue` an den Anfang des Schleifenrumpfs."
+  },
+  {
+   "id": "readfile",
+   "title": "Eine Datei zeilenweise lesen",
+   "body": [
+    "Das richtige Muster zum zeilenweisen Lesen ist `while IFS= read -r line; do ... done < file`. `IFS=` bewahrt führende und folgende Leerzeichen, `-r` interpretiert Backslashes nicht.",
+    "Schreibe nicht `for line in $(cat file)`: Zeilen werden an Leerzeichen zerlegt, jedes Wort wird eine Runde. Die Umleitung `done < ~/lab/servers.txt` macht die Datei zur Eingabe der Schleife."
+   ],
+   "commands": [
+    {
+     "cmd": "while IFS= read -r",
+     "what": "Liest die Eingabe zeilenweise und legt jede Zeile in eine Variable.",
+     "where": "Bei Serverlisten, Logs oder CSV-Dateien.",
+     "why": "Liest sicher, ohne Leerzeichen und Backslashes zu verändern.",
+     "example": "while IFS= read -r host; do echo \"$host\"; done < servers.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "done < file",
+     "what": "Leitet die Eingabe der Schleife aus einer Datei um.",
+     "where": "In der letzten Zeile eines `while read`-Blocks.",
+     "why": "Eine Pipe (`cat | while`) läuft in einer Subshell; Variablen sind nach der Schleife weg, bei der Umleitung nicht.",
+     "example": "done < ~/lab/servers.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "wc -l",
+     "what": "Gibt die Zeilenanzahl aus.",
+     "where": "Wenn du wissen willst, wie viele Runden die Schleife dreht.",
+     "why": "Du vergleichst deine Erwartung mit der echten Zahl.",
+     "example": "wc -l ~/lab/servers.txt"
+    }
+   ],
+   "warn": "Endet die letzte Zeile nicht mit `\\n`, kann `read` sie überspringen. Füge bei Bedarf `|| [ -n \"$host\" ]` hinzu."
+  },
+  {
+   "id": "case",
+   "title": "Verzweigen mit case",
+   "body": [
+    "`case` vergleicht einen Wert mit Mustern und ist viel lesbarer als eine lange `if/elif`-Kette. Jeder Zweig beginnt mit `muster)` und endet mit `;;`; `*)` läuft, wenn nichts passt. Der Block endet mit `esac`.",
+    "Typisch: das erste Argument (`$1`) wie bei `./menu.sh start` verzweigen oder je nach Präfix eines Servernamens anders handeln."
+   ],
+   "commands": [
+    {
+     "cmd": "case ... esac",
+     "what": "Verzweigt einen Wert nach Mustern.",
+     "where": "In Dienstskripten (start/stop/status) und Menüs.",
+     "why": "Lesbar; unbekannte Eingaben fängst du mit `*)` ab.",
+     "example": "case \"$1\" in start) echo go ;; *) echo usage ;; esac",
+     "nosim": true
+    },
+    {
+     "cmd": "$1  $@  $#",
+     "what": "Erstes Argument, alle Argumente und Anzahl der Argumente.",
+     "where": "Wenn du dem Skript Werte von außen gibst.",
+     "why": "Das Skript wird wiederverwendbar; `\"$@\"` bewahrt Argumente mit Leerzeichen.",
+     "example": "echo \"first: $1, count: $#\"",
+     "nosim": true
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Gibt dem Skript das Ausführungsrecht.",
+     "where": "Bevor du es mit `./menu.sh` startest.",
+     "why": "Ohne das Recht erhältst du `Permission denied`.",
+     "example": "chmod +x ~/scripts/menu.sh"
+    }
+   ],
+   "tip": "Mehrere Muster kombinierst du mit `|`, etwa `start|restart)`."
+  },
+  {
+   "id": "functions",
+   "title": "Funktionen, local und Arrays",
+   "body": [
+    "Eine **Funktion** gibt wiederholtem Code einen Namen: `name() { ...; }`. Variablen sind in Bash standardmäßig **global**; ohne `local` in der Funktion überschreibst du Variablen von außen.",
+    "`return` liefert nur einen Exit-Code von 0–255. Für Text nutze `echo` und fange ihn mit `$(funktion)` ab. Ein **Array** sammelt mehrere Werte unter einem Namen; in Schleifen immer `\"${arr[@]}\"` schreiben, damit Elemente mit Leerzeichen heil bleiben."
+   ],
+   "commands": [
+    {
+     "cmd": "name() { ...; }",
+     "what": "Gibt einem Codeblock einen Namen, den du später aufrufst.",
+     "where": "Wenn dieselbe Prüfung an mehreren Stellen im Skript läuft.",
+     "why": "Gliedert den Code, beendet Wiederholung und erleichtert Tests.",
+     "example": "log() { echo \"[log] $1\"; }",
+     "nosim": true
+    },
+    {
+     "cmd": "local",
+     "what": "Begrenzt eine Variable auf die Funktion.",
+     "where": "Bei temporären Variablen in Funktionen.",
+     "why": "Du überschreibst nicht versehentlich gleichnamige Variablen außerhalb.",
+     "example": "local msg=$1",
+     "nosim": true
+    },
+    {
+     "cmd": "arr=(a b c)",
+     "what": "Definiert ein Array mit drei Elementen.",
+     "where": "Bei Listen von Servern oder Optionen.",
+     "why": "Die Liste steckt in einer Variablen; mit `${#arr[@]}` erhältst du die Anzahl.",
+     "example": "hosts=(web01 web02 db01)",
+     "nosim": true
+    },
+    {
+     "cmd": "\"${arr[@]}\"",
+     "what": "Expandiert jedes Element als eigenes, gequotetes Wort.",
+     "where": "Beim Bau einer `for`-Schleife über ein Array.",
+     "why": "Elemente mit Leerzeichen werden nicht zerlegt.",
+     "example": "for h in \"${hosts[@]}\"; do echo \"$h\"; done",
+     "nosim": true
+    }
+   ],
+   "tip": "Arrays gibt es nur in Bash, nicht in `sh` (dash). Schreibe `#!/usr/bin/env bash` in die erste Zeile."
+  },
+  {
+   "id": "cleanup",
+   "title": "Sichere Skripte: set, mktemp, trap",
+   "body": [
+    "Lege temporäre Dateien nicht mit festem Namen, sondern mit `mktemp` an: Der Name ist eindeutig und nicht vorhersagbar. Mit `trap ... EXIT` läuft die Aufräumfunktion, wie auch immer das Skript endet (Fehler, Ctrl+C, normal); `kill -9` ist die Ausnahme.",
+    "`set -euo pipefail` macht das Skript strenger: Stopp bei Fehlern (`-e`), Stopp bei undefinierten Variablen (`-u`), Fehler in Pipelines bleiben sichtbar (`pipefail`)."
+   ],
+   "commands": [
+    {
+     "cmd": "mktemp -d",
+     "what": "Erzeugt ein temporäres Verzeichnis mit eindeutigem Namen und gibt den Pfad aus.",
+     "where": "Wenn das Skript Zwischendateien braucht.",
+     "why": "Verhindert Kollisionen und Angriffe über vorhersagbare Namen.",
+     "example": "tmp=$(mktemp -d)",
+     "nosim": true
+    },
+    {
+     "cmd": "trap cleanup EXIT",
+     "what": "Führt die Funktion `cleanup` aus, wenn das Skript endet.",
+     "where": "Bei temporären Verzeichnissen, Lock-Dateien oder Verbindungen.",
+     "why": "Auch nach einem Fehler wird aufgeräumt.",
+     "example": "trap cleanup EXIT",
+     "nosim": true
+    },
+    {
+     "cmd": "set -euo pipefail",
+     "what": "Stoppt das Skript bei Fehlern, undefinierten Variablen und Pipeline-Fehlern.",
+     "where": "In den ersten Zeilen des Skripts.",
+     "why": "Du stoppst sofort, statt still falsch weiterzumachen.",
+     "example": "set -euo pipefail",
+     "nosim": true
+    }
+   ],
+   "danger": "Löschst du in `trap`, gilt dieselbe Regel: schreibe `rm -rf \"${tmp:?}\"`. Ist `tmp` leer, wird aus `rm -rf $tmp/` in Wahrheit `rm -rf /`. Teste zuerst mit `echo rm -rf \"$tmp\"`."
+  },
+  {
+   "id": "pitfalls",
+   "title": "Fallstricke und Fehlersuche",
+   "body": [
+    "Der häufigste Fehler sind **unquotierte Variablen**: `touch $F` mit `F=\"my notes.txt\"` erzeugt zwei Dateien (`my` und `notes.txt`). Regel: Setze Variablen immer als `\"$F\"` in Anführungszeichen.",
+    "Die gefährlichste Zeile ist `rm -rf $DIR/*`: Ist `DIR` leer, wird daraus `rm -rf /*`. `\"${DIR:?}\"` stoppt das Skript mit Fehler bei leerem oder undefiniertem Wert. Zeige den Pfad vor dem Löschen mit `echo`.",
+    "Fehlersuche: `bash -n` prüft die Syntax ohne Ausführung, `bash -x` zeigt jeden Befehl mit `+`-Präfix, `shellcheck` findet häufige Fallen."
+   ],
+   "commands": [
+    {
+     "cmd": "\"$var\"",
+     "what": "Quotet die Variable; kein Word Splitting und keine Glob-Expansion.",
+     "where": "Bei jeder Verwendung einer Variablen.",
+     "why": "Dateinamen mit Leerzeichen bleiben ein Stück.",
+     "example": "touch \"$F\""
+    },
+    {
+     "cmd": "\"${DIR:?}\"",
+     "what": "Bricht mit Fehler ab, wenn `DIR` leer oder undefiniert ist.",
+     "where": "Bei `rm -rf` und anderen zerstörerischen Befehlen.",
+     "why": "Verhindert, dass eine leere Variable den Pfad `/` löscht.",
+     "example": "rm -rf \"${DIR:?}/\"*",
+     "nosim": true
+    },
+    {
+     "cmd": "shellcheck",
+     "what": "Analysiert das Skript statisch und meldet Fallen mit Code (SC2086).",
+     "where": "Nach dem Schreiben, vor dem Commit.",
+     "why": "Findet unquotierte Variablen und Ähnliches ohne Ausführung.",
+     "example": "shellcheck ~/scripts/bad.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -n",
+     "what": "Prüft nur die Syntax, ohne das Skript auszuführen.",
+     "where": "Bei Verdacht auf fehlendes `done`, `fi` oder `esac`.",
+     "why": "Ungefährlich; es läuft kein Befehl.",
+     "example": "bash -n ~/scripts/loop.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -x",
+     "what": "Schreibt jeden Befehl mit Expansionen und `+`-Präfix auf den Bildschirm.",
+     "where": "Wenn sich das Skript unerwartet verhält.",
+     "why": "Du siehst, was die Variablen wirklich enthalten.",
+     "example": "bash -x ~/scripts/loop.sh",
+     "nosim": true
+    }
+   ],
+   "tip": "Lass einen zerstörerischen Befehl zuerst mit vorangestelltem `echo` laufen: `echo rm -rf \"$DIR\"`. Stimmt die Ausgabe, entfernst du das `echo`.",
+   "warn": "ShellCheck installierst du unter Ubuntu/Debian mit `sudo apt install shellcheck`, unter Rocky/Alma mit EPEL: `sudo dnf install epel-release`, danach `sudo dnf install ShellCheck`."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Erzeuge `~/scripts/loop.sh` mit `printf`; die erste Zeile soll `#!/usr/bin/env bash` sein (Umleitung `>`).",
+   "hint": "`printf '#!/usr/bin/env bash\\n' > ~/scripts/loop.sh` — das `\\n` am Ende ist der Zeilenumbruch."
+  },
+  "t02": {
+   "text": "Wie viele Server stehen in `~/lab/servers.txt`? Zähle mit `wc -l` und schätze, wie viele Runden eine Schleife drehen würde.",
+   "hint": "`wc -l ~/lab/servers.txt` gibt die Zeilenzahl aus."
+  },
+  "t03": {
+   "text": "Hänge mit `>>` (ohne Überschreiben) eine `for i in 1 2 3; do ... done`-Schleife an `loop.sh` an: drei Zeilen mit `printf`.",
+   "hint": "In einfachen Anführungszeichen wird `$i` von der Shell nicht expandiert. Nutze `\\n` für Zeilenumbrüche."
+  },
+  "t04": {
+   "text": "Mache `loop.sh` ausführbar (Rechte 755).",
+   "hint": "`chmod 755 ~/scripts/loop.sh` oder `chmod +x`; prüfe mit `ls -l` auf `-rwxr-xr-x`."
+  },
+  "t05": {
+   "text": "Schreibe `~/scripts/readlines.sh` mit dem Muster `while IFS= read -r host; do ... done < ~/lab/servers.txt`, das jeden Server mit `echo` ausgibt.",
+   "hint": "Schreibe mit einem einzigen `printf` vier Zeilen; die letzte ist `done < ~/lab/servers.txt`."
+  },
+  "t06": {
+   "text": "Setze `F=\"my notes.txt\"` und lege die Datei mit `touch \"$F\"` an. Was wäre ohne Anführungszeichen passiert?",
+   "hint": "Zwei Befehle: erst die Zuweisung, dann `touch \"$F\"`. Prüfe mit `ls`."
+  },
+  "t07": {
+   "text": "Schreibe `~/scripts/arr.sh`: Es definiert das Array `hosts=(web01 web02 db01)` und gibt es mit `for h in \"${hosts[@]}\"; do ... done` aus.",
+   "hint": "Im einfach gequoteten `printf` steht `\"${hosts[@]}\"` unverändert."
+  },
+  "t08": {
+   "text": "Schätze die Ausgabe von `./scripts/count.sh | wc -l`, bevor du es startest: wie viele Zeilen? Führe es dann aus und prüfe.",
+   "hint": "Das Skript enthält drei `echo`-Zeilen; sieh mit `cat scripts/count.sh` nach."
+  },
+  "t09": {
+   "text": "Setze mit `DIR=` eine leere Variable und führe `echo \"rm -rf $DIR/\"` aus. Welchen Pfad würde es löschen? Schätze, dann prüfe.",
+   "hint": "Das leere `$DIR` verschwindet; übrig bleibt `/`. Darum schreibt man `\"${DIR:?}\"`."
+  },
+  "t10": {
+   "text": "`~/scripts/hello.sh` läuft nicht (`Permission denied`). Repariere es und führe es aus.",
+   "hint": "`ls -l ~/scripts` zeigt die Rechte; `chmod +x` ergänzt sie; dann `~/scripts/hello.sh`."
+  },
+  "t11": {
+   "text": "Die Zeile `rm -rf $DIR/*` in `~/scripts/clean.sh` ist gefährlich. Schreibe die Datei neu: `DIR=/home/student/tmpwork` bleibt, die Löschzeile nutzt `\"${DIR:?}/\"*`.",
+   "hint": "Sieh mit `cat ~/scripts/clean.sh` nach; schreibe dann die drei Zeilen mit `printf` neu."
+  },
+  "t12": {
+   "text": "In `~/scripts/list_files.sh` steht `for f in $(ls *.txt)`; das zerlegt Namen mit Leerzeichen. Schreibe die Datei mit Glob neu: `for f in ./*.txt; do`.",
+   "hint": "Sieh den Inhalt mit `cat` an. Schreibe vier Zeilen mit `printf`; `$f` bleibt in einfachen Anführungszeichen."
+  },
+  "t13": {
+   "text": "Erzeuge `~/scripts/menu.sh`: `case \"$1\" in` mit den Zweigen `start)`, `stop)` und `*)`, Ende mit `esac`; mache es danach ausführbar.",
+   "hint": "Schreibe die Datei mit einem `printf`, dann `chmod 755`. Jeder Zweig endet mit `;;`."
+  },
+  "t14": {
+   "text": "Schreibe `~/scripts/safe.sh`: temporäres Verzeichnis mit `mktemp -d`, eine Funktion `cleanup()`, `trap cleanup EXIT` und eine Funktion `log()` mit `local`.",
+   "hint": "Erst `tmp=$(mktemp -d)`, dann `cleanup() { rm -rf \"${tmp:?}\"; }`, ganz am Ende `trap cleanup EXIT`."
+  },
+  "t15": {
+   "text": "Welche Server haben in `~/lab/app.log` einen `ERROR` gemeldet? Schreibe die eindeutigen, sortierten Servernamen in `~/lab/failed_hosts.txt`.",
+   "hint": "`grep ERROR`, dann `cut -d' ' -f4`, `sort -u`; leite die Ausgabe mit `>` in die Datei um."
+  },
+  "t16": {
+   "text": "Ticket: Das nächtliche Aufräumskript hat auf einem Server mehr gelöscht als gedacht, weil die Variable leer war. Schreibe `~/scripts/cleanup.sh`: `set -euo pipefail`, `DIR=/home/student/tmpwork`, ein `trap` beim Beenden, `\"${DIR:?}/\"*` beim Löschen; ausführbar.",
+   "hint": "Ein `printf` mit fünf Zeilen, dann `chmod 755`. `trap \"echo cleanup done\" EXIT` genügt."
+  },
+  "t17": {
+   "text": "Ticket: Das Team möchte ein Skript, das jeden Server aus `~/lab/servers.txt` prüft. Schreibe `~/scripts/check_all.sh`: Funktion `check_host()` mit `local`, Schleife `while IFS= read -r host; do`, `done < ~/lab/servers.txt`; ausführbar.",
+   "hint": "Erst die Funktion, dann die Schleife; leere Zeilen mit `[ -n \"$host\" ] || continue` überspringen; zuletzt `chmod 755`."
+  }
+ },
+ "vm": {
+  "intro": "Mache diese Aufgaben in deiner eigenen VM (Ubuntu, Rocky/Alma oder WSL). Alles passiert unter `~/scripts`; fasse keine Systemdateien an. Bevor du etwas mit `rm` ausprobierst, erstelle einen VM-Snapshot (Modul 0.2) und setze `echo` vor den Löschbefehl.",
+  "tasks": {
+   "v01": {
+    "title": "Erste Schleife und bash -n",
+    "text": "Schreibe eine `for`-Schleife, prüfe sie zuerst mit `bash -n` und führe sie dann aus. Füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/scripts && cd ~/scripts\nprintf '#!/usr/bin/env bash\\nfor i in 1 2 3; do\\n  echo \"n=$i\"\\ndone\\n' > loop.sh\nchmod +x loop.sh\nbash -n loop.sh && ./loop.sh",
+      "expected": "n=1\nn=2\nn=3"
+     }
+    ],
+    "differs": [
+     "Meldet `bash -n` einen Fehler, prüfe mit `cat loop.sh` die Zeilen `do` und `done`.",
+     "Bei `Permission denied` hast du `chmod +x loop.sh` vergessen."
+    ]
+   },
+   "v02": {
+    "title": "Schleife über Datei und case",
+    "text": "Lies die Serverliste zeilenweise und gib mit `case` je nach Name eine Rolle aus.",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\nprintf 'web01\\nweb02\\ndb01\\ncache01\\nmail01\\n' > servers.txt\ncat > readlines.sh <<'EOF'\n#!/usr/bin/env bash\nwhile IFS= read -r host; do\n  case \"$host\" in\n    web*) echo \"$host: web\" ;;\n    db*) echo \"$host: database\" ;;\n    *) echo \"$host: other\" ;;\n  esac\ndone < servers.txt\nEOF\nbash readlines.sh",
+      "expected": "web01: web\nweb02: web\ndb01: database\ncache01: other\nmail01: other"
+     }
+    ],
+    "differs": [
+     "Ist die Ausgabe leer, prüfe mit `ls`, ob `servers.txt` im selben Ordner liegt.",
+     "Steht überall `other`, hast du dich in den `case`-Mustern (`web*)`) vertippt."
+    ]
+   },
+   "v03": {
+    "title": "Funktion, local, mktemp, trap",
+    "text": "Führe ein Skript aus, das ein temporäres Verzeichnis anlegt und beim Beenden aufräumt. Füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\ncat > safe.sh <<'EOF'\n#!/usr/bin/env bash\nset -euo pipefail\ntmp=$(mktemp -d)\ncleanup() {\n  rm -rf \"${tmp:?}\"\n  echo \"cleanup: removed $tmp\"\n}\ntrap cleanup EXIT\nlog() {\n  local msg=$1\n  echo \"work in $tmp: $msg\"\n}\nlog \"hello\"\nEOF\nbash safe.sh",
+      "expected": "work in /tmp/tmp.Ab12Cd: hello\ncleanup: removed /tmp/tmp.Ab12Cd"
+     }
+    ],
+    "differs": [
+     "Der Verzeichnisname ist bei jedem Lauf anders; wichtig ist, dass beide Zeilen erscheinen.",
+     "Fehlt die `cleanup`-Zeile, prüfe, ob `trap cleanup EXIT` nach der Funktion steht."
+    ]
+   },
+   "v04": {
+    "title": "Fallen mit shellcheck finden",
+    "text": "Installiere ShellCheck und prüfe ein Skript mit unquotierter Variable. Füge die Warnung ein.",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu/Debian\nsudo apt install -y shellcheck\n# Rocky/Alma (needs EPEL)\nsudo dnf install -y epel-release && sudo dnf install -y ShellCheck",
+      "expected": "..."
+     },
+     {
+      "cmd": "cd ~/scripts\nprintf '#!/usr/bin/env bash\\nF=\"my notes.txt\"\\ntouch $F\\n' > bad.sh\nshellcheck bad.sh",
+      "expected": "In bad.sh line 3:\ntouch $F\n      ^-- SC2086 (info): Double quote to prevent globbing and word splitting."
+     }
+    ],
+    "differs": [
+     "Schlägt die Installation fehl, prüfe unter Rocky mit `dnf repolist`, ob `epel-release` aktiv ist.",
+     "Je nach ShellCheck-Version unterscheidet sich der Text leicht; der Code `SC2086` genügt."
+    ]
+   },
+   "v05": {
+    "title": "bash -x und sicherer Test",
+    "text": "Verfolge mit `bash -x` jeden Schritt des Skripts; probiere danach `rm` mit leerem `DIR` nur mit `echo` aus (kein echtes Löschen).",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\nbash -x loop.sh 2>&1 | head -8\nDIR=\"\"\necho rm -rf $DIR/*",
+      "expected": "+ for i in 1 2 3\n+ echo n=1\nn=1\n...\nrm -rf /bin /boot /etc ..."
+     }
+    ],
+    "differs": [
+     "Zeilen mit `+` sind die Spur von `bash -x`; mehrere `+` zeigen verschachtelte Befehle.",
+     "Die letzte Zeile ist nur `echo`, es wird nichts gelöscht; sie zeigt nur, dass die leere Variable zu `/*` wird."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Was passiert bei `rm -rf $DIR/*`, wenn `DIR` leer ist, und welche Schreibweise schützt?",
+   "options": [
+    "Nichts passiert; füge `rm -i` hinzu",
+    "Nur das Home-Verzeichnis wird gelöscht; nutze `sudo`",
+    "Es wird `/*` zu löschen versucht; `\"${DIR:?}\"` schützt",
+    "Es gibt einen Fehler; `chmod 000` genügt"
+   ],
+   "explain": "Die leere Variable verschwindet und der Befehl wird zu `rm -rf /*`. `${DIR:?}` stoppt das Skript bei leerem Wert."
+  },
+  "q2": {
+   "q": "Welches Muster liest eine Datei sicher zeilenweise?",
+   "options": [
+    "`for l in $(cat file); do ... done`",
+    "`while IFS= read -r l; do ... done < file`",
+    "`cat file | for l; do ... done`",
+    "`ls file | read l`"
+   ],
+   "explain": "`for` mit `$(cat)` zerlegt Zeilen in Wörter. `while IFS= read -r` liest die Zeile unverändert."
+  },
+  "q3": {
+   "q": "Was bewirkt `local x=1` in einer Funktion?",
+   "options": [
+    "Macht `x` zur Konstante",
+    "Gibt `x` an Kindprozesse weiter",
+    "Definiert `x` im ganzen System",
+    "Macht `x` nur innerhalb der Funktion gültig"
+   ],
+   "explain": "`local` begrenzt den Geltungsbereich auf die Funktion; gleichnamige Variablen außerhalb bleiben unberührt."
+  },
+  "q4": {
+   "q": "Wann läuft `trap cleanup EXIT`?",
+   "options": [
+    "Wie auch immer das Skript endet (auch bei Fehlern); außer bei `kill -9`",
+    "Nur bei Ctrl+C",
+    "Vor der ersten Zeile des Skripts",
+    "Nur wenn `cleanup` 0 zurückgibt"
+   ],
+   "explain": "Die EXIT-Falle läuft bei normalem Ende, Fehlern und den meisten Signalen; SIGKILL lässt sich nicht abfangen."
+  }
+ },
+ "summary": [
+  "`for` läuft für jedes Listenelement, `while` solange die Bedingung wahr ist; wähle eine sichere Quelle.",
+  "Lies Dateien mit `while IFS= read -r line; do ... done < file`, nicht mit `$(cat)`.",
+  "`case ... esac` verzweigt Argumente und Menüs lesbar; `*)` ist der Standardzweig.",
+  "Nutze `local` in Funktionen; durchlaufe Arrays mit `\"${arr[@]}\"`.",
+  "Lege temporäre Dateien mit `mktemp` an und räume mit `trap cleanup EXIT` auf.",
+  "Quote jede Variable; schreibe beim Löschen `\"${DIR:?}\"` und teste zuerst mit `echo`.",
+  "`bash -n`, `bash -x` und `shellcheck` zeigen Fehler ohne Ausführung oder Schritt für Schritt."
+ ],
+ "glossary": [
+  {"term": "Schleife (loop)", "meaning": "Struktur, die einen Befehlsblock wiederholt: `for`, `while`."},
+  {"term": "Word Splitting", "meaning": "Zerlegen einer unquotierten Variablen an Leerzeichen."},
+  {"term": "IFS", "meaning": "Zeichen, an denen die Shell Wörter trennt (Feldtrenner)."},
+  {"term": "case", "meaning": "Mehrfachverzweigung, die einen Wert mit Mustern vergleicht."},
+  {"term": "local", "meaning": "Schlüsselwort, das eine Variable auf die Funktion begrenzt."},
+  {"term": "Array", "meaning": "Bash-Variable, die mehrere Werte unter einem Namen hält."},
+  {"term": "trap", "meaning": "Legt einen Befehl fest, der bei einem Signal oder beim Beenden läuft."},
+  {"term": "mktemp", "meaning": "Erzeugt eine temporäre Datei oder ein Verzeichnis mit eindeutigem Namen."},
+  {"term": "shellcheck", "meaning": "Statisches Analysewerkzeug für Shell-Skripte."},
+  {"term": "bash -x", "meaning": "Trace-Modus, der jeden Befehl mit Expansionen vor der Ausführung ausgibt."}
+ ]
+}

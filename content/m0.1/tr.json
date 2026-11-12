@@ -1,0 +1,141 @@
+{
+ "title": "Linux nedir? — Çekirdek, dağıtım, felsefe",
+ "lead": "Linux'un gerçekte ne olduğunu anla: bir çekirdek, onun etrafında kurulan dağıtımlar ve komut satırını bu kadar güçlü yapan fikirler.",
+ "objectives": [
+  "Çekirdek (kernel), dağıtım ve kabuk (shell) arasındaki farkı açıklayabilirsin.",
+  "İki büyük dağıtım ailesini (Debian ve RHEL) ve paket araçlarını bilirsin.",
+  "Çekirdek sürümünü, dağıtımı ve mimariyi `uname` ve `/etc/os-release` ile bulursun.",
+  "\"Her şey bir dosyadır\" ilkesini ve ana üst dizinlerin amacını bilirsin."
+ ],
+ "sections": [
+  {
+   "id": "kernel",
+   "title": "Çekirdek, dağıtım ve kabuk",
+   "body": [
+    "**Linux** aslında yalnızca **çekirdek**tir (kernel): donanımla konuşan, süreçleri zamanlayan ve belleği yöneten çekirdek parça. Linus Torvalds 1991'de başlattı. Çekirdek tek başına kullanılamaz — araçlara, kütüphanelere ve komut yazabileceğin bir yola ihtiyacın var.",
+    "Bir **dağıtım** (distro), çekirdeği GNU araçları, bir paket yöneticisi, bir yükleyici ve varsayılan ayarlarla birlikte paketler. Ubuntu, Debian, Fedora, Rocky Linux ve AlmaLinux birer dağıtımdır. **Kabuk** (genellikle `bash`) komutlarını okuyan ve çekirdekten çalıştırmasını isteyen programdır.",
+    "Ne çalıştırdığını iki kaynak söyler: `uname` çekirdeği ve mimariyi, `/etc/os-release` dağıtımı bildirir. Yardım isterken veya dokümantasyon okurken ikisini de kullanacaksın."
+   ],
+   "commands": [
+    {"cmd": "uname -r", "what": "Çekirdek sürümünü (release) yazdırır.", "where": "Destek veya hata bildirimi için çekirdek sürümünü kontrol ederken.", "why": "Çekirdek sürümü hangi donanım ve özelliklere sahip olduğunu belirler.", "example": "uname -r"},
+    {"cmd": "uname -a", "what": "Tüm sistem bilgisini tek satırda yazdırır.", "where": "Sistem ayrıntılarını bir bilet (ticket) içine yapıştırırken.", "why": "Ana bilgisayar adını, çekirdeği ve mimariyi tek seferde gösterir.", "example": "uname -a"},
+    {"cmd": "uname -m", "what": "Makine mimarisini yazdırır (x86_64, aarch64, ...).", "where": "Yazılım veya ISO indirmeden önce.", "why": "Paketler mimariye göre derlenir.", "example": "uname -m"},
+    {"cmd": "cat /etc/os-release", "what": "Dağıtım adını ve sürümünü gösterir.", "where": "Her modern dağıtımda.", "why": "Standart bir dosyadır; Ubuntu, Rocky, Alma ve diğerlerinde aynı biçimdedir.", "example": "cat /etc/os-release"}
+   ],
+   "tip": "Çekirdek ve dağıtım ayrı sürümlenir: Ubuntu 24.04 çekirdek 6.8 ile, Rocky Linux 9 pek çok geri taşımayla (backport) birlikte 5.14 ile gelir."
+  },
+  {
+   "id": "family",
+   "title": "Dağıtım aileleri ve lisanslar",
+   "body": [
+    "Dağıtımlar **aileler** halinde gruplanır. **Debian ailesi** (Debian, Ubuntu, Mint) `.deb` paketlerini ve `apt` aracını kullanır. **RHEL ailesi** (Red Hat Enterprise Linux, Rocky, AlmaLinux, Fedora) `.rpm` paketlerini ve `dnf` aracını kullanır. Bu kursta öğrendiğin komutlar ikisinde de çalışır; yalnızca paket yönetimi farklıdır.",
+    "Linux çekirdeği GPL-2.0-only lisansıyla yayımlanır; bir dağıtımın paketlediği araç ve uygulamalar farklı lisanslar kullanabilir. Bu açıklık yüzlerce dağıtımın oluşmasını destekler; kurumsal üreticiler yazılımın yanı sıra destek ve hizmet de sunabilir. `/etc/os-release` içindeki `ID_LIKE` satırı aileyi söyler: Rocky `rhel fedora`, Ubuntu `debian` bildirir.",
+    "Bu kursta referans sistemin bir **Rocky/Alma Linux** VM'idir; Ubuntu eşit bir alternatiftir. Modül 0.2'de hangisini kurduysan onu kullan."
+   ],
+   "commands": [
+    {"cmd": "grep ID_LIKE /etc/os-release", "what": "Sürüm dosyasından yalnızca aile satırını gösterir.", "where": "apt mi dnf mi kullanacağından emin olmadığında.", "why": "Uzun bir dosyayı ihtiyacın olan tek bilgiye indirger.", "example": "grep ID_LIKE /etc/os-release"}
+   ],
+   "tip": "`ID_LIKE` içinde `debian` varsa `apt`; `rhel` veya `fedora` varsa `dnf` kullan."
+  },
+  {
+   "id": "philosophy",
+   "title": "Felsefe ve dizin ağacı",
+   "body": [
+    "Unix düşüncesi dört satırda: **her şey bir dosyadır** (diskler, aygıtlar ve süreçler birer yol olarak görünür), **küçük araçlar tek işi iyi yapar**, araçlar **boru hatlarıyla (pipe) birleştirilir** ve yapılandırma okuyup düzenleyebileceğin **düz metindir**.",
+    "Tüm dosyalar `/` (kök dizin) ile başlayan **tek bir ağaçta** yaşar. Sürücü harfi yoktur. `/etc` yapılandırmayı, `/home` kullanıcı dosyalarını, `/var` günlükler gibi değişen verileri, `/usr` programları ve kütüphaneleri, `/tmp` geçici dosyaları, `/dev` aygıtları, `/proc` canlı çekirdek bilgisini barındırır. Modern sistemlerde `/bin` yalnızca `/usr/bin`'e bir bağlantıdır.",
+    "Normal bir kullanıcı ev dizininde çalışır: `/home/student`. Yönetici hesabı **root**'tur; onunla sonraki modüllerde dikkatle tanışacaksın."
+   ],
+   "commands": [
+    {"cmd": "ls /", "what": "Dizin ağacının en üst düzeyini listeler.", "where": "Tanımadığın bir sistemde yön bulurken.", "why": "Yukarıda anlatılan standart dizinleri gösterir.", "example": "ls /"},
+    {"cmd": "ls /etc", "what": "Yapılandırma dizinini listeler.", "where": "Bir sistem ayarını ararken.", "why": "Neredeyse tüm sistem yapılandırması burada bir metin dosyasıdır.", "example": "ls /etc"},
+    {"cmd": "cat /etc/shells", "what": "Sistemde kurulu kabukları listeler.", "where": "Hangi kabuk programlarının olduğunu merak ettiğinde.", "why": "Kabuğun değiştirilebilir bir program olduğunu gösterir.", "example": "cat /etc/shells"}
+   ],
+   "tip": "Bir şey yapılandırılabiliyorsa önce `/etc` içine bak, sonra dosyayı oku — metindir."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`uname -r` ile çekirdek sürümünü göster.", "hint": "-r release (sürüm) demektir."},
+  "t02": {"text": "`cat /etc/os-release` ile dağıtım bilgisini göster.", "hint": "`NAME` ve `ID_LIKE` satırlarına dikkat et."},
+  "t03": {"text": "`uname -a` ile tüm sistem bilgisini göster.", "hint": "-a all (hepsi) demektir."},
+  "t04": {"text": "`ls /` ile dizin ağacının en üst düzeyini listele.", "hint": "Çıktıda `etc`, `home`, `usr`, `var` dizinlerini bul."},
+  "t05": {"text": "`ls /etc` ile yapılandırma dizinini listele.", "hint": "Bunların çoğu metin dosyasıdır."},
+  "t06": {"text": "`cat /etc/shells` ile kurulu kabukları göster.", "hint": "`/bin/bash` listelenmiş olmalı."},
+  "t07": {"text": "Tahmin et: `uname -m` bu sistemde hangi mimariyi yazdırır? Sonra çalıştır.", "hint": "Çoğu PC ve VM x86_64 kullanır."},
+  "t08": {"text": "Tahmin et: `cat /etc/hostname` neyi içerir? Kontrol etmek için çalıştır.", "hint": "Varsayılan ana bilgisayar adı `linux-lab`'dır."},
+  "t09": {"text": "Tahmin et: `echo $SHELL` ne yazdırır? Kontrol etmek için çalıştır.", "hint": "Kabuk programının tam yoludur."},
+  "t10": {"text": "Hata ayıkla: `~/distro.txt` yanlışlıkla `ID=windows` diyor. Dosyanın içeriği `ID=linux` olacak şekilde üzerine yaz.", "hint": "`echo ID=linux > ~/distro.txt` içeriği değiştirir; `cat` ile kontrol et."},
+  "t11": {"text": "Mini proje: `~/about_linux` klasörünü oluştur. Çekirdek sürümünü `~/about_linux/kernel.txt` dosyasına, `/etc/os-release` içeriğini `~/about_linux/distro.txt` dosyasına kaydet.", "hint": "`uname -r > file` komut çıktısını bir dosyaya yazar."},
+  "t12": {"text": "Zorlu görev: `~/system_report.txt` dosyasını üç satırla oluştur: ana bilgisayar adı, çekirdek sürümü ve kullanıcı adın.", "hint": "`>` dosyayı oluşturur, `>>` ekler. Komutlar: `hostname`, `uname -r`, `whoami`."},
+  "t13": {"text": "Bilet: \"Bir meslektaşın bu sunucunun hangi dağıtım ailesine ait olduğunu soruyor. Sürüm dosyasındaki `ID_LIKE` satırını `~/ticket_answer.txt` dosyasına kaydet.\"", "hint": "Satır için `grep`, dosya için `>` birleştir."}
+ },
+ "vm": {
+  "intro": "Bu komutlar zararsızdır ve yalnızca okur. VM'inin (Rocky/Alma veya Ubuntu) terminalinde çalıştır ve karşılaştır.",
+  "tasks": {
+   "v01": {
+    "title": "Sistemini tanı",
+    "text": "Çekirdek sürümünü ve dağıtımı göster, iki çıktıyı da yapıştır.",
+    "blocks": [
+     {"cmd": "uname -r\ncat /etc/os-release", "expected": "5.14.0-427.el9.x86_64\nNAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\nID_LIKE=\"rhel centos fedora\"\n..."}
+    ],
+    "differs": [
+     "Ubuntu'da `NAME=\"Ubuntu\"` ve `6.8.0-...-generic` gibi bir çekirdek görürsün — bu doğrudur.",
+     "WSL'de çekirdek adı `microsoft-standard-WSL2` içerir."
+    ]
+   },
+   "v02": {
+    "title": "Dizin ağacında gez",
+    "text": "En üst düzeyi ve yapılandırma dizinini listele, ilk komutun çıktısını yapıştır.",
+    "blocks": [
+     {"cmd": "ls /\nls /etc | head -n 15", "expected": "afs  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+    ],
+    "differs": [
+     "Tam liste dağıtıma göre değişir, ama `etc`, `home`, `usr` ve `var` mutlaka bulunmalı.",
+     "Modern sistemlerde `bin`, `usr/bin`'e bir bağlantı olarak görünür; `ls -ld /bin` ile kontrol et."
+    ]
+   },
+   "v03": {
+    "title": "1 numaralı süreçle tanış",
+    "text": "Her sistem ilk olarak tek bir süreç başlatır. Adını bul.",
+    "blocks": [
+     {"cmd": "ps -p 1 -o comm=", "expected": "systemd"}
+    ],
+    "differs": [
+     "Bazı konteynerlerde `bash` veya `init` görebilirsin; normal bir VM'de `systemd`'dir.",
+     "`ps` yoksa bunun yerine `cat /proc/1/comm` çalıştır."
+    ]
+   },
+   "v04": {
+    "title": "Bağlantıyı ve aileni kontrol et",
+    "text": "`/bin`'in bir bağlantı olduğunu kontrol et ve sisteminin apt mi dnf mi kullandığına karar ver.",
+    "blocks": [
+     {"cmd": "ls -ld /bin\ngrep ID_LIKE /etc/os-release\nwhich apt dnf", "expected": "lrwxrwxrwx. 1 root root 7 ... /bin -> usr/bin"}
+    ],
+    "differs": [
+     "`which` yalnızca var olan aracı yazdırır: Ubuntu'da `apt`, Rocky/Alma'da `dnf`.",
+     "`which` ikisi için de bir şey yazdırmazsa `command -v dnf` dene veya önce `which` kur."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Linux çekirdeği (kernel) nedir?", "options": ["Masaüstü olan eksiksiz bir işletim sistemi", "Donanımı, belleği ve süreçleri yöneten çekirdek parça", "Bir metin düzenleyici", "Bir paket yöneticisi"], "explain": "Linux aslında çekirdek demektir. Dağıtım onun etrafına araçlar, paketler ve bir yükleyici ekler."},
+  "q2": {"q": "Hangi paket aracı Rocky Linux / RHEL ailesine aittir?", "options": ["apt", "pacman", "yalnızca zypper", "dnf"], "explain": "RHEL ailesi sistemleri dnf ile yönetilen rpm paketlerini kullanır; Debian ve Ubuntu apt kullanır."},
+  "q3": {"q": "Dağıtımın adını ve sürümünü hangi dosya gösterir?", "options": ["/etc/os-release", "/etc/hostname", "/proc/cpuinfo", "/var/log/messages"], "explain": "`/etc/os-release` tüm modern dağıtımlardaki standart dosyadır."},
+  "q4": {"q": "\"Her şey bir dosyadır\" ne demektir?", "options": ["Her dosya bir programdır", "Hiç dizin yoktur", "Aygıtlara, süreçlere ve ayarlara yollar üzerinden ulaşılır ve aynı araçlarla okunur", "Dosyalar silinemez"], "explain": "Diskler `/dev` altında, süreçler `/proc` altında görünür; `cat` ve `ls` gibi aynı araçlar bunlarda da çalışır."}
+ },
+ "summary": [
+  "Linux çekirdektir; dağıtım araçlar, paketler ve yükleyici ekler; kabuk komutlarını okur.",
+  "Debian ailesi `apt`, RHEL ailesi `dnf` kullanır; `/etc/os-release` içindeki `ID_LIKE` hangisi olduğunu söyler.",
+  "`uname -r`, `uname -m` ve `cat /etc/os-release` her sistemi tanımlar.",
+  "`/` ile başlayan tek ağaç: `/etc` yapılandırma, `/home` kullanıcılar, `/var` veri, `/usr` programlar.",
+  "Unix felsefesi: her şey dosya, küçük araçlar, düz metin yapılandırma."
+ ],
+ "glossary": [
+  {"term": "kernel", "meaning": "Donanımı, belleği ve süreçleri denetleyen işletim sisteminin çekirdeği."},
+  {"term": "distribution", "meaning": "Eksiksiz bir sistem: çekirdek artı araçlar, paketler, yükleyici ve varsayılanlar."},
+  {"term": "shell", "meaning": "Komutlarını okuyan ve çalıştıran program, genellikle bash."},
+  {"term": "package manager", "meaning": "Yazılımı kuran ve güncelleyen araç: apt veya dnf."},
+  {"term": "root directory", "meaning": "Dosya ağacının tepesi, `/` olarak yazılır."},
+  {"term": "GPL", "meaning": "Özgür yazılım lisansları ailesi; Linux çekirdeği GPL-2.0-only ile lisanslıdır."}
+ ]
+}

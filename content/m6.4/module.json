@@ -1,0 +1,45 @@
+{
+  "id": "6.4",
+  "level": 6,
+  "setup": {
+    "dirs": ["/home/student/lvm"],
+    "files": {
+      "/home/student/lvm/pvs.txt": "PV         VG      Fmt  PSize  PFree\n/dev/sdb   vg_data lvm2 10.00g 0\n/dev/sdc   vg_data lvm2 10.00g 4.00g\n/dev/sda2  vg_sys  lvm2 29.00g 0\n",
+      "/home/student/lvm/vgs.txt": "VG      #PV #LV VSize  VFree\nvg_data   2   2 19.99g 4.00g\nvg_sys    1   2 29.00g 0\n",
+      "/home/student/lvm/lvs.txt": "lv_web vg_data -wi-ao---- 10.00g\nlv_db vg_data -wi-ao---- 5.00g\nlv_root vg_sys -wi-ao---- 25.00g\nlv_swap vg_sys -wi-ao---- 4.00g\n",
+      "/home/student/lvm/fs.txt": "xfs: grow=yes shrink=NO\next4: grow=yes shrink=yes(unmounted only)\n",
+      "/home/student/lvm/grow.sh": "lvextend -L +2G /dev/vg_data/lv_web\n",
+      "/home/student/lvm/fstab.test": "/dev/vg_data/lv_wb /srv/web xfs defaults 0 0\n"
+    }
+  },
+  "tasks": [
+    {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^cat \\S*vgs\\.txt$", "ok": true}, "solution": ["cat ~/lvm/vgs.txt"]},
+    {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^grep vg_data \\S*lvs\\.txt$", "ok": true}, "solution": ["grep vg_data ~/lvm/lvs.txt"]},
+    {"id": "t03", "kind": "warmup", "diff": 1, "check": {"exists": "~/lvm/fstab.bak", "type": "f"}, "solution": ["cp ~/lvm/fstab.test ~/lvm/fstab.bak"]},
+    {"id": "t04", "kind": "guided", "diff": 2, "check": [{"contains": ["~/lvm/lab.sh", "truncate -s 300M \\S*disk1\\.img"]}, {"contains": ["~/lvm/lab.sh", "losetup -f --show \\S*disk1\\.img"]}], "solution": ["printf 'truncate -s 300M ~/lvm-lab/disk1.img\\n' > ~/lvm/lab.sh", "printf 'sudo losetup -f --show ~/lvm-lab/disk1.img\\n' >> ~/lvm/lab.sh"]},
+    {"id": "t05", "kind": "guided", "diff": 2, "check": [{"contains": ["~/lvm/lab.sh", "pvcreate /dev/loop0"]}, {"contains": ["~/lvm/lab.sh", "vgcreate vg_data /dev/loop0"]}], "solution": ["printf 'sudo pvcreate /dev/loop0\\n' >> ~/lvm/lab.sh", "printf 'sudo vgcreate vg_data /dev/loop0\\n' >> ~/lvm/lab.sh"]},
+    {"id": "t06", "kind": "guided", "diff": 2, "check": [{"contains": ["~/lvm/lab.sh", "lvcreate -L 200M -n lv_web vg_data"]}, {"contains": ["~/lvm/lab.sh", "mkfs\\.xfs /dev/vg_data/lv_web"]}], "solution": ["printf 'sudo lvcreate -L 200M -n lv_web vg_data\\n' >> ~/lvm/lab.sh", "printf 'sudo mkfs.xfs /dev/vg_data/lv_web\\n' >> ~/lvm/lab.sh"]},
+    {"id": "t07", "kind": "predict", "diff": 2, "check": [{"cmd": "^grep -c vg_data \\S*lvs\\.txt$", "ok": true}, {"out": "2"}], "solution": ["grep -c vg_data ~/lvm/lvs.txt"]},
+    {"id": "t08", "kind": "predict", "diff": 2, "check": [{"cmd": "^grep xfs \\S*fs\\.txt$", "ok": true}, {"out": "shrink=NO"}], "solution": ["grep xfs ~/lvm/fs.txt"]},
+    {"id": "t09", "kind": "debug", "diff": 2, "check": {"contains": ["~/lvm/grow.sh", "lvextend (-r -L \\+2G|-L \\+2G -r) /dev/vg_data/lv_web"]}, "solution": ["echo 'lvextend -r -L +2G /dev/vg_data/lv_web' > ~/lvm/grow.sh"]},
+    {"id": "t10", "kind": "debug", "diff": 2, "check": {"equals": ["~/lvm/fstab.test", "/dev/vg_data/lv_web /srv/web xfs defaults 0 0\n"]}, "solution": ["echo '/dev/vg_data/lv_web /srv/web xfs defaults 0 0' > ~/lvm/fstab.test"]},
+    {"id": "t11", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lvm/data-lvs.txt", "lv_web"]}, {"contains": ["~/lvm/data-lvs.txt", "lv_db"]}, {"linesMin": ["~/lvm/data-lvs.txt", 2]}], "solution": ["grep vg_data ~/lvm/lvs.txt | cut -d' ' -f1 > ~/lvm/data-lvs.txt"]},
+    {"id": "t12", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lvm/check.sh", "pvs"]}, {"contains": ["~/lvm/check.sh", "vgs"]}, {"contains": ["~/lvm/check.sh", "lvs"]}, {"mode": ["~/lvm/check.sh", "755"]}], "solution": ["printf 'pvs\\nvgs\\nlvs\\n' > ~/lvm/check.sh", "chmod 755 ~/lvm/check.sh"]},
+    {"id": "t13", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/lvm/runbook.txt", "pvcreate"]}, {"contains": ["~/lvm/runbook.txt", "vgcreate"]}, {"contains": ["~/lvm/runbook.txt", "lvcreate"]}, {"contains": ["~/lvm/runbook.txt", "mkfs"]}, {"contains": ["~/lvm/runbook.txt", "lvextend -r"]}, {"linesMin": ["~/lvm/runbook.txt", 5]}], "solution": ["printf 'pvcreate /dev/loop0\\nvgcreate vg_data /dev/loop0\\nlvcreate -L 200M -n lv_web vg_data\\nmkfs.xfs /dev/vg_data/lv_web\\nlvextend -r -L +100M /dev/vg_data/lv_web\\n' > ~/lvm/runbook.txt"]},
+    {"id": "t14", "kind": "challenge", "diff": 3, "check": [{"cmd": "uniq -c", "ok": true}, {"out": "2 vg_data"}], "solution": ["tr -s ' ' < ~/lvm/lvs.txt | cut -d' ' -f2 | sort | uniq -c"]},
+    {"id": "t15", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lvm/ticket-fix.sh", "pvcreate /dev/loop1"]}, {"contains": ["~/lvm/ticket-fix.sh", "vgextend vg_sys /dev/loop1"]}, {"contains": ["~/lvm/ticket-fix.sh", "lvextend -r -L \\+5G /dev/vg_sys/lv_root"]}], "solution": ["printf 'pvcreate /dev/loop1\\nvgextend vg_sys /dev/loop1\\nlvextend -r -L +5G /dev/vg_sys/lv_root\\n' > ~/lvm/ticket-fix.sh"]},
+    {"id": "t16", "kind": "guided", "diff": 1, "check": [{"exists": "~/mnt/web", "type": "d"}, {"exists": "~/mnt/web/index.html", "type": "f"}], "solution": ["mkdir -p ~/mnt/web", "touch ~/mnt/web/index.html"]}
+  ],
+  "vm": [
+    {"id": "v01", "expect": "(?=[\\s\\S]*VG)(?=[\\s\\S]*LV)"},
+    {"id": "v02", "expect": "vg_data"},
+    {"id": "v03", "expect": "lv_web"},
+    {"id": "v04", "expect": null}
+  ],
+  "quiz": [
+    {"id": "q1", "answer": 1},
+    {"id": "q2", "answer": 3},
+    {"id": "q3", "answer": 0},
+    {"id": "q4", "answer": 2}
+  ]
+}

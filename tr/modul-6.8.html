@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6.8 Bitirme Projesi — Küçük Şirket Sunucusu — Temel Linux Akademisi</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","tr")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="6.8">
+<header class="top"><a class="brand" href="index.html">Temel Linux Akademisi</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (isteğe bağlı)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-6.8.html" hreflang="tr" lang="tr" data-switch="tr" aria-current="true">TR</a><a href="../de/modul-6.8.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-6.8.html" hreflang="en" lang="en" data-switch="en">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Tema" aria-label="Tema">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Genel ilerleme"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><ol><li><a href="#plan">1. Önce plan ve güvenlik</a></li><li><a href="#users">2. Kullanıcılar, gruplar ve ortak dizin</a></li><li><a href="#web">3. nginx ile web sitesi, SELinux ve AppArmor</a></li><li><a href="#firewall">4. Güvenlik duvarı: 80 ve 443 açık, SSH korunur</a></li><li><a href="#backup">5. Yedek betiği ve systemd zamanlayıcısı</a></li><li><a href="#verify">6. Doğrulama kontrol listesi ve teslim raporu</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>İçindekiler</summary><ol><li><a href="#plan">1. Önce plan ve güvenlik</a></li><li><a href="#users">2. Kullanıcılar, gruplar ve ortak dizin</a></li><li><a href="#web">3. nginx ile web sitesi, SELinux ve AppArmor</a></li><li><a href="#firewall">4. Güvenlik duvarı: 80 ve 443 açık, SSH korunur</a></li><li><a href="#backup">5. Yedek betiği ve systemd zamanlayıcısı</a></li><li><a href="#verify">6. Doğrulama kontrol listesi ve teslim raporu</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Ana sayfa</a> <span aria-hidden="true">/</span> Seviye 6</p>
+<h1><span class="module-id">6.8</span> Bitirme Projesi — Küçük Şirket Sunucusu</h1>
+<p class="lead">Öğrendiklerini tek sunucuda birleştir: kullanıcılar, ortak dizin, web sitesi, güvenlik duvarı, yedek, zamanlayıcı ve doğrulanmış bir teslim raporu.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>Bu modülde neler öğreneceksin?</h2><ul><li>Önce tüm sunucuyu planlar, bir şeyi değiştirmeden önce VM anlık görüntüsü (snapshot) alırsın.</li><li>alice, bob, carol kullanıcılarını, staff ve admins gruplarını ve setgid&#x27;li ortak dizin /srv/company&#x27;yi kurarsın.</li><li>nginx ile site yayınlar, doğru etiketler (SELinux) veya AppArmor&#x27;u kontrol eder, SSH&#x27;ten kopmadan 80/443 portlarını açarsın.</li><li>Yedeği bir betik ve systemd zamanlayıcısı ile otomatikleştirirsin.</li><li>Her adımı kontrol listesiyle doğrular ve teslim raporu yazarsın.</li></ul></section>
+<section id="plan"><h2>1. Önce plan ve güvenlik</h2>
+<p>Hedef: <code>linux-lab</code> adlı küçük bir şirket sunucusu. Üç kişi çalışıyor: <strong>alice</strong> (yönetici), <strong>bob</strong> ve <strong>carol</strong>. Her şey <code>/srv/company</code> altında: <code>shared</code> (ekip dosyaları), <code>admin</code> (yalnızca yöneticiler), <code>web</code> (site), <code>backup</code> ve <code>scripts</code>.</p>
+<p><strong>VM&#x27;de çalış, asla üretim makinesinde değil.</strong> Bu proje kullanıcı oluşturur, izinleri, SELinux etiketlerini, güvenlik duvarı kurallarını ve systemd birimlerini değiştirir. Başlamadan önce <strong>snapshot</strong> al (modül 0.2). Bir adım bozulursa saniyeler içinde geri dönersin.</p>
+<p>Yerleşik terminal <code>useradd</code>, <code>nginx</code>, <code>firewall-cmd</code> veya <code>systemctl</code> çalıştıramaz. Bu yüzden simülatör görevleri projenin <strong>dosyalarını</strong> (izin ağacı, betik, birim dosyaları, rapor) <code>~/srv/company</code> altında yeniden kurar; VM görevleri ise gerçek işi <code>/srv/company</code> içinde yapar.</p>
+<p>Çalışma sırası: 1) plan + snapshot, 2) kullanıcılar ve dizinler, 3) web, 4) güvenlik duvarı, 5) yedek + zamanlayıcı, 6) doğrulama + rapor. RHEL/Rocky ile Debian/Ubuntu yalnızca birkaç komutta ayrılır; ikisi de gösterilir.</p>
+<article class="cmd"><h3><code>cat /etc/os-release</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dağıtım adını ve sürümünü gösterir.</dd><dt>Nerede kullanılır?</dt><dd>dnf mi apt mi kullanacağını seçmeden önce.</dd><dt>Neden önemli?</dt><dd>Rehberin hangi varyantının geçerli olduğunu söyler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cat /etc/os-release" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="cat /etc/os-release">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>getenforce</code></h3><dl><dt>Ne işe yarar?</dt><dd>SELinux modunu yazar: Enforcing, Permissive veya Disabled.</dd><dt>Nerede kullanılır?</dt><dd>RHEL, Rocky, Alma, Fedora.</dd><dt>Neden önemli?</dt><dd>Web etiketini denemeden önce modu bilmelisin; Enforcing kalsın.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">getenforce</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="getenforce">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo aa-status</code></h3><dl><dt>Ne işe yarar?</dt><dd>Hangi AppArmor profillerinin hangi modda yüklü olduğunu gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Debian ve Ubuntu.</dd><dt>Neden önemli?</dt><dd>Ubuntu SELinux yerine AppArmor kullanır; burada yalnızca kontrol edersin.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> aa-status</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo aa-status">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>id</code></h3><dl><dt>Ne işe yarar?</dt><dd>Kullanıcı kimliğini ve grup üyeliklerini gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Ortak dizini kimin kullanabileceğini kontrol ederken.</dd><dt>Neden önemli?</dt><dd>Grup üyeliği <code>/srv/company/shared</code> erişimini belirler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">id</span> student</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="id student" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="id student">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Çalışırken bir not dosyası tut. Çalıştırdığın her komut daha sonra teslim raporunda bir satır olur.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>Şimdi bir VM snapshot&#x27;ı al ve adını <code>before-company-project</code> koy. Bu projeyi başkalarının kullandığı gerçek bir sunucuda çalıştırma.</p></aside>
+</section>
+<section id="users"><h2>2. Kullanıcılar, gruplar ve ortak dizin</h2>
+<p><code>staff</code> (alice, bob, carol) ve <code>admins</code> (yalnızca alice) gruplarını oluştur. Kullanıcılar için <code>useradd -m -G</code> kullan. Kullanıcı silmek bu projenin parçası <strong>değil</strong> (<code>userdel -r</code> ev dizinlerini de siler).</p>
+<p>Ortak dizin iki şeye ihtiyaç duyar. <strong>Setgid</strong> (<code>chmod 2770</code>) yeni dosyaların dizinin grubunu (<code>staff</code>) devralmasını sağlar; böylece bob, carol&#x27;ın dosyasını düzenleyebilir. <code>770</code> modu diğer herkesi dışarıda tutar. İsteğe bağlı olarak <strong>varsayılan ACL</strong> (<code>setfacl -d -m g:staff:rwx</code>) sıkı bir umask&#x27;ta bile yeni dosyaları grup için yazılabilir yapar.</p>
+<p>En az yetki ilkesi: <code>web</code> <code>755</code> (nginx okuyabilmeli), <code>scripts</code> <code>750</code>, <code>backup</code> <code>700</code>. Simülatörde aynı modları <code>~/srv/company</code> üzerinde <code>chmod</code> ile çalışırsın; normal kullanıcı orada <code>chgrp</code> yapamaz, grup kısmı yalnızca VM&#x27;dedir.</p>
+<article class="cmd"><h3><code>sudo useradd -m -s /bin/bash -G staff alice</code></h3><dl><dt>Ne işe yarar?</dt><dd>Ev dizini, kabuk ve ek grupla kullanıcı oluşturur.</dd><dt>Nerede kullanılır?</dt><dd>alice, bob, carol için birer kez.</dd><dt>Neden önemli?</dt><dd>Kendi ev dizinleri olan gerçek hesaplar.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> useradd <span class="tf">-m</span> <span class="tf">-s</span> <span class="tp">/bin/bash</span> <span class="tf">-G</span> staff alice</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo useradd -m -s /bin/bash -G staff alice">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo chgrp staff /srv/company/shared</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dizinin sahibi olan grubu ayarlar.</dd><dt>Nerede kullanılır?</dt><dd>shared ve admin dizinlerinde.</dd><dt>Neden önemli?</dt><dd>Setgid&#x27;in yeni dosyalara aktardığı şey grup sahipliğidir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chgrp staff <span class="tp">/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo chgrp staff /srv/company/shared">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>chmod 2770</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sahip ve grup için rwx, diğerleri için hiçbir şey, ayrıca setgid biti ayarlar.</dd><dt>Nerede kullanılır?</dt><dd>shared ve admin dizinlerinde.</dd><dt>Neden önemli?</dt><dd>Yeni dosyalar grubu devralır; dışarıdakiler erişemez.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 2770 <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod 2770 ~/srv/company/shared" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod 2770 ~/srv/company/shared">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo setfacl -d -m g:staff:rwx</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dizindeki yeni dosyaların devralacağı varsayılan ACL koyar.</dd><dt>Nerede kullanılır?</dt><dd>shared dizininde (paket <code>acl</code>).</dd><dt>Neden önemli?</dt><dd>Kullanıcının umask&#x27;ı 077 olsa bile grup yazabilir kalır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> setfacl <span class="tf">-d</span> <span class="tf">-m</span> g:staff:rwx <span class="tp">/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo setfacl -d -m g:staff:rwx /srv/company/shared">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ls -ld</code></h3><dl><dt>Ne işe yarar?</dt><dd>İçeriği değil, dizinin kendisini gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Modu ve grubu doğrularken.</dd><dt>Neden önemli?</dt><dd><code>drwxrws---</code> setgid&#x27;in açık olduğunu gösterir (<code>s</code> harfi).</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -ld ~/srv/company/shared" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -ld ~/srv/company/shared">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p><code>drwxr-S---</code> içindeki büyük <code>S</code>, setgid&#x27;in açık ama grubun çalıştırma (x) bitinin olmadığı anlamına gelir; modu düzelt.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>İzin sorunlarını asla <code>chmod 777</code> ile çözme. Herkes dosyaları değiştirebilir veya silebilir.</p></aside>
+</section>
+<section id="web"><h2>3. nginx ile web sitesi, SELinux ve AppArmor</h2>
+<p>nginx&#x27;i kur ve <code>/srv/company/web</code> dizinini sunmasını sağla. <code>/etc/nginx/conf.d/company.conf</code> içine <code>company.local</code> adlı bir sunucu bloğu ekliyoruz (iki ailede de çalışır) ve varsayılan site karışmasın diye <code>Host:</code> başlığıyla test ediyoruz.</p>
+<p><strong>RHEL/Rocky:</strong> SELinux her dosyayı etiketler. <code>/srv</code> altındaki yeni dizin genel bir etiket alır; Unix izinleri doğru olsa bile nginx <strong>403 Forbidden</strong> alır. Çözüm doğru etikettir: <code>semanage fcontext</code> kuralı saklar, <code>restorecon</code> uygular. Kestirme olarak <code>setenforce 0</code> kullanma; bu tüm sistemin korumasını kapatır.</p>
+<p><strong>Debian/Ubuntu:</strong> ayarlanacak etiket yok. AppArmor etkindir ama nginx normalde bir profille kısıtlanmaz; yalnızca <code>aa-status</code> ile durumu kontrol edersin. Orada 403 normal bir izin sorunudur (<code>/srv</code>&#x27;ye kadar dizin modlarını kontrol et).</p>
+<article class="cmd"><h3><code>sudo dnf install -y nginx</code></h3><dl><dt>Ne işe yarar?</dt><dd>nginx kurar (RHEL, Rocky, Alma). Ubuntu&#x27;da <code>sudo apt install -y nginx</code> kullan.</dd><dt>Nerede kullanılır?</dt><dd>Web bölümünün ilk adımı.</dd><dt>Neden önemli?</dt><dd>Paket yöneticisi dosyaları ve bağımlılıkları halleder.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> dnf install <span class="tf">-y</span> nginx</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo dnf install -y nginx">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo semanage fcontext -a -t httpd_sys_content_t &quot;/srv/company/web(/.*)?&quot;</code></h3><dl><dt>Ne işe yarar?</dt><dd>Kural saklar: web altındaki dosyalar web-içeriği etiketini alır.</dd><dt>Nerede kullanılır?</dt><dd>RHEL ailesi (paket <code>policycoreutils-python-utils</code>).</dd><dt>Neden önemli?</dt><dd>Etiket yeniden etiketlemeden sonra da kalır; <code>chcon</code> kalmaz.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> semanage fcontext <span class="tf">-a</span> <span class="tf">-t</span> httpd_sys_content_t <span class="ts">&quot;/srv/company/web(/.*)?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo semanage fcontext -a -t httpd_sys_content_t &quot;/srv/company/web(/.*)?&quot;">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo restorecon -Rv /srv/company/web</code></h3><dl><dt>Ne işe yarar?</dt><dd>Saklanan etiket kuralını mevcut dosyalara uygular.</dd><dt>Nerede kullanılır?</dt><dd><code>semanage fcontext</code>&#x27;ten hemen sonra.</dd><dt>Neden önemli?</dt><dd>Bunsuz kural vardır ama dosyalar eski etiketi korur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> restorecon <span class="tf">-Rv</span> <span class="tp">/srv/company/web</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo restorecon -Rv /srv/company/web">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ls -Zd /srv/company/web</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dizinin SELinux etiketini gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Etiketi doğrularken.</dd><dt>Neden önemli?</dt><dd><code>httpd_sys_content_t</code> görmek istersin.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -Zd /srv/company/web">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo nginx -t</code></h3><dl><dt>Ne işe yarar?</dt><dd>nginx yapılandırmasını yeniden başlatmadan test eder.</dd><dt>Nerede kullanılır?</dt><dd>Her başlatma veya yeniden yüklemeden önce.</dd><dt>Neden önemli?</dt><dd>Bir yazım hatası siteyi çökertebilir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> nginx <span class="tf">-t</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo nginx -t">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>SELinux&#x27;un neyi engellediğini görmek için: <code>sudo ausearch -m avc -ts recent</code>. Bir şeyi değiştirmeden önce kaydı oku.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p><code>setenforce 0</code> olsa olsa bir teşhis aracıdır, çözüm değil. Bunun yerine dosyaları etiketle.</p></aside>
+</section>
+<section id="firewall"><h2>4. Güvenlik duvarı: 80 ve 443 açık, SSH korunur</h2>
+<p>RHEL/Rocky <strong>firewalld</strong>, Ubuntu <strong>ufw</strong> kullanır. SSH ile bağlıyken ikisi de seni kendi sunucundan dışarıda bırakabilir. Kurallar: SSH açık kalsın, önce <strong>runtime</strong> (geçici) kuralla test et, testten sonra <strong>kalıcı</strong> yap.</p>
+<p>firewalld: <code>--permanent</code> olmayan kurallar yeniden yüklemede veya yeniden başlatmada kaybolur; <code>--timeout=300</code> ile kendiliğinden silinir. ufw: kurallar hemen kaydedilir, bu yüzden <code>ufw enable</code>&#x27;dan <strong>önce</strong> SSH&#x27;i izin ver.</p>
+<p>Güvenlik duvarını değiştirirken her zaman <strong>ikinci bir SSH oturumu açık</strong> tut (veya VM konsolu). Yeni kurallar seni dışarıda bırakırsa açık oturum veya konsol çalışmaya devam eder.</p>
+<article class="cmd"><h3><code>sudo firewall-cmd --list-services</code></h3><dl><dt>Ne işe yarar?</dt><dd>Etkin bölgede izinli servisleri listeler.</dd><dt>Nerede kullanılır?</dt><dd>Her değişiklikten önce ve sonra.</dd><dt>Neden önemli?</dt><dd><code>ssh</code>&#x27;ın hâlâ orada olduğunu doğrular.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--list-services</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo firewall-cmd --list-services">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo firewall-cmd --permanent --add-service={http,https}</code></h3><dl><dt>Ne işe yarar?</dt><dd>80 ve 443 portları için kalıcı kural saklar.</dd><dt>Nerede kullanılır?</dt><dd>Runtime testi çalıştıktan sonra.</dd><dt>Neden önemli?</dt><dd>Yeniden yüklemeyi ve yeniden başlatmayı atlatır; <code>--reload</code> ile uygulanır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--permanent</span> <span class="tf">--add-service={http,https}</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo firewall-cmd --permanent --add-service={http,https}">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo ufw allow OpenSSH</code></h3><dl><dt>Ne işe yarar?</dt><dd>ufw&#x27;de SSH&#x27;e (port 22) izin verir.</dd><dt>Nerede kullanılır?</dt><dd>Ubuntu, her zaman <code>ufw enable</code>&#x27;dan önce.</dd><dt>Neden önemli?</dt><dd>Güvenlik duvarı açılırken kopmayı önler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> ufw allow OpenSSH</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo ufw allow OpenSSH">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo ufw allow 80/tcp</code></h3><dl><dt>Ne işe yarar?</dt><dd>HTTP&#x27;ye izin verir; HTTPS için <code>443/tcp</code> ile tekrarla.</dd><dt>Nerede kullanılır?</dt><dd>Ubuntu web sunucusu.</dd><dt>Neden önemli?</dt><dd>Yalnızca sitenin ihtiyaç duyduğu portları açar.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> ufw allow <span class="tp">80/tcp</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo ufw allow 80/tcp">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ss -tulpn</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dinleyen TCP/UDP portlarını süreçle birlikte listeler.</dd><dt>Nerede kullanılır?</dt><dd>Sunucunun gerçekte ne sunduğunu görmek için.</dd><dt>Neden önemli?</dt><dd>Beklenmeyen her port raporun için bir bulgudur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ss</span> <span class="tf">-tulpn</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ss -tulpn">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p><code>ss</code> çıktısını simülatörde çalış: ev dizinindeki audit dosyaları <code>grep</code> ve <code>cut</code> ile inceleyebileceğin örnek bir liste içerir.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p>SSH ile bağlıyken <code>ssh</code> servisini asla kaldırma veya 22 portunu engelleme. <code>firewall-cmd --reload</code> veya <code>ufw enable</code>&#x27;dan <strong>önce</strong> <code>--list-services</code> ya da <code>ufw status</code> ile ssh&#x27;ı kontrol et. Dışarıda kalırsan VM konsolunu kullan, gerekirse snapshot&#x27;ı geri yükle.</p></aside>
+</section>
+<section id="backup"><h2>5. Yedek betiği ve systemd zamanlayıcısı</h2>
+<p>Yedek kısa bir betiktir (modül 6.5/6.6): <code>shared</code>, <code>web</code> ve <code>admin</code> için tarihli bir <code>tar.gz</code> arşivi <code>/srv/company/backup</code> içine yazar ve 7 günden eski arşivleri siler. Gerçek hayatta ikinci disk veya uzak kopya daha iyidir; proje için yerel klasör yeterli.</p>
+<p>Betiği systemd çalıştırır: <code>Type=oneshot</code> bir <code>.service</code> neyin çalışacağını, bir <code>.timer</code> ne zaman çalışacağını (<code>OnCalendar=</code>, <code>Persistent=true</code>) tanımlar. Servisi değil <strong>zamanlayıcıyı</strong> etkinleştir. Birim dosyalarını oluşturduktan veya değiştirdikten sonra <code>systemctl daemon-reload</code> çalıştır.</p>
+<p>RHEL/Rocky&#x27;de <code>/srv/company/scripts</code> içindeki betik genel etiket taşır ve systemd çalıştırmayı reddedebilir (durum 203/EXEC). Web dizininde yaptığın gibi <code>semanage fcontext</code> ve <code>restorecon</code> ile ona <code>bin_t</code> etiketini ver.</p>
+<article class="cmd"><h3><code>tar -czf</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sıkıştırılmış arşiv oluşturur.</dd><dt>Nerede kullanılır?</dt><dd>Yedek betiğinde.</dd><dt>Neden önemli?</dt><dd>Yedek başına tarihli tek dosya saklaması ve geri yüklemesi kolaydır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">tar</span> <span class="tf">-czf</span> <span class="tp">/srv/company/backup/company-test.tar.gz</span> <span class="tf">-C</span> <span class="tp">/srv/company</span> shared web admin</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="tar -czf /srv/company/backup/company-test.tar.gz -C /srv/company shared web admin">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>systemctl daemon-reload</code></h3><dl><dt>Ne işe yarar?</dt><dd>systemd&#x27;nin yeni veya değişmiş birim dosyalarını okumasını sağlar.</dd><dt>Nerede kullanılır?</dt><dd>Servis ve zamanlayıcıyı yazdıktan sonra.</dd><dt>Neden önemli?</dt><dd>Aksi hâlde systemd yeni birimleri tanımaz.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> systemctl daemon-reload</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo systemctl daemon-reload">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>systemctl enable --now company-backup.timer</code></h3><dl><dt>Ne işe yarar?</dt><dd>Zamanlayıcıyı açılışta etkinleştirir ve hemen başlatır.</dd><dt>Nerede kullanılır?</dt><dd>daemon-reload&#x27;dan sonra bir kez.</dd><dt>Neden önemli?</dt><dd>Yedek sen uğraşmadan her gece çalışır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> systemctl enable <span class="tf">--now</span> company-backup.timer</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo systemctl enable --now company-backup.timer">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>systemctl list-timers</code></h3><dl><dt>Ne işe yarar?</dt><dd>Zamanlayıcıları sonraki ve son çalışma zamanıyla gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Takvimi doğrularken.</dd><dt>Neden önemli?</dt><dd>Sonraki yedeğin ne zaman çalışacağını görürsün.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">systemctl</span> list-timers company-backup.timer <span class="tf">--no-pager</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="systemctl list-timers company-backup.timer --no-pager">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>chmod 755 backup.sh</code></h3><dl><dt>Ne işe yarar?</dt><dd>Betiği çalıştırılabilir yapar.</dd><dt>Nerede kullanılır?</dt><dd>Her betik oluşturduğunda.</dd><dt>Neden önemli?</dt><dd>x biti olmadan servis betiği başlatamaz.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/company/scripts/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod 755 ~/srv/company/scripts/backup.sh" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod 755 ~/srv/company/scripts/backup.sh">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Zamanlayıcıyı beklemeden önce servisi <code>sudo systemctl start company-backup.service</code> ile elle bir kez çalıştır ve <code>ls -l /srv/company/backup</code> çıktısına bak.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p><code>find ... -delete</code> geri alınamaz. Satırı önce <code>-delete</code> yerine <code>-print</code> ile dene ve yalnızca <code>/srv/company/backup</code> üzerinde çalıştır.</p></aside>
+</section>
+<section id="verify"><h2>6. Doğrulama kontrol listesi ve teslim raporu</h2>
+<p>Bir sunucu ancak <strong>kanıtın</strong> olduğunda bitmiştir. Kontrol listesini gez: kullanıcılar ve gruplar, setgid&#x27;li ortak dizin, site 200 yanıtı veriyor, SELinux etiketi veya AppArmor durumu, güvenlik duvarında ssh/80/443 var, zamanlayıcı etkin, yedek dosyası var, yedek dizini <code>700</code>.</p>
+<p>Küçük bir betik her kontrol için <code>OK:</code> veya <code>FAIL:</code> yazar; sonuç okunması ve yapıştırılması kolay olur. <strong>Teslim raporu</strong> <code>/srv/company/REPORT.txt</code> host adını, tarihi, doğrulama çıktısını ve dinleyen portları içerir. Teslim ettiğin budur.</p>
+<p>Bir satır FAIL diyorsa ilgili bölüme dön ve düzelt. Başarısızlığı gizlemek için raporu elle düzenleme.</p>
+<article class="cmd"><h3><code>getent group staff</code></h3><dl><dt>Ne işe yarar?</dt><dd>Grup kaydını üyeleriyle gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Grup üyeliğini kanıtlamak için.</dd><dt>Neden önemli?</dt><dd>Gerçek kullanıcı veritabanından okur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">getent</span> group staff</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="getent group staff">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>stat -c &#x27;%A %U:%G %n&#x27; /srv/company/shared</code></h3><dl><dt>Ne işe yarar?</dt><dd>İzinleri, sahibi ve grubu tek satırda yazar.</dd><dt>Nerede kullanılır?</dt><dd>Kontrollerde ve raporda.</dd><dt>Neden önemli?</dt><dd>Modun <code>drwxrws---</code> olduğunun kısa kanıtı.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">stat</span> <span class="tf">-c</span> <span class="ts">&#x27;%A %U:%G %n&#x27;</span> <span class="tp">/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="stat -c &#x27;%A %U:%G %n&#x27; /srv/company/shared">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>curl -I</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca HTTP başlıklarını getirir.</dd><dt>Nerede kullanılır?</dt><dd>Web sitesini yerel olarak test etmek için.</dd><dt>Neden önemli?</dt><dd><code>200 OK</code>, nginx&#x27;in yerel isteğe yanıt verdiğini ve içerik izin/etiketlerinin erişime izin verdiğini gösterir; dış güvenlik duvarını ayrıca kural listesiyle ve mümkünse başka bir makineden test et.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">curl</span> <span class="tf">-I</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="curl -I -H &#x27;Host: company.local&#x27; http://localhost">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>wc -l</code></h3><dl><dt>Ne işe yarar?</dt><dd>Satırları sayar.</dd><dt>Nerede kullanılır?</dt><dd>Raporun boş olmadığını kontrol etmek için.</dd><dt>Neden önemli?</dt><dd>Rapor gerçek içerik taşımalı.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">wc</span> <span class="tf">-l</span> <span class="tp">~/srv/company/REPORT.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="wc -l ~/srv/company/REPORT.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="wc -l ~/srv/company/REPORT.txt">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Kontrol listesini yeniden başlatmadan sonra da çalıştır. Bir sonraki yeniden başlatmaya kadar çalışan servis bitmiş sayılmaz.</p></aside>
+</section>
+<section id="vm"><h2>Kendi VM&#x27;inde yap <span class="gcount" data-g="vm"></span></h2><p>Asıl uygulama gerçek Linux&#x27;ta yapılır: kendi sanal makinende (VirtualBox, UTM veya WSL) komutları çalıştır, çıktıyı karşılaştır.</p><p>Gerçek projeyi VM&#x27;inde bu sırayla yap. Önce snapshot al: bir şey ters giderse geri dönersin. Görev isterse çıktıyı yapıştır. RHEL veya Ubuntu için işaretli komutlarda yalnızca kendi varyantını çalıştır.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>Snapshot ve başlangıç durumu</h3><span class="status" aria-hidden="true"></span></header><p>VM programında <code>before-company-project</code> adlı bir VM snapshot&#x27;ı al (modül 0.2). Sonra sistemi kontrol et ve çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-E</span> <span class="ts">&#x27;^(ID|PRETTY_NAME)=&#x27;</span> <span class="tp">/etc/os-release</span></span>
+<span class="ln"><span class="tc"># RHEL / Rocky / Alma:</span></span>
+<span class="ln"><span class="tk">getenforce</span></span>
+<span class="ln"><span class="tc"># Debian / Ubuntu:</span></span>
+<span class="ln"><span class="tk">sudo</span> aa-status <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 3</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -E &#x27;^(ID|PRETTY_NAME)=&#x27; /etc/os-release
+# RHEL / Rocky / Alma:
+getenforce
+# Debian / Ubuntu:
+sudo aa-status | head -n 3">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">ID=rocky
+PRETTY_NAME=&quot;Rocky Linux 9.4 (Blue Onyx)&quot;
+Enforcing</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Ubuntu&#x27;da <code>getenforce: command not found</code> normaldir; <code>aa-status</code> satırını kullan.</li><li>SELinux Permissive veya Disabled diyorsa notlarına yaz; devam et ama modu <code>setenforce</code> ile değiştirme.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Kullanıcılar, gruplar, ortak dizin</h3><span class="status" aria-hidden="true"></span></header><p>Grupları, kullanıcıları ve setgid&#x27;li dizin ağacını oluştur. Sonra kanıtla ve çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> groupadd staff</span>
+<span class="ln"><span class="tk">sudo</span> groupadd admins</span>
+<span class="ln"><span class="tk">for</span> u in alice bob carol; do sudo useradd <span class="tf">-m</span> <span class="tf">-s</span> <span class="tp">/bin/bash</span> <span class="tf">-G</span> staff <span class="tp">$u;</span> done</span>
+<span class="ln"><span class="tk">sudo</span> usermod <span class="tf">-aG</span> admins alice</span>
+<span class="ln"><span class="tk">sudo</span> mkdir <span class="tf">-p</span> <span class="tp">/srv/company/{shared,admin,web,backup,scripts}</span></span>
+<span class="ln"><span class="tk">sudo</span> chgrp staff <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">sudo</span> chgrp admins <span class="tp">/srv/company/admin</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 2770 <span class="tp">/srv/company/shared</span> <span class="tp">/srv/company/admin</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 755 <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 750 <span class="tp">/srv/company/scripts</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 700 <span class="tp">/srv/company/backup</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo groupadd staff
+sudo groupadd admins
+for u in alice bob carol; do sudo useradd -m -s /bin/bash -G staff $u; done
+sudo usermod -aG admins alice
+sudo mkdir -p /srv/company/{shared,admin,web,backup,scripts}
+sudo chgrp staff /srv/company/shared
+sudo chgrp admins /srv/company/admin
+sudo chmod 2770 /srv/company/shared /srv/company/admin
+sudo chmod 755 /srv/company/web
+sudo chmod 750 /srv/company/scripts
+sudo chmod 700 /srv/company/backup">Kopyala</button></div></div><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> <span class="tf">-u</span> bob touch <span class="tp">/srv/company/shared/from_bob.txt</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">getent</span> group staff</span>
+<span class="ln"><span class="tk">id</span> alice</span>
+<span class="ln"><span class="tk">sudo</span> <span class="tf">-u</span> carol ls <span class="tp">/srv/company/admin</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo -u bob touch /srv/company/shared/from_bob.txt
+ls -ld /srv/company/shared
+ls -l /srv/company/shared
+getent group staff
+id alice
+sudo -u carol ls /srv/company/admin">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">drwxrws--- 2 root staff 4096 ... /srv/company/shared
+-rw-r--r-- 1 bob staff 0 ... from_bob.txt
+staff:x:1002:alice,bob,carol
+uid=1001(alice) gid=1001(alice) groups=1001(alice),1002(staff),1003(admins)
+ls: cannot open directory &#x27;/srv/company/admin&#x27;: Permission denied</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Grup kimlikleri sistemler arasında farklıdır; yalnızca adlar eşleşmeli.</li><li><code>from_bob.txt</code> dosyasının grubu <code>staff</code> yerine <code>bob</code> ise setgid biti eksiktir: <code>chmod 2770</code>&#x27;i tekrarla.</li><li>İsteğe bağlı varsayılan ACL (önce <code>acl</code> paketini kur): <code>sudo setfacl -d -m g:staff:rwx /srv/company/shared</code>.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Doğru etiketli web sitesi</h3><span class="status" aria-hidden="true"></span></header><p>nginx&#x27;i kur, sunucu bloğunu ve sayfayı ekle, test et, etiketi düzelt (RHEL) veya AppArmor&#x27;u kontrol et (Ubuntu) ve son curl çıktısını yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma:</span></span>
+<span class="ln"><span class="tk">sudo</span> dnf install <span class="tf">-y</span> nginx policycoreutils-python-utils</span>
+<span class="ln"><span class="tc"># Debian / Ubuntu:</span></span>
+<span class="ln"><span class="tk">sudo</span> apt install <span class="tf">-y</span> nginx</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma:
+sudo dnf install -y nginx policycoreutils-python-utils
+# Debian / Ubuntu:
+sudo apt install -y nginx">Kopyala</button></div></div><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;&lt;h1&gt;Small Company&lt;/h1&gt;&#x27;</span> <span class="to">|</span> <span class="tk">sudo</span> tee <span class="tp">/srv/company/web/index.html</span></span>
+<span class="ln"><span class="tk">sudo</span> tee <span class="tp">/etc/nginx/conf.d/company.conf</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tk">server</span> {</span>
+<span class="ln">    <span class="tk">listen</span> 80;</span>
+<span class="ln">    <span class="tk">server_name</span> company.local;</span>
+<span class="ln">    <span class="tk">root</span> <span class="tp">/srv/company/web;</span></span>
+<span class="ln"><span class="tk">}</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> nginx <span class="tf">-t</span></span>
+<span class="ln"><span class="tk">sudo</span> systemctl enable <span class="tf">--now</span> nginx</span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-sI</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 1</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &#x27;&lt;h1&gt;Small Company&lt;/h1&gt;&#x27; | sudo tee /srv/company/web/index.html
+sudo tee /etc/nginx/conf.d/company.conf &lt;&lt;&#x27;EOF&#x27;
+server {
+    listen 80;
+    server_name company.local;
+    root /srv/company/web;
+}
+EOF
+sudo nginx -t
+sudo systemctl enable --now nginx
+curl -sI -H &#x27;Host: company.local&#x27; http://localhost | head -n 1">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">HTTP/1.1 403 Forbidden   (RHEL before the label fix)
+HTTP/1.1 200 OK          (Ubuntu)</pre>
+<div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma only:</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tk">sudo</span> semanage fcontext <span class="tf">-a</span> <span class="tf">-t</span> httpd_sys_content_t <span class="ts">&quot;/srv/company/web(/.*)?&quot;</span></span>
+<span class="ln"><span class="tk">sudo</span> restorecon <span class="tf">-Rv</span> <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tc"># Debian / Ubuntu only:</span></span>
+<span class="ln"><span class="tk">sudo</span> aa-status <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-i</span> nginx</span>
+<span class="ln"><span class="tc"># both:</span></span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-sI</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 1</span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-s</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma only:
+ls -Zd /srv/company/web
+sudo semanage fcontext -a -t httpd_sys_content_t &quot;/srv/company/web(/.*)?&quot;
+sudo restorecon -Rv /srv/company/web
+ls -Zd /srv/company/web
+# Debian / Ubuntu only:
+sudo aa-status | grep -i nginx
+# both:
+curl -sI -H &#x27;Host: company.local&#x27; http://localhost | head -n 1
+curl -s -H &#x27;Host: company.local&#x27; http://localhost">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">unconfined_u:object_r:default_t:s0 /srv/company/web
+... httpd_sys_content_t ...
+HTTP/1.1 200 OK
+&lt;h1&gt;Small Company&lt;/h1&gt;</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>RHEL&#x27;de etiket düzeltmesinden sonra 403: <code>ls -Zd</code>&#x27;yi tekrar kontrol et ve <code>/srv</code> ile <code>/srv/company</code> modlarına bak (diğerleri için <code>x</code> gerekir).</li><li><code>semanage: command not found</code>: <code>policycoreutils-python-utils</code> paketini kur.</li><li>Connection refused: <code>sudo systemctl status nginx</code>; 80 portunu başka bir servis kullanıyor olabilir (<code>ss -tulpn</code>).</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>Kopmadan güvenlik duvarı</h3><span class="status" aria-hidden="true"></span></header><p>İkinci bir SSH oturumunu veya konsolu açık tut. SSH&#x27;i kaybetmeden web portlarına izin ver, sonra kural listesini yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma (firewalld):</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--list-services</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--add-service={http,https}</span> <span class="tf">--timeout=300</span></span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-sI</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 1</span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--permanent</span> <span class="tf">--add-service={http,https}</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--reload</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--list-services</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma (firewalld):
+sudo firewall-cmd --list-services
+sudo firewall-cmd --add-service={http,https} --timeout=300
+curl -sI http://localhost | head -n 1
+sudo firewall-cmd --permanent --add-service={http,https}
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-services">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">cockpit dhcpv6-client http https ssh</pre>
+<div class="code"><pre><code><span class="ln"><span class="tc"># Debian / Ubuntu (ufw): SSH FIRST!</span></span>
+<span class="ln"><span class="tk">sudo</span> ufw allow OpenSSH</span>
+<span class="ln"><span class="tk">sudo</span> ufw allow <span class="tp">80/tcp</span></span>
+<span class="ln"><span class="tk">sudo</span> ufw allow <span class="tp">443/tcp</span></span>
+<span class="ln"><span class="tk">sudo</span> ufw enable</span>
+<span class="ln"><span class="tk">sudo</span> ufw status</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# Debian / Ubuntu (ufw): SSH FIRST!
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+sudo ufw status">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">Status: active
+OpenSSH                    ALLOW       Anywhere
+80/tcp                     ALLOW       Anywhere
+443/tcp                    ALLOW       Anywhere</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>RHEL&#x27;de listede <code>ssh</code> yoksa hemen ekle: <code>sudo firewall-cmd --permanent --add-service=ssh</code> ve reload.</li><li>Rocky&#x27;de <code>ufw: command not found</code> sorun değil; orada firewalld kullanırsın.</li><li>Dışarıda mı kaldın? VM konsolunu kullan veya snapshot&#x27;ı geri yükle.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Yedek betiği ve zamanlayıcı</h3><span class="status" aria-hidden="true"></span></header><p>Yedek betiğini ve systemd birimlerini oluştur, zamanlayıcıyı etkinleştir, elle bir yedek çalıştır ve zamanlayıcı listesini yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> tee <span class="tp">/srv/company/scripts/backup.sh</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">set</span> <span class="tf">-euo</span> pipefail</span>
+<span class="ln"><span class="tp">DEST=/srv/company/backup</span></span>
+<span class="ln"><span class="tk">tar</span> <span class="tf">-czf</span> <span class="ts">&quot;$DEST/company-$(date +%F_%H%M).tar.gz&quot;</span> <span class="tf">-C</span> <span class="tp">/srv/company</span> shared web admin</span>
+<span class="ln"><span class="tk">find</span> <span class="ts">&quot;$DEST&quot;</span> <span class="tf">-name</span> <span class="ts">&#x27;company-*.tar.gz&#x27;</span> <span class="tf">-mtime</span> +7 <span class="tf">-delete</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 750 <span class="tp">/srv/company/scripts/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo tee /srv/company/scripts/backup.sh &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+set -euo pipefail
+DEST=/srv/company/backup
+tar -czf &quot;$DEST/company-$(date +%F_%H%M).tar.gz&quot; -C /srv/company shared web admin
+find &quot;$DEST&quot; -name &#x27;company-*.tar.gz&#x27; -mtime +7 -delete
+EOF
+sudo chmod 750 /srv/company/scripts/backup.sh">Kopyala</button></div></div><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> tee <span class="tp">/etc/systemd/system/company-backup.service</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tk">[Unit]</span></span>
+<span class="ln">Description=Company <span class="tk">backup</span></span>
+<span class="ln"></span>
+<span class="ln"><span class="tk">[Service]</span></span>
+<span class="ln">Type=oneshot</span>
+<span class="ln"><span class="tp">ExecStart=/srv/company/scripts/backup.sh</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> tee <span class="tp">/etc/systemd/system/company-backup.timer</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tk">[Unit]</span></span>
+<span class="ln">Description=Daily <span class="tk">company</span> backup</span>
+<span class="ln"></span>
+<span class="ln"><span class="tk">[Timer]</span></span>
+<span class="ln">OnCalendar=*-*-* <span class="tk">02:00:00</span></span>
+<span class="ln">Persistent=true</span>
+<span class="ln"></span>
+<span class="ln"><span class="tk">[Install]</span></span>
+<span class="ln">WantedBy=timers.target</span>
+<span class="ln"><span class="tk">EOF</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo tee /etc/systemd/system/company-backup.service &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+[Unit]
+Description=Company backup
+
+[Service]
+Type=oneshot
+ExecStart=/srv/company/scripts/backup.sh
+EOF
+sudo tee /etc/systemd/system/company-backup.timer &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+[Unit]
+Description=Daily company backup
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF">Kopyala</button></div></div><div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma only (script label):</span></span>
+<span class="ln"><span class="tk">sudo</span> semanage fcontext <span class="tf">-a</span> <span class="tf">-t</span> bin_t <span class="ts">&quot;/srv/company/scripts(/.*)?&quot;</span></span>
+<span class="ln"><span class="tk">sudo</span> restorecon <span class="tf">-Rv</span> <span class="tp">/srv/company/scripts</span></span>
+<span class="ln"><span class="tc"># both:</span></span>
+<span class="ln"><span class="tk">sudo</span> systemd-analyze verify <span class="tp">/etc/systemd/system/company-backup.service</span></span>
+<span class="ln"><span class="tk">sudo</span> systemctl daemon-reload</span>
+<span class="ln"><span class="tk">sudo</span> systemctl enable <span class="tf">--now</span> company-backup.timer</span>
+<span class="ln"><span class="tk">sudo</span> systemctl start company-backup.service</span>
+<span class="ln"><span class="tk">sudo</span> ls <span class="tf">-l</span> <span class="tp">/srv/company/backup</span></span>
+<span class="ln"><span class="tk">systemctl</span> list-timers company-backup.timer <span class="tf">--no-pager</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma only (script label):
+sudo semanage fcontext -a -t bin_t &quot;/srv/company/scripts(/.*)?&quot;
+sudo restorecon -Rv /srv/company/scripts
+# both:
+sudo systemd-analyze verify /etc/systemd/system/company-backup.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now company-backup.timer
+sudo systemctl start company-backup.service
+sudo ls -l /srv/company/backup
+systemctl list-timers company-backup.timer --no-pager">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">-rw-r--r-- 1 root root 2048 ... company-2026-11-12_0215.tar.gz
+NEXT                        LEFT   LAST PASSED UNIT                 ACTIVATES
+Fri 2026-11-13 02:00:00 CET 23h    -    -      company-backup.timer company-backup.service</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>systemctl status company-backup.service</code> içinde <code>status=203/EXEC</code>: RHEL&#x27;de <code>bin_t</code> etiketini ayarla (bu bloğun ilk satırları) ve x bitini kontrol et.</li><li><code>find ... -delete</code> satırını başka dizinlerde deneme; şüphedeysen <code>-delete</code> yerine <code>-print</code> yaz.</li><li>Zamanlayıcı listede yoksa büyük olasılıkla <code>daemon-reload</code> unuttun.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v06" data-expect="1"><header><h3>Doğrulama kontrol listesi ve teslim raporu</h3><span class="status" aria-hidden="true"></span></header><p>Kontrol listesi betiğini yaz, root olarak çalıştır ve teslim raporunu oluştur. Tüm satırlar OK demeli. Verify çıktısını yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> tee <span class="tp">/srv/company/scripts/verify.sh</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">set</span> <span class="tf">-o</span> pipefail</span>
+<span class="ln"><span class="tk">chk()</span> { local label=$1; shift; if <span class="ts">&quot;$@&quot;</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1; then echo <span class="ts">&quot;OK: $label&quot;</span><span class="to">;</span> <span class="tk">else</span> echo <span class="ts">&quot;FAIL: $label&quot;</span><span class="to">;</span> <span class="tk">fi;</span> }</span>
+<span class="ln"><span class="tk">staff_ok()</span> { id <span class="tf">-nG</span> alice <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-qw</span> staff <span class="to">&amp;&amp;</span> <span class="tk">id</span> <span class="tf">-nG</span> bob <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-qw</span> staff <span class="to">&amp;&amp;</span> <span class="tk">id</span> <span class="tf">-nG</span> carol <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-qw</span> staff; }</span>
+<span class="ln"><span class="tk">site_ok()</span> { curl <span class="tf">-fsS</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-q</span> Company; }</span>
+<span class="ln"><span class="tk">selinux_ok()</span> { if ! command <span class="tf">-v</span> getenforce <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1 <span class="to">||</span> <span class="tk">[</span> <span class="ts">&quot;$(getenforce)&quot;</span> = Disabled ]; then return 0; fi; ls <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span> <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-q</span> httpd_sys_content_t; }</span>
+<span class="ln"><span class="tk">firewall_ok()</span> {</span>
+<span class="ln">  <span class="tk">if</span> command <span class="tf">-v</span> firewall-cmd <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1 <span class="to">&amp;&amp;</span> <span class="tk">firewall-cmd</span> <span class="tf">--state</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1; then</span>
+<span class="ln">    <span class="tk">local</span> services</span>
+<span class="ln">    services=$(firewall-cmd <span class="tk">--list-services)</span> <span class="to">||</span> <span class="tk">return</span> 1</span>
+<span class="ln">    <span class="tk">for</span> service in ssh http https; do [[ <span class="ts">&quot; $services &quot;</span> == *&quot; <span class="tp">$service</span> &quot;* ]] <span class="to">||</span> <span class="tk">return</span> 1; done</span>
+<span class="ln">  <span class="tk">elif</span> command <span class="tf">-v</span> ufw <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1; then</span>
+<span class="ln">    <span class="tk">local</span> status</span>
+<span class="ln">    status=$(ufw <span class="tk">status)</span> <span class="to">||</span> <span class="tk">return</span> 1</span>
+<span class="ln">    <span class="tk">grep</span> <span class="tf">-q</span> <span class="ts">&#x27;^Status: active&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span> <span class="to">&amp;&amp;</span> <span class="tk">grep</span> <span class="tf">-Eq</span> <span class="ts">&#x27;^OpenSSH[[:space:]]+ALLOW&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span> <span class="to">&amp;&amp;</span> <span class="tk">grep</span> <span class="tf">-Eq</span> <span class="ts">&#x27;^80/tcp[[:space:]]+ALLOW&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span> <span class="to">&amp;&amp;</span> <span class="tk">grep</span> <span class="tf">-Eq</span> <span class="ts">&#x27;^443/tcp[[:space:]]+ALLOW&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span></span>
+<span class="ln">  <span class="tk">else</span></span>
+<span class="ln">    <span class="tk">return</span> 1</span>
+<span class="ln">  <span class="tk">fi</span></span>
+<span class="ln"><span class="tk">}</span></span>
+<span class="ln"><span class="tk">backup_ok()</span> { compgen <span class="tf">-G</span> <span class="ts">&#x27;/srv/company/backup/company-*.tar.gz&#x27;</span> <span class="to">&gt;</span><span class="tk">/dev/null;</span> }</span>
+<span class="ln"><span class="tk">backup_mode_ok()</span> { [[ <span class="tp">$(stat</span> <span class="tf">-c</span> %a <span class="tp">/srv/company/backup)</span> == 700 ]]; }</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;alice bob carol are in staff&quot;</span> staff_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;shared has setgid&quot;</span> test <span class="tf">-g</span> <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;site answers with Small Company&quot;</span> site_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;nginx enabled&quot;</span> systemctl is-enabled <span class="tf">--quiet</span> nginx</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;web label (SELinux) or no SELinux&quot;</span> selinux_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;firewall allows SSH, HTTP and HTTPS&quot;</span> firewall_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;timer enabled&quot;</span> systemctl is-enabled <span class="tf">--quiet</span> company-backup.timer</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;backup archive exists&quot;</span> backup_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;backup dir is 700&quot;</span> backup_mode_ok</span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> bash <span class="tp">/srv/company/scripts/verify.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo tee /srv/company/scripts/verify.sh &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+set -o pipefail
+chk() { local label=$1; shift; if &quot;$@&quot; &gt;/dev/null 2&gt;&amp;1; then echo &quot;OK: $label&quot;; else echo &quot;FAIL: $label&quot;; fi; }
+staff_ok() { id -nG alice | grep -qw staff &amp;&amp; id -nG bob | grep -qw staff &amp;&amp; id -nG carol | grep -qw staff; }
+site_ok() { curl -fsS -H &#x27;Host: company.local&#x27; http://localhost | grep -q Company; }
+selinux_ok() { if ! command -v getenforce &gt;/dev/null 2&gt;&amp;1 || [ &quot;$(getenforce)&quot; = Disabled ]; then return 0; fi; ls -Zd /srv/company/web | grep -q httpd_sys_content_t; }
+firewall_ok() {
+  if command -v firewall-cmd &gt;/dev/null 2&gt;&amp;1 &amp;&amp; firewall-cmd --state &gt;/dev/null 2&gt;&amp;1; then
+    local services
+    services=$(firewall-cmd --list-services) || return 1
+    for service in ssh http https; do [[ &quot; $services &quot; == *&quot; $service &quot;* ]] || return 1; done
+  elif command -v ufw &gt;/dev/null 2&gt;&amp;1; then
+    local status
+    status=$(ufw status) || return 1
+    grep -q &#x27;^Status: active&#x27; &lt;&lt;&lt;&quot;$status&quot; &amp;&amp; grep -Eq &#x27;^OpenSSH[[:space:]]+ALLOW&#x27; &lt;&lt;&lt;&quot;$status&quot; &amp;&amp; grep -Eq &#x27;^80/tcp[[:space:]]+ALLOW&#x27; &lt;&lt;&lt;&quot;$status&quot; &amp;&amp; grep -Eq &#x27;^443/tcp[[:space:]]+ALLOW&#x27; &lt;&lt;&lt;&quot;$status&quot;
+  else
+    return 1
+  fi
+}
+backup_ok() { compgen -G &#x27;/srv/company/backup/company-*.tar.gz&#x27; &gt;/dev/null; }
+backup_mode_ok() { [[ $(stat -c %a /srv/company/backup) == 700 ]]; }
+chk &quot;alice bob carol are in staff&quot; staff_ok
+chk &quot;shared has setgid&quot; test -g /srv/company/shared
+chk &quot;site answers with Small Company&quot; site_ok
+chk &quot;nginx enabled&quot; systemctl is-enabled --quiet nginx
+chk &quot;web label (SELinux) or no SELinux&quot; selinux_ok
+chk &quot;firewall allows SSH, HTTP and HTTPS&quot; firewall_ok
+chk &quot;timer enabled&quot; systemctl is-enabled --quiet company-backup.timer
+chk &quot;backup archive exists&quot; backup_ok
+chk &quot;backup dir is 700&quot; backup_mode_ok
+EOF
+sudo bash /srv/company/scripts/verify.sh">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">OK: alice bob carol are in staff
+OK: shared has setgid
+OK: site answers with Small Company
+OK: nginx enabled
+OK: web label (SELinux) or no SELinux
+OK: firewall allows SSH, HTTP and HTTPS
+OK: timer enabled
+OK: backup archive exists
+OK: backup dir is 700</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">{</span> echo <span class="ts">&quot;Company server delivery report&quot;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;Host: $(hostname)&quot;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;Date: $(date)&quot;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;--- verification ---&quot;</span><span class="to">;</span> <span class="tk">sudo</span> bash <span class="tp">/srv/company/scripts/verify.sh;</span> echo <span class="ts">&quot;--- listening ports ---&quot;</span><span class="to">;</span> <span class="tk">ss</span> <span class="tf">-tulpn;</span> } <span class="to">|</span> <span class="tk">sudo</span> tee <span class="tp">/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">wc</span> <span class="tf">-l</span> <span class="tp">/srv/company/REPORT.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="{ echo &quot;Company server delivery report&quot;; echo &quot;Host: $(hostname)&quot;; echo &quot;Date: $(date)&quot;; echo &quot;--- verification ---&quot;; sudo bash /srv/company/scripts/verify.sh; echo &quot;--- listening ports ---&quot;; ss -tulpn; } | sudo tee /srv/company/REPORT.txt
+wc -l /srv/company/REPORT.txt">Kopyala</button></div></div><details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Herhangi bir <code>FAIL:</code> satırı: ilgili bölüme dön, düzelt ve betiği yeniden çalıştır.</li><li><code>[ ... = 700 ]</code> satırı <code>$(stat</code> öncesindeki ters eğik çizgiyi tam yazıldığı gibi ister; yoksa kabuk onu erken açar.</li><li>Son olarak yeniden başlat ve verify betiğini tekrar çalıştır: her şey hâlâ OK olmalı.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Hızlı alıştırmalar (simülatör)</h2><p>İsteğe bağlı: VM&#x27;e geçmeden önce ısınmak veya VM&#x27;in yokken denemek için tarayıcıdaki sanal terminali kullan. Görevler otomatik doğrulanır.</p><p>Görevler ısınmadan ticket&#x27;a doğru zorlaşır. Rozetler zorluğu gösterir.</p><p><button type="button" class="btn" data-openterm>&gt;_ Terminali aç (isteğe bağlı)</button></p>
+<h3 class="kind k-warmup">Isınma <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Proje kökünü ev dizininde oluştur: <code>mkdir -p ~/srv/company</code> (VM&#x27;de bu <code>/srv/company</code> olur).</p><details><summary>İpucu</summary><p><code>-p</code> eksik üst dizin <code>srv</code>&#x27;yi de oluşturur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/srv/company</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/srv/company">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>~/srv/company</code> içinde <code>shared</code>, <code>admin</code>, <code>web</code>, <code>backup</code> ve <code>scripts</code> olmak üzere beş alt dizini tek <code>mkdir</code> komutuyla oluştur.</p><details><summary>İpucu</summary><p>Süslü parantez açılımı: <code>mkdir ~/srv/company/{shared,admin,web,backup,scripts}</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tp">~/srv/company/{shared,admin,web,backup,scripts}</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir ~/srv/company/{shared,admin,web,backup,scripts}">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Proje çalışması için sıkı bir umask ayarla: <code>umask 027</code>.</p><details><summary>İpucu</summary><p>027, yeni dosyalarda diğerlerinin tüm haklarını ve grubun yazma hakkını kaldırır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 027</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 027">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Adım adım lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p>Ortak dizine <code>2770</code> modunu ver (setgid, sahip ve grup için rwx, diğerleri için hiçbir şey).</p><details><summary>İpucu</summary><p><code>chmod 2770 ~/srv/company/shared</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 2770 <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 2770 ~/srv/company/shared">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>web</code> dizinini herkes için okunabilir (<code>755</code>), <code>backup</code> dizinini özel (<code>700</code>) yap.</p><details><summary>İpucu</summary><p>Her dizin için bir <code>chmod</code> komutu, toplam iki.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/company/web</span></span>
+<span class="ln"><span class="tk">chmod</span> 700 <span class="tp">~/srv/company/backup</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 755 ~/srv/company/web
+chmod 700 ~/srv/company/backup">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p>Site sayfasını yaz: <code>&lt;h1&gt;Small Company&lt;/h1&gt;</code> metnini <code>~/srv/company/web/index.html</code> dosyasına koy.</p><details><summary>İpucu</summary><p><code>echo &quot;...&quot; &gt; file</code> kullan; <code>&lt;</code> ve <code>&gt;</code> karakterleri yüzünden metni tırnağa al.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;&lt;h1&gt;Small Company&lt;/h1&gt;&quot;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/web/index.html</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &quot;&lt;h1&gt;Small Company&lt;/h1&gt;&quot; &gt; ~/srv/company/web/index.html">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p>nginx sunucu bloğunu <code>~/srv/company/company.conf</code> dosyasına yaz: <code>server {</code>, <code>listen 80;</code>, <code>server_name company.local;</code>, <code>root /srv/company/web;</code> ve <code>}</code> satırları.</p><details><summary>İpucu</summary><p><code>\n</code> ile <code>printf</code> birden çok satırı tek seferde yazar; metni tek tırnak içine al.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;server {\n    listen 80;\n    server_name company.local;\n    root /srv/company/web;\n}\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/company.conf</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;server {\n    listen 80;\n    server_name company.local;\n    root /srv/company/web;\n}\n&#x27; &gt; ~/srv/company/company.conf">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Tahmin et <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t08" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>ls -ld ~/srv/company/shared</code> hangi izin dizesini gösterecek? Bir kenara yaz, sonra komutu çalıştır.</p><details><summary>İpucu</summary><p><code>s</code> grup <code>x</code>&#x27;inin yerini alır: <code>drwxrws---</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -ld ~/srv/company/shared">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>~/audit/group.txt</code> içinde <code>admins</code> grubunun üyeleri kimler? Doğrulamak için <code>grep admins ~/audit/group.txt | cut -d: -f4</code> çalıştır.</p><details><summary>İpucu</summary><p>Grup dosyasının 4. alanı üye listesidir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> admins <span class="tp">~/audit/group.txt</span> <span class="to">|</span> <span class="tk">cut</span> <span class="tf">-d:</span> <span class="tf">-f4</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep admins ~/audit/group.txt | cut -d: -f4">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>~/audit/ss.txt</code> içinde kaç satır <code>LISTEN</code> içeriyor? <code>grep -c LISTEN ~/audit/ss.txt</code> ile kontrol et.</p><details><summary>İpucu</summary><p>UDP satırında <code>LISTEN</code> değil <code>UNCONN</code> yazar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-c</span> LISTEN <span class="tp">~/audit/ss.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -c LISTEN ~/audit/ss.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Hata ayıkla <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t11" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>~/srv/site</code> içindeki deneme sitesi nginx&#x27;te 403 verirdi. Dizinin modu <code>700</code>, <code>index.html</code> modu <code>600</code>. Bunları <code>755</code> ve <code>644</code> olarak düzelt.</p><details><summary>İpucu</summary><p><code>ls -ld ~/srv/site</code> ve <code>ls -l ~/srv/site</code> ile kontrol et.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/site</span></span>
+<span class="ln"><span class="tk">chmod</span> 644 <span class="tp">~/srv/site/index.html</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 755 ~/srv/site
+chmod 644 ~/srv/site/index.html">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>~/srv/broken/backup.sh</code> Permission denied hatası veriyor. Düzelt ve çalıştır; sonunda <code>~/srv/broken/out/notes.bak</code> var olsun.</p><details><summary>İpucu</summary><p>Betiğin x bitine ihtiyacı var: <code>chmod 755</code>, sonra yoluyla çalıştır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/broken/backup.sh</span></span>
+<span class="ln"><span class="tk">~/srv/broken/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 755 ~/srv/broken/backup.sh
+~/srv/broken/backup.sh">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini proje <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d2">Orta</span></p><p>Mini proje: <code>~/srv/company/scripts/backup.sh</code> dosyasını <code>#!/bin/bash</code> satırı ve <code>~/srv/company/web/index.html</code> dosyasını <code>~/srv/company/backup/index.html.bak</code> olarak kopyalayan bir <code>cp</code> satırıyla yaz. Çalıştırılabilir yap ve çalıştır.</p><details><summary>İpucu</summary><p>Dosya için <code>printf</code>, <code>chmod 755</code>, sonra <code>~/srv/company/scripts/backup.sh</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\ncp ~/srv/company/web/index.html ~/srv/company/backup/index.html.bak\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/scripts/backup.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/company/scripts/backup.sh</span></span>
+<span class="ln"><span class="tk">~/srv/company/scripts/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\ncp ~/srv/company/web/index.html ~/srv/company/backup/index.html.bak\n&#x27; &gt; ~/srv/company/scripts/backup.sh
+chmod 755 ~/srv/company/scripts/backup.sh
+~/srv/company/scripts/backup.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t14" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d3">Zor</span></p><p>Mini proje: <code>~/srv/company/scripts</code> içine <code>company-backup.service</code> (<code>Type=oneshot</code>, <code>ExecStart=/srv/company/scripts/backup.sh</code>) ve <code>company-backup.timer</code> (<code>[Timer]</code>, <code>OnCalendar=*-*-* 02:00:00</code>, <code>Persistent=true</code>, <code>[Install]</code>, <code>WantedBy=timers.target</code>) birim dosyalarını yaz.</p><details><summary>İpucu</summary><p><code>\n</code> ile iki <code>printf</code> komutu; serviste <code>[Unit]</code> ve <code>[Service]</code>, zamanlayıcıda <code>[Unit]</code>, <code>[Timer]</code> ve <code>[Install]</code> olmalı.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;[Unit]\nDescription=Company backup\n\n[Service]\nType=oneshot\nExecStart=/srv/company/scripts/backup.sh\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/scripts/company-backup.service</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;[Unit]\nDescription=Daily company backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/scripts/company-backup.timer</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;[Unit]\nDescription=Company backup\n\n[Service]\nType=oneshot\nExecStart=/srv/company/scripts/backup.sh\n&#x27; &gt; ~/srv/company/scripts/company-backup.service
+printf &#x27;[Unit]\nDescription=Daily company backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n&#x27; &gt; ~/srv/company/scripts/company-backup.timer">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Meydan okuma <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: güvenlik duvarı planını <code>~/srv/company/firewall-plan.txt</code> dosyasına güvenli sırayla, satır başına bir komut olacak şekilde yaz: önce ssh için <code>firewall-cmd --permanent --add-service=</code>, sonra http, sonra https ve en son <code>firewall-cmd --reload</code>.</p><details><summary>İpucu</summary><p>Dosyayı <code>&gt;</code> ile başlat, satırları <code>&gt;&gt;</code> ile ekle. SSH ilk sırada olmalı.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --permanent --add-service=ssh&quot;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --permanent --add-service=http&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --permanent --add-service=https&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --reload&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &quot;firewall-cmd --permanent --add-service=ssh&quot; &gt; ~/srv/company/firewall-plan.txt
+echo &quot;firewall-cmd --permanent --add-service=http&quot; &gt;&gt; ~/srv/company/firewall-plan.txt
+echo &quot;firewall-cmd --permanent --add-service=https&quot; &gt;&gt; ~/srv/company/firewall-plan.txt
+echo &quot;firewall-cmd --reload&quot; &gt;&gt; ~/srv/company/firewall-plan.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t16" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: en az 8 satırlık teslim raporunu <code>~/srv/company/REPORT.txt</code> dosyasına yaz: başlık, host adı (<code>$(hostname)</code> kullan), tarih, kullanıcılar alice bob carol, gruplar staff admins, ortak dizin, web portları 80 ve 443, backup.</p><details><summary>İpucu</summary><p><code>echo &quot;...&quot; &gt; file</code> ile başla, satırları <code>&gt;&gt;</code> ile ekle. <code>echo &quot;Host: $(hostname)&quot;</code> host adını doldurur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Company server delivery report&quot;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Host: $(hostname)&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Date: $(date)&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Users: alice bob carol&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Groups: staff admins&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Shared dir: /srv/company/shared mode 2770&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Web: nginx ports 80 and 443&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Backup: backup.sh via company-backup.timer&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &quot;Company server delivery report&quot; &gt; ~/srv/company/REPORT.txt
+echo &quot;Host: $(hostname)&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Date: $(date)&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Users: alice bob carol&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Groups: staff admins&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Shared dir: /srv/company/shared mode 2770&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Web: nginx ports 80 and 443&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Backup: backup.sh via company-backup.timer&quot; &gt;&gt; ~/srv/company/REPORT.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t17" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d2">Orta</span></p><p>Ticket: Denetçi sunucunun beklenmeyen portlarda dinleyebileceğini söylüyor. <code>~/audit/ss.txt</code> dosyasını kullan ve portu 22, 80 veya 443 olmayan tüm satırları <code>~/audit/unexpected.txt</code> dosyasına yaz.</p><details><summary>İpucu</summary><p><code>grep -v -E &#x27;:(22|80|443) &#x27; file &gt; result</code>; kapanış parantezinden sonraki boşluk önemli.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-v</span> <span class="tf">-E</span> <span class="ts">&#x27;:(22|80|443) &#x27;</span> <span class="tp">~/audit/ss.txt</span> <span class="to">&gt;</span> <span class="tk">~/audit/unexpected.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -v -E &#x27;:(22|80|443) &#x27; ~/audit/ss.txt &gt; ~/audit/unexpected.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t18" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>Ticket: Yönetim ekip listesini istiyor. <code>~/audit/passwd.txt</code> dosyasından gerçek kullanıcıların (ev dizini <code>/home/</code> altında olanlar) adlarını sıralı ve satır başına bir tane olacak şekilde <code>~/audit/team.txt</code> dosyasına yaz.</p><details><summary>İpucu</summary><p><code>grep /home/ file | cut -d: -f1 | sort &gt; ~/audit/team.txt</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tp">/home/</span> <span class="tp">~/audit/passwd.txt</span> <span class="to">|</span> <span class="tk">cut</span> <span class="tf">-d:</span> <span class="tf">-f1</span> <span class="to">|</span> <span class="tk">sort</span> <span class="to">&gt;</span> <span class="tk">~/audit/team.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep /home/ ~/audit/passwd.txt | cut -d: -f1 | sort &gt; ~/audit/team.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Laboratuvarı sıfırla</button></p></section>
+<section id="quiz"><h2>Öz test</h2>
+<div class="q card" data-q="q1"><p><strong>Rocky Linux&#x27;ta mod 755 olmasına rağmen nginx /srv/company/web içindeki dosyalar için 403 veriyor. En olası neden nedir?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">nginx kurulu değil</button><button type="button" class="opt" data-i="1">Dosyalar yanlış SELinux etiketi taşıyor (httpd_sys_content_t değil)</button><button type="button" class="opt" data-i="2">80 portu güvenlik duvarında kapalı</button><button type="button" class="opt" data-i="3">staff grubu eksik</button></div><p class="explain" hidden>Kapalı port 403 değil zaman aşımı verir. /srv altındaki genel etiket nginx&#x27;i engeller; setenforce 0 ile değil semanage fcontext ve restorecon ile düzelt.</p></div>
+<div class="q card" data-q="q2"><p><strong>Bir Ubuntu sunucusuna SSH ile bağlısın. ufw&#x27;yi açmanın güvenli yolu hangisi?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Önce ufw enable, sonra kural ekle</button><button type="button" class="opt" data-i="1">Sunucuyu yeniden başlat ve umut et</button><button type="button" class="opt" data-i="2">Önce ufw allow OpenSSH, sonra ufw enable</button><button type="button" class="opt" data-i="3">SSH&#x27;i kapat ve konsolu kullan</button></div><p class="explain" hidden>ufw kuralları hemen etkin olur. İzinli bir SSH kuralı olmadan güvenlik duvarını açmak oturumunu keser.</p></div>
+<div class="q card" data-q="q3"><p><strong>Ortak dizine neden 2770 modu (setgid) verilir?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Yeni dosyalar staff grubunu devralır, ekip birbirinin dosyalarında çalışabilir</button><button type="button" class="opt" data-i="1">Herkes dosyaları okuyabilir</button><button type="button" class="opt" data-i="2">Dosyalar şifrelenir</button><button type="button" class="opt" data-i="3">Yalnızca root yazabilir</button></div><p class="explain" hidden>Dizindeki setgid biti grubunu yeni dosyalara aktarır. 770 diğerlerini dışarıda tutar.</p></div>
+<div class="q card" data-q="q4"><p><strong>company-backup.service ve company-backup.timer dosyalarını oluşturdun. Gece yedeğinin çalışması için ne yapmalısın?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Yeniden başlat, başka bir şey yapma</button><button type="button" class="opt" data-i="1">Birim dosyalarına chmod 777</button><button type="button" class="opt" data-i="2">Hiçbir şey, systemd kendiliğinden bulur</button><button type="button" class="opt" data-i="3">systemctl daemon-reload, sonra systemctl enable --now company-backup.timer</button></div><p class="explain" hidden>systemd birim dosyalarını yeniden okumalı (daemon-reload) ve zamanlayıcı birimi etkinleştirilip başlatılmalı; servisi zamanlayıcı başlatır.</p></div>
+</section>
+<section id="summary" class="card"><h2>Özet</h2><ul><li>Önce plan yap, VM snapshot&#x27;ı al, yalnızca test VM&#x27;inde çalış.</li><li>Ortak dizin: grup staff, mod 2770 (setgid); başka yerde en az yetki: web 755, scripts 750, backup 700.</li><li>RHEL&#x27;de nginx httpd_sys_content_t etiketine ihtiyaç duyar (semanage fcontext + restorecon); Ubuntu&#x27;da AppArmor&#x27;u kontrol edersin.</li><li>Güvenlik duvarı: ssh kalsın, runtime kurallar veya --timeout ile test et, ikinci oturumu açık tut; ufw&#x27;de enable&#x27;dan önce allow OpenSSH.</li><li>Yedek: betik + service (oneshot) + timer; daemon-reload, zamanlayıcıyı enable --now; RHEL&#x27;de betiği bin_t etiketle.</li><li>Kanıt olarak kontrol listesi (OK/FAIL) ve teslim raporu dosyasıyla bitir.</li></ul></section>
+<section id="glossary"><h2>Terimler</h2><dl class="gl"><dt>snapshot (anlık görüntü)</dt><dd>Bir adım ters giderse dönebileceğin, VM&#x27;in kaydedilmiş durumu.</dd><dt>setgid (dizinde)</dt><dd>Yeni dosyalar oluşturanın birincil grubu yerine dizinin grubunu devralır.</dd><dt>varsayılan ACL</dt><dd>Bir dizinde, yeni dosyaların devraldığı erişim kuralı.</dd><dt>SELinux etiketi</dt><dd>Dosyalardaki güvenlik bağlamı (örneğin httpd_sys_content_t); bir sürecin neye erişebileceğini belirler.</dd><dt>semanage fcontext</dt><dd>Kalıcı dosya etiketi kuralı saklar; restorecon onu uygular.</dd><dt>AppArmor</dt><dd>Debian/Ubuntu&#x27;nun yol tabanlı güvenlik sistemi; aa-status ile kontrol edilir.</dd><dt>firewalld / ufw</dt><dd>RHEL ailesi ve Ubuntu sistemlerinin güvenlik duvarı arayüzleri.</dd><dt>runtime ve kalıcı</dt><dd>Runtime kurallar yeniden yüklemede veya yeniden başlatmada kaybolur; kalıcı kurallar saklanır.</dd><dt>systemd timer</dt><dd>Bir servisi takvime göre başlatan birim (OnCalendar=).</dd><dt>teslim raporu</dt><dd>Bitmiş sunucuyu ve doğrulama sonuçlarını belgeleyen dosya.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-6.7.html">← Önceki</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (isteğe bağlı)</strong><button type="button" class="ibtn" id="termclose" aria-label="Terminali kapat">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "tr", "module": "6.8", "setup": {"dirs": ["/home/student/audit", "/home/student/srv/site", "/home/student/srv/broken"], "files": {"/home/student/audit/ss.txt": "tcp LISTEN 0 128 0.0.0.0:22 users:((\"sshd\"))\ntcp LISTEN 0 511 0.0.0.0:80 users:((\"nginx\"))\ntcp LISTEN 0 511 0.0.0.0:443 users:((\"nginx\"))\ntcp LISTEN 0 80 0.0.0.0:3306 users:((\"mysqld\"))\ntcp LISTEN 0 128 127.0.0.1:8080 users:((\"python3\"))\nudp UNCONN 0 0 0.0.0.0:68 users:((\"dhclient\"))\n", "/home/student/audit/passwd.txt": "root:x:0:0:root:/root:/bin/bash\nnginx:x:990:988:nginx:/var/lib/nginx:/sbin/nologin\ncarol:x:1003:1003::/home/carol:/bin/bash\nalice:x:1001:1001::/home/alice:/bin/bash\nbob:x:1002:1002::/home/bob:/bin/bash\n", "/home/student/audit/group.txt": "staff:x:2001:alice,bob,carol\nadmins:x:2002:alice\n", "/home/student/srv/site/index.html": "<h1>Small Company<\/h1>\n", "/home/student/srv/broken/backup.sh": "#!/bin/bash\nmkdir -p ~/srv/broken/out\ncp ~/notes.txt ~/srv/broken/out/notes.bak\n"}, "modes": [["/home/student/srv/site", "700"], ["/home/student/srv/site/index.html", "600"], ["/home/student/srv/broken/backup.sh", "644"]]}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"exists": "~/srv/company", "type": "d"}}, {"id": "t02", "kind": "warmup", "check": [{"exists": "~/srv/company/shared", "type": "d"}, {"exists": "~/srv/company/admin", "type": "d"}, {"exists": "~/srv/company/web", "type": "d"}, {"exists": "~/srv/company/backup", "type": "d"}, {"exists": "~/srv/company/scripts", "type": "d"}]}, {"id": "t03", "kind": "warmup", "check": {"cmd": "^umask 0?27$", "ok": true}}, {"id": "t04", "kind": "guided", "check": {"mode": ["~/srv/company/shared", "2770"]}}, {"id": "t05", "kind": "guided", "check": [{"mode": ["~/srv/company/web", "755"]}, {"mode": ["~/srv/company/backup", "700"]}]}, {"id": "t06", "kind": "guided", "check": {"contains": ["~/srv/company/web/index.html", "Company"]}}, {"id": "t07", "kind": "guided", "check": [{"contains": ["~/srv/company/company.conf", "listen 80;"]}, {"contains": ["~/srv/company/company.conf", "root /srv/company/web;"]}]}, {"id": "t08", "kind": "predict", "check": {"out": "drwxrws---", "of": "^ls -ld"}}, {"id": "t09", "kind": "predict", "check": {"out": "\\balice\\b", "of": "^grep admins"}}, {"id": "t10", "kind": "predict", "check": {"out": "\\b5\\b", "of": "^grep -c LISTEN"}}, {"id": "t11", "kind": "debug", "check": [{"mode": ["~/srv/site", "755"]}, {"mode": ["~/srv/site/index.html", "644"]}]}, {"id": "t12", "kind": "debug", "check": [{"mode": ["~/srv/broken/backup.sh", "755"]}, {"exists": "~/srv/broken/out/notes.bak", "type": "f"}]}, {"id": "t13", "kind": "mini", "check": [{"mode": ["~/srv/company/scripts/backup.sh", "755"]}, {"contains": ["~/srv/company/scripts/backup.sh", "cp "]}, {"exists": "~/srv/company/backup/index.html.bak", "type": "f"}]}, {"id": "t14", "kind": "mini", "check": [{"contains": ["~/srv/company/scripts/company-backup.service", "ExecStart=\\S*backup\\.sh"]}, {"contains": ["~/srv/company/scripts/company-backup.service", "Type=oneshot"]}, {"contains": ["~/srv/company/scripts/company-backup.timer", "\\[Timer\\]"]}, {"contains": ["~/srv/company/scripts/company-backup.timer", "OnCalendar="]}, {"contains": ["~/srv/company/scripts/company-backup.timer", "WantedBy=timers\\.target"]}]}, {"id": "t15", "kind": "challenge", "check": [{"contains": ["~/srv/company/firewall-plan.txt", "add-service=ssh[\\s\\S]*add-service=http\\b"]}, {"contains": ["~/srv/company/firewall-plan.txt", "add-service=https"]}, {"contains": ["~/srv/company/firewall-plan.txt", "--permanent"]}, {"contains": ["~/srv/company/firewall-plan.txt", "--reload"]}]}, {"id": "t16", "kind": "challenge", "check": [{"linesMin": ["~/srv/company/REPORT.txt", 8]}, {"contains": ["~/srv/company/REPORT.txt", "(?=[\\s\\S]*alice)(?=[\\s\\S]*bob)(?=[\\s\\S]*carol)(?=[\\s\\S]*staff)(?=[\\s\\S]*admins)"]}, {"contains": ["~/srv/company/REPORT.txt", "(?=[\\s\\S]*\\b80\\b)(?=[\\s\\S]*\\b443\\b)(?=[\\s\\S]*linux-lab)(?=[\\s\\S]*backup)"]}]}, {"id": "t17", "kind": "ticket", "check": [{"contains": ["~/audit/unexpected.txt", "^(?![\\s\\S]*(nginx|sshd))[\\s\\S]*3306[\\s\\S]*8080"]}, {"linesMin": ["~/audit/unexpected.txt", 3]}]}, {"id": "t18", "kind": "ticket", "check": {"equals": ["~/audit/team.txt", "alice\nbob\ncarol\n"]}}], "vm": [{"id": "v01", "expect": "ID=|PRETTY_NAME|Enforcing|Permissive|Disabled|apparmor|profiles"}, {"id": "v02", "expect": "(?=[\\s\\S]*drwxrws)(?=[\\s\\S]*staff)(?=[\\s\\S]*alice)"}, {"id": "v03", "expect": "HTTP/\\S+ 200|200 OK|Small Company"}, {"id": "v04", "expect": "(ssh|22)[\\s\\S]*(http|80)|(http|80)[\\s\\S]*(ssh|22)"}, {"id": "v05", "expect": "company-backup"}, {"id": "v06", "expect": "^(?![\\s\\S]*FAIL)[\\s\\S]*(OK:[\\s\\S]*){6}"}], "quiz": {"q1": 1, "q2": 2, "q3": 0, "q4": 3}, "ui": {"correct": "Doğru!", "wrong": "Yanlış, tekrar dene.", "taskDone": "Görev tamamlandı", "moduleDone": "Modül tamamlandı! 🎉", "tasksDone": "tamamlandı", "welcome": "Sanal Linux terminali — komutlar yalnızca bu sayfadaki sanal dosya sisteminde çalışır. 'help' yazarak komutları gör, Tab ile tamamla, ↑/↓ ile geçmişte gez.", "sandboxNote": "Güvenli kum havuzu: gerçek sistemine dokunulmaz.", "resetConfirm": "Bu modülün sanal dosya sistemi ve komut geçmişi sıfırlanacak. İlerlemen (tamamlanan görevler) korunur. Devam?", "openTerminal": "Terminali aç (isteğe bağlı)", "closeTerminal": "Terminali kapat", "continue": "Devam et", "startPath": "Öğrenmeye başla", "noResult": "Eşleşen modül veya komut yok.", "soon": "Yakında", "overall": "Genel ilerleme", "copied": "Kopyalandı ✓", "pasteOk": "Çıktın beklenen kalıpla eşleşti ✓", "pasteBad": "Henüz eşleşmedi. \"Çıktım farklı çıktı\" ipuçlarına bak ve çıktının tamamını yapıştır.", "iDidIt": "Yaptım", "undo": "Geri al", "groupDone": "tamam", "vmDone": "VM görevleri"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

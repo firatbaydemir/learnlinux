@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6.8 Final Project — Small Company Server — Linux Foundations Academy</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","en")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="6.8">
+<header class="top"><a class="brand" href="index.html">Linux Foundations Academy</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (optional)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-6.8.html" hreflang="tr" lang="tr" data-switch="tr">TR</a><a href="../de/modul-6.8.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-6.8.html" hreflang="en" lang="en" data-switch="en" aria-current="true">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Theme" aria-label="Theme">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Overall progress"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#plan">1. Plan and safety first</a></li><li><a href="#users">2. Users, groups and the shared directory</a></li><li><a href="#web">3. Web site with nginx, SELinux and AppArmor</a></li><li><a href="#firewall">4. Firewall: open 80 and 443, keep SSH</a></li><li><a href="#backup">5. Backup script and systemd timer</a></li><li><a href="#verify">6. Verification checklist and delivery report</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>Contents</summary><ol><li><a href="#plan">1. Plan and safety first</a></li><li><a href="#users">2. Users, groups and the shared directory</a></li><li><a href="#web">3. Web site with nginx, SELinux and AppArmor</a></li><li><a href="#firewall">4. Firewall: open 80 and 443, keep SSH</a></li><li><a href="#backup">5. Backup script and systemd timer</a></li><li><a href="#verify">6. Verification checklist and delivery report</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> Level 6</p>
+<h1><span class="module-id">6.8</span> Final Project — Small Company Server</h1>
+<p class="lead">Combine everything on one server: users, shared directory, web site, firewall, backup, timer, and a verified delivery report.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>What will you learn in this module?</h2><ul><li>You plan the whole server first and take a VM snapshot before you change anything.</li><li>You build users alice, bob, carol, the groups staff and admins, and a shared directory /srv/company with setgid.</li><li>You publish a site with nginx, label it correctly (SELinux) or check AppArmor, and open ports 80/443 without locking yourself out of SSH.</li><li>You automate a backup with a script and a systemd timer.</li><li>You verify every step with a checklist and write a delivery report.</li></ul></section>
+<section id="plan"><h2>1. Plan and safety first</h2>
+<p>The target: a small company server called <code>linux-lab</code>. Three people work on it: <strong>alice</strong> (admin), <strong>bob</strong> and <strong>carol</strong>. Everything lives under <code>/srv/company</code>: <code>shared</code> (team files), <code>admin</code> (admins only), <code>web</code> (the site), <code>backup</code> and <code>scripts</code>.</p>
+<p><strong>Work in the VM, never on a production machine.</strong> This project creates users, changes permissions, SELinux labels, firewall rules and systemd units. Before you start, take a <strong>snapshot</strong> (module 0.2). If a step goes wrong you roll back in seconds.</p>
+<p>The built-in terminal cannot run <code>useradd</code>, <code>nginx</code>, <code>firewall-cmd</code> or <code>systemctl</code>. So the simulator tasks rebuild the <strong>files</strong> of the project (permission tree, script, unit files, report) under <code>~/srv/company</code>, while the VM tasks do the real thing in <code>/srv/company</code>.</p>
+<p>Order of work: 1) plan + snapshot, 2) users and directories, 3) web, 4) firewall, 5) backup + timer, 6) verify + report. RHEL/Rocky and Debian/Ubuntu differ in only a few commands; both are shown.</p>
+<article class="cmd"><h3><code>cat /etc/os-release</code></h3><dl><dt>What is it for?</dt><dd>Shows distribution name and version.</dd><dt>Where is it used?</dt><dd>Before you choose dnf or apt commands.</dd><dt>Why does it matter?</dt><dd>Tells you which variant of the guide applies.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cat /etc/os-release" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="cat /etc/os-release">Copy</button></div></div></article>
+<article class="cmd"><h3><code>getenforce</code></h3><dl><dt>What is it for?</dt><dd>Prints the SELinux mode: Enforcing, Permissive or Disabled.</dd><dt>Where is it used?</dt><dd>RHEL, Rocky, Alma, Fedora.</dd><dt>Why does it matter?</dt><dd>You must know the mode before testing the web label; keep it Enforcing.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">getenforce</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="getenforce">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo aa-status</code></h3><dl><dt>What is it for?</dt><dd>Shows which AppArmor profiles are loaded and in which mode.</dd><dt>Where is it used?</dt><dd>Debian and Ubuntu.</dd><dt>Why does it matter?</dt><dd>Ubuntu uses AppArmor instead of SELinux; here you only check it.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> aa-status</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo aa-status">Copy</button></div></div></article>
+<article class="cmd"><h3><code>id</code></h3><dl><dt>What is it for?</dt><dd>Shows user id and group memberships.</dd><dt>Where is it used?</dt><dd>When you check who may use the shared directory.</dd><dt>Why does it matter?</dt><dd>Group membership decides access to <code>/srv/company/shared</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">id</span> student</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="id student" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="id student">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Keep a notes file while you work. Every command you run becomes a line in your delivery report later.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Take a VM snapshot now and name it <code>before-company-project</code>. Do not run this project on a real server that others use.</p></aside>
+</section>
+<section id="users"><h2>2. Users, groups and the shared directory</h2>
+<p>Create the groups <code>staff</code> (alice, bob, carol) and <code>admins</code> (alice only). Use <code>useradd -m -G</code> for the users. Deleting users is <strong>not</strong> part of this project (<code>userdel -r</code> would remove home directories).</p>
+<p>A shared directory needs two things. <strong>Setgid</strong> (<code>chmod 2770</code>) makes new files inherit the directory group <code>staff</code>, so bob can edit carol&#x27;s files. Mode <code>770</code> keeps everybody else out. Optionally add a <strong>default ACL</strong> (<code>setfacl -d -m g:staff:rwx</code>) so new files are group-writable even with a strict umask.</p>
+<p>Use least privilege: <code>web</code> is <code>755</code> (nginx must read it), <code>scripts</code> is <code>750</code>, <code>backup</code> is <code>700</code>. In the simulator you practise the same modes with <code>chmod</code> on <code>~/srv/company</code>; a normal user cannot <code>chgrp</code> there, so the group part is VM only.</p>
+<article class="cmd"><h3><code>sudo useradd -m -s /bin/bash -G staff alice</code></h3><dl><dt>What is it for?</dt><dd>Creates a user with home directory, shell and extra group.</dd><dt>Where is it used?</dt><dd>Once for each of alice, bob, carol.</dd><dt>Why does it matter?</dt><dd>Real accounts with their own home directories.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> useradd <span class="tf">-m</span> <span class="tf">-s</span> <span class="tp">/bin/bash</span> <span class="tf">-G</span> staff alice</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo useradd -m -s /bin/bash -G staff alice">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo chgrp staff /srv/company/shared</code></h3><dl><dt>What is it for?</dt><dd>Sets the owning group of the directory.</dd><dt>Where is it used?</dt><dd>On the shared and admin directories.</dd><dt>Why does it matter?</dt><dd>Group ownership is what setgid passes on to new files.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chgrp staff <span class="tp">/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo chgrp staff /srv/company/shared">Copy</button></div></div></article>
+<article class="cmd"><h3><code>chmod 2770</code></h3><dl><dt>What is it for?</dt><dd>Sets rwx for owner and group, nothing for others, plus the setgid bit.</dd><dt>Where is it used?</dt><dd>On the shared and admin directories.</dd><dt>Why does it matter?</dt><dd>New files inherit the group; outsiders get no access.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 2770 <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod 2770 ~/srv/company/shared" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod 2770 ~/srv/company/shared">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo setfacl -d -m g:staff:rwx</code></h3><dl><dt>What is it for?</dt><dd>Sets a default ACL that new files in the directory inherit.</dd><dt>Where is it used?</dt><dd>On the shared directory (package <code>acl</code>).</dd><dt>Why does it matter?</dt><dd>Group stays writable even if a user has umask 077.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> setfacl <span class="tf">-d</span> <span class="tf">-m</span> g:staff:rwx <span class="tp">/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo setfacl -d -m g:staff:rwx /srv/company/shared">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ls -ld</code></h3><dl><dt>What is it for?</dt><dd>Shows the directory itself, not its content.</dd><dt>Where is it used?</dt><dd>To verify mode and group.</dd><dt>Why does it matter?</dt><dd><code>drwxrws---</code> means setgid is active (the <code>s</code>).</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -ld ~/srv/company/shared" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -ld ~/srv/company/shared">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>A capital <code>S</code> in <code>drwxr-S---</code> means setgid is set but the group has no execute bit; fix the mode.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Never fix permission problems with <code>chmod 777</code>. Everybody could then change or delete the files.</p></aside>
+</section>
+<section id="web"><h2>3. Web site with nginx, SELinux and AppArmor</h2>
+<p>Install nginx and let it serve <code>/srv/company/web</code>. We add a server block named <code>company.local</code> in <code>/etc/nginx/conf.d/company.conf</code> (works on both families) and test with a <code>Host:</code> header, so the default site does not interfere.</p>
+<p><strong>RHEL/Rocky:</strong> SELinux labels every file. A new directory under <code>/srv</code> gets a generic label, so nginx gets <strong>403 Forbidden</strong> although the Unix permissions are fine. The fix is the right label: <code>semanage fcontext</code> stores the rule, <code>restorecon</code> applies it. Do not use <code>setenforce 0</code> as a shortcut; that switches protection off for the whole system.</p>
+<p><strong>Debian/Ubuntu:</strong> there is no label to set. AppArmor is active but nginx is normally not confined by a profile; you only check the status with <code>aa-status</code>. A 403 there is a normal permission problem (check the directory modes up to <code>/srv</code>).</p>
+<article class="cmd"><h3><code>sudo dnf install -y nginx</code></h3><dl><dt>What is it for?</dt><dd>Installs nginx (RHEL, Rocky, Alma). On Ubuntu use <code>sudo apt install -y nginx</code>.</dd><dt>Where is it used?</dt><dd>First step of the web chapter.</dd><dt>Why does it matter?</dt><dd>Package manager handles files and dependencies.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> dnf install <span class="tf">-y</span> nginx</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo dnf install -y nginx">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo semanage fcontext -a -t httpd_sys_content_t &quot;/srv/company/web(/.*)?&quot;</code></h3><dl><dt>What is it for?</dt><dd>Stores a rule: files below web get the web-content label.</dd><dt>Where is it used?</dt><dd>RHEL family (package <code>policycoreutils-python-utils</code>).</dd><dt>Why does it matter?</dt><dd>The label survives a relabel; <code>chcon</code> does not.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> semanage fcontext <span class="tf">-a</span> <span class="tf">-t</span> httpd_sys_content_t <span class="ts">&quot;/srv/company/web(/.*)?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo semanage fcontext -a -t httpd_sys_content_t &quot;/srv/company/web(/.*)?&quot;">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo restorecon -Rv /srv/company/web</code></h3><dl><dt>What is it for?</dt><dd>Applies the stored label rule to existing files.</dd><dt>Where is it used?</dt><dd>Right after <code>semanage fcontext</code>.</dd><dt>Why does it matter?</dt><dd>Without it the rule exists but files keep the old label.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> restorecon <span class="tf">-Rv</span> <span class="tp">/srv/company/web</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo restorecon -Rv /srv/company/web">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ls -Zd /srv/company/web</code></h3><dl><dt>What is it for?</dt><dd>Shows the SELinux label of the directory.</dd><dt>Where is it used?</dt><dd>To verify the label.</dd><dt>Why does it matter?</dt><dd>You want to see <code>httpd_sys_content_t</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -Zd /srv/company/web">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo nginx -t</code></h3><dl><dt>What is it for?</dt><dd>Tests the nginx configuration without restarting.</dd><dt>Where is it used?</dt><dd>Before every start or reload.</dd><dt>Why does it matter?</dt><dd>A typo would otherwise take the site down.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> nginx <span class="tf">-t</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo nginx -t">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>To see why SELinux blocked something: <code>sudo ausearch -m avc -ts recent</code>. Read the log before you change anything.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p><code>setenforce 0</code> is a diagnosis tool at best, never a fix. Label the files instead.</p></aside>
+</section>
+<section id="firewall"><h2>4. Firewall: open 80 and 443, keep SSH</h2>
+<p>RHEL/Rocky uses <strong>firewalld</strong>, Ubuntu uses <strong>ufw</strong>. Both can block you out of your own server when you are connected over SSH. Rules: keep SSH allowed, test with a <strong>runtime</strong> rule first, make it <strong>permanent</strong> only after the test.</p>
+<p>firewalld: rules without <code>--permanent</code> vanish at reload or reboot; with <code>--timeout=300</code> they remove themselves. ufw: rules are saved at once, so allow SSH <strong>before</strong> <code>ufw enable</code>.</p>
+<p>Always keep a <strong>second SSH session open</strong> (or the VM console) while you change the firewall. If the new rules lock you out, the open session or the console still works.</p>
+<article class="cmd"><h3><code>sudo firewall-cmd --list-services</code></h3><dl><dt>What is it for?</dt><dd>Lists the services allowed in the active zone.</dd><dt>Where is it used?</dt><dd>Before and after every change.</dd><dt>Why does it matter?</dt><dd>Confirms that <code>ssh</code> is still there.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--list-services</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo firewall-cmd --list-services">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo firewall-cmd --permanent --add-service={http,https}</code></h3><dl><dt>What is it for?</dt><dd>Stores permanent rules for ports 80 and 443.</dd><dt>Where is it used?</dt><dd>After the runtime test worked.</dd><dt>Why does it matter?</dt><dd>Survives reload and reboot; apply with <code>--reload</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--permanent</span> <span class="tf">--add-service={http,https}</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo firewall-cmd --permanent --add-service={http,https}">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo ufw allow OpenSSH</code></h3><dl><dt>What is it for?</dt><dd>Allows SSH (port 22) in ufw.</dd><dt>Where is it used?</dt><dd>Ubuntu, always before <code>ufw enable</code>.</dd><dt>Why does it matter?</dt><dd>Prevents the lockout when the firewall is switched on.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> ufw allow OpenSSH</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo ufw allow OpenSSH">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo ufw allow 80/tcp</code></h3><dl><dt>What is it for?</dt><dd>Allows HTTP; repeat with <code>443/tcp</code> for HTTPS.</dd><dt>Where is it used?</dt><dd>Ubuntu web server.</dd><dt>Why does it matter?</dt><dd>Opens only the ports the site needs.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> ufw allow <span class="tp">80/tcp</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo ufw allow 80/tcp">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ss -tulpn</code></h3><dl><dt>What is it for?</dt><dd>Lists listening TCP/UDP ports with the process.</dd><dt>Where is it used?</dt><dd>To see what the server really offers.</dd><dt>Why does it matter?</dt><dd>Every unexpected port is a finding for your report.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ss</span> <span class="tf">-tulpn</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ss -tulpn">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Practise reading <code>ss</code> output in the simulator: the audit files in your home directory contain a sample listing you can analyse with <code>grep</code> and <code>cut</code>.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p>Never remove the <code>ssh</code> service or deny port 22 while connected over SSH. Check <code>--list-services</code> or <code>ufw status</code> for ssh <strong>before</strong> <code>firewall-cmd --reload</code> or <code>ufw enable</code>. Use the VM console if you are locked out, and restore the snapshot if needed.</p></aside>
+</section>
+<section id="backup"><h2>5. Backup script and systemd timer</h2>
+<p>The backup is a short script (modules 6.5/6.6) that writes a dated <code>tar.gz</code> archive of <code>shared</code>, <code>web</code> and <code>admin</code> to <code>/srv/company/backup</code> and deletes archives older than 7 days. A second disk or remote copy is better in real life; a local folder is enough for the project.</p>
+<p>systemd runs the script: a <code>.service</code> of <code>Type=oneshot</code> describes what to run, a <code>.timer</code> describes when (<code>OnCalendar=</code>, <code>Persistent=true</code>). Enable the <strong>timer</strong>, not the service. After creating or changing unit files run <code>systemctl daemon-reload</code>.</p>
+<p>On RHEL/Rocky a script in <code>/srv/company/scripts</code> has a generic label and systemd may refuse to run it (status 203/EXEC). Give it the label <code>bin_t</code> with <code>semanage fcontext</code> and <code>restorecon</code>, like you did for the web directory.</p>
+<article class="cmd"><h3><code>tar -czf</code></h3><dl><dt>What is it for?</dt><dd>Creates a compressed archive.</dd><dt>Where is it used?</dt><dd>In the backup script.</dd><dt>Why does it matter?</dt><dd>One dated file per backup is easy to store and restore.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">tar</span> <span class="tf">-czf</span> <span class="tp">/srv/company/backup/company-test.tar.gz</span> <span class="tf">-C</span> <span class="tp">/srv/company</span> shared web admin</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="tar -czf /srv/company/backup/company-test.tar.gz -C /srv/company shared web admin">Copy</button></div></div></article>
+<article class="cmd"><h3><code>systemctl daemon-reload</code></h3><dl><dt>What is it for?</dt><dd>Makes systemd read new or changed unit files.</dd><dt>Where is it used?</dt><dd>After writing the service and timer.</dd><dt>Why does it matter?</dt><dd>Otherwise systemd does not know the new units.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> systemctl daemon-reload</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo systemctl daemon-reload">Copy</button></div></div></article>
+<article class="cmd"><h3><code>systemctl enable --now company-backup.timer</code></h3><dl><dt>What is it for?</dt><dd>Enables the timer at boot and starts it now.</dd><dt>Where is it used?</dt><dd>Once, after daemon-reload.</dd><dt>Why does it matter?</dt><dd>The backup then runs every night without you.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> systemctl enable <span class="tf">--now</span> company-backup.timer</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo systemctl enable --now company-backup.timer">Copy</button></div></div></article>
+<article class="cmd"><h3><code>systemctl list-timers</code></h3><dl><dt>What is it for?</dt><dd>Shows timers with next and last run.</dd><dt>Where is it used?</dt><dd>To verify the schedule.</dd><dt>Why does it matter?</dt><dd>You see when the next backup will run.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">systemctl</span> list-timers company-backup.timer <span class="tf">--no-pager</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="systemctl list-timers company-backup.timer --no-pager">Copy</button></div></div></article>
+<article class="cmd"><h3><code>chmod 755 backup.sh</code></h3><dl><dt>What is it for?</dt><dd>Makes the script executable.</dd><dt>Where is it used?</dt><dd>Whenever you create a script.</dd><dt>Why does it matter?</dt><dd>Without the x bit the service cannot start it.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/company/scripts/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod 755 ~/srv/company/scripts/backup.sh" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod 755 ~/srv/company/scripts/backup.sh">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Run the service once by hand with <code>sudo systemctl start company-backup.service</code> and look at <code>ls -l /srv/company/backup</code> before you wait for the timer.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p><code>find ... -delete</code> cannot be undone. Test the line with <code>-print</code> instead of <code>-delete</code> first and run it only on <code>/srv/company/backup</code>.</p></aside>
+</section>
+<section id="verify"><h2>6. Verification checklist and delivery report</h2>
+<p>A server is only finished when you have <strong>proof</strong>. Go through the checklist: users and groups, setgid shared directory, site answers with 200, SELinux label or AppArmor status, firewall has ssh/80/443, timer is enabled, a backup file exists, backup directory is <code>700</code>.</p>
+<p>A small script prints <code>OK:</code> or <code>FAIL:</code> per check, so the result is easy to read and to paste. The <strong>delivery report</strong> <code>/srv/company/REPORT.txt</code> contains host, date, the verification output and the listening ports. This is what you hand over.</p>
+<p>If a line says FAIL, go back to that chapter and fix it. Do not edit the report by hand to hide a failure.</p>
+<article class="cmd"><h3><code>getent group staff</code></h3><dl><dt>What is it for?</dt><dd>Shows the group entry with members.</dd><dt>Where is it used?</dt><dd>To prove group membership.</dd><dt>Why does it matter?</dt><dd>Reads from the real user database.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">getent</span> group staff</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="getent group staff">Copy</button></div></div></article>
+<article class="cmd"><h3><code>stat -c &#x27;%A %U:%G %n&#x27; /srv/company/shared</code></h3><dl><dt>What is it for?</dt><dd>Prints permissions, owner and group in one line.</dd><dt>Where is it used?</dt><dd>In checks and in the report.</dd><dt>Why does it matter?</dt><dd>Short proof that the mode is <code>drwxrws---</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">stat</span> <span class="tf">-c</span> <span class="ts">&#x27;%A %U:%G %n&#x27;</span> <span class="tp">/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="stat -c &#x27;%A %U:%G %n&#x27; /srv/company/shared">Copy</button></div></div></article>
+<article class="cmd"><h3><code>curl -I</code></h3><dl><dt>What is it for?</dt><dd>Fetches only the HTTP headers.</dd><dt>Where is it used?</dt><dd>To test the web site locally.</dd><dt>Why does it matter?</dt><dd><code>200 OK</code> shows nginx answered the local request and content permissions/labels allow access; check firewall rules separately and, if possible, test from another machine.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">curl</span> <span class="tf">-I</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="curl -I -H &#x27;Host: company.local&#x27; http://localhost">Copy</button></div></div></article>
+<article class="cmd"><h3><code>wc -l</code></h3><dl><dt>What is it for?</dt><dd>Counts lines.</dd><dt>Where is it used?</dt><dd>To check that the report is not empty.</dd><dt>Why does it matter?</dt><dd>A report needs real content.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">wc</span> <span class="tf">-l</span> <span class="tp">~/srv/company/REPORT.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="wc -l ~/srv/company/REPORT.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="wc -l ~/srv/company/REPORT.txt">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Run the checklist after a reboot, too. A service that works only until the next reboot is not finished.</p></aside>
+</section>
+<section id="vm"><h2>Do it on your own VM <span class="gcount" data-g="vm"></span></h2><p>The real practice happens on real Linux: run the commands in your own virtual machine (VirtualBox, UTM or WSL) and compare the output.</p><p>Do the real project in your VM, in this order. First take a snapshot: if anything fails, you go back. Paste the output when a task asks for it. Commands marked for RHEL or Ubuntu: run only your variant.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>Snapshot and starting state</h3><span class="status" aria-hidden="true"></span></header><p>Take a VM snapshot named <code>before-company-project</code> in your VM program (module 0.2). Then check the system and paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-E</span> <span class="ts">&#x27;^(ID|PRETTY_NAME)=&#x27;</span> <span class="tp">/etc/os-release</span></span>
+<span class="ln"><span class="tc"># RHEL / Rocky / Alma:</span></span>
+<span class="ln"><span class="tk">getenforce</span></span>
+<span class="ln"><span class="tc"># Debian / Ubuntu:</span></span>
+<span class="ln"><span class="tk">sudo</span> aa-status <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 3</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -E &#x27;^(ID|PRETTY_NAME)=&#x27; /etc/os-release
+# RHEL / Rocky / Alma:
+getenforce
+# Debian / Ubuntu:
+sudo aa-status | head -n 3">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">ID=rocky
+PRETTY_NAME=&quot;Rocky Linux 9.4 (Blue Onyx)&quot;
+Enforcing</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>getenforce: command not found</code> on Ubuntu is normal; use the <code>aa-status</code> line.</li><li>If SELinux says Permissive or Disabled, tell your teacher/notes; continue but do not change the mode with <code>setenforce</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Users, groups, shared directory</h3><span class="status" aria-hidden="true"></span></header><p>Create groups, users and the directory tree with setgid. Then prove it and paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> groupadd staff</span>
+<span class="ln"><span class="tk">sudo</span> groupadd admins</span>
+<span class="ln"><span class="tk">for</span> u in alice bob carol; do sudo useradd <span class="tf">-m</span> <span class="tf">-s</span> <span class="tp">/bin/bash</span> <span class="tf">-G</span> staff <span class="tp">$u;</span> done</span>
+<span class="ln"><span class="tk">sudo</span> usermod <span class="tf">-aG</span> admins alice</span>
+<span class="ln"><span class="tk">sudo</span> mkdir <span class="tf">-p</span> <span class="tp">/srv/company/{shared,admin,web,backup,scripts}</span></span>
+<span class="ln"><span class="tk">sudo</span> chgrp staff <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">sudo</span> chgrp admins <span class="tp">/srv/company/admin</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 2770 <span class="tp">/srv/company/shared</span> <span class="tp">/srv/company/admin</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 755 <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 750 <span class="tp">/srv/company/scripts</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 700 <span class="tp">/srv/company/backup</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo groupadd staff
+sudo groupadd admins
+for u in alice bob carol; do sudo useradd -m -s /bin/bash -G staff $u; done
+sudo usermod -aG admins alice
+sudo mkdir -p /srv/company/{shared,admin,web,backup,scripts}
+sudo chgrp staff /srv/company/shared
+sudo chgrp admins /srv/company/admin
+sudo chmod 2770 /srv/company/shared /srv/company/admin
+sudo chmod 755 /srv/company/web
+sudo chmod 750 /srv/company/scripts
+sudo chmod 700 /srv/company/backup">Copy</button></div></div><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> <span class="tf">-u</span> bob touch <span class="tp">/srv/company/shared/from_bob.txt</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">getent</span> group staff</span>
+<span class="ln"><span class="tk">id</span> alice</span>
+<span class="ln"><span class="tk">sudo</span> <span class="tf">-u</span> carol ls <span class="tp">/srv/company/admin</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo -u bob touch /srv/company/shared/from_bob.txt
+ls -ld /srv/company/shared
+ls -l /srv/company/shared
+getent group staff
+id alice
+sudo -u carol ls /srv/company/admin">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">drwxrws--- 2 root staff 4096 ... /srv/company/shared
+-rw-r--r-- 1 bob staff 0 ... from_bob.txt
+staff:x:1002:alice,bob,carol
+uid=1001(alice) gid=1001(alice) groups=1001(alice),1002(staff),1003(admins)
+ls: cannot open directory &#x27;/srv/company/admin&#x27;: Permission denied</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>Group ids differ between systems; only the names must match.</li><li>If <code>from_bob.txt</code> has group <code>bob</code> instead of <code>staff</code>, the setgid bit is missing: repeat <code>chmod 2770</code>.</li><li>Optional default ACL (install package <code>acl</code> first): <code>sudo setfacl -d -m g:staff:rwx /srv/company/shared</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Web site with the right label</h3><span class="status" aria-hidden="true"></span></header><p>Install nginx, add the server block and the page, test, fix the label (RHEL) or check AppArmor (Ubuntu) and paste the last curl output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma:</span></span>
+<span class="ln"><span class="tk">sudo</span> dnf install <span class="tf">-y</span> nginx policycoreutils-python-utils</span>
+<span class="ln"><span class="tc"># Debian / Ubuntu:</span></span>
+<span class="ln"><span class="tk">sudo</span> apt install <span class="tf">-y</span> nginx</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma:
+sudo dnf install -y nginx policycoreutils-python-utils
+# Debian / Ubuntu:
+sudo apt install -y nginx">Copy</button></div></div><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;&lt;h1&gt;Small Company&lt;/h1&gt;&#x27;</span> <span class="to">|</span> <span class="tk">sudo</span> tee <span class="tp">/srv/company/web/index.html</span></span>
+<span class="ln"><span class="tk">sudo</span> tee <span class="tp">/etc/nginx/conf.d/company.conf</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tk">server</span> {</span>
+<span class="ln">    <span class="tk">listen</span> 80;</span>
+<span class="ln">    <span class="tk">server_name</span> company.local;</span>
+<span class="ln">    <span class="tk">root</span> <span class="tp">/srv/company/web;</span></span>
+<span class="ln"><span class="tk">}</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> nginx <span class="tf">-t</span></span>
+<span class="ln"><span class="tk">sudo</span> systemctl enable <span class="tf">--now</span> nginx</span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-sI</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 1</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &#x27;&lt;h1&gt;Small Company&lt;/h1&gt;&#x27; | sudo tee /srv/company/web/index.html
+sudo tee /etc/nginx/conf.d/company.conf &lt;&lt;&#x27;EOF&#x27;
+server {
+    listen 80;
+    server_name company.local;
+    root /srv/company/web;
+}
+EOF
+sudo nginx -t
+sudo systemctl enable --now nginx
+curl -sI -H &#x27;Host: company.local&#x27; http://localhost | head -n 1">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">HTTP/1.1 403 Forbidden   (RHEL before the label fix)
+HTTP/1.1 200 OK          (Ubuntu)</pre>
+<div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma only:</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tk">sudo</span> semanage fcontext <span class="tf">-a</span> <span class="tf">-t</span> httpd_sys_content_t <span class="ts">&quot;/srv/company/web(/.*)?&quot;</span></span>
+<span class="ln"><span class="tk">sudo</span> restorecon <span class="tf">-Rv</span> <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span></span>
+<span class="ln"><span class="tc"># Debian / Ubuntu only:</span></span>
+<span class="ln"><span class="tk">sudo</span> aa-status <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-i</span> nginx</span>
+<span class="ln"><span class="tc"># both:</span></span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-sI</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 1</span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-s</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma only:
+ls -Zd /srv/company/web
+sudo semanage fcontext -a -t httpd_sys_content_t &quot;/srv/company/web(/.*)?&quot;
+sudo restorecon -Rv /srv/company/web
+ls -Zd /srv/company/web
+# Debian / Ubuntu only:
+sudo aa-status | grep -i nginx
+# both:
+curl -sI -H &#x27;Host: company.local&#x27; http://localhost | head -n 1
+curl -s -H &#x27;Host: company.local&#x27; http://localhost">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">unconfined_u:object_r:default_t:s0 /srv/company/web
+... httpd_sys_content_t ...
+HTTP/1.1 200 OK
+&lt;h1&gt;Small Company&lt;/h1&gt;</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>403 after the label fix on RHEL: check <code>ls -Zd</code> again and the modes of <code>/srv</code> and <code>/srv/company</code> (they need <code>x</code> for others).</li><li><code>semanage: command not found</code>: install <code>policycoreutils-python-utils</code>.</li><li>Connection refused: <code>sudo systemctl status nginx</code>; port 80 may be used by another service (<code>ss -tulpn</code>).</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>Firewall without lockout</h3><span class="status" aria-hidden="true"></span></header><p>Keep a second SSH session or the console open. Allow web ports without losing SSH, then paste the rule list.</p>
+<div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma (firewalld):</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--list-services</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--add-service={http,https}</span> <span class="tf">--timeout=300</span></span>
+<span class="ln"><span class="tk">curl</span> <span class="tf">-sI</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">head</span> <span class="tf">-n</span> 1</span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--permanent</span> <span class="tf">--add-service={http,https}</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--reload</span></span>
+<span class="ln"><span class="tk">sudo</span> firewall-cmd <span class="tf">--list-services</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma (firewalld):
+sudo firewall-cmd --list-services
+sudo firewall-cmd --add-service={http,https} --timeout=300
+curl -sI http://localhost | head -n 1
+sudo firewall-cmd --permanent --add-service={http,https}
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-services">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">cockpit dhcpv6-client http https ssh</pre>
+<div class="code"><pre><code><span class="ln"><span class="tc"># Debian / Ubuntu (ufw): SSH FIRST!</span></span>
+<span class="ln"><span class="tk">sudo</span> ufw allow OpenSSH</span>
+<span class="ln"><span class="tk">sudo</span> ufw allow <span class="tp">80/tcp</span></span>
+<span class="ln"><span class="tk">sudo</span> ufw allow <span class="tp">443/tcp</span></span>
+<span class="ln"><span class="tk">sudo</span> ufw enable</span>
+<span class="ln"><span class="tk">sudo</span> ufw status</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# Debian / Ubuntu (ufw): SSH FIRST!
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+sudo ufw status">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">Status: active
+OpenSSH                    ALLOW       Anywhere
+80/tcp                     ALLOW       Anywhere
+443/tcp                    ALLOW       Anywhere</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>No <code>ssh</code> in the list on RHEL: add it at once with <code>sudo firewall-cmd --permanent --add-service=ssh</code> and reload.</li><li><code>ufw: command not found</code> on Rocky is fine; you use firewalld there.</li><li>Locked out? Use the VM console, or restore the snapshot.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Backup script and timer</h3><span class="status" aria-hidden="true"></span></header><p>Create the backup script and the systemd units, enable the timer, run one backup by hand and paste the timer list.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> tee <span class="tp">/srv/company/scripts/backup.sh</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">set</span> <span class="tf">-euo</span> pipefail</span>
+<span class="ln"><span class="tp">DEST=/srv/company/backup</span></span>
+<span class="ln"><span class="tk">tar</span> <span class="tf">-czf</span> <span class="ts">&quot;$DEST/company-$(date +%F_%H%M).tar.gz&quot;</span> <span class="tf">-C</span> <span class="tp">/srv/company</span> shared web admin</span>
+<span class="ln"><span class="tk">find</span> <span class="ts">&quot;$DEST&quot;</span> <span class="tf">-name</span> <span class="ts">&#x27;company-*.tar.gz&#x27;</span> <span class="tf">-mtime</span> +7 <span class="tf">-delete</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> chmod 750 <span class="tp">/srv/company/scripts/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo tee /srv/company/scripts/backup.sh &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+set -euo pipefail
+DEST=/srv/company/backup
+tar -czf &quot;$DEST/company-$(date +%F_%H%M).tar.gz&quot; -C /srv/company shared web admin
+find &quot;$DEST&quot; -name &#x27;company-*.tar.gz&#x27; -mtime +7 -delete
+EOF
+sudo chmod 750 /srv/company/scripts/backup.sh">Copy</button></div></div><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> tee <span class="tp">/etc/systemd/system/company-backup.service</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tk">[Unit]</span></span>
+<span class="ln">Description=Company <span class="tk">backup</span></span>
+<span class="ln"></span>
+<span class="ln"><span class="tk">[Service]</span></span>
+<span class="ln">Type=oneshot</span>
+<span class="ln"><span class="tp">ExecStart=/srv/company/scripts/backup.sh</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> tee <span class="tp">/etc/systemd/system/company-backup.timer</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tk">[Unit]</span></span>
+<span class="ln">Description=Daily <span class="tk">company</span> backup</span>
+<span class="ln"></span>
+<span class="ln"><span class="tk">[Timer]</span></span>
+<span class="ln">OnCalendar=*-*-* <span class="tk">02:00:00</span></span>
+<span class="ln">Persistent=true</span>
+<span class="ln"></span>
+<span class="ln"><span class="tk">[Install]</span></span>
+<span class="ln">WantedBy=timers.target</span>
+<span class="ln"><span class="tk">EOF</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo tee /etc/systemd/system/company-backup.service &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+[Unit]
+Description=Company backup
+
+[Service]
+Type=oneshot
+ExecStart=/srv/company/scripts/backup.sh
+EOF
+sudo tee /etc/systemd/system/company-backup.timer &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+[Unit]
+Description=Daily company backup
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF">Copy</button></div></div><div class="code"><pre><code><span class="ln"><span class="tc"># RHEL / Rocky / Alma only (script label):</span></span>
+<span class="ln"><span class="tk">sudo</span> semanage fcontext <span class="tf">-a</span> <span class="tf">-t</span> bin_t <span class="ts">&quot;/srv/company/scripts(/.*)?&quot;</span></span>
+<span class="ln"><span class="tk">sudo</span> restorecon <span class="tf">-Rv</span> <span class="tp">/srv/company/scripts</span></span>
+<span class="ln"><span class="tc"># both:</span></span>
+<span class="ln"><span class="tk">sudo</span> systemd-analyze verify <span class="tp">/etc/systemd/system/company-backup.service</span></span>
+<span class="ln"><span class="tk">sudo</span> systemctl daemon-reload</span>
+<span class="ln"><span class="tk">sudo</span> systemctl enable <span class="tf">--now</span> company-backup.timer</span>
+<span class="ln"><span class="tk">sudo</span> systemctl start company-backup.service</span>
+<span class="ln"><span class="tk">sudo</span> ls <span class="tf">-l</span> <span class="tp">/srv/company/backup</span></span>
+<span class="ln"><span class="tk">systemctl</span> list-timers company-backup.timer <span class="tf">--no-pager</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# RHEL / Rocky / Alma only (script label):
+sudo semanage fcontext -a -t bin_t &quot;/srv/company/scripts(/.*)?&quot;
+sudo restorecon -Rv /srv/company/scripts
+# both:
+sudo systemd-analyze verify /etc/systemd/system/company-backup.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now company-backup.timer
+sudo systemctl start company-backup.service
+sudo ls -l /srv/company/backup
+systemctl list-timers company-backup.timer --no-pager">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">-rw-r--r-- 1 root root 2048 ... company-2026-11-12_0215.tar.gz
+NEXT                        LEFT   LAST PASSED UNIT                 ACTIVATES
+Fri 2026-11-13 02:00:00 CET 23h    -    -      company-backup.timer company-backup.service</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>status=203/EXEC</code> in <code>systemctl status company-backup.service</code>: on RHEL set the <code>bin_t</code> label (first lines of this block) and check the x bit.</li><li>Do not test the <code>find ... -delete</code> line on other directories; if in doubt replace <code>-delete</code> with <code>-print</code>.</li><li>If the timer is not listed, you probably forgot <code>daemon-reload</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v06" data-expect="1"><header><h3>Verification checklist and delivery report</h3><span class="status" aria-hidden="true"></span></header><p>Write the checklist script, run it as root and build the delivery report. All lines must say OK. Paste the verify output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> tee <span class="tp">/srv/company/scripts/verify.sh</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">set</span> <span class="tf">-o</span> pipefail</span>
+<span class="ln"><span class="tk">chk()</span> { local label=$1; shift; if <span class="ts">&quot;$@&quot;</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1; then echo <span class="ts">&quot;OK: $label&quot;</span><span class="to">;</span> <span class="tk">else</span> echo <span class="ts">&quot;FAIL: $label&quot;</span><span class="to">;</span> <span class="tk">fi;</span> }</span>
+<span class="ln"><span class="tk">staff_ok()</span> { id <span class="tf">-nG</span> alice <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-qw</span> staff <span class="to">&amp;&amp;</span> <span class="tk">id</span> <span class="tf">-nG</span> bob <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-qw</span> staff <span class="to">&amp;&amp;</span> <span class="tk">id</span> <span class="tf">-nG</span> carol <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-qw</span> staff; }</span>
+<span class="ln"><span class="tk">site_ok()</span> { curl <span class="tf">-fsS</span> <span class="tf">-H</span> <span class="ts">&#x27;Host: company.local&#x27;</span> <span class="tp">http://localhost</span> <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-q</span> Company; }</span>
+<span class="ln"><span class="tk">selinux_ok()</span> { if ! command <span class="tf">-v</span> getenforce <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1 <span class="to">||</span> <span class="tk">[</span> <span class="ts">&quot;$(getenforce)&quot;</span> = Disabled ]; then return 0; fi; ls <span class="tf">-Zd</span> <span class="tp">/srv/company/web</span> <span class="to">|</span> <span class="tk">grep</span> <span class="tf">-q</span> httpd_sys_content_t; }</span>
+<span class="ln"><span class="tk">firewall_ok()</span> {</span>
+<span class="ln">  <span class="tk">if</span> command <span class="tf">-v</span> firewall-cmd <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1 <span class="to">&amp;&amp;</span> <span class="tk">firewall-cmd</span> <span class="tf">--state</span> <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1; then</span>
+<span class="ln">    <span class="tk">local</span> services</span>
+<span class="ln">    services=$(firewall-cmd <span class="tk">--list-services)</span> <span class="to">||</span> <span class="tk">return</span> 1</span>
+<span class="ln">    <span class="tk">for</span> service in ssh http https; do [[ <span class="ts">&quot; $services &quot;</span> == *&quot; <span class="tp">$service</span> &quot;* ]] <span class="to">||</span> <span class="tk">return</span> 1; done</span>
+<span class="ln">  <span class="tk">elif</span> command <span class="tf">-v</span> ufw <span class="to">&gt;</span><span class="tk">/dev/null</span> 2&gt;&amp;1; then</span>
+<span class="ln">    <span class="tk">local</span> status</span>
+<span class="ln">    status=$(ufw <span class="tk">status)</span> <span class="to">||</span> <span class="tk">return</span> 1</span>
+<span class="ln">    <span class="tk">grep</span> <span class="tf">-q</span> <span class="ts">&#x27;^Status: active&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span> <span class="to">&amp;&amp;</span> <span class="tk">grep</span> <span class="tf">-Eq</span> <span class="ts">&#x27;^OpenSSH[[:space:]]+ALLOW&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span> <span class="to">&amp;&amp;</span> <span class="tk">grep</span> <span class="tf">-Eq</span> <span class="ts">&#x27;^80/tcp[[:space:]]+ALLOW&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span> <span class="to">&amp;&amp;</span> <span class="tk">grep</span> <span class="tf">-Eq</span> <span class="ts">&#x27;^443/tcp[[:space:]]+ALLOW&#x27;</span> <span class="to">&lt;&lt;&lt;</span><span class="ts">&quot;$status&quot;</span></span>
+<span class="ln">  <span class="tk">else</span></span>
+<span class="ln">    <span class="tk">return</span> 1</span>
+<span class="ln">  <span class="tk">fi</span></span>
+<span class="ln"><span class="tk">}</span></span>
+<span class="ln"><span class="tk">backup_ok()</span> { compgen <span class="tf">-G</span> <span class="ts">&#x27;/srv/company/backup/company-*.tar.gz&#x27;</span> <span class="to">&gt;</span><span class="tk">/dev/null;</span> }</span>
+<span class="ln"><span class="tk">backup_mode_ok()</span> { [[ <span class="tp">$(stat</span> <span class="tf">-c</span> %a <span class="tp">/srv/company/backup)</span> == 700 ]]; }</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;alice bob carol are in staff&quot;</span> staff_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;shared has setgid&quot;</span> test <span class="tf">-g</span> <span class="tp">/srv/company/shared</span></span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;site answers with Small Company&quot;</span> site_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;nginx enabled&quot;</span> systemctl is-enabled <span class="tf">--quiet</span> nginx</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;web label (SELinux) or no SELinux&quot;</span> selinux_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;firewall allows SSH, HTTP and HTTPS&quot;</span> firewall_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;timer enabled&quot;</span> systemctl is-enabled <span class="tf">--quiet</span> company-backup.timer</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;backup archive exists&quot;</span> backup_ok</span>
+<span class="ln"><span class="tk">chk</span> <span class="ts">&quot;backup dir is 700&quot;</span> backup_mode_ok</span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">sudo</span> bash <span class="tp">/srv/company/scripts/verify.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo tee /srv/company/scripts/verify.sh &gt;/dev/null &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+set -o pipefail
+chk() { local label=$1; shift; if &quot;$@&quot; &gt;/dev/null 2&gt;&amp;1; then echo &quot;OK: $label&quot;; else echo &quot;FAIL: $label&quot;; fi; }
+staff_ok() { id -nG alice | grep -qw staff &amp;&amp; id -nG bob | grep -qw staff &amp;&amp; id -nG carol | grep -qw staff; }
+site_ok() { curl -fsS -H &#x27;Host: company.local&#x27; http://localhost | grep -q Company; }
+selinux_ok() { if ! command -v getenforce &gt;/dev/null 2&gt;&amp;1 || [ &quot;$(getenforce)&quot; = Disabled ]; then return 0; fi; ls -Zd /srv/company/web | grep -q httpd_sys_content_t; }
+firewall_ok() {
+  if command -v firewall-cmd &gt;/dev/null 2&gt;&amp;1 &amp;&amp; firewall-cmd --state &gt;/dev/null 2&gt;&amp;1; then
+    local services
+    services=$(firewall-cmd --list-services) || return 1
+    for service in ssh http https; do [[ &quot; $services &quot; == *&quot; $service &quot;* ]] || return 1; done
+  elif command -v ufw &gt;/dev/null 2&gt;&amp;1; then
+    local status
+    status=$(ufw status) || return 1
+    grep -q &#x27;^Status: active&#x27; &lt;&lt;&lt;&quot;$status&quot; &amp;&amp; grep -Eq &#x27;^OpenSSH[[:space:]]+ALLOW&#x27; &lt;&lt;&lt;&quot;$status&quot; &amp;&amp; grep -Eq &#x27;^80/tcp[[:space:]]+ALLOW&#x27; &lt;&lt;&lt;&quot;$status&quot; &amp;&amp; grep -Eq &#x27;^443/tcp[[:space:]]+ALLOW&#x27; &lt;&lt;&lt;&quot;$status&quot;
+  else
+    return 1
+  fi
+}
+backup_ok() { compgen -G &#x27;/srv/company/backup/company-*.tar.gz&#x27; &gt;/dev/null; }
+backup_mode_ok() { [[ $(stat -c %a /srv/company/backup) == 700 ]]; }
+chk &quot;alice bob carol are in staff&quot; staff_ok
+chk &quot;shared has setgid&quot; test -g /srv/company/shared
+chk &quot;site answers with Small Company&quot; site_ok
+chk &quot;nginx enabled&quot; systemctl is-enabled --quiet nginx
+chk &quot;web label (SELinux) or no SELinux&quot; selinux_ok
+chk &quot;firewall allows SSH, HTTP and HTTPS&quot; firewall_ok
+chk &quot;timer enabled&quot; systemctl is-enabled --quiet company-backup.timer
+chk &quot;backup archive exists&quot; backup_ok
+chk &quot;backup dir is 700&quot; backup_mode_ok
+EOF
+sudo bash /srv/company/scripts/verify.sh">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">OK: alice bob carol are in staff
+OK: shared has setgid
+OK: site answers with Small Company
+OK: nginx enabled
+OK: web label (SELinux) or no SELinux
+OK: firewall allows SSH, HTTP and HTTPS
+OK: timer enabled
+OK: backup archive exists
+OK: backup dir is 700</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">{</span> echo <span class="ts">&quot;Company server delivery report&quot;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;Host: $(hostname)&quot;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;Date: $(date)&quot;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;--- verification ---&quot;</span><span class="to">;</span> <span class="tk">sudo</span> bash <span class="tp">/srv/company/scripts/verify.sh;</span> echo <span class="ts">&quot;--- listening ports ---&quot;</span><span class="to">;</span> <span class="tk">ss</span> <span class="tf">-tulpn;</span> } <span class="to">|</span> <span class="tk">sudo</span> tee <span class="tp">/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">wc</span> <span class="tf">-l</span> <span class="tp">/srv/company/REPORT.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="{ echo &quot;Company server delivery report&quot;; echo &quot;Host: $(hostname)&quot;; echo &quot;Date: $(date)&quot;; echo &quot;--- verification ---&quot;; sudo bash /srv/company/scripts/verify.sh; echo &quot;--- listening ports ---&quot;; ss -tulpn; } | sudo tee /srv/company/REPORT.txt
+wc -l /srv/company/REPORT.txt">Copy</button></div></div><details class="differs"><summary>My output looks different</summary><ul><li>Any <code>FAIL:</code> line: go back to the matching chapter, fix it and run the script again.</li><li>The <code>[ ... = 700 ]</code> line needs the backslash before <code>$(stat</code> exactly as written, otherwise the shell expands it too early.</li><li>Finally reboot and run the verify script again: everything must still be OK.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Quick exercises (simulator)</h2><p>Optional: warm up before the VM, or practise without one, in the in-browser virtual terminal. Tasks are verified automatically.</p><p>Tasks get harder from warm-up to ticket. Badges show the difficulty.</p><p><button type="button" class="btn" data-openterm>&gt;_ Open terminal (optional)</button></p>
+<h3 class="kind k-warmup">Warm-up <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Create the project root in your home directory: <code>mkdir -p ~/srv/company</code> (in the VM this is <code>/srv/company</code>).</p><details><summary>Hint</summary><p><code>-p</code> also creates the missing parent <code>srv</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/srv/company</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/srv/company">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Create the five subdirectories <code>shared</code>, <code>admin</code>, <code>web</code>, <code>backup</code> and <code>scripts</code> inside <code>~/srv/company</code> with one <code>mkdir</code> command.</p><details><summary>Hint</summary><p>Brace expansion: <code>mkdir ~/srv/company/{shared,admin,web,backup,scripts}</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tp">~/srv/company/{shared,admin,web,backup,scripts}</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir ~/srv/company/{shared,admin,web,backup,scripts}">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Set a strict umask for the project work: <code>umask 027</code>.</p><details><summary>Hint</summary><p>027 removes all rights for others and write for the group on new files.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 027</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 027">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Guided lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Give the shared directory mode <code>2770</code> (setgid, rwx for owner and group, nothing for others).</p><details><summary>Hint</summary><p><code>chmod 2770 ~/srv/company/shared</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 2770 <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 2770 ~/srv/company/shared">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Make <code>web</code> readable for everybody (<code>755</code>) and <code>backup</code> private (<code>700</code>).</p><details><summary>Hint</summary><p>Two <code>chmod</code> commands, one per directory.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/company/web</span></span>
+<span class="ln"><span class="tk">chmod</span> 700 <span class="tp">~/srv/company/backup</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 755 ~/srv/company/web
+chmod 700 ~/srv/company/backup">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Write the site page: put the text <code>&lt;h1&gt;Small Company&lt;/h1&gt;</code> into <code>~/srv/company/web/index.html</code>.</p><details><summary>Hint</summary><p>Use <code>echo &quot;...&quot; &gt; file</code>; quote the text because of the <code>&lt;</code> and <code>&gt;</code> characters.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;&lt;h1&gt;Small Company&lt;/h1&gt;&quot;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/web/index.html</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &quot;&lt;h1&gt;Small Company&lt;/h1&gt;&quot; &gt; ~/srv/company/web/index.html">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Write the nginx server block to <code>~/srv/company/company.conf</code>: lines <code>server {</code>, <code>listen 80;</code>, <code>server_name company.local;</code>, <code>root /srv/company/web;</code> and <code>}</code>.</p><details><summary>Hint</summary><p><code>printf</code> with <code>\n</code> writes several lines at once; put the text in single quotes.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;server {\n    listen 80;\n    server_name company.local;\n    root /srv/company/web;\n}\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/company.conf</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;server {\n    listen 80;\n    server_name company.local;\n    root /srv/company/web;\n}\n&#x27; &gt; ~/srv/company/company.conf">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Predict <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t08" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: which permission string will <code>ls -ld ~/srv/company/shared</code> show? Write it down, then run the command.</p><details><summary>Hint</summary><p>The <code>s</code> replaces the group <code>x</code>: <code>drwxrws---</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">~/srv/company/shared</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -ld ~/srv/company/shared">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: which members does the group <code>admins</code> have in <code>~/audit/group.txt</code>? Run <code>grep admins ~/audit/group.txt | cut -d: -f4</code> to confirm.</p><details><summary>Hint</summary><p>Field 4 of the group file is the member list.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> admins <span class="tp">~/audit/group.txt</span> <span class="to">|</span> <span class="tk">cut</span> <span class="tf">-d:</span> <span class="tf">-f4</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep admins ~/audit/group.txt | cut -d: -f4">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: how many lines in <code>~/audit/ss.txt</code> contain <code>LISTEN</code>? Check with <code>grep -c LISTEN ~/audit/ss.txt</code>.</p><details><summary>Hint</summary><p>The UDP line says <code>UNCONN</code>, not <code>LISTEN</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-c</span> LISTEN <span class="tp">~/audit/ss.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -c LISTEN ~/audit/ss.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Debug <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t11" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: the test site in <code>~/srv/site</code> would give nginx a 403. The directory has mode <code>700</code> and <code>index.html</code> has <code>600</code>. Fix them to <code>755</code> and <code>644</code>.</p><details><summary>Hint</summary><p>Check with <code>ls -ld ~/srv/site</code> and <code>ls -l ~/srv/site</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/site</span></span>
+<span class="ln"><span class="tk">chmod</span> 644 <span class="tp">~/srv/site/index.html</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 755 ~/srv/site
+chmod 644 ~/srv/site/index.html">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: <code>~/srv/broken/backup.sh</code> fails with Permission denied. Fix it and run it so that <code>~/srv/broken/out/notes.bak</code> exists.</p><details><summary>Hint</summary><p>The script needs the x bit: <code>chmod 755</code>, then run it with its path.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/broken/backup.sh</span></span>
+<span class="ln"><span class="tk">~/srv/broken/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 755 ~/srv/broken/backup.sh
+~/srv/broken/backup.sh">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini project <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d2">Medium</span></p><p>Mini project: write <code>~/srv/company/scripts/backup.sh</code> with the line <code>#!/bin/bash</code> and a <code>cp</code> line that copies <code>~/srv/company/web/index.html</code> to <code>~/srv/company/backup/index.html.bak</code>. Make it executable and run it.</p><details><summary>Hint</summary><p><code>printf</code> for the file, <code>chmod 755</code>, then <code>~/srv/company/scripts/backup.sh</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\ncp ~/srv/company/web/index.html ~/srv/company/backup/index.html.bak\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/scripts/backup.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> 755 <span class="tp">~/srv/company/scripts/backup.sh</span></span>
+<span class="ln"><span class="tk">~/srv/company/scripts/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\ncp ~/srv/company/web/index.html ~/srv/company/backup/index.html.bak\n&#x27; &gt; ~/srv/company/scripts/backup.sh
+chmod 755 ~/srv/company/scripts/backup.sh
+~/srv/company/scripts/backup.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t14" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d3">Hard</span></p><p>Mini project: write the unit files <code>company-backup.service</code> (<code>Type=oneshot</code>, <code>ExecStart=/srv/company/scripts/backup.sh</code>) and <code>company-backup.timer</code> (<code>[Timer]</code>, <code>OnCalendar=*-*-* 02:00:00</code>, <code>Persistent=true</code>, <code>[Install]</code>, <code>WantedBy=timers.target</code>) into <code>~/srv/company/scripts</code>.</p><details><summary>Hint</summary><p>Two <code>printf</code> commands with <code>\n</code>; the service needs <code>[Unit]</code> and <code>[Service]</code>, the timer needs <code>[Unit]</code>, <code>[Timer]</code> and <code>[Install]</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;[Unit]\nDescription=Company backup\n\n[Service]\nType=oneshot\nExecStart=/srv/company/scripts/backup.sh\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/scripts/company-backup.service</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;[Unit]\nDescription=Daily company backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/scripts/company-backup.timer</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;[Unit]\nDescription=Company backup\n\n[Service]\nType=oneshot\nExecStart=/srv/company/scripts/backup.sh\n&#x27; &gt; ~/srv/company/scripts/company-backup.service
+printf &#x27;[Unit]\nDescription=Daily company backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n&#x27; &gt; ~/srv/company/scripts/company-backup.timer">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Challenge <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: write the firewall plan <code>~/srv/company/firewall-plan.txt</code>, one command per line, in a safe order: <code>firewall-cmd --permanent --add-service=</code> for ssh first, then http, then https, and finally <code>firewall-cmd --reload</code>.</p><details><summary>Hint</summary><p>Start the file with <code>&gt;</code>, then add lines with <code>&gt;&gt;</code>. SSH must come first.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --permanent --add-service=ssh&quot;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --permanent --add-service=http&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --permanent --add-service=https&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;firewall-cmd --reload&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/firewall-plan.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &quot;firewall-cmd --permanent --add-service=ssh&quot; &gt; ~/srv/company/firewall-plan.txt
+echo &quot;firewall-cmd --permanent --add-service=http&quot; &gt;&gt; ~/srv/company/firewall-plan.txt
+echo &quot;firewall-cmd --permanent --add-service=https&quot; &gt;&gt; ~/srv/company/firewall-plan.txt
+echo &quot;firewall-cmd --reload&quot; &gt;&gt; ~/srv/company/firewall-plan.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t16" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: write the delivery report <code>~/srv/company/REPORT.txt</code> with at least 8 lines: title, host name (use <code>$(hostname)</code>), date, users alice bob carol, groups staff admins, shared directory, web ports 80 and 443, backup.</p><details><summary>Hint</summary><p>Start with <code>echo &quot;...&quot; &gt; file</code>, add lines with <code>&gt;&gt;</code>. <code>echo &quot;Host: $(hostname)&quot;</code> fills in the host.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Company server delivery report&quot;</span> <span class="to">&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Host: $(hostname)&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Date: $(date)&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Users: alice bob carol&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Groups: staff admins&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Shared dir: /srv/company/shared mode 2770&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Web: nginx ports 80 and 443&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Backup: backup.sh via company-backup.timer&quot;</span> <span class="to">&gt;&gt;</span> <span class="tk">~/srv/company/REPORT.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &quot;Company server delivery report&quot; &gt; ~/srv/company/REPORT.txt
+echo &quot;Host: $(hostname)&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Date: $(date)&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Users: alice bob carol&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Groups: staff admins&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Shared dir: /srv/company/shared mode 2770&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Web: nginx ports 80 and 443&quot; &gt;&gt; ~/srv/company/REPORT.txt
+echo &quot;Backup: backup.sh via company-backup.timer&quot; &gt;&gt; ~/srv/company/REPORT.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t17" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d2">Medium</span></p><p>Ticket: The auditor says the server may listen on unexpected ports. Use <code>~/audit/ss.txt</code> and write all lines whose port is not 22, 80 or 443 into <code>~/audit/unexpected.txt</code>.</p><details><summary>Hint</summary><p><code>grep -v -E &#x27;:(22|80|443) &#x27; file &gt; result</code>; the space after the closing bracket matters.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-v</span> <span class="tf">-E</span> <span class="ts">&#x27;:(22|80|443) &#x27;</span> <span class="tp">~/audit/ss.txt</span> <span class="to">&gt;</span> <span class="tk">~/audit/unexpected.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -v -E &#x27;:(22|80|443) &#x27; ~/audit/ss.txt &gt; ~/audit/unexpected.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t18" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>Ticket: Management wants the team list. From <code>~/audit/passwd.txt</code> write the names of the real users (home directory under <code>/home/</code>) sorted into <code>~/audit/team.txt</code>, one per line.</p><details><summary>Hint</summary><p><code>grep /home/ file | cut -d: -f1 | sort &gt; ~/audit/team.txt</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tp">/home/</span> <span class="tp">~/audit/passwd.txt</span> <span class="to">|</span> <span class="tk">cut</span> <span class="tf">-d:</span> <span class="tf">-f1</span> <span class="to">|</span> <span class="tk">sort</span> <span class="to">&gt;</span> <span class="tk">~/audit/team.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep /home/ ~/audit/passwd.txt | cut -d: -f1 | sort &gt; ~/audit/team.txt">Copy</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Reset lab</button></p></section>
+<section id="quiz"><h2>Self-test</h2>
+<div class="q card" data-q="q1"><p><strong>On Rocky Linux nginx returns 403 for files in /srv/company/web although the mode is 755. What is the most likely cause?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">nginx is not installed</button><button type="button" class="opt" data-i="1">The files carry the wrong SELinux label (not httpd_sys_content_t)</button><button type="button" class="opt" data-i="2">Port 80 is closed in the firewall</button><button type="button" class="opt" data-i="3">The group staff is missing</button></div><p class="explain" hidden>A closed port gives a timeout, not a 403. A generic label under /srv blocks nginx; fix it with semanage fcontext and restorecon, not with setenforce 0.</p></div>
+<div class="q card" data-q="q2"><p><strong>You are connected over SSH to an Ubuntu server. What is the safe way to switch on ufw?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">ufw enable first, then add rules</button><button type="button" class="opt" data-i="1">Reboot the server and hope</button><button type="button" class="opt" data-i="2">ufw allow OpenSSH first, then ufw enable</button><button type="button" class="opt" data-i="3">Disable SSH and use the console</button></div><p class="explain" hidden>ufw rules are active at once. Without an allowed SSH rule, enabling the firewall cuts your session.</p></div>
+<div class="q card" data-q="q3"><p><strong>Why does the shared directory get mode 2770 (setgid)?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">New files inherit the group staff, so the team can work on each other&#x27;s files</button><button type="button" class="opt" data-i="1">Everybody may read the files</button><button type="button" class="opt" data-i="2">The files are encrypted</button><button type="button" class="opt" data-i="3">Only root may write</button></div><p class="explain" hidden>The setgid bit on a directory passes its group to new files. 770 keeps others out.</p></div>
+<div class="q card" data-q="q4"><p><strong>You created company-backup.service and company-backup.timer. What must you do so the nightly backup runs?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Reboot and do nothing else</button><button type="button" class="opt" data-i="1">chmod 777 on the unit files</button><button type="button" class="opt" data-i="2">Nothing, systemd finds them alone</button><button type="button" class="opt" data-i="3">systemctl daemon-reload, then systemctl enable --now company-backup.timer</button></div><p class="explain" hidden>systemd must re-read unit files (daemon-reload), and the timer unit has to be enabled and started; the service is started by the timer.</p></div>
+</section>
+<section id="summary" class="card"><h2>Summary</h2><ul><li>Plan first, take a VM snapshot, work only in the test VM.</li><li>Shared directory: group staff, mode 2770 (setgid), least privilege elsewhere: web 755, scripts 750, backup 700.</li><li>nginx on RHEL needs the label httpd_sys_content_t (semanage fcontext + restorecon); on Ubuntu you check AppArmor.</li><li>Firewall: keep ssh, test with runtime rules or --timeout, keep a second session; ufw: allow OpenSSH before enable.</li><li>Backup: script + service (oneshot) + timer; daemon-reload, enable --now the timer; on RHEL label the script bin_t.</li><li>Finish with a checklist (OK/FAIL) and a delivery report file as proof.</li></ul></section>
+<section id="glossary"><h2>Key terms</h2><dl class="gl"><dt>snapshot</dt><dd>A saved state of the VM you can return to if a step goes wrong.</dd><dt>setgid (on a directory)</dt><dd>New files inherit the directory&#x27;s group instead of the creator&#x27;s primary group.</dd><dt>default ACL</dt><dd>An access rule on a directory that new files inherit.</dd><dt>SELinux label</dt><dd>A security context (such as httpd_sys_content_t) on files; decides what a process may access.</dd><dt>semanage fcontext</dt><dd>Stores a permanent file-label rule; restorecon applies it.</dd><dt>AppArmor</dt><dd>Path-based security system of Debian/Ubuntu; checked with aa-status.</dd><dt>firewalld / ufw</dt><dd>Firewall front ends of RHEL-family and Ubuntu systems.</dd><dt>runtime vs permanent</dt><dd>Runtime rules vanish at reload or reboot; permanent rules are stored.</dd><dt>systemd timer</dt><dd>A unit that starts a service on a schedule (OnCalendar=).</dd><dt>delivery report</dt><dd>The file that documents the finished server and the verification results.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-6.7.html">← Previous</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (optional)</strong><button type="button" class="ibtn" id="termclose" aria-label="Close terminal">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "en", "module": "6.8", "setup": {"dirs": ["/home/student/audit", "/home/student/srv/site", "/home/student/srv/broken"], "files": {"/home/student/audit/ss.txt": "tcp LISTEN 0 128 0.0.0.0:22 users:((\"sshd\"))\ntcp LISTEN 0 511 0.0.0.0:80 users:((\"nginx\"))\ntcp LISTEN 0 511 0.0.0.0:443 users:((\"nginx\"))\ntcp LISTEN 0 80 0.0.0.0:3306 users:((\"mysqld\"))\ntcp LISTEN 0 128 127.0.0.1:8080 users:((\"python3\"))\nudp UNCONN 0 0 0.0.0.0:68 users:((\"dhclient\"))\n", "/home/student/audit/passwd.txt": "root:x:0:0:root:/root:/bin/bash\nnginx:x:990:988:nginx:/var/lib/nginx:/sbin/nologin\ncarol:x:1003:1003::/home/carol:/bin/bash\nalice:x:1001:1001::/home/alice:/bin/bash\nbob:x:1002:1002::/home/bob:/bin/bash\n", "/home/student/audit/group.txt": "staff:x:2001:alice,bob,carol\nadmins:x:2002:alice\n", "/home/student/srv/site/index.html": "<h1>Small Company<\/h1>\n", "/home/student/srv/broken/backup.sh": "#!/bin/bash\nmkdir -p ~/srv/broken/out\ncp ~/notes.txt ~/srv/broken/out/notes.bak\n"}, "modes": [["/home/student/srv/site", "700"], ["/home/student/srv/site/index.html", "600"], ["/home/student/srv/broken/backup.sh", "644"]]}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"exists": "~/srv/company", "type": "d"}}, {"id": "t02", "kind": "warmup", "check": [{"exists": "~/srv/company/shared", "type": "d"}, {"exists": "~/srv/company/admin", "type": "d"}, {"exists": "~/srv/company/web", "type": "d"}, {"exists": "~/srv/company/backup", "type": "d"}, {"exists": "~/srv/company/scripts", "type": "d"}]}, {"id": "t03", "kind": "warmup", "check": {"cmd": "^umask 0?27$", "ok": true}}, {"id": "t04", "kind": "guided", "check": {"mode": ["~/srv/company/shared", "2770"]}}, {"id": "t05", "kind": "guided", "check": [{"mode": ["~/srv/company/web", "755"]}, {"mode": ["~/srv/company/backup", "700"]}]}, {"id": "t06", "kind": "guided", "check": {"contains": ["~/srv/company/web/index.html", "Company"]}}, {"id": "t07", "kind": "guided", "check": [{"contains": ["~/srv/company/company.conf", "listen 80;"]}, {"contains": ["~/srv/company/company.conf", "root /srv/company/web;"]}]}, {"id": "t08", "kind": "predict", "check": {"out": "drwxrws---", "of": "^ls -ld"}}, {"id": "t09", "kind": "predict", "check": {"out": "\\balice\\b", "of": "^grep admins"}}, {"id": "t10", "kind": "predict", "check": {"out": "\\b5\\b", "of": "^grep -c LISTEN"}}, {"id": "t11", "kind": "debug", "check": [{"mode": ["~/srv/site", "755"]}, {"mode": ["~/srv/site/index.html", "644"]}]}, {"id": "t12", "kind": "debug", "check": [{"mode": ["~/srv/broken/backup.sh", "755"]}, {"exists": "~/srv/broken/out/notes.bak", "type": "f"}]}, {"id": "t13", "kind": "mini", "check": [{"mode": ["~/srv/company/scripts/backup.sh", "755"]}, {"contains": ["~/srv/company/scripts/backup.sh", "cp "]}, {"exists": "~/srv/company/backup/index.html.bak", "type": "f"}]}, {"id": "t14", "kind": "mini", "check": [{"contains": ["~/srv/company/scripts/company-backup.service", "ExecStart=\\S*backup\\.sh"]}, {"contains": ["~/srv/company/scripts/company-backup.service", "Type=oneshot"]}, {"contains": ["~/srv/company/scripts/company-backup.timer", "\\[Timer\\]"]}, {"contains": ["~/srv/company/scripts/company-backup.timer", "OnCalendar="]}, {"contains": ["~/srv/company/scripts/company-backup.timer", "WantedBy=timers\\.target"]}]}, {"id": "t15", "kind": "challenge", "check": [{"contains": ["~/srv/company/firewall-plan.txt", "add-service=ssh[\\s\\S]*add-service=http\\b"]}, {"contains": ["~/srv/company/firewall-plan.txt", "add-service=https"]}, {"contains": ["~/srv/company/firewall-plan.txt", "--permanent"]}, {"contains": ["~/srv/company/firewall-plan.txt", "--reload"]}]}, {"id": "t16", "kind": "challenge", "check": [{"linesMin": ["~/srv/company/REPORT.txt", 8]}, {"contains": ["~/srv/company/REPORT.txt", "(?=[\\s\\S]*alice)(?=[\\s\\S]*bob)(?=[\\s\\S]*carol)(?=[\\s\\S]*staff)(?=[\\s\\S]*admins)"]}, {"contains": ["~/srv/company/REPORT.txt", "(?=[\\s\\S]*\\b80\\b)(?=[\\s\\S]*\\b443\\b)(?=[\\s\\S]*linux-lab)(?=[\\s\\S]*backup)"]}]}, {"id": "t17", "kind": "ticket", "check": [{"contains": ["~/audit/unexpected.txt", "^(?![\\s\\S]*(nginx|sshd))[\\s\\S]*3306[\\s\\S]*8080"]}, {"linesMin": ["~/audit/unexpected.txt", 3]}]}, {"id": "t18", "kind": "ticket", "check": {"equals": ["~/audit/team.txt", "alice\nbob\ncarol\n"]}}], "vm": [{"id": "v01", "expect": "ID=|PRETTY_NAME|Enforcing|Permissive|Disabled|apparmor|profiles"}, {"id": "v02", "expect": "(?=[\\s\\S]*drwxrws)(?=[\\s\\S]*staff)(?=[\\s\\S]*alice)"}, {"id": "v03", "expect": "HTTP/\\S+ 200|200 OK|Small Company"}, {"id": "v04", "expect": "(ssh|22)[\\s\\S]*(http|80)|(http|80)[\\s\\S]*(ssh|22)"}, {"id": "v05", "expect": "company-backup"}, {"id": "v06", "expect": "^(?![\\s\\S]*FAIL)[\\s\\S]*(OK:[\\s\\S]*){6}"}], "quiz": {"q1": 1, "q2": 2, "q3": 0, "q4": 3}, "ui": {"correct": "Correct!", "wrong": "Not quite, try again.", "taskDone": "Task complete", "moduleDone": "Module complete! 🎉", "tasksDone": "done", "welcome": "Virtual Linux terminal — commands only affect this page's virtual file system. Type 'help' to list commands, Tab to complete, ↑/↓ for history.", "sandboxNote": "Safe sandbox: your real system is never touched.", "resetConfirm": "This module's virtual file system and command history will be reset. Your progress (completed tasks) is kept. Continue?", "openTerminal": "Open terminal (optional)", "closeTerminal": "Close terminal", "continue": "Continue", "startPath": "Start learning", "noResult": "No matching module or command.", "soon": "Coming soon", "overall": "Overall progress", "copied": "Copied ✓", "pasteOk": "Your output matches the expected pattern ✓", "pasteBad": "No match yet. See the tips under \"My output looks different\" and paste the complete output.", "iDidIt": "Done", "undo": "Undo", "groupDone": "done", "vmDone": "VM tasks"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

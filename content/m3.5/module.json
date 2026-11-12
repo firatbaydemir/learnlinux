@@ -1,0 +1,42 @@
+{
+  "id": "3.5",
+  "level": 3,
+  "setup": {
+    "dirs": ["/home/student/lab/data", "/home/student/lab/reports"],
+    "files": {
+      "/home/student/lab/data/fruits.txt": "pear\napple\nbanana\napple\npear\nplum\n",
+      "/home/student/lab/data/numbers.txt": "10\n2\n100\n9\n",
+      "/home/student/lab/data/mixed.txt": "b\na\nb\nc\na\n",
+      "/home/student/lab/data/employees.csv": "name,dept,salary\nalice,it,5200\nbob,hr,4100\ncarol,it,6100\ndan,ops,3900\n",
+      "/home/student/lab/data/access.log": "10.0.0.1 200\n10.0.0.2 404\n10.0.0.1 200\n10.0.0.3 500\n10.0.0.2 200\n"
+    },
+    "cwd": "/home/student/lab"
+  },
+  "tasks": [
+    {"id":"t01","kind":"warmup","diff":1,"check":{"cmd":"^sort data/fruits\\.txt$","out":"apple"},"solution":["sort data/fruits.txt"]},
+    {"id":"t02","kind":"warmup","diff":1,"check":{"cmd":"^sort -r data/fruits\\.txt$","out":"plum"},"solution":["sort -r data/fruits.txt"]},
+    {"id":"t03","kind":"guided","diff":1,"check":{"cmd":"^sort -n data/numbers\\.txt$","out":"2[\\s\\S]*100"},"solution":["sort -n data/numbers.txt"]},
+    {"id":"t04","kind":"guided","diff":2,"check":{"cmd":"^sort data/fruits\\.txt \\| uniq$","out":"banana"},"solution":["sort data/fruits.txt | uniq"]},
+    {"id":"t05","kind":"guided","diff":2,"check":{"cmd":"^sort data/fruits\\.txt \\| uniq -c$","out":"2 apple"},"solution":["sort data/fruits.txt | uniq -c"]},
+    {"id":"t06","kind":"guided","diff":2,"check":{"cmd":"^cut -d, -f1 data/employees\\.csv$","out":"alice"},"solution":["cut -d, -f1 data/employees.csv"]},
+    {"id":"t07","kind":"predict","diff":2,"check":{"cmd":"^cut -d, -f2 data/employees\\.csv \\| sort \\| uniq -c$","out":"2 it"},"solution":["cut -d, -f2 data/employees.csv | sort | uniq -c"]},
+    {"id":"t08","kind":"predict","diff":2,"check":{"cmd":"^sort data/numbers\\.txt \\| head -n 1$","out":"10"},"solution":["sort data/numbers.txt | head -n 1"]},
+    {"id":"t09","kind":"debug","diff":2,"check":{"equals":["~/lab/unique.txt","a\nb\nc\n"]},"solution":["sort data/mixed.txt | uniq > unique.txt"]},
+    {"id":"t10","kind":"mini","diff":2,"check":{"cmd":"^echo hello \\| tr 'a-z' 'A-Z'$","out":"HELLO"},"solution":["echo hello | tr 'a-z' 'A-Z'"]},
+    {"id":"t11","kind":"mini","diff":2,"check":{"contains":["reports/departments.txt","it"]},"solution":["cut -d, -f2 data/employees.csv | sort | uniq > reports/departments.txt"]},
+    {"id":"t12","kind":"challenge","diff":3,"check":{"cmd":"^cut -d' ' -f2 data/access\\.log \\| sort \\| uniq -c \\| sort -rn$","out":"3 200"},"solution":["cut -d' ' -f2 data/access.log | sort | uniq -c | sort -rn"]},
+    {"id":"t13","kind":"ticket","diff":3,"check":{"contains":["~/lab/reports/status_count.txt","3 200"]},"solution":["cut -d' ' -f2 data/access.log | sort | uniq -c > reports/status_count.txt"]}
+  ],
+  "vm": [
+    {"id":"v01","expect":"2[\\s\\S]*100"},
+    {"id":"v02","expect":"alice[\\s\\S]*bob"},
+    {"id":"v03","expect":"\\d+\\s+\\S+"},
+    {"id":"v04","expect":null}
+  ],
+  "quiz": [
+    {"id":"q1","answer":1},
+    {"id":"q2","answer":3},
+    {"id":"q3","answer":0},
+    {"id":"q4","answer":2}
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "title": "LVM — PV, VG, LV ve Genişletme",
+  "lead": "Disk dolduğunda panik yok: hacmi büyüt. Önce güvenli bir loop-aygıt laboratuvarında dene.",
+  "objectives": [
+    "PV → VG → LV katmanlarını ve her birinin görevini açıklarsın.",
+    "pvcreate, vgcreate, lvcreate ile havuz kurar, pvs/vgs/lvs/lvdisplay ile okursun.",
+    "lvextend -r ile hacmi ve dosya sistemini birlikte büyütürsün; XFS'in küçülmediğini bilirsin.",
+    "Alıştırmaları yalnızca dosyayla desteklenen loop aygıtlarda, snapshot'lı bir VM'de yaparsın."
+  ],
+  "sections": [
+    {
+      "id": "concepts",
+      "title": "Kavramlar: PV, VG, LV",
+      "body": [
+        "Klasik bölümde boyut sabittir. **LVM** (Logical Volume Manager) diskleri bir havuza toplar ve havuzdan istediğin boyutta hacim keser. Üç katman vardır: **PV** (Physical Volume) bir disk veya bölüm üzerindeki LVM imzasıdır, **VG** (Volume Group) PV'lerin oluşturduğu havuzdur, **LV** (Logical Volume) havuzdan kesilen, disk gibi görünen hacimdir.",
+        "Sıra: disk → PV → VG → LV → dosya sistemi (XFS/ext4) → mount. Örnek isimler: `vg_data` havuzu, `lv_web` hacmi, yol `/dev/vg_data/lv_web`. Okumak için önce şu komutlar yeterli; hiçbirini değiştirmez."
+      ],
+      "commands": [
+        {"cmd": "pvs", "what": "Physical Volume'ları kısa tabloda listeler.", "where": "Hangi disklerin havuza ait olduğunu görmek için.", "why": "PFree sütunu PV'de boş yeri gösterir.", "example": "sudo pvs", "nosim": true},
+        {"cmd": "vgs", "what": "Volume Group'ları listeler; VSize toplam, VFree boş alandır.", "where": "Genişletmeden önce havuzda yer var mı diye bakarken.", "why": "VFree 0 ise önce vgextend ile PV eklemen gerekir.", "example": "sudo vgs", "nosim": true},
+        {"cmd": "lvs", "what": "Logical Volume'ları listeler.", "where": "Hangi hacim hangi VG'de, ne kadar büyük?", "why": "Hızlı genel bakış verir.", "example": "sudo lvs", "nosim": true},
+        {"cmd": "lvdisplay", "what": "Bir LV'nin ayrıntılı bilgisini verir (yol, boyut, durum).", "where": "Tek bir hacmi incelerken.", "why": "LV Path ve LV Size alanlarını doğrulamanı sağlar.", "example": "sudo lvdisplay /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "lsblk -f", "what": "Diskleri, LVM katmanlarını, dosya sistemini ve mount noktalarını ağaç olarak gösterir.", "where": "Her LVM işleminden önce.", "why": "Doğru aygıtı seçtiğinden emin olursun.", "example": "lsblk -f", "nosim": true}
+      ],
+      "tip": "Önce **oku, sonra yaz**: pvs, vgs, lvs ve lsblk -f hiçbir şeyi değiştirmez; değiştiren komutlardan önce hep bunları çalıştır."
+    },
+    {
+      "id": "safe-lab",
+      "title": "Güvenli laboratuvar: loop aygıtlar",
+      "body": [
+        "Gerçek diske dokunma. Bir dosyayı `truncate` ile oluşturup `losetup` ile **loop aygıt** (`/dev/loop0`) yaparsın; LVM bunu gerçek disk sanır ama yanlış yazsan en fazla bir dosya bozulur.",
+        "Önce VM'inde **snapshot al** (modül 0.2). LVM araçları: Rocky/Alma'da `sudo dnf install lvm2 xfsprogs`, Debian/Ubuntu'da `sudo apt install lvm2 xfsprogs`. Dosyalar `~/lvm-lab` içinde durur; loop numarası farklı çıkabilir, `--show` çıktısını kullan."
+      ],
+      "commands": [
+        {"cmd": "truncate -s 300M", "what": "Belirtilen boyutta seyrek (sparse) bir dosya oluşturur.", "where": "Sahte disk imajı için.", "why": "Gerçek disk yerine güvenli bir yedek verir.", "example": "truncate -s 300M ~/lvm-lab/disk1.img", "nosim": true},
+        {"cmd": "losetup -f --show", "what": "Dosyayı ilk boş loop aygıta bağlar ve adını yazar.", "where": "İmajı blok aygıt yaparken.", "why": "pvcreate yalnızca blok aygıtla çalışır.", "example": "sudo losetup -f --show ~/lvm-lab/disk1.img", "nosim": true},
+        {"cmd": "losetup -a", "what": "Etkin loop aygıtları ve dosyalarını listeler.", "where": "Hangi loop'un hangi dosyaya ait olduğunu doğrularken.", "why": "Yanlış aygıta yazmanı önler.", "example": "losetup -a", "nosim": true},
+        {"cmd": "losetup -d", "what": "Loop aygıtı serbest bırakır.", "where": "Laboratuvarı temizlerken.", "why": "Dosya silinmeden önce aygıt kapatılmalıdır.", "example": "sudo losetup -d /dev/loop0", "nosim": true}
+      ],
+      "warn": "`pvcreate`, `vgcreate` ve `mkfs` hedefin içeriğini siler. Komuttan önce aygıt adını `losetup -a` ile doğrula; `/dev/sda` gibi gerçek disk adlarını bu modülde asla yazma.",
+      "tip": "Sparse imaj `ls -lh` ile 300M görünür ama diskte neredeyse yer tutmaz."
+    },
+    {
+      "id": "create",
+      "title": "PV, VG ve LV oluşturmak",
+      "body": [
+        "Sıra hep aynı: `pvcreate` → `vgcreate` → `lvcreate` → dosya sistemi → mount. Aşağıdaki örnekte `LOOP1` değişkeni `losetup` çıktısını tutar.",
+        "`lvcreate -L 200M` sabit boyut, `-l 100%FREE` kalan tüm alan demektir. Dosya sistemi olarak RHEL ailesinde varsayılan **XFS**, Debian/Ubuntu'da genelde **ext4** kullanılır; ikisi de çalışır."
+      ],
+      "commands": [
+        {"cmd": "pvcreate", "what": "Aygıta LVM imzası yazar, PV yapar.", "where": "Havuza disk eklemeden önce.", "why": "VG yalnızca PV'lerden kurulur.", "example": "sudo pvcreate $LOOP1", "nosim": true},
+        {"cmd": "vgcreate", "what": "Bir veya daha fazla PV'den VG oluşturur.", "where": "Havuzu kurarken.", "why": "Hacimler bu havuzdan kesilir.", "example": "sudo vgcreate vg_data $LOOP1", "nosim": true},
+        {"cmd": "lvcreate", "what": "VG içinden isimli bir LV keser.", "where": "Uygulamaya ayrı hacim verirken.", "why": "-n ile ad, -L ile boyut verirsin.", "example": "sudo lvcreate -L 200M -n lv_web vg_data", "nosim": true},
+        {"cmd": "mkfs.xfs", "what": "LV üzerinde XFS dosya sistemi kurar (ext4 için mkfs.ext4).", "where": "Yeni hacmi kullanıma hazırlarken.", "why": "Dosya sistemi olmadan mount edilemez.", "example": "sudo mkfs.xfs /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "mount", "what": "Hacmi bir dizine bağlar.", "where": "Veriyi yazmaya başlamadan önce.", "why": "Dosyalar bağlandığı dizinde görünür.", "example": "sudo mount /dev/vg_data/lv_web /mnt/web", "nosim": true}
+      ],
+      "danger": "`mkfs` mevcut veriyi yok eder. Var olan bir LV veya disk üzerinde çalıştırma; önce `lsblk -f` ile boş olduğunu ve loop aygıt olduğunu doğrula."
+    },
+    {
+      "id": "extend",
+      "title": "Genişletme: lvextend -r",
+      "body": [
+        "Hacim dolunca iki adım gerekir: önce LV'yi, sonra dosya sistemini büyüt. `lvextend -r` ikisini birden yapar. Elle yapacaksan XFS için `xfs_growfs <mountpoint>`, ext4 için `resize2fs <aygıt>` kullanılır; ikisi de **bağlıyken** büyütebilir.",
+        "VG'de boş yer (VFree) yoksa önce yeni aygıtı `pvcreate` ile PV yap, `vgextend` ile havuza kat, sonra `lvextend` çalıştır. Küçültme **sorunlu**: XFS **asla küçülmez**; ext4 ancak bağlı değilken ve yedek alınmışken küçülür."
+      ],
+      "commands": [
+        {"cmd": "lvextend -r", "what": "LV'yi büyütür ve dosya sistemini de aynı anda büyütür.", "where": "Dolan bir hacmi çevrimiçi genişletirken.", "why": "İkinci adımı unutma riskini ortadan kaldırır.", "example": "sudo lvextend -r -L +100M /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "xfs_growfs", "what": "Bağlı bir XFS'i LV boyutuna kadar büyütür.", "where": "lvextend -r kullanmadığında.", "why": "XFS mount noktasını argüman alır.", "example": "sudo xfs_growfs /mnt/web", "nosim": true},
+        {"cmd": "resize2fs", "what": "ext4 dosya sistemini LV boyutuna kadar büyütür.", "where": "ext4 hacimde elle büyütürken.", "why": "Aygıt yolunu argüman alır.", "example": "sudo resize2fs /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "vgextend", "what": "Mevcut VG'ye yeni bir PV ekler.", "where": "VFree bittiğinde.", "why": "Havuzu büyütür; sonra LV'yi büyütebilirsin.", "example": "sudo vgextend vg_data $LOOP2", "nosim": true}
+      ],
+      "tip": "`-L +100M` mevcut boyuta ekler, `-L 300M` toplam boyutu belirler. Tüm boş yeri almak için `-l +100%FREE` yaz."
+    },
+    {
+      "id": "safety",
+      "title": "Kalıcı bağlama, silme ve uyarılar",
+      "body": [
+        "Yeniden başlatmada hacmin gelmesi için `/etc/fstab` satırı gerekir: `/dev/vg_data/lv_web /srv/web xfs defaults 0 0`. Bir yazım hatası açılışı bozabilir; düzenlemeden önce yedek al, sonra `sudo mount -a` ile dene. Loop lab'ında fstab'a yazmana gerek yok.",
+        "Silme sırası ters yöndedir: `umount` → `lvremove` → `vgremove` → `pvremove` → `losetup -d`. Bu komutlar onay ister ve veriyi geri getirilemez biçimde yok eder. Her zaman önce adı `lvs`/`vgs` ile gör."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/fstab", "what": "Açılışta bağlanan dosya sistemlerini gösterir.", "where": "Kalıcı mount'u kontrol ederken.", "why": "Hatalı satır açılışı engelleyebilir.", "example": "cat /etc/fstab"},
+        {"cmd": "lvremove", "what": "Bir LV'yi ve içindeki veriyi siler.", "where": "Yalnızca laboratuvarı temizlerken.", "why": "Geri dönüşü yoktur; önce umount gerekir.", "example": "sudo lvremove /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "vgreduce", "what": "VG'den bir PV çıkarır.", "where": "Diski havuzdan ayırırken.", "why": "PV'de veri varsa önce pvmove ile taşınmalıdır.", "example": "sudo vgreduce vg_data $LOOP2", "nosim": true},
+        {"cmd": "pvremove", "what": "Aygıttan LVM imzasını siler.", "where": "Laboratuvarın son adımı.", "why": "Aygıt artık PV değildir; VG'de kullanılıyorsa reddeder.", "example": "sudo pvremove $LOOP1", "nosim": true}
+      ],
+      "warn": "`lvremove`, `vgreduce` ve `pvremove` gerçek bir sunucuda üretim verisini yok edebilir. Önce snapshot/yedek al, adı iki kez kontrol et.",
+      "danger": "Gerçek sistemde ayrı bir disk kullanıyorsan yanlış adı yazmak tüm veriyi götürür. Bu modülde yalnızca loop aygıt kullan; XFS hacmini küçültmeye kalkma, bunun yolu yedekle, yeniden oluştur, geri yüklemedir."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "`~/lvm/vgs.txt` örnek çıktısını `cat` ile oku. Hangi VG'nin boş yeri var?", "hint": "`cat ~/lvm/vgs.txt` — VFree sütununa bak."},
+    "t02": {"text": "`~/lvm/lvs.txt` içinde yalnızca `vg_data` hacimlerini `grep` ile göster.", "hint": "`grep vg_data ~/lvm/lvs.txt`"},
+    "t03": {"text": "Düzenlemeden önce yedek al: `~/lvm/fstab.test` dosyasını `~/lvm/fstab.bak` olarak kopyala.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak`"},
+    "t04": {"text": "`~/lvm/lab.sh` dosyasını oluştur: ilk satır `truncate -s 300M ~/lvm-lab/disk1.img`, ikinci satır `sudo losetup -f --show ~/lvm-lab/disk1.img` (ikincisini `>>` ile ekle).", "hint": "İlk satır için `printf '...\\n' > ~/lvm/lab.sh`, sonrakiler için `>>`."},
+    "t05": {"text": "`lab.sh` sonuna iki satır ekle: `sudo pvcreate /dev/loop0` ve `sudo vgcreate vg_data /dev/loop0`.", "hint": "`printf '...\\n' >> ~/lvm/lab.sh` iki kez."},
+    "t06": {"text": "`lab.sh` sonuna `sudo lvcreate -L 200M -n lv_web vg_data` ve `sudo mkfs.xfs /dev/vg_data/lv_web` satırlarını ekle.", "hint": "Yine `>>` ile ekle; `>` dosyayı sıfırlar."},
+    "t07": {"text": "Tahmin et: `grep -c vg_data ~/lvm/lvs.txt` kaç yazacak? Sonra çalıştırıp doğrula.", "hint": "`-c` eşleşen satırları sayar."},
+    "t08": {"text": "Tahmin et: `grep xfs ~/lvm/fs.txt` XFS için küçültme hakkında ne diyor? Çalıştırıp doğrula.", "hint": "XFS büyür ama küçülmez."},
+    "t09": {"text": "Hata ayıkla: `~/lvm/grow.sh` içindeki `lvextend` dosya sistemini büyütmüyor. Satırı `-r` ekleyerek düzelt: `lvextend -r -L +2G /dev/vg_data/lv_web`.", "hint": "Dosyayı `echo '...' > ~/lvm/grow.sh` ile yeniden yaz."},
+    "t10": {"text": "Hata ayıkla: `~/lvm/fstab.test` içinde aygıt adı yanlış yazılmış (`lv_wb`). Satırı `/dev/vg_data/lv_web /srv/web xfs defaults 0 0` olarak düzelt.", "hint": "Önce `cat ~/lvm/fstab.test`, sonra tek satırı yeniden yaz."},
+    "t11": {"text": "Mini proje: `lvs.txt` içinden `vg_data` satırlarını seç, yalnızca ilk sütunu (LV adı) kes ve `~/lvm/data-lvs.txt` dosyasına yaz.", "hint": "`grep ... | cut -d' ' -f1 > file`"},
+    "t12": {"text": "Mini proje: `~/lvm/check.sh` oluştur; içinde sırayla `pvs`, `vgs`, `lvs` olsun. Sonra çalıştırılabilir yap (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` sonra `chmod 755`."},
+    "t13": {"text": "Zor görev: `~/lvm/runbook.txt` dosyasına sırasıyla `pvcreate`, `vgcreate`, `lvcreate`, `mkfs.xfs` ve `lvextend -r` komutlarını (her biri ayrı satır) yaz. Aygıt `/dev/loop0`, VG `vg_data`, LV `lv_web`.", "hint": "Tek `printf` ile `\\n` ayırarak yazabilirsin."},
+    "t14": {"text": "Zor görev: `lvs.txt` içinde her VG'nin kaç LV'si var? Boşlukları sıkıştır (`tr -s`), VG sütununu kes, `sort` ve `uniq -c` ile say.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c`"},
+    "t15": {"text": "Ticket: `vg_sys` dolu (VFree 0), `lv_root` 5G'ye ihtiyaç duyuyor. `~/lvm/ticket-fix.sh` dosyasına sırayla yaz: yeni PV `/dev/loop1`, `vgextend vg_sys /dev/loop1`, `lvextend -r -L +5G /dev/vg_sys/lv_root`.", "hint": "Üç satır: `pvcreate`, `vgextend`, `lvextend -r`."},
+    "t16": {"text": "Mount noktasını hazırla: `~/mnt/web` dizinini oluştur ve içine boş `index.html` koy.", "hint": "`mkdir -p` ve `touch`."}
+  },
+  "vm": {
+    "intro": "Bu görevleri VM'inde yap. Önce **snapshot al**. Yalnızca loop aygıt kullan; gerçek disk adı yazma.",
+    "tasks": {
+      "v01": {
+        "title": "Mevcut LVM durumunu oku",
+        "text": "Hiçbir şey değiştirmeden mevcut diskleri ve LVM katmanlarını listele. Çıktıyı yapıştır.",
+        "blocks": [
+          {"cmd": "lsblk -f\nsudo pvs\nsudo vgs\nsudo lvs", "expected": "VG   #PV #LV #SN Attr   VSize  VFree\nrl     1   2   0 wz--n- <19.00g 0"}
+        ],
+        "differs": ["LVM kurulu değilse `sudo dnf install lvm2` (Rocky/Alma) veya `sudo apt install lvm2` (Debian/Ubuntu) çalıştır.", "Ubuntu'da varsayılan kurulum LVM kullanmıyorsa boş çıktı normaldir; yine de komutların çalıştığını gösterir."]
+      },
+      "v02": {
+        "title": "Loop aygıtlarda PV, VG ve LV kur",
+        "text": "Snapshot aldıktan sonra iki sahte disk üret, VG ve LV kur, XFS yapıp bağla. Çıktıyı yapıştır.",
+        "blocks": [
+          {"cmd": "mkdir -p ~/lvm-lab\ntruncate -s 300M ~/lvm-lab/disk1.img\ntruncate -s 300M ~/lvm-lab/disk2.img\nLOOP1=$(sudo losetup -f --show ~/lvm-lab/disk1.img)\nLOOP2=$(sudo losetup -f --show ~/lvm-lab/disk2.img)\necho $LOOP1 $LOOP2\nsudo pvcreate $LOOP1\nsudo vgcreate vg_data $LOOP1\nsudo lvcreate -L 200M -n lv_web vg_data\nsudo mkfs.xfs /dev/vg_data/lv_web\nsudo mkdir -p /mnt/web\nsudo mount /dev/vg_data/lv_web /mnt/web\nsudo vgs vg_data", "expected": "VG      #PV #LV #SN Attr   VSize    VFree\nvg_data   1   1   0 wz--n- 296.00m 96.00m"}
+        ],
+        "differs": ["Loop numarası `/dev/loop0` olmayabilir; `$LOOP1` değişkeni bunu halleder.", "Debian/Ubuntu'da `mkfs.xfs` yoksa `sudo apt install xfsprogs`; ya da `mkfs.ext4` kullan.", "Başka terminalde değişkenler yoksa `losetup -a` ile adları bul ve elle yaz."]
+      },
+      "v03": {
+        "title": "Hacmi çevrimiçi büyüt",
+        "text": "İlk diskte 96M boş yer var: LV'yi önce 90M büyüt, sonra ikinci diski havuza ekleyip kalan boş yerle bir kez daha büyüt. Boyutu `df` ile doğrula.",
+        "blocks": [
+          {"cmd": "sudo lvextend -r -L +90M /dev/vg_data/lv_web\ndf -h /mnt/web\nsudo vgextend vg_data $LOOP2\nsudo lvextend -r -l +100%FREE /dev/vg_data/lv_web\nsudo lvs vg_data\ndf -h /mnt/web", "expected": "LV     VG      Attr       LSize\nlv_web vg_data -wi-ao---- 592.00m"}
+        ],
+        "differs": ["`-r` hata verirse mount edilmiş olduğunu kontrol et; elle `sudo xfs_growfs /mnt/web` (ext4'te `resize2fs`) çalıştır.", "`Insufficient free space` hatası VFree'nin bittiğini gösterir; önce `vgextend` yap."]
+      },
+      "v04": {
+        "title": "Laboratuvarı temizle",
+        "text": "Sırayla bağlantıyı kes, LV, VG ve PV'leri sil, loop aygıtları kapat ve imajları kaldır. Hata yoksa \"Yaptım\" de.",
+        "blocks": [
+          {"cmd": "sudo umount /mnt/web\nsudo lvremove -y /dev/vg_data/lv_web\nsudo vgremove vg_data\nsudo pvremove $LOOP1 $LOOP2\nsudo losetup -d $LOOP1 $LOOP2\nrm ~/lvm-lab/disk1.img ~/lvm-lab/disk2.img", "expected": "Logical volume \"lv_web\" successfully removed."}
+        ],
+        "differs": ["`target is busy` alırsan önce `cd ~` yap ve `/mnt/web` içinde açık kabuk bırakma.", "Başka bir terminalde `$LOOP1` boşsa `losetup -a` ile adları bulup elle yaz.", "Emin değilsen snapshot'a geri dön."]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {"q": "LVM katmanlarının doğru sırası hangisi?", "options": ["Disk → LV → VG → PV", "Disk → PV → VG → LV", "VG → Disk → LV → PV", "LV → PV → Disk → VG"], "explain": "Disk önce PV olur, PV'ler VG havuzunu oluşturur, hacimler (LV) havuzdan kesilir."},
+    "q2": {"q": "Hangisi doğrudur?", "options": ["ext4 hiçbir zaman küçülmez", "XFS çevrimiçi küçülür", "XFS ve ext4 birlikte küçülür", "XFS küçültülemez"], "explain": "XFS yalnızca büyür; küçültmek için yedekle, yeniden oluştur, geri yükle."},
+    "q3": {"q": "`lvextend -r -L +100M /dev/vg_data/lv_web` ne yapar?", "options": ["LV'yi ve dosya sistemini büyütür", "Yalnızca VG'yi büyütür", "LV'yi 100M'a küçültür", "Yeni bir PV oluşturur"], "explain": "-r (resizefs) LV ile birlikte dosya sistemini de büyütür."},
+    "q4": {"q": "Loop lab'ını temizlerken doğru sıra hangisi?", "options": ["pvremove → vgremove → lvremove → umount", "lvremove → umount → pvremove → vgremove", "umount → lvremove → vgremove → pvremove", "vgremove → umount → pvremove → lvremove"], "explain": "Önce bağı kes, sonra üstten alta sil: LV, VG, PV."}
+  },
+  "summary": [
+    "LVM: disk → PV → VG → LV → dosya sistemi → mount.",
+    "Okuma komutları: pvs, vgs, lvs, lvdisplay, lsblk -f.",
+    "Oluşturma: pvcreate, vgcreate, lvcreate, mkfs, mount.",
+    "Büyütme: lvextend -r (gerekirse önce vgextend).",
+    "XFS küçülmez; lvremove/vgreduce/pvremove veriyi yok eder.",
+    "Alıştırmayı yalnızca loop aygıtta, snapshot'lı VM'de yap."
+  ],
+  "glossary": [
+    {"term": "PV", "meaning": "Physical Volume: LVM imzası taşıyan disk veya bölüm."},
+    {"term": "VG", "meaning": "Volume Group: PV'lerden oluşan depolama havuzu."},
+    {"term": "LV", "meaning": "Logical Volume: VG'den kesilen, disk gibi kullanılan hacim."},
+    {"term": "VFree", "meaning": "VG içinde henüz hiçbir LV'ye ayrılmamış boş alan."},
+    {"term": "loop aygıt", "meaning": "Bir dosyayı blok aygıt gibi gösteren çekirdek özelliği."},
+    {"term": "sparse dosya", "meaning": "Boyutu büyük görünen ama diskte az yer tutan dosya."},
+    {"term": "lvextend -r", "meaning": "LV'yi ve üstündeki dosya sistemini birlikte büyütür."},
+    {"term": "xfs_growfs", "meaning": "Bağlı bir XFS dosya sistemini büyütür."},
+    {"term": "resize2fs", "meaning": "ext2/3/4 dosya sistemini yeniden boyutlandırır."},
+    {"term": "fstab", "meaning": "Açılışta bağlanacak dosya sistemlerinin listesi: /etc/fstab."}
+  ]
+}

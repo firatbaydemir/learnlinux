@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6.5 Bash Script 1 — Değişken, Argüman, Koşul — Temel Linux Akademisi</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","tr")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="6.5">
+<header class="top"><a class="brand" href="index.html">Temel Linux Akademisi</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (isteğe bağlı)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-6.5.html" hreflang="tr" lang="tr" data-switch="tr" aria-current="true">TR</a><a href="../de/modul-6.5.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-6.5.html" hreflang="en" lang="en" data-switch="en">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Tema" aria-label="Tema">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Genel ilerleme"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><ol><li><a href="#first">İlk script: shebang ve çalıştırma izni</a></li><li><a href="#vars">Değişkenler, tırnaklar ve aritmetik</a></li><li><a href="#args">Argümanlar ve çıkış kodları</a></li><li><a href="#cond">Koşullar: if, elif, else</a></li><li><a href="#strict">Güvenli script: set -euo pipefail ve hata ayıklama</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>İçindekiler</summary><ol><li><a href="#first">İlk script: shebang ve çalıştırma izni</a></li><li><a href="#vars">Değişkenler, tırnaklar ve aritmetik</a></li><li><a href="#args">Argümanlar ve çıkış kodları</a></li><li><a href="#cond">Koşullar: if, elif, else</a></li><li><a href="#strict">Güvenli script: set -euo pipefail ve hata ayıklama</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Ana sayfa</a> <span aria-hidden="true">/</span> Seviye 6</p>
+<h1><span class="module-id">6.5</span> Bash Script 1 — Değişken, Argüman, Koşul</h1>
+<p class="lead">İlk Bash script&#x27;ini yaz, çalıştırılabilir yap; değişkenler, argümanlar, çıkış kodları ve koşullarla çalış.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>Bu modülde neler öğreneceksin?</h2><ul><li>Shebang&#x27;li bir script yazar, chmod +x ile çalıştırılabilir yapar ve ./script.sh ile başlatırsın.</li><li>Değişken atar; tek ve çift tırnak farkını, read, $(komut) ve $(( )) kullanımını bilirsin.</li><li>Argümanları $1, $# ve &quot;$@&quot; ile okur, çıkış kodlarını $? ve exit ile kontrol edersin.</li><li>if/elif/else, [[ ]] ve test ile karar verir, set -euo pipefail&#x27;i güvenlik ağı olarak kullanırsın.</li></ul></section>
+<section id="first"><h2>İlk script: shebang ve çalıştırma izni</h2>
+<p>Script, komutlar içeren bir metin dosyasıdır. İlk satırdaki <strong>shebang</strong> <code>#!/bin/bash</code>, dosyayı hangi yorumlayıcının çalıştıracağını söyler. <strong>Çalıştırma biti</strong> (x) yoksa dosya doğrudan başlatılamaz: <code>./hello.sh</code> o zaman *Permission denied* verir.</p>
+<p><code>./</code> &#x27;bu klasördeki dosya&#x27; demektir. Linux komutları bulunduğun klasörde aramaz; bu yüzden yalnızca <code>hello.sh</code> yazarsan *command not found* alırsın. Bu modülde script&#x27;leri <code>printf</code> ile (VM&#x27;inde heredoc ile) oluşturuyorsun; böylece dosyada tam olarak ne olduğunu görürsün.</p>
+<article class="cmd"><h3><code>#!/bin/bash</code></h3><dl><dt>Ne işe yarar?</dt><dd>Shebang: dosyanın ilk satırı, yorumlayıcıyı belirtir.</dd><dt>Nerede kullanılır?</dt><dd>Her Bash script&#x27;inin en başında.</dd><dt>Neden önemli?</dt><dd>Script, sh gibi başka bir kabukla değil Bash ile çalışır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>chmod +x</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosyaya çalıştırma bitini ekler.</dd><dt>Nerede kullanılır?</dt><dd>Bir script oluşturduktan sonra bir kez.</dd><dt>Neden önemli?</dt><dd>Olmazsa <code>./script.sh</code> Permission denied hatası verir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod +x ~/bin/hello.sh" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod +x ~/bin/hello.sh">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>./script.sh</code></h3><dl><dt>Ne işe yarar?</dt><dd>Çalıştırılabilir script&#x27;i yoluyla başlatır.</dd><dt>Nerede kullanılır?</dt><dd>Kendi script&#x27;lerini başlatırken.</dd><dt>Neden önemli?</dt><dd>Yol (<code>./</code> ya da tam yol) kabuğa dosyanın nerede olduğunu söyler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="~/bin/hello.sh" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="~/bin/hello.sh">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>bash script.sh</code></h3><dl><dt>Ne işe yarar?</dt><dd>Script&#x27;i çalıştırma biti olmadan doğrudan Bash ile çalıştırır.</dd><dt>Nerede kullanılır?</dt><dd>Hızlı denemelerde ve noexec bağlanmış disklerde.</dd><dt>Neden önemli?</dt><dd>Hata ayıklamada işe yarar; shebang yok sayılır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">bash</span> <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="bash ~/bin/hello.sh">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Kendi script&#x27;lerini <code>~/bin</code> içine koy. Ubuntu ve Rocky&#x27;de bu klasör, varsa, oturum açılışında <code>PATH</code>&#x27;e eklenir; böylece script&#x27;i adıyla başlatabilirsin.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>İndirdiğin veya anlamadığın bir script&#x27;i asla çalıştırma. Önce <code>cat script.sh</code> ile oku. Özellikle <code>curl ... | bash</code> ve ilk denemede <code>sudo</code> konusunda çok dikkatli ol.</p></aside>
+</section>
+<section id="vars"><h2>Değişkenler, tırnaklar ve aritmetik</h2>
+<p>Değişken <code>NAME=value</code> ile atanır — <strong><code>=</code> çevresinde boşluk olmaz</strong>. Değeri <code>$NAME</code> ile okursun. <code>NAME = value</code> çalışmaz: Bash <code>NAME</code>&#x27;i bir komut sanır.</p>
+<p><strong>Çift tırnak</strong> <code>&quot;...&quot;</code> değişkenleri açar, <strong>tek tırnak</strong> <code>&#x27;...&#x27;</code> açmaz: <code>echo &#x27;$HOME&#x27;</code> metni <code>$HOME</code> olarak yazar. Değişkenleri hep tırnak içine al (<code>&quot;$NAME&quot;</code>); boşluklu dosya adları tek kelime kalsın.</p>
+<p><code>$(komut)</code> komutun çıktısını yerleştirir, <code>$(( ))</code> tamsayı hesaplar, <code>read</code> kullanıcıdan girdi ister (yalnızca VM).</p>
+<article class="cmd"><h3><code>NAME=value</code></h3><dl><dt>Ne işe yarar?</dt><dd>Değişken atar (eşittir çevresinde boşluk yok).</dd><dt>Nerede kullanılır?</dt><dd>Script başında ayarlar ve yollar için.</dd><dt>Neden önemli?</dt><dd>Bir değeri on yerde değil, tek yerde değiştirirsin.</dd></dl><div class="code"><pre><code><span class="ln">NAME=student; <span class="tk">echo</span> <span class="ts">&quot;Hello $NAME&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="NAME=student; echo &quot;Hello $NAME&quot;" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="NAME=student; echo &quot;Hello $NAME&quot;">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>&quot;$VAR&quot; ve &#x27;$VAR&#x27;</code></h3><dl><dt>Ne işe yarar?</dt><dd>Çift tırnak değişkeni açar, tek tırnak metni olduğu gibi bırakır.</dd><dt>Nerede kullanılır?</dt><dd>Değişken kullanan her komutta.</dd><dt>Neden önemli?</dt><dd>Tırnak, değerdeki boşluk ve joker karakterlerden korur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;$HOME&#x27;</span> <span class="ts">&quot;$HOME&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="echo &#x27;$HOME&#x27; &quot;$HOME&quot;" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="echo &#x27;$HOME&#x27; &quot;$HOME&quot;">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>read -r -p</code></h3><dl><dt>Ne işe yarar?</dt><dd>Bir satır girdiyi değişkene okur.</dd><dt>Nerede kullanılır?</dt><dd>Soru soran etkileşimli script&#x27;lerde.</dd><dt>Neden önemli?</dt><dd><code>-r</code> ters eğik çizgileri korur, <code>-p</code> istem metni gösterir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">read</span> <span class="tf">-r</span> <span class="tf">-p</span> <span class="ts">&quot;Name: &quot;</span> NAME</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="read -r -p &quot;Name: &quot; NAME">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>$(command)</code></h3><dl><dt>Ne işe yarar?</dt><dd>Kendi yerine komutun çıktısını koyar.</dd><dt>Nerede kullanılır?</dt><dd>Çıktıyı değişkende saklamak veya metne katmak için.</dd><dt>Neden önemli?</dt><dd>Script&#x27;ler sistem durumuna tepki verebilir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Host: $(hostname)&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="echo &quot;Host: $(hostname)&quot;" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="echo &quot;Host: $(hostname)&quot;">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>$(( ))</code></h3><dl><dt>Ne işe yarar?</dt><dd>Tamsayı aritmetiği.</dd><dt>Nerede kullanılır?</dt><dd>Sayaçlar, boyutlar, basit hesaplar.</dd><dt>Neden önemli?</dt><dd>Bash&#x27;te ondalık yoktur; onlar için <code>bc</code> kullanılır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="tp">$((6</span> * 7))</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo $((6 * 7))">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Varsayılan değer <code>${NAME:-default}</code> yazılır: <code>NAME</code> boş ya da tanımsızsa o değer kullanılır.</p></aside>
+</section>
+<section id="args"><h2>Argümanlar ve çıkış kodları</h2>
+<p>Script argüman alabilir: <code>$0</code> script adı, <code>$1</code>, <code>$2</code>, ... argümanlar, <code>$#</code> sayıları, <code>&quot;$@&quot;</code> hepsinin listesidir ve her biri tek kelime kalır. <code>&quot;$@&quot;</code>&#x27;yi tırnakla; yoksa <code>my file</code> iki kelimeye bölünür.</p>
+<p>Her komut bir <strong>çıkış koduyla</strong> biter: <code>0</code> başarı, diğer her sayı hatadır. <code>$?</code> son komutun kodunu tutar. Script&#x27;te <code>exit 0</code> ya da <code>exit 1</code> ile bitirirsin. Simülatör script içindeki argümanları güvenilir çalıştıramaz; gerçek denemeler VM bölümünde.</p>
+<article class="cmd"><h3><code>$0 $1 $2</code></h3><dl><dt>Ne işe yarar?</dt><dd>Script adı ve ilk argümanlar.</dd><dt>Nerede kullanılır?</dt><dd>Script çağıranın girdisine ihtiyaç duyduğunda.</dd><dt>Neden önemli?</dt><dd>Tek script birçok dosya veya isimle çalışır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">./args.sh</span> alice bob</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="./args.sh alice bob">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>$# ve &quot;$@&quot;</code></h3><dl><dt>Ne işe yarar?</dt><dd>Argüman sayısı ve tüm argümanların listesi.</dd><dt>Nerede kullanılır?</dt><dd>Sayıyı kontrol etmek veya argümanlar üzerinde döngü kurmak için.</dd><dt>Neden önemli?</dt><dd><code>&quot;$@&quot;</code> boşluklu olsa bile her argümanı bozmadan korur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">./args.sh</span> <span class="ts">&quot;my file&quot;</span> bob</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="./args.sh &quot;my file&quot; bob">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>${1:-guest}</code></h3><dl><dt>Ne işe yarar?</dt><dd>İlk argüman; verilmediyse <code>guest</code>.</dd><dt>Nerede kullanılır?</dt><dd>İsteğe bağlı argümanlar için.</dd><dt>Neden önemli?</dt><dd>Argüman eksik olunca script bozulmaz.</dd></dl><div class="code"><pre><code><span class="ln">NAME=&quot;${1:-guest}&quot;</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="NAME=&quot;${1:-guest}&quot;">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>$? ve exit</code></h3><dl><dt>Ne işe yarar?</dt><dd><code>$?</code> son çıkış kodu, <code>exit N</code> script&#x27;i N koduyla bitirir.</dd><dt>Nerede kullanılır?</dt><dd>Kontrol etmek istediğin komutlardan sonra ve script sonunda.</dd><dt>Neden önemli?</dt><dd>Başka script&#x27;ler, cron ve CI bu koda göre karar verir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">false;</span> echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="false; echo $?" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="false; echo $?">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p><code>grep</code> eşleşme bulamazsa 1 döndürür. Bu programın hatası değil, sadece bir &#x27;hayır&#x27; cevabıdır: <code>grep carol ~/users.txt; echo $?</code> çıktısı <code>1</code>&#x27;dir.</p></aside>
+</section>
+<section id="cond"><h2>Koşullar: if, elif, else</h2>
+<p><code>if</code> bir komutu çalıştırır ve çıkış koduna bakar. Komut genelde <code>[ ... ]</code> (<code>test</code> ile aynı) ya da Bash&#x27;in <code>[[ ... ]]</code> yapısıdır. Parantez içindeki boşluklar zorunludur: <code>[ -f &quot;$1&quot; ]</code>.</p>
+<p>Sık testler: <code>-f</code> normal dosya, <code>-d</code> klasör, <code>-x</code> çalıştırılabilir, <code>-z</code> metin boş, <code>-n</code> metin boş değil. Sayılar için <code>-eq -ne -lt -le -gt -ge</code>, metin için <code>==</code> ve <code>!=</code>. <code>[[ ]]</code>, <code>[ ]</code>&#x27;den daha güvenlidir (kelime bölme yok) ama yalnızca Bash&#x27;te vardır, düz <code>sh</code>&#x27;de yoktur.</p>
+<p>Kısa biçimler: <code>cmd1 &amp;&amp; cmd2</code> ikinciyi yalnızca başarıda, <code>cmd1 || cmd2</code> yalnızca hatada çalıştırır.</p>
+<article class="cmd"><h3><code>if / elif / else / fi</code></h3><dl><dt>Ne işe yarar?</dt><dd>Bir teste göre farklı komutlar çalıştırır.</dd><dt>Nerede kullanılır?</dt><dd>Script&#x27;in karar vermesi gereken her yerde.</dd><dt>Neden önemli?</dt><dd>Script körlemesine değil, girdiye ve duruma göre çalışır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">if</span> [ <span class="tf">-f</span> <span class="ts">&quot;$1&quot;</span> ]; then echo exists; else echo missing; fi</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="if [ -f &quot;$1&quot; ]; then echo exists; else echo missing; fi">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>[ ] / test</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosya, metin ve sayı testi yapar; sonuç çıkış koduyla gelir.</dd><dt>Nerede kullanılır?</dt><dd><code>if</code> koşulunda ya da tek başına <code>&amp;&amp;</code> / <code>||</code> ile.</dd><dt>Neden önemli?</dt><dd>Her kabukta çalışan taşınabilir biçim.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">~/notes.txt</span> <span class="to">&amp;&amp;</span> <span class="tk">echo</span> yes</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="test -f ~/notes.txt &amp;&amp; echo yes" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="test -f ~/notes.txt &amp;&amp; echo yes">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>[[ ]]</code></h3><dl><dt>Ne işe yarar?</dt><dd>Desen ve içinde <code>&amp;&amp;</code> / <code>||</code> destekleyen Bash koşulu.</dd><dt>Nerede kullanılır?</dt><dd><code>#!/bin/bash</code> ile başlayan script&#x27;lerde.</dd><dt>Neden önemli?</dt><dd><code>[ ]</code>&#x27;den daha az tırnak tuzağı vardır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">[[</span> <span class="tp">$score</span> <span class="tf">-ge</span> 50 <span class="to">&amp;&amp;</span> <span class="tk">-n</span> <span class="tp">$name</span> ]] <span class="to">&amp;&amp;</span> <span class="tk">echo</span> ok</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="[[ $score -ge 50 &amp;&amp; -n $name ]] &amp;&amp; echo ok">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>&amp;&amp; ve ||</code></h3><dl><dt>Ne işe yarar?</dt><dd>Komutları başarı ya da hataya göre zincirler.</dd><dt>Nerede kullanılır?</dt><dd>Tek satırlık kısa kontrollerde.</dd><dt>Neden önemli?</dt><dd>Tam bir <code>if</code>&#x27;e hızlı alternatif.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-d</span> <span class="tp">~/Documents</span> <span class="to">&amp;&amp;</span> <span class="tk">echo</span> dir <span class="to">||</span> <span class="tk">echo</span> nodir</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="test -d ~/Documents &amp;&amp; echo dir || echo nodir" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="test -d ~/Documents &amp;&amp; echo dir || echo nodir">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Önce kontrol et, sonra işlem yap: <code>[ -f &quot;$1&quot; ] || { echo &quot;no such file&quot;; exit 1; }</code> açık bir mesajla erken durur.</p></aside>
+</section>
+<section id="strict"><h2>Güvenli script: set -euo pipefail ve hata ayıklama</h2>
+<p>Bash varsayılan olarak <strong>hatadan sonra devam eder</strong>. En üstteki <code>set -euo pipefail</code> satırı bunu değiştirir: <code>-e</code> ilk başarısız komutta durur, <code>-u</code> tanımsız değişkeni hata sayar, <code>-o pipefail</code> boru hattının herhangi bir parçası başarısızsa hattı başarısız yapar.</p>
+<p>Hata ayıklamak için <code>bash -n script.sh</code> (yalnızca sözdizimi kontrolü) ve <code>bash -x script.sh</code> (her komutu çalışmadan önce başına <code>+</code> koyup yazar) kullan. <code>shellcheck</code> tipik hataları script&#x27;i çalıştırmadan bulur. Debian/Ubuntu&#x27;da <code>sudo apt install shellcheck</code>, RHEL/Rocky&#x27;de <code>sudo dnf install epel-release &amp;&amp; sudo dnf install ShellCheck</code> ile kurulur.</p>
+<p>Sıkılaştırılmış sistemlerde <code>chmod +x</code> yapılsa bile script çalışmayabilir: klasör <code>noexec</code> bağlanmış olabilir ya da bir servis başlattığında SELinux (RHEL/Rocky) / AppArmor (Ubuntu) engelleyebilir. O zaman test için <code>bash script.sh</code> kullan ve audit/journal kayıtlarına bak.</p>
+<article class="cmd"><h3><code>set -euo pipefail</code></h3><dl><dt>Ne işe yarar?</dt><dd>Katı mod: hata, tanımsız değişken ve başarısız boru hattında durur.</dd><dt>Nerede kullanılır?</dt><dd>Hemen her script&#x27;in ikinci satırı.</dd><dt>Neden önemli?</dt><dd>Hatalar sessizce geçilmez, script daha az zarar verir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">set</span> <span class="tf">-euo</span> pipefail</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="set -euo pipefail">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>bash -n / bash -x</code></h3><dl><dt>Ne işe yarar?</dt><dd><code>-n</code> sözdizimini denetler, <code>-x</code> her komutu izler.</dd><dt>Nerede kullanılır?</dt><dd>Script yanlış davrandığında.</dd><dt>Neden önemli?</dt><dd>Hangi satırın hangi değerlerle çalıştığını görürsün.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">bash</span> <span class="tf">-x</span> <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="bash -x ~/bin/hello.sh">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>shellcheck</code></h3><dl><dt>Ne işe yarar?</dt><dd>Kabuk script&#x27;leri için statik analiz.</dd><dt>Nerede kullanılır?</dt><dd>Script&#x27;i paylaşmadan veya zamanlamadan önce.</dd><dt>Neden önemli?</dt><dd>Tırnak hatalarını ve yazım hatalarını erken bulur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">shellcheck</span> <span class="tp">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="shellcheck ~/bin/vars.sh">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>${VAR:?message}</code></h3><dl><dt>Ne işe yarar?</dt><dd>Değişken boş ya da tanımsızsa mesajla durdurur.</dd><dt>Nerede kullanılır?</dt><dd>Değişken kullanan yıkıcı komutlardan önce.</dd><dt>Neden önemli?</dt><dd><code>rm</code>&#x27;nin yanlış yolda çalışmasını önler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">rm</span> <span class="tf">-r</span> <span class="ts">&quot;${TARGET:?TARGET is not set}/cache&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="rm -r &quot;${TARGET:?TARGET is not set}/cache&quot;">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Önce yazdır, sonra sil: test çalıştırmasında <code>rm</code> yerine <code>echo rm</code> yaz ve yolları gözünle kontrol et.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>Tek başına <code>-e</code> garanti değildir: koşulların (<code>if</code>, <code>&amp;&amp;</code>, <code>||</code>) içinde yok sayılır. Her script&#x27;i önce zararsız örnek verilerle dene.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p>Boş değişken tehlikelidir: <code>DIR</code> boşsa <code>rm -rf &quot;$DIR&quot;/*</code> komutu <code>rm -rf /*</code> olur. <code>set -u</code> ve <code>${DIR:?}</code> kullan, VM&#x27;de dene ve önce <strong>snapshot</strong> al (modül 0.2).</p></aside>
+</section>
+<section id="vm"><h2>Kendi VM&#x27;inde yap <span class="gcount" data-g="vm"></span></h2><p>Asıl uygulama gerçek Linux&#x27;ta yapılır: kendi sanal makinende (VirtualBox, UTM veya WSL) komutları çalıştır, çıktıyı karşılaştır.</p><p>VM&#x27;inde (Ubuntu veya Rocky) script&#x27;leri gerçekten çalıştırırsın. Yalnızca kendi <code>~/bin</code> klasörünü ve zararsız test verilerini kullan. Yıkıcı denemelerden önce snapshot al (modül 0.2).</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>İlk script ve çalıştırma biti</h3><span class="status" aria-hidden="true"></span></header><p>Script&#x27;i heredoc ile oluştur, <code>chmod +x</code> öncesinde ve sonrasında çalıştırmayı dene ve çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/bin</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/hello.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Hello, Linux!&quot;</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/hello.sh</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">~/bin/hello.sh</span></span>
+<span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/bin
+cat &gt; ~/bin/hello.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+echo &quot;Hello, Linux!&quot;
+EOF
+~/bin/hello.sh
+chmod +x ~/bin/hello.sh
+ls -l ~/bin/hello.sh
+~/bin/hello.sh">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">bash: /home/student/bin/hello.sh: Permission denied
+-rwxr-xr-x. 1 student student 38 Nov 12 10:00 /home/student/bin/hello.sh
+Hello, Linux!</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Ubuntu&#x27;da <code>ls -l</code> izinlerden sonra nokta göstermez; Rocky&#x27;de (SELinux bağlamı) nokta vardır.</li><li>İlk çalıştırma zaten başarılıysa umask&#x27;in veya dosya sistemin çalıştırma biti veriyor demektir; sorun değil.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Değişken, tırnak, read ve aritmetik</h3><span class="status" aria-hidden="true"></span></header><p>Tırnak farkını gösteren, bir sayı okuyup ikiyle çarpan script yaz. Sayıyı boru ile ver.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/vars.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln">NAME=&quot;student&quot;</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;single: $NAME&#x27;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;double: $NAME&quot;</span></span>
+<span class="ln"><span class="tk">read</span> <span class="tf">-r</span> <span class="tf">-p</span> <span class="ts">&quot;Number: &quot;</span> N</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Double: $((N * 2))&quot;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Year: $(date +%Y)&quot;</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/vars.sh</span></span>
+<span class="ln"><span class="tk">echo</span> 21 <span class="to">|</span> <span class="tk">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/vars.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+NAME=&quot;student&quot;
+echo &#x27;single: $NAME&#x27;
+echo &quot;double: $NAME&quot;
+read -r -p &quot;Number: &quot; N
+echo &quot;Double: $((N * 2))&quot;
+echo &quot;Year: $(date +%Y)&quot;
+EOF
+chmod +x ~/bin/vars.sh
+echo 21 | ~/bin/vars.sh">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">single: $NAME
+double: student
+Double: 42
+Year: 2026</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Girdi boru ile geldiği için <code>Number:</code> istemi görünmez; bu normaldir.</li><li><code>unbound variable</code> veya <code>syntax error</code> görürsen <code>=</code> çevresinde boşluk olmadığından emin ol.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Boşluklu argümanlar</h3><span class="status" aria-hidden="true"></span></header><p>Argüman sayısını ve her argümanı yazdıran bir script yaz, sonra boşluk içeren bir dosya adıyla çağır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/args.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Script: $0&quot;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Count: $#&quot;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;First: $1&quot;</span></span>
+<span class="ln"><span class="tk">for</span> item in <span class="ts">&quot;$@&quot;</span><span class="to">;</span> <span class="tk">do</span></span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;Arg: $item&quot;</span></span>
+<span class="ln"><span class="tk">done</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/args.sh</span></span>
+<span class="ln"><span class="tk">~/bin/args.sh</span> <span class="ts">&quot;my file&quot;</span> bob</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/args.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+echo &quot;Script: $0&quot;
+echo &quot;Count: $#&quot;
+echo &quot;First: $1&quot;
+for item in &quot;$@&quot;; do
+  echo &quot;Arg: $item&quot;
+done
+EOF
+chmod +x ~/bin/args.sh
+~/bin/args.sh &quot;my file&quot; bob">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">Script: /home/student/bin/args.sh
+Count: 2
+First: my file
+Arg: my file
+Arg: bob</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>Count</code> 3 ise <code>my file</code> çevresine tırnak koymadan çağırmışsındır.</li><li><code>&quot;$@&quot;</code> yerine <code>$@</code> yazıp tekrar çalıştır: <code>my</code> ve <code>file</code> ayrı argüman olur.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>if / elif / else ve çıkış kodları</h3><span class="status" aria-hidden="true"></span></header><p><code>[[ ]]</code> ile küçük bir not script&#x27;i yaz, üç girdiyle çalıştır ve <code>test</code> çıkış kodlarına bak.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/grade.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln">score=&quot;${1:-0}&quot;</span>
+<span class="ln"><span class="tk">if</span> [[ <span class="tp">$score</span> <span class="tf">-ge</span> 90 ]]; then</span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;top&quot;</span></span>
+<span class="ln"><span class="tk">elif</span> [[ <span class="tp">$score</span> <span class="tf">-ge</span> 50 ]]; then</span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;pass&quot;</span></span>
+<span class="ln"><span class="tk">else</span></span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;fail&quot;</span></span>
+<span class="ln"><span class="tk">fi</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/grade.sh</span></span>
+<span class="ln"><span class="tk">~/bin/grade.sh</span> 95</span>
+<span class="ln"><span class="tk">~/bin/grade.sh</span> 60</span>
+<span class="ln"><span class="tk">~/bin/grade.sh</span></span>
+<span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">/etc/passwd;</span> echo <span class="ts">&quot;rc=$?&quot;</span></span>
+<span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">/nonexistent;</span> echo <span class="ts">&quot;rc=$?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/grade.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+score=&quot;${1:-0}&quot;
+if [[ $score -ge 90 ]]; then
+  echo &quot;top&quot;
+elif [[ $score -ge 50 ]]; then
+  echo &quot;pass&quot;
+else
+  echo &quot;fail&quot;
+fi
+EOF
+chmod +x ~/bin/grade.sh
+~/bin/grade.sh 95
+~/bin/grade.sh 60
+~/bin/grade.sh
+test -f /etc/passwd; echo &quot;rc=$?&quot;
+test -f /nonexistent; echo &quot;rc=$?&quot;">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">top
+pass
+fail
+rc=0
+rc=1</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>[[: not found</code> alırsan script&#x27;i <code>sh script.sh</code> ile başlatmışsındır; <code>bash</code> kullan veya doğrudan çalıştır.</li><li>Her girdi <code>fail</code> yazıyorsa <code>[[ ... ]]</code> içindeki boşlukları kontrol et.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Katı mod iş başında</h3><span class="status" aria-hidden="true"></span></header><p><code>set -euo pipefail</code>&#x27;in başarısız bir komutta ve tanımsız bir değişkende ne yaptığını karşılaştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/strict.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">set</span> <span class="tf">-euo</span> pipefail</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;before&quot;</span></span>
+<span class="ln"><span class="tk">false</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;after&quot;</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/strict.sh</span></span>
+<span class="ln"><span class="tk">~/bin/strict.sh;</span> echo <span class="ts">&quot;exit=$?&quot;</span></span>
+<span class="ln"><span class="tk">bash</span> <span class="tf">-c</span> <span class="ts">&#x27;set -u; echo &quot;$UNDEFINED_VAR&quot;&#x27;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;exit=$?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/strict.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+set -euo pipefail
+echo &quot;before&quot;
+false
+echo &quot;after&quot;
+EOF
+chmod +x ~/bin/strict.sh
+~/bin/strict.sh; echo &quot;exit=$?&quot;
+bash -c &#x27;set -u; echo &quot;$UNDEFINED_VAR&quot;&#x27;; echo &quot;exit=$?&quot;">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">before
+exit=1
+bash: line 1: UNDEFINED_VAR: unbound variable
+exit=1</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>after</code> görünmemeli. Görünüyorsa <code>set</code> satırını kontrol et.</li><li><code>unbound variable</code> mesajının tam metni Bash sürümüne göre değişir.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v06" data-expect="1"><header><h3>Hata ayıklama: bash -n, bash -x, shellcheck</h3><span class="status" aria-hidden="true"></span></header><p>Sözdizimini kontrol et, bir script&#x27;i izle ve ShellCheck&#x27;i kur (dağıtımını seç). Kurulum mümkün değilse üçüncü bloğu atla ve ilk iki çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">bash</span> <span class="tf">-n</span> <span class="tp">~/bin/hello.sh;</span> echo <span class="ts">&quot;syntax=$?&quot;</span></span>
+<span class="ln"><span class="tk">bash</span> <span class="tf">-x</span> <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="bash -n ~/bin/hello.sh; echo &quot;syntax=$?&quot;
+bash -x ~/bin/hello.sh">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">syntax=0
++ echo &#x27;Hello, Linux!&#x27;
+Hello, Linux!</pre>
+<div class="code"><pre><code><span class="ln"><span class="tc"># Ubuntu / Debian</span></span>
+<span class="ln"><span class="tk">sudo</span> apt install <span class="tf">-y</span> shellcheck</span>
+<span class="ln"><span class="tc"># Rocky / RHEL</span></span>
+<span class="ln"><span class="tk">sudo</span> dnf install <span class="tf">-y</span> epel-release <span class="to">&amp;&amp;</span> <span class="tk">sudo</span> dnf install <span class="tf">-y</span> ShellCheck</span>
+<span class="ln"><span class="tk">shellcheck</span> <span class="tp">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# Ubuntu / Debian
+sudo apt install -y shellcheck
+# Rocky / RHEL
+sudo dnf install -y epel-release &amp;&amp; sudo dnf install -y ShellCheck
+shellcheck ~/bin/vars.sh">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">(çıktı yoksa bulgu yok demektir)</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>syntax=0</code> sözdiziminin doğru olduğunu gösterir; başka bir sayı sözdizimi hatasıdır ve Bash satırı yazar.</li><li>ShellCheck SC2086 gibi ipuçları veriyorsa bunlar genelde değişken çevresinde eksik tırnağı gösterir.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Hızlı alıştırmalar (simülatör)</h2><p>İsteğe bağlı: VM&#x27;e geçmeden önce ısınmak veya VM&#x27;in yokken denemek için tarayıcıdaki sanal terminali kullan. Görevler otomatik doğrulanır.</p><p>Görevler ısınmadan ticket&#x27;a doğru zorlaşır. Rozetler zorluğu gösterir.</p><p><button type="button" class="btn" data-openterm>&gt;_ Terminali aç (isteğe bağlı)</button></p>
+<h3 class="kind k-warmup">Isınma <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Ev dizininde script&#x27;lerin için klasörü oluştur: <code>mkdir ~/bin</code>.</p><details><summary>İpucu</summary><p><code>~</code> ev dizinindir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tp">~/bin</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir ~/bin">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>İlk script&#x27;ini <code>printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh</code> ile yaz.</p><details><summary>İpucu</summary><p><code>\n</code> satır sonudur; dosya iki satır olur. <code>cat ~/bin/hello.sh</code> ile kontrol et.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Script&#x27;i <code>chmod +x ~/bin/hello.sh</code> ile çalıştırılabilir yap.</p><details><summary>İpucu</summary><p><code>ls -l ~/bin/hello.sh</code> çıktısında izinlerde artık <code>x</code> var.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod +x ~/bin/hello.sh">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Adım adım lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d1">Kolay</span></p><p>Script&#x27;i yoluyla çalıştır: <code>~/bin/hello.sh</code>.</p><details><summary>İpucu</summary><p>Ya da önce <code>cd ~/bin</code>, sonra <code>./hello.sh</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="~/bin/hello.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>~/bin/vars.sh</code> dosyasını <code>#!/bin/bash</code>, <code>NAME=student</code> ve <code>echo &quot;Hello $NAME&quot;</code> satırlarıyla yaz (<code>printf</code> kullan), çalıştırılabilir yap ve çalıştır.</p><details><summary>İpucu</summary><p>Üç komut: <code>printf ... &gt; ~/bin/vars.sh</code>, <code>chmod +x</code>, sonra çalıştır. Çıktı: <code>Hello student</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nNAME=student\necho &quot;Hello $NAME&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/vars.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/vars.sh</span></span>
+<span class="ln"><span class="tk">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nNAME=student\necho &quot;Hello $NAME&quot;\n&#x27; &gt; ~/bin/vars.sh
+chmod +x ~/bin/vars.sh
+~/bin/vars.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t08" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>~/bin/check.sh</code> yaz (shebang, sonra <code>if [ -f &quot;$1&quot; ]; then</code>, <code>echo &quot;exists&quot;</code>, <code>else</code>, <code>echo &quot;missing&quot;</code>, <code>fi</code>) ve çalıştırılabilir yap. Simülatör <code>if</code> çalıştıramaz; VM&#x27;de çalıştıracaksın.</p><details><summary>İpucu</summary><p>Satırlar arasına <code>\n</code> koyarak tek <code>printf</code> kullan, sonra <code>chmod +x</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nif [ -f &quot;$1&quot; ]; then\n  echo &quot;exists&quot;\nelse\n  echo &quot;missing&quot;\nfi\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/check.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/check.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nif [ -f &quot;$1&quot; ]; then\n  echo &quot;exists&quot;\nelse\n  echo &quot;missing&quot;\nfi\n&#x27; &gt; ~/bin/check.sh
+chmod +x ~/bin/check.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>test</code> veya <code>[ ]</code> ile iki kontrol yap: <code>~/notes.txt</code> bir dosya mı (<code>-f</code>) ve <code>~/Documents</code> bir klasör mü (<code>-d</code>)? Sonucu görmek için <code>&amp;&amp; echo ok</code> ekle.</p><details><summary>İpucu</summary><p><code>test -f ~/notes.txt &amp;&amp; echo file</code> ve <code>[ -d ~/Documents ] &amp;&amp; echo dir</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">~/notes.txt</span> <span class="to">&amp;&amp;</span> <span class="tk">echo</span> file</span>
+<span class="ln"><span class="tk">[</span> <span class="tf">-d</span> <span class="tp">~/Documents</span> ] <span class="to">&amp;&amp;</span> <span class="tk">echo</span> dir</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="test -f ~/notes.txt &amp;&amp; echo file
+[ -d ~/Documents ] &amp;&amp; echo dir">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Tahmin et <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t06" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>&#x27;$HOME&#x27;</code> ve <code>&quot;$HOME&quot;</code> ne yazdırır? Sonra <code>echo &#x27;$HOME&#x27; &quot;$HOME&quot;</code> ile kontrol et.</p><details><summary>İpucu</summary><p>Tek tırnak metni korur, çift tırnak değişkeni açar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;$HOME&#x27;</span> <span class="ts">&quot;$HOME&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &#x27;$HOME&#x27; &quot;$HOME&quot;">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Eşleşme bulamayan bir aramanın çıkış kodunu tahmin et. <code>grep carol ~/users.txt; echo $?</code> çalıştır.</p><details><summary>İpucu</summary><p>grep bu dosyada hiçbir şey bulamaz ve sıfırdan farklı bir kodla cevap verir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> carol <span class="tp">~/users.txt;</span> echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep carol ~/users.txt; echo $?">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>~/notes.txt</code> çalıştırılabilir mi? <code>test -x ~/notes.txt; echo $?</code> çalıştır ve kodu oku.</p><details><summary>İpucu</summary><p>Çıkış kodu 0 doğru, 1 yanlış demektir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-x</span> <span class="tp">~/notes.txt;</span> echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="test -x ~/notes.txt; echo $?">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Hata ayıkla <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t11" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>~/scripts/broken.sh</code> dosyasında shebang ve çalıştırma izni yok. İkisini de düzelt (içindeki iki komutu koru), sonra çalıştır; <code>~/backup.done</code> oluşmalı.</p><details><summary>İpucu</summary><p>Dosyayı <code>printf</code> ile yeniden yaz, ilk satır <code>#!/bin/bash</code> olsun, sonra <code>chmod +x</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho Backup started\ntouch /home/student/backup.done\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/scripts/broken.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/scripts/broken.sh</span></span>
+<span class="ln"><span class="tk">~/scripts/broken.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho Backup started\ntouch /home/student/backup.done\n&#x27; &gt; ~/scripts/broken.sh
+chmod +x ~/scripts/broken.sh
+~/scripts/broken.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d3">Zor</span></p><p>Hata ayıkla: <code>~/scripts/greet.sh</code> <code>Hello alice</code> yazdırmalı ama <code>Hello $NAME</code> metnini yazdırıyor. İki hatayı bul (<code>=</code> çevresinde boşluk, tek tırnak), düzelt ve script&#x27;i çalıştır.</p><details><summary>İpucu</summary><p>Boşluksuz <code>NAME=alice</code> ve çift tırnaklı <code>echo &quot;Hello $NAME&quot;</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nNAME=alice\necho &quot;Hello $NAME&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/scripts/greet.sh</span></span>
+<span class="ln"><span class="tk">~/scripts/greet.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nNAME=alice\necho &quot;Hello $NAME&quot;\n&#x27; &gt; ~/scripts/greet.sh
+~/scripts/greet.sh">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini proje <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d2">Orta</span></p><p>Mini proje: shebang&#x27;li ve <code>$1</code>, <code>$#</code>, <code>&quot;$@&quot;</code> kullanan üç <code>echo</code> satırlı <code>~/bin/args.sh</code> yaz. Çalıştırılabilir yap.</p><details><summary>İpucu</summary><p>Örnek satır: <code>echo &quot;Count: $#&quot;</code>. Tek <code>printf</code> kullan, satırlar arasında <code>\n</code> olsun.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho &quot;First: $1&quot;\necho &quot;Count: $#&quot;\necho &quot;All:&quot; &quot;$@&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/args.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/args.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho &quot;First: $1&quot;\necho &quot;Count: $#&quot;\necho &quot;All:&quot; &quot;$@&quot;\n&#x27; &gt; ~/bin/args.sh
+chmod +x ~/bin/args.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t14" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d3">Zor</span></p><p>Mini proje: <code>~/bin/backup.sh</code> yaz: shebang, <code>set -euo pipefail</code>, <code>SRC=&quot;$HOME/Documents&quot;</code>, <code>DEST=&quot;$HOME/backup&quot;</code>, <code>mkdir -p &quot;$DEST&quot;</code> ve <code>cp &quot;$SRC/report.txt&quot; &quot;$DEST/&quot;</code>. Çalıştırılabilir yap.</p><details><summary>İpucu</summary><p>Her değişkeni tırnakla. Simülatör <code>set</code> çalıştıramaz; yalnızca dosyayı oluştur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nset -euo pipefail\nSRC=&quot;$HOME/Documents&quot;\nDEST=&quot;$HOME/backup&quot;\nmkdir -p &quot;$DEST&quot;\ncp &quot;$SRC/report.txt&quot; &quot;$DEST/&quot;\necho &quot;Backup done: $DEST&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/backup.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nset -euo pipefail\nSRC=&quot;$HOME/Documents&quot;\nDEST=&quot;$HOME/backup&quot;\nmkdir -p &quot;$DEST&quot;\ncp &quot;$SRC/report.txt&quot; &quot;$DEST/&quot;\necho &quot;Backup done: $DEST&quot;\n&#x27; &gt; ~/bin/backup.sh
+chmod +x ~/bin/backup.sh">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Meydan okuma <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: <code>~/bin/need_arg.sh</code> oluştur. Argüman yoksa <code>Usage: need_arg.sh NAME</code> yazdırır ve <code>exit 1</code> ile biter; varsa <code>Hello, $1</code> yazdırır ve <code>exit 0</code> ile biter. Çalıştırılabilir yap.</p><details><summary>İpucu</summary><p><code>-z &quot;$1&quot;</code> ile test et; <code>if ... then ... fi</code> kullan.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nif [ -z &quot;$1&quot; ]; then\n  echo &quot;Usage: need_arg.sh NAME&quot;\n  exit 1\nfi\necho &quot;Hello, $1&quot;\nexit 0\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/need_arg.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/need_arg.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nif [ -z &quot;$1&quot; ]; then\n  echo &quot;Usage: need_arg.sh NAME&quot;\n  exit 1\nfi\necho &quot;Hello, $1&quot;\nexit 0\n&#x27; &gt; ~/bin/need_arg.sh
+chmod +x ~/bin/need_arg.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t16" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: tek komutu <code>test -f /home/student/missing.txt</code> olan <code>~/bin/probe.sh</code> oluştur. Çalıştırılabilir yap, çalıştır ve çıkış kodunu <code>echo $? &gt; ~/code.txt</code> ile <code>~/code.txt</code> dosyasına yaz.</p><details><summary>İpucu</summary><p>Script, son komutunun çıkış kodunu döndürür. Script&#x27;ten hemen sonra <code>echo $?</code> çalıştır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\ntest -f /home/student/missing.txt\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/probe.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/probe.sh</span></span>
+<span class="ln"><span class="tk">~/bin/probe.sh</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="tp">$?</span> <span class="to">&gt;</span> <span class="tk">~/code.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\ntest -f /home/student/missing.txt\n&#x27; &gt; ~/bin/probe.sh
+chmod +x ~/bin/probe.sh
+~/bin/probe.sh
+echo $? &gt; ~/code.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t17" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>Ticket: Yeni çalışan ekibi <code>~/bin/welcome.sh</code> istiyor. İsim verilirse <code>Welcome, NAME</code> yazdırır; argüman yoksa <code>guest</code> kullanmalı. <code>${1:-guest}</code> kullan, shebang ekle ve çalıştırılabilir yap.</p><details><summary>İpucu</summary><p><code>NAME=&quot;${1:-guest}&quot;</code> ve ardından <code>echo &quot;Welcome, $NAME&quot;</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nNAME=&quot;${1:-guest}&quot;\necho &quot;Welcome, $NAME&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/welcome.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/welcome.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nNAME=&quot;${1:-guest}&quot;\necho &quot;Welcome, $NAME&quot;\n&#x27; &gt; ~/bin/welcome.sh
+chmod +x ~/bin/welcome.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t18" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d2">Orta</span></p><p>Ticket: Bir meslektaşın <code>~/scripts/report.sh</code> dosyasının &#x27;Permission denied&#x27; ile başarısız olduğunu söylüyor. En küçük değişiklikle düzelt ve çalıştır; <code>~/report.done</code> oluşmalı.</p><details><summary>İpucu</summary><p>Dosyada çalıştırma biti eksik; içeriğini değiştirmen gerekmez.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/scripts/report.sh</span></span>
+<span class="ln"><span class="tk">~/scripts/report.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod +x ~/scripts/report.sh
+~/scripts/report.sh">Kopyala</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Laboratuvarı sıfırla</button></p></section>
+<section id="quiz"><h2>Öz test</h2>
+<div class="q card" data-q="q1"><p><strong><code>echo &#x27;$HOME&#x27;</code> ne yazdırır?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">/home/student</button><button type="button" class="opt" data-i="1">$HOME</button><button type="button" class="opt" data-i="2">Boş bir satır</button><button type="button" class="opt" data-i="3">HOME</button></div><p class="explain" hidden>Tek tırnak açılımı engeller; <code>$HOME</code> metni yazdırılır. Değişkenleri yalnızca çift tırnak açar.</p></div>
+<div class="q card" data-q="q2"><p><strong>Bir script içinde <code>$#</code> neyi tutar?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Argüman sayısını</button><button type="button" class="opt" data-i="1">Script&#x27;in adını</button><button type="button" class="opt" data-i="2">Son komutun çıkış kodunu</button><button type="button" class="opt" data-i="3">Tüm argümanları tek metin olarak</button></div><p class="explain" hidden><code>$#</code> argüman sayısıdır; <code>$0</code> script adı, <code>$?</code> son çıkış kodu, <code>&quot;$@&quot;</code> argüman listesidir.</p></div>
+<div class="q card" data-q="q3"><p><strong><code>set -euo pipefail</code> ne yapar?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Script&#x27;i root olarak başlatır</button><button type="button" class="opt" data-i="1">Her komutu çalışmadan önce yazdırır</button><button type="button" class="opt" data-i="2">Tüm hataları yok sayar</button><button type="button" class="opt" data-i="3">Hata, tanımsız değişken ve başarısız boru parçasında durur</button></div><p class="explain" hidden><code>-e</code> hatada, <code>-u</code> tanımsız değişkende, <code>pipefail</code> başarısız boru parçasında durdurur. Komutları yazdırmak <code>-x</code>&#x27;tir.</p></div>
+<div class="q card" data-q="q4"><p><strong><code>./run.sh</code> başlatıyorsun ve dosyada çalıştırma biti yok. Ne olur?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">command not found</button><button type="button" class="opt" data-i="1">Sözdizimi hatası</button><button type="button" class="opt" data-i="2">Permission denied</button><button type="button" class="opt" data-i="3">Script normal çalışır</button></div><p class="explain" hidden>x biti yoksa çekirdek dosyayı başlatmaz: Permission denied. <code>chmod +x run.sh</code> ile düzeltilir.</p></div>
+</section>
+<section id="summary" class="card"><h2>Özet</h2><ul><li>Script, <code>#!/bin/bash</code> shebang&#x27;i ile başlar, <code>chmod +x</code> ister ve <code>./script.sh</code> ile başlatılır.</li><li>Değişken: boşluksuz <code>NAME=value</code>; <code>&quot;$NAME&quot;</code> açar, <code>&#x27;$NAME&#x27;</code> açmaz. Hep tırnakla.</li><li><code>$1</code>, <code>$#</code> ve <code>&quot;$@&quot;</code> argümanları okur; <code>${1:-default}</code> varsayılan değer verir.</li><li><code>$?</code> son çıkış kodudur (0 = başarı); <code>exit N</code> script&#x27;i bir kodla bitirir.</li><li><code>if</code> ile <code>[ ]</code>, <code>[[ ]]</code> veya <code>test</code> karar verir; en sık testler <code>-f -d -z -eq</code>.</li><li><code>set -euo pipefail</code>, <code>bash -x</code> ve <code>shellcheck</code> script&#x27;leri daha güvenli ve ayıklaması kolay yapar.</li></ul></section>
+<section id="glossary"><h2>Terimler</h2><dl class="gl"><dt>shebang</dt><dd>İlk satır <code>#!/bin/bash</code>; script&#x27;in yorumlayıcısını belirtir.</dd><dt>çalıştırma biti</dt><dd>Dosyanın program olarak başlatılmasına izin veren x yetkisi.</dd><dt>değişken</dt><dd><code>NAME=value</code> ile atanan, <code>$NAME</code> ile okunan adlandırılmış değer.</dd><dt>tırnaklama</dt><dd>Tek tırnak metni olduğu gibi korur, çift tırnak değişkenleri açar.</dd><dt>konumsal argüman</dt><dd>Script&#x27;e verilen değer: <code>$1</code>, <code>$2</code>, ...</dd><dt>çıkış kodu</dt><dd>Bir komutun döndürdüğü sayı; 0 başarı, diğerleri hatadır.</dd><dt>test / [ ]</dt><dd>Bir koşulu değerlendirip çıkış koduyla cevap veren komut.</dd><dt>katı mod</dt><dd><code>set -euo pipefail</code>: hata, tanımsız değişken ve başarısız boru hattında durur.</dd><dt>heredoc</dt><dd><code>&lt;&lt;&#x27;EOF&#x27;</code> birkaç satır metni bir komuta verir; çoğunlukla dosya oluşturmak için kullanılır.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-6.4.html">← Önceki</a><a class="btn primary" href="modul-6.6.html">Sonraki →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (isteğe bağlı)</strong><button type="button" class="ibtn" id="termclose" aria-label="Terminali kapat">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "tr", "module": "6.5", "setup": {"dirs": ["/home/student/scripts"], "files": {"/home/student/users.txt": "alice\nbob\n", "/home/student/scripts/broken.sh": "echo Backup started\ntouch /home/student/backup.done\n", "/home/student/scripts/greet.sh": "#!/bin/bash\nNAME = alice\necho 'Hello $NAME'\n", "/home/student/scripts/report.sh": "#!/bin/bash\necho Report done\ntouch /home/student/report.done\n"}, "modes": [["/home/student/scripts/broken.sh", "644"], ["/home/student/scripts/greet.sh", "755"], ["/home/student/scripts/report.sh", "644"]]}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"exists": "~/bin", "type": "d"}}, {"id": "t02", "kind": "warmup", "check": [{"contains": ["~/bin/hello.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/hello.sh", "echo \"Hello, Linux!\""]}]}, {"id": "t03", "kind": "warmup", "check": {"mode": ["~/bin/hello.sh", "755"]}}, {"id": "t04", "kind": "guided", "check": {"cmd": "^(\\./|~/bin/|/home/student/bin/)hello\\.sh$", "ok": true, "out": "Hello, Linux!"}}, {"id": "t05", "kind": "guided", "check": [{"contains": ["~/bin/vars.sh", "NAME=student"]}, {"contains": ["~/bin/vars.sh", "echo \"Hello \\$NAME\""]}, {"out": "Hello student", "of": "vars\\.sh$"}]}, {"id": "t06", "kind": "predict", "check": {"out": "\\$HOME /home/student", "of": "^echo"}}, {"id": "t07", "kind": "predict", "check": {"out": "1", "of": "carol.*echo \\$\\?"}}, {"id": "t08", "kind": "guided", "check": [{"contains": ["~/bin/check.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/check.sh", "if \\[+ -f"]}, {"contains": ["~/bin/check.sh", "\\nelse\\n"]}, {"contains": ["~/bin/check.sh", "\\nfi\\n"]}, {"mode": ["~/bin/check.sh", "755"]}]}, {"id": "t09", "kind": "guided", "check": [{"cmd": "^(test|\\[) -f \\S*notes\\.txt", "ok": true}, {"cmd": "^(test|\\[) -d \\S*Documents", "ok": true}]}, {"id": "t10", "kind": "predict", "check": {"out": "1", "of": "-x.*echo \\$\\?"}}, {"id": "t11", "kind": "debug", "check": [{"contains": ["~/scripts/broken.sh", "^#!/bin/bash\\n"]}, {"mode": ["~/scripts/broken.sh", "755"]}, {"exists": "~/backup.done", "type": "f"}]}, {"id": "t12", "kind": "debug", "check": [{"contains": ["~/scripts/greet.sh", "\\nNAME=alice\\n"]}, {"contains": ["~/scripts/greet.sh", "echo \"Hello \\$NAME\""]}, {"out": "Hello alice", "of": "greet\\.sh$"}]}, {"id": "t13", "kind": "mini", "check": [{"contains": ["~/bin/args.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/args.sh", "\\$1"]}, {"contains": ["~/bin/args.sh", "\\$#"]}, {"contains": ["~/bin/args.sh", "\"\\$@\""]}, {"mode": ["~/bin/args.sh", "755"]}]}, {"id": "t14", "kind": "mini", "check": [{"contains": ["~/bin/backup.sh", "^#!/bin/bash\\nset -euo pipefail\\n"]}, {"contains": ["~/bin/backup.sh", "\\nSRC="]}, {"contains": ["~/bin/backup.sh", "\\nDEST="]}, {"contains": ["~/bin/backup.sh", "mkdir -p \"\\$DEST\""]}, {"contains": ["~/bin/backup.sh", "\\ncp \"\\$SRC"]}, {"mode": ["~/bin/backup.sh", "755"]}]}, {"id": "t15", "kind": "challenge", "check": [{"contains": ["~/bin/need_arg.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/need_arg.sh", "-z \"?\\$1\"?"]}, {"contains": ["~/bin/need_arg.sh", "Usage: need_arg\\.sh NAME"]}, {"contains": ["~/bin/need_arg.sh", "exit 1"]}, {"contains": ["~/bin/need_arg.sh", "exit 0"]}, {"contains": ["~/bin/need_arg.sh", "Hello, \\$1"]}, {"mode": ["~/bin/need_arg.sh", "755"]}]}, {"id": "t16", "kind": "challenge", "check": [{"contains": ["~/bin/probe.sh", "test -f /home/student/missing\\.txt"]}, {"mode": ["~/bin/probe.sh", "755"]}, {"equals": ["~/code.txt", "1\n"]}]}, {"id": "t17", "kind": "ticket", "check": [{"contains": ["~/bin/welcome.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/welcome.sh", "\\$\\{1:-guest\\}"]}, {"contains": ["~/bin/welcome.sh", "Welcome, "]}, {"mode": ["~/bin/welcome.sh", "755"]}]}, {"id": "t18", "kind": "ticket", "check": [{"mode": ["~/scripts/report.sh", "755"]}, {"exists": "~/report.done", "type": "f"}]}], "vm": [{"id": "v01", "expect": "(?=[\\s\\S]*Hello)(?=[\\s\\S]*rwx)"}, {"id": "v02", "expect": "(?=[\\s\\S]*single: \\$NAME)(?=[\\s\\S]*double: student)(?=[\\s\\S]*Double: 42)"}, {"id": "v03", "expect": "(?=[\\s\\S]*Count: 2)(?=[\\s\\S]*Arg: my file)"}, {"id": "v04", "expect": "(?=[\\s\\S]*pass)(?=[\\s\\S]*fail)"}, {"id": "v05", "expect": "(?=[\\s\\S]*before)(?=[\\s\\S]*exit=1)"}, {"id": "v06", "expect": "(?=[\\s\\S]*syntax=0)(?=[\\s\\S]*\\+ )"}], "quiz": {"q1": 1, "q2": 0, "q3": 3, "q4": 2}, "ui": {"correct": "Doğru!", "wrong": "Yanlış, tekrar dene.", "taskDone": "Görev tamamlandı", "moduleDone": "Modül tamamlandı! 🎉", "tasksDone": "tamamlandı", "welcome": "Sanal Linux terminali — komutlar yalnızca bu sayfadaki sanal dosya sisteminde çalışır. 'help' yazarak komutları gör, Tab ile tamamla, ↑/↓ ile geçmişte gez.", "sandboxNote": "Güvenli kum havuzu: gerçek sistemine dokunulmaz.", "resetConfirm": "Bu modülün sanal dosya sistemi ve komut geçmişi sıfırlanacak. İlerlemen (tamamlanan görevler) korunur. Devam?", "openTerminal": "Terminali aç (isteğe bağlı)", "closeTerminal": "Terminali kapat", "continue": "Devam et", "startPath": "Öğrenmeye başla", "noResult": "Eşleşen modül veya komut yok.", "soon": "Yakında", "overall": "Genel ilerleme", "copied": "Kopyalandı ✓", "pasteOk": "Çıktın beklenen kalıpla eşleşti ✓", "pasteBad": "Henüz eşleşmedi. \"Çıktım farklı çıktı\" ipuçlarına bak ve çıktının tamamını yapıştır.", "iDidIt": "Yaptım", "undo": "Geri al", "groupDone": "tamam", "vmDone": "VM görevleri"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

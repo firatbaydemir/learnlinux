@@ -1,0 +1,138 @@
+{
+ "title": "Dateiinformation",
+ "lead": "Lies mit file, stat, ls -l, ln -s, readlink und realpath den echten Typ, die Größe, die Zeiten und das Linkziel einer Datei.",
+ "objectives": [
+  "Du weißt, dass die Endung unter Linux nur ein Name ist und `file` den echten Typ zeigt.",
+  "Du liest Größe, Rechte, Besitzer und Zeiten mit `stat` und `ls -l`.",
+  "Du legst symbolische Links an und findest ihr Ziel mit `ls -l`, `readlink` und `realpath`."
+ ],
+ "sections": [
+  {
+   "id": "type",
+   "title": "Echter Typ: file",
+   "body": [
+    "Unter Windows erkennst du den Typ an der Endung. Unter Linux ist `.jpg` nur ein Name; der Inhalt kann etwas ganz anderes sein. `file` schaut nicht auf die Endung, sondern auf die ersten Bytes des Inhalts.",
+    "Das hilft bei heruntergeladenen Dateien: Eine Datei `bild.jpg` kann in Wahrheit ein ausführbares Programm sein."
+   ],
+   "commands": [
+    {"cmd": "file", "what": "Nennt den echten Dateityp anhand des Inhalts.", "where": "Bei heruntergeladenen oder verdächtigen Dateien.", "why": "Deckt falsche Endungen und getarnte Dateien auf.", "example": "file /etc/hostname", "nosim": true},
+    {"cmd": "file -i", "what": "Gibt den Typ als MIME-Typ aus (z. B. text/plain).", "where": "In Skripten und Webserver-Konfigurationen.", "why": "Liefert einen kurzen, maschinenlesbaren Typ.", "example": "file -i /etc/hostname", "nosim": true}
+   ],
+   "tip": "In der Ausgabe heißt `ASCII text` Text, `ELF` ausführbares Programm und `directory` Ordner."
+  },
+  {
+   "id": "details",
+   "title": "Details: stat und ls -l",
+   "body": [
+    "`ls -l` zeigt in einer Zeile Typ, Rechte, Besitzer, Größe und Datum. `stat` liefert mehr: Inode, Linkanzahl und drei Zeitstempel.",
+    "Zeiten: **Access** letzter Lesezugriff, **Modify** letzte Änderung des Inhalts, **Change** letzte Änderung der Metadaten (z. B. Rechte oder Besitzer). Das erste Zeichen zeigt den Typ: `-` Datei, `d` Ordner, `l` symbolischer Link."
+   ],
+   "commands": [
+    {"cmd": "stat", "what": "Zeigt alle technischen Daten einer Datei.", "where": "Wenn du genaue Größe, Rechte und Zeiten brauchst.", "why": "Detaillierter als `ls -l`.", "example": "stat ~/info/data.txt"},
+    {"cmd": "ls -l", "what": "Gibt eine Liste im Langformat aus.", "where": "Beim schnellen Blick in einen Ordner.", "why": "Typ, Rechte, Besitzer, Größe und Datum in einer Zeile.", "example": "ls -l ~/info"},
+    {"cmd": "ls -lh", "what": "Zeigt Größen lesbar in KB/MB.", "where": "Bei großen Dateien.", "why": "Verständliche Größe statt Bytezahl.", "example": "ls -lh ~/info"},
+    {"cmd": "ls -ld", "what": "Listet den Ordner selbst, nicht seinen Inhalt.", "where": "Wenn du die Rechte eines Ordners prüfst.", "why": "Ordnerinfo, ohne ihn zu öffnen.", "example": "ls -ld ~/info"}
+   ],
+   "tip": "`ls -lh` rundet; für die exakten Bytes nimm `stat` oder `wc -c`."
+  },
+  {
+   "id": "links",
+   "title": "Symbolische Links und echter Pfad",
+   "body": [
+    "Ein symbolischer Link (Symlink) ist eine kleine Datei, die auf einen anderen Pfad zeigt. `ls -l` zeigt ihn als `link.txt -> data.txt`. Fehlt das Ziel, ist der Link **kaputt**: Er existiert, beim Öffnen gibt es aber einen Fehler.",
+    "Das Löschen eines Links löscht nicht das Ziel; `rm link.txt` entfernt nur den Link. `readlink` gibt das Ziel einen Schritt weit aus, `realpath` den vollständig aufgelösten absoluten Pfad."
+   ],
+   "commands": [
+    {"cmd": "ln -s", "what": "Legt einen symbolischen Link an: erst Ziel, dann Linkname.", "where": "Für Abkürzungen oder Versionsmarker.", "why": "Zugriff unter zweitem Namen, ohne zu kopieren.", "example": "ln -s data.txt ~/info/link.txt"},
+    {"cmd": "readlink", "what": "Gibt das Ziel eines Links aus.", "where": "Wenn du wissen willst, wohin ein Link zeigt.", "why": "In Skripten bekommst du das Ziel sauber.", "example": "readlink ~/info/link.txt", "nosim": true},
+    {"cmd": "realpath", "what": "Gibt den absoluten Pfad mit aufgelösten Links aus.", "where": "Bei relativen Pfaden oder Linkketten.", "why": "Zeigt den echten Ort der Datei auf der Platte.", "example": "realpath ~/info/link.txt", "nosim": true}
+   ],
+   "warn": "Der Zielpfad wird relativ zum Ordner des Links aufgelöst. `ln -s data.txt ~/info/link.txt` funktioniert; `ln -s data.txt ~/link.txt` in einem anderen Ordner erzeugt einen kaputten Link."
+  },
+  {
+   "id": "names",
+   "title": "Name und Größe: basename, dirname, wc",
+   "body": [
+    "`basename` liefert den letzten Teil eines Pfades, `dirname` den Ordnerteil. Beides nutzt man oft in Skripten, um Pfade zu zerlegen.",
+    "Die Größe in Bytes liefert `wc -c`, die Zeilenzahl `wc -l`."
+   ],
+   "commands": [
+    {"cmd": "basename", "what": "Gibt die letzte Komponente (Dateiname) eines Pfades aus.", "where": "In Skripten, wenn du nur den Namen brauchst.", "why": "Du musst den Pfad nicht von Hand zerschneiden.", "example": "basename ~/info/data.txt"},
+    {"cmd": "dirname", "what": "Gibt den Ordnerteil eines Pfades aus.", "where": "Um den Ordner einer Datei zu finden.", "why": "Du bekommst den Ordner ohne Dateinamen.", "example": "dirname ~/info/data.txt"},
+    {"cmd": "wc -c", "what": "Gibt die Bytezahl einer Datei aus.", "where": "Wenn du die genaue Größe brauchst.", "why": "Exakte Größe ohne Rundung.", "example": "wc -c ~/info/data.txt"}
+   ]
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Führe `stat` für `~/info/data.txt` aus und finde die Zeilen Size und Modify.", "hint": "`stat ~/info/data.txt`"},
+  "t02": {"text": "Liste den Ordner `~/info` im Langformat.", "hint": "`ls -l ~/info`"},
+  "t03": {"text": "Gib mit `basename` nur den Dateinamen des Pfades `~/info/data.txt` aus.", "hint": "Die Ausgabe muss `data.txt` sein."},
+  "t04": {"text": "Gib mit `dirname` den Ordnerteil desselben Pfades aus.", "hint": "Die Ausgabe muss `/home/student/info` sein."},
+  "t05": {"text": "Liste den Inhalt von `~/info` mit lesbaren Größen.", "hint": "`ls -lh ~/info`"},
+  "t06": {"text": "Wie viele Bytes hat `data.txt`? Finde es mit `wc -c`.", "hint": "Drei Zeilen: alpha, beta, gamma; jede mit Zeilenende."},
+  "t07": {"text": "Finde mit `wc -l` die Zeilenzahl von `data.txt`.", "hint": "`wc -l ~/info/data.txt`"},
+  "t08": {"text": "Lege den symbolischen Link `~/info/link.txt` mit dem Ziel `data.txt` an.", "hint": "`ln -s data.txt ~/info/link.txt`; das Ziel ist relativ zum Link-Ordner."},
+  "t09": {"text": "Vorhersage: Wie sieht der Link in der Ausgabe von `ls -l ~/info` aus? Führe es aus und prüfe.", "hint": "Du siehst `link.txt -> data.txt` und am Anfang ein `l`."},
+  "t10": {"text": "Lies den Typ des Links mit `stat ~/info/link.txt`.", "hint": "In der Ausgabe steht `symbolic link`."},
+  "t11": {"text": "Vorhersage: Mit welchem Buchstaben beginnt die Zeile von `ls -ld ~/info`? Führe es aus.", "hint": "Ein Ordner beginnt mit `d`: `drwx...`."},
+  "t12": {"text": "Vorhersage: Was macht `stat` für die nicht vorhandene `~/info/missing.txt`? Führe es aus.", "hint": "Es gibt einen Fehler: No such file or directory."},
+  "t13": {"text": "Teste einen kaputten Link: Lege mit `ln -s nothing.txt ~/broken` einen Link ohne Ziel an und führe dann `cat ~/broken` aus.", "hint": "Der Link existiert, das Ziel nicht; `cat` meldet einen Fehler."},
+  "t14": {"text": "Debug: `~/info/picture.jpg` ist in Wahrheit reiner Text. Benenne sie in `picture.txt` um.", "hint": "Schau mit `cat` hinein, dann `mv` zum Umbenennen."},
+  "t15": {"text": "Miniprojekt: Lege den Ordner `~/inventory` an, schreibe mit `echo version1 > ~/inventory/v1.txt` eine Datei, lege den Link `current` mit Ziel `v1.txt` an und prüfe mit `ls -l ~/inventory`.", "hint": "Reihenfolge: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`."},
+  "t16": {"text": "Schwere Aufgabe: Lege `~/shortcut` als Link auf `~/info/data.txt` an, untersuche ihn mit `ls -l ~/shortcut` und `stat ~/shortcut`, lösche dann den Link. `data.txt` muss bleiben.", "hint": "`rm` entfernt nur den Link und berührt das Ziel nicht."},
+  "t17": {"text": "Ticket #2520: Das Audit-Team will die Größe von `~/info/data.txt` in Bytes in der Datei `~/size.txt`. Leite die Ausgabe in die Datei um.", "hint": "`wc -c ~/info/data.txt > ~/size.txt`"}
+ },
+ "vm": {
+  "intro": "Probiere es auf deiner VM aus. Hier gibt es keine zerstörerischen Befehle; du legst nur kleine Testdateien im Home-Verzeichnis an.",
+  "tasks": {
+   "v01": {
+    "title": "Echten Typ erfahren",
+    "text": "Führe `file` für eine Textdatei, ein Programm und einen Ordner aus und füge die Ausgabe ein.",
+    "blocks": [{"cmd": "file /etc/hostname /usr/bin/ls /etc", "expected": "/etc/hostname: ASCII text\n/usr/bin/ls:  ELF 64-bit LSB pie executable, x86-64, ...\n/etc:         directory"}],
+    "differs": ["Der Ort von `ls` hängt von der Distribution ab; finde ihn mit `which ls`.", "Fehlt `file`, installiere es auf Ubuntu mit `sudo apt install file`, auf Rocky/Alma mit `sudo dnf install file`."]
+   },
+   "v02": {
+    "title": "Die lügende Endung",
+    "text": "Gib einer Textdatei den Namen `.jpg` und sieh, was `file` sagt.",
+    "blocks": [{"cmd": "echo hello > ~/fake.jpg\nfile ~/fake.jpg", "expected": "/home/student/fake.jpg: ASCII text"}],
+    "differs": ["Dein Pfad kann `/home/alice/fake.jpg` heißen; wichtig ist das Wort `text`."]
+   },
+   "v03": {
+    "title": "Details mit stat",
+    "text": "Finde in der `stat`-Ausgabe die Zeilen Size, Modify und Change.",
+    "blocks": [{"cmd": "stat ~/fake.jpg", "expected": "  File: /home/student/fake.jpg\n  Size: 6   Blocks: 8   regular file\nAccess: (0644/-rw-r--r--) ...\nModify: 2026-01-01 10:00:00 ..."}],
+    "differs": ["Bei deutscher Ausgabe siehst du evtl. `Größe` statt `Size`; `LANG=C stat ~/fake.jpg` gibt Englisch aus.", "Die Birth-Zeile ist auf manchen Dateisystemen `-`."]
+   },
+   "v04": {
+    "title": "Link und echter Pfad",
+    "text": "Lege einen symbolischen Link an und finde das Ziel mit `ls -l`, `readlink` und `realpath`.",
+    "blocks": [{"cmd": "ln -s fake.jpg ~/pic_link\nls -l ~/pic_link\nreadlink ~/pic_link\nrealpath ~/pic_link", "expected": "lrwxrwxrwx 1 student student 8 ... /home/student/pic_link -> fake.jpg\nfake.jpg\n/home/student/fake.jpg"}],
+    "differs": ["Fehlt `->` in der `ls -l`-Ausgabe, prüfe die Reihenfolge bei `ln -s` (erst Ziel, dann Linkname).", "Gibt es `realpath` nicht, leistet `readlink -f ~/pic_link` dasselbe."]
+   },
+   "v05": {
+    "title": "Aufräumen",
+    "text": "Lösche die Testdateien. Wenn kein Fehler auftritt, drücke \"Erledigt\".",
+    "blocks": [{"cmd": "ls -l ~/fake.jpg ~/pic_link\nrm ~/pic_link ~/fake.jpg"}],
+    "differs": ["`rm` entfernt erst den Link, dann die Zieldatei. Bei umgekehrter Reihenfolge bleibt der Link kaputt, ist aber harmlos."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Woran erkennt `file bild.jpg` den Typ einer Datei?", "options": ["An der Endung", "An den ersten Bytes des Inhalts", "An der Größe", "Am Besitzer"], "explain": "Unter Linux ist die Endung nur ein Name; `file` prüft den Inhalt."},
+  "q2": {"q": "Was zeigt die Zeit Modify in der `stat`-Ausgabe?", "options": ["Den letzten Lesezugriff", "Die letzte Änderung der Rechte", "Die letzte Änderung des Inhalts", "Das Löschen der Datei"], "explain": "Modify ist die Zeit des Inhalts, Change die der Metadaten, Access die des letzten Lesens."},
+  "q3": {"q": "Was passiert bei `rm link.txt` (symbolischer Link)?", "options": ["Nur der Link wird gelöscht", "Die Zieldatei wird gelöscht", "Beides wird gelöscht", "Es gibt einen Fehler"], "explain": "Ein Link ist ein eigener Eintrag; sein Löschen berührt das Ziel nicht."},
+  "q4": {"q": "Welcher Befehl gibt den absoluten Pfad mit aufgelösten Links aus?", "options": ["basename", "dirname", "wc -c", "realpath"], "explain": "`realpath` löst relative Pfade und Linkketten zum echten absoluten Pfad auf."}
+ },
+ "summary": [
+  "Die Endung ist nur ein Name; den echten Typ zeigt `file`.",
+  "`ls -l` ist die schnelle Übersicht, `stat` die Details; Modify ist die Inhalts-, Change die Metadatenzeit.",
+  "`ln -s Ziel Link` legt einen symbolischen Link an; `ls -l` zeigt `->`.",
+  "`readlink` zeigt das Ziel, `realpath` den vollen absoluten Pfad; `rm link` löscht das Ziel nicht."
+ ],
+ "glossary": [
+  {"term": "Symlink", "meaning": "Spezielle Datei, die auf einen anderen Pfad zeigt."},
+  {"term": "Inode", "meaning": "Metadateneintrag einer Datei im Dateisystem."},
+  {"term": "kaputter Link", "meaning": "Symbolischer Link ohne vorhandenes Ziel."},
+  {"term": "MIME-Typ", "meaning": "Bezeichnung des Inhaltstyps, z. B. text/plain."}
+ ]
+}

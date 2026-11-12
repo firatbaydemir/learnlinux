@@ -1,0 +1,262 @@
+{
+ "title": "Creating and deleting files and folders",
+ "lead": "Use mkdir, touch, rmdir and rm to build and clean up a file structure in a safe practice area.",
+ "objectives": [
+  "You create folders and nested structures with mkdir and mkdir -p.",
+  "You create empty files with touch, several at once using brace expansion.",
+  "You know the difference between rmdir and rm -r and check before deleting."
+ ],
+ "sections": [
+  {
+   "id": "create",
+   "title": "Creating: mkdir and touch",
+   "body": [
+    "First make a safe **practice area**: a folder `practice` in your home directory. Mistakes then only affect it. As a normal user you cannot write to system directories like `/etc` — that is a protection mechanism.",
+    "`mkdir` creates folders, `touch` creates empty files. Brace expansion produces several names: `touch {a,b,c}.txt` creates `a.txt b.txt c.txt`."
+   ],
+   "commands": [
+    {
+     "cmd": "mkdir",
+     "what": "Creates a new folder.",
+     "where": "For projects, backups or practice areas.",
+     "why": "Keeps your files organised.",
+     "example": "mkdir practice"
+    },
+    {
+     "cmd": "mkdir -p",
+     "what": "Also creates missing parent folders; no error if the folder exists.",
+     "where": "When building nested structures.",
+     "why": "One command builds the whole tree.",
+     "example": "mkdir -p project/src/code"
+    },
+    {
+     "cmd": "touch",
+     "what": "Creates an empty file or updates an existing file's timestamp.",
+     "where": "When you quickly need an empty file.",
+     "why": "A starting point for scripts and test files.",
+     "example": "touch file1.txt"
+    },
+    {
+     "cmd": "ls -R",
+     "what": "Lists the tree including subfolders.",
+     "where": "When verifying the structure.",
+     "why": "You see what will be affected before deleting or moving.",
+     "example": "ls -R project"
+    }
+   ],
+   "tip": "Always verify the result with ls after an action."
+  },
+  {
+   "id": "delete",
+   "title": "Deleting: rm and rmdir",
+   "body": [
+    "Linux has **no trash can** on the command line: files removed with `rm` are gone. So check with `ls` what you are about to delete.",
+    "`rmdir` removes only **empty** folders; for a non-empty one it fails and protects you. To delete a folder with its contents you need `rm -r`. Using `rm` on a folder without `-r` gives 'Is a directory'. In this simulator dangerous commands such as `rm -rf /` are refused."
+   ],
+   "commands": [
+    {
+     "cmd": "rm",
+     "what": "Deletes files (no undo).",
+     "where": "When cleaning up unneeded files.",
+     "why": "For space and tidiness — but use with care.",
+     "example": "rm delete_me.txt"
+    },
+    {
+     "cmd": "rmdir",
+     "what": "Removes only empty folders.",
+     "where": "When removing empty folders.",
+     "why": "Stops you from accidentally deleting a full folder.",
+     "example": "rmdir project"
+    },
+    {
+     "cmd": "rm -r",
+     "what": "Deletes a folder together with its contents.",
+     "where": "When removing non-empty folders.",
+     "why": "Clears the tree in one command; use after checking.",
+     "example": "rm -r project"
+    }
+   ],
+   "tip": "Make it a habit: first `ls -R folder`, then `rm -r folder`.",
+   "warn": "Before pressing ENTER, re-read which folder `rm -r` will delete. In the wrong directory it destroys your whole project.",
+   "danger": "On a real system never type `rm -rf /` or `rm -rf ~`. It causes irreversible data loss; only the simulator refuses it here."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "In your home directory create a practice folder with `mkdir practice`.",
+   "hint": "Make sure you are home first with `cd ~`."
+  },
+  "t02": {
+   "text": "Enter the folder with `cd practice`.",
+   "hint": "The directory in the prompt changes."
+  },
+  "t03": {
+   "text": "Create an empty file with `touch file1.txt`.",
+   "hint": "You can check with ls -l."
+  },
+  "t04": {
+   "text": "Create a subfolder with `mkdir folder1`.",
+   "hint": "In ls -l the line starts with d."
+  },
+  "t05": {
+   "text": "Build the nested structure in one command with `mkdir -p project/src/code`.",
+   "hint": "-p also creates the intermediate folders."
+  },
+  "t06": {
+   "text": "List the structure with its subfolders using `ls -R project`.",
+   "hint": "-R is a capital letter."
+  },
+  "t07": {
+   "text": "Create three files in one command with `touch {a,b,c}.txt`.",
+   "hint": "Separate with commas inside the braces, no spaces."
+  },
+  "t08": {
+   "text": "Create `delete_me.txt` with `touch`, then delete it with `rm`.",
+   "hint": "Two commands; check with ls that it is gone."
+  },
+  "t09": {
+   "text": "Try to delete the non-empty folder with `rmdir project`. Did it fail? Why?",
+   "hint": "rmdir only removes empty folders."
+  },
+  "t10": {
+   "text": "Delete the folder with its contents using `rm -r project`.",
+   "hint": "Look inside first with ls -R proje."
+  },
+  "t11": {
+   "text": "Run `rm folder1` on the folder without `-r` and read the error.",
+   "hint": "Expect 'Is a directory'."
+  },
+  "t12": {
+   "text": "Challenge: `mkdir -p ~/practice/final_project`, `touch report.txt` inside it, `ls -R final_project` one level up, then `rm -r final_project`.",
+   "hint": "To create the file, `cd ~/practice/final_project` first, then leave with `cd ..`."
+  },
+  "t13": {
+   "text": "As a normal user, try to create a folder in a system directory: `mkdir /etc/practice`. What happens?",
+   "hint": "Expect Permission denied; system directories are protected."
+  },
+  "t14": {
+   "text": "Debug: the folder `~/old_project` cannot be removed (`rmdir` fails). Remove it together with its contents.",
+   "hint": "It contains files; `rmdir` is not enough, you need `rm -r`."
+  },
+  "t15": {
+   "text": "Mini project: under `~/web` create the folders `css`, `js`, `img` with a single `mkdir -p` and the file `index.html` with `touch`.",
+   "hint": "Brace: `~/web/{css,js,img}`."
+  },
+  "t16": {
+   "text": "TICKET #2310 — Accounting expects `jan.txt`, `feb.txt`, `mar.txt` in `~/archive/2026/q1`. Build the structure.",
+   "hint": "`mkdir -p` for the folders, `touch` with brace for the files."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "What is true for a file deleted with `rm`?",
+   "options": [
+    "It goes to the trash",
+    "It is kept for 30 days",
+    "It cannot be recovered",
+    "It is only hidden"
+   ],
+   "explain": "The command line has no trash can; deletion is permanent."
+  },
+  "q2": {
+   "q": "What does `-p` do in `mkdir -p a/b/c`?",
+   "options": [
+    "Asks for a password",
+    "Also creates missing parent folders",
+    "Hides the folder",
+    "Makes the folder read-only"
+   ],
+   "explain": "-p (parents) builds the whole path at once and does not complain if the folder already exists."
+  },
+  "q3": {
+   "q": "What happens if you run `rmdir` on a non-empty folder?",
+   "options": [
+    "It fails and the folder stays",
+    "The folder is deleted with its contents",
+    "The folder is emptied",
+    "The folder is moved"
+   ],
+   "explain": "rmdir only removes empty folders. For non-empty ones use `rm -r`."
+  },
+  "q4": {
+   "q": "Which command is most commonly used to create an empty file?",
+   "options": [
+    "mkdir",
+    "rm",
+    "ls",
+    "touch"
+   ],
+   "explain": "`touch file` creates an empty file or updates its timestamp."
+  }
+ },
+ "summary": [
+  "`mkdir` creates folders, `mkdir -p` nested folders, `touch` empty files.",
+  "`touch {a,b,c}.txt` uses brace expansion to create several files.",
+  "`rmdir` removes only empty folders, `rm -r` non-empty ones; there is no trash.",
+  "Check with `ls` before and after every action."
+ ],
+ "glossary": [
+  {
+   "term": "directory / folder",
+   "meaning": "A structure that holds files; the same concept."
+  },
+  {
+   "term": "recursive",
+   "meaning": "An operation that includes subfolders; -r or -R."
+  },
+  {
+   "term": "brace expansion",
+   "meaning": "The shell turns patterns like {a,b,c} into several words."
+  },
+  {
+   "term": "timestamp",
+   "meaning": "The time a file was last modified."
+  }
+ ],
+ "vm": {
+  "intro": "On your VM, first create a safe practice folder; never try `rm -r` where real data lives.",
+  "tasks": {
+   "v01": {
+    "title": "Build a project tree",
+    "text": "Build a nested structure in the practice folder and paste the `ls -R` output.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/practice/project/{src,test}\ntouch ~/practice/project/src/main.c\nls -R ~/practice",
+      "expected": "/home/student/practice:\nproject\n\n/home/student/practice/project:\nsrc  test\n..."
+     }
+    ],
+    "differs": [
+     "The order of `ls -R` may differ; `src` and `test` must appear.",
+     "Empty folders are separated by a blank line in `ls -R` output."
+    ]
+   },
+   "v02": {
+    "title": "See the protection",
+    "text": "As a normal user try to create a folder in a system directory and paste the error.",
+    "blocks": [
+     {
+      "cmd": "mkdir /etc/practice",
+      "expected": "mkdir: cannot create directory ‘/etc/practice’: Permission denied"
+     }
+    ],
+    "differs": [
+     "On a localised system the message may be translated.",
+     "If the folder was created you are root; use a normal user and remove it with `sudo rmdir /etc/practice`."
+    ]
+   },
+   "v03": {
+    "title": "Clean up",
+    "text": "Look inside first, then delete the practice folder. If no errors, press \"Done\".",
+    "blocks": [
+     {
+      "cmd": "ls -R ~/practice\nrm -r ~/practice\nls ~/practice",
+      "expected": "ls: cannot access '/home/student/practice': No such file or directory"
+     }
+    ],
+    "differs": [
+     "If you see `rm: cannot remove ... Is a directory`, you forgot `-r`."
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,344 @@
+{
+ "id": "2.4",
+ "level": 2,
+ "setup": {
+  "dirs": [
+   "/home/student/lab",
+   "/home/student/lab/photos",
+   "/home/student/lab/inbox",
+   "/home/student/lab/wrong"
+  ],
+  "files": {
+   "/home/student/lab/draft.txt": "draft v1\n",
+   "/home/student/lab/todo.txt": "buy milk\n",
+   "/home/student/lab/photos/img1.jpg": "jpg1\n",
+   "/home/student/lab/photos/img2.jpg": "jpg2\n",
+   "/home/student/lab/inbox/mail1.txt": "mail one\n",
+   "/home/student/lab/inbox/mail2.txt": "mail two\n",
+   "/home/student/lab/wrong/report.txt": "important report\n"
+  }
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cwd": "~/lab"
+   },
+   "solution": [
+    "cd lab"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": [
+    {
+     "exists": "~/lab/draft_copy.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/lab/draft_copy.txt",
+      "draft v1"
+     ]
+    },
+    {
+     "exists": "~/lab/draft.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "cp draft.txt draft_copy.txt"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": [
+    {
+     "exists": "~/lab/tasks.txt",
+     "type": "f"
+    },
+    {
+     "absent": "~/lab/todo.txt"
+    }
+   ],
+   "solution": [
+    "mv todo.txt tasks.txt"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "exists": "~/lab/backup",
+    "type": "d"
+   },
+   "solution": [
+    "mkdir backup"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/backup/draft.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/draft.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "cp draft.txt backup/"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/backup/photos/img1.jpg",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/backup/photos/img2.jpg",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "cp -r photos backup/"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/backup/draft_old.txt",
+     "type": "f"
+    },
+    {
+     "absent": "~/lab/draft_copy.txt"
+    }
+   ],
+   "solution": [
+    "mv draft_copy.txt backup/draft_old.txt"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "cmd": "^cp photos backup$",
+    "ok": false
+   },
+   "solution": [
+    "cp photos backup"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^cat backup/draft\\.txt$",
+     "ok": true
+    },
+    {
+     "out": "draft v1",
+     "of": "^cat backup/draft\\.txt$"
+    }
+   ],
+   "solution": [
+    "cat backup/draft.txt"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "cmd": "^mv ghost\\.txt backup$",
+    "ok": false
+   },
+   "solution": [
+    "mv ghost.txt backup"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/inbox/report.txt",
+     "type": "f"
+    },
+    {
+     "absent": "~/lab/wrong/report.txt"
+    }
+   ],
+   "solution": [
+    "mv wrong/report.txt inbox/"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/archive/2026/jan.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/lab/archive/2026/jan.txt",
+      "mail one"
+     ]
+    },
+    {
+     "absent": "~/lab/inbox/mail1.txt"
+    }
+   ],
+   "solution": [
+    "mkdir -p archive/2026",
+    "mv inbox/mail1.txt archive/2026/jan.txt"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "exists": "~/lab/pictures/img1.jpg",
+     "type": "f"
+    },
+    {
+     "absent": "~/lab/photos"
+    },
+    {
+     "exists": "~/Documents/pictures/img2.jpg",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "mv photos pictures",
+    "cp -r pictures ~/Documents"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "exists": "~/lab/backup/inbox_2026/mail2.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/backup/inbox_2026/report.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/inbox/mail2.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "cp -r inbox backup/inbox_2026"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^cp -\\w*v\\w* tasks\\.txt tasks_v\\.txt$",
+     "ok": true
+    },
+    {
+     "exists": "~/lab/tasks_v.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "cp -v tasks.txt tasks_v.txt"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "predict",
+   "diff": 3,
+   "check": [
+    {
+     "cmd": "^cp tasks\\.txt draft\\.txt$",
+     "ok": true
+    },
+    {
+     "out": "buy milk",
+     "of": "^cat draft\\.txt$"
+    }
+   ],
+   "solution": [
+    "cp tasks.txt draft.txt",
+    "cat draft.txt"
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 2
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "(?=[\\s\\S]*copy\\.txt)(?=[\\s\\S]*original\\.txt)"
+  },
+  {
+   "id": "v02",
+   "expect": "(?=[\\s\\S]*project)(?=[\\s\\S]*project_backup)"
+  },
+  {
+   "id": "v03",
+   "expect": "(?=[\\s\\S]*renamed\\.txt)(?=[\\s\\S]*moved)"
+  },
+  {
+   "id": "v04",
+   "expect": "keep me"
+  },
+  {
+   "id": "v05",
+   "expect": null
+  }
+ ]
+}

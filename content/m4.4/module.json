@@ -1,0 +1,197 @@
+{
+ "id": "4.4",
+ "level": 4,
+ "setup": {
+  "dirs": [
+   "/home/student/lab",
+   "/home/student/lab/shared",
+   "/home/student/lab/locked",
+   "/home/student/lab/vault",
+   "/home/student/lab/data",
+   "/home/student/lab/data/sub"
+  ],
+  "files": {
+   "/home/student/lab/secret.txt": "top secret\n",
+   "/home/student/lab/script.sh": "echo hello\n",
+   "/home/student/lab/deploy.sh": "echo deploy\n",
+   "/home/student/lab/report.txt": "quarterly report\n",
+   "/home/student/lab/notes.txt": "my notes\n",
+   "/home/student/lab/team.txt": "team list\n",
+   "/home/student/lab/locked/old.txt": "old data\n",
+   "/home/student/lab/vault/data.txt": "vault data\n",
+   "/home/student/lab/data/a.txt": "file a\n",
+   "/home/student/lab/data/sub/b.txt": "file b\n"
+  },
+  "modes": [
+   ["/home/student/lab/secret.txt", "600"],
+   ["/home/student/lab/locked", "555"],
+   ["/home/student/lab/vault", "600"],
+   ["/home/student/lab/data/a.txt", "777"],
+   ["/home/student/lab/data/sub/b.txt", "777"],
+   ["/home/student/lab/data/sub", "777"],
+   ["/home/student/lab/data", "777"]
+  ],
+  "cwd": "/home/student/lab"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^ls -\\w*l", "ok": true},
+   "solution": ["ls -l"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"mode": ["~/lab/script.sh", "755"]},
+   "solution": ["chmod +x script.sh"]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^umask$", "ok": true},
+   "solution": ["umask"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"mode": ["~/lab/notes.txt", "640"]},
+   "solution": ["chmod 640 notes.txt"]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"mode": ["~/lab/shared", "770"]},
+   "solution": ["chmod g+w,o-rx shared"]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"owner": ["~/lab/team.txt", "alice"]},
+   "solution": ["sudo chown alice team.txt"]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"owner": ["~/lab/team.txt", "alice", "devs"]},
+   "solution": ["sudo chgrp devs team.txt"]
+  },
+  {
+   "id": "t08",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"cmd": "^umask 0?27$", "ok": true},
+    {"mode": ["~/lab/new.txt", "640"]}
+   ],
+   "solution": ["umask 027", "touch new.txt"]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^rm locked/old\\.txt$", "ok": false},
+   "solution": ["rm locked/old.txt"]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 3,
+   "check": [
+    {"cmd": "^umask 0?25$", "ok": true},
+    {"mode": ["~/lab/predict.txt", "642"]}
+   ],
+   "solution": ["umask 025", "touch predict.txt", "ls -l predict.txt"]
+  },
+  {
+   "id": "t11",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^\\./deploy\\.sh$", "ok": false},
+   "solution": ["./deploy.sh"]
+  },
+  {
+   "id": "t12",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"absent": "~/lab/locked/old.txt"},
+   "solution": ["chmod u+w locked", "rm locked/old.txt"]
+  },
+  {
+   "id": "t13",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"cmd": "^cat (\\./)?vault/data\\.txt$", "ok": true},
+   "solution": ["chmod u+x vault", "cat vault/data.txt"]
+  },
+  {
+   "id": "t14",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"mode": ["~/lab/team", "770"]},
+    {"mode": ["~/lab/team/plan.txt", "660"]},
+    {"owner": ["~/lab/team", "student", "devs"]}
+   ],
+   "solution": [
+    "mkdir team",
+    "touch team/plan.txt",
+    "chmod 770 team",
+    "chmod 660 team/plan.txt",
+    "sudo chgrp devs team"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"mode": ["~/lab/data", "755"]},
+    {"mode": ["~/lab/data/sub", "755"]},
+    {"mode": ["~/lab/data/a.txt", "644"]},
+    {"mode": ["~/lab/data/sub/b.txt", "644"]}
+   ],
+   "solution": ["chmod -R u=rwX,go=rX data"]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"owner": ["~/lab/report.txt", "alice", "devs"]},
+    {"mode": ["~/lab/report.txt", "660"]}
+   ],
+   "solution": ["chmod 660 report.txt", "sudo chown alice:devs report.txt"]
+  },
+  {
+   "id": "t17",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"cmd": "^umask 0?02$", "ok": true},
+    {"mode": ["~/lab/shared/log.txt", "664"]}
+   ],
+   "solution": ["umask 002", "touch shared/log.txt"]
+  }
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "[-d][rwx-]{9}"},
+  {"id": "v02", "expect": "-rw-r-----"},
+  {"id": "v03", "expect": "Permission denied|Erişim engellendi|Zugriff verweigert|Keine Berechtigung"},
+  {"id": "v04", "expect": "(?=[\\s\\S]*-rw-r-----)(?=[\\s\\S]*drwxr-x---)"},
+  {"id": "v05", "expect": "root\\s+root"}
+ ]
+}

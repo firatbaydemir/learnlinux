@@ -1,0 +1,448 @@
+{
+ "title": "Archiving and compression",
+ "lead": "Bundle files with tar, gzip and zip, compress them, restore them safely and verify your backups.",
+ "objectives": [
+  "You explain the difference between archiving (tar: bundling) and compression (gzip, bzip2, xz).",
+  "You create archives with `tar -czf`, list them with `tar -tf` and extract into a new directory with `tar -xzf -C`.",
+  "You know the risks of tar bombs and overwriting, and always list before extracting.",
+  "You use `gzip -k` and `zip`/`unzip` and compare compression ratios.",
+  "You make a dated backup and verify it with `sha256sum`."
+ ],
+ "sections": [
+  {
+   "id": "concept",
+   "title": "Archiving and compression are different things",
+   "body": [
+    "**Archiving** means **bundling** many files and directories, with their paths and permissions, into **one** file; the size does not shrink. `tar` (tape archive) does this. **Compression** shrinks a single file: `gzip` (fast, common), `bzip2` (smaller, slower), `xz` (smallest, slowest).",
+    "In practice you use both: `tar` bundles, then gzip compresses. The result is a `.tar.gz` or `.tgz` file. `tar` does both in one command with `-z` (gzip), `-j` (bzip2) or `-J` (xz).",
+    "Important detail: `gzip notes.txt` **deletes** the original file and leaves only the `.gz` file. Use `-k` (keep) to preserve the original."
+   ],
+   "commands": [
+    {
+     "cmd": "gzip -k",
+     "what": "Compresses a file and keeps the original (adds `.gz`).",
+     "where": "For large logs or text files.",
+     "why": "Without `-k` the original is deleted; with `-k` you can experiment safely.",
+     "example": "gzip -k logs/app.log",
+     "nosim": true
+    },
+    {
+     "cmd": "gunzip",
+     "what": "Decompresses a `.gz` file and deletes the `.gz` file (same as `gzip -d`).",
+     "where": "When you restore a single compressed file.",
+     "why": "`gunzip -k` keeps the `.gz` as a safety copy.",
+     "example": "gunzip logs/app.log.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "zcat",
+     "what": "Prints the content of a compressed file without decompressing it on disk.",
+     "where": "When reading old compressed logs or searching them with `grep`.",
+     "why": "No disk space or extra time spent on unpacking.",
+     "example": "zcat logs/app.log.gz | head",
+     "nosim": true
+    }
+   ],
+   "tip": "Compare sizes with `ls -lh`. Text and logs compress very well; already compressed JPG, MP4 or ZIP files barely shrink.",
+   "warn": "`gzip notes.txt` deletes the original. Back up data that exists only once first, or use `-k`."
+  },
+  {
+   "id": "tar",
+   "title": "tar: create, list, extract",
+   "body": [
+    "`tar` options can be combined in one word: **c** (create), **x** (extract), **t** (list), **v** (verbose), **f** (file, the archive name; **always the last letter**, the name follows immediately), **z/j/J** (gzip/bzip2/xz).",
+    "Always add **relative paths** to an archive (`project`, not `/home/student/project`). GNU tar strips a leading `/` and warns, so extracting cannot overwrite system files.",
+    "`-C directory` makes tar change into that directory first: when extracting it is the destination, when creating it is the root of the source. The target directory must already exist."
+   ],
+   "commands": [
+    {
+     "cmd": "tar -czf",
+     "what": "Bundles a directory into one gzip-compressed archive.",
+     "where": "When making backups and before sending a project.",
+     "why": "One file is much easier to copy, transfer and store.",
+     "example": "tar -czf backups/project.tar.gz project",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -tf",
+     "what": "Lists the paths inside the archive without extracting (`-z` not needed, tar detects the type).",
+     "where": "Before extracting, to see the content.",
+     "why": "Prevents tar bombs and overwrite surprises.",
+     "example": "tar -tf backups/project.tar.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xzf -C",
+     "what": "Extracts the archive into the given (existing) directory.",
+     "where": "When restoring, to keep the current directory clean.",
+     "why": "Always extract into a new, empty directory, then check.",
+     "example": "tar -xzf backups/project.tar.gz -C restore",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xzf ... member",
+     "what": "Extracts only the named file or directory from the archive.",
+     "where": "When rescuing a single file from a backup.",
+     "why": "You do not extract everything or overwrite current files. The path must be written as in the `tar -tf` output.",
+     "example": "tar -xzf backups/project.tar.gz -C restore project/notes.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "tar --exclude",
+     "what": "Leaves files matching the pattern out of the archive.",
+     "where": "To keep logs, temporary files or `.git` out of a backup.",
+     "why": "The backup gets smaller and faster. Put `--exclude` before the path to archive.",
+     "example": "tar -czf backups/lab-nologs.tar.gz --exclude='*.log' .",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -cJf",
+     "what": "Creates an archive with xz compression, the strongest level (`-j` is for bzip2).",
+     "where": "For archives that are rarely used and kept long.",
+     "why": "Smaller file, but slower and more CPU load.",
+     "example": "tar -cJf backups/project.tar.xz project",
+     "nosim": true
+    }
+   ],
+   "tip": "Mnemonic: **c**reate, e**x**tract, lis**t**; then `f` and the file name. tar detects the compression type itself when extracting, so `tar -xf` is often enough.",
+   "warn": "The archive name must directly follow `f`. With `tar -cfz backup.tgz project`, `z` is taken as the archive name and the file ends up wrongly named."
+  },
+  {
+   "id": "safe",
+   "title": "Extracting safely: tar bombs and overwriting",
+   "body": [
+    "Some archives have no top-level directory; extracting dumps hundreds of files straight into your current directory (a **tar bomb**). Cleaning up is painful because you cannot tell which files came from the archive. Solution: list first with `tar -tf` (or `tar -tvf`), then extract into a new, empty directory.",
+    "`tar -x` **silently overwrites** existing files with the same name. Never extract directly into your working directory.",
+    "Permissions and owners: `tar` stores permissions in the archive. As **root**, owners and permissions are restored faithfully; as a normal user the `umask` applies. Use `-p` to explicitly preserve permissions. Restoring files owned by another user requires `sudo`."
+   ],
+   "commands": [
+    {
+     "cmd": "tar -tvf",
+     "what": "Lists the archive verbosely: permissions, owner, size, date and path.",
+     "where": "Before extracting, to check permissions and whether there is a top-level directory.",
+     "why": "You spot tar bombs and absolute paths in advance.",
+     "example": "tar -tvf backups/project.tar.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xpf",
+     "what": "Extracts the archive and preserves file permissions.",
+     "where": "For backups where permissions matter.",
+     "why": "Stops the `umask` from altering permissions.",
+     "example": "tar -xpf backups/project.tar.gz -C restore",
+     "nosim": true
+    },
+    {
+     "cmd": "sudo tar -xpf",
+     "what": "Extracts as root; owner and group are restored too.",
+     "where": "For system backups or files belonging to other users.",
+     "why": "Ownership is kept, but root also magnifies mistakes.",
+     "example": "sudo tar -xpf backups/project.tar.gz -C restore",
+     "nosim": true
+    }
+   ],
+   "tip": "Habit: look with `tar -tf backup.tar.gz | head`, run `mkdir restore`, then `tar -xzf backup.tar.gz -C restore`.",
+   "danger": "Never extract an archive you do not trust as root, least of all with target `/` (`-C /`). Members with absolute paths or `..` can overwrite system files. Snapshot first, list first."
+  },
+  {
+   "id": "zip",
+   "title": "zip and unzip",
+   "body": [
+    "`zip` bundles and compresses at once and is compatible with Windows/macOS; ideal for exchanging files. Directories need `-r` (recursive). Install with `sudo apt install zip unzip` on Ubuntu or `sudo dnf install zip unzip` on Rocky/Alma.",
+    "Difference from `.tar.gz`: zip compresses each file separately, so extracting single files is fast; but it preserves Linux permissions and owners less reliably than `tar`. For Linux backups prefer `tar`."
+   ],
+   "commands": [
+    {
+     "cmd": "zip -r",
+     "what": "Adds a directory with its subdirectories to a zip archive.",
+     "where": "When sending files to Windows/macOS users.",
+     "why": "Opens everywhere; without `-r` the directory content is not added.",
+     "example": "zip -r backups/project.zip project",
+     "nosim": true
+    },
+    {
+     "cmd": "unzip -l",
+     "what": "Lists the content of a zip archive without extracting.",
+     "where": "For checking before extracting.",
+     "why": "The same safety habit as `tar -tf`.",
+     "example": "unzip -l backups/project.zip",
+     "nosim": true
+    },
+    {
+     "cmd": "unzip -d",
+     "what": "Extracts the zip archive into the given directory (created if needed).",
+     "where": "When restoring.",
+     "why": "You do not scatter files into the current directory.",
+     "example": "unzip backups/project.zip -d restore",
+     "nosim": true
+    }
+   ]
+  },
+  {
+   "id": "backup",
+   "title": "A simple backup and verification",
+   "body": [
+    "A simple backup: a name with the date, one command to bundle, plus a checksum. `date +%F` prints today as `2026-11-12`, so each backup gets its own name and never overwrites an older one. `$(...)` inside the command runs first and its output becomes part of the name.",
+    "`sha256sum` produces a file's fingerprint. If you check the backup with `sha256sum -c` after copying it, you know it is intact. A backup only counts once a copy lives **on another disk or machine**; also try a restore once.",
+    "Automatic backups use a scheduler (`cron` or a systemd timer). That is a topic for another module; here we run the command by hand."
+   ],
+   "commands": [
+    {
+     "cmd": "sha256sum",
+     "what": "Prints the SHA-256 checksum of a file.",
+     "where": "When verifying backups or downloaded files.",
+     "why": "Even one changed bit changes the sum, so corruption shows up.",
+     "example": "sha256sum backups/project.tar.gz > backups/SHA256SUMS",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum -c",
+     "what": "Compares stored sums with the files; prints `OK` or `FAILED`.",
+     "where": "After copying a backup or before restoring it.",
+     "why": "You find a broken backup right away, not in a crisis.",
+     "example": "sha256sum -c backups/SHA256SUMS",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -czf ... $(date +%F)",
+     "what": "Creates a backup archive with today's date in its name.",
+     "where": "For regular, manually made backups.",
+     "why": "Old backups are not overwritten and versions stay distinguishable.",
+     "example": "tar -czf backups/project-$(date +%F).tar.gz project",
+     "nosim": true
+    },
+    {
+     "cmd": "date +%F",
+     "what": "Prints today's date as `2026-11-12`.",
+     "where": "For date stamps in file names.",
+     "why": "Produces names that sort by date.",
+     "example": "date +%F"
+    }
+   ],
+   "tip": "The 3-2-1 rule: 3 copies, 2 different media, 1 off-site."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "You are in the `lab` directory. Look at the project tree to archive with `ls -R project`.",
+   "hint": "-R is uppercase; it lists subdirectories too."
+  },
+  "t02": {
+   "text": "Create the `backups` directory for the backups: `mkdir backups`.",
+   "hint": "Create it inside `lab`."
+  },
+  "t03": {
+   "text": "Bundle `project` with gzip into the archive `backups/project.tar.gz` (`tar -czf ...`). The simulator does not run `tar`; the command's correctness is checked.",
+   "hint": "Order: `tar -czf <archive> <source>`; the archive name follows `f`."
+  },
+  "t04": {
+   "text": "List the archive's content without extracting: `tar -tzf backups/project.tar.gz`.",
+   "hint": "`t` = list. `-tf` is accepted too."
+  },
+  "t05": {
+   "text": "Create the `restore` directory, then extract the archive there with `-C`: `tar -xzf backups/project.tar.gz -C restore`.",
+   "hint": "`mkdir restore` first; the `-C` target must exist."
+  },
+  "t06": {
+   "text": "Compress `logs/app.log` and keep the original: `gzip -k logs/app.log`.",
+   "hint": "`-k` = keep. Without it the original is deleted."
+  },
+  "t07": {
+   "text": "Extract only `project/notes.txt` from the archive into `restore`.",
+   "hint": "The member name goes at the end of the command, as shown by `tar -tf`: `project/notes.txt`."
+  },
+  "t08": {
+   "text": "Predict: what total line count does `wc -l logs/*.log` show? Guess first, then run it.",
+   "hint": "Three files: `app.log`, `web.log`, `db.log`; the last line is `total`."
+  },
+  "t09": {
+   "text": "Predict: which two paths does `find project -name '*.c' | sort` print? Run it to verify.",
+   "hint": "The paths start with `project/src/...` and are sorted alphabetically."
+  },
+  "t10": {
+   "text": "Bundle the whole `lab` directory without the `.log` files into `backups/lab-nologs.tar.gz` (`--exclude='*.log'`).",
+   "hint": "Put the pattern in quotes and before the source path (`.`)."
+  },
+  "t11": {
+   "text": "Make a backup of `project` with today's date in the name: `backups/project-$(date +%F).tar.gz`.",
+   "hint": "`$(date +%F)` is command substitution; you can use it inside the name."
+  },
+  "t12": {
+   "text": "Debug: a tar bomb dumped `bomb1.txt`, `bomb2.txt`, `bomb3.txt` into `lab`. Create a directory `cleanup` and move all three there.",
+   "hint": "`mkdir cleanup`, then `mv bomb1.txt bomb2.txt bomb3.txt cleanup/`."
+  },
+  "t13": {
+   "text": "Mini project: create `staging`, copy the `project` tree into it with `cp -r`, check with `ls -R staging`, then bundle `staging` as `staging.tar.gz`.",
+   "hint": "Steps: `mkdir staging`, `cp -r project staging/`, `ls -R staging`, `tar -czf staging.tar.gz staging`."
+  },
+  "t14": {
+   "text": "Challenge: add `project` recursively to `backups/project.zip` (`zip -r`), list it with `unzip -l`, then create its sum with `sha256sum`. All three in this order.",
+   "hint": "`zip -r backups/project.zip project`, `unzip -l backups/project.zip`, `sha256sum backups/project.zip`."
+  },
+  "t15": {
+   "text": "TICKET #3801 — The auditors want compressed copies of the logs, but the originals in `logs` must stay. Create `audit`, copy `logs/*.log` into it and compress the copies with `gzip`.",
+   "hint": "`mkdir audit`, `cp logs/*.log audit/`, `gzip audit/*.log`; `gzip` only deletes the copies."
+  },
+  "t16": {
+   "text": "Predict: what does `ls -1 project/src | wc -l` print? Run it to verify.",
+   "hint": "`src` contains two `.c` files."
+  }
+ },
+ "vm": {
+  "intro": "Run the commands below on your own VM (Ubuntu/Rocky/Alma). Everything stays in `~/lab`; your real data is untouched. No step is destructive, but archives overwrite files of the same name: do not experiment outside lab. Taking a snapshot before bigger experiments is a good habit.",
+  "tasks": {
+   "v01": {
+    "title": "Set up the test project",
+    "text": "Create a small project and a big log file under `~/lab`, then list the project files.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab/project/{src,docs}\ncd ~/lab\necho 'int main(void) { return 0; }' > project/src/main.c\necho 'Demo project' > project/docs/readme.txt\necho 'todo: backup' > project/notes.txt\nseq 1 200000 > big.log\nfind project -type f | sort",
+      "expected": "project/docs/readme.txt\nproject/notes.txt\nproject/src/main.c"
+     }
+    ],
+    "differs": [
+     "The order may differ; all three files showing up is enough.",
+     "If `seq` is missing (very rare), use `yes line | head -n 200000 > big.log`."
+    ]
+   },
+   "v02": {
+    "title": "Archive and list without extracting",
+    "text": "Pack `project` into `backup.tar.gz`, list its content without extracting and check the size.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ntar -czf backup.tar.gz project\ntar -tzf backup.tar.gz\nls -lh backup.tar.gz",
+      "expected": "project/\nproject/docs/\nproject/docs/readme.txt\nproject/notes.txt\nproject/src/\nproject/src/main.c\n-rw-r--r--. 1 student student 300 Nov 12 10:00 backup.tar.gz"
+     }
+    ],
+    "differs": [
+     "The order of the list may differ.",
+     "Size and date differ; what matters is that paths start with `project/`.",
+     "The warning `Removing leading '/'` appears with absolute paths; it should not appear here."
+    ]
+   },
+   "v03": {
+    "title": "Restore safely",
+    "text": "Extract the archive into a new directory, then extract only a single file.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nmkdir restore restore2\ntar -xzf backup.tar.gz -C restore\ntar -xzf backup.tar.gz -C restore2 project/notes.txt\nls -R restore restore2",
+      "expected": "restore:\nproject\n...\nrestore2:\nproject\n\nrestore2/project:\nnotes.txt"
+     }
+    ],
+    "differs": [
+     "If you see `Cannot open: No such file or directory`, the `-C` directory is missing; create it with `mkdir` first.",
+     "If tar says `Not found in archive`, write the path as shown by `tar -tf`."
+    ]
+   },
+   "v04": {
+    "title": "Compare compression ratios",
+    "text": "Compress `big.log` with gzip, bzip2 and xz, keeping the original. Compare the sizes.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ngzip -k big.log\nbzip2 -k big.log\nxz -k big.log\nls -l big.log*",
+      "expected": "-rw-r--r--. 1 student student 1228895 Nov 12 10:01 big.log\n-rw-r--r--. 1 student student  580000 Nov 12 10:01 big.log.bz2\n-rw-r--r--. 1 student student  480000 Nov 12 10:01 big.log.gz\n-rw-r--r--. 1 student student  400000 Nov 12 10:01 big.log.xz"
+     }
+    ],
+    "differs": [
+     "The numbers differ; usually `xz` < `bzip2` < `gzip` < original.",
+     "If you get `bzip2: command not found`, install it: Ubuntu `sudo apt install bzip2`, Rocky/Alma `sudo dnf install bzip2`.",
+     "If an old `gzip` does not know `-k`, make a copy first with `cp big.log big2.log`."
+    ]
+   },
+   "v05": {
+    "title": "Dated backup and checksum",
+    "text": "Make a dated backup, save its checksum and verify it. Optionally try zip.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ntar -czf backup-$(date +%F).tar.gz project\nsha256sum backup-*.tar.gz > SHA256SUMS\nsha256sum -c SHA256SUMS",
+      "expected": "backup-2026-11-12.tar.gz: OK"
+     },
+     {
+      "cmd": "# Optional (without zip: sudo apt install zip unzip or sudo dnf install zip unzip)\nzip -r project.zip project\nunzip -l project.zip",
+      "expected": "  adding: project/ (stored 0%)\n...\n---------\n  4 files"
+     }
+    ],
+    "differs": [
+     "If you see `FAILED`, you changed the archive after computing the sum; run `sha256sum` again.",
+     "On a German or Turkish system the output may be translated instead of `OK`.",
+     "If `backup-*.tar.gz` matches several files, you get one line for each."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Which command only lists an archive's content without extracting?",
+   "options": [
+    "`tar -xzf backup.tar.gz`",
+    "`tar -tf backup.tar.gz`",
+    "`tar -czf backup.tar.gz`",
+    "`gzip -d backup.tar.gz`"
+   ],
+   "explain": "`t` lists (list). `x` extracts, `c` creates; `gzip -d` decompresses."
+  },
+  "q2": {
+   "q": "What happens after `gzip notes.txt`?",
+   "options": [
+    "Both `notes.txt` and `notes.txt.gz` remain",
+    "A `.zip` file is created",
+    "`notes.txt.gz` is deleted",
+    "`notes.txt` is deleted and replaced by `notes.txt.gz`"
+   ],
+   "explain": "gzip replaces the original with the compressed file. Use `gzip -k` to keep it."
+  },
+  "q3": {
+   "q": "Why do you list an archive with `tar -tf` before extracting?",
+   "options": [
+    "To see tar bombs and files that would be overwritten beforehand",
+    "To make extraction faster",
+    "Because `tar -x` does not work without listing",
+    "To compress the archive"
+   ],
+   "explain": "Without a top-level directory the files scatter into the current directory, and existing files can be overwritten."
+  },
+  "q4": {
+   "q": "What does `-C restore` do in `tar -xzf backup.tar.gz -C restore`?",
+   "options": [
+    "Compresses the archive under the name `restore`",
+    "Excludes files named `restore`",
+    "Changes into `restore` before extracting and extracts there",
+    "Checks the archive's checksum"
+   ],
+   "explain": "`-C` (change directory) sets the target directory; it must exist beforehand."
+  }
+ },
+ "summary": [
+  "Archiving (`tar`) bundles, compression (`gzip`, `bzip2`, `xz`) shrinks; `.tar.gz` is the combination.",
+  "Create: `tar -czf backup.tar.gz project`; list: `tar -tf`; extract: `tar -xzf ... -C restore`.",
+  "List first, then extract into a new directory: protects against tar bombs and overwriting.",
+  "`gzip` deletes the original, `gzip -k` keeps it; zip is compatible with Windows/macOS.",
+  "Make dated backups, verify them with `sha256sum` and test a restore."
+ ],
+ "glossary": [
+  {
+   "term": "archive",
+   "meaning": "Many files and directories, with their paths, bundled into one file (`tar`)."
+  },
+  {
+   "term": "compression",
+   "meaning": "Reducing the size of data; `gzip`, `bzip2`, `xz`."
+  },
+  {
+   "term": "tarball",
+   "meaning": "An archive made with `tar`, usually `.tar.gz`."
+  },
+  {
+   "term": "tar bomb",
+   "meaning": "An archive without a top-level directory that scatters files into the current directory when extracted."
+  },
+  {
+   "term": "relative and absolute path",
+   "meaning": "Absolute paths start with `/`; relative paths are preferred inside archives."
+  },
+  {
+   "term": "checksum",
+   "meaning": "A file's fingerprint (`sha256sum`); makes corruption visible."
+  }
+ ]
+}

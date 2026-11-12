@@ -1,0 +1,428 @@
+{
+ "title": "Ressourcenüberwachung",
+ "lead": "Lies CPU, Last, Speicher und Festplatte mit uptime, free, df, top und Co. und finde heraus, was das System bremst.",
+ "objectives": [
+  "Du liest den Load Average relativ zur Anzahl der CPU-Kerne (nproc).",
+  "Du unterscheidest freien (free) von verfügbarem (available) Speicher und verstehst buff/cache.",
+  "Du prüfst die Festplattenbelegung mit df und du und findest große Ordner.",
+  "Du findest mit top, htop und ps die größten CPU- und Speicherverbraucher."
+ ],
+ "sections": [
+  {
+   "id": "load",
+   "title": "Last und CPU: uptime, nproc, lscpu",
+   "body": [
+    "Wenn ein Server langsam wirkt, schau zuerst auf den **Load Average**. `uptime` zeigt drei Zahlen: die durchschnittliche Last der letzten **1, 5 und 15 Minuten**. Dieselben Werte stehen in `/proc/loadavg`.",
+    "Eine Lastzahl allein sagt nichts. Lies sie **relativ zur Anzahl der Kerne** (`nproc`). Auf einer 4-Kern-Maschine bedeutet Last 4.0 volle Auslastung, 8.0 bedeutet, dass Prozesse in der Schlange warten (Sättigung). Faustregel: Last unter der Kernzahl ist gut, darüber ist es Überlast.",
+    "Vergleiche die drei Werte: 1 Min höher als 15 Min heißt, die Last steigt gerade; niedriger heißt, sie sinkt."
+   ],
+   "commands": [
+    {
+     "cmd": "uptime",
+     "what": "Zeigt Uhrzeit, Laufzeit des Systems, angemeldete Benutzer und den Load Average (1, 5, 15 Min).",
+     "where": "Als allererster Blick auf einen langsamen Server.",
+     "why": "Eine Zeile verrät, ob die Maschine ausgelastet ist und in welche Richtung es geht.",
+     "example": "uptime"
+    },
+    {
+     "cmd": "nproc",
+     "what": "Gibt die Anzahl der verfügbaren CPU-Kerne (Threads) aus.",
+     "where": "Zusammen mit uptime, um die Last zu bewerten.",
+     "why": "Last 4.0 ist bei 8 Kernen in Ordnung, bei 2 Kernen gesättigt.",
+     "example": "nproc",
+     "nosim": true
+    },
+    {
+     "cmd": "lscpu",
+     "what": "Zeigt CPU-Details: Modell, Sockel, Kerne, Threads, MHz.",
+     "where": "Wenn du wissen willst, welche Hardware die VM oder der Server wirklich hat.",
+     "why": "Bestätigt die Kernzahl und ob die CPU virtuell ist.",
+     "example": "lscpu",
+     "nosim": true
+    },
+    {
+     "cmd": "cat /proc/loadavg",
+     "what": "Rohdaten zur Last: drei Lastwerte, laufende/gesamte Tasks und die letzte PID.",
+     "where": "In Skripten oder wenn uptime nicht installiert ist.",
+     "why": "Das ist die Quelle, aus der uptime und top lesen.",
+     "example": "cat /proc/loadavg",
+     "nosim": true
+    }
+   ],
+   "tip": "Schnelltest: Teile den ersten Lastwert durch `nproc`; liegt das Ergebnis über 1, ist die CPU gesättigt."
+  },
+  {
+   "id": "memory",
+   "title": "Speicher: free, /proc/meminfo, vmstat",
+   "body": [
+    "`free -h` zeigt RAM und Swap in lesbaren Einheiten. Erschrick nicht über einen kleinen **free**-Wert: Linux nutzt ungenutzten RAM als Cache (**buff/cache**) und gibt ihn zurück, sobald Programme ihn brauchen.",
+    "Die wichtige Spalte ist **available**: eine Schätzung, wie viel Speicher neue Programme ohne Swapping bekommen. Wenig *available* plus starke Swap-Nutzung bedeutet echten Speichermangel. Details stehen in `/proc/meminfo` (`MemTotal`, `MemFree`, `MemAvailable`).",
+    "`vmstat` zeigt Speicher, Swap, I/O und CPU in einer Tabelle. Bleiben `si`/`so` (Swap ein/aus) lange über null und ist `wa` (Warten auf I/O) hoch, sind das Warnzeichen."
+   ],
+   "commands": [
+    {
+     "cmd": "free -h",
+     "what": "Zeigt total, used, free, shared, buff/cache und available für RAM und Swap in lesbaren Einheiten.",
+     "where": "Wenn das System langsam ist und du vollen RAM vermutest.",
+     "why": "Der Blick auf available statt free verhindert Fehlalarme.",
+     "example": "free -h"
+    },
+    {
+     "cmd": "cat /proc/meminfo",
+     "what": "Gibt die detaillierten Speicherstatistiken des Kernels aus.",
+     "where": "Für Skripte oder wenn du genaue Werte wie MemAvailable oder SwapFree brauchst.",
+     "why": "Das ist die Quelle hinter free.",
+     "example": "grep MemAvailable /proc/meminfo",
+     "nosim": true
+    },
+    {
+     "cmd": "vmstat 1 5",
+     "what": "Gibt jede Sekunde eine Zeile mit CPU, Speicher, Swap und I/O aus, insgesamt fünfmal.",
+     "where": "Um einen Trend über einige Sekunden statt einer Momentaufnahme zu sehen.",
+     "why": "Zeigt Swapping (si/so) und I/O-Wartezeit (wa), die top auf den ersten Blick verbirgt.",
+     "example": "vmstat 1 5",
+     "nosim": true
+    }
+   ],
+   "tip": "Ignoriere die erste Zeile von `vmstat`; sie zeigt Durchschnittswerte seit dem Start. Die folgenden Zeilen sind live."
+  },
+  {
+   "id": "disk",
+   "title": "Festplatte: df, du, iostat",
+   "body": [
+    "Eine volle Platte verursacht seltsame Fehler: Dienste stürzen ab, Logs können nicht geschrieben werden. `df -h` zeigt die Belegung pro Dateisystem, `du` zeigt, welcher Ordner den Platz belegt.",
+    "Ablauf: `df -h` findet das volle Dateisystem, dann finden `du -sh /var/*` oder `du -h /var | sort -h | tail` die großen Ordner. `sort -h` versteht Größen wie 4K, 12M, 3G.",
+    "`iostat` kommt aus dem Paket **sysstat** und zeigt die Plattenaktivität. Hohe `%util` und `await` zeigen, dass die Platte der Engpass ist."
+   ],
+   "commands": [
+    {
+     "cmd": "df -h",
+     "what": "Zeigt Größe, belegt, verfügbar und Prozent pro eingehängtem Dateisystem.",
+     "where": "Als erste Prüfung bei 'No space left on device'.",
+     "why": "Du siehst, welcher Mountpunkt fast voll ist (Use%).",
+     "example": "df -h"
+    },
+    {
+     "cmd": "du -sh",
+     "what": "Zeigt die Gesamtgröße eines Ordners (-s Summe, -h lesbar).",
+     "where": "Um einen einzelnen Ordner wie dein Home oder /var/log zu messen.",
+     "why": "Beantwortet 'Wie groß ist das?' in einer Zeile.",
+     "example": "du -sh ~/Documents",
+     "nosim": true
+    },
+    {
+     "cmd": "du -h | sort -h",
+     "what": "Listet die Größen aller Unterordner sortiert von klein nach groß.",
+     "where": "Um die größten Ordner zu finden; für die Top fünf hänge `| tail -n 5` an.",
+     "why": "Findet den Platzfresser schnell.",
+     "example": "du -h /var/log | sort -h | tail -n 5",
+     "nosim": true
+    },
+    {
+     "cmd": "iostat -x 1 3",
+     "what": "Erweiterte Plattenstatistik jede Sekunde, dreimal (braucht das Paket sysstat).",
+     "where": "Wenn das System langsam ist, CPU und RAM aber unauffällig sind.",
+     "why": "Zeigt, ob die Platte gesättigt ist (%util, await).",
+     "example": "iostat -x 1 3",
+     "nosim": true
+    }
+   ],
+   "tip": "sysstat installieren: Ubuntu/Debian `sudo apt install sysstat`, Rocky/Alma `sudo dnf install sysstat`.",
+   "warn": "`du` auf `/` kann Minuten dauern und die Platte belasten. Beschränke es auf einen Ordner, zum Beispiel `du -h /var | sort -h | tail`."
+  },
+  {
+   "id": "procs",
+   "title": "Prozesse: top, htop, ps",
+   "body": [
+    "`top` ist der Live-Task-Manager des Terminals. Oben stehen Last, Tasks, CPU und Speicher, darunter die Prozessliste. In `top`: `P` sortiert nach CPU, `M` nach Speicher, `q` beendet.",
+    "`htop` ist die bunte, einfachere Variante. Sie ist nicht standardmäßig installiert. Ubuntu/Debian: `sudo apt install htop`. Auf Rocky/Alma liegt sie im Repository **EPEL**: erst `sudo dnf install epel-release`, dann `sudo dnf install htop`.",
+    "Für Skripte und Logs nutze den Batch-Modus: `top -b -n 1` gibt eine Momentaufnahme aus und beendet sich. `ps aux --sort=-%mem | head` listet die größten Speicherverbraucher, `--sort=-%cpu` die größten CPU-Verbraucher (das Minus heißt absteigend)."
+   ],
+   "commands": [
+    {
+     "cmd": "top",
+     "what": "Live-Ansicht von Last, CPU, Speicher und Prozessen; Aktualisierung alle 3 Sekunden.",
+     "where": "Um jetzt zu sehen, wer Ressourcen verbraucht.",
+     "why": "Findet die PID des Problemprozesses.",
+     "example": "top",
+     "nosim": true
+    },
+    {
+     "cmd": "top -b -n 1",
+     "what": "Batch-Modus: gibt eine Momentaufnahme aus und beendet sich.",
+     "where": "In Skripten, Tickets und beim Weiterleiten an head oder grep.",
+     "why": "Du kannst die Ausgabe speichern oder filtern, zum Beispiel `top -b -n 1 | head -n 15`.",
+     "example": "top -b -n 1 | head -n 15",
+     "nosim": true
+    },
+    {
+     "cmd": "htop",
+     "what": "Interaktiver Prozessbetrachter mit Farben, Balken und Mausunterstützung.",
+     "where": "Im Alltag auf Servern und VMs.",
+     "why": "Besser lesbar und leichter zu sortieren als top.",
+     "example": "htop",
+     "nosim": true
+    },
+    {
+     "cmd": "ps aux --sort=-%mem | head",
+     "what": "Listet Prozesse nach Speicherverbrauch sortiert, höchster zuerst, die ersten 10 Zeilen.",
+     "where": "Wenn der RAM fast voll ist und du den Verursacher suchst.",
+     "why": "Zeigt Benutzer, PID, %CPU, %MEM und Befehl in einer kopierbaren Liste.",
+     "example": "ps aux --sort=-%mem | head",
+     "nosim": true
+    },
+    {
+     "cmd": "ps aux --sort=-%cpu | head",
+     "what": "Listet Prozesse nach CPU-Verbrauch sortiert, höchster zuerst.",
+     "where": "Wenn die Last hoch ist.",
+     "why": "Findet den CPU-Fresser ohne interaktive Anzeige.",
+     "example": "ps aux --sort=-%cpu | head",
+     "nosim": true
+    }
+   ],
+   "tip": "In `top` zeigt `1` jeden Kern einzeln und `c` die vollständige Befehlszeile."
+  },
+  {
+   "id": "triage",
+   "title": "Triage: eine feste Reihenfolge",
+   "body": [
+    "Steht im Ticket 'Server ist langsam', gehe immer in derselben Reihenfolge vor: **1.** `uptime` und `nproc` (Last gegen Kerne), **2.** `free -h` (available Speicher, Swap), **3.** `df -h` (volle Platte), **4.** `top` oder `ps aux --sort=-%cpu | head` (wer ist der Verursacher), **5.** `vmstat 1 5` / `iostat -x` (Swap- oder Platten-Engpass).",
+    "Entscheide: Hohe Last und hohe `us`-CPU ist ein CPU-Problem. Hohe Last mit niedriger CPU, aber hohem `wa` ist ein Platten- oder Netzwerk-I/O-Problem. Wenig available Speicher und Swap-Aktivität ist ein RAM-Problem.",
+    "Zum Üben auf deiner VM brauchst du Last. Nutze ein Zeitlimit: `timeout 30 yes > /dev/null &` startet einen CPU-Fresser, der nach 30 Sekunden endet. Siehe den VM-Abschnitt."
+   ],
+   "tip": "Notiere die Zahlen, bevor du etwas änderst. Eine Ticket-Antwort wie 'Last 4.5 auf 2 Kernen, python3 nutzt 85% CPU' ist mehr wert als 'es ist langsam'.",
+   "warn": "Lastgeneratoren wie `yes > /dev/null &` oder `stress-ng` laufen, bis sie gestoppt werden. Nutze immer `timeout` und räume danach mit `pkill yes` auf.",
+   "danger": "Starte niemals einen Lastgenerator und beende keine Prozesse auf einem Produktivserver. Übe nur auf deiner eigenen VM und mache vorher einen Snapshot."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Zeige Laufzeit und Load Average mit `uptime`.",
+   "hint": "Die drei Zahlen nach 'load average:' sind 1, 5 und 15 Minuten."
+  },
+  "t02": {
+   "text": "Zeige den Speicher in lesbaren Einheiten mit `free -h`. Finde die Spalte `available`.",
+   "hint": "-h bedeutet human-readable."
+  },
+  "t03": {
+   "text": "Zeige die Belegung aller Dateisysteme mit `df -h`.",
+   "hint": "Schau auf die Spalte Use%."
+  },
+  "t04": {
+   "text": "Finde mit `which free` heraus, wo das Programm `free` liegt.",
+   "hint": "Meist /usr/bin/free."
+  },
+  "t05": {
+   "text": "Die Datei `~/lab/loadavg.txt` ist eine Kopie von `/proc/loadavg`. Zeige sie mit `cat ~/lab/loadavg.txt`.",
+   "hint": "Die ersten drei Zahlen sind die Last der letzten 1, 5 und 15 Minuten."
+  },
+  "t06": {
+   "text": "Die Kernzahl der Maschine steht in `~/lab/cores.txt`. Lies sie mit `cat ~/lab/cores.txt`, vergleiche sie mit der 1-Minuten-Last 4.52 und schreibe dein Urteil (`overloaded` oder `ok`) mit `echo` in `~/lab/load_verdict.txt`.",
+   "hint": "Last 4.52 auf 2 Kernen liegt über der Kernzahl: `echo overloaded > ~/lab/load_verdict.txt`."
+  },
+  "t07": {
+   "text": "Finde in `~/lab/meminfo.txt` die Zeile `MemAvailable` mit `grep MemAvailable ~/lab/meminfo.txt`.",
+   "hint": "Wichtig ist MemAvailable, nicht MemFree."
+  },
+  "t08": {
+   "text": "Zeige in `~/lab/top_snapshot.txt` die CPU-Zeile mit `grep Cpu ~/lab/top_snapshot.txt`.",
+   "hint": "`us` ist User-Zeit, `wa` I/O-Wartezeit, `id` Leerlauf."
+  },
+  "t09": {
+   "text": "Vorhersage: Welchen Wert zeigt `free -h | grep Mem` in der Spalte `available`? Erst überlegen, dann ausführen.",
+   "hint": "Schau auf die letzte Spalte der Zeile Mem."
+  },
+  "t10": {
+   "text": "Vorhersage: Was gibt `grep -c java ~/lab/ps_snapshot.txt` aus? Erst überlegen, dann ausführen.",
+   "hint": "-c zählt die passenden Zeilen."
+  },
+  "t11": {
+   "text": "Vorhersage: Was gibt `cut -d ' ' -f 1 ~/lab/loadavg.txt` aus? Erst überlegen, dann ausführen.",
+   "hint": "-d legt das Trennzeichen fest, -f 1 ist das erste Feld."
+  },
+  "t12": {
+   "text": "Finde die größten CPU-Verbraucher im Snapshot: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 3`. Welcher Prozess steht vorn?",
+   "hint": "-k3 ist die Spalte %CPU, -n numerisch, -r absteigend."
+  },
+  "t13": {
+   "text": "Mini: Speichere die 2 größten Speicherverbraucher aus `~/lab/ps_snapshot.txt` in `~/lab/top_mem.txt`. Sortiere mit `sort -k4 -nr` nach Spalte 4, nimm mit `head -n 2` zwei Zeilen und leite mit `>` um.",
+   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt`"
+  },
+  "t14": {
+   "text": "Debug: `~/lab/monitor_cmds.txt` listet falsche Befehle (`nprocs` gibt es nicht und `free -m` ist nicht lesbar). Schreibe die Datei mit `printf` neu, sodass sie je Zeile `cores: nproc`, `memory: free -h` und `disk: df -h` enthält.",
+   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt`"
+  },
+  "t15": {
+   "text": "Mini: `~/lab/du_report.txt` enthält Größen in KB. Speichere die 3 größten Einträge mit `sort -nr`, `head -n 3` und `>` in `~/lab/biggest.txt`.",
+   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt`"
+  },
+  "t16": {
+   "text": "Challenge: Baue `~/lab/report.txt` aus drei Teilen: der 1-Minuten-Last aus `~/lab/loadavg.txt` (nutze `cut`), der Zeile `MemAvailable` aus `~/lab/meminfo.txt` (nutze `grep`, mit `>>` anhängen) und deinem Urteil `overloaded` (nutze `echo`, anhängen).",
+   "hint": "Der erste Befehl nutzt `>`, die anderen `>>`, damit nichts überschrieben wird."
+  },
+  "t17": {
+   "text": "TICKET #5201 — Der Server linux-lab ist sehr langsam. In `~/lab/top_snapshot.txt` liegt die Ausgabe von `top -b -n 1`. Finde den Prozess mit der höchsten CPU-Last und schreibe seinen Namen und seinen Benutzer in `~/lab/culprit.txt`.",
+   "hint": "Sieh dir mit `head -n 9 ~/lab/top_snapshot.txt` die erste Prozesszeile an, dann `echo \"name user\" > ~/lab/culprit.txt`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Welcher Speicherwert sagt dir, wie viel RAM neue Programme wirklich bekommen können?",
+   "options": [
+    "free",
+    "shared",
+    "available",
+    "buff/cache"
+   ],
+   "explain": "free ist nur ungenutzter RAM. Linux nutzt RAM auch als Cache; available enthält den Teil, den es zurückgeben kann, und ist der richtige Wert."
+  },
+  "q2": {
+   "q": "Eine 4-Kern-Maschine zeigt 1-Minuten-Last 8.0. Was heißt das?",
+   "options": [
+    "Alles in Ordnung",
+    "Die CPU ist gesättigt: Prozesse warten in der Schlange",
+    "Die Platte ist voll",
+    "Das System ist gerade gestartet"
+   ],
+   "explain": "Last wird relativ zu den Kernen gelesen. Last 8 auf 4 Kernen heißt doppelt so viele lauffähige Tasks wie Kerne."
+  },
+  "q3": {
+   "q": "Wie installierst du htop auf Rocky Linux?",
+   "options": [
+    "sudo apt install htop",
+    "direkt sudo dnf install htop, geht immer",
+    "sudo yum remove htop",
+    "sudo dnf install epel-release, dann sudo dnf install htop"
+   ],
+   "explain": "In der RHEL-Familie liegt htop im Repository EPEL, aktiviere also zuerst EPEL. apt ist für Debian/Ubuntu."
+  },
+  "q4": {
+   "q": "Welcher Befehl listet die größten Speicherverbraucher?",
+   "options": [
+    "ps aux --sort=-%mem | head",
+    "df -h",
+    "uptime",
+    "nproc"
+   ],
+   "explain": "ps mit --sort=-%mem sortiert absteigend nach Speicher; head zeigt die ersten Zeilen."
+  }
+ },
+ "summary": [
+  "Lies den Load Average (1/5/15 Min) relativ zu `nproc`; Last über der Kernzahl bedeutet Sättigung.",
+  "`free -h`: Schau auf available, nicht auf free; buff/cache ist wiederverwendbar.",
+  "`df -h` findet das volle Dateisystem, `du -sh` und `du -h | sort -h` die großen Ordner.",
+  "`top`, `htop` (EPEL auf Rocky/Alma), `top -b -n 1` und `ps aux --sort=-%mem | head` finden den Verursacher.",
+  "`vmstat` und `iostat` (sysstat) zeigen Swap- und Platten-Engpässe.",
+  "Teste Last nur auf deiner eigenen VM, mit `timeout` und nach einem Snapshot."
+ ],
+ "glossary": [
+  {
+   "term": "Load Average",
+   "meaning": "Durchschnittliche Anzahl laufender oder auf CPU/I-O wartender Tasks über 1, 5 und 15 Minuten."
+  },
+  {
+   "term": "Sättigung",
+   "meaning": "Die Last ist höher als die Kernzahl; Arbeit wartet in einer Schlange."
+  },
+  {
+   "term": "buff/cache",
+   "meaning": "RAM für Datei-Caches; der Kernel gibt ihn bei Bedarf frei."
+  },
+  {
+   "term": "available",
+   "meaning": "Schätzung des Speichers, den neue Programme ohne Swapping nutzen können."
+  },
+  {
+   "term": "Swap",
+   "meaning": "Plattenplatz als Notfall-Erweiterung des RAM; langsam."
+  },
+  {
+   "term": "EPEL",
+   "meaning": "Extra Packages for Enterprise Linux: zusätzliches Repository für RHEL, Rocky und Alma."
+  },
+  {
+   "term": "I/O-Wartezeit (wa)",
+   "meaning": "Zeitanteil, in dem die CPU auf Platte oder Netzwerk wartet."
+  }
+ ],
+ "vm": {
+  "intro": "Führe das auf deiner eigenen VM aus (Ubuntu, Rocky, Alma oder WSL). Überwachungsbefehle sind harmlos; nur die letzte Aufgabe erzeugt Last. Mache davor einen Snapshot.",
+  "tasks": {
+   "v01": {
+    "title": "Last und Kerne",
+    "text": "Zeige den Load Average und die Kernzahl. Liegt die 1-Minuten-Last unter der Kernzahl? Füge die Ausgabe von `uptime` ein.",
+    "blocks": [
+     {
+      "cmd": "uptime\nnproc\ncat /proc/loadavg\nlscpu | head -n 12",
+      "expected": " 10:25:01 up 3 days,  2:30,  1 user,  load average: 0.08, 0.03, 0.01\n2\n0.08 0.03 0.01 1/245 12345"
+     }
+    ],
+    "differs": [
+     "Die Zahlen sind anders; nur das Format zählt.",
+     "Unter WSL zeigt `uptime` evtl. eine sehr kurze Laufzeit. Das ist normal."
+    ]
+   },
+   "v02": {
+    "title": "Speicher: free und available",
+    "text": "Sieh dir den Speicher an. Vergleiche die Spalten free und available. Füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "free -h\ngrep -E 'MemTotal|MemFree|MemAvailable' /proc/meminfo",
+      "expected": "              total        used        free      shared  buff/cache   available\nMem:          3.8Gi       612Mi       2.4Gi        12Mi       860Mi       3.0Gi\nSwap:         2.0Gi          0B       2.0Gi\nMemTotal:        3980000 kB\nMemFree:         2500000 kB\nMemAvailable:    3100000 kB"
+     }
+    ],
+    "differs": [
+     "Ohne Swap zeigt die Zeile Swap 0B; das ist in Ordnung.",
+     "Auf alten Systemen fehlt evtl. die Spalte `available`; nutze MemAvailable aus /proc/meminfo."
+    ]
+   },
+   "v03": {
+    "title": "Plattenbelegung",
+    "text": "Finde die Dateisystem-Belegung und die fünf größten Ordner unter `/var`. Füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "df -h\ndu -sh ~\nsudo du -h /var 2>/dev/null | sort -h | tail -n 5",
+      "expected": "Filesystem           Size  Used Avail Use% Mounted on\n/dev/mapper/rhel-root  20G  4.1G   16G  21% /\n..."
+     }
+    ],
+    "differs": [
+     "Die Gerätenamen unterscheiden sich (/dev/sda1, /dev/vda2, /dev/mapper/...).",
+     "Unter WSL siehst du zusätzliche Mounts wie /mnt/c; ignoriere sie."
+    ]
+   },
+   "v04": {
+    "title": "vmstat, iostat und htop",
+    "text": "Installiere die Werkzeuge und messe kurz. Debian/Ubuntu: `sudo apt install sysstat htop`. Rocky/Alma: htop braucht EPEL, also zuerst `sudo dnf install epel-release`.",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu / Debian\nsudo apt install -y sysstat htop\n# Rocky / Alma\nsudo dnf install -y epel-release\nsudo dnf install -y sysstat htop",
+      "expected": "Complete! (oder: Setting up htop ...)"
+     },
+     {
+      "cmd": "vmstat 1 5\niostat -x 1 3",
+      "expected": "procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----\n r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st"
+     }
+    ],
+    "differs": [
+     "Führe nur den Block für deine Distribution aus; der andere schlägt fehl.",
+     "Wird `iostat` nicht gefunden, ist sysstat nicht installiert.",
+     "Mit `q` verlässt du htop."
+    ]
+   },
+   "v05": {
+    "title": "Last erzeugen und den Verursacher finden",
+    "text": "Warnung: Diese Aufgabe belastet deine CPU. Mache vorher einen VM-Snapshot und führe sie nur auf deiner eigenen VM aus. `timeout` stoppt die Last nach 30 Sekunden. Starte sie, beobachte sie in top, finde sie mit ps und räume auf. Drücke \"Erledigt\", wenn `pgrep yes` am Ende nichts ausgibt.",
+    "blocks": [
+     {
+      "cmd": "timeout 30 yes > /dev/null &\nsleep 5\nuptime\ntop -b -n 1 | head -n 12\nps aux --sort=-%cpu | head -n 5\npkill yes\nsleep 1\npgrep yes",
+      "expected": "... der Prozess `yes` steht oben mit etwa 100 %CPU ...\n(der letzte Befehl gibt nichts aus)"
+     }
+    ],
+    "differs": [
+     "Bei mehreren Kernen nutzt ein einzelnes `yes` nur etwa 100% eines Kerns, die Last steigt langsam.",
+     "Gibt `pgrep yes` noch eine PID aus, führe `pkill yes` nochmals aus."
+    ]
+   }
+  }
+ }
+}

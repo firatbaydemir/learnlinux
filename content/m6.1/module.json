@@ -1,0 +1,353 @@
+{
+ "id": "6.1",
+ "level": 6,
+ "setup": {
+  "dirs": [
+   "/home/student/net"
+  ],
+  "files": {
+   "/home/student/net/ipa.txt": "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 state UNKNOWN\n    inet 127.0.0.1/8 scope host lo\n2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP\n    link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff\n    inet 192.168.1.42/24 brd 192.168.1.255 scope global eth0\n",
+   "/home/student/net/routes.txt": "default via 192.168.1.1 dev eth0 proto dhcp metric 100\n192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.42\n",
+   "/home/student/net/ss.txt": "Netid State Recv-Q Send-Q Local-Address:Port Peer-Address:Port Process\ntcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:* users:((\"sshd\",pid=812,fd=3))\ntcp LISTEN 0 511 0.0.0.0:80 0.0.0.0:* users:((\"nginx\",pid=905,fd=6))\ntcp LISTEN 0 244 127.0.0.1:5432 0.0.0.0:* users:((\"postgres\",pid=1021,fd=5))\ntcp LISTEN 0 4096 127.0.0.1:631 0.0.0.0:* users:((\"cupsd\",pid=744,fd=7))\ntcp LISTEN 0 5 0.0.0.0:8080 0.0.0.0:* users:((\"python3\",pid=2310,fd=3))\nudp UNCONN 0 0 127.0.0.53:53 0.0.0.0:* users:((\"resolved\",pid=601,fd=13))\nudp UNCONN 0 0 0.0.0.0:68 0.0.0.0:* users:((\"dhclient\",pid=688,fd=6))\n",
+   "/home/student/net/hosts": "127.0.0.1 localhost\n127.0.1.1 linux-lab\n192.168.1.1 router.lab\n",
+   "/home/student/net/resolv.conf": "search lab.local\nnameserver 192.168.1.300\n",
+   "/home/student/net/check_ports.sh": "grep LISTEN ~/net/ss.txt\n"
+  },
+  "modes": [
+   [
+    "/home/student/net/check_ports.sh",
+    "644"
+   ]
+  ]
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^cat \\S*routes\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "cat ~/net/routes.txt"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^grep\\s.*LISTEN.*ss\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "grep LISTEN ~/net/ss.txt"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^(cat|head|less|more) /etc/hosts$",
+    "ok": true
+   },
+   "solution": [
+    "cat /etc/hosts"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 1,
+   "check": {
+    "out": "default via 192\\.168\\.1\\.1",
+    "of": "^grep\\s.*default"
+   },
+   "solution": [
+    "grep default ~/net/routes.txt"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "equals": [
+     "~/net/gateway.txt",
+     "192.168.1.1\n"
+    ]
+   },
+   "solution": [
+    "grep default ~/net/routes.txt | cut -d' ' -f3 > ~/net/gateway.txt"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "contains": [
+     "~/net/listen_count.txt",
+     "^\\s*5\\s*$"
+    ]
+   },
+   "solution": [
+    "grep LISTEN ~/net/ss.txt | wc -l > ~/net/listen_count.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "~/net/exposed.txt",
+      "sshd"
+     ]
+    },
+    {
+     "contains": [
+      "~/net/exposed.txt",
+      "nginx"
+     ]
+    },
+    {
+     "contains": [
+      "~/net/exposed.txt",
+      "8080"
+     ]
+    },
+    {
+     "linesMin": [
+      "~/net/exposed.txt",
+      3
+     ]
+    }
+   ],
+   "solution": [
+    "grep LISTEN ~/net/ss.txt | grep -v 127.0.0.1 > ~/net/exposed.txt"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 1,
+   "check": {
+    "out": "python3",
+    "of": "^grep\\s.*8080"
+   },
+   "solution": [
+    "grep 8080 ~/net/ss.txt"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "192\\.168\\.1\\.42/24",
+    "of": "^grep\\s.*ipa\\.txt"
+   },
+   "solution": [
+    "grep 192 ~/net/ipa.txt"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "(^|\\n)24(\\n|$)",
+    "of": "cut\\s.*-f2"
+   },
+   "solution": [
+    "echo 192.168.1.42/24 | cut -d/ -f2"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "equals": [
+     "~/net/resolv.conf",
+     "nameserver 192.168.1.1\nnameserver 1.1.1.1\n"
+    ]
+   },
+   "solution": [
+    "printf 'nameserver 192.168.1.1\\nnameserver 1.1.1.1\\n' > ~/net/resolv.conf"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "debug",
+   "diff": 2,
+   "check": [
+    {
+     "mode": [
+      "~/net/check_ports.sh",
+      "755"
+     ]
+    },
+    {
+     "cmd": "check_ports\\.sh$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "chmod 755 ~/net/check_ports.sh",
+    "~/net/check_ports.sh"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "~/net/report.txt",
+      "linux-lab"
+     ]
+    },
+    {
+     "contains": [
+      "~/net/report.txt",
+      "192\\.168\\.1\\.1"
+     ]
+    },
+    {
+     "linesMin": [
+      "~/net/report.txt",
+      3
+     ]
+    }
+   ],
+   "solution": [
+    "hostname > ~/net/report.txt",
+    "grep default ~/net/routes.txt | cut -d' ' -f3 >> ~/net/report.txt",
+    "grep LISTEN ~/net/ss.txt | wc -l >> ~/net/report.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {
+    "equals": [
+     "~/net/ports.txt",
+     "22\n80\n631\n5432\n8080\n"
+    ]
+   },
+   "solution": [
+    "grep LISTEN ~/net/ss.txt | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > ~/net/ports.txt"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "contains": [
+      "~/net/fw_plan.txt",
+      "--permanent --add-port=8080/tcp"
+     ]
+    },
+    {
+     "contains": [
+      "~/net/fw_plan.txt",
+      "firewall-cmd --reload"
+     ]
+    }
+   ],
+   "solution": [
+    "echo 'firewall-cmd --permanent --add-port=8080/tcp' > ~/net/fw_plan.txt",
+    "echo 'firewall-cmd --reload' >> ~/net/fw_plan.txt"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 2,
+   "check": {
+    "contains": [
+     "~/net/hosts",
+     "192\\.168\\.1\\.50\\s+intranet\\.lab"
+    ]
+   },
+   "solution": [
+    "echo '192.168.1.50 intranet.lab' >> ~/net/hosts"
+   ]
+  },
+  {
+   "id": "t17",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "contains": [
+      "~/net/audit.txt",
+      "127\\.0\\.0\\.1:5432"
+     ]
+    },
+    {
+     "contains": [
+      "~/net/audit.txt",
+      "postgres"
+     ]
+    }
+   ],
+   "solution": [
+    "grep 5432 ~/net/ss.txt > ~/net/audit.txt"
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 2
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+"
+  },
+  {
+   "id": "v02",
+   "expect": "LISTEN|UNCONN"
+  },
+  {
+   "id": "v03",
+   "expect": "nameserver|DNS Server|127\\.0\\.0\\.\\d+|\\d+\\.\\d+\\.\\d+\\.\\d+"
+  },
+  {
+   "id": "v04",
+   "expect": "ttl=|icmp_seq|packet loss|Paket|paket"
+  },
+  {
+   "id": "v05",
+   "expect": "8080"
+  },
+  {
+   "id": "v06",
+   "expect": "running|not running|Status|active|inactive|command not found"
+  }
+ ]
+}

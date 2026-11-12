@@ -1,0 +1,256 @@
+{
+ "id": "6.5",
+ "level": 6,
+ "setup": {
+  "dirs": [
+   "/home/student/scripts"
+  ],
+  "files": {
+   "/home/student/users.txt": "alice\nbob\n",
+   "/home/student/scripts/broken.sh": "echo Backup started\ntouch /home/student/backup.done\n",
+   "/home/student/scripts/greet.sh": "#!/bin/bash\nNAME = alice\necho 'Hello $NAME'\n",
+   "/home/student/scripts/report.sh": "#!/bin/bash\necho Report done\ntouch /home/student/report.done\n"
+  },
+  "modes": [
+   ["/home/student/scripts/broken.sh", "644"],
+   ["/home/student/scripts/greet.sh", "755"],
+   ["/home/student/scripts/report.sh", "644"]
+  ]
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"exists": "~/bin", "type": "d"},
+   "solution": ["mkdir ~/bin"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": [
+    {"contains": ["~/bin/hello.sh", "^#!/bin/bash\\n"]},
+    {"contains": ["~/bin/hello.sh", "echo \"Hello, Linux!\""]}
+   ],
+   "solution": ["printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh"]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"mode": ["~/bin/hello.sh", "755"]},
+   "solution": ["chmod +x ~/bin/hello.sh"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 1,
+   "check": {"cmd": "^(\\./|~/bin/|/home/student/bin/)hello\\.sh$", "ok": true, "out": "Hello, Linux!"},
+   "solution": ["~/bin/hello.sh"]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/bin/vars.sh", "NAME=student"]},
+    {"contains": ["~/bin/vars.sh", "echo \"Hello \\$NAME\""]},
+    {"out": "Hello student", "of": "vars\\.sh$"}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\nNAME=student\\necho \"Hello $NAME\"\\n' > ~/bin/vars.sh",
+    "chmod +x ~/bin/vars.sh",
+    "~/bin/vars.sh"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "\\$HOME /home/student", "of": "^echo"},
+   "solution": ["echo '$HOME' \"$HOME\""]
+  },
+  {
+   "id": "t07",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "1", "of": "carol.*echo \\$\\?"},
+   "solution": ["grep carol ~/users.txt; echo $?"]
+  },
+  {
+   "id": "t08",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/bin/check.sh", "^#!/bin/bash\\n"]},
+    {"contains": ["~/bin/check.sh", "if \\[+ -f"]},
+    {"contains": ["~/bin/check.sh", "\\nelse\\n"]},
+    {"contains": ["~/bin/check.sh", "\\nfi\\n"]},
+    {"mode": ["~/bin/check.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\nif [ -f \"$1\" ]; then\\n  echo \"exists\"\\nelse\\n  echo \"missing\"\\nfi\\n' > ~/bin/check.sh",
+    "chmod +x ~/bin/check.sh"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"cmd": "^(test|\\[) -f \\S*notes\\.txt", "ok": true},
+    {"cmd": "^(test|\\[) -d \\S*Documents", "ok": true}
+   ],
+   "solution": [
+    "test -f ~/notes.txt && echo file",
+    "[ -d ~/Documents ] && echo dir"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "1", "of": "-x.*echo \\$\\?"},
+   "solution": ["test -x ~/notes.txt; echo $?"]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/scripts/broken.sh", "^#!/bin/bash\\n"]},
+    {"mode": ["~/scripts/broken.sh", "755"]},
+    {"exists": "~/backup.done", "type": "f"}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\necho Backup started\\ntouch /home/student/backup.done\\n' > ~/scripts/broken.sh",
+    "chmod +x ~/scripts/broken.sh",
+    "~/scripts/broken.sh"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "debug",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/scripts/greet.sh", "\\nNAME=alice\\n"]},
+    {"contains": ["~/scripts/greet.sh", "echo \"Hello \\$NAME\""]},
+    {"out": "Hello alice", "of": "greet\\.sh$"}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\nNAME=alice\\necho \"Hello $NAME\"\\n' > ~/scripts/greet.sh",
+    "~/scripts/greet.sh"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/bin/args.sh", "^#!/bin/bash\\n"]},
+    {"contains": ["~/bin/args.sh", "\\$1"]},
+    {"contains": ["~/bin/args.sh", "\\$#"]},
+    {"contains": ["~/bin/args.sh", "\"\\$@\""]},
+    {"mode": ["~/bin/args.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\necho \"First: $1\"\\necho \"Count: $#\"\\necho \"All:\" \"$@\"\\n' > ~/bin/args.sh",
+    "chmod +x ~/bin/args.sh"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "mini",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/bin/backup.sh", "^#!/bin/bash\\nset -euo pipefail\\n"]},
+    {"contains": ["~/bin/backup.sh", "\\nSRC="]},
+    {"contains": ["~/bin/backup.sh", "\\nDEST="]},
+    {"contains": ["~/bin/backup.sh", "mkdir -p \"\\$DEST\""]},
+    {"contains": ["~/bin/backup.sh", "\\ncp \"\\$SRC"]},
+    {"mode": ["~/bin/backup.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\nset -euo pipefail\\nSRC=\"$HOME/Documents\"\\nDEST=\"$HOME/backup\"\\nmkdir -p \"$DEST\"\\ncp \"$SRC/report.txt\" \"$DEST/\"\\necho \"Backup done: $DEST\"\\n' > ~/bin/backup.sh",
+    "chmod +x ~/bin/backup.sh"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/bin/need_arg.sh", "^#!/bin/bash\\n"]},
+    {"contains": ["~/bin/need_arg.sh", "-z \"?\\$1\"?"]},
+    {"contains": ["~/bin/need_arg.sh", "Usage: need_arg\\.sh NAME"]},
+    {"contains": ["~/bin/need_arg.sh", "exit 1"]},
+    {"contains": ["~/bin/need_arg.sh", "exit 0"]},
+    {"contains": ["~/bin/need_arg.sh", "Hello, \\$1"]},
+    {"mode": ["~/bin/need_arg.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\nif [ -z \"$1\" ]; then\\n  echo \"Usage: need_arg.sh NAME\"\\n  exit 1\\nfi\\necho \"Hello, $1\"\\nexit 0\\n' > ~/bin/need_arg.sh",
+    "chmod +x ~/bin/need_arg.sh"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/bin/probe.sh", "test -f /home/student/missing\\.txt"]},
+    {"mode": ["~/bin/probe.sh", "755"]},
+    {"equals": ["~/code.txt", "1\n"]}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\ntest -f /home/student/missing.txt\\n' > ~/bin/probe.sh",
+    "chmod +x ~/bin/probe.sh",
+    "~/bin/probe.sh",
+    "echo $? > ~/code.txt"
+   ]
+  },
+  {
+   "id": "t17",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/bin/welcome.sh", "^#!/bin/bash\\n"]},
+    {"contains": ["~/bin/welcome.sh", "\\$\\{1:-guest\\}"]},
+    {"contains": ["~/bin/welcome.sh", "Welcome, "]},
+    {"mode": ["~/bin/welcome.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/bin/bash\\nNAME=\"${1:-guest}\"\\necho \"Welcome, $NAME\"\\n' > ~/bin/welcome.sh",
+    "chmod +x ~/bin/welcome.sh"
+   ]
+  },
+  {
+   "id": "t18",
+   "kind": "ticket",
+   "diff": 2,
+   "check": [
+    {"mode": ["~/scripts/report.sh", "755"]},
+    {"exists": "~/report.done", "type": "f"}
+   ],
+   "solution": [
+    "chmod +x ~/scripts/report.sh",
+    "~/scripts/report.sh"
+   ]
+  }
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*Hello)(?=[\\s\\S]*rwx)"},
+  {"id": "v02", "expect": "(?=[\\s\\S]*single: \\$NAME)(?=[\\s\\S]*double: student)(?=[\\s\\S]*Double: 42)"},
+  {"id": "v03", "expect": "(?=[\\s\\S]*Count: 2)(?=[\\s\\S]*Arg: my file)"},
+  {"id": "v04", "expect": "(?=[\\s\\S]*pass)(?=[\\s\\S]*fail)"},
+  {"id": "v05", "expect": "(?=[\\s\\S]*before)(?=[\\s\\S]*exit=1)"},
+  {"id": "v06", "expect": "(?=[\\s\\S]*syntax=0)(?=[\\s\\S]*\\+ )"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 0},
+  {"id": "q3", "answer": 3},
+  {"id": "q4", "answer": 2}
+ ]
+}

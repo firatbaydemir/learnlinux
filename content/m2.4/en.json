@@ -1,0 +1,329 @@
+{
+ "title": "Copy and Move",
+ "lead": "Copy files and folders with cp, move or rename them with mv, and protect yourself from overwrite traps with -i, -n and -v.",
+ "objectives": [
+  "You copy files and (with -r) folders using cp; for backups you use cp -a.",
+  "You move or rename files and folders with mv.",
+  "You think about whether the target exists and control overwriting with -i, -n and -v."
+ ],
+ "sections": [
+  {
+   "id": "copy",
+   "title": "Copying: cp",
+   "body": [
+    "`cp SOURCE TARGET` creates a **copy** of the source; the source stays where it is. If the target is an existing folder, the copy goes inside it; otherwise the target becomes the new file name.",
+    "Copying folders needs **`-r`** (recursive); without it `cp` skips the folder and prints an error. If you also want to keep ownership, permissions and timestamps, use `cp -a` (archive), the safest choice for backups."
+   ],
+   "commands": [
+    {
+     "cmd": "cp",
+     "what": "Copies a file; the source is unchanged.",
+     "where": "To make a backup before editing a file or to put it elsewhere.",
+     "why": "If the original breaks, you still have a copy.",
+     "example": "cp draft.txt draft_copy.txt"
+    },
+    {
+     "cmd": "cp -r",
+     "what": "Copies a folder including its contents.",
+     "where": "When backing up a project or photo folder.",
+     "why": "Without -r a folder is not copied.",
+     "example": "cp -r photos backup/"
+    },
+    {
+     "cmd": "cp -a",
+     "what": "Archive copy: keeps subfolders, permissions, owner and timestamps.",
+     "where": "For real backups and when copying system files.",
+     "why": "The copy is as identical to the original as possible.",
+     "example": "cp -a photos backup/"
+    }
+   ],
+   "tip": "After copying, check both the source and the target with `ls`."
+  },
+  {
+   "id": "move",
+   "title": "Moving and renaming: mv",
+   "body": [
+    "`mv SOURCE TARGET` **moves** a file: the source disappears and shows up at the target. Linux has no separate 'rename' command; moving within the same folder is renaming (`mv old.txt new.txt`).",
+    "Folders need no `-r`. With several sources the last argument must be an existing **folder**: `mv a.txt b.txt folder/`. Within one filesystem `mv` does not copy data, it only changes the entry, so it is very fast."
+   ],
+   "commands": [
+    {
+     "cmd": "mv",
+     "what": "Moves a file or folder to another folder.",
+     "where": "When organising files or fixing a misplaced file.",
+     "why": "Leaves no copy behind and takes no extra space.",
+     "example": "mv wrong/report.txt inbox/"
+    },
+    {
+     "cmd": "mv old new",
+     "what": "Renames in the same folder (if the target does not exist).",
+     "where": "To fix a file or folder name.",
+     "why": "Renaming = moving within the same place.",
+     "example": "mv todo.txt tasks.txt"
+    },
+    {
+     "cmd": "mv a b folder/",
+     "what": "Moves several files into a folder in one command.",
+     "where": "Bulk organising.",
+     "why": "One command, fewer mistakes.",
+     "example": "mv inbox/mail1.txt inbox/mail2.txt backup/"
+    }
+   ],
+   "tip": "Make sure the target folder exists before moving: if it does not, `mv a.txt folder` renames the file to `folder`!"
+  },
+  {
+   "id": "safety",
+   "title": "Overwriting and safety options",
+   "body": [
+    "If a file with the same name exists at the target, `cp` and `mv` **overwrite it without asking**; the old content does not come back. This is the most common way to lose data silently.",
+    "Three safety options: **`-i`** (interactive) asks before overwriting, **`-n`** (no-clobber) leaves existing files alone, **`-v`** (verbose) prints what it does line by line. On many distributions `cp` and `mv` are aliased to `-i` for root, but not for a normal user."
+   ],
+   "commands": [
+    {
+     "cmd": "cp -i",
+     "what": "Asks for confirmation (y/n) before overwriting an existing target.",
+     "where": "When you are not sure whether the target exists.",
+     "why": "Prevents accidental data loss.",
+     "example": "cp -i tasks.txt draft.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cp -n",
+     "what": "Never overwrites an existing file.",
+     "where": "In bulk copies, to protect older files.",
+     "why": "Quiet but safe: the target stays unchanged.",
+     "example": "cp -n tasks.txt draft.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cp -v",
+     "what": "Prints every file that is copied.",
+     "where": "In multi-file operations to see what happened.",
+     "why": "Makes it easy to verify the result.",
+     "example": "cp -v tasks.txt tasks_v.txt"
+    },
+    {
+     "cmd": "mv -i",
+     "what": "Asks before overwriting when moving.",
+     "where": "When moving into a folder that may hold a file with the same name.",
+     "why": "The file at the target is not lost.",
+     "example": "mv -i draft.txt backup/",
+     "nosim": true
+    }
+   ],
+   "warn": "`cp a b` and `mv a b` **overwrite `b` without asking** if it exists. Look with `ls b` first or add `-i` / `-n`.",
+   "danger": "Typing a wrong target (for example `mv notes.txt /etc/hosts`) can destroy an important system file. Take a VM snapshot before experimenting near system folders; without privileges the command simply fails.",
+   "tip": "For permanent safety you can define `alias cp='cp -i'` and `alias mv='mv -i'` (added to your shell configuration file)."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Enter the working folder: `cd lab`.",
+   "hint": "All following tasks happen in `~/lab`."
+  },
+  "t02": {
+   "text": "Make a copy of `draft.txt` called `draft_copy.txt`: `cp draft.txt draft_copy.txt`.",
+   "hint": "Source first, then target. Use `ls` to see both still exist."
+  },
+  "t03": {
+   "text": "Rename `todo.txt` to `tasks.txt`: `mv todo.txt tasks.txt`.",
+   "hint": "Renaming is moving within the same folder; `todo.txt` must be gone."
+  },
+  "t04": {
+   "text": "Create a backup folder: `mkdir backup`.",
+   "hint": "It is the target of the next steps."
+  },
+  "t05": {
+   "text": "Copy `draft.txt` into the `backup` folder: `cp draft.txt backup/`.",
+   "hint": "The trailing `/` makes clear the target is a folder."
+  },
+  "t06": {
+   "text": "Copy the `photos` folder with its contents into `backup`: `cp -r photos backup/`.",
+   "hint": "`-r` is required for folders."
+  },
+  "t07": {
+   "text": "Move and rename at once: `mv draft_copy.txt backup/draft_old.txt`.",
+   "hint": "Giving a new name in the target renames while moving."
+  },
+  "t08": {
+   "text": "Predict: what does `cp photos backup` (without `-r`) do? Run it to verify.",
+   "hint": "Expect an error: the folder is skipped ('-r not specified')."
+  },
+  "t09": {
+   "text": "Predict: what does `cat backup/draft.txt` show? Run it to verify.",
+   "hint": "The copy has the same content as the original: `draft v1`."
+  },
+  "t10": {
+   "text": "Predict: try to move a file that does not exist: `mv ghost.txt backup`. Does it succeed?",
+   "hint": "Expect 'No such file or directory'."
+  },
+  "t11": {
+   "text": "Debug: `report.txt` was left in the `wrong` folder by mistake. Move it to the `inbox` folder.",
+   "hint": "`mv wrong/report.txt inbox/`. Then check with `ls wrong inbox`."
+  },
+  "t12": {
+   "text": "Mini project: create `archive/2026` with `mkdir -p`, then move `inbox/mail1.txt` there under the name `jan.txt`.",
+   "hint": "Two commands: `mkdir -p archive/2026`, then `mv inbox/mail1.txt archive/2026/jan.txt`."
+  },
+  "t13": {
+   "text": "Challenge: rename the `photos` folder to `pictures`, then copy the `pictures` folder with its contents into `~/Documents`.",
+   "hint": "First `mv`, then `cp -r`; the target `~/Documents` is an existing folder."
+  },
+  "t14": {
+   "text": "TICKET #2410 — Accounting wants a backup of the `inbox` folder named `backup/inbox_2026`. The original `inbox` must stay in place and complete.",
+   "hint": "Folder copy: `cp -r inbox backup/inbox_2026`. The target does not exist, so it becomes the new name."
+  },
+  "t15": {
+   "text": "Copy with `-v` and see what happens: `cp -v tasks.txt tasks_v.txt`.",
+   "hint": "-v prints every copied file; verify the result with `ls`."
+  },
+  "t16": {
+   "text": "Predict: `cp tasks.txt draft.txt` overwrites the target. Run it, then read the content with `cat draft.txt`. What do you see?",
+   "hint": "`draft v1` is gone; `buy milk` took its place. On a real system `-i` would have prevented this."
+  }
+ },
+ "vm": {
+  "intro": "On your VM work in a safe folder called `~/vmlab`; never experiment with `cp` and `mv` in folders that hold real data.",
+  "tasks": {
+   "v01": {
+    "title": "Copy a file",
+    "text": "Create a file, copy it and paste the `ls -l` output.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/vmlab && cd ~/vmlab\necho \"original content\" > original.txt\ncp original.txt copy.txt\nls -l",
+      "expected": "total 8\n-rw-r--r--. 1 student student 17 Jan 10 10:00 copy.txt\n-rw-r--r--. 1 student student 17 Jan 10 10:00 original.txt"
+     }
+    ],
+    "differs": [
+     "Date, time and owner may differ; `copy.txt` and `original.txt` must appear.",
+     "The `.` mark (SELinux) appears only on Rocky/Alma, not on Ubuntu."
+    ]
+   },
+   "v02": {
+    "title": "Copy a folder",
+    "text": "Create a project folder, back it up with `cp -r` and paste the `ls -R` output.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\nmkdir -p project/src\ntouch project/src/main.c\ncp -r project project_backup\nls -R",
+      "expected": ".:\ncopy.txt  original.txt  project  project_backup\n\n./project:\nsrc\n..."
+     }
+    ],
+    "differs": [
+     "If you get `cp: -r not specified` you forgot `-r`.",
+     "The order may differ; both `project` and `project_backup` must appear."
+    ]
+   },
+   "v03": {
+    "title": "Move and rename",
+    "text": "Rename the file, then move it into a new folder and paste the result.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\nmv copy.txt renamed.txt\nmkdir moved\nmv renamed.txt moved/\nls . moved",
+      "expected": ".:\nmoved  original.txt  project  project_backup\n\nmoved:\nrenamed.txt"
+     }
+    ],
+    "differs": [
+     "If you see `mv: cannot stat` the source name is wrong; look with `ls` first.",
+     "Without creating `moved/` first, `mv renamed.txt moved/` fails."
+    ]
+   },
+   "v04": {
+    "title": "Prevent overwriting",
+    "text": "Show with `-n` that an existing file is kept. Careful: without `-n` the content would be lost.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\necho \"keep me\" > keep.txt\necho \"new\" > other.txt\ncp -n other.txt keep.txt\ncat keep.txt",
+      "expected": "keep me"
+     }
+    ],
+    "differs": [
+     "If you see `new`, `-n` was not typed or your `cp` is very old; try `cp -i` and answer `n`.",
+     "With `-i`, answer the `overwrite 'keep.txt'?` question with `n`."
+    ]
+   },
+   "v05": {
+    "title": "Clean up",
+    "text": "Delete the working folder. Look inside first; if no errors, press \"Done\".",
+    "blocks": [
+     {
+      "cmd": "ls -R ~/vmlab\nrm -r ~/vmlab\nls ~/vmlab",
+      "expected": "ls: cannot access '/home/student/vmlab': No such file or directory"
+     }
+    ],
+    "differs": [
+     "If you see `rm: cannot remove ... Is a directory`, you forgot `-r`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Why does `cp photos backup/` fail for a folder?",
+   "options": [
+    "The backup folder is protected",
+    "Copying folders needs -r",
+    "cp only copies .txt files",
+    "The folder must be renamed first"
+   ],
+   "explain": "`cp` skips folders by default; use `cp -r` (or `cp -a`) to copy them with their contents."
+  },
+  "q2": {
+   "q": "Which command renames a file within the same folder?",
+   "options": [
+    "rename",
+    "cp",
+    "mv",
+    "touch"
+   ],
+   "explain": "On Linux renaming is moving within the same folder: `mv old new`."
+  },
+  "q3": {
+   "q": "What does `cp -i a b` do when the target already exists?",
+   "options": [
+    "Asks before overwriting",
+    "Silently deletes the target",
+    "Merges the files",
+    "Ignores the target and does not copy"
+   ],
+   "explain": "`-i` (interactive) asks for confirmation before overwriting. To never overwrite without asking, use `-n`."
+  },
+  "q4": {
+   "q": "Which option best keeps permissions and timestamps when making a backup?",
+   "options": [
+    "cp -v",
+    "cp -n",
+    "cp -i",
+    "cp -a"
+   ],
+   "explain": "`cp -a` (archive) copies recursively and preserves permissions, owner and timestamps."
+  }
+ },
+ "summary": [
+  "`cp source target` copies, `cp -r` copies folders, `cp -a` also keeps permissions.",
+  "`mv source target` moves; in the same folder it renames, and folders need no `-r`.",
+  "If the target exists, `cp` and `mv` overwrite without asking; `-i` asks, `-n` protects, `-v` shows.",
+  "Check with `ls` whether the target exists and where things end up."
+ ],
+ "glossary": [
+  {
+   "term": "source / target",
+   "meaning": "The item being copied or moved / where it goes."
+  },
+  {
+   "term": "recursive (-r)",
+   "meaning": "Processing a folder with its subfolders and contents."
+  },
+  {
+   "term": "overwrite",
+   "meaning": "Replacing the content of a same-named target file with new content."
+  },
+  {
+   "term": "archive copy (-a)",
+   "meaning": "A recursive copy that preserves permissions, owner and timestamps."
+  },
+  {
+   "term": "rename",
+   "meaning": "Changing a name with mv within the same folder."
+  }
+ ]
+}

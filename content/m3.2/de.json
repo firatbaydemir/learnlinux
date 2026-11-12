@@ -1,0 +1,102 @@
+{
+ "title": "Umleitung und Pipe",
+ "lead": "Eine Pipe verbindet die Ausgabe eines Befehls mit der Eingabe des nächsten. Kleine Werkzeuge lösen so große Aufgaben.",
+ "objectives": [
+  "Du verkettest Befehle mit `|` zu Pipelines.",
+  "Du zählst, sortierst und entfernst Duplikate mit `wc`, `sort` und `uniq`.",
+  "Du kombinierst Pipes und Umleitung und teilst einen Datenstrom mit `tee`."
+ ],
+ "sections": [
+  {
+   "id": "pipe",
+   "title": "Die Pipe: Befehl | Befehl",
+   "body": [
+    "`|` verbindet **stdout** des linken Befehls mit **stdin** des rechten. Dazwischen wird nichts auf die Festplatte geschrieben. Jedes Werkzeug macht eine Sache; die Pipe kombiniert sie.",
+    "Durch die Pipe läuft nur stdout. Fehlermeldungen (stderr) gehen weiter auf den Bildschirm; sollen sie durch, füge vor der Pipe `2>&1` hinzu."
+   ],
+   "commands": [
+    {"cmd": "wc -l", "what": "Zählt Zeilen.", "where": "Am Ende einer Pipeline, um Ergebnisse zu zählen.", "why": "Beantwortet 'Wie viele?'.", "example": "cat logs/app.log | wc -l"},
+    {"cmd": "grep", "what": "Behält nur Zeilen, die zum Muster passen.", "where": "Zum Filtern von Logs und Listen.", "why": "Reduziert einen großen Strom auf die interessanten Zeilen.", "example": "grep ERROR logs/app.log | wc -l"},
+    {"cmd": "head / tail", "what": "Zeigt die ersten / letzten Zeilen.", "where": "Um Anfang oder Ende eines Ergebnisses zu sehen.", "why": "Hält die Ausgabe kurz.", "example": "sort -n data/nums.txt | tail -n 1"}
+   ],
+   "tip": "Baue eine Pipeline Schritt für Schritt: Erst den ersten Befehl ausführen, Ausgabe prüfen, dann das nächste `|` anfügen."
+  },
+  {
+   "id": "sortuniq",
+   "title": "sort, uniq und tee",
+   "body": [
+    "`uniq` fasst nur **aufeinanderfolgende** Duplikate zusammen, daher läuft fast immer zuerst `sort`. `uniq -c` stellt jeder Zeile die Anzahl voran; `sort -rn` ordnet danach.",
+    "`sort` vergleicht standardmäßig Text, daher kommt `10` vor `9`. Für Zahlen nimm `sort -n`. `tee file` schreibt den Strom in eine Datei **und** gibt ihn weiter, wie ein T-Stück."
+   ],
+   "commands": [
+    {"cmd": "sort", "what": "Sortiert Zeilen; `-n` numerisch, `-r` umgekehrt, `-u` eindeutig.", "where": "Vor `uniq` oder um Werte zu ordnen.", "why": "Bringt gleiche Zeilen zusammen.", "example": "sort data/fruits.txt"},
+    {"cmd": "uniq -c", "what": "Fasst aufeinanderfolgende Duplikate zusammen und zählt sie.", "where": "Für Häufigkeitstabellen.", "why": "Zeigt, wie oft jede Zeile vorkommt.", "example": "sort data/fruits.txt | uniq -c"},
+    {"cmd": "tee", "what": "Speichert den Strom in einer Datei und gibt ihn weiter.", "where": "Um ein Zwischenergebnis einer Pipeline zu behalten.", "why": "Du siehst und speicherst die Daten in einem Zug.", "example": "grep ERROR logs/app.log | tee all_errors.txt | wc -l"}
+   ],
+   "tip": "Das klassische Ranking: `sort | uniq -c | sort -rn`.",
+   "warn": "`uniq` ohne `sort` lässt Duplikate stehen, die nicht nebeneinander liegen."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Zähle die Zeilen von `logs/app.log` mit `cat logs/app.log | wc -l`.", "hint": "Die Pipe übergibt den Dateiinhalt an `wc -l`."},
+  "t02": {"text": "Sortiere `data/fruits.txt` mit `sort` alphabetisch.", "hint": "Gleiche Zeilen stehen nebeneinander."},
+  "t03": {"text": "Zähle mit `ls -1 data | wc -l`, wie viele Einträge der Ordner `data` hat.", "hint": "`-1` schreibt jeden Namen in eine eigene Zeile; `wc -l` zählt die Zeilen."},
+  "t04": {"text": "Zähle die ERROR-Zeilen des Logs mit `grep ERROR logs/app.log | wc -l`.", "hint": "grep filtert, `wc -l` zählt."},
+  "t05": {"text": "Entferne Duplikate mit `sort data/fruits.txt | uniq`.", "hint": "Erst sortieren, damit Duplikate nebeneinander liegen."},
+  "t06": {"text": "Zähle jede Frucht mit `sort data/fruits.txt | uniq -c`.", "hint": "Die Zahl davor ist die Anzahl."},
+  "t07": {"text": "Speichere alle ERROR-Zeilen mit `grep ERROR logs/app.log > errors.txt` in `errors.txt`.", "hint": "Prüfe mit `cat errors.txt`."},
+  "t08": {"text": "Vorhersage: Ist die erste Zeile von `sort data/nums.txt | head -n 1` `2` oder `10`? Führe es aus und prüfe.", "hint": "Einfaches `sort` vergleicht Text, nicht Zahlen."},
+  "t09": {"text": "Vorhersage: Welche Zahl gibt `sort -n data/nums.txt | tail -n 1` aus? Führe es aus und prüfe.", "hint": "`-n` sortiert numerisch; die letzte Zeile ist die größte."},
+  "t10": {"text": "Fehlersuche: `uniq data/unsorted.txt` zeigt noch Duplikate. Schreibe die eindeutigen Zeilen (`a`, `b`) nach `~/unique.txt`.", "hint": "`sort data/unsorted.txt | uniq > unique.txt`."},
+  "t11": {"text": "Mini-Projekt: Erzeuge den Bericht `report.txt` mit gezählten und gerankten ERROR-Zeilen: `grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt`.", "hint": "Vier Stufen: filtern, sortieren, zählen, ordnen; dann umleiten."},
+  "t12": {"text": "Herausforderung: Speichere in einer einzigen Pipeline alle ERROR-Zeilen in `all_errors.txt` und gib auch ihre Anzahl aus (mit `tee`).", "hint": "`grep ... | tee all_errors.txt | wc -l`."},
+  "t13": {"text": "Ticket: Die Leitung will wissen, wie viele verschiedene Benutzer in `data/access.txt` vorkommen. Schreibe nur die Zahl nach `~/users_count.txt`.", "hint": "`sort | uniq | wc -l`, dann mit `>` umleiten."}
+ },
+ "vm": {
+  "intro": "Auf deiner VM lesen diese Pipelines nur; geschrieben werden nur Dateien, die du selbst im Home-Verzeichnis anlegst.",
+  "tasks": {
+   "v01": {
+    "title": "Mit der Pipe zählen",
+    "text": "Zähle, wie viele Einträge `/etc` hat, und füge die Zahl ein.",
+    "blocks": [{"cmd": "ls /etc | wc -l", "expected": "187"}],
+    "differs": ["Die Zahl hängt von deinem System ab; jede Zahl ist richtig."]
+   },
+   "v02": {
+    "title": "Benutzer extrahieren und sortieren",
+    "text": "Nimm das erste Feld von `/etc/passwd`, sortiere es und zeige die ersten fünf Namen.",
+    "blocks": [{"cmd": "cut -d: -f1 /etc/passwd | sort | head -n 5", "expected": "_apt\nbackup\nbin\ndaemon\ngames"}],
+    "differs": ["Die Namen unterscheiden sich je nach Distribution; nur die alphabetische Reihenfolge zählt. Mit `| grep root` prüfst du, ob `root` existiert."]
+   },
+   "v03": {
+    "title": "Häufigkeitstabelle",
+    "text": "Zähle, welche Login-Shells in `/etc/passwd` benutzt werden, und ordne sie.",
+    "blocks": [{"cmd": "cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn", "expected": "     24 /usr/sbin/nologin\n      3 /bin/bash\n      1 /bin/sync"}],
+    "differs": ["Zahlen und Shells hängen von deinem System ab.", "Siehst du nur eine Zeile, prüfe, dass `sort` vor `uniq -c` steht."]
+   },
+   "v04": {
+    "title": "Mit tee eine Kopie behalten",
+    "text": "Speichere eine Liste mit `tee` in einer Datei, während du sie zählst, und prüfe die Datei. Wenn es geklappt hat, drücke \"Erledigt\".",
+    "blocks": [{"cmd": "ls /etc | tee ~/etc_list.txt | wc -l\nhead -n 3 ~/etc_list.txt"}],
+    "differs": ["Ist `etc_list.txt` leer, prüfe, dass nach `tee` `~/etc_list.txt` steht."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Was verbindet die Pipe `|`?", "options": ["stdout des linken Befehls mit stdin des rechten", "Eine Datei mit einem Befehl", "stderr mit stdout", "Zwei Dateien"], "explain": "Die Pipe übergibt das stdout links als stdin rechts."},
+  "q2": {"q": "Warum nutzt man `sort` vor `uniq`?", "options": ["`uniq` braucht eine Datei", "`sort` macht es schneller", "`uniq` funktioniert nur bei Zahlen", "`uniq` fasst nur aufeinanderfolgende Duplikate zusammen"], "explain": "Sortieren bringt gleiche Zeilen nebeneinander."},
+  "q3": {"q": "Was macht `tee out.txt` in einer Pipeline?", "options": ["Löscht den Strom", "Schreibt den Strom in eine Datei und gibt ihn weiter", "Zeigt nur Fehler", "Sortiert den Strom"], "explain": "`tee` teilt den Strom wie ein T-Stück."},
+  "q4": {"q": "Welcher Befehl gibt die größte Zahl einer Datei mit einer Zahl pro Zeile aus?", "options": ["`sort file | head -n 1`", "`sort -r file | tail -n 1`", "`sort -n file | tail -n 1`", "`uniq -c file`"], "explain": "`sort -n` ordnet numerisch; die letzte Zeile ist die größte."}
+ },
+ "summary": [
+  "`cmd1 | cmd2` gibt stdout von cmd1 als stdin an cmd2.",
+  "`sort | uniq -c | sort -rn` erzeugt ein Häufigkeits-Ranking.",
+  "`sort -n` sortiert numerisch, einfaches `sort` als Text.",
+  "`tee` speichert einen Strom in einer Datei und gibt ihn weiter."
+ ],
+ "glossary": [
+  {"term": "Pipe", "meaning": "Verbindet die Ausgabe eines Befehls mit der Eingabe eines anderen."},
+  {"term": "Pipeline", "meaning": "Eine durch Pipes verbundene Befehlskette."},
+  {"term": "Filter", "meaning": "Befehl, der stdin liest und einen veränderten Strom nach stdout schreibt."},
+  {"term": "tee", "meaning": "Schreibt einen Strom in eine Datei und nach stdout."}
+ ]
+}

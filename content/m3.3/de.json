@@ -1,0 +1,323 @@
+{
+  "title": "Platzhalter und Anführungszeichen",
+  "lead": "Die Shell erweitert Platzhaltermuster und behandelt Leerzeichen als Trennzeichen, bevor ein Befehl ausgeführt wird. Wähle Dateigruppen sicher aus, indem du Muster und Anführungszeichen richtig verwendest.",
+  "objectives": [
+    "Du passt Dateinamen mit `*`, `?` und `[]` an.",
+    "Du unterscheidest geschweifte Klammererweiterung von Glob-Erweiterung.",
+    "Du erklärst das Verhalten von einfachen und doppelten Anführungszeichen sowie Backslashes.",
+    "Du prüfst passende Namen, bevor du eine Sammelaktion ausführst."
+  ],
+  "sections": [
+    {
+      "id": "globbing",
+      "title": "Platzhalter: *, ? und []",
+      "body": [
+        "Die Shell gleicht Platzhaltermuster vor der Befehlsausführung mit den Namen im aktuellen Ordner ab. `*` passt auf null oder mehr Zeichen, `?` auf genau ein Zeichen. `img?.jpg` passt auf Namen mit einem Zeichen an dieser Stelle; `img*.jpg` umfasst auch längere Namen.",
+        "`[12]` passt auf genau eines der Zeichen in den eckigen Klammern; `[0-9]` passt auf eine Ziffer. Gibt es keine Übereinstimmung, lässt Bash das Muster normalerweise unverändert. Das erkennst du an der Befehlsausgabe.",
+        "Die Shell erweitert Platzhalter, nicht `ls`. Bei `ls *.txt` übergibt die Shell die passenden Namen als einzelne Argumente an `ls`."
+      ],
+      "commands": [
+        {
+          "cmd": "ls *.jpg",
+          "what": "Listet Namen auf, die zu `*.jpg` passen.",
+          "where": "Wenn du Dateien mit einer bestimmten Endung gemeinsam ansehen willst.",
+          "why": "Du siehst alle Treffer, ohne jeden Namen einzeln einzugeben.",
+          "example": "ls *.jpg"
+        },
+        {
+          "cmd": "ls img?.jpg",
+          "what": "Listet `.jpg`-Namen mit genau einem Zeichen nach `img` auf.",
+          "where": "Wenn ein bestimmter Teil und eine bestimmte Länge des Namens passen sollen.",
+          "why": "`?` steht für genau ein Zeichen; `img10.jpg` passt nicht.",
+          "example": "ls img?.jpg"
+        },
+        {
+          "cmd": "ls img[12].jpg",
+          "what": "Passt auf Namen wie `img1.jpg` und `img2.jpg`.",
+          "where": "Wenn nur bestimmte einzelne Zeichen erlaubt sind.",
+          "why": "Das Muster wird auf die Zeichen in den eckigen Klammern begrenzt.",
+          "example": "ls img[12].jpg"
+        },
+        {
+          "cmd": "ls *.{jpg,png}",
+          "what": "Erweitert die Optionen in geschweiften Klammern zu einzelnen Mustern.",
+          "where": "Wenn du denselben Vorgang für mehrere Endungen ausführen willst.",
+          "why": "Ähnliche Muster lassen sich kurz und übersichtlich schreiben.",
+          "example": "ls *.{jpg,png}"
+        }
+      ],
+      "tip": "Wenn du nicht sicher bist, welche Namen passen, zeige die Erweiterung zuerst mit `printf '%s\\n' *.jpg` an. Führe noch keinen Befehl aus, der Dateien verändert."
+    },
+    {
+      "id": "quoting",
+      "title": "Anführungszeichen und Escape",
+      "body": [
+        "Anführungszeichen bestimmen, wie die Shell Leerzeichen und Sonderzeichen behandelt. Ohne Anführungszeichen wird ein Name mit Leerzeichen in mehrere Argumente aufgeteilt. `\"my file.txt\"` hält ihn als ein Argument zusammen.",
+        "Innerhalb einfacher Anführungszeichen bleiben alle Zeichen unverändert; Variablen wie `$HOME` werden nicht erweitert. Doppelte Anführungszeichen erhalten Leerzeichen, erweitern aber Variablen und Befehlsersetzungen. Ein Backslash hebt die Sonderbedeutung des direkt folgenden Zeichens auf."
+      ],
+      "commands": [
+        {
+          "cmd": "ls \"my file.txt\"",
+          "what": "Übergibt den Namen mit Leerzeichen als ein Argument.",
+          "where": "Wenn du Namen mit Leerzeichen auflistest oder an Befehle übergibst.",
+          "why": "Die Shell teilt den Namen nicht in zwei Teile auf.",
+          "example": "ls \"my file.txt\""
+        },
+        {
+          "cmd": "echo '$HOME'",
+          "what": "Gibt den Text `$HOME` innerhalb einfacher Anführungszeichen unverändert aus.",
+          "where": "Wenn du Sonderzeichen ohne Erweiterung anzeigen willst.",
+          "why": "Du siehst den geschriebenen Text statt des Variablenwerts.",
+          "example": "echo '$HOME'"
+        },
+        {
+          "cmd": "echo \"$HOME\"",
+          "what": "Erweitert die Variable in doppelten Anführungszeichen und gibt ihren Wert aus.",
+          "where": "Wenn du einen Variablenwert verwendest und Leerzeichen erhalten willst.",
+          "why": "Der Wert bleibt zusammen und die Shell erweitert die Variable.",
+          "example": "echo \"$HOME\""
+        },
+        {
+          "cmd": "ls my\\ file.txt",
+          "what": "Hebt die Sonderbedeutung des Leerzeichens mit einem Backslash auf.",
+          "where": "Wenn du ein einzelnes Sonderzeichen schützen willst.",
+          "why": "Auch ohne Anführungszeichen bleibt der Name ein Argument.",
+          "example": "ls my\\ file.txt"
+        }
+      ],
+      "tip": "Setze einen Namen mit Variablen meistens in die Form `\"$NAME\"`; so bleiben auch enthaltene Leerzeichen erhalten."
+    },
+    {
+      "id": "safe",
+      "title": "Platzhalter sicher verwenden",
+      "body": [
+        "Ein Platzhaltermuster kann auf mehrere Namen passen. Führe vor einem Löschbefehl wie `rm *.tmp` dasselbe Muster mit `ls` aus und prüfe, welche Namen ausgewählt werden.",
+        "Vor allem `*` kann sehr weit passen. Prüfe zuerst mit `pwd`, ob du im richtigen Ordner bist, und liste dann die Treffer auf. Teste ein unbekanntes Muster nicht mit einem destruktiven Befehl auf einem echten System."
+      ],
+      "commands": [
+        {
+          "cmd": "ls *.tmp",
+          "what": "Zeigt vor dem Löschen passende Namen mit der Endung `.tmp` an.",
+          "where": "Unmittelbar vor einer Sammelaktion mit Platzhaltern.",
+          "why": "Du prüfst, welche Namen der Befehl treffen würde.",
+          "example": "ls *.tmp"
+        },
+        {
+          "cmd": "rm -i *.tmp",
+          "what": "Fragt vor dem Löschen jeder passenden Datei nach einer Bestätigung.",
+          "where": "Wenn du nur geprüfte temporäre Dateien entfernen willst.",
+          "why": "Bei einem falschen Treffer kannst du den Vorgang abbrechen.",
+          "example": "rm -i *.tmp",
+          "nosim": true
+        }
+      ],
+      "warn": "Verwende Platzhalter in Löschbefehlen niemals blind. Prüfe zuerst mit `pwd` und `ls` den Ordner und die Treffer; teste destruktive Befehle nur in einer sicheren Umgebung."
+    },
+    {
+      "id": "practice",
+      "title": "Muster in Übungen anwenden",
+      "body": [
+        "Dieses Modul verwendet englische ASCII-Namen wie `img1.jpg`, `img2.jpg`, `img10.png`, `doc1.txt` und `doc2.txt`. Die Befehle lassen sich sicher im virtuellen Labor ausprobieren.",
+        "Geschweifte Klammererweiterung ist nicht dasselbe wie Globbing: `{1,2}` wird von der Shell in einzelne Zeichenfolgen aufgeteilt; `*` und `?` passen dagegen auf vorhandene Namen. Überlege, welche Namen ein Befehl erhält, und prüfe es dann im Labor."
+      ],
+      "commands": [
+        {
+          "cmd": "echo *.txt",
+          "what": "Gibt passende Namen mit der Endung `.txt` aus.",
+          "where": "Wenn du ein Muster vor einer Änderung testen willst.",
+          "why": "Du siehst, wie die Shell das Muster erweitert.",
+          "example": "echo *.txt"
+        },
+        {
+          "cmd": "touch log_{1,2,3}.txt",
+          "what": "Erstellt mit Optionen in geschweiften Klammern drei verschiedene Namen.",
+          "where": "Wenn du ähnliche Testnamen benötigst.",
+          "why": "Du sparst dir wiederholte Befehle.",
+          "example": "touch log_{1,2,3}.txt"
+        }
+      ],
+      "tip": "Die Namen mit Leerzeichen im Labor befinden sich nur im virtuellen Dateisystem. Du musst dieselben Befehle nicht auf deinem echten System ausprobieren."
+    }
+  ],
+  "tasks": {
+    "t01": {
+      "text": "Das Labor enthält bereits verschiedene Namen. Führe `ls *.jpg` aus und beobachte, dass nur Namen mit der Endung `.jpg` aufgelistet werden.",
+      "hint": "`*` passt auf null oder mehr Zeichen; der Punkt und die Endung `jpg` bleiben im Muster fest."
+    },
+    "t02": {
+      "text": "Liste mit `ls img?.jpg` Namen mit genau einem Zeichen nach `img` und der Endung `.jpg` auf.",
+      "hint": "`?` steht für genau ein Zeichen. Schreibe das Muster ohne Anführungszeichen, damit die Shell es erweitert."
+    },
+    "t03": {
+      "text": "Liste mit `ls doc*` Namen auf, die mit `doc` beginnen.",
+      "hint": "`*` erlaubt nach `doc` null oder mehr Zeichen."
+    },
+    "t04": {
+      "text": "Führe `echo *.txt` aus. Wie übergibt die Shell die passenden Namen an `echo`?",
+      "hint": "Zuerst erweitert die Shell das Muster zu den passenden Namen; `echo` gibt sie aus."
+    },
+    "t05": {
+      "text": "Liste mit `ls img[12].jpg` Bilder auf, deren Endung nach `img` eine `1` oder `2` enthält.",
+      "hint": "Jede Option in den eckigen Klammern steht für genau ein Zeichen."
+    },
+    "t06": {
+      "text": "Passe mit `ls *.{jpg,png}` `.jpg`- und `.png`-Namen in einem Befehl an.",
+      "hint": "Die Optionen `jpg` und `png` in den geschweiften Klammern erzeugen einzelne Muster."
+    },
+    "t07": {
+      "text": "Erstelle den Ordner `texts` und kopiere Namen, die mit `doc` beginnen und auf `.txt` enden, hinein. Kopiere `notes.md` nicht.",
+      "hint": "Führe erst `mkdir texts`, dann `cp doc*.txt texts` aus."
+    },
+    "t08": {
+      "text": "Vorhersage: Gibt `echo '$HOME'` den Variablenwert oder den Text `$HOME` aus? Führe den Befehl aus und prüfe es.",
+      "hint": "Text in einfachen Anführungszeichen wird nicht erweitert."
+    },
+    "t09": {
+      "text": "Vorhersage: Was gibt `echo *.xyz` aus, wenn keine Namen zu `*.xyz` passen? Prüfe es im Labor.",
+      "hint": "In Bash bleibt ein nicht passendes Muster standardmäßig unverändert."
+    },
+    "t10": {
+      "text": "Fehlersuche: Sprich den Namen `old report.txt` als ein Argument an und entferne diese Datei.",
+      "hint": "Setze den Namen mit Leerzeichen in Anführungszeichen: `rm \"old report.txt\"`."
+    },
+    "t11": {
+      "text": "Mini-Projekt: Erstelle den Ordner `backup` und kopiere nur `.jpg`- und `.png`-Dateien hinein.",
+      "hint": "Verwende `mkdir backup` und danach `cp *.jpg *.png backup`."
+    },
+    "t12": {
+      "text": "Herausforderung: Erstelle mit geschweiften Klammern die Namen `log_1.txt`, `log_2.txt` und `log_3.txt`; entferne anschließend mit dem Muster `log_?` alle drei.",
+      "hint": "Führe zuerst `touch log_{1,2,3}.txt`, danach `rm log_?.txt` aus."
+    },
+    "t13": {
+      "text": "Ticket: Benenne `my file.txt` mit Leerzeichen in `my_file.txt` um. Achte darauf, dass der ursprüngliche Name ein einzelnes Argument bleibt.",
+      "hint": "Verwende `mv \"my file.txt\" my_file.txt`."
+    }
+  },
+  "vm": {
+    "intro": "Du kannst die Befehle dieses Abschnitts in deiner eigenen VM ausführen. Erstelle Dateien nur im Ordner `glob-lab` in deinem Home-Verzeichnis und teste Löschmuster nicht in anderen Ordnern.",
+    "tasks": {
+      "v01": {
+        "title": "Platzhalter für ein Zeichen",
+        "text": "Erstelle `glob-lab` in deinem Home-Verzeichnis. Lege darin die Namen `a1.txt` und `a2.txt` an und liste anschließend das Muster `a?.txt` auf.",
+        "blocks": [
+          {
+            "cmd": "mkdir -p ~/glob-lab && cd ~/glob-lab && touch a1.txt a2.txt && ls a?.txt",
+            "expected": "a1.txt\na2.txt"
+          }
+        ],
+        "differs": [
+          "`a?.txt` passt auf genau ein Zeichen; beide Namen sollten erscheinen.",
+          "Wenn die Namen nebeneinander erscheinen, zeigt `ls -1 a?.txt` jeden in einer eigenen Zeile."
+        ]
+      },
+      "v02": {
+        "title": "Einfache und doppelte Anführungszeichen",
+        "text": "Definiere in derselben Terminalsitzung zuerst `NAME=linux`. Gib die Variable dann mit doppelten und einfachen Anführungszeichen aus. Die Ausgabe sollte sowohl `linux` als auch `$NAME` enthalten.",
+        "blocks": [
+          {
+            "cmd": "NAME=linux\necho \"$NAME\"\necho '$NAME'",
+            "expected": "linux\n$NAME"
+          }
+        ],
+        "differs": [
+          "Wenn in beiden Zeilen `linux` erscheint, hast du möglicherweise statt einfacher doppelte Anführungszeichen verwendet.",
+          "Die Zuweisung `NAME=linux` und die `echo`-Befehle müssen in derselben Shell-Sitzung laufen."
+        ]
+      },
+      "v03": {
+        "title": "Namen mit Leerzeichen erhalten",
+        "text": "Erstelle in `glob-lab` einen Ordner namens `my docs`. Liste ihn anschließend mit Anführungszeichen auf; die Ausgabe sollte `my docs` enthalten.",
+        "blocks": [
+          {
+            "cmd": "mkdir -p ~/glob-lab && cd ~/glob-lab && mkdir -p \"my docs\" && ls -d \"my docs\"",
+            "expected": "my docs"
+          }
+        ],
+        "differs": [
+          "Wird der Name geteilt, prüfe die Anführungszeichen sowohl beim Erstellen als auch beim Auflisten.",
+          "`ls -d` zeigt den Ordnernamen statt seines Inhalts."
+        ]
+      },
+      "v04": {
+        "title": "Treffer vor dem Löschen prüfen",
+        "text": "Erstelle in `glob-lab` zwei temporäre Dateien. Liste zuerst die Treffer für `*.tmp` auf und prüfe, dass nur diese beiden Namen erscheinen. Lösche sie nur, wenn du den richtigen Ordner und die richtigen Treffer bestätigt hast.",
+        "blocks": [
+          {
+            "cmd": "cd ~/glob-lab && touch sample1.tmp sample2.tmp && ls *.tmp"
+          }
+        ],
+        "differs": [
+          "Wenn weitere Namen erscheinen, führe den Löschbefehl nicht aus; prüfe zuerst `pwd` und die Liste.",
+          "Gibt es keine Treffer, prüfe, ob du in `glob-lab` bist und ob die Namen auf `.tmp` enden."
+        ]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {
+      "q": "Worauf passt der Platzhalter `?`?",
+      "options": [
+        "Auf null oder mehr Zeichen",
+        "Nur auf eine Dateiendung",
+        "Auf alle Zeichen in eckigen Klammern",
+        "Auf genau ein Zeichen"
+      ],
+      "explain": "`?` steht für genau ein Zeichen; `*` passt auf null oder mehr Zeichen."
+    },
+    "q2": {
+      "q": "Welche Schreibweise gibt `$HOME` aus, ohne den Ausdruck zu erweitern?",
+      "options": [
+        "`echo '$HOME'`",
+        "`echo \"$HOME\"`",
+        "`echo $HOME`",
+        "`echo \\$HOME`"
+      ],
+      "explain": "Innerhalb einfacher Anführungszeichen bleibt alles unverändert. In diesem Beispiel schützt auch der Backslash das Zeichen `$`."
+    },
+    "q3": {
+      "q": "Was macht `echo *.xyz` in Bash standardmäßig, wenn kein Name zu `*.xyz` passt?",
+      "options": [
+        "Es löscht alle Dateien",
+        "Es gibt nichts aus",
+        "Es gibt das nicht passende Muster `*.xyz` unverändert aus",
+        "Es wechselt den aktuellen Ordner"
+      ],
+      "explain": "In der Standardeinstellung von Bash wird ein nicht passendes Glob-Muster unverändert an den Befehl übergeben."
+    },
+    "q4": {
+      "q": "Wie listest du den Namen `my file.txt` korrekt auf?",
+      "options": [
+        "`ls my file.txt`",
+        "`ls \"my file.txt\"`",
+        "`ls my-file.txt`",
+        "`ls *.txt`"
+      ],
+      "explain": "Die Anführungszeichen erhalten das Leerzeichen und übergeben den Namen als ein Argument an `ls`."
+    }
+  },
+  "summary": [
+    "`*` passt auf null oder mehr Zeichen, `?` auf genau ein Zeichen.",
+    "`[abc]` passt auf eines der angegebenen Zeichen; `{a,b}` erweitert Optionen zu getrennten Zeichenfolgen.",
+    "Einfache Anführungszeichen erhalten alles unverändert; doppelte erhalten Leerzeichen und erweitern Variablen.",
+    "Namen mit Leerzeichen schützt du mit Anführungszeichen oder einem Backslash.",
+    "Prüfe vor einem destruktiven Befehl mit Platzhaltern den Ordner und die Treffer."
+  ],
+  "glossary": [
+    {
+      "term": "Glob",
+      "meaning": "Ein Platzhaltermuster, das die Shell mit Dateinamen abgleicht."
+    },
+    {
+      "term": "Platzhalter",
+      "meaning": "Ein Sonderzeichen, das in Dateinamensmustern ein oder mehrere Zeichen darstellt."
+    },
+    {
+      "term": "Quoting",
+      "meaning": "Festlegen, wie die Shell Leerzeichen und Sonderzeichen interpretiert."
+    },
+    {
+      "term": "Escape-Zeichen",
+      "meaning": "Ein Backslash (`\\`), der die Sonderbedeutung des folgenden Zeichens aufhebt."
+    }
+  ]
+}

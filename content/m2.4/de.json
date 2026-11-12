@@ -1,0 +1,329 @@
+{
+ "title": "Kopieren und Verschieben",
+ "lead": "Kopiere Dateien und Ordner mit cp, verschiebe oder benenne sie mit mv um und schütze dich mit -i, -n und -v vor Überschreib-Fallen.",
+ "objectives": [
+  "Du kopierst Dateien und (mit -r) Ordner mit cp; für Backups nutzt du cp -a.",
+  "Du verschiebst oder benennst Dateien und Ordner mit mv um.",
+  "Du prüfst, ob das Ziel existiert, und kontrollierst das Überschreiben mit -i, -n und -v."
+ ],
+ "sections": [
+  {
+   "id": "copy",
+   "title": "Kopieren: cp",
+   "body": [
+    "`cp QUELLE ZIEL` erzeugt eine **Kopie** der Quelle; die Quelle bleibt unverändert. Ist das Ziel ein vorhandener Ordner, landet die Kopie darin; sonst wird das Ziel der neue Dateiname.",
+    "Zum Kopieren von Ordnern brauchst du **`-r`** (recursive); ohne es überspringt `cp` den Ordner und gibt einen Fehler aus. Willst du auch Besitzer, Rechte und Zeitstempel behalten, nimm `cp -a` (archive), die sicherste Wahl für Backups."
+   ],
+   "commands": [
+    {
+     "cmd": "cp",
+     "what": "Kopiert eine Datei; die Quelle bleibt unverändert.",
+     "where": "Für ein Backup vor dem Bearbeiten oder um eine Datei woanders abzulegen.",
+     "why": "Geht das Original kaputt, hast du noch die Kopie.",
+     "example": "cp draft.txt draft_copy.txt"
+    },
+    {
+     "cmd": "cp -r",
+     "what": "Kopiert einen Ordner samt Inhalt.",
+     "where": "Beim Sichern eines Projekt- oder Fotoordners.",
+     "why": "Ohne -r wird ein Ordner nicht kopiert.",
+     "example": "cp -r photos backup/"
+    },
+    {
+     "cmd": "cp -a",
+     "what": "Archivkopie: behält Unterordner, Rechte, Besitzer und Zeitstempel.",
+     "where": "Bei echten Backups und beim Kopieren von Systemdateien.",
+     "why": "Die Kopie ist dem Original so ähnlich wie möglich.",
+     "example": "cp -a photos backup/"
+    }
+   ],
+   "tip": "Prüfe nach dem Kopieren mit `ls` Quelle und Ziel."
+  },
+  {
+   "id": "move",
+   "title": "Verschieben und Umbenennen: mv",
+   "body": [
+    "`mv QUELLE ZIEL` **verschiebt** eine Datei: Die Quelle verschwindet und erscheint am Ziel. Linux hat keinen eigenen 'Umbenennen'-Befehl; Verschieben im selben Ordner ist Umbenennen (`mv old.txt new.txt`).",
+    "Für Ordner brauchst du kein `-r`. Bei mehreren Quellen muss das letzte Argument ein vorhandener **Ordner** sein: `mv a.txt b.txt folder/`. Innerhalb desselben Dateisystems kopiert `mv` keine Daten, sondern ändert nur den Eintrag; deshalb ist es sehr schnell."
+   ],
+   "commands": [
+    {
+     "cmd": "mv",
+     "what": "Verschiebt eine Datei oder einen Ordner in einen anderen Ordner.",
+     "where": "Beim Aufräumen oder wenn eine Datei am falschen Ort liegt.",
+     "why": "Hinterlässt keine Kopie und braucht keinen zusätzlichen Platz.",
+     "example": "mv wrong/report.txt inbox/"
+    },
+    {
+     "cmd": "mv old new",
+     "what": "Benennt im selben Ordner um (wenn das Ziel nicht existiert).",
+     "where": "Um einen Datei- oder Ordnernamen zu korrigieren.",
+     "why": "Umbenennen = Verschieben am selben Ort.",
+     "example": "mv todo.txt tasks.txt"
+    },
+    {
+     "cmd": "mv a b folder/",
+     "what": "Verschiebt mehrere Dateien mit einem Befehl in einen Ordner.",
+     "where": "Beim Aufräumen in großen Mengen.",
+     "why": "Ein Befehl, weniger Fehler.",
+     "example": "mv inbox/mail1.txt inbox/mail2.txt backup/"
+    }
+   ],
+   "tip": "Stelle sicher, dass der Zielordner existiert: Sonst benennt `mv a.txt folder` die Datei in `folder` um!"
+  },
+  {
+   "id": "safety",
+   "title": "Überschreiben und Schutzoptionen",
+   "body": [
+    "Existiert am Ziel eine Datei mit gleichem Namen, **überschreiben** `cp` und `mv` sie **ohne Nachfrage**; der alte Inhalt kommt nicht zurück. Das ist der häufigste Weg, still Daten zu verlieren.",
+    "Drei Schutzoptionen: **`-i`** (interactive) fragt vor dem Überschreiben, **`-n`** (no-clobber) lässt vorhandene Dateien in Ruhe, **`-v`** (verbose) gibt Zeile für Zeile aus, was passiert. Bei vielen Distributionen sind `cp` und `mv` für root auf `-i` aliasiert, für normale Benutzer nicht."
+   ],
+   "commands": [
+    {
+     "cmd": "cp -i",
+     "what": "Fragt (y/n) nach, bevor ein vorhandenes Ziel überschrieben wird.",
+     "where": "Wenn du nicht sicher bist, ob das Ziel existiert.",
+     "why": "Verhindert versehentlichen Datenverlust.",
+     "example": "cp -i tasks.txt draft.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cp -n",
+     "what": "Überschreibt eine vorhandene Datei nie.",
+     "where": "Bei Massenkopien, um ältere Dateien zu schützen.",
+     "why": "Leise, aber sicher: Das Ziel bleibt unverändert.",
+     "example": "cp -n tasks.txt draft.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cp -v",
+     "what": "Gibt jede kopierte Datei aus.",
+     "where": "Bei Vorgängen mit vielen Dateien, um zu sehen, was passiert.",
+     "why": "Das Ergebnis lässt sich leicht überprüfen.",
+     "example": "cp -v tasks.txt tasks_v.txt"
+    },
+    {
+     "cmd": "mv -i",
+     "what": "Fragt beim Verschieben vor dem Überschreiben nach.",
+     "where": "Beim Verschieben in einen Ordner, der eine gleichnamige Datei enthalten könnte.",
+     "why": "Die Datei am Ziel geht nicht verloren.",
+     "example": "mv -i draft.txt backup/",
+     "nosim": true
+    }
+   ],
+   "warn": "`cp a b` und `mv a b` **überschreiben `b` ohne Nachfrage**, falls es existiert. Prüfe vorher mit `ls b` oder füge `-i` / `-n` hinzu.",
+   "danger": "Ein falsches Ziel (zum Beispiel `mv notes.txt /etc/hosts`) kann eine wichtige Systemdatei zerstören. Mache vor Experimenten in der Nähe von Systemordnern einen VM-Snapshot; ohne Rechte schlägt der Befehl einfach fehl.",
+   "tip": "Für dauerhaften Schutz kannst du `alias cp='cp -i'` und `alias mv='mv -i'` definieren (in die Shell-Konfigurationsdatei eintragen)."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Wechsle in den Arbeitsordner: `cd lab`.",
+   "hint": "Alle folgenden Aufgaben finden in `~/lab` statt."
+  },
+  "t02": {
+   "text": "Erstelle eine Kopie von `draft.txt` namens `draft_copy.txt`: `cp draft.txt draft_copy.txt`.",
+   "hint": "Erst die Quelle, dann das Ziel. Mit `ls` siehst du, dass beide existieren."
+  },
+  "t03": {
+   "text": "Benenne `todo.txt` in `tasks.txt` um: `mv todo.txt tasks.txt`.",
+   "hint": "Umbenennen ist Verschieben im selben Ordner; `todo.txt` muss weg sein."
+  },
+  "t04": {
+   "text": "Erstelle einen Backup-Ordner: `mkdir backup`.",
+   "hint": "Er ist das Ziel der nächsten Schritte."
+  },
+  "t05": {
+   "text": "Kopiere `draft.txt` in den Ordner `backup`: `cp draft.txt backup/`.",
+   "hint": "Der abschließende `/` zeigt, dass das Ziel ein Ordner ist."
+  },
+  "t06": {
+   "text": "Kopiere den Ordner `photos` samt Inhalt nach `backup`: `cp -r photos backup/`.",
+   "hint": "Für Ordner ist `-r` Pflicht."
+  },
+  "t07": {
+   "text": "Verschieben und umbenennen in einem Schritt: `mv draft_copy.txt backup/draft_old.txt`.",
+   "hint": "Ein neuer Name im Ziel benennt beim Verschieben um."
+  },
+  "t08": {
+   "text": "Vorhersage: Was macht `cp photos backup` (ohne `-r`)? Führe es aus und prüfe.",
+   "hint": "Erwartet wird ein Fehler: Der Ordner wird übersprungen ('-r not specified')."
+  },
+  "t09": {
+   "text": "Vorhersage: Was zeigt `cat backup/draft.txt`? Führe es aus und prüfe.",
+   "hint": "Die Kopie hat denselben Inhalt wie das Original: `draft v1`."
+  },
+  "t10": {
+   "text": "Vorhersage: Versuche, eine nicht vorhandene Datei zu verschieben: `mv ghost.txt backup`. Klappt es?",
+   "hint": "Erwartet wird 'No such file or directory'."
+  },
+  "t11": {
+   "text": "Fehlersuche: `report.txt` liegt versehentlich im Ordner `wrong`. Verschiebe sie in den Ordner `inbox`.",
+   "hint": "`mv wrong/report.txt inbox/`. Danach mit `ls wrong inbox` prüfen."
+  },
+  "t12": {
+   "text": "Mini-Projekt: Erstelle `archive/2026` mit `mkdir -p` und verschiebe dann `inbox/mail1.txt` dorthin unter dem Namen `jan.txt`.",
+   "hint": "Zwei Befehle: `mkdir -p archive/2026`, dann `mv inbox/mail1.txt archive/2026/jan.txt`."
+  },
+  "t13": {
+   "text": "Herausforderung: Benenne den Ordner `photos` in `pictures` um und kopiere den Ordner `pictures` samt Inhalt nach `~/Documents`.",
+   "hint": "Erst `mv`, dann `cp -r`; das Ziel `~/Documents` ist ein vorhandener Ordner."
+  },
+  "t14": {
+   "text": "TICKET #2410 — Die Buchhaltung möchte ein Backup des Ordners `inbox` unter dem Namen `backup/inbox_2026`. Das Original `inbox` muss unverändert und vollständig bleiben.",
+   "hint": "Ordnerkopie: `cp -r inbox backup/inbox_2026`. Das Ziel existiert nicht, daher wird es der neue Name."
+  },
+  "t15": {
+   "text": "Kopiere mit `-v` und sieh, was passiert: `cp -v tasks.txt tasks_v.txt`.",
+   "hint": "-v gibt jede kopierte Datei aus; prüfe das Ergebnis mit `ls`."
+  },
+  "t16": {
+   "text": "Vorhersage: `cp tasks.txt draft.txt` überschreibt das Ziel. Führe es aus und lies dann den Inhalt mit `cat draft.txt`. Was siehst du?",
+   "hint": "`draft v1` ist weg; `buy milk` steht jetzt dort. Auf einem echten System hätte `-i` das verhindert."
+  }
+ },
+ "vm": {
+  "intro": "Arbeite auf deiner VM in einem sicheren Ordner namens `~/vmlab`; experimentiere nie mit `cp` und `mv` in Ordnern mit echten Daten.",
+  "tasks": {
+   "v01": {
+    "title": "Datei kopieren",
+    "text": "Erstelle eine Datei, kopiere sie und füge die Ausgabe von `ls -l` ein.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/vmlab && cd ~/vmlab\necho \"original content\" > original.txt\ncp original.txt copy.txt\nls -l",
+      "expected": "total 8\n-rw-r--r--. 1 student student 17 Jan 10 10:00 copy.txt\n-rw-r--r--. 1 student student 17 Jan 10 10:00 original.txt"
+     }
+    ],
+    "differs": [
+     "Datum, Uhrzeit und Besitzer können abweichen; `copy.txt` und `original.txt` müssen erscheinen.",
+     "Das `.`-Zeichen (SELinux) erscheint nur auf Rocky/Alma, nicht auf Ubuntu."
+    ]
+   },
+   "v02": {
+    "title": "Ordner kopieren",
+    "text": "Erstelle einen Projektordner, sichere ihn mit `cp -r` und füge die Ausgabe von `ls -R` ein.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\nmkdir -p project/src\ntouch project/src/main.c\ncp -r project project_backup\nls -R",
+      "expected": ".:\ncopy.txt  original.txt  project  project_backup\n\n./project:\nsrc\n..."
+     }
+    ],
+    "differs": [
+     "Bei `cp: -r not specified` hast du `-r` vergessen.",
+     "Die Reihenfolge kann abweichen; `project` und `project_backup` müssen beide erscheinen."
+    ]
+   },
+   "v03": {
+    "title": "Verschieben und umbenennen",
+    "text": "Benenne die Datei um, verschiebe sie dann in einen neuen Ordner und füge das Ergebnis ein.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\nmv copy.txt renamed.txt\nmkdir moved\nmv renamed.txt moved/\nls . moved",
+      "expected": ".:\nmoved  original.txt  project  project_backup\n\nmoved:\nrenamed.txt"
+     }
+    ],
+    "differs": [
+     "Bei `mv: cannot stat` ist der Quellname falsch; schau vorher mit `ls`.",
+     "Ohne vorher `moved/` anzulegen, schlägt `mv renamed.txt moved/` fehl."
+    ]
+   },
+   "v04": {
+    "title": "Überschreiben verhindern",
+    "text": "Zeige mit `-n`, dass eine vorhandene Datei erhalten bleibt. Achtung: Ohne `-n` ginge der Inhalt verloren.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\necho \"keep me\" > keep.txt\necho \"new\" > other.txt\ncp -n other.txt keep.txt\ncat keep.txt",
+      "expected": "keep me"
+     }
+    ],
+    "differs": [
+     "Siehst du `new`, fehlt `-n` oder dein `cp` ist sehr alt; probiere `cp -i` und antworte `n`.",
+     "Mit `-i` beantworte die Frage `overwrite 'keep.txt'?` mit `n`."
+    ]
+   },
+   "v05": {
+    "title": "Aufräumen",
+    "text": "Lösche den Arbeitsordner. Schau vorher hinein; wenn keine Fehler, drücke \"Erledigt\".",
+    "blocks": [
+     {
+      "cmd": "ls -R ~/vmlab\nrm -r ~/vmlab\nls ~/vmlab",
+      "expected": "ls: cannot access '/home/student/vmlab': No such file or directory"
+     }
+    ],
+    "differs": [
+     "Bei `rm: cannot remove ... Is a directory` hast du `-r` vergessen."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Warum schlägt `cp photos backup/` bei einem Ordner fehl?",
+   "options": [
+    "Der Ordner backup ist geschützt",
+    "Zum Kopieren von Ordnern braucht man -r",
+    "cp kopiert nur .txt-Dateien",
+    "Der Ordner muss erst umbenannt werden"
+   ],
+   "explain": "`cp` überspringt Ordner standardmäßig; mit `cp -r` (oder `cp -a`) kopierst du sie samt Inhalt."
+  },
+  "q2": {
+   "q": "Welcher Befehl benennt eine Datei im selben Ordner um?",
+   "options": [
+    "rename",
+    "cp",
+    "mv",
+    "touch"
+   ],
+   "explain": "Unter Linux ist Umbenennen ein Verschieben im selben Ordner: `mv old new`."
+  },
+  "q3": {
+   "q": "Was macht `cp -i a b`, wenn das Ziel schon existiert?",
+   "options": [
+    "Fragt vor dem Überschreiben nach",
+    "Löscht das Ziel stillschweigend",
+    "Führt die Dateien zusammen",
+    "Ignoriert das Ziel und kopiert nicht"
+   ],
+   "explain": "`-i` (interactive) fragt vor dem Überschreiben nach. Um nie ohne Nachfrage zu überschreiben, nimmt man `-n`."
+  },
+  "q4": {
+   "q": "Welche Option erhält bei einem Backup am besten Rechte und Zeitstempel?",
+   "options": [
+    "cp -v",
+    "cp -n",
+    "cp -i",
+    "cp -a"
+   ],
+   "explain": "`cp -a` (archive) kopiert rekursiv und bewahrt Rechte, Besitzer und Zeitstempel."
+  }
+ },
+ "summary": [
+  "`cp source target` kopiert, `cp -r` Ordner, `cp -a` behält zusätzlich die Rechte.",
+  "`mv source target` verschiebt; im selben Ordner benennt es um, und Ordner brauchen kein `-r`.",
+  "Existiert das Ziel, überschreiben `cp` und `mv` ohne Nachfrage; `-i` fragt, `-n` schützt, `-v` zeigt.",
+  "Prüfe mit `ls`, ob das Ziel existiert und wo die Dinge landen."
+ ],
+ "glossary": [
+  {
+   "term": "Quelle / Ziel",
+   "meaning": "Das kopierte oder verschobene Objekt / der Ort, wohin es geht."
+  },
+  {
+   "term": "rekursiv (-r)",
+   "meaning": "Einen Ordner samt Unterordnern und Inhalt verarbeiten."
+  },
+  {
+   "term": "Überschreiben",
+   "meaning": "Den Inhalt einer gleichnamigen Zieldatei durch neuen Inhalt ersetzen."
+  },
+  {
+   "term": "Archivkopie (-a)",
+   "meaning": "Eine rekursive Kopie, die Rechte, Besitzer und Zeitstempel erhält."
+  },
+  {
+   "term": "Umbenennen",
+   "meaning": "Einen Namen mit mv im selben Ordner ändern."
+  }
+ ]
+}

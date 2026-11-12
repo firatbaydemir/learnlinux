@@ -1,0 +1,147 @@
+{
+ "title": "Kullanıcı yönetimi: ekle, değiştir, kilitle, sil",
+ "lead": "useradd, passwd, usermod, groupadd, chage ve userdel ile bir hesabın yaşam döngüsünü güvenle yönet.",
+ "objectives": [
+  "`useradd -m -s` ile home dizini ve kabuğu olan bir hesap açar, `passwd` ile parola verirsin.",
+  "`usermod -aG` ile gruba eklersin ve `-G` içindeki `-a` unutulursa ne olduğunu bilirsin.",
+  "Hesabı `usermod -L` ile kilitler, `chage` ile parola politikasını yönetirsin.",
+  "`userdel` ve `userdel -r` farkını bilir, silmeden önce veriyi korumayı düşünürsün."
+ ],
+ "sections": [
+  {
+   "id": "create",
+   "title": "Hesap oluşturma: useradd ve passwd",
+   "body": [
+    "Yeni bir çalışan geldiğinde ona bir hesap açarsın. Bu işlemler sistem dosyalarını (`/etc/passwd`, `/etc/shadow`, `/etc/group`) değiştirdiği için **root yetkisi**, yani `sudo` gerekir.",
+    "`useradd` **home dizinini varsayılan olarak her dağıtımda oluşturmaz**; bu yüzden `-m` ekle. `-s /bin/bash` giriş kabuğunu belirler. Yeni home dizini `/etc/skel` içindeki şablon dosyalarla doldurulur. `passwd` hesaba parola atar; yazarken ekranda hiçbir şey görünmez, bu normaldir.",
+    "Debian/Ubuntu'da etkileşimli `adduser` sarmalayıcısı da vardır; Rocky/Alma'da yoktur (orada `useradd` kullanılır). Betiklerde her yerde çalışan `useradd` tercih edilir."
+   ],
+   "commands": [
+    {"cmd": "useradd", "what": "Yeni kullanıcı hesabı oluşturur.", "where": "Yeni çalışan veya servis hesabı açarken.", "why": "Herkesin ayrı dosyası ve yetkisi olur.", "example": "sudo useradd -m -s /bin/bash testuser", "nosim": true},
+    {"cmd": "passwd", "what": "Hesabın parolasını belirler veya değiştirir.", "where": "Hesap açıldıktan sonra.", "why": "Parolasız hesapla giriş yapılamaz.", "example": "sudo passwd testuser", "nosim": true},
+    {"cmd": "chage", "what": "Parola yaşlandırma ayarlarını yönetir (`-d 0` ilk girişte parola değiştirtir).", "where": "Yeni hesabı ilk girişte parola değişmeye zorlarken.", "why": "Yöneticinin verdiği geçici parola kalıcı olmaz.", "example": "sudo chage -d 0 testuser", "nosim": true},
+    {"cmd": "getent passwd", "what": "Hesabın oluştuğunu doğrular.", "where": "Her ekleme sonrası.", "why": "Yazım hatasını hemen yakalarsın.", "example": "getent passwd testuser", "nosim": true}
+   ],
+   "tip": "Hesap adlarını küçük harf ve ASCII tut (`alice`, `testuser`). Boşluk, Türkçe karakter ve büyük harf sorun çıkarır.",
+   "warn": "Gerçek bir VM'de kullanıcı eklemek sistemi değiştirir. Başlamadan önce VM'inin snapshot'ını al (modül 0.2). Parolayı komut satırına yazma (`chpasswd` ile geçmişe düşer)."
+  },
+  {
+   "id": "modify",
+   "title": "Değiştirme: usermod, groupadd, gruplar",
+   "body": [
+    "`usermod` var olan hesabı değiştirir. En sık kullanılan: `-aG GROUP` (gruba **ekle**), `-s` (kabuk), `-L` (kilitle), `-U` (kilidi aç). Grup oluşturmak için `groupadd`, grup üyeliği değişince kullanıcının **yeniden giriş yapması** gerekir.",
+    "En klasik hata: `-a` olmadan `usermod -G devs alice` yazmak. Bu, alice'in tüm ek gruplarını siler ve yalnızca `devs` bırakır; `wheel` dahil. Sonuç: kullanıcı sudo yetkisini kaybeder. Her zaman `-aG` kullan.",
+    "Sudo yetkisi, Rocky/Alma'da `wheel`, Ubuntu'da `sudo` grubuna üyelikle verilir. `/etc/sudoers` dosyasını elle düzenleme; gerekirse `visudo` kullan, o sözdizimini denetler."
+   ],
+   "commands": [
+    {"cmd": "groupadd", "what": "Yeni grup oluşturur.", "where": "Proje ekibi için ortak grup açarken.", "why": "Yetkiyi tek tek kişilere değil gruba verirsin.", "example": "sudo groupadd labteam", "nosim": true},
+    {"cmd": "usermod -aG", "what": "Kullanıcıyı mevcut gruplarını koruyarak gruba ekler.", "where": "Birini ekibe veya sudo grubuna alırken.", "why": "`-a` olmazsa eski gruplar silinir.", "example": "sudo usermod -aG labteam testuser", "nosim": true},
+    {"cmd": "usermod -L", "what": "Hesabı kilitler (parola ile giriş kapanır); `-U` ile açılır.", "where": "Çalışan ayrılırken veya şüpheli hesapta.", "why": "Silmeden önce erişimi hemen keser, veri korunur.", "example": "sudo usermod -L testuser", "nosim": true},
+    {"cmd": "passwd -S", "what": "Hesap durumunu gösterir (L/LK = kilitli).", "where": "Kilidi doğrularken.", "why": "Kilidin gerçekten uygulandığını görürsün.", "example": "sudo passwd -S testuser", "nosim": true},
+    {"cmd": "id", "what": "Grup değişikliğini doğrular.", "where": "Her usermod sonrası.", "why": "Üyeliğin eklendiğini ve eskilerin silinmediğini gösterir.", "example": "id testuser"}
+   ],
+   "tip": "Grup değişikliğinden sonra açık oturum eski grupları kullanır; kullanıcı çıkış yapıp yeniden girmeli.",
+   "danger": "`usermod -G` (`-a` olmadan) kullanıcının tüm ek gruplarını siler. Bir yönetici hesabında bu, sudo erişimini kaybettirip sistemin dışında kalmana yol açabilir. Her zaman `-aG` yaz ve `id` ile kontrol et."
+  },
+  {
+   "id": "delete",
+   "title": "Silme: userdel ve ev dizini",
+   "body": [
+    "`userdel NAME` hesabı `/etc/passwd`, `/etc/shadow` ve `/etc/group` kayıtlarından siler, ama **home dizinini ve dosyalarını bırakır**. Dizin artık sahibi olmayan bir UID'ye ait kalır. `userdel -r` ise home dizinini ve posta kutusunu da kalıcı olarak siler.",
+    "Gerçek hayatta güvenli sıra: (1) `usermod -L` ile kilitle, (2) çalışan süreçleri ve cron görevlerini kontrol et, (3) home dizinini yedekle, (4) ancak sonra sil. Hesap silinen kullanıcının dosyalarını `find / -user UID` ile bulabilirsin.",
+    "Kullanıcının oturumu veya çalışan süreci varsa `userdel` hata verir; önce oturumu kapattır."
+   ],
+   "commands": [
+    {"cmd": "userdel", "what": "Hesabı siler, home dizinini korur.", "where": "Çalışan ayrıldıktan ve veri yedeklendikten sonra.", "why": "Veri kaybı riski olmadan hesabı kapatır.", "example": "sudo userdel testuser", "nosim": true},
+    {"cmd": "userdel -r", "what": "Hesabı, home dizinini ve posta kutusunu kalıcı siler.", "where": "Yalnızca verinin gerçekten gereksiz olduğu durumlarda.", "why": "Disk ve kalıntıları temizler.", "example": "sudo userdel -r testuser", "nosim": true},
+    {"cmd": "ls -ld", "what": "Home dizininin hâlâ var olduğunu gösterir.", "where": "userdel sonrası.", "why": "Kalıntı dizinlerin sahipsiz kaldığını görürsün.", "example": "ls -ld /home/testuser"}
+   ],
+   "warn": "`userdel -r` geri alınamaz: fotoğraflar, belgeler ve anahtarlar gider. Önce yedek al, VM'inde snapshot al, hesabı kilitle ve silme komutunu yazmadan önce kullanıcı adını bir kez daha oku.",
+   "danger": "`sudo rm -r /home/NAME` yazarken yolu yanlış bırakırsan (örneğin boşluk veya eksik ad) başka verileri silersin. Yalnızca kendi oluşturduğun `testuser` için ve tam yolu yazarak çalıştır."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`sudo whoami` ile sudo yetkini dene. Çıktı `root` olmalı.", "hint": "`student` wheel grubunda olduğu için sudo çalışır."},
+  "t02": {"text": "`grep alice /etc/passwd` ile alice hesabının kaydını göster.", "hint": "6. alan home dizinidir."},
+  "t03": {"text": "`ls /home` ile hangi kullanıcıların home dizini olduğunu listele.", "hint": "Her kullanıcı için bir klasör vardır."},
+  "t04": {"text": "`sudo cat /etc/shadow` ile parola özetlerini oku. Dosya sadece root'a açıktır.", "hint": "Başına `sudo` koy; özetler `$6$...` ile başlar."},
+  "t05": {"text": "`sudo ls -ld /home/alice` ile alice'in home dizininin izinlerini ve sahibini gör.", "hint": "`-d` dizinin kendisini listeler, içeriğini değil."},
+  "t06": {"text": "`cat /etc/group` ile tüm grupları oku.", "hint": "Satır: grup:x:GID:üyeler."},
+  "t07": {"text": "`grep devs /etc/group` ile `devs` grubunun üyelerini bul.", "hint": "Üyeler 4. alanda, virgülle ayrılmıştır."},
+  "t08": {"text": "`sudo ls -la /home/alice` ile alice'in home içeriğini (gizli dosyalar dahil) listele.", "hint": "Başka kullanıcının home dizinini okumak için root gerekir."},
+  "t09": {"text": "Tahmin: normal kullanıcıyla `cat /etc/shadow` ne yapar? Çalıştır ve doğrula.", "hint": "Permission denied|Erişim engellendi|Zugriff verweigert beklenir."},
+  "t10": {"text": "Tahmin: alice'in home dizininin izinleri nasıl görünür? Önce tahmin et, sonra `sudo ls -ld /home/alice` ile doğrula.", "hint": "Özel home dizini: `drwx------` (700)."},
+  "t11": {"text": "Tahmin: henüz oluşturulmamış `carol` için `id carol` ne döner? Çalıştır.", "hint": "`no such user` hatası beklenir."},
+  "t12": {"text": "Hata ayıkla: `~/offboard.sh` içindeki `userdel -r alice` komutu, denetim için saklanması gereken home dizinini siler. Betiği `-r` olmadan `sudo userdel alice` içerecek şekilde yeniden yaz.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Tek tırnak kullan."},
+  "t13": {"text": "Mini proje: `~/new_user_plan.txt` dosyasına üç satırlık plan yaz: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` ve `sudo usermod -aG devs carol`.", "hint": "İlk satırda `>`, sonrakilerde `>>` kullan."},
+  "t14": {"text": "Meydan okuma: `~/onboard.sh` betiği şunları yapsın: `dave` hesabını `-m -s /bin/bash -G devs` ile aç, sonra `chage -d 0 dave` ile ilk girişte parola değiştirt. Betiği `chmod 750` yap.", "hint": "İki `echo` ve bir `chmod`; `sudo` kullan."},
+  "t15": {"text": "TICKET #4210: `eve` şirketten ayrıldı. Önce hesabı kilitle, sonra (home dizinini koruyarak) sil. Komutları `~/offboard_eve.txt` dosyasına sırayla yaz.", "hint": "`sudo usermod -L eve` ve `sudo userdel eve`; `-r` kullanma."},
+  "t16": {"text": "TICKET #4211: `frank` sunucuda yönetici olacak (Rocky/Alma). Komutu `~/frank.txt` dosyasına yaz.", "hint": "`sudo usermod -aG wheel frank`; `-a` unutma."}
+ },
+ "vm": {
+  "intro": "Bu bölüm sistemi değiştirir. Önce VM'inin snapshot'ını al. Yalnızca bu bölümdeki `testuser` ve `labteam` üzerinde çalış; kendi hesabına dokunma.",
+  "tasks": {
+   "v01": {
+    "title": "Hesap oluştur",
+    "text": "`testuser` hesabını home dizini ve bash kabuğuyla aç ve kaydını yapıştır.",
+    "blocks": [{"cmd": "sudo useradd -m -s /bin/bash testuser\ngetent passwd testuser", "expected": "testuser:x:1001:1001::/home/testuser:/bin/bash"}],
+    "differs": ["`user already exists` görürsen hesap önceden açılmış; `getent passwd testuser` yeterlidir.", "Ubuntu'da UID'in 1001 yerine başka bir sayı olabilir."]
+   },
+   "v02": {
+    "title": "Parola ver",
+    "text": "`testuser` için parola ata. Yazarken ekranda hiçbir şey görünmez. Başarı mesajını yapıştır.",
+    "blocks": [{"cmd": "sudo passwd testuser", "expected": "passwd: password updated successfully"}],
+    "differs": ["Rocky/Alma'da mesaj `passwd: all authentication tokens updated successfully.` olur.", "Parola çok kısa/basitse uyarı çıkar ama yine de kabul edilir (root olarak)."]
+   },
+   "v03": {
+    "title": "Gruba ekle",
+    "text": "`labteam` grubunu aç, `testuser`'ı **-aG** ile ekle ve `id` çıktısını yapıştır.",
+    "blocks": [{"cmd": "sudo groupadd labteam\nsudo usermod -aG labteam testuser\nid testuser", "expected": "uid=1001(testuser) gid=1001(testuser) groups=1001(testuser),1002(labteam)"}],
+    "differs": ["Grup varsa `groupadd: group 'labteam' already exists` çıkar; devam edebilirsin.", "Ana grubun yanında `labteam` görünmüyorsa `-a` ve `-G` harflerini kontrol et."]
+   },
+   "v04": {
+    "title": "Hesabı kilitle",
+    "text": "`testuser`'ı kilitle ve durumunu göster.",
+    "blocks": [{"cmd": "sudo usermod -L testuser\nsudo passwd -S testuser", "expected": "testuser L 2026-11-12 0 99999 7 -1"}],
+    "differs": ["Rocky/Alma'da durum `LK` olarak yazılır.", "Kilit açmak için `sudo usermod -U testuser`."]
+   },
+   "v05": {
+    "title": "Parola politikası",
+    "text": "`chage -l` çıktısını yapıştır; ilk girişte parola değiştirmeyi zorunlu kıl.",
+    "blocks": [{"cmd": "sudo chage -d 0 testuser\nsudo chage -l testuser", "expected": "Last password change                : password must be changed\nPassword expires                    : never\n..."}],
+    "differs": ["Çıktıda `Last password change` satırı olmalı; değer `password must be changed` ya da bir tarih olabilir.", "`chage: command not found` ise `shadow-utils` (Rocky) veya `passwd` paketi (Ubuntu) eksiktir."]
+   },
+   "v06": {
+    "title": "userdel home'u korur",
+    "text": "Hesabı `-r` OLMADAN sil; sonra hesabın yok, ama home dizininin duruyor olduğunu göster.",
+    "blocks": [{"cmd": "sudo userdel testuser\ngetent passwd testuser\nls -ld /home/testuser", "expected": "drwx------ 2 1001 1001 62 Nov 12 10:00 /home/testuser"}],
+    "differs": ["`getent` çıktı vermez; hesap silinmiştir.", "Home dizininin sahibi artık isim yerine sayı (1001) olarak görünür; bu sahipsiz dizin demektir.", "`user is currently used by process` hatasında kullanıcının oturumunu kapat."]
+   },
+   "v07": {
+    "title": "Temizlik",
+    "text": "Artık gereksiz olan deneme dizinini ve grubu temizle. Komutlarda yolu tam yaz. Bitince \"Yaptım\" de.",
+    "blocks": [{"cmd": "sudo rm -r /home/testuser\nsudo groupdel labteam\nls /home", "expected": "student"}],
+    "differs": ["`groupdel: group 'labteam' does not exist` ise zaten silinmiş.", "Yolu yanlış yazdığını fark edersen ENTER'a basma; `/home/testuser` tam yolundan emin ol."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "`sudo usermod -G devs alice` (`-a` olmadan) ne yapar?", "options": ["alice'i devs grubuna ekler, diğerlerini korur", "alice'in tüm ek gruplarını silip yalnızca devs bırakır", "alice hesabını siler", "alice'i kilitler"], "explain": "-G ek grup listesinin yerine geçer; `-a` (append) olmazsa wheel gibi eski gruplar da kaybolur."},
+  "q2": {"q": "`userdel alice` (`-r` olmadan) sonrasında ne olur?", "options": ["Home dizini de silinir", "Hiçbir şey olmaz", "Hesap silinir ama home dizini kalır", "Hesap yalnızca kilitlenir"], "explain": "Kayıtlar silinir, `/home/alice` ve dosyaları diskte kalır. Silmek için `-r` gerekir."},
+  "q3": {"q": "Bir hesabı silmeden hemen erişimini kesmek için ne yapılır?", "options": ["usermod -L", "userdel -r", "passwd -d", "chmod 000 /home"], "explain": "`usermod -L` parola ile girişi kapatır; veri ve hesap durur, gerekirse `-U` ile geri açılır."},
+  "q4": {"q": "Rocky/Alma'da sudo yetkisi hangi gruba üyelikle verilir?", "options": ["wheel", "sudoers", "admin", "root"], "explain": "RHEL ailesinde sudo grubu `wheel`'dir; Debian/Ubuntu'da `sudo`."}
+ },
+ "summary": [
+  "`sudo useradd -m -s /bin/bash ad` hesap açar; `passwd` parola verir; `chage -d 0` ilk girişte değiştirtir.",
+  "Gruba eklerken her zaman `usermod -aG`; `-a` unutulursa eski gruplar silinir.",
+  "`usermod -L` kilitler, `-U` açar; kilit silmeden önce güvenli ilk adımdır.",
+  "`userdel` home dizinini korur, `userdel -r` kalıcı siler; önce yedek ve snapshot."
+ ],
+ "glossary": [
+  {"term": "wheel", "meaning": "RHEL ailesinde sudo yetkisi veren yönetici grubu (Debian'da `sudo`)."},
+  {"term": "/etc/skel", "meaning": "Yeni home dizinine kopyalanan şablon dosyalar."},
+  {"term": "kilitli hesap", "meaning": "Parola ile girişi kapatılmış hesap (`usermod -L`)."},
+  {"term": "sahipsiz dizin", "meaning": "Sahibi silinmiş bir UID'ye ait kalan dizin."},
+  {"term": "snapshot", "meaning": "VM'in belirli andaki geri dönülebilir kaydı."}
+ ]
+}

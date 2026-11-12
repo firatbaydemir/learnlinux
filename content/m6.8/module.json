@@ -1,0 +1,71 @@
+{
+ "id": "6.8",
+ "level": 6,
+ "setup": {
+  "dirs": ["/home/student/audit", "/home/student/srv/site", "/home/student/srv/broken"],
+  "files": {
+   "/home/student/audit/ss.txt": "tcp LISTEN 0 128 0.0.0.0:22 users:((\"sshd\"))\ntcp LISTEN 0 511 0.0.0.0:80 users:((\"nginx\"))\ntcp LISTEN 0 511 0.0.0.0:443 users:((\"nginx\"))\ntcp LISTEN 0 80 0.0.0.0:3306 users:((\"mysqld\"))\ntcp LISTEN 0 128 127.0.0.1:8080 users:((\"python3\"))\nudp UNCONN 0 0 0.0.0.0:68 users:((\"dhclient\"))\n",
+   "/home/student/audit/passwd.txt": "root:x:0:0:root:/root:/bin/bash\nnginx:x:990:988:nginx:/var/lib/nginx:/sbin/nologin\ncarol:x:1003:1003::/home/carol:/bin/bash\nalice:x:1001:1001::/home/alice:/bin/bash\nbob:x:1002:1002::/home/bob:/bin/bash\n",
+   "/home/student/audit/group.txt": "staff:x:2001:alice,bob,carol\nadmins:x:2002:alice\n",
+   "/home/student/srv/site/index.html": "<h1>Small Company</h1>\n",
+   "/home/student/srv/broken/backup.sh": "#!/bin/bash\nmkdir -p ~/srv/broken/out\ncp ~/notes.txt ~/srv/broken/out/notes.bak\n"
+  },
+  "modes": [
+   ["/home/student/srv/site", "700"],
+   ["/home/student/srv/site/index.html", "600"],
+   ["/home/student/srv/broken/backup.sh", "644"]
+  ]
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"exists": "~/srv/company", "type": "d"}, "solution": ["mkdir -p ~/srv/company"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": [
+    {"exists": "~/srv/company/shared", "type": "d"}, {"exists": "~/srv/company/admin", "type": "d"},
+    {"exists": "~/srv/company/web", "type": "d"}, {"exists": "~/srv/company/backup", "type": "d"},
+    {"exists": "~/srv/company/scripts", "type": "d"}], "solution": ["mkdir ~/srv/company/{shared,admin,web,backup,scripts}"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^umask 0?27$", "ok": true}, "solution": ["umask 027"]},
+  {"id": "t04", "kind": "guided", "diff": 2, "check": {"mode": ["~/srv/company/shared", "2770"]}, "solution": ["chmod 2770 ~/srv/company/shared"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": [{"mode": ["~/srv/company/web", "755"]}, {"mode": ["~/srv/company/backup", "700"]}], "solution": ["chmod 755 ~/srv/company/web", "chmod 700 ~/srv/company/backup"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"contains": ["~/srv/company/web/index.html", "Company"]}, "solution": ["echo \"<h1>Small Company</h1>\" > ~/srv/company/web/index.html"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": [{"contains": ["~/srv/company/company.conf", "listen 80;"]}, {"contains": ["~/srv/company/company.conf", "root /srv/company/web;"]}], "solution": ["printf 'server {\\n    listen 80;\\n    server_name company.local;\\n    root /srv/company/web;\\n}\\n' > ~/srv/company/company.conf"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "drwxrws---", "of": "^ls -ld"}, "solution": ["ls -ld ~/srv/company/shared"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "\\balice\\b", "of": "^grep admins"}, "solution": ["grep admins ~/audit/group.txt | cut -d: -f4"]},
+  {"id": "t10", "kind": "predict", "diff": 2, "check": {"out": "\\b5\\b", "of": "^grep -c LISTEN"}, "solution": ["grep -c LISTEN ~/audit/ss.txt"]},
+  {"id": "t11", "kind": "debug", "diff": 2, "check": [{"mode": ["~/srv/site", "755"]}, {"mode": ["~/srv/site/index.html", "644"]}], "solution": ["chmod 755 ~/srv/site", "chmod 644 ~/srv/site/index.html"]},
+  {"id": "t12", "kind": "debug", "diff": 2, "check": [{"mode": ["~/srv/broken/backup.sh", "755"]}, {"exists": "~/srv/broken/out/notes.bak", "type": "f"}], "solution": ["chmod 755 ~/srv/broken/backup.sh", "~/srv/broken/backup.sh"]},
+  {"id": "t13", "kind": "mini", "diff": 2, "check": [{"mode": ["~/srv/company/scripts/backup.sh", "755"]}, {"contains": ["~/srv/company/scripts/backup.sh", "cp "]}, {"exists": "~/srv/company/backup/index.html.bak", "type": "f"}], "solution": ["printf '#!/bin/bash\\ncp ~/srv/company/web/index.html ~/srv/company/backup/index.html.bak\\n' > ~/srv/company/scripts/backup.sh", "chmod 755 ~/srv/company/scripts/backup.sh", "~/srv/company/scripts/backup.sh"]},
+  {"id": "t14", "kind": "mini", "diff": 3, "check": [
+    {"contains": ["~/srv/company/scripts/company-backup.service", "ExecStart=\\S*backup\\.sh"]},
+    {"contains": ["~/srv/company/scripts/company-backup.service", "Type=oneshot"]},
+    {"contains": ["~/srv/company/scripts/company-backup.timer", "\\[Timer\\]"]},
+    {"contains": ["~/srv/company/scripts/company-backup.timer", "OnCalendar="]},
+    {"contains": ["~/srv/company/scripts/company-backup.timer", "WantedBy=timers\\.target"]}],
+   "solution": ["printf '[Unit]\\nDescription=Company backup\\n\\n[Service]\\nType=oneshot\\nExecStart=/srv/company/scripts/backup.sh\\n' > ~/srv/company/scripts/company-backup.service", "printf '[Unit]\\nDescription=Daily company backup\\n\\n[Timer]\\nOnCalendar=*-*-* 02:00:00\\nPersistent=true\\n\\n[Install]\\nWantedBy=timers.target\\n' > ~/srv/company/scripts/company-backup.timer"]},
+  {"id": "t15", "kind": "challenge", "diff": 3, "check": [
+    {"contains": ["~/srv/company/firewall-plan.txt", "add-service=ssh[\\s\\S]*add-service=http\\b"]},
+    {"contains": ["~/srv/company/firewall-plan.txt", "add-service=https"]},
+    {"contains": ["~/srv/company/firewall-plan.txt", "--permanent"]},
+    {"contains": ["~/srv/company/firewall-plan.txt", "--reload"]}],
+   "solution": ["echo \"firewall-cmd --permanent --add-service=ssh\" > ~/srv/company/firewall-plan.txt", "echo \"firewall-cmd --permanent --add-service=http\" >> ~/srv/company/firewall-plan.txt", "echo \"firewall-cmd --permanent --add-service=https\" >> ~/srv/company/firewall-plan.txt", "echo \"firewall-cmd --reload\" >> ~/srv/company/firewall-plan.txt"]},
+  {"id": "t16", "kind": "challenge", "diff": 3, "check": [
+    {"linesMin": ["~/srv/company/REPORT.txt", 8]},
+    {"contains": ["~/srv/company/REPORT.txt", "(?=[\\s\\S]*alice)(?=[\\s\\S]*bob)(?=[\\s\\S]*carol)(?=[\\s\\S]*staff)(?=[\\s\\S]*admins)"]},
+    {"contains": ["~/srv/company/REPORT.txt", "(?=[\\s\\S]*\\b80\\b)(?=[\\s\\S]*\\b443\\b)(?=[\\s\\S]*linux-lab)(?=[\\s\\S]*backup)"]}],
+   "solution": ["echo \"Company server delivery report\" > ~/srv/company/REPORT.txt", "echo \"Host: $(hostname)\" >> ~/srv/company/REPORT.txt", "echo \"Date: $(date)\" >> ~/srv/company/REPORT.txt", "echo \"Users: alice bob carol\" >> ~/srv/company/REPORT.txt", "echo \"Groups: staff admins\" >> ~/srv/company/REPORT.txt", "echo \"Shared dir: /srv/company/shared mode 2770\" >> ~/srv/company/REPORT.txt", "echo \"Web: nginx ports 80 and 443\" >> ~/srv/company/REPORT.txt", "echo \"Backup: backup.sh via company-backup.timer\" >> ~/srv/company/REPORT.txt"]},
+  {"id": "t17", "kind": "ticket", "diff": 2, "check": [{"contains": ["~/audit/unexpected.txt", "^(?![\\s\\S]*(nginx|sshd))[\\s\\S]*3306[\\s\\S]*8080"]}, {"linesMin": ["~/audit/unexpected.txt", 3]}], "solution": ["grep -v -E ':(22|80|443) ' ~/audit/ss.txt > ~/audit/unexpected.txt"]},
+  {"id": "t18", "kind": "ticket", "diff": 3, "check": {"equals": ["~/audit/team.txt", "alice\nbob\ncarol\n"]}, "solution": ["grep /home/ ~/audit/passwd.txt | cut -d: -f1 | sort > ~/audit/team.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "ID=|PRETTY_NAME|Enforcing|Permissive|Disabled|apparmor|profiles"},
+  {"id": "v02", "expect": "(?=[\\s\\S]*drwxrws)(?=[\\s\\S]*staff)(?=[\\s\\S]*alice)"},
+  {"id": "v03", "expect": "HTTP/\\S+ 200|200 OK|Small Company"},
+  {"id": "v04", "expect": "(ssh|22)[\\s\\S]*(http|80)|(http|80)[\\s\\S]*(ssh|22)"},
+  {"id": "v05", "expect": "company-backup"},
+  {"id": "v06", "expect": "^(?![\\s\\S]*FAIL)[\\s\\S]*(OK:[\\s\\S]*){6}"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

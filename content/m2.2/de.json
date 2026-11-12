@@ -1,0 +1,150 @@
+{
+ "title": "Pfade und Typen",
+ "lead": "Lies absolute und relative Pfade richtig, erkenne Dateitypen mit ls -l und lege symbolische Links (Verknüpfungen) an.",
+ "objectives": [
+  "Du unterscheidest absolute (beginnen mit `/`) und relative Pfade und nutzt die Kürzel `.`, `..` und `~`.",
+  "Du liest den Dateityp am ersten Buchstaben von `ls -l` (`-`, `d`, `l`, `c`, `b`).",
+  "Du legst mit `ln -s` einen symbolischen Link an und siehst, worauf er zeigt."
+ ],
+ "sections": [
+  {
+   "id": "paths",
+   "title": "Absolute und relative Pfade",
+   "body": [
+    "Eine Datei erreichst du unter Linux nur, indem du einen **Pfad** angibst. Ein **absoluter Pfad** beginnt am Wurzelverzeichnis (`/`) und zeigt von überall auf dieselbe Stelle: `/etc/hostname`.",
+    "Ein **relativer Pfad** beginnt nicht mit `/` und wird **vom aktuellen Verzeichnis** aus berechnet. In `/etc` genügt `hostname`; im Home-Verzeichnis gibt derselbe Name einen Fehler, weil dort keine solche Datei liegt.",
+    "Schau zuerst mit `pwd`, wo du bist. Die Bedeutung eines relativen Pfads hängt immer vom aktuellen Verzeichnis ab."
+   ],
+   "commands": [
+    {"cmd": "pwd", "what": "Gibt den absoluten Pfad des aktuellen Verzeichnisses aus.", "where": "Bevor du relative Pfade benutzt.", "why": "Damit du nicht im falschen Verzeichnis arbeitest.", "example": "pwd"},
+    {"cmd": "cd", "what": "Wechselt das Arbeitsverzeichnis; nimmt absolute oder relative Pfade.", "where": "Beim Navigieren durch Verzeichnisse.", "why": "Danach reichen kurze relative Pfade.", "example": "cd /etc"},
+    {"cmd": "cat", "what": "Gibt den Inhalt einer Datei aus.", "where": "Beim Lesen kleiner Textdateien.", "why": "Zum Testen, ob der Pfad auf die richtige Datei zeigt.", "example": "cat /etc/hostname"}
+   ],
+   "tip": "Bist du unsicher, schreib den absoluten Pfad; er funktioniert von jedem Verzeichnis."
+  },
+  {
+   "id": "shortcuts",
+   "title": "Spezielle Pfadkürzel: . .. ~",
+   "body": [
+    "`.` ist das aktuelle Verzeichnis, `..` das übergeordnete, `~` dein Home-Verzeichnis (`/home/student`). Du kannst sie in Pfaden kombinieren: `../config.txt`, `~/Documents/report.txt`.",
+    "Dateien, deren Name mit `.` beginnt, sind **versteckt**; `ls` zeigt sie nicht, `ls -a` schon. In jedem Verzeichnis werden auch die Einträge `.` und `..` aufgelistet."
+   ],
+   "commands": [
+    {"cmd": "cd ..", "what": "Wechselt ins übergeordnete Verzeichnis.", "where": "Beim Zurückgehen aus einem Unterverzeichnis.", "why": "Schnell nach oben, ohne den ganzen Pfad zu tippen.", "example": "cd .."},
+    {"cmd": "ls -a", "what": "Listet alle Dateien inklusive versteckter.", "where": "Beim Suchen von Konfigurationsdateien.", "why": "Versteckte Dateien erscheinen sonst nicht.", "example": "ls -a ~"}
+   ]
+  },
+  {
+   "id": "types",
+   "title": "Dateitypen lesen",
+   "body": [
+    "Unter Linux ist alles eine Datei: Text, Ordner, Geräte, Verknüpfungen. In der Ausgabe von `ls -l` verrät der **erste Buchstabe** der Zeile den Typ.",
+    "`-` normale Datei, `d` Verzeichnis, `l` symbolischer Link, `c` Zeichengerät (`/dev/null`), `b` Blockgerät (Festplatte), `s` Socket, `p` Named Pipe. Die folgenden neun Zeichen sind die Rechte (kommt in späteren Modulen)."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Lange Liste: Typ, Rechte, Besitzer, Größe, Datum, Name.", "where": "Um den Typ von etwas zu erkennen.", "why": "Du weißt vor dem Löschen oder Lesen, was es ist.", "example": "ls -l /dev/null"},
+    {"cmd": "stat", "what": "Zeigt ausführliche Informationen und den Typ einer Datei.", "where": "Wenn du Typ oder Zeitstempel brauchst.", "why": "Nennt den Typ als Wort statt als Buchstabe.", "example": "stat /etc/hostname"}
+   ],
+   "tip": "Dateien unter `/dev` sind Hardware-Schnittstellen, keine echten Daten; lies sie nicht wahllos mit `cat`."
+  },
+  {
+   "id": "links",
+   "title": "Symbolische Links",
+   "body": [
+    "Ein **symbolischer Link** ist eine kleine Verknüpfungsdatei, die auf einen anderen Pfad zeigt. `ls -l` zeigt ihn mit `l` und als `link -> ziel`. Den Link zu lesen heißt, das Ziel zu lesen.",
+    "Wird das Ziel gelöscht oder verschoben, bleibt der Link **kaputt** zurück. Ein relatives Ziel (`../docs/readme.txt`) wird **vom Verzeichnis des Links** aus aufgelöst, nicht von deinem aktuellen."
+   ],
+   "commands": [
+    {"cmd": "ln -s", "what": "Legt einen symbolischen Link an: `ln -s ZIEL LINK`.", "where": "Um einen langen Pfad unter kurzem Namen erreichbar zu machen.", "why": "Du behältst die Datei an einer Stelle, ohne zu kopieren.", "example": "ln -s ~/Documents/report.txt ~/link.txt"},
+    {"cmd": "readlink", "what": "Gibt das Ziel eines Links aus.", "where": "Um zu sehen, wohin ein Link führt.", "why": "Nur das Ziel statt der ganzen `ls -l`-Zeile.", "example": "readlink ~/link.txt", "nosim": true}
+   ],
+   "warn": "Reihenfolge bei `ln -s`: zuerst ZIEL, dann LINK. Vertauscht entsteht ein kaputter Link. `ln -sf` überschreibt eine vorhandene Datei; sei vorsichtig.",
+   "danger": "Zeigt ein Link auf ein Verzeichnis, kann `rm -r link/` (mit `/` am Ende) den Inhalt des Zielverzeichnisses löschen. Zum Löschen des Links schreib `rm link` und prüfe vorher mit `ls -l`."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Führe mit absolutem Pfad `cat /etc/hostname` aus.", "hint": "Funktioniert aus jedem Verzeichnis."},
+  "t02": {"text": "Wechsle mit `cd /etc` nach `/etc`.", "hint": "Ein absoluter Pfad beginnt mit `/`."},
+  "t03": {"text": "Gib in `/etc` den relativen Pfad `cat hostname` ein.", "hint": "Die Datei liegt im aktuellen Verzeichnis."},
+  "t04": {"text": "Geh mit `cd ~` nach Hause und führe `cat hostname` erneut aus. Was passiert und warum?", "hint": "Im Home gibt es keine Datei hostname; ein Fehler ist zu erwarten."},
+  "t05": {"text": "Geh aus `/home/student` mit `cd ..` ein Verzeichnis nach oben.", "hint": "Prüfe mit `pwd`, dass `/home` erscheint."},
+  "t06": {"text": "Schreib jetzt relativ `cd student/Documents`.", "hint": "Am Anfang steht kein `/`."},
+  "t07": {"text": "Führe `ls -l /etc/hostname` aus. Was ist das erste Zeichen?", "hint": "`-` bedeutet normale Datei."},
+  "t08": {"text": "Führe `ls -l /dev/null` aus und rate vorher: Welcher Buchstabe kommt zuerst?", "hint": "`c` für Zeichengerät."},
+  "t09": {"text": "Lege mit `ln -s ~/Documents/report.txt ~/link.txt` den symbolischen Link `~/link.txt` an.", "hint": "Erst ZIEL, dann LINK-Name."},
+  "t10": {"text": "Untersuche den Link mit `ls -l ~/link.txt`. Was steht hinter dem Pfeil (`->`)?", "hint": "Die Zeile beginnt mit `l`."},
+  "t11": {"text": "Was gibt `cat ~/link.txt` aus? Rate zuerst, dann führe es aus.", "hint": "Der Link liest sein Ziel."},
+  "t12": {"text": "Debug: In `~/projects/app` wird `config.txt` nicht gefunden; die Datei liegt eine Ebene höher. Lies sie mit `cat` über den relativen Pfad mit `../`.", "hint": "Erst `cd ~/projects/app`, dann `cat ../config.txt`."},
+  "t13": {"text": "Mini-Projekt: Lege `~/lab/docs` und `~/lab/bin` an, schreibe mit `echo hello linux > ~/lab/docs/readme.txt` eine Datei und erstelle `~/lab/bin/readme-link` als symbolischen Link darauf.", "hint": "`mkdir -p`, `echo ... >` und `ln -s ZIEL LINK`."},
+  "t14": {"text": "Knifflig: Wechsle nach `~/lab/bin` und lege mit **relativem Ziel** (`../docs/readme.txt`) den Link `rel-link` an; lies ihn dann mit `cat rel-link`.", "hint": "Ein relatives Ziel wird vom Verzeichnis des Links aus berechnet."},
+  "t15": {"text": "Ticket: Die Anwendung sucht die Konfiguration unter `~/app/current/config.txt`, die echte Datei liegt in `~/releases/v2/config.txt`. Lege `~/app/current` als symbolischen Link auf `~/releases/v2` an und prüfe mit `cat ~/app/current/config.txt`.", "hint": "`mkdir -p ~/app`, dann `ln -s ~/releases/v2 ~/app/current`."},
+  "t16": {"text": "Führe `ls -la ~` aus, um auch versteckte Dateien zu sehen.", "hint": "`-a` zeigt versteckte Dateien, `-l` Details."}
+ },
+ "vm": {
+  "intro": "Probiere auf deiner VM absolute/relative Pfade, sieh dir die Dateitypen in `/dev` an und lege einen symbolischen Link an. Alles harmlose Befehle.",
+  "tasks": {
+   "v01": {
+    "title": "Absoluter und relativer Pfad",
+    "text": "Probiere dieselbe Datei erst relativ, dann aus dem falschen Verzeichnis und füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "pwd\ncd /etc\npwd\ncat hostname\ncd ~\ncat hostname", "expected": "/home/student\n/etc\nlinux-lab\ncat: hostname: No such file or directory"}
+    ],
+    "differs": [
+     "Heißt dein Host nicht `linux-lab`, ist das in Ordnung; du siehst deinen eigenen Hostnamen.",
+     "Gibt `cat hostname` im Home keinen Fehler, hast du dort eine Datei namens `hostname` angelegt."
+    ]
+   },
+   "v02": {
+    "title": "Dateitypen lesen",
+    "text": "Sieh dir den Typ einer Datei, eines Verzeichnisses und eines Geräts an; achte auf die ersten Buchstaben.",
+    "blocks": [
+     {"cmd": "ls -ld /etc /etc/hostname /dev/null", "expected": "drwxr-xr-x. ... /etc\n-rw-r--r--. ... /etc/hostname\ncrw-rw-rw-. ... /dev/null"}
+    ],
+    "differs": [
+     "Manche Distributionen haben kein `/etc/hostname`; probiere dann `/etc/os-release`.",
+     "Ein `.` oder `+` hinter den Rechten ist die SELinux-/ACL-Markierung, unwichtig."
+    ]
+   },
+   "v03": {
+    "title": "Symbolischen Link anlegen",
+    "text": "Lege im Home eine Datei und einen Link darauf an und lies den Link.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/practice\necho hello linux > ~/practice/notes.txt\nln -s ~/practice/notes.txt ~/practice/link.txt\nls -l ~/practice\ncat ~/practice/link.txt", "expected": "lrwxrwxrwx. 1 student student ... link.txt -> /home/student/practice/notes.txt\nhello linux"}
+    ],
+    "differs": [
+     "Fehlt `->` oder ist `link.txt` rot, hast du eventuell die Argumente vertauscht: erst ZIEL, dann LINK.",
+     "Bei `File exists` gibt es `~/practice/link.txt` schon; lösche es vorher mit `rm ~/practice/link.txt`."
+    ]
+   },
+   "v04": {
+    "title": "Typname mit stat",
+    "text": "Lass dir mit `stat` den Typ als Wort anzeigen und lösche danach den Übungsordner.",
+    "blocks": [
+     {"cmd": "stat -c '%F' /etc /etc/hostname /dev/null ~/practice/link.txt\n# Aufräumen: erst mit ls -l ~/practice ansehen, dann\nrm -r ~/practice", "expected": "directory\nregular file\ncharacter special file\nsymbolic link"}
+    ],
+    "differs": [
+     "Auf macOS oder BSD-Tools gibt es `-c` nicht; das gehört auf eine Linux-VM.",
+     "Siehst du `rm: cannot remove ... Is a directory`, fehlt `-r`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Welcher ist ein absoluter Pfad?", "options": ["Documents/report.txt", "/home/student/Documents/report.txt", "../report.txt", "~report.txt"], "explain": "Ein absoluter Pfad beginnt mit `/` am Wurzelverzeichnis und zeigt von überall auf dieselbe Datei."},
+  "q2": {"q": "Eine Zeile in `ls -l` beginnt mit `l`. Was ist das?", "options": ["Normale Datei", "Verzeichnis", "Gerät", "Symbolischer Link"], "explain": "`l` steht für symbolic link; `-` ist eine normale Datei, `d` ein Verzeichnis."},
+  "q3": {"q": "Wo bist du nach `cd ..` aus `/etc`?", "options": ["/", "/home", "/etc/..", "~"], "explain": "`..` ist das übergeordnete Verzeichnis; aus `/etc` kommst du nach `/`."},
+  "q4": {"q": "Was passiert, wenn das Ziel eines symbolischen Links gelöscht wird?", "options": ["Der Link wird mitgelöscht", "Der Link kopiert das Ziel", "Der Link bleibt kaputt", "Das Ziel kehrt zurück"], "explain": "Der Link speichert nur einen Pfad; verschwindet das Ziel, bleibt der Link, ist aber kaputt."}
+ },
+ "summary": [
+  "Absolute Pfade beginnen mit `/`, relative werden vom aktuellen Verzeichnis aus berechnet.",
+  "`.` ist aktuell, `..` übergeordnet, `~` dein Home-Verzeichnis.",
+  "Der erste Buchstabe von `ls -l` nennt den Typ: `-`, `d`, `l`, `c`, `b`.",
+  "`ln -s ZIEL LINK` legt einen symbolischen Link an; fällt das Ziel weg, ist der Link kaputt."
+ ],
+ "glossary": [
+  {"term": "absoluter Pfad", "meaning": "Vollständige Adresse ab dem Wurzelverzeichnis (`/`)."},
+  {"term": "relativer Pfad", "meaning": "Adresse, die vom aktuellen Verzeichnis aus berechnet wird."},
+  {"term": "symbolischer Link", "meaning": "Verknüpfungsdatei, die auf einen anderen Pfad zeigt."},
+  {"term": "Gerätedatei", "meaning": "Spezielle Datei unter `/dev`, die Hardware darstellt."}
+ ]
+}

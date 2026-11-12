@@ -1,0 +1,212 @@
+{
+ "title": "Hilfe und Erkundung",
+ "lead": "Mit man, --help, which, type, find und history findest du ohne Internet selbst heraus, was ein unbekannter Befehl tut.",
+ "objectives": [
+  "Du öffnest eine man-Seite, navigierst darin, suchst und beendest sie; du erkennst die Abschnittsnummern (1, 5, 8).",
+  "Du holst dir mit --help und help eine schnelle Übersicht und liest die SYNOPSIS-Schreibweise ([ ], | und ...).",
+  "Du findest mit which und type heraus, wo ein Befehl liegt und welcher Art er ist, und suchst mit find nach Dateien.",
+  "Du siehst mit history alte Befehle an und behebst den Fehler 'command not found' (Exit-Code 127) systematisch."
+ ],
+ "sections": [
+  {
+   "id": "man",
+   "title": "man: die Handbuchseiten",
+   "body": [
+    "Linux kennt Hunderte von Befehlen; auch Profis lernen nicht alle auswendig, sie **wissen, wo sie nachschlagen**. Die verlässlichste Quelle ist das Handbuch des Systems selbst, also die `man`-Seiten: `man ls`.",
+    "Die Seite öffnet sich in einem Pager: **Leertaste** blättert eine Seite vor, **b** zurück, **/kernel** + Enter sucht im Text, **n** springt zum nächsten Treffer, **q** beendet. Die Überschriften sind immer gleich: NAME (Kurzname), SYNOPSIS (Aufrufform), DESCRIPTION (Beschreibung), OPTIONS, EXAMPLES, SEE ALSO.",
+    "Das Handbuch ist in **Abschnitte** unterteilt: 1 = Benutzerbefehle, 5 = Dateiformate (z. B. `/etc/passwd`), 8 = Administrationsbefehle. Derselbe Name kann in mehreren Abschnitten vorkommen: `man passwd` zeigt den Befehl, `man 5 passwd` das Dateiformat. Im Simulator sind die Seiten kurz und Abschnittsnummern werden nicht unterstützt; die vollständige Seite siehst du in der echten VM."
+   ],
+   "commands": [
+    {"cmd": "man", "what": "Öffnet die Handbuchseite eines Befehls.", "where": "Wenn du einen neuen Befehl oder eine Option kennenlernst.", "why": "Es sind die korrekten Informationen, die zu deiner Version passen und mit dem System mitgeliefert werden.", "example": "man ls"},
+    {"cmd": "man <Abschnitt>", "what": "Öffnet einen bestimmten Handbuchabschnitt.", "where": "Wenn derselbe Name sowohl Befehl als auch Dateiformat ist.", "why": "Du gelangst direkt zur richtigen Seite.", "example": "man 5 passwd", "nosim": true},
+    {"cmd": "whatis", "what": "Gibt die einzeilige Beschreibung eines Befehls aus.", "where": "Um sich schnell zu erinnern, wofür ein Befehl gut ist.", "why": "Du bekommst eine Kurzfassung, ohne die Seite zu öffnen.", "example": "whatis ls", "nosim": true},
+    {"cmd": "apropos", "what": "Sucht Handbuchseiten per Stichwort.", "where": "Wenn du den Namen des Befehls nicht kennst, aber weißt, was er tun soll.", "why": "Du suchst nach 'copy' und findest cp.", "example": "apropos copy", "nosim": true}
+   ],
+   "tip": "Wenn du dich auf der Seite verirrst, beende sie mit `q`. Zum Suchen tippe `/`, gib das Wort ein und drücke Enter; der nächste Treffer mit `n`.",
+   "warn": "`whatis` und `apropos` beruhen auf einem Index (mandb); auf frisch installierten Minimalsystemen können sie leer bleiben. Führe dann `sudo mandb` aus."
+  },
+  {
+   "id": "help",
+   "title": "--help und help: schnelle Übersicht",
+   "body": [
+    "Wenn du nicht das ganze Handbuch lesen willst, gibt `ls --help` eine kurze Verwendungsübersicht aus. Ist die Ausgabe lang, begrenze sie mit `| head` oder `| less`: `ls --help | head -n 5`.",
+    "Shell-interne Befehle wie `cd` haben kein eigenes Programm, daher gibt es für sie manchmal keine Seite mit `man cd`. Dafür gibt es Bashs `help`-Befehl: `help cd`. `help` allein liefert die Liste der bekannten Befehle (im Simulator ist diese Liste kurz).",
+    "Schnelle Entscheidung: bei externen Programmen zuerst `--help`, für Details `man`; bei Shell-internen Befehlen `help`."
+   ],
+   "commands": [
+    {"cmd": "--help", "what": "Gibt eine kurze Verwendungsübersicht des Befehls aus.", "where": "Um sich schnell an eine Option zu erinnern.", "why": "Es geht viel schneller als man.", "example": "ls --help"},
+    {"cmd": "help", "what": "Zeigt Hilfe zu Bashs eigenen (Shell-internen) Befehlen.", "where": "Für Befehle wie cd, type, history.", "why": "Diese Befehle haben möglicherweise keine eigene man-Seite.", "example": "help"},
+    {"cmd": "less", "what": "Zeigt lange Ausgaben seitenweise an.", "where": "Bei langer --help- oder Dateiausgabe.", "why": "Die Navigationstasten sind dieselben wie bei man.", "example": "ls --help | less", "nosim": true}
+   ],
+   "tip": "Übersieh beim Aufruf der Hilfe nicht die oberste Zeile: Die Zeile `Usage:` zeigt dir die Aufrufform."
+  },
+  {
+   "id": "synopsis",
+   "title": "Die SYNOPSIS-Schreibweise lesen",
+   "body": [
+    "Die SYNOPSIS-Zeile gibt das 'Muster' des Befehls an. Beispiel: `ls [OPTION]... [FILE]...`. Lies sie so:",
+    "Was in `[ ]` steht, ist **optional**. `...` besagt, dass der vorherige Teil **mehrfach** angegeben werden kann. `a | b` bedeutet **entweder a oder b**. `< >` oder GROSSBUCHSTABEN (FILE, DIR) sind Werte, die du selbst einsetzt. Fett gedruckte Teile werden unverändert eingegeben.",
+    "Beispiel: `cp [OPTION]... SOURCE... DEST` → Optionen sind optional, mindestens eine Quelle und ein Ziel sind Pflicht. `ls` läuft auch ganz ohne Argumente, weil alles in eckigen Klammern steht."
+   ],
+   "commands": [
+    {"cmd": "ls --help", "what": "Zeigt das Aufrufmuster (Usage).", "where": "Um die Reihenfolge der Argumente zu erfahren.", "why": "Wenn du das Muster lesen kannst, verstehst du jeden neuen Befehl.", "example": "ls --help"},
+    {"cmd": "man cat", "what": "Öffnet die Seite mit dem SYNOPSIS-Abschnitt.", "where": "Ein einfaches Beispiel zum Üben.", "why": "Du siehst eckige Klammern und ... auf einer echten Seite.", "example": "man cat"}
+   ],
+   "tip": "Um das Pflichtige zu finden, schau auf die Teile außerhalb der eckigen Klammern."
+  },
+  {
+   "id": "where",
+   "title": "which und type: wo liegt der Befehl?",
+   "body": [
+    "Wenn du einen Befehl eingibst, sucht die Shell der Reihe nach in den Verzeichnissen der Variable `PATH`. `which ls` gibt den gefundenen **Pfad** aus (z. B. `/usr/bin/ls`).",
+    "`type` ist aufschlussreicher: Es sagt, ob der Befehl ein **externes Programm**, ein **Shell-Builtin**, ein Alias oder eine Funktion ist. `type cd` → `cd is a shell builtin`. Nutze es, um zu verstehen, welcher Befehl läuft, wenn derselbe Name mehrfach vorkommt.",
+    "Den Inhalt von `PATH` siehst du mit `echo $PATH`. `alias` und `command -v` funktionieren in der echten VM ebenfalls, im Simulator gibt es sie nicht."
+   ],
+   "commands": [
+    {"cmd": "which", "what": "Zeigt den Dateipfad des Befehls.", "where": "Um herauszufinden, wo ein Programm installiert ist.", "why": "Du prüfst, dass du die richtige Version ausführst.", "example": "which ls"},
+    {"cmd": "type", "what": "Nennt die Art des Befehls (Programm, Builtin, Alias).", "where": "Beim Untersuchen unerwarteten Verhaltens.", "why": "Du unterscheidest Builtin und externes Programm.", "example": "type cd"},
+    {"cmd": "echo $PATH", "what": "Gibt die Verzeichnisse aus, in denen nach Befehlen gesucht wird.", "where": "Bei der Untersuchung von 'command not found'.", "why": "Du siehst, ob das Verzeichnis des Programms im PATH steht.", "example": "echo $PATH"},
+    {"cmd": "command -v", "what": "Gibt Pfad/Namen aus, wenn der Befehl existiert; sonst bleibt es still.", "where": "In Skripten für die Prüfung 'ist es installiert?'.", "why": "Es ist eine portable Existenzprüfung.", "example": "command -v ls", "nosim": true},
+    {"cmd": "alias", "what": "Listet definierte Kürzel auf.", "where": "Um zu verstehen, woher Befehle wie `ll` stammen.", "why": "Du siehst die Quelle dessen, was type als 'alias' meldet.", "example": "alias", "nosim": true}
+   ],
+   "tip": "Wenn sich ein Befehl seltsam verhält, prüfe zuerst mit `type Befehl` seine Art."
+  },
+  {
+   "id": "find",
+   "title": "find: Grundlagen der Dateisuche",
+   "body": [
+    "`find <Startpunkt> <Bedingungen>` durchläuft einen Verzeichnisbaum und gibt aus, was der Bedingung entspricht. Die beiden häufigsten Bedingungen: `-name` (nach Name) und `-type` (`f` Datei, `d` Verzeichnis).",
+    "Setze Platzhalter **in Anführungszeichen**: `find . -name \"*.txt\"`. Ohne Anführungszeichen expandiert die Shell das Muster zuerst selbst und das Ergebnis täuscht. Als Startpunkt steht `.` für das aktuelle Verzeichnis und `~` für das Home-Verzeichnis.",
+    "Du kannst das Ergebnis mit `| wc -l` zählen und mit `> Datei` speichern. `-maxdepth 1` begrenzt auf einem echten System die Tiefe (der Simulator ignoriert das)."
+   ],
+   "commands": [
+    {"cmd": "find", "what": "Sucht im Verzeichnisbaum nach Dateien, die einer Bedingung entsprechen.", "where": "Wenn du vergessen hast, wo eine Datei liegt.", "why": "Er durchsucht den Baum nach Name, Typ oder Größe.", "example": "find . -name \"*.txt\""},
+    {"cmd": "find -type", "what": "Findet nur Dateien (f) oder Verzeichnisse (d).", "where": "Um Verzeichnisse getrennt zu zählen.", "why": "Du grenzt das Ergebnis ein.", "example": "find ~ -type d"},
+    {"cmd": "find | wc -l", "what": "Liefert die Anzahl der Fundstellen.", "where": "Um zu wissen, wie viele Treffer es gibt.", "why": "Du bekommst die Zahl, ohne die lange Liste zu lesen.", "example": "find ~ -name \"*.txt\" | wc -l"}
+   ],
+   "tip": "Um Fehlermeldungen auszublenden, hänge auf einem echten System `2>/dev/null` an.",
+   "warn": "Lösche nicht mit `find ... -delete` oder `-exec rm`; sieh dir zuerst nur mit `find` die Liste an und entscheide dann."
+  },
+  {
+   "id": "history",
+   "title": "history: frühere Befehle",
+   "body": [
+    "`history` listet die Befehle, die du in dieser und in früheren Sitzungen eingegeben hast, nummeriert auf. Ist die Liste lang, hole dir mit `history | tail -n 10` die letzten zehn Befehle.",
+    "In der echten Bash holt **Pfeil nach oben** den vorherigen Befehl, **Strg+R** sucht im Verlauf, `!!` führt den letzten Befehl und `!42` den Befehl Nr. 42 erneut aus. Der Simulator unterstützt `!!` nicht; die Pfeiltasten funktionieren.",
+    "Befehle mit vertraulichen Daten (Passwörtern) werden in den Verlauf geschrieben; denk daran."
+   ],
+   "commands": [
+    {"cmd": "history", "what": "Listet frühere Befehle nummeriert auf.", "where": "Um sich zu erinnern, was du zuvor eingegeben hast.", "why": "Du findest einen langen Befehl, ohne ihn neu zu tippen.", "example": "history"},
+    {"cmd": "history | tail", "what": "Zeigt nur die letzten Befehle.", "where": "Bei langem Verlauf.", "why": "Die Liste bleibt kurz.", "example": "history | tail -n 5"},
+    {"cmd": "!!", "what": "Führt den letzten Befehl erneut aus.", "where": "Mit `sudo !!` als erneuter Versuch mit Rechten.", "why": "Es spart Zeit.", "example": "!!", "nosim": true}
+   ],
+   "tip": "Tippe Strg+R und gib einen Teil des Befehls ein: Bash holt den Treffer."
+  },
+  {
+   "id": "notfound",
+   "title": "Mit 'command not found' umgehen",
+   "body": [
+    "Wenn du einen nicht existierenden Befehl eingibst, erhältst du `nosuchcmd: command not found` und der Exit-Code ist **127**: `nosuchcmd; echo $?` → `127`. Code 127 bedeutet 'Befehl nicht gefunden'.",
+    "Systematische Prüfung: (1) Tippfehler? (`lss` statt `ls`) (2) Groß-/Kleinschreibung: Linux unterscheidet sie. (3) Prüfe mit `type Befehl`, ob es ihn gibt. (4) Ist das Programm nicht installiert, installiere das Paket (Ubuntu `sudo apt install`, Rocky/Alma `sudo dnf install`). (5) Ist es installiert, prüfe das Verzeichnis mit `echo $PATH`.",
+    "Das ist etwas anderes als der Fehler 'Datei oder Verzeichnis nicht gefunden': Dort wurde der Befehl gefunden, aber die angegebene Datei existiert nicht."
+   ],
+   "commands": [
+    {"cmd": "echo $?", "what": "Gibt den Exit-Code des letzten Befehls aus.", "where": "Wenn du den Erfolg eines Befehls prüfst.", "why": "0 bedeutet Erfolg, 127 bedeutet, dass der Befehl fehlt.", "example": "nosuchcmd; echo $?"},
+    {"cmd": "type", "what": "Gibt es den Befehl, und wo?", "where": "Erste Prüfung nach einem Fehler.", "why": "Es filtert Tippfehler heraus.", "example": "type nosuchcmd"}
+   ],
+   "tip": "Auf einem echten System macht Ubuntu manchmal mit 'Command 'x' not found, did you mean...' einen Vorschlag; lies den Vorschlag aufmerksam."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Öffne mit `man ls` die Handbuchseite des Befehls `ls`.", "hint": "Die Sim-Seite ist kurz; achte auf NAME, SYNOPSIS und DESCRIPTION."},
+  "t02": {"text": "Zeige mit `ls --help` die kurze Verwendungsübersicht an.", "hint": "Doppelter Bindestrich: --help."},
+  "t03": {"text": "Gib `type cd` ein. Erscheint in der Ausgabe 'builtin'? Was bedeutet das?", "hint": "Builtin: in Bash eingebaut, kein eigenes Programm."},
+  "t04": {"text": "Finde mit `which ls` den Pfad des Befehls `ls`.", "hint": "Die Ausgabe beginnt mit /usr/bin/."},
+  "t05": {"text": "Öffne `man cat` und lies die SYNOPSIS-Zeile: Welcher Teil ist optional?", "hint": "Was in eckigen Klammern steht, ist optional."},
+  "t06": {"text": "Gib `help` ein und sieh dir die Liste der bekannten Befehle an.", "hint": "Ohne Argument eingeben."},
+  "t07": {"text": "Finde mit `find . -name \"*.txt\"` alle `.txt`-Dateien unterhalb des aktuellen Verzeichnisses.", "hint": "Setze das Muster in Anführungszeichen."},
+  "t08": {"text": "Liste mit `history` die bisher eingegebenen Befehle auf.", "hint": "Es erscheint eine nummerierte Liste."},
+  "t09": {"text": "Zeige mit `man ls | head -n 3` nur die ersten drei Zeilen der Seite.", "hint": "Pipe: |."},
+  "t10": {"text": "Vorhersage: Welche Zahl gibt `nosuchcmd; echo $?` aus? Führe es dann aus und prüfe.", "hint": "Befehl fehlt → Exit-Code 127."},
+  "t11": {"text": "Vorhersage: Wie viele Verzeichnisse zählt `find ~ -type d | wc -l` unter Home (Home eingeschlossen)? Führe es aus und prüfe.", "hint": "Desktop, Documents, Downloads und Home selbst."},
+  "t12": {"text": "Debug: `man mkdirr` liefert einen Fehler ('No manual entry'). Öffne mit `man mkdir` das Handbuch des richtigen Befehls.", "hint": "Tippfehler: ein überzähliges r."},
+  "t13": {"text": "Mini: Finde mit `find` heraus, wo die Datei `todo.txt` liegt, und speichere den Pfad in der Datei `~/path.txt`.", "hint": "`find ~ -name todo.txt > ~/path.txt`; sieh danach mit `cat ~/path.txt` nach."},
+  "t14": {"text": "Challenge: Ermittle die Anzahl der `.txt`-Dateien unter Home in einem einzigen Befehl und schreibe sie in die Datei `~/count.txt`.", "hint": "`find`, Pipe, `wc -l` und Umleitung. Das Ergebnis ist die Dateianzahl; selbst angelegte .txt-Dateien zählen mit."},
+  "t15": {"text": "TICKET #4410 — Support: 'Wo ist ls installiert, und was für ein Befehl ist cd?' Speichere den Pfad in der Datei `~/ls_path.txt` und die Art von `cd` in der Datei `~/cd_type.txt`.", "hint": "`which ls > ...` und `type cd > ...`."},
+  "t16": {"text": "TICKET #4411 — Die Lehrkraft möchte sehen, was du ausprobiert hast: Führe zuerst `which ls` aus und speichere dann den Verlauf in der Datei `~/hist.txt`.", "hint": "`history > ~/hist.txt`."}
+ },
+ "vm": {
+  "intro": "Führe in deiner VM (Ubuntu, Rocky, Alma oder WSL) die folgenden Befehle aus. Es ist kein zerstörerischer Befehl dabei; vergiss trotzdem nicht, den Pager (man) mit `q` zu verlassen.",
+  "tasks": {
+   "v01": {
+    "title": "Handbuchseite öffnen",
+    "text": "Öffne `man ls`, suche mit `/` nach `long` und beende mit `q`. Füge danach die ersten Zeilen ein.",
+    "blocks": [{"cmd": "man ls | head -n 5", "expected": "LS(1)    User Commands\n\nNAME\n       ls - list directory contents"}],
+    "differs": ["Ist deine Systemsprache Deutsch oder Türkisch, können die Überschriften übersetzt sein.", "Wenn du 'No manual entry' erhältst, fehlt das Handbuchpaket: `sudo apt install man-db` oder `sudo dnf install man-db`."]
+   },
+   "v02": {
+    "title": "--help-Übersicht",
+    "text": "Füge die ersten Zeilen der Ausgabe von `ls --help` ein.",
+    "blocks": [{"cmd": "ls --help | head -n 5", "expected": "Usage: ls [OPTION]... [FILE]...\nList information about the FILEs (the current directory by default)."}],
+    "differs": ["Unter macOS oder BusyBox kann das `--help`-Format anders aussehen; führe es in der Linux-VM aus."]
+   },
+   "v03": {
+    "title": "Befehlsarten",
+    "text": "Füge die Art und den Pfad der Befehle `cd`, `ls` und `which ls` ein.",
+    "blocks": [{"cmd": "type cd\ntype ls\nwhich ls", "expected": "cd is a shell builtin\nls is aliased to `ls --color=auto'\n/usr/bin/ls"}],
+    "differs": ["`ls` kann ein Alias sein (unter Ubuntu/Rocky wegen der Farben); das ist normal.", "Bei manchen Distributionen erscheint `/bin/ls` (`/bin` ist ein Link auf `/usr/bin`)."]
+   },
+   "v04": {
+    "title": "Mit find suchen",
+    "text": "Finde die `.txt`-Dateien in deinem Home. Da die Ausgabe personenbezogen ist, antworte nur mit 'Erledigt'.",
+    "blocks": [{"cmd": "find ~ -maxdepth 2 -name \"*.txt\" 2>/dev/null"}],
+    "differs": ["Gibt es keine Ausgabe, hast du keine .txt-Datei in deinem Home: Lege zuerst mit `touch ~/notes.txt` eine an."]
+   },
+   "v05": {
+    "title": "whatis und apropos",
+    "text": "Suche die einzeilige Beschreibung zu `ls` und die Befehle, die 'copy' enthalten.",
+    "blocks": [{"cmd": "whatis ls\napropos copy | head -n 5", "expected": "ls (1) - list directory contents\ncp (1) - copy files and directories"}],
+    "differs": ["Siehst du 'nothing appropriate', fehlt der Index: Führe `sudo mandb` aus und versuche es erneut.", "Unter Ubuntu/Rocky kann die Ausgabe von `apropos` eine andere Zeilenzahl haben."]
+   },
+   "v06": {
+    "title": "command not found",
+    "text": "Führe einen nicht existierenden Befehl aus und füge den Exit-Code ein.",
+    "blocks": [{"cmd": "nosuchcmd; echo $?", "expected": "bash: nosuchcmd: command not found\n127"}],
+    "differs": ["Ubuntu kann mit 'Command 'nosuchcmd' not found, did you mean...' einen Vorschlag machen; die letzte Zeile muss trotzdem 127 sein.", "Wenn du Zsh verwendest, lautet die Meldung 'zsh: command not found: nosuchcmd'."]
+   },
+   "v07": {
+    "title": "Verlauf ansehen",
+    "text": "Liste deine letzten fünf Befehle auf.",
+    "blocks": [{"cmd": "history | tail -n 5", "expected": "  498  which ls\n  499  nosuchcmd\n  500  history | tail -n 5"}],
+    "differs": ["Die Nummern sind anders; das ist normal.", "In einem frisch geöffneten Terminal kann die Liste kurz sein."]
+   },
+   "v08": {
+    "title": "Handbuchabschnitte",
+    "text": "Öffne die Seite aus Abschnitt 5, die das Format der Datei `/etc/passwd` beschreibt, und füge die ersten Zeilen ein.",
+    "blocks": [{"cmd": "man 5 passwd | head -n 5", "expected": "PASSWD(5)   File Formats Manual\n\nNAME\n       passwd - password file"}],
+    "differs": ["`man passwd` (Abschnitt 1) ist eine andere Seite: der Befehl zum Ändern des Passworts.", "Gibt es die Seite nicht, fehlt das Paket `man-db` oder `man-pages`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Welche Tasten verwendet man auf einer man-Seite, um im Text zu suchen und die Seite zu beenden?", "options": ["`f` und `x`", "`/` und `q`", "`s` und `e`", "`?` und `Esc`"], "explain": "`/Wort` sucht, `n` springt zum nächsten Treffer, `q` beendet."},
+  "q2": {"q": "Was bedeuten `[ ]` und `...` im Muster `ls [OPTION]... [FILE]...`?", "options": ["Pflicht und verboten", "Der Teil in eckigen Klammern ist versteckt", "Optional und mehrfach angebbar", "Nur eine Kommentarzeile"], "explain": "Eckige Klammern bedeuten optional, die drei Punkte zeigen, dass sich der vorherige Teil wiederholen kann."},
+  "q3": {"q": "Welche Zahl steht in der Ausgabe von `nosuchcmd; echo $?`?", "options": ["127", "0", "1", "255"], "explain": "Bei 'command not found' liefert Bash 127 als Exit-Code zurück."},
+  "q4": {"q": "Mit welchem Befehl siehst du, dass `cd` kein externes Programm ist?", "options": ["`find cd`", "`ls cd`", "`man -f cd`", "`type cd`"], "explain": "Die Ausgabe von `type cd` lautet `cd is a shell builtin`; es steckt also in Bash selbst."}
+ },
+ "summary": [
+  "`man Befehl` ist das ausführliche Handbuch, `Befehl --help` die Kurzübersicht, `help` gilt für Shell-interne Befehle.",
+  "In man: `/` suchen, `n` nächster Treffer, `q` beenden; Abschnitte: 1 Befehle, 5 Dateiformate, 8 Administration.",
+  "SYNOPSIS: `[ ]` optional, `...` Wiederholung, `|` oder.",
+  "`which` zeigt den Pfad, `type` die Art; `find . -name \"*.txt\"` sucht Dateien.",
+  "`history` listet den Verlauf auf; bei `command not found` ist der Exit-Code 127."
+ ],
+ "glossary": [
+  {"term": "man-Seite", "meaning": "Die mit dem System gelieferte Handbuchseite eines Befehls."},
+  {"term": "SYNOPSIS", "meaning": "Der man-Abschnitt, der das Aufrufmuster des Befehls zeigt."},
+  {"term": "Builtin", "meaning": "Ein in Bash eingebauter Befehl ohne eigenes Programm."},
+  {"term": "PATH", "meaning": "Die Liste der Verzeichnisse, in denen nach Befehlen gesucht wird."},
+  {"term": "Exit-Code", "meaning": "Die Zahl, die ein Befehl beim Beenden hinterlässt; 0 Erfolg, 127 Befehl nicht gefunden."},
+  {"term": "Pager", "meaning": "Ein Programm, das langen Text seitenweise anzeigt (less)."}
+ ]
+}

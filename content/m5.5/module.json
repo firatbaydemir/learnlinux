@@ -1,0 +1,33 @@
+{
+  "id": "5.5",
+  "level": 5,
+  "setup": {
+    "dirs": ["/home/student/lab"],
+    "files": {
+      "/home/student/lab/package_notes.txt": "RHEL Rocky Alma Fedora: dnf, rpm\nUbuntu Debian: apt, dpkg\nRHEL web package: httpd\nDebian web package: apache2\n"
+    },
+    "modes": [],
+    "cwd": "/home/student"
+  },
+  "tasks": [
+    {"id": "t01", "kind": "warmup", "diff": 1, "check": {"out": "dnf", "of": "^grep RHEL \\S*package_notes\\.txt$"}, "solution": ["grep RHEL ~/lab/package_notes.txt"]},
+    {"id": "t02", "kind": "guided", "diff": 1, "check": {"out": "apt", "of": "^grep Ubuntu \\S*package_notes\\.txt$"}, "solution": ["grep Ubuntu ~/lab/package_notes.txt"]},
+    {"id": "t03", "kind": "predict", "diff": 2, "check": {"out": "2", "of": "^grep -c package \\S*package_notes\\.txt$"}, "solution": ["grep -c package ~/lab/package_notes.txt"]},
+    {"id": "t04", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/install_plan.txt", "apt update"]}, "solution": ["echo 'sudo apt update before installing on Debian or Ubuntu' > ~/lab/install_plan.txt"]},
+    {"id": "t05", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/install_plan.txt", "dnf install"]}, {"contains": ["~/lab/install_plan.txt", "apt install"]}], "solution": ["echo 'sudo dnf install cowsay; sudo apt install cowsay' >> ~/lab/install_plan.txt"]},
+    {"id": "t06", "kind": "challenge", "diff": 3, "check": {"contains": ["~/lab/cleanup_plan.txt", "autoremove"]}, "solution": ["echo 'Remove only the test package; review the autoremove list before confirming' > ~/lab/cleanup_plan.txt"]},
+    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5501.txt", "httpd"]}, {"contains": ["~/lab/ticket_5501.txt", "apache2"]}], "solution": ["echo 'Check the distribution; use httpd on RHEL-family systems or apache2 on Debian-family systems' > ~/lab/ticket_5501.txt"]}
+  ],
+  "vm": [
+    {"id": "v01", "expect": "ID=|Ubuntu|Debian|Rocky|Alma|Fedora"},
+    {"id": "v02", "expect": "cowsay|Package|Candidate|Available"},
+    {"id": "v03", "expect": "installed|Setting up|Complete|cowsay"},
+    {"id": "v04", "expect": "remove|removed|not installed|not found"}
+  ],
+  "quiz": [
+    {"id": "q1", "answer": 0},
+    {"id": "q2", "answer": 2},
+    {"id": "q3", "answer": 1},
+    {"id": "q4", "answer": 3}
+  ]
+}

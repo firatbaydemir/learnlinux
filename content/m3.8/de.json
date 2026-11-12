@@ -1,0 +1,448 @@
+{
+ "title": "Archivierung und Kompression",
+ "lead": "Pakete Dateien mit tar, gzip und zip, komprimiere sie, stelle sie sicher wieder her und prüfe deine Backups.",
+ "objectives": [
+  "Du erklärst den Unterschied zwischen Archivieren (tar: bündeln) und Komprimieren (gzip, bzip2, xz).",
+  "Du erstellst mit `tar -czf`, `tar -tf` und `tar -xzf -C` Archive, listest ihren Inhalt und entpackst in ein neues Verzeichnis.",
+  "Du kennst die Risiken von Tar-Bombs und Überschreiben und listest immer vor dem Entpacken.",
+  "Du nutzt `gzip -k`, `zip`/`unzip` und vergleichst Kompressionsraten.",
+  "Du erstellst ein Backup mit Datum und prüfst es mit `sha256sum`."
+ ],
+ "sections": [
+  {
+   "id": "concept",
+   "title": "Archiv und Kompression sind verschiedene Dinge",
+   "body": [
+    "**Archivieren** heißt, viele Dateien und Verzeichnisse samt Pfaden und Rechten in **einer** Datei zu **bündeln**; die Größe schrumpft dabei nicht. Das macht `tar` (tape archive). **Komprimieren** verkleinert eine einzelne Datei: `gzip` (schnell, verbreitet), `bzip2` (kleiner, langsamer), `xz` (am kleinsten, am langsamsten).",
+    "In der Praxis nutzt man beides zusammen: `tar` bündelt, gzip komprimiert. Ergebnis ist eine `.tar.gz`- oder `.tgz`-Datei. `tar` erledigt das mit den Optionen `-z` (gzip), `-j` (bzip2), `-J` (xz) in einem Befehl.",
+    "Wichtiges Detail: `gzip notes.txt` **löscht** die Originaldatei und hinterlässt nur die `.gz`-Datei. Mit `-k` (keep) bleibt das Original erhalten."
+   ],
+   "commands": [
+    {
+     "cmd": "gzip -k",
+     "what": "Komprimiert eine Datei und behält das Original (hängt `.gz` an).",
+     "where": "Bei großen Logs oder Textdateien.",
+     "why": "Ohne `-k` wird das Original gelöscht; mit `-k` probierst du gefahrlos.",
+     "example": "gzip -k logs/app.log",
+     "nosim": true
+    },
+    {
+     "cmd": "gunzip",
+     "what": "Entpackt eine `.gz`-Datei und löscht dabei die `.gz`-Datei (wie `gzip -d`).",
+     "where": "Wenn du eine einzelne komprimierte Datei wiederherstellst.",
+     "why": "Mit `gunzip -k` bleibt das `.gz` als Sicherung erhalten.",
+     "example": "gunzip logs/app.log.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "zcat",
+     "what": "Gibt den Inhalt einer komprimierten Datei aus, ohne sie zu entpacken.",
+     "where": "Beim Lesen alter, komprimierter Logs oder zum Suchen mit `grep`.",
+     "why": "Kein Platz- und Zeitaufwand für das Entpacken.",
+     "example": "zcat logs/app.log.gz | head",
+     "nosim": true
+    }
+   ],
+   "tip": "Größen vergleichst du mit `ls -lh`. Text und Logs lassen sich sehr gut komprimieren; bereits komprimierte JPG-, MP4- oder ZIP-Dateien schrumpfen kaum.",
+   "warn": "`gzip notes.txt` löscht das Original. Sichere Daten, die nur einmal existieren, vorher oder nutze `-k`."
+  },
+  {
+   "id": "tar",
+   "title": "tar: erstellen, auflisten, entpacken",
+   "body": [
+    "`tar`-Optionen lassen sich in einem Wort kombinieren: **c** (create, erstellen), **x** (extract, entpacken), **t** (list, auflisten), **v** (verbose, ausführlich), **f** (file, Name des Archivs; **immer der letzte Buchstabe**, direkt danach folgt der Name), **z/j/J** (gzip/bzip2/xz).",
+    "Nimm ins Archiv immer **relative Pfade** auf (`project`, nicht `/home/student/project`). GNU tar entfernt ein führendes `/` und warnt; so überschreibt das Entpacken keine Systemdateien.",
+    "`-C Verzeichnis` lässt tar vor der Arbeit in dieses Verzeichnis wechseln: beim Entpacken ist es das Ziel, beim Erstellen die Wurzel der Quelle. Das Zielverzeichnis muss vorher existieren."
+   ],
+   "commands": [
+    {
+     "cmd": "tar -czf",
+     "what": "Bündelt ein Verzeichnis in ein gzip-komprimiertes Archiv.",
+     "where": "Beim Backup und vor dem Versand eines Projekts.",
+     "why": "Eine Datei lässt sich viel einfacher kopieren, transportieren und aufbewahren.",
+     "example": "tar -czf backups/project.tar.gz project",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -tf",
+     "what": "Listet die Pfade im Archiv, ohne zu entpacken (`-z` nicht nötig, tar erkennt den Typ selbst).",
+     "where": "Vor dem Entpacken, um den Inhalt zu sehen.",
+     "why": "Verhindert Tar-Bombs und Überschreib-Überraschungen.",
+     "example": "tar -tf backups/project.tar.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xzf -C",
+     "what": "Entpackt das Archiv in das angegebene (existierende) Verzeichnis.",
+     "where": "Bei der Wiederherstellung, damit das aktuelle Verzeichnis sauber bleibt.",
+     "why": "Entpacke immer in ein neues, leeres Verzeichnis und prüfe dann.",
+     "example": "tar -xzf backups/project.tar.gz -C restore",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xzf ... member",
+     "what": "Entpackt nur die genannte Datei oder das genannte Verzeichnis aus dem Archiv.",
+     "where": "Wenn du eine einzelne Datei aus dem Backup rettest.",
+     "why": "Du entpackst nicht alles und überschreibst keine aktuellen Dateien. Der Pfad muss wie in der Ausgabe von `tar -tf` lauten.",
+     "example": "tar -xzf backups/project.tar.gz -C restore project/notes.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "tar --exclude",
+     "what": "Nimmt Dateien, die auf das Muster passen, nicht ins Archiv auf.",
+     "where": "Um Logs, temporäre Dateien oder `.git` aus dem Backup auszuschließen.",
+     "why": "Das Backup wird kleiner und schneller. Schreibe `--exclude` vor den zu archivierenden Pfad.",
+     "example": "tar -czf backups/lab-nologs.tar.gz --exclude='*.log' .",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -cJf",
+     "what": "Erstellt ein Archiv mit xz-Kompression, der stärksten Stufe (`-j` steht für bzip2).",
+     "where": "Bei Archiven, die selten gebraucht und lange aufbewahrt werden.",
+     "why": "Kleinere Datei, dafür langsamer und mit mehr CPU-Last.",
+     "example": "tar -cJf backups/project.tar.xz project",
+     "nosim": true
+    }
+   ],
+   "tip": "Merkhilfe: **c**reate, e**x**tract, lis**t**; danach `f` und der Dateiname. Den Kompressionstyp erkennt tar beim Entpacken selbst, oft reicht `tar -xf`.",
+   "warn": "Nach `f` muss sofort der Archivname stehen. Bei `tar -cfz backup.tgz project` wird `z` als Archivname verstanden und die Datei heißt falsch."
+  },
+  {
+   "id": "safe",
+   "title": "Sicher entpacken: Tar-Bomb und Überschreiben",
+   "body": [
+    "Manche Archive haben kein oberstes Verzeichnis; beim Entpacken landen Hunderte Dateien direkt in deinem aktuellen Verzeichnis (**Tar-Bomb**). Das Aufräumen ist mühsam, weil du nicht erkennst, welche Dateien aus dem Archiv stammen. Lösung: erst mit `tar -tf` (oder `tar -tvf`) auflisten, dann in ein neues, leeres Verzeichnis entpacken.",
+    "`tar -x` **überschreibt stillschweigend** vorhandene Dateien gleichen Namens. Entpacke daher nie direkt in dein Arbeitsverzeichnis.",
+    "Rechte und Besitzer: `tar` speichert die Rechte im Archiv. Als **root** werden Besitzer und Rechte originalgetreu wiederhergestellt; als normaler Benutzer greift die `umask`. Mit `-p` bleiben die Rechte ausdrücklich erhalten. Dateien mit anderem Besitzer stellst du nur mit `sudo` wieder her."
+   ],
+   "commands": [
+    {
+     "cmd": "tar -tvf",
+     "what": "Listet das Archiv ausführlich: Rechte, Besitzer, Größe, Datum und Pfad.",
+     "where": "Vor dem Entpacken, um Rechte und ein oberstes Verzeichnis zu prüfen.",
+     "why": "Du siehst Tar-Bombs und absolute Pfade im Voraus.",
+     "example": "tar -tvf backups/project.tar.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xpf",
+     "what": "Entpackt das Archiv und bewahrt die Dateirechte.",
+     "where": "Bei Backups, bei denen die Rechte wichtig sind.",
+     "why": "Verhindert, dass die `umask` die Rechte verändert.",
+     "example": "tar -xpf backups/project.tar.gz -C restore",
+     "nosim": true
+    },
+    {
+     "cmd": "sudo tar -xpf",
+     "what": "Entpackt als root; Besitzer und Gruppe werden mit wiederhergestellt.",
+     "where": "Bei System-Backups oder Dateien anderer Benutzer.",
+     "why": "Der Besitz bleibt erhalten, aber root vergrößert auch Fehler.",
+     "example": "sudo tar -xpf backups/project.tar.gz -C restore",
+     "nosim": true
+    }
+   ],
+   "tip": "Gewohnheit: `tar -tf backup.tar.gz | head` ansehen, `mkdir restore`, dann `tar -xzf backup.tar.gz -C restore`.",
+   "danger": "Entpacke kein Archiv, dem du nicht traust, als root, erst recht nicht mit Ziel `/` (`-C /`). Mitglieder mit absoluten Pfaden oder `..` können Systemdateien überschreiben. Erst Snapshot, erst auflisten."
+  },
+  {
+   "id": "zip",
+   "title": "zip und unzip",
+   "body": [
+    "`zip` bündelt und komprimiert zugleich und ist mit Windows/macOS kompatibel; ideal für den Dateiaustausch. Für Verzeichnisse brauchst du `-r` (recursive). Installation: Ubuntu `sudo apt install zip unzip`, Rocky/Alma `sudo dnf install zip unzip`.",
+    "Unterschied zu `.tar.gz`: zip komprimiert jede Datei einzeln, einzelne Dateien lassen sich schnell extrahieren; Linux-Rechte und Besitzer bewahrt es aber weniger zuverlässig als `tar`. Für Linux-Backups nimmt man `tar`."
+   ],
+   "commands": [
+    {
+     "cmd": "zip -r",
+     "what": "Fügt ein Verzeichnis samt Unterverzeichnissen in ein zip-Archiv ein.",
+     "where": "Beim Senden von Dateien an Windows/macOS-Nutzer.",
+     "why": "Lässt sich überall öffnen; ohne `-r` wird der Verzeichnisinhalt nicht aufgenommen.",
+     "example": "zip -r backups/project.zip project",
+     "nosim": true
+    },
+    {
+     "cmd": "unzip -l",
+     "what": "Listet den Inhalt eines zip-Archivs, ohne zu entpacken.",
+     "where": "Zur Kontrolle vor dem Entpacken.",
+     "why": "Dieselbe Sicherheitsgewohnheit wie `tar -tf`.",
+     "example": "unzip -l backups/project.zip",
+     "nosim": true
+    },
+    {
+     "cmd": "unzip -d",
+     "what": "Entpackt das zip-Archiv in das angegebene Verzeichnis (wird bei Bedarf angelegt).",
+     "where": "Bei der Wiederherstellung.",
+     "why": "Du verstreust keine Dateien im aktuellen Verzeichnis.",
+     "example": "unzip backups/project.zip -d restore",
+     "nosim": true
+    }
+   ]
+  },
+  {
+   "id": "backup",
+   "title": "Einfaches Backup und Prüfung",
+   "body": [
+    "Ein einfaches Backup: Name mit Datum, ein Befehl zum Bündeln, dazu eine Prüfsumme (Checksum). `date +%F` gibt das heutige Datum als `2026-11-12` aus; so hat jedes Backup einen eigenen Namen und überschreibt kein älteres. `$(...)` im Befehl wird zuerst ausgeführt, die Ausgabe landet im Namen.",
+    "`sha256sum` erzeugt den Fingerabdruck einer Datei. Prüfst du das Backup nach dem Kopieren mit `sha256sum -c`, weißt du, dass es unbeschädigt ist. Ein Backup zählt erst, wenn es **auf einer anderen Platte oder einem anderen Rechner** liegt; probiere außerdem einmal die Wiederherstellung.",
+    "Automatische Backups laufen über einen Zeitplaner (`cron` oder systemd-Timer). Das ist Thema eines eigenen Moduls; hier führen wir den Befehl von Hand aus."
+   ],
+   "commands": [
+    {
+     "cmd": "sha256sum",
+     "what": "Gibt die SHA-256-Prüfsumme einer Datei aus.",
+     "where": "Beim Prüfen von Backups oder heruntergeladenen Dateien.",
+     "why": "Schon ein geändertes Bit ändert die Summe; Beschädigung fällt auf.",
+     "example": "sha256sum backups/project.tar.gz > backups/SHA256SUMS",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum -c",
+     "what": "Vergleicht gespeicherte Summen mit den Dateien; meldet `OK` oder `FAILED`.",
+     "where": "Nach dem Kopieren oder vor dem Wiederherstellen eines Backups.",
+     "why": "Ein defektes Backup entdeckst du sofort, nicht erst im Ernstfall.",
+     "example": "sha256sum -c backups/SHA256SUMS",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -czf ... $(date +%F)",
+     "what": "Erstellt ein Backup-Archiv mit dem heutigen Datum im Namen.",
+     "where": "Bei regelmäßigen, manuell erstellten Backups.",
+     "why": "Alte Backups werden nicht überschrieben, Versionen bleiben unterscheidbar.",
+     "example": "tar -czf backups/project-$(date +%F).tar.gz project",
+     "nosim": true
+    },
+    {
+     "cmd": "date +%F",
+     "what": "Gibt das heutige Datum im Format `2026-11-12` aus.",
+     "where": "Für Datumsstempel in Dateinamen.",
+     "why": "Erzeugt nach Datum sortierbare Namen.",
+     "example": "date +%F"
+    }
+   ],
+   "tip": "3-2-1-Regel: 3 Kopien, 2 verschiedene Medien, 1 an einem anderen Ort."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Du bist im Verzeichnis `lab`. Sieh dir mit `ls -R project` den zu archivierenden Projektbaum an.",
+   "hint": "-R groß; listet auch Unterverzeichnisse."
+  },
+  "t02": {
+   "text": "Lege das Verzeichnis `backups` für die Backups an: `mkdir backups`.",
+   "hint": "Lege es in `lab` an."
+  },
+  "t03": {
+   "text": "Bündle `project` mit gzip in das Archiv `backups/project.tar.gz` (`tar -czf ...`). Der Simulator führt `tar` nicht aus; geprüft wird die Korrektheit des Befehls.",
+   "hint": "Reihenfolge: `tar -czf <archive> <source>`; nach `f` folgt der Archivname."
+  },
+  "t04": {
+   "text": "Liste den Inhalt des Archivs auf, ohne zu entpacken: `tar -tzf backups/project.tar.gz`.",
+   "hint": "`t` = list. `-tf` wird auch akzeptiert."
+  },
+  "t05": {
+   "text": "Lege das Verzeichnis `restore` an und entpacke das Archiv mit `-C` dorthin: `tar -xzf backups/project.tar.gz -C restore`.",
+   "hint": "Erst `mkdir restore`; das `-C`-Ziel muss existieren."
+  },
+  "t06": {
+   "text": "Komprimiere `logs/app.log` und behalte das Original: `gzip -k logs/app.log`.",
+   "hint": "`-k` = keep. Ohne wird das Original gelöscht."
+  },
+  "t07": {
+   "text": "Entpacke aus dem Archiv nur `project/notes.txt` nach `restore`.",
+   "hint": "Der Member-Name steht wie in `tar -tf` am Ende des Befehls: `project/notes.txt`."
+  },
+  "t08": {
+   "text": "Vorhersage: Wie viele Zeilen insgesamt zeigt `wc -l logs/*.log`? Erst raten, dann ausführen.",
+   "hint": "Drei Dateien: `app.log`, `web.log`, `db.log`; die letzte Zeile heißt `total`."
+  },
+  "t09": {
+   "text": "Vorhersage: Welche zwei Pfade gibt `find project -name '*.c' | sort` aus? Zur Prüfung ausführen.",
+   "hint": "Die Pfade beginnen mit `project/src/...` und sind alphabetisch sortiert."
+  },
+  "t10": {
+   "text": "Bündle das ganze Verzeichnis `lab` ohne die `.log`-Dateien in `backups/lab-nologs.tar.gz` (`--exclude='*.log'`).",
+   "hint": "Schreibe das Muster in Anführungszeichen und vor den Quellpfad (`.`)."
+  },
+  "t11": {
+   "text": "Erstelle für `project` ein Backup mit dem heutigen Datum im Namen: `backups/project-$(date +%F).tar.gz`.",
+   "hint": "`$(date +%F)` ist eine Befehlsersetzung; du kannst sie im Namen verwenden."
+  },
+  "t12": {
+   "text": "Fehlersuche: Eine Tar-Bomb hat die Dateien `bomb1.txt`, `bomb2.txt`, `bomb3.txt` in `lab` abgeladen. Lege das Verzeichnis `cleanup` an und verschiebe alle drei dorthin.",
+   "hint": "`mkdir cleanup`, dann `mv bomb1.txt bomb2.txt bomb3.txt cleanup/`."
+  },
+  "t13": {
+   "text": "Mini-Projekt: Lege `staging` an, kopiere den Baum `project` mit `cp -r` hinein, prüfe mit `ls -R staging` und bündle `staging` als `staging.tar.gz`.",
+   "hint": "Schritte: `mkdir staging`, `cp -r project staging/`, `ls -R staging`, `tar -czf staging.tar.gz staging`."
+  },
+  "t14": {
+   "text": "Herausforderung: Füge `project` rekursiv in `backups/project.zip` ein (`zip -r`), liste mit `unzip -l` und erzeuge mit `sha256sum` die Summe. Alle drei in dieser Reihenfolge.",
+   "hint": "`zip -r backups/project.zip project`, `unzip -l backups/project.zip`, `sha256sum backups/project.zip`."
+  },
+  "t15": {
+   "text": "TICKET #3801 — Die Prüfer wollen komprimierte Kopien der Logs, die Originale in `logs` müssen aber bleiben. Lege `audit` an, kopiere `logs/*.log` hinein und komprimiere die Kopien mit `gzip`.",
+   "hint": "`mkdir audit`, `cp logs/*.log audit/`, `gzip audit/*.log`; `gzip` löscht nur die Kopien."
+  },
+  "t16": {
+   "text": "Vorhersage: Was gibt `ls -1 project/src | wc -l` aus? Zur Prüfung ausführen.",
+   "hint": "In `src` liegen zwei `.c`-Dateien."
+  }
+ },
+ "vm": {
+  "intro": "Führe die folgenden Befehle auf deiner eigenen VM (Ubuntu/Rocky/Alma) aus. Alles bleibt in `~/lab`; deine echten Daten bleiben unberührt. Es gibt keinen zerstörerischen Schritt, aber Archive überschreiben gleichnamige Dateien: experimentiere nicht außerhalb von lab. Vor größeren Experimenten ist ein Snapshot eine gute Gewohnheit.",
+  "tasks": {
+   "v01": {
+    "title": "Testprojekt anlegen",
+    "text": "Lege unter `~/lab` ein kleines Projekt und eine große Logdatei an und liste die Projektdateien auf.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab/project/{src,docs}\ncd ~/lab\necho 'int main(void) { return 0; }' > project/src/main.c\necho 'Demo project' > project/docs/readme.txt\necho 'todo: backup' > project/notes.txt\nseq 1 200000 > big.log\nfind project -type f | sort",
+      "expected": "project/docs/readme.txt\nproject/notes.txt\nproject/src/main.c"
+     }
+    ],
+    "differs": [
+     "Die Reihenfolge kann abweichen; es genügt, wenn alle drei Dateien erscheinen.",
+     "Fehlt `seq` (sehr selten), nimm `yes line | head -n 200000 > big.log`."
+    ]
+   },
+   "v02": {
+    "title": "Archivieren und ohne Entpacken auflisten",
+    "text": "Packe `project` in `backup.tar.gz`, liste den Inhalt ohne Entpacken auf und sieh dir die Größe an.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ntar -czf backup.tar.gz project\ntar -tzf backup.tar.gz\nls -lh backup.tar.gz",
+      "expected": "project/\nproject/docs/\nproject/docs/readme.txt\nproject/notes.txt\nproject/src/\nproject/src/main.c\n-rw-r--r--. 1 student student 300 Nov 12 10:00 backup.tar.gz"
+     }
+    ],
+    "differs": [
+     "Die Reihenfolge der Liste kann abweichen.",
+     "Größe und Datum sind anders; wichtig ist, dass Pfade mit `project/` beginnen.",
+     "Die Warnung `Removing leading '/'` erscheint bei absoluten Pfaden; hier sollte sie nicht erscheinen."
+    ]
+   },
+   "v03": {
+    "title": "Sicher wiederherstellen",
+    "text": "Entpacke das Archiv in ein neues Verzeichnis und danach nur eine einzelne Datei.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nmkdir restore restore2\ntar -xzf backup.tar.gz -C restore\ntar -xzf backup.tar.gz -C restore2 project/notes.txt\nls -R restore restore2",
+      "expected": "restore:\nproject\n...\nrestore2:\nproject\n\nrestore2/project:\nnotes.txt"
+     }
+    ],
+    "differs": [
+     "Bei `Cannot open: No such file or directory` fehlt das `-C`-Verzeichnis; lege es vorher mit `mkdir` an.",
+     "Meldet tar `Not found in archive`, schreibe den Pfad wie in der Ausgabe von `tar -tf`."
+    ]
+   },
+   "v04": {
+    "title": "Kompressionsraten vergleichen",
+    "text": "Komprimiere `big.log` mit gzip, bzip2 und xz, das Original bleibt. Vergleiche die Größen.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ngzip -k big.log\nbzip2 -k big.log\nxz -k big.log\nls -l big.log*",
+      "expected": "-rw-r--r--. 1 student student 1228895 Nov 12 10:01 big.log\n-rw-r--r--. 1 student student  580000 Nov 12 10:01 big.log.bz2\n-rw-r--r--. 1 student student  480000 Nov 12 10:01 big.log.gz\n-rw-r--r--. 1 student student  400000 Nov 12 10:01 big.log.xz"
+     }
+    ],
+    "differs": [
+     "Die Zahlen weichen ab; meist gilt `xz` < `bzip2` < `gzip` < Original.",
+     "Bei `bzip2: command not found` installiere es: Ubuntu `sudo apt install bzip2`, Rocky/Alma `sudo dnf install bzip2`.",
+     "Kennt ein altes `gzip` `-k` nicht, mache vorher mit `cp big.log big2.log` eine Kopie."
+    ]
+   },
+   "v05": {
+    "title": "Backup mit Datum und Prüfsumme",
+    "text": "Erstelle ein Backup mit Datum, speichere die Prüfsumme und prüfe sie. Optional probierst du zip.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ntar -czf backup-$(date +%F).tar.gz project\nsha256sum backup-*.tar.gz > SHA256SUMS\nsha256sum -c SHA256SUMS",
+      "expected": "backup-2026-11-12.tar.gz: OK"
+     },
+     {
+      "cmd": "# Optional (ohne zip: sudo apt install zip unzip oder sudo dnf install zip unzip)\nzip -r project.zip project\nunzip -l project.zip",
+      "expected": "  adding: project/ (stored 0%)\n...\n---------\n  4 files"
+     }
+    ],
+    "differs": [
+     "Bei `FAILED` hast du das Archiv nach der Summenbildung geändert; führe `sha256sum` erneut aus.",
+     "Bei deutschem oder türkischem System kann die Ausgabe statt `OK` übersetzt sein.",
+     "Passt `backup-*.tar.gz` auf mehrere Dateien, erhältst du für jede eine Zeile."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Welcher Befehl listet den Inhalt eines Archivs nur auf, ohne zu entpacken?",
+   "options": [
+    "`tar -xzf backup.tar.gz`",
+    "`tar -tf backup.tar.gz`",
+    "`tar -czf backup.tar.gz`",
+    "`gzip -d backup.tar.gz`"
+   ],
+   "explain": "`t` listet (list). `x` entpackt, `c` erstellt; `gzip -d` entpackt."
+  },
+  "q2": {
+   "q": "Was passiert nach `gzip notes.txt`?",
+   "options": [
+    "`notes.txt` und `notes.txt.gz` bleiben beide",
+    "Es entsteht eine `.zip`-Datei",
+    "`notes.txt.gz` wird gelöscht",
+    "`notes.txt` wird gelöscht und durch `notes.txt.gz` ersetzt"
+   ],
+   "explain": "gzip ersetzt das Original durch die komprimierte Datei. Zum Behalten nutzt du `gzip -k`."
+  },
+  "q3": {
+   "q": "Warum listet man ein Archiv vor dem Entpacken mit `tar -tf` auf?",
+   "options": [
+    "Um Tar-Bombs und zu überschreibende Dateien vorher zu sehen",
+    "Damit das Entpacken schneller geht",
+    "Weil `tar -x` ohne Auflisten nicht funktioniert",
+    "Um das Archiv zu komprimieren"
+   ],
+   "explain": "Ohne oberstes Verzeichnis verteilen sich die Dateien im aktuellen Verzeichnis; vorhandene Dateien können überschrieben werden."
+  },
+  "q4": {
+   "q": "Was bewirkt `-C restore` in `tar -xzf backup.tar.gz -C restore`?",
+   "options": [
+    "Komprimiert das Archiv unter dem Namen `restore`",
+    "Schließt Dateien namens `restore` aus",
+    "Wechselt vor dem Entpacken in `restore` und entpackt dorthin",
+    "Prüft die Prüfsumme des Archivs"
+   ],
+   "explain": "`-C` (change directory) legt das Zielverzeichnis fest; es muss vorher existieren."
+  }
+ },
+ "summary": [
+  "Archivieren (`tar`) bündelt, Komprimieren (`gzip`, `bzip2`, `xz`) verkleinert; `.tar.gz` ist die Kombination.",
+  "Erstellen: `tar -czf backup.tar.gz project`; auflisten: `tar -tf`; entpacken: `tar -xzf ... -C restore`.",
+  "Erst auflisten, dann in ein neues Verzeichnis entpacken: schützt vor Tar-Bomb und Überschreiben.",
+  "`gzip` löscht das Original, `gzip -k` behält es; zip ist mit Windows/macOS kompatibel.",
+  "Backups mit Datum erstellen, mit `sha256sum` prüfen und die Wiederherstellung testen."
+ ],
+ "glossary": [
+  {
+   "term": "Archiv",
+   "meaning": "Viele Dateien und Verzeichnisse samt Pfaden in einer Datei gebündelt (`tar`)."
+  },
+  {
+   "term": "Kompression",
+   "meaning": "Verkleinern von Daten; `gzip`, `bzip2`, `xz`."
+  },
+  {
+   "term": "Tarball",
+   "meaning": "Ein mit `tar` erstelltes Archiv, meist `.tar.gz`."
+  },
+  {
+   "term": "Tar-Bomb",
+   "meaning": "Archiv ohne oberstes Verzeichnis, das beim Entpacken Dateien im aktuellen Verzeichnis verstreut."
+  },
+  {
+   "term": "relativer und absoluter Pfad",
+   "meaning": "Absolute Pfade beginnen mit `/`; im Archiv bevorzugt man relative Pfade."
+  },
+  {
+   "term": "Prüfsumme (Checksum)",
+   "meaning": "Fingerabdruck einer Datei (`sha256sum`); macht Beschädigungen sichtbar."
+  }
+ ]
+}

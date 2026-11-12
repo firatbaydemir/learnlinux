@@ -1,0 +1,204 @@
+{
+ "id": "4.5",
+ "level": 4,
+ "setup": {
+  "dirs": [
+   "/home/student/lab",
+   "/home/student/lab/team",
+   "/home/student/lab/drop",
+   "/home/student/lab/inbox",
+   "/home/student/lab/proj",
+   "/home/student/lab/finance",
+   "/home/student/lab/release",
+   "/home/student/lab/legacy",
+   "/home/student/lab/audit",
+   "/home/student/lab/bin"
+  ],
+  "files": {
+   "/home/student/lab/notes.txt": "special bits lab\n",
+   "/home/student/lab/backup.sh": "#!/bin/bash\necho backup\n",
+   "/home/student/lab/prog_a": "#!/bin/bash\necho a\n",
+   "/home/student/lab/prog_b": "#!/bin/bash\necho b\n",
+   "/home/student/lab/prog_c": "#!/bin/bash\necho c\n",
+   "/home/student/lab/legacy/tool.sh": "#!/bin/bash\necho tool\n",
+   "/home/student/lab/audit/s1.sh": "#!/bin/bash\necho 1\n",
+   "/home/student/lab/audit/s2.sh": "#!/bin/bash\necho 2\n",
+   "/home/student/lab/audit/s3.sh": "#!/bin/bash\necho 3\n",
+   "/home/student/lab/bin/deploy.sh": "#!/bin/bash\necho deploy\n"
+  },
+  "modes": [
+   ["/home/student/lab/backup.sh", "755"],
+   ["/home/student/lab/prog_a", "4755"],
+   ["/home/student/lab/prog_b", "4644"],
+   ["/home/student/lab/prog_c", "2755"],
+   ["/home/student/lab/inbox", "777"],
+   ["/home/student/lab/legacy/tool.sh", "4755"],
+   ["/home/student/lab/audit/s1.sh", "4755"],
+   ["/home/student/lab/audit/s2.sh", "2755"],
+   ["/home/student/lab/audit/s3.sh", "755"],
+   ["/home/student/lab/bin/deploy.sh", "4755"]
+  ],
+  "cwd": "/home/student/lab"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"out": "drwxrwxrwt", "of": "^ls -\\w*d\\w* /tmp$"},
+   "solution": ["ls -ld /tmp"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"mode": ["~/lab/backup.sh", "4755"]},
+   "solution": ["chmod u+s backup.sh"]
+  },
+  {
+   "id": "t03",
+   "kind": "guided",
+   "diff": 1,
+   "check": [
+    {"owner": ["~/lab/team", "student", "devs"]},
+    {"mode": ["~/lab/team", "2775"]}
+   ],
+   "solution": ["sudo chgrp devs team", "chmod 2775 team"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 1,
+   "check": [
+    {"mode": ["~/lab/drop", "1777"]},
+    {"out": "drwxrwxrwt", "of": "^ls -\\w*d\\w* (\\./)?drop$"}
+   ],
+   "solution": ["chmod 1777 drop", "ls -ld drop"]
+  },
+  {
+   "id": "t05",
+   "kind": "predict",
+   "diff": 1,
+   "check": {"out": "-rwsr-xr-x", "of": "^ls -\\w*l\\w* (\\./)?prog_a$"},
+   "solution": ["ls -l prog_a"]
+  },
+  {
+   "id": "t06",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "-rwSr--r--", "of": "^ls -\\w*l\\w* (\\./)?prog_b$"},
+   "solution": ["ls -l prog_b"]
+  },
+  {
+   "id": "t07",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"out": "2755/-rwxr-sr-x", "of": "^stat (\\./)?prog_c$"},
+   "solution": ["stat prog_c"]
+  },
+  {
+   "id": "t08",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"mode": ["~/lab/legacy/tool.sh", "755"]},
+   "solution": ["chmod 755 legacy/tool.sh"]
+  },
+  {
+   "id": "t09",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"mode": ["~/lab/inbox", "1777"]},
+   "solution": ["chmod +t inbox"]
+  },
+  {
+   "id": "t10",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"owner": ["~/lab/proj", "student", "devs"]},
+    {"mode": ["~/lab/proj", "2770"]},
+    {"cmd": "^umask 0?002$", "ok": true},
+    {"exists": "~/lab/proj/plan.txt", "type": "f"}
+   ],
+   "solution": ["sudo chgrp devs proj", "chmod 2770 proj", "umask 002", "touch proj/plan.txt"]
+  },
+  {
+   "id": "t11",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"exists": "~/lab/upload", "type": "d"},
+    {"mode": ["~/lab/upload", "1777"]},
+    {"owner": ["~/lab/upload/a.txt", "alice", "devs"]}
+   ],
+   "solution": ["mkdir upload", "chmod 1777 upload", "touch upload/a.txt", "sudo chown alice:devs upload/a.txt"]
+  },
+  {
+   "id": "t12",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"owner": ["~/lab/release", "student", "devs"]},
+    {"mode": ["~/lab/release", "2750"]}
+   ],
+   "solution": ["sudo chgrp devs release", "chmod 2750 release"]
+  },
+  {
+   "id": "t13",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {"mode": ["~/lab/audit/s1.sh", "755"]},
+    {"mode": ["~/lab/audit/s2.sh", "755"]},
+    {"mode": ["~/lab/audit/s3.sh", "755"]}
+   ],
+   "solution": ["chmod 755 audit/s1.sh audit/s2.sh"]
+  },
+  {
+   "id": "t14",
+   "kind": "ticket",
+   "diff": 2,
+   "check": [
+    {"owner": ["~/lab/finance", "student", "devs"]},
+    {"mode": ["~/lab/finance", "2770"]},
+    {"exists": "~/lab/finance/2026", "type": "d"}
+   ],
+   "solution": ["sudo chgrp devs finance", "chmod 2770 finance", "mkdir finance/2026"]
+  },
+  {
+   "id": "t15",
+   "kind": "ticket",
+   "diff": 2,
+   "check": [
+    {"owner": ["~/lab/bin/deploy.sh", "student", "devs"]},
+    {"mode": ["~/lab/bin/deploy.sh", "750"]}
+   ],
+   "solution": ["sudo chgrp devs bin/deploy.sh", "chmod 750 bin/deploy.sh"]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"exists": "~/lab/dropbox", "type": "d"},
+    {"owner": ["~/lab/dropbox", "student", "devs"]},
+    {"mode": ["~/lab/dropbox", "3770"]},
+    {"contains": ["~/lab/dropbox/README.txt", "uploads"]}
+   ],
+   "solution": ["mkdir dropbox", "sudo chgrp devs dropbox", "chmod 3770 dropbox", "echo uploads only > dropbox/README.txt"]
+  }
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*rwt)(?=[\\s\\S]*rws)"},
+  {"id": "v02", "expect": "/(passwd|sudo|su|mount|umount|chsh|newgrp|gpasswd)\\b"},
+  {"id": "v03", "expect": "alice\\s+devs"},
+  {"id": "v04", "expect": "not permitted|nicht zul|nicht erlaubt|izin verilmiyor"},
+  {"id": "v05", "expect": "euid=0"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

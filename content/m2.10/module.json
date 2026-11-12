@@ -1,0 +1,36 @@
+{
+  "id": "2.10",
+  "level": 2,
+  "setup": {
+    "dirs": ["/home/student/transfer", "/home/student/ops", "/home/student/.ssh"],
+    "files": {
+      "/home/student/transfer/report.txt": "Weekly report\nStatus: ready\n",
+      "/home/student/transfer/manifest.txt": "report.txt  28 bytes\n",
+      "/home/student/transfer/old_copy.txt": "outdated copy\n",
+      "/home/student/ops/ssh-config.sample": "Host linux-lab\n  HostName 192.0.2.10\n  User student\n  Port 22\n",
+      "/home/student/.ssh/known_hosts.sample": "linux-lab ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAExampleKey\n"
+    }
+  },
+  "tasks": [
+    {"id":"t01","kind":"warmup","diff":1,"check":{"cmd":"^ls ~/transfer$","ok":true},"solution":["ls ~/transfer"]},
+    {"id":"t02","kind":"warmup","diff":1,"check":{"cmd":"^ls ~/.ssh$","ok":true},"solution":["ls ~/.ssh"]},
+    {"id":"t03","kind":"guided","diff":1,"check":{"out":"report.txt","of":"^cat ~/transfer/manifest.txt$"},"solution":["cat ~/transfer/manifest.txt"]},
+    {"id":"t04","kind":"guided","diff":2,"check":{"exists":"~/transfer/report.remote.txt","type":"f"},"solution":["cp ~/transfer/report.txt ~/transfer/report.remote.txt"]},
+    {"id":"t05","kind":"predict","diff":2,"check":{"out":"ssh-ed25519","of":"^grep linux-lab ~/\\.ssh/known_hosts.sample$"},"solution":["grep linux-lab ~/.ssh/known_hosts.sample"]},
+    {"id":"t06","kind":"debug","diff":2,"check":{"absent":"~/transfer/old_copy.txt"},"solution":["rm ~/transfer/old_copy.txt"]},
+    {"id":"t07","kind":"mini","diff":2,"check":[{"contains":["~/ops/connection-plan.txt","Host linux-lab"]},{"contains":["~/ops/connection-plan.txt","Port 22"]}],"solution":["cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt"]},
+    {"id":"t08","kind":"challenge","diff":3,"check":[{"exists":"~/transfer/sync-copy.txt","type":"f"},{"contains":["~/transfer/sync-copy.txt","Status: ready"]}],"solution":["cp ~/transfer/report.txt ~/transfer/sync-copy.txt"]},
+    {"id":"t09","kind":"ticket","diff":3,"check":[{"contains":["~/ops/transfer-ticket.txt","scp"]},{"contains":["~/ops/transfer-ticket.txt","rsync"]}],"solution":["echo \"Use scp for a simple copy; use rsync for repeatable synchronization.\" > ~/ops/transfer-ticket.txt"]}
+  ],
+  "vm": [
+    {"id":"v01","expect":"OpenSSH"},
+    {"id":"v02","expect":"hostname|user|port"},
+    {"id":"v03","expect":"rsync"}
+  ],
+  "quiz": [
+    {"id":"q1","answer":1},
+    {"id":"q2","answer":0},
+    {"id":"q3","answer":3},
+    {"id":"q4","answer":2}
+  ]
+}

@@ -1,0 +1,45 @@
+{
+ "id": "3.3",
+ "level": 3,
+ "setup": {
+  "dirs": ["/home/student/work"],
+  "files": {
+   "/home/student/work/img1.jpg": "x\n",
+   "/home/student/work/img2.jpg": "x\n",
+   "/home/student/work/img10.png": "x\n",
+   "/home/student/work/doc1.txt": "doc one\n",
+   "/home/student/work/doc2.txt": "doc two\n",
+   "/home/student/work/notes.md": "# notes\n",
+   "/home/student/work/my file.txt": "spaces\n",
+   "/home/student/work/old report.txt": "old\n"
+  },
+  "cwd": "/home/student/work"
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls \\*\\.jpg$", "out": "img2\\.jpg"}, "solution": ["ls *.jpg"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls img\\?\\.jpg$", "ok": true}, "solution": ["ls img?.jpg"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls doc\\*$", "ok": true}, "solution": ["ls doc*"]},
+  {"id": "t04", "kind": "guided", "diff": 1, "check": {"cmd": "^echo \\*\\.txt$", "out": "doc1\\.txt"}, "solution": ["echo *.txt"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^ls img\\[12\\]\\.jpg$", "ok": true}, "solution": ["ls img[12].jpg"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cmd": "^ls \\*\\.\\{jpg,png\\}$", "out": "img10\\.png"}, "solution": ["ls *.{jpg,png}"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": [{"exists": "~/work/texts/doc1.txt", "type": "f"}, {"exists": "~/work/texts/doc2.txt", "type": "f"}, {"absent": "~/work/texts/notes.md"}], "solution": ["mkdir texts", "cp doc*.txt texts"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"cmd": "^echo '\\$HOME'$", "out": "\\$HOME"}, "solution": ["echo '$HOME'"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"cmd": "^echo \\*\\.xyz$", "out": "\\*\\.xyz"}, "solution": ["echo *.xyz"]},
+  {"id": "t10", "kind": "debug", "diff": 2, "check": {"absent": "~/work/old report.txt"}, "solution": ["rm \"old report.txt\""]},
+  {"id": "t11", "kind": "mini", "diff": 2, "check": [{"exists": "~/work/backup/img1.jpg", "type": "f"}, {"exists": "~/work/backup/img2.jpg", "type": "f"}, {"exists": "~/work/backup/img10.png", "type": "f"}, {"absent": "~/work/backup/doc1.txt"}], "solution": ["mkdir backup", "cp *.jpg *.png backup"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [{"seq": ["^touch ", "^rm log_"], "ok": true}, {"absent": "~/work/log_1.txt"}, {"exists": "~/work/doc1.txt", "type": "f"}], "solution": ["touch log_{1,2,3}.txt", "rm log_?.txt"]},
+  {"id": "t13", "kind": "ticket", "diff": 3, "check": [{"exists": "~/work/my_file.txt", "type": "f"}, {"absent": "~/work/my file.txt"}], "solution": ["mv \"my file.txt\" my_file.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*a1\\.txt)(?=[\\s\\S]*a2\\.txt)"},
+  {"id": "v02", "expect": "\\$NAME[\\s\\S]*linux|linux[\\s\\S]*\\$NAME"},
+  {"id": "v03", "expect": "my docs"},
+  {"id": "v04", "expect": null}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 3},
+  {"id": "q2", "answer": 0},
+  {"id": "q3", "answer": 2},
+  {"id": "q4", "answer": 1}
+ ]
+}

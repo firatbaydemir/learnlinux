@@ -1,0 +1,113 @@
+{
+ "title": "Akış Kavramı: stdin, stdout, stderr",
+ "lead": "Her Linux komutunun üç standart kanalı vardır: girdi, çıktı ve hata. Bu kanalları anlamak, yönlendirme ve pipe'ın temelidir.",
+ "objectives": [
+  "stdin (0), stdout (1) ve stderr (2) kanallarını ayırt edersin.",
+  "`>`, `>>` ve `2>` ile çıktı ve hataları dosyaya yönlendirirsin.",
+  "`2>&1` ve `/dev/null` ile hata/çıktı akışlarını birleştirir veya atarsın."
+ ],
+ "sections": [
+  {
+   "id": "streams",
+   "title": "Üç standart kanal",
+   "body": [
+    "Bir program çalışırken üç kanal açık olur: **stdin** (0) girdiyi okur, **stdout** (1) normal sonucu yazar, **stderr** (2) hata mesajlarını yazar. Varsayılan olarak girdi klavyeden gelir, çıktı ve hata ise ekrana gider.",
+    "Hata ve normal çıktı ekranda aynı yere düştüğü için karışık görünür; oysa ayrı kanallardır. Bu ayrım, hataları ayrı bir dosyaya almanı sağlar."
+   ],
+   "commands": [
+    {"cmd": "echo", "what": "Metni stdout'a yazar.", "where": "Test ve basit çıktı için.", "why": "stdout'un en basit örneğidir.", "example": "echo hello"},
+    {"cmd": "cat", "what": "Dosyayı stdout'a yazar.", "where": "Dosya içeriğini görmek için.", "why": "Dosyadan okuyup kanala verir.", "example": "cat lab/names.txt"},
+    {"cmd": "ls", "what": "Olmayan bir yolu listelemeye çalışırsa hata stderr'e gider.", "where": "Hata kanalını görmek için.", "why": "Hata mesajı ekranda görünür ama stdout'ta değildir.", "example": "ls lab/missing.txt"}
+   ],
+   "tip": "Kanal numaraları: 0 = girdi, 1 = çıktı, 2 = hata. Yönlendirmede bu numaraları kullanırsın."
+  },
+  {
+   "id": "redirect",
+   "title": "Dosyaya yönlendirme",
+   "body": [
+    "`>` stdout'u dosyaya yazar ve dosyayı **sıfırlar**. `>>` dosyanın sonuna **ekler**. `2>` yalnızca stderr'i yönlendirir. `<` dosyayı stdin olarak verir.",
+    "Hem çıktı hem hata aynı dosyaya gidecekse `> file 2>&1` yaz: önce stdout dosyaya gider, sonra stderr stdout'un gittiği yere bağlanır. Sıra önemlidir. `/dev/null` yazılan her şeyi yok eden özel bir dosyadır."
+   ],
+   "commands": [
+    {"cmd": ">", "what": "stdout'u dosyaya yazar; dosya varsa içeriği silinir.", "where": "Çıktıyı kaydetmek için.", "why": "Sonucu sonra kullanmak üzere saklarsın.", "example": "echo hello > out.txt"},
+    {"cmd": ">>", "what": "stdout'u dosyanın sonuna ekler.", "where": "Log tutarken.", "why": "Eski içeriği korur.", "example": "echo world >> out.txt"},
+    {"cmd": "2>", "what": "Yalnızca hata mesajlarını dosyaya yazar.", "where": "Hataları ayrı toplarken.", "why": "Çıktıyı ekranda tutup hataları kaydedersin.", "example": "ls lab/missing.txt 2> errors.txt"},
+    {"cmd": "<", "what": "Dosyayı komutun girdisi yapar.", "where": "Girdi bekleyen komutlarda.", "why": "Klavye yerine dosyadan okutursun.", "example": "cat < lab/names.txt"},
+    {"cmd": "2>&1", "what": "stderr'i stdout'un gittiği yere yönlendirir.", "where": "Hepsini tek dosyada toplarken.", "why": "Çıktı ve hata birlikte kaydedilir.", "example": "ls lab missing_dir > all.txt 2>&1"},
+    {"cmd": "2>/dev/null", "what": "Hataları atar.", "where": "Önemsiz hataları susturmak için.", "why": "Ekranı temiz tutar.", "example": "ls lab missing_dir 2>/dev/null"}
+   ],
+   "tip": "Güvenli alışkanlık: önce `>>` mi `>` mi gerektiğini düşün. Yanlış `>` mevcut dosyayı sessizce siler.",
+   "warn": "`>` hedef dosyayı komut çalışmadan önce boşaltır. `sort file > file` yazmak dosyanın içeriğini kaybettirir."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`echo hello` ile ekrana (stdout) bir metin yaz.", "hint": "Çıktı doğrudan ekranda görünür."},
+  "t02": {"text": "`cat lab/names.txt` ile dosyanın içeriğini stdout'a yazdır.", "hint": "Üç isim görmelisin."},
+  "t03": {"text": "Olmayan `lab/missing.txt` yolunu `ls` ile listele ve hata mesajını oku.", "hint": "Bu mesaj stderr'dendir."},
+  "t04": {"text": "`echo hello > out.txt` ile metni `out.txt` dosyasına yaz.", "hint": "Ekranda çıktı görmezsin; `cat out.txt` ile kontrol et."},
+  "t05": {"text": "`echo world >> out.txt` ile aynı dosyaya ikinci bir satır ekle.", "hint": "`>>` ekler, `>` ezer."},
+  "t06": {"text": "`ls lab/missing.txt 2> errors.txt` ile hatayı `errors.txt` dosyasına al.", "hint": "Hata artık ekranda görünmez."},
+  "t07": {"text": "`cat < lab/names.txt` ile dosyayı stdin olarak ver.", "hint": "`<` dosyadan girdi okutur."},
+  "t08": {"text": "Tahmin et: `ls lab/missing.txt > result.txt` çalışınca hata ekranda görünür mü? `result.txt` dolu mu olur? Çalıştırıp doğrula.", "hint": "`>` yalnızca stdout'u yönlendirir; hata stderr'dedir."},
+  "t09": {"text": "Tahmin et: `cat lab/names.txt | wc -l` ne yazdırır? Çalıştırarak doğrula.", "hint": "`wc -l` satır sayar; dosyada kaç satır var?"},
+  "t10": {"text": "Hata ayıklama: `ls lab missing_dir > all.txt` hata mesajını ekrana yazıyor, `all.txt`'ye girmiyor. `all.txt` hem liste hem hatayı içersin.", "hint": "Komutun sonuna `2>&1` ekle."},
+  "t11": {"text": "Mini proje: `build.log` oluştur. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. Dosyada 3 satır olmalı.", "hint": "İlk komut `>`, diğerleri `>>` ve `2>>` kullanır."},
+  "t12": {"text": "Meydan okuma: `ls lab missing_dir` komutunun hatalarını `/dev/null`'a at, normal çıktıyı `found.txt` dosyasına kaydet.", "hint": "İki yönlendirme: `2>/dev/null` ve `> found.txt`."},
+  "t13": {"text": "Ticket: Denetçi `lab/names.txt` içindeki kullanıcı sayısını `~/count.txt` dosyasında istiyor (yalnızca sayı).", "hint": "`wc -l < file` dosya adı olmadan sayı verir; çıktıyı `>` ile kaydet."}
+ },
+ "vm": {
+  "intro": "Bu komutlar VM'inde home dizininde çalışır ve yalnızca kendi oluşturduğun dosyaları yazar; yine de önemli bir dosya adı kullanma.",
+  "tasks": {
+   "v01": {
+    "title": "Çıktı ve hatayı ayır",
+    "text": "Var olan bir dosya ve olmayan bir yolu listele; çıktıyı ve hatayı ayrı dosyalara yaz, sonra ikisini göster.",
+    "blocks": [
+     {"cmd": "ls /etc/hostname /nonexistent > out.txt 2> err.txt\ncat out.txt err.txt", "expected": "/etc/hostname\nls: cannot access '/nonexistent': No such file or directory"}
+    ],
+    "differs": [
+     "Hata mesajı dağıtımına ve dile göre biraz değişebilir; `nonexistent` geçmeli.",
+     "`out.txt` boşsa `/etc/hostname` dosyası sisteminde yok demektir; `/etc/hosts` kullan."
+    ]
+   },
+   "v02": {
+    "title": "Üzerine yaz ve ekle",
+    "text": "`>` ile bir dosya oluştur, `>>` ile satır ekle ve sonucu göster.",
+    "blocks": [
+     {"cmd": "echo \"line one\" > ~/streams.txt\necho \"line two\" >> ~/streams.txt\ncat ~/streams.txt", "expected": "line one\nline two"}
+    ],
+    "differs": [
+     "Yalnızca `line two` görünüyorsa ilk komutta `>>` yerine `>`, ikincide de `>` yazmışsın."
+    ]
+   },
+   "v03": {
+    "title": "Hataları sustur",
+    "text": "Normal kullanıcı olarak erişemeyeceğin bir dizinle birlikte listele; hataları `/dev/null`'a at.",
+    "blocks": [
+     {"cmd": "ls /root /etc/hostname 2>/dev/null", "expected": "/etc/hostname"}
+    ],
+    "differs": [
+     "Çıktıda `hostname` geçmiyorsa sisteminde bu dosya yok demektir; yine de hata mesajının ekrana düşmediğini doğruladıysan sorun yok."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "stderr hangi kanal numarasıdır?", "options": ["1", "2", "0", "3"], "explain": "0 = stdin, 1 = stdout, 2 = stderr."},
+  "q2": {"q": "`echo x > file` komutu dosya zaten varsa ne yapar?", "options": ["Sonuna ekler", "Hata verir", "İçeriğini silip üzerine yazar", "Onay ister"], "explain": "`>` dosyayı sıfırlar; eklemek için `>>` kullanılır."},
+  "q3": {"q": "Hataları dosyaya alıp normal çıktıyı ekranda tutan hangisidir?", "options": ["`ls x 2> err.txt`", "`ls x > err.txt`", "`ls x >> err.txt`", "`ls x | err.txt`"], "explain": "`2>` yalnızca stderr'i yönlendirir."},
+  "q4": {"q": "`/dev/null` ne işe yarar?", "options": ["Log depolar", "Klavye girdisidir", "Geçici dosya dizinidir", "Yazılan her şeyi atar"], "explain": "`/dev/null` bir çöp kutusudur: içine yazılanlar yok olur."}
+ },
+ "summary": [
+  "Üç kanal: stdin (0), stdout (1), stderr (2).",
+  "`>` ezer, `>>` ekler, `2>` hataları yönlendirir, `<` girdi verir.",
+  "`2>&1` hatayı çıktıyla birleştirir; `> file 2>&1` sırası önemlidir.",
+  "`/dev/null` verileri atar."
+ ],
+ "glossary": [
+  {"term": "stdin", "meaning": "Standart girdi, kanal 0; varsayılan klavye."},
+  {"term": "stdout", "meaning": "Standart çıktı, kanal 1; varsayılan ekran."},
+  {"term": "stderr", "meaning": "Standart hata, kanal 2; hata mesajları."},
+  {"term": "yönlendirme", "meaning": "Bir kanalı dosyaya veya başka kanala bağlamak."},
+  {"term": "/dev/null", "meaning": "Yazılanları atan özel dosya."}
+ ]
+}

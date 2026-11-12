@@ -1,0 +1,282 @@
+{
+ "title": "Terminal und erste Schritte",
+ "lead": "Lerne, den Prompt zu lesen, erste Befehle zu tippen und dir bei Problemen selbst zu helfen.",
+ "objectives": [
+  "Du kannst Benutzer, Rechner und Verzeichnis im Prompt ablesen.",
+  "Du führst sichere erste Befehle wie whoami, hostname, pwd und ls aus.",
+  "Du findest mit man, --help und Fehlermeldungen selbst Hilfe."
+ ],
+ "sections": [
+  {
+   "id": "prompt",
+   "title": "Terminal und Prompt",
+   "body": [
+    "Das **Terminal** ist das Fenster, in dem du dem Computer per Text Befehle gibst. Das darin laufende Programm heißt **Shell**; am verbreitetsten ist `bash`. Die Shell liest deine Zeile, führt sie aus und zeigt das Ergebnis an.",
+    "Der **Prompt** am Zeilenanfang verrät drei Dinge: wer du bist, auf welchem Rechner du arbeitest und in welchem Verzeichnis du dich befindest. Beispiel: `student@linux-lab:~$` — Benutzer `student`, Rechner `linux-lab`, `~` steht für das Home-Verzeichnis. Das `$` am Ende zeigt einen normalen Benutzer, `#` den Administrator (root)."
+   ],
+   "tip": "Nichts wird ausgeführt, bis du Enter drückst. Fehler korrigierst du mit der Rücktaste."
+  },
+  {
+   "id": "first",
+   "title": "Erste Befehle: Wer bin ich, wo bin ich?",
+   "body": [
+    "Bevor du ein System anfasst, musst du wissen, wer du bist und wo du dich befindest. Die folgenden Befehle lesen nur Informationen und verändern nichts. Ein Klick auf die Box fügt den Befehl ins Terminal ein."
+   ],
+   "commands": [
+    {
+     "cmd": "whoami",
+     "what": "Gibt aus, mit welchem Benutzer du arbeitest.",
+     "where": "Nach dem Login sowie vor und nach sudo.",
+     "why": "Verhindert Aktionen mit dem falschen Benutzer.",
+     "example": "whoami"
+    },
+    {
+     "cmd": "hostname",
+     "what": "Gibt den Namen des Rechners aus.",
+     "where": "Wenn du dich mit mehreren Servern verbindest.",
+     "why": "Du stellst sicher, dass du auf dem richtigen Rechner bist.",
+     "example": "hostname"
+    },
+    {
+     "cmd": "pwd",
+     "what": "Gibt den vollständigen Pfad des aktuellen Verzeichnisses aus.",
+     "where": "Wenn du die Orientierung verlierst.",
+     "why": "Wer seinen Standort kennt, macht weniger Fehler bei Dateioperationen.",
+     "example": "pwd"
+    },
+    {
+     "cmd": "ls",
+     "what": "Listet Dateien und Ordner im aktuellen Verzeichnis. -l zeigt Details.",
+     "where": "Überall — der meistgenutzte Befehl.",
+     "why": "Schau dir die Umgebung an, bevor du handelst.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "echo",
+     "what": "Gibt den Text aus und ersetzt Variablen wie $USER.",
+     "where": "In Skripten und für schnelle Tests.",
+     "why": "Der einfachste Weg, Variablenwerte zu sehen.",
+     "example": "echo $USER"
+    }
+   ]
+  },
+  {
+   "id": "help",
+   "title": "Hilfe holen und Fehler lesen",
+   "body": [
+    "Jeder Linux-Befehl hat ein Handbuch: `man befehl` zeigt es vollständig, `befehl --help` eine Kurzfassung. Tippst du einen unbekannten Befehl, meldet die Shell `command not found` — das ist keine Katastrophe, sondern eine Information: vermutlich ein Tippfehler.",
+    "Die Shell spart dir außerdem Zeit: **Tab** vervollständigt Befehle und Dateinamen, **↑ / ↓** holt frühere Befehle zurück, `history` listet alle nummeriert auf, `clear` leert den Bildschirm."
+   ],
+   "commands": [
+    {
+     "cmd": "man",
+     "what": "Zeigt die Handbuchseite eines Befehls.",
+     "where": "Wenn du die Optionen eines Befehls nachschlagen willst.",
+     "why": "Du bekommst die passende Information direkt von deinem System.",
+     "example": "man ls"
+    },
+    {
+     "cmd": "--help",
+     "what": "Gibt eine kurze Gebrauchsanweisung aus.",
+     "where": "Zum schnellen Auffrischen.",
+     "why": "Kürzer als man und oft ausreichend.",
+     "example": "ls --help"
+    },
+    {
+     "cmd": "history",
+     "what": "Listet frühere Befehle nummeriert auf.",
+     "where": "Um einen alten Befehl wiederzufinden.",
+     "why": "Du musst nicht alles neu tippen.",
+     "example": "history"
+    }
+   ],
+   "tip": "Zweimal Tab zeigt alle möglichen Vervollständigungen. Probiere: `whoa` tippen, dann Tab."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Tippe `whoami` und lies, mit welchem Benutzer du arbeitest.",
+   "hint": "Nur den Befehlsnamen tippen und Enter drücken."
+  },
+  "t02": {
+   "text": "Ermittle mit `hostname` den Namen des Rechners.",
+   "hint": "Die Ausgabe entspricht dem Wort nach dem @ im Prompt."
+  },
+  "t03": {
+   "text": "Gib mit `pwd` den vollständigen Pfad des aktuellen Verzeichnisses aus.",
+   "hint": "Der Pfad beginnt mit / — ein absoluter Pfad."
+  },
+  "t04": {
+   "text": "Gib mit `echo \"Hello Linux\"` diesen Text aus.",
+   "hint": "Setze den Text in doppelte Anführungszeichen."
+  },
+  "t05": {
+   "text": "Liste das Verzeichnis mit `ls -l` ausführlich auf. Was bedeutet das `d` in der ersten Spalte?",
+   "hint": "d steht für Verzeichnis (directory), - für eine normale Datei."
+  },
+  "t06": {
+   "text": "Öffne mit `man ls` das Handbuch von `ls`.",
+   "hint": "Nach man folgt der Befehlsname."
+  },
+  "t07": {
+   "text": "Zeige mit `ls --help` die Kurzhilfe an.",
+   "hint": "Zwei Bindestriche, zusammengeschrieben: --help"
+  },
+  "t08": {
+   "text": "Tippe absichtlich einen nicht existierenden Befehl (z. B. `lss`) und lies die Fehlermeldung.",
+   "hint": "Die Meldung lautet command not found — Zeichen für einen Tippfehler."
+  },
+  "t09": {
+   "text": "Zeige mit `uname -r` die laufende Kernel-Version an.",
+   "hint": "-r steht für release (Version)."
+  },
+  "t10": {
+   "text": "Tippe `echo $USER`. Entspricht die Ausgabe der von `whoami`?",
+   "hint": "Das Dollarzeichen ersetzt die Variable durch ihren Wert."
+  },
+  "t11": {
+   "text": "Führe nacheinander aus: `pwd`, `ls`, `cd Documents`, `pwd`. Wie hat sich dein Standort verändert?",
+   "hint": "Vier einzelne Zeilen, jede mit Enter."
+  },
+  "t12": {
+   "text": "Liste mit `history` die in dieser Sitzung getippten Befehle auf.",
+   "hint": "Es erscheint eine nummerierte Liste."
+  },
+  "t13": {
+   "text": "Leere den Bildschirm mit `clear`.",
+   "hint": "Tastenkürzel: Strg+L"
+  },
+  "t14": {
+   "text": "Herausforderung: Erstelle im Home-Verzeichnis mit `echo Hello > first.txt` eine Datei und lies sie mit `cat first.txt`.",
+   "hint": "Das > schreibt die Ausgabe in eine Datei. Wechsle zuerst mit `cd ~` ins Home-Verzeichnis."
+  },
+  "t15": {
+   "text": "Vorhersagen: `cd ~/Documents`, dann `cd ..`, dann `pwd`. Sage vor dem Ausführen voraus, welchen Pfad du siehst, und prüfe es dann.",
+   "hint": "`..` bedeutet das übergeordnete Verzeichnis."
+  },
+  "t16": {
+   "text": "Fehler finden: Ein Kollege bekommt bei `cat nots.txt` einen Fehler. Finde mit `ls` im Home-Verzeichnis den richtigen Namen und lies die Datei mit `cat`.",
+   "hint": "Ein falscher Dateiname führt zu „No such file“; nutze den Namen aus der `ls`-Ausgabe."
+  },
+  "t17": {
+   "text": "Mini-Projekt: Schreibe mit `whoami > hello.txt` deinen Benutzernamen in eine Datei und lies sie mit `cat hello.txt`.",
+   "hint": "`>` leitet die Ausgabe in eine Datei um. Zuerst `cd ~`."
+  },
+  "t18": {
+   "text": "TICKET #1001 — Der Support braucht Systeminfos: Schreibe im Home-Verzeichnis in `info.txt` zuerst die Kernel-Version (`uname -r`), dann den Rechnernamen (`hostname`). Die Datei muss 2 Zeilen haben.",
+   "hint": "Beim ersten `>`, beim zweiten `>>` (anhängen); sonst geht die erste Zeile verloren."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Am Ende deines Prompts steht `#`. Was bedeutet das?",
+   "options": [
+    "Der Befehl wurde als Kommentar geschrieben",
+    "Du arbeitest als Administrator (root)",
+    "Die Datei ist versteckt",
+    "Das Terminal ist defekt"
+   ],
+   "explain": "`$` steht für normale Benutzer, `#` für root. Als root können falsche Befehle großen Schaden anrichten — sei vorsichtig."
+  },
+  "q2": {
+   "q": "Womit öffnest du das Handbuch eines Befehls?",
+   "options": [
+    "help befehl",
+    "manual befehl",
+    "man befehl",
+    "read befehl"
+   ],
+   "explain": "`man befehl` öffnet das vollständige Handbuch, `befehl --help` eine Kurzfassung."
+  },
+  "q3": {
+   "q": "Was bedeutet `command not found` meistens?",
+   "options": [
+    "Der Befehlsname ist falsch geschrieben oder der Befehl nicht installiert",
+    "Der Rechner schaltet sich ab",
+    "Die Festplatte ist voll",
+    "Es gibt kein Internet"
+   ],
+   "explain": "Prüfe zuerst die Schreibweise; schau dann, ob der Befehl installiert ist."
+  },
+  "q4": {
+   "q": "Welche Taste vervollständigt einen angefangenen Befehl oder Dateinamen?",
+   "options": [
+    "Esc",
+    "Strg+Z",
+    "Tab",
+    "Alt"
+   ],
+   "explain": "Tab vervollständigt; zweimal gedrückt listet es die Möglichkeiten auf."
+  }
+ },
+ "summary": [
+  "Der Prompt zeigt Benutzer, Rechner und Verzeichnis; `$` ist normal, `#` ist root.",
+  "`whoami`, `hostname`, `pwd`, `ls` sind sichere Erkundungsbefehle.",
+  "Für Hilfe nutze `man befehl` und `befehl --help`; Fehlermeldungen sind Hinweise.",
+  "Tab, ↑/↓ und `history` sparen Zeit."
+ ],
+ "glossary": [
+  {
+   "term": "Terminal",
+   "meaning": "Das Fenster, in dem du Befehle tippst."
+  },
+  {
+   "term": "Shell",
+   "meaning": "Das Programm, das deine Befehle ausführt, z. B. bash."
+  },
+  {
+   "term": "Prompt",
+   "meaning": "Die Angabe Benutzer@Rechner:Verzeichnis am Zeilenanfang."
+  },
+  {
+   "term": "Home-Verzeichnis",
+   "meaning": "Der Ordner des Benutzers; wird mit ~ abgekürzt."
+  }
+ ],
+ "vm": {
+  "intro": "Erledige die folgenden Aufgaben in deiner eigenen Linux-VM (Rocky/Alma oder Ubuntu). Hast du noch keine VM, schau zuerst in Modul 0.2.",
+  "tasks": {
+   "v01": {
+    "title": "Kernel-Version herausfinden",
+    "text": "Öffne in deiner VM das Terminal und gib die Version des laufenden Kernels aus. Füge die Ausgabe unten ein.",
+    "blocks": [
+     {
+      "cmd": "uname -r",
+      "expected": "5.14.0-427.13.1.el9_4.x86_64"
+     }
+    ],
+    "differs": [
+     "Deine Versionsnummer kann abweichen; wichtig ist eine punktgetrennte Version wie `5.14.0`.",
+     "Bei `command not found` prüfe Schreibweise (Kleinbuchstaben, Leerzeichen)."
+    ]
+   },
+   "v02": {
+    "title": "Distribution erkennen",
+    "text": "Die Datei `/etc/os-release` nennt Name und Version der Distribution.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\""
+     }
+    ],
+    "differs": [
+     "Unter Ubuntu siehst du `NAME=\"Ubuntu\"`; das ist normal.",
+     "Bei `No such file` prüfe, ob du in einer echten Distribution und nicht in einem Container bist."
+    ]
+   },
+   "v03": {
+    "title": "Deine erste Datei",
+    "text": "Schreibe im Home-Verzeichnis eine Datei und lies sie. In der Ausgabe muss `Hello` stehen; bestätige dann mit „Erledigt“.",
+    "blocks": [
+     {
+      "cmd": "cd ~ && echo Hello > first.txt && cat first.txt",
+      "expected": "Hello"
+     }
+    ],
+    "differs": [
+     "Kommt nichts, prüfe mit `ls -l first.txt`, ob die Datei entstanden ist."
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,323 @@
+{
+  "title": "Joker Karakterler ve Tırnaklar",
+  "lead": "Kabuk, komut çalışmadan önce joker desenlerini genişletir ve boşlukları ayırıcı sayar. Desenleri ve tırnakları doğru kullanarak dosya gruplarını güvenle seç.",
+  "objectives": [
+    "`*`, `?` ve `[]` ile dosya adlarını eşleştirirsin.",
+    "Süslü parantez genişletmesini glob genişletmesinden ayırırsın.",
+    "Tek tırnak, çift tırnak ve ters eğik çizginin davranışını açıklarsın.",
+    "Toplu bir işlemden önce eşleşen dosyaları kontrol edersin."
+  ],
+  "sections": [
+    {
+      "id": "globbing",
+      "title": "Joker karakterler: *, ? ve []",
+      "body": [
+        "Kabuk, komut çalışmadan önce joker desenlerini mevcut dizindeki adlarla eşleştirir. `*` sıfır veya daha fazla karakterle, `?` tam bir karakterle eşleşir. `img?.jpg` tam bir karakter içeren adları eşleştirir; `img*.jpg` daha uzun adları da kapsar.",
+        "`[12]` köşeli parantez içindeki karakterlerden tam birini eşleştirir; `[0-9]` ise bir rakamı eşleştirir. Eşleşme bulunmazsa Bash çoğunlukla deseni olduğu gibi bırakır; komutun çıktısına bakarak bunu fark edebilirsin.",
+        "Jokerleri kabuk genişletir, `ls` değil. Örneğin `ls *.txt` çalıştırıldığında `ls` komutuna eşleşen adlar ayrı argümanlar olarak verilir."
+      ],
+      "commands": [
+        {
+          "cmd": "ls *.jpg",
+          "what": "`*.jpg` ile eşleşen adları listeler.",
+          "where": "Bir uzantıya sahip dosyaları topluca incelerken.",
+          "why": "Adları tek tek yazmadan eşleşmeleri görmeni sağlar.",
+          "example": "ls *.jpg"
+        },
+        {
+          "cmd": "ls img?.jpg",
+          "what": "`img` sonrasında tek karakter bulunan `.jpg` adlarını listeler.",
+          "where": "Adın belirli bir bölümünü ve uzunluğunu eşleştirirken.",
+          "why": "`?` yalnızca bir karakteri karşılar; `img10.jpg` eşleşmez.",
+          "example": "ls img?.jpg"
+        },
+        {
+          "cmd": "ls img[12].jpg",
+          "what": "`img1.jpg` ve `img2.jpg` gibi adları eşleştirir.",
+          "where": "İzin verilen tek karakter seçenekleri belliyse.",
+          "why": "Deseni yalnızca köşeli parantezdeki karakterlerle sınırlar.",
+          "example": "ls img[12].jpg"
+        },
+        {
+          "cmd": "ls *.{jpg,png}",
+          "what": "Süslü parantez içindeki seçenekleri ayrı desenlere genişletir.",
+          "where": "Birden fazla uzantı için aynı işlemi yaparken.",
+          "why": "Benzer desenleri kısa ve okunur yazarsın.",
+          "example": "ls *.{jpg,png}"
+        }
+      ],
+      "tip": "Desenin neyle eşleştiğinden emin değilsen önce `printf '%s\\n' *.jpg` ile genişleyen adları gör; henüz dosyaları değiştiren bir komut çalıştırma."
+    },
+    {
+      "id": "quoting",
+      "title": "Tırnaklar ve kaçış",
+      "body": [
+        "Tırnaklar, kabuğun boşlukları ve özel karakterleri nasıl yorumlayacağını belirler. Boşluk içeren bir ad tırnaksız yazılırsa birden fazla argümana bölünür. `\"my file.txt\"` bunu tek argüman olarak korur.",
+        "Tek tırnak içindeki karakterler harfiyen korunur; `$HOME` gibi değişkenler genişletilmez. Çift tırnak boşlukları korur ama değişkenleri ve komut yerine koymayı çalıştırır. Ters eğik çizgi, hemen arkasındaki özel karakterin anlamını kaldırır."
+      ],
+      "commands": [
+        {
+          "cmd": "ls \"my file.txt\"",
+          "what": "Boşluk içeren adı tek argüman olarak verir.",
+          "where": "Boşluklu adları listelerken veya komutlara aktarırken.",
+          "why": "Kabuğun adı iki ayrı parçaya bölmesini önler.",
+          "example": "ls \"my file.txt\""
+        },
+        {
+          "cmd": "echo '$HOME'",
+          "what": "Tek tırnak içindeki `$HOME` metnini aynen yazdırır.",
+          "where": "Özel karakterleri genişletmeden göstermek istediğinde.",
+          "why": "Değişkenin değerini değil, yazıldığı biçimi görürsün.",
+          "example": "echo '$HOME'"
+        },
+        {
+          "cmd": "echo \"$HOME\"",
+          "what": "Çift tırnak içindeki değişkeni genişletip değerini yazdırır.",
+          "where": "Değişken değerini boşluklardan etkilenmeden kullanırken.",
+          "why": "Değer korunur ve kabuk değişkeni yine genişletir.",
+          "example": "echo \"$HOME\""
+        },
+        {
+          "cmd": "ls my\\ file.txt",
+          "what": "Ters eğik çizgiyle boşluğun özel anlamını kaldırır.",
+          "where": "Tek bir özel karakteri korumak istediğinde.",
+          "why": "Tırnak kullanmadan da adı tek argüman yapar.",
+          "example": "ls my\\ file.txt"
+        }
+      ],
+      "tip": "Değişken içeren bir dosya adını genellikle `\"$NAME\"` biçiminde tırnakla; böylece içindeki boşluklar da korunur."
+    },
+    {
+      "id": "safe",
+      "title": "Jokerleri güvenle kullan",
+      "body": [
+        "Bir joker deseni birden çok adı eşleştirebilir. `rm *.tmp` gibi silme komutlarından önce aynı deseni `ls` ile çalıştırıp hangi adların seçildiğini kontrol et.",
+        "Özellikle `*` çok geniş eşleşebilir. Önce `pwd` ile doğru dizinde olduğunu doğrula, sonra eşleşenleri listele. Emin olmadığın bir deseni gerçek sistemde yıkıcı bir komutla deneme."
+      ],
+      "commands": [
+        {
+          "cmd": "ls *.tmp",
+          "what": "Silme öncesinde `.tmp` ile biten eşleşmeleri gösterir.",
+          "where": "Joker içeren toplu bir işlemden hemen önce.",
+          "why": "Komutun hangi adları hedefleyeceğini doğrularsın.",
+          "example": "ls *.tmp"
+        },
+        {
+          "cmd": "rm -i *.tmp",
+          "what": "Eşleşen her dosyayı silmeden önce onay ister.",
+          "where": "Yalnızca kontrol ettiğin geçici dosyaları kaldırırken.",
+          "why": "Yanlış eşleşmede işlemi iptal etme fırsatı verir.",
+          "example": "rm -i *.tmp",
+          "nosim": true
+        }
+      ],
+      "warn": "Jokeri silme komutunda körlemesine kullanma. Önce `pwd` ve `ls` ile dizini ve eşleşen adları doğrula; yıkıcı denemeleri yalnızca güvenli bir test ortamında yap."
+    },
+    {
+      "id": "practice",
+      "title": "Desenleri uygulama görevlerine bağla",
+      "body": [
+        "Bu modülde `img1.jpg`, `img2.jpg`, `img10.png`, `doc1.txt` ve `doc2.txt` gibi İngilizce ASCII adlar kullanılır. Komut örnekleri sanal laboratuvarda güvenle denenebilir.",
+        "Süslü parantez genişletmesi glob ile aynı şey değildir: `{1,2}` seçenekleri kabuk tarafından ayrı metinlere çevrilir; `*` ve `?` ise mevcut adlarla eşleşir. Komutun hangi adları alacağını düşün ve sonra laboratuvarda doğrula."
+      ],
+      "commands": [
+        {
+          "cmd": "echo *.txt",
+          "what": "Eşleşen `.txt` adlarını ekrana yazar.",
+          "where": "Bir deseni değiştirme işleminden önce sınarken.",
+          "why": "Kabuğun deseni nasıl genişlettiğini görürsün.",
+          "example": "echo *.txt"
+        },
+        {
+          "cmd": "touch log_{1,2,3}.txt",
+          "what": "Süslü parantez seçenekleriyle üç ayrı ad oluşturur.",
+          "where": "Birbirine benzeyen test adları gerektiğinde.",
+          "why": "Tekrarlanan komutları kısaltır.",
+          "example": "touch log_{1,2,3}.txt"
+        }
+      ],
+      "tip": "Laboratuvardaki tırnaklı dosya adları yalnızca sanal dosya sisteminde bulunur; gerçek sisteminde aynı komutları denemek zorunda değilsin."
+    }
+  ],
+  "tasks": {
+    "t01": {
+      "text": "Laboratuvar zaten karışık adlarla hazır. `ls *.jpg` çalıştır ve yalnızca `.jpg` dosyalarının listelendiğini gözlemle.",
+      "hint": "`*` sıfır veya daha fazla karakterle eşleşir; nokta ve `jpg` son eki desende aynen kalır."
+    },
+    "t02": {
+      "text": "`ls img?.jpg` komutuyla `img` sonrasında tek karakter bulunan `.jpg` adlarını listele.",
+      "hint": "`?` tam bir karakteri karşılar. Deseni tırnaksız yaz ki kabuk genişletsin."
+    },
+    "t03": {
+      "text": "`ls doc*` komutuyla `doc` ile başlayan adları listele.",
+      "hint": "`*`, `doc` sonrasında sıfır veya daha fazla karaktere izin verir."
+    },
+    "t04": {
+      "text": "`echo *.txt` çalıştır. Kabuk, eşleşen adları `echo` komutuna nasıl iletiyor?",
+      "hint": "Önce kabuk deseni eşleşen adlara genişletir; `echo` bu adları yazar."
+    },
+    "t05": {
+      "text": "`ls img[12].jpg` ile son eki `1` veya `2` olan görselleri listele.",
+      "hint": "Köşeli parantez içindeki her seçenek tek bir karakteri temsil eder."
+    },
+    "t06": {
+      "text": "`ls *.{jpg,png}` ile `.jpg` ve `.png` dosyalarını tek komutta eşleştir.",
+      "hint": "Süslü parantezdeki `jpg` ve `png` seçenekleri ayrı desenler üretir."
+    },
+    "t07": {
+      "text": "`texts` klasörünü oluştur ve `doc` ile başlayan `.txt` dosyalarını içine kopyala. `notes.md` dosyasını kopyalama.",
+      "hint": "`mkdir texts` komutundan sonra `cp doc*.txt texts` çalıştır."
+    },
+    "t08": {
+      "text": "Tahmin et: `echo '$HOME'` değişkenin değerini mi, yoksa `$HOME` metnini mi yazar? Komutu çalıştırıp kontrol et.",
+      "hint": "Tek tırnak içindeki metin genişletilmez."
+    },
+    "t09": {
+      "text": "Tahmin et: `*.xyz` ile eşleşen ad yoksa `echo *.xyz` ne yazar? Laboratuvarda doğrula.",
+      "hint": "Bash'in varsayılan davranışında eşleşmeyen desen olduğu gibi kalır."
+    },
+    "t10": {
+      "text": "Hata ayıklama: `old report.txt` adındaki dosyayı tek bir argüman olarak hedefleyip kaldır.",
+      "hint": "Boşluklu adı tırnakla: `rm \"old report.txt\"`."
+    },
+    "t11": {
+      "text": "Mini proje: `backup` klasörünü oluştur ve yalnızca `.jpg` ile `.png` dosyalarını bu klasöre kopyala.",
+      "hint": "`mkdir backup` ardından `cp *.jpg *.png backup` kullan."
+    },
+    "t12": {
+      "text": "Meydan okuma: `log_1.txt`, `log_2.txt` ve `log_3.txt` adlarını süslü parantezle oluştur; ardından `log_?` deseniyle bu üç dosyayı kaldır.",
+      "hint": "Önce `touch log_{1,2,3}.txt`, sonra `rm log_?.txt` çalıştır."
+    },
+    "t13": {
+      "text": "Ticket: Boşluk içeren `my file.txt` adını `my_file.txt` olarak yeniden adlandır. Adın tek argüman olmasına dikkat et.",
+      "hint": "`mv \"my file.txt\" my_file.txt` komutunu kullan."
+    }
+  },
+  "vm": {
+    "intro": "Bu bölümdeki komutları kendi VM'inde çalıştırabilirsin. Dosyaları yalnızca kendi home dizinindeki `glob-lab` klasöründe oluştur; jokerle silme denemelerini başka dizinlerde yapma.",
+    "tasks": {
+      "v01": {
+        "title": "Tek karakterli joker",
+        "text": "Home dizininde `glob-lab` klasörünü oluştur. İçine `a1.txt` ve `a2.txt` adlarını ekle, sonra `a?.txt` desenini listele.",
+        "blocks": [
+          {
+            "cmd": "mkdir -p ~/glob-lab && cd ~/glob-lab && touch a1.txt a2.txt && ls a?.txt",
+            "expected": "a1.txt\na2.txt"
+          }
+        ],
+        "differs": [
+          "`a?.txt` tam bir karakterle eşleşir; iki ad da görünmelidir.",
+          "Çıktıda adlar bitişikse `ls -1 a?.txt` kullanarak her birini ayrı satırda görebilirsin."
+        ]
+      },
+      "v02": {
+        "title": "Tek ve çift tırnak",
+        "text": "Aynı terminal oturumunda önce `NAME=linux` tanımla, sonra değişkeni çift tırnakla ve tek tırnakla yazdır. Çıktıda hem `linux` hem de `$NAME` bulunmalı.",
+        "blocks": [
+          {
+            "cmd": "NAME=linux\necho \"$NAME\"\necho '$NAME'",
+            "expected": "linux\n$NAME"
+          }
+        ],
+        "differs": [
+          "İki satırda da `linux` görüyorsan tek tırnak yerine çift tırnak kullanmış olabilirsin.",
+          "`NAME=linux` ataması ve `echo` komutları aynı kabuk oturumunda çalışmalıdır."
+        ]
+      },
+      "v03": {
+        "title": "Boşluklu adı koru",
+        "text": "`glob-lab` içinde `my docs` adında bir klasör oluştur. Ardından bu adı tırnakla listele; çıktıda `my docs` görünmeli.",
+        "blocks": [
+          {
+            "cmd": "mkdir -p ~/glob-lab && cd ~/glob-lab && mkdir -p \"my docs\" && ls -d \"my docs\"",
+            "expected": "my docs"
+          }
+        ],
+        "differs": [
+          "Ad iki parçaya ayrılıyorsa hem oluşturma hem listeleme komutunda tırnakları kontrol et.",
+          "`ls -d` klasörün içeriği yerine klasör adını gösterir."
+        ]
+      },
+      "v04": {
+        "title": "Eşleşmeleri silmeden önce incele",
+        "text": "`glob-lab` içinde iki geçici dosya oluştur. Önce `*.tmp` eşleşmesini listele; sonuçta yalnızca bu iki adı gördüğünü doğrula. Silme işlemini yalnızca doğru klasörde ve doğru eşleşmeyi gördüysen yap.",
+        "blocks": [
+          {
+            "cmd": "cd ~/glob-lab && touch sample1.tmp sample2.tmp && ls *.tmp"
+          }
+        ],
+        "differs": [
+          "Başka dosyalar listeleniyorsa silme komutunu çalıştırma; önce `pwd` ve listeyi kontrol et.",
+          "Joker eşleşmesi yoksa `glob-lab` içinde olduğundan ve dosya adlarının `.tmp` ile bittiğinden emin ol."
+        ]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {
+      "q": "`?` joker karakteri neyle eşleşir?",
+      "options": [
+        "Sıfır veya daha fazla karakterle",
+        "Yalnızca bir dosya uzantısıyla",
+        "Köşeli parantez içindeki tüm karakterlerle",
+        "Tam olarak bir karakterle"
+      ],
+      "explain": "`?` tam bir karakteri temsil eder; `*` ise sıfır veya daha fazla karakterle eşleşebilir."
+    },
+    "q2": {
+      "q": "Hangi kullanım `$HOME` ifadesini genişletmeden aynen yazar?",
+      "options": [
+        "`echo '$HOME'`",
+        "`echo \"$HOME\"`",
+        "`echo $HOME`",
+        "`echo \\$HOME`"
+      ],
+      "explain": "Tek tırnak içindeki her şey harfiyen korunur. Ters eğik çizgi de bu örnekte `$` karakterini kaçırabilir."
+    },
+    "q3": {
+      "q": "Bash'te `*.xyz` ile eşleşen ad yoksa `echo *.xyz` varsayılan olarak ne yapar?",
+      "options": [
+        "Tüm dosyaları siler",
+        "Hiçbir şey yazmaz",
+        "Eşleşmeyen `*.xyz` desenini olduğu gibi yazar",
+        "Geçerli dizini değiştirir"
+      ],
+      "explain": "Bash'in varsayılan ayarında eşleşmeyen glob deseni genişletilmeden komuta aktarılır."
+    },
+    "q4": {
+      "q": "Adı `my file.txt` olan dosyayı doğru biçimde nasıl listelersin?",
+      "options": [
+        "`ls my file.txt`",
+        "`ls \"my file.txt\"`",
+        "`ls my-file.txt`",
+        "`ls *.txt`"
+      ],
+      "explain": "Tırnaklar boşluğu koruyarak adı `ls` komutuna tek argüman olarak verir."
+    }
+  },
+  "summary": [
+    "`*` sıfır veya daha fazla karakteri, `?` tam bir karakteri eşleştirir.",
+    "`[abc]` belirtilen karakterlerden birini eşleştirir; `{a,b}` seçenekleri ayrı metinlere genişletir.",
+    "Tek tırnak her şeyi harfiyen korur; çift tırnak boşlukları korurken değişkenleri genişletir.",
+    "Boşluklu adları tırnakla veya ters eğik çizgiyle koru.",
+    "Joker içeren yıkıcı bir komuttan önce dizini ve eşleşmeleri kontrol et."
+  ],
+  "glossary": [
+    {
+      "term": "glob",
+      "meaning": "Kabuğun dosya adlarıyla eşleştirdiği joker desen."
+    },
+    {
+      "term": "joker karakter",
+      "meaning": "Dosya adı desenlerinde bir veya daha fazla karakteri temsil eden özel karakter."
+    },
+    {
+      "term": "tırnaklama",
+      "meaning": "Kabuğun boşlukları ve özel karakterleri nasıl yorumlayacağını belirleme."
+    },
+    {
+      "term": "kaçış karakteri",
+      "meaning": "Ardından gelen karakterin özel anlamını kaldıran ters eğik çizgi (`\\`)."
+    }
+  ]
+}

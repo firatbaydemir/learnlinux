@@ -1,0 +1,464 @@
+{
+ "levels": {
+  "0": {
+   "tr": "Giriş",
+   "de": "Einstieg",
+   "en": "Introduction"
+  },
+  "1": {
+   "tr": "Temel komutlar",
+   "de": "Grundbefehle",
+   "en": "Basic commands"
+  },
+  "2": {
+   "tr": "Dosyalar ve diskler",
+   "de": "Dateien und Datenträger",
+   "en": "Files and disks"
+  },
+  "3": {
+   "tr": "Metin ve akışlar",
+   "de": "Text und Datenströme",
+   "en": "Text and streams"
+  },
+  "4": {
+   "tr": "Kullanıcılar ve izinler",
+   "de": "Benutzer und Rechte",
+   "en": "Users and permissions"
+  },
+  "5": {
+   "tr": "Süreçler ve servisler",
+   "de": "Prozesse und Dienste",
+   "en": "Processes and services"
+  },
+  "6": {
+   "tr": "Sistem ve otomasyon",
+   "de": "System und Automatisierung",
+   "en": "Systems and automation"
+  }
+ },
+ "modules": [
+  {
+   "id": "0.1",
+   "level": 0,
+   "title": {
+    "tr": "Linux Nedir? — Çekirdek, Dağıtım, Felsefe",
+    "de": "Was ist Linux? — Kernel, Distribution, Philosophie",
+    "en": "What Is Linux? — Kernel, Distribution, Philosophy"
+   }
+  },
+  {
+   "id": "0.2",
+   "level": 0,
+   "title": {
+    "tr": "Ortam Kurulumu — VM, WSL, Bulut ve Snapshot",
+    "de": "Umgebung einrichten — VM, WSL, Cloud und Snapshots",
+    "en": "Setting Up Your Environment — VM, WSL, Cloud, and Snapshots"
+   }
+  },
+  {
+   "id": "0.3",
+   "level": 0,
+   "title": {
+    "tr": "Terminal ve İlk Adımlar — Prompt, Kısayollar, Yardım",
+    "de": "Terminal und erste Schritte — Prompt, Tastenkürzel, Hilfe",
+    "en": "The Terminal and First Steps — Prompt, Shortcuts, Help"
+   }
+  },
+  {
+   "id": "1.1",
+   "level": 1,
+   "title": {
+    "tr": "Terminalde Gezinme",
+    "de": "Navigation im Terminal",
+    "en": "Navigating the Terminal"
+   }
+  },
+  {
+   "id": "1.2",
+   "level": 1,
+   "title": {
+    "tr": "Kimlik ve Sistem",
+    "de": "Identität und System",
+    "en": "Identity and System"
+   }
+  },
+  {
+   "id": "1.3",
+   "level": 1,
+   "title": {
+    "tr": "Yardım ve Keşif",
+    "de": "Hilfe und Erkundung",
+    "en": "Help and Discovery"
+   }
+  },
+  {
+   "id": "1.4",
+   "level": 1,
+   "title": {
+    "tr": "Komut Başarısı",
+    "de": "Befehlserfolg",
+    "en": "Command Success"
+   }
+  },
+  {
+   "id": "1.5",
+   "level": 1,
+   "title": {
+    "tr": "Shell Araçları",
+    "de": "Shell-Werkzeuge",
+    "en": "Shell Tools"
+   }
+  },
+  {
+   "id": "2.1",
+   "level": 2,
+   "title": {
+    "tr": "Linux Dizin Ağacı",
+    "de": "Linux-Verzeichnisbaum",
+    "en": "Linux Directory Tree"
+   }
+  },
+  {
+   "id": "2.2",
+   "level": 2,
+   "title": {
+    "tr": "Yollar ve Türler",
+    "de": "Pfade und Typen",
+    "en": "Paths and Types"
+   }
+  },
+  {
+   "id": "2.3",
+   "level": 2,
+   "title": {
+    "tr": "Oluşturma ve Silme",
+    "de": "Erstellen und Löschen",
+    "en": "Create and Delete"
+   }
+  },
+  {
+   "id": "2.4",
+   "level": 2,
+   "title": {
+    "tr": "Kopyalama ve Taşıma",
+    "de": "Kopieren und Verschieben",
+    "en": "Copy and Move"
+   }
+  },
+  {
+   "id": "2.5",
+   "level": 2,
+   "title": {
+    "tr": "Dosya Bilgisi",
+    "de": "Dateiinformation",
+    "en": "File Information"
+   }
+  },
+  {
+   "id": "2.6",
+   "level": 2,
+   "title": {
+    "tr": "Dosya Okuma",
+    "de": "Dateien lesen",
+    "en": "Reading Files"
+   }
+  },
+  {
+   "id": "2.7",
+   "level": 2,
+   "title": {
+    "tr": "Editörler",
+    "de": "Editoren",
+    "en": "Editors"
+   }
+  },
+  {
+   "id": "2.8",
+   "level": 2,
+   "title": {
+    "tr": "Disk ve Ağ Sağlığı",
+    "de": "Disk- und Netzwerkstatus",
+    "en": "Disk and Network Health"
+   }
+  },
+  {
+   "id": "2.9",
+   "level": 2,
+   "title": {
+    "tr": "Disk Yönetimi",
+    "de": "Diskverwaltung",
+    "en": "Disk Management"
+   }
+  },
+  {
+   "id": "2.10",
+   "level": 2,
+   "title": {
+    "tr": "Uzak Bağlantı",
+    "de": "Fernverbindung",
+    "en": "Remote Connection"
+   }
+  },
+  {
+   "id": "2.11",
+   "level": 2,
+   "title": {
+    "tr": "Zamanlanmış Görevler",
+    "de": "Geplante Aufgaben",
+    "en": "Scheduled Tasks"
+   }
+  },
+  {
+   "id": "3.1",
+   "level": 3,
+   "title": {
+    "tr": "Akış Kavramı",
+    "de": "Streams",
+    "en": "Streams"
+   }
+  },
+  {
+   "id": "3.2",
+   "level": 3,
+   "title": {
+    "tr": "Yönlendirme ve Pipe",
+    "de": "Umleitung und Pipe",
+    "en": "Redirection and Pipes"
+   }
+  },
+  {
+   "id": "3.3",
+   "level": 3,
+   "title": {
+    "tr": "Wildcards ve Quoting",
+    "de": "Wildcards und Quoting",
+    "en": "Wildcards and Quoting"
+   }
+  },
+  {
+   "id": "3.4",
+   "level": 3,
+   "title": {
+    "tr": "Arama",
+    "de": "Suche",
+    "en": "Search"
+   }
+  },
+  {
+   "id": "3.5",
+   "level": 3,
+   "title": {
+    "tr": "Metin Filtreleme",
+    "de": "Textfilter",
+    "en": "Text Filtering"
+   }
+  },
+  {
+   "id": "3.6",
+   "level": 3,
+   "title": {
+    "tr": "sed ve awk",
+    "de": "sed und awk",
+    "en": "sed and awk"
+   }
+  },
+  {
+   "id": "3.7",
+   "level": 3,
+   "title": {
+    "tr": "Karşılaştırma",
+    "de": "Vergleich",
+    "en": "Comparison"
+   }
+  },
+  {
+   "id": "3.8",
+   "level": 3,
+   "title": {
+    "tr": "Arşivleme",
+    "de": "Archivierung",
+    "en": "Archiving"
+   }
+  },
+  {
+   "id": "3.9",
+   "level": 3,
+   "title": {
+    "tr": "İleri Temel",
+    "de": "Fortgeschritten",
+    "en": "Advanced Basics"
+   }
+  },
+  {
+   "id": "4.1",
+   "level": 4,
+   "title": {
+    "tr": "Kullanıcı Bilgisi",
+    "de": "Benutzerinformation",
+    "en": "User Information"
+   }
+  },
+  {
+   "id": "4.2",
+   "level": 4,
+   "title": {
+    "tr": "Kullanıcı Yönetimi",
+    "de": "Benutzerverwaltung",
+    "en": "User Management"
+   }
+  },
+  {
+   "id": "4.3",
+   "level": 4,
+   "title": {
+    "tr": "Kimlik Değiştirme",
+    "de": "Identitätswechsel",
+    "en": "Switching Identity"
+   }
+  },
+  {
+   "id": "4.4",
+   "level": 4,
+   "title": {
+    "tr": "İzin Temelleri",
+    "de": "Berechtigungen",
+    "en": "Permission Basics"
+   }
+  },
+  {
+   "id": "4.5",
+   "level": 4,
+   "title": {
+    "tr": "Özel İzinler",
+    "de": "Spezielle Rechte",
+    "en": "Special Permissions"
+   }
+  },
+  {
+   "id": "5.1",
+   "level": 5,
+   "title": {
+    "tr": "Süreç Temelleri",
+    "de": "Prozessgrundlagen",
+    "en": "Process Basics"
+   }
+  },
+  {
+   "id": "5.2",
+   "level": 5,
+   "title": {
+    "tr": "Kaynak İzleme",
+    "de": "Ressourcenüberwachung",
+    "en": "Resource Monitoring"
+   }
+  },
+  {
+   "id": "5.3",
+   "level": 5,
+   "title": {
+    "tr": "Süreç Kontrolü",
+    "de": "Prozesskontrolle",
+    "en": "Process Control"
+   }
+  },
+  {
+   "id": "5.4",
+   "level": 5,
+   "title": {
+    "tr": "İş Kontrolü",
+    "de": "Job-Kontrolle",
+    "en": "Job Control"
+   }
+  },
+  {
+   "id": "5.5",
+   "level": 5,
+   "title": {
+    "tr": "Paket Yönetimi",
+    "de": "Paketverwaltung",
+    "en": "Package Management"
+   }
+  },
+  {
+   "id": "5.6",
+   "level": 5,
+   "title": {
+    "tr": "Servis ve Log",
+    "de": "Dienste und Logs",
+    "en": "Services and Logs"
+   }
+  },
+  {
+   "id": "6.1",
+   "level": 6,
+   "title": {
+    "tr": "Ağ Temelleri — ip, ss, DNS, Portlar",
+    "de": "Netzwerk-Grundlagen — ip, ss, DNS, Ports",
+    "en": "Network Basics — ip, ss, DNS, Ports"
+   }
+  },
+  {
+   "id": "6.2",
+   "level": 6,
+   "title": {
+    "tr": "SELinux — Etiketler, Booleanlar, AVC",
+    "de": "SELinux — Labels, Booleans, AVC",
+    "en": "SELinux — Labels, Booleans, AVC"
+   }
+  },
+  {
+   "id": "6.3",
+   "level": 6,
+   "title": {
+    "tr": "firewalld — Zone, Servis, Port",
+    "de": "firewalld — Zone, Dienst, Port",
+    "en": "firewalld — Zone, Service, Port"
+   }
+  },
+  {
+   "id": "6.4",
+   "level": 6,
+   "title": {
+    "tr": "LVM — PV, VG, LV ve Genişletme",
+    "de": "LVM — PV, VG, LV und Erweitern",
+    "en": "LVM — PV, VG, LV and Extending"
+   }
+  },
+  {
+   "id": "6.5",
+   "level": 6,
+   "title": {
+    "tr": "Bash Script 1 — Değişken, Argüman, Koşul",
+    "de": "Bash-Skript 1 — Variablen, Argumente, Bedingungen",
+    "en": "Bash Script 1 — Variables, Arguments, Conditions"
+   }
+  },
+  {
+   "id": "6.6",
+   "level": 6,
+   "title": {
+    "tr": "Bash Script 2 — Döngü, Fonksiyon, Tuzaklar",
+    "de": "Bash-Skript 2 — Schleifen, Funktionen, Fallstricke",
+    "en": "Bash Script 2 — Loops, Functions, Pitfalls"
+   }
+  },
+  {
+   "id": "6.7",
+   "level": 6,
+   "title": {
+    "tr": "systemd Timer — Cron'un Modern Alternatifi",
+    "de": "systemd-Timer — Die moderne Alternative zu Cron",
+    "en": "systemd Timers — The Modern Alternative to Cron"
+   }
+  },
+  {
+   "id": "6.8",
+   "level": 6,
+   "title": {
+    "tr": "Bitirme Projesi — Küçük Şirket Sunucusu",
+    "de": "Abschlussprojekt — Kleiner Firmenserver",
+    "en": "Final Project — Small Company Server"
+   }
+  }
+ ]
+}

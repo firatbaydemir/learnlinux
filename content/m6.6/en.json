@@ -1,0 +1,466 @@
+{
+ "title": "Bash Script 2 — Loops, Functions, Pitfalls",
+ "lead": "Do not do the same work a hundred times: build loops, case and functions, clean up temporary files with trap and write safe scripts without quoting traps.",
+ "objectives": [
+  "You write repeated work with `for` and `while`.",
+  "You read a file safely line by line with `while IFS= read -r`.",
+  "You route arguments and menus with `case` and structure code with functions and `local`.",
+  "You clean up with `mktemp` and `trap` and prevent the empty-variable disaster with `\"${DIR:?}\"`.",
+  "You find script errors with `shellcheck`, `bash -n` and `bash -x`."
+ ],
+ "sections": [
+  {
+   "id": "loops",
+   "title": "Loops: for and while",
+   "body": [
+    "A script is more than commands running in order. If you do the same work for several servers or files, you use a **loop**. `for` runs once per item in a list, `while` runs as long as a condition stays true.",
+    "The source of the list must be safe: file patterns (`./*.txt`), fixed lists or `\"$@\"`. Never feed the output of `$(ls)` into a loop; names with spaces get split.",
+    "**Note:** The built-in simulator cannot execute loops; you write them into script files and run them in your VM."
+   ],
+   "commands": [
+    {
+     "cmd": "for",
+     "what": "Runs the commands once for each item in the list.",
+     "where": "When running the same check on several servers or processing the files of a folder.",
+     "why": "Shortens repeated code and reduces mistakes.",
+     "example": "for i in 1 2 3; do echo \"n=$i\"; done",
+     "nosim": true
+    },
+    {
+     "cmd": "while",
+     "what": "Repeats the commands as long as the condition is true.",
+     "where": "When waiting for something or reading files.",
+     "why": "You do not need to know the number of rounds in advance.",
+     "example": "while [ -e /tmp/lock ]; do sleep 1; done",
+     "nosim": true
+    },
+    {
+     "cmd": "echo {1..5}",
+     "what": "Brace expansion: produces 1 2 3 4 5 (no spaces inside the range).",
+     "where": "For number ranges or numbered series of files.",
+     "why": "Makes short lists without a loop; also used in `for i in {1..5}`.",
+     "example": "echo {1..5}"
+    },
+    {
+     "cmd": "break / continue",
+     "what": "`break` ends the loop, `continue` jumps to the next round.",
+     "where": "When skipping empty lines or leaving once the item is found.",
+     "why": "Avoids needless work and nested `if` blocks.",
+     "example": "[ -n \"$line\" ] || continue",
+     "nosim": true
+    }
+   ],
+   "tip": "If a file pattern matches nothing, `./*.txt` stays literal. Put `[ -e \"$f\" ] || continue` at the start of the loop body."
+  },
+  {
+   "id": "readfile",
+   "title": "Reading a file line by line",
+   "body": [
+    "The correct pattern for line-by-line reading is `while IFS= read -r line; do ... done < file`. `IFS=` keeps leading and trailing spaces, `-r` does not interpret backslashes.",
+    "Do not write `for line in $(cat file)`: lines are split at spaces and every word becomes a round. The redirection `done < ~/lab/servers.txt` makes the file the input of the loop."
+   ],
+   "commands": [
+    {
+     "cmd": "while IFS= read -r",
+     "what": "Reads input line by line and puts each line into a variable.",
+     "where": "With server lists, logs or CSV files.",
+     "why": "Reads safely without altering spaces or backslashes.",
+     "example": "while IFS= read -r host; do echo \"$host\"; done < servers.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "done < file",
+     "what": "Redirects the loop's input from a file.",
+     "where": "On the last line of a `while read` block.",
+     "why": "A pipe (`cat | while`) runs in a subshell and variables vanish after the loop; a redirection does not.",
+     "example": "done < ~/lab/servers.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "wc -l",
+     "what": "Prints the number of lines.",
+     "where": "When you want to know how many rounds the loop will run.",
+     "why": "You compare your expectation with the real number.",
+     "example": "wc -l ~/lab/servers.txt"
+    }
+   ],
+   "warn": "If the last line does not end with `\\n`, `read` may skip it. If needed, add `|| [ -n \"$host\" ]`."
+  },
+  {
+   "id": "case",
+   "title": "Branching with case",
+   "body": [
+    "`case` compares a value with patterns and is far more readable than a long `if/elif` chain. Each branch starts with `pattern)` and ends with `;;`; `*)` runs when nothing matches. The block closes with `esac`.",
+    "Typical uses: branching on the first argument (`$1`) as in `./menu.sh start`, or acting differently by the prefix of a server name."
+   ],
+   "commands": [
+    {
+     "cmd": "case ... esac",
+     "what": "Branches a value according to patterns.",
+     "where": "In service scripts (start/stop/status) and menus.",
+     "why": "Readable; you catch unknown input with `*)`.",
+     "example": "case \"$1\" in start) echo go ;; *) echo usage ;; esac",
+     "nosim": true
+    },
+    {
+     "cmd": "$1  $@  $#",
+     "what": "First argument, all arguments and the number of arguments.",
+     "where": "When passing values to the script from outside.",
+     "why": "The script becomes reusable; `\"$@\"` preserves arguments with spaces.",
+     "example": "echo \"first: $1, count: $#\"",
+     "nosim": true
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Gives the script execute permission.",
+     "where": "Before running it as `./menu.sh`.",
+     "why": "Without the permission you get `Permission denied`.",
+     "example": "chmod +x ~/scripts/menu.sh"
+    }
+   ],
+   "tip": "Combine several patterns with `|`, for example `start|restart)`."
+  },
+  {
+   "id": "functions",
+   "title": "Functions, local and arrays",
+   "body": [
+    "A **function** names repeated code: `name() { ...; }`. In Bash variables are **global** by default; without `local` inside a function you overwrite variables from outside.",
+    "`return` only gives an exit code of 0–255. For text use `echo` and capture it with `$(function)`. An **array** collects several values under one name; always write `\"${arr[@]}\"` in loops so elements with spaces stay intact."
+   ],
+   "commands": [
+    {
+     "cmd": "name() { ...; }",
+     "what": "Gives a block of code a name that you call later.",
+     "where": "When the same check runs in several places in the script.",
+     "why": "Structures the code, ends repetition and makes testing easier.",
+     "example": "log() { echo \"[log] $1\"; }",
+     "nosim": true
+    },
+    {
+     "cmd": "local",
+     "what": "Limits a variable to the function.",
+     "where": "For temporary variables inside functions.",
+     "why": "You do not accidentally overwrite a variable of the same name outside.",
+     "example": "local msg=$1",
+     "nosim": true
+    },
+    {
+     "cmd": "arr=(a b c)",
+     "what": "Defines an array with three elements.",
+     "where": "For lists of servers or options.",
+     "why": "The list lives in one variable; `${#arr[@]}` gives the count.",
+     "example": "hosts=(web01 web02 db01)",
+     "nosim": true
+    },
+    {
+     "cmd": "\"${arr[@]}\"",
+     "what": "Expands each element as a separate quoted word.",
+     "where": "When building a `for` loop over an array.",
+     "why": "Elements with spaces are not split.",
+     "example": "for h in \"${hosts[@]}\"; do echo \"$h\"; done",
+     "nosim": true
+    }
+   ],
+   "tip": "Arrays exist only in Bash, not in `sh` (dash). Put `#!/usr/bin/env bash` on the first line."
+  },
+  {
+   "id": "cleanup",
+   "title": "Safe scripts: set, mktemp, trap",
+   "body": [
+    "Create temporary files not with a fixed name but with `mktemp`: the name is unique and unpredictable. With `trap ... EXIT` the cleanup function runs however the script ends (error, Ctrl+C, normal); `kill -9` is the exception.",
+    "`set -euo pipefail` makes the script stricter: stop on errors (`-e`), stop on undefined variables (`-u`), do not hide failures inside pipelines (`pipefail`)."
+   ],
+   "commands": [
+    {
+     "cmd": "mktemp -d",
+     "what": "Creates a temporary directory with a unique name and prints its path.",
+     "where": "When the script needs intermediate files.",
+     "why": "Prevents collisions and attacks through predictable names.",
+     "example": "tmp=$(mktemp -d)",
+     "nosim": true
+    },
+    {
+     "cmd": "trap cleanup EXIT",
+     "what": "Runs the `cleanup` function when the script ends.",
+     "where": "With temporary directories, lock files or connections.",
+     "why": "Everything is cleaned up even after an error.",
+     "example": "trap cleanup EXIT",
+     "nosim": true
+    },
+    {
+     "cmd": "set -euo pipefail",
+     "what": "Stops the script on errors, undefined variables and pipeline failures.",
+     "where": "In the first lines of the script.",
+     "why": "You stop at once instead of silently continuing wrongly.",
+     "example": "set -euo pipefail",
+     "nosim": true
+    }
+   ],
+   "danger": "If you delete inside `trap`, the same rule applies: write `rm -rf \"${tmp:?}\"`. If `tmp` is empty, `rm -rf $tmp/` really becomes `rm -rf /`. Test first with `echo rm -rf \"$tmp\"`."
+  },
+  {
+   "id": "pitfalls",
+   "title": "Pitfalls and debugging",
+   "body": [
+    "The most common mistake is the **unquoted variable**: `touch $F` with `F=\"my notes.txt\"` creates two files (`my` and `notes.txt`). Rule: always quote variables as `\"$F\"`.",
+    "The most dangerous line is `rm -rf $DIR/*`: if `DIR` is empty it becomes `rm -rf /*`. `\"${DIR:?}\"` stops the script with an error on an empty or undefined value. Show the path with `echo` before deleting.",
+    "Debugging: `bash -n` checks the syntax without running, `bash -x` shows every command with a `+` prefix, `shellcheck` finds common traps."
+   ],
+   "commands": [
+    {
+     "cmd": "\"$var\"",
+     "what": "Quotes the variable; no word splitting and no glob expansion.",
+     "where": "Every time you use a variable.",
+     "why": "File names with spaces stay in one piece.",
+     "example": "touch \"$F\""
+    },
+    {
+     "cmd": "\"${DIR:?}\"",
+     "what": "Aborts with an error if `DIR` is empty or undefined.",
+     "where": "With `rm -rf` and other destructive commands.",
+     "why": "Prevents an empty variable from deleting the path `/`.",
+     "example": "rm -rf \"${DIR:?}/\"*",
+     "nosim": true
+    },
+    {
+     "cmd": "shellcheck",
+     "what": "Statically analyses the script and reports traps with a code (SC2086).",
+     "where": "After writing a script, before committing.",
+     "why": "Catches unquoted variables and similar mistakes without running anything.",
+     "example": "shellcheck ~/scripts/bad.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -n",
+     "what": "Checks only the syntax without running the script.",
+     "where": "When you suspect a missing `done`, `fi` or `esac`.",
+     "why": "Harmless; no command runs.",
+     "example": "bash -n ~/scripts/loop.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -x",
+     "what": "Prints every command with its expansions and a `+` prefix.",
+     "where": "When the script behaves unexpectedly.",
+     "why": "You see what the variables really contain.",
+     "example": "bash -x ~/scripts/loop.sh",
+     "nosim": true
+    }
+   ],
+   "tip": "Run a destructive command first with `echo` in front: `echo rm -rf \"$DIR\"`. If the output is right, remove the `echo`.",
+   "warn": "Install ShellCheck on Ubuntu/Debian with `sudo apt install shellcheck`, on Rocky/Alma via EPEL: `sudo dnf install epel-release`, then `sudo dnf install ShellCheck`."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Create `~/scripts/loop.sh` with `printf`; its first line should be `#!/usr/bin/env bash` (redirection `>`).",
+   "hint": "`printf '#!/usr/bin/env bash\\n' > ~/scripts/loop.sh` — the `\\n` at the end is the line break."
+  },
+  "t02": {
+   "text": "How many servers are in `~/lab/servers.txt`? Count with `wc -l` and guess how many rounds a loop would run.",
+   "hint": "`wc -l ~/lab/servers.txt` prints the line count."
+  },
+  "t03": {
+   "text": "Append with `>>` (without overwriting) a `for i in 1 2 3; do ... done` loop to `loop.sh`: three lines with `printf`.",
+   "hint": "Inside single quotes the shell does not expand `$i`. Use `\\n` for line breaks."
+  },
+  "t04": {
+   "text": "Make `loop.sh` executable (mode 755).",
+   "hint": "`chmod 755 ~/scripts/loop.sh` or `chmod +x`; check with `ls -l` for `-rwxr-xr-x`."
+  },
+  "t05": {
+   "text": "Write `~/scripts/readlines.sh` using the pattern `while IFS= read -r host; do ... done < ~/lab/servers.txt` that prints every server with `echo`.",
+   "hint": "Write four lines with a single `printf`; the last line is `done < ~/lab/servers.txt`."
+  },
+  "t06": {
+   "text": "Set `F=\"my notes.txt\"` and create the file with `touch \"$F\"`. What would have happened without quotes?",
+   "hint": "Two commands: first the assignment, then `touch \"$F\"`. Check with `ls`."
+  },
+  "t07": {
+   "text": "Write `~/scripts/arr.sh`: it defines the array `hosts=(web01 web02 db01)` and prints it with `for h in \"${hosts[@]}\"; do ... done`.",
+   "hint": "Inside the single-quoted `printf`, `\"${hosts[@]}\"` is written as is."
+  },
+  "t08": {
+   "text": "Guess the output of `./scripts/count.sh | wc -l` before running it: how many lines? Then run it and verify.",
+   "hint": "The script contains three `echo` lines; look with `cat scripts/count.sh`."
+  },
+  "t09": {
+   "text": "Set an empty variable with `DIR=` and run `echo \"rm -rf $DIR/\"`. Which path would it delete? Guess, then verify.",
+   "hint": "The empty `$DIR` vanishes; only `/` remains. That is why you write `\"${DIR:?}\"`."
+  },
+  "t10": {
+   "text": "`~/scripts/hello.sh` does not run (`Permission denied`). Fix it and run it.",
+   "hint": "`ls -l ~/scripts` shows the permissions; `chmod +x` adds them; then `~/scripts/hello.sh`."
+  },
+  "t11": {
+   "text": "The line `rm -rf $DIR/*` in `~/scripts/clean.sh` is dangerous. Rewrite the file: keep `DIR=/home/student/tmpwork`, and make the delete line use `\"${DIR:?}/\"*`.",
+   "hint": "Look with `cat ~/scripts/clean.sh`; then rewrite the three lines with `printf`."
+  },
+  "t12": {
+   "text": "`~/scripts/list_files.sh` contains `for f in $(ls *.txt)`, which splits names with spaces. Rewrite the file with a glob: `for f in ./*.txt; do`.",
+   "hint": "Look at the content with `cat`. Rewrite four lines with `printf`; keep `$f` inside single quotes."
+  },
+  "t13": {
+   "text": "Create `~/scripts/menu.sh`: `case \"$1\" in` with branches `start)`, `stop)` and `*)`, ending with `esac`; then make it executable.",
+   "hint": "Write the file with one `printf`, then `chmod 755`. Every branch ends with `;;`."
+  },
+  "t14": {
+   "text": "Write `~/scripts/safe.sh`: a temp directory with `mktemp -d`, a `cleanup()` function, `trap cleanup EXIT` and a `log()` function that uses `local`.",
+   "hint": "First `tmp=$(mktemp -d)`, then `cleanup() { rm -rf \"${tmp:?}\"; }`, and `trap cleanup EXIT` at the end."
+  },
+  "t15": {
+   "text": "Which servers logged an `ERROR` in `~/lab/app.log`? Write the unique, sorted server names to `~/lab/failed_hosts.txt`.",
+   "hint": "`grep ERROR`, then `cut -d' ' -f4`, `sort -u`; redirect the output with `>` into the file."
+  },
+  "t16": {
+   "text": "Ticket: The nightly cleanup script deleted more than expected on a server because the variable was empty. Write `~/scripts/cleanup.sh`: `set -euo pipefail`, `DIR=/home/student/tmpwork`, a `trap` on exit, `\"${DIR:?}/\"*` for deleting; make it executable.",
+   "hint": "One `printf` with five lines, then `chmod 755`. `trap \"echo cleanup done\" EXIT` is enough."
+  },
+  "t17": {
+   "text": "Ticket: The team wants a script that checks every server in `~/lab/servers.txt`. Write `~/scripts/check_all.sh`: a `check_host()` function using `local`, a `while IFS= read -r host; do` loop, `done < ~/lab/servers.txt`; make it executable.",
+   "hint": "Function first, then the loop; skip blank lines with `[ -n \"$host\" ] || continue`; `chmod 755` last."
+  }
+ },
+ "vm": {
+  "intro": "Do these tasks in your own VM (Ubuntu, Rocky/Alma or WSL). Everything happens under `~/scripts`; do not touch system files. Before trying anything with `rm`, take a VM snapshot (Module 0.2) and put `echo` in front of the delete command.",
+  "tasks": {
+   "v01": {
+    "title": "First loop and bash -n",
+    "text": "Write a `for` loop, check it first with `bash -n`, then run it. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/scripts && cd ~/scripts\nprintf '#!/usr/bin/env bash\\nfor i in 1 2 3; do\\n  echo \"n=$i\"\\ndone\\n' > loop.sh\nchmod +x loop.sh\nbash -n loop.sh && ./loop.sh",
+      "expected": "n=1\nn=2\nn=3"
+     }
+    ],
+    "differs": [
+     "If `bash -n` reports an error, check the `do` and `done` lines with `cat loop.sh`.",
+     "If you see `Permission denied`, you forgot `chmod +x loop.sh`."
+    ]
+   },
+   "v02": {
+    "title": "Loop over a file and case",
+    "text": "Read the server list line by line and print a role with `case` according to each name.",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\nprintf 'web01\\nweb02\\ndb01\\ncache01\\nmail01\\n' > servers.txt\ncat > readlines.sh <<'EOF'\n#!/usr/bin/env bash\nwhile IFS= read -r host; do\n  case \"$host\" in\n    web*) echo \"$host: web\" ;;\n    db*) echo \"$host: database\" ;;\n    *) echo \"$host: other\" ;;\n  esac\ndone < servers.txt\nEOF\nbash readlines.sh",
+      "expected": "web01: web\nweb02: web\ndb01: database\ncache01: other\nmail01: other"
+     }
+    ],
+    "differs": [
+     "If the output is empty, check with `ls` that `servers.txt` is in the same folder.",
+     "If everything says `other`, you have a typo in the `case` patterns (`web*)`)."
+    ]
+   },
+   "v03": {
+    "title": "Function, local, mktemp, trap",
+    "text": "Run a script that creates a temporary directory and cleans it up on exit. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\ncat > safe.sh <<'EOF'\n#!/usr/bin/env bash\nset -euo pipefail\ntmp=$(mktemp -d)\ncleanup() {\n  rm -rf \"${tmp:?}\"\n  echo \"cleanup: removed $tmp\"\n}\ntrap cleanup EXIT\nlog() {\n  local msg=$1\n  echo \"work in $tmp: $msg\"\n}\nlog \"hello\"\nEOF\nbash safe.sh",
+      "expected": "work in /tmp/tmp.Ab12Cd: hello\ncleanup: removed /tmp/tmp.Ab12Cd"
+     }
+    ],
+    "differs": [
+     "The directory name differs on every run; what matters is that both lines appear.",
+     "If the `cleanup` line is missing, check that `trap cleanup EXIT` comes after the function."
+    ]
+   },
+   "v04": {
+    "title": "Catching traps with shellcheck",
+    "text": "Install ShellCheck and scan a script that has an unquoted variable. Paste the warning.",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu/Debian\nsudo apt install -y shellcheck\n# Rocky/Alma (needs EPEL)\nsudo dnf install -y epel-release && sudo dnf install -y ShellCheck",
+      "expected": "..."
+     },
+     {
+      "cmd": "cd ~/scripts\nprintf '#!/usr/bin/env bash\\nF=\"my notes.txt\"\\ntouch $F\\n' > bad.sh\nshellcheck bad.sh",
+      "expected": "In bad.sh line 3:\ntouch $F\n      ^-- SC2086 (info): Double quote to prevent globbing and word splitting."
+     }
+    ],
+    "differs": [
+     "If the install fails, on Rocky check with `dnf repolist` that `epel-release` is active.",
+     "The message differs slightly between ShellCheck versions; the code `SC2086` is enough."
+    ]
+   },
+   "v05": {
+    "title": "bash -x and a safe test",
+    "text": "Trace every step of the script with `bash -x`; then try `rm` with an empty `DIR` only through `echo` (no real deleting).",
+    "blocks": [
+     {
+      "cmd": "cd ~/scripts\nbash -x loop.sh 2>&1 | head -8\nDIR=\"\"\necho rm -rf $DIR/*",
+      "expected": "+ for i in 1 2 3\n+ echo n=1\nn=1\n...\nrm -rf /bin /boot /etc ..."
+     }
+    ],
+    "differs": [
+     "Lines starting with `+` are the `bash -x` trace; several `+` signs mean nested commands.",
+     "The last line is only `echo`, so nothing is deleted; it just shows that the empty variable becomes `/*`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "What happens with `rm -rf $DIR/*` when `DIR` is empty, and which notation protects?",
+   "options": [
+    "Nothing happens; add `rm -i`",
+    "Only the home directory is deleted; use `sudo`",
+    "It tries to delete `/*`; `\"${DIR:?}\"` protects",
+    "It errors out; `chmod 000` is enough"
+   ],
+   "explain": "The empty variable disappears and the command becomes `rm -rf /*`. `${DIR:?}` stops the script on an empty value."
+  },
+  "q2": {
+   "q": "Which pattern reads a file safely line by line?",
+   "options": [
+    "`for l in $(cat file); do ... done`",
+    "`while IFS= read -r l; do ... done < file`",
+    "`cat file | for l; do ... done`",
+    "`ls file | read l`"
+   ],
+   "explain": "`for` with `$(cat)` splits lines into words. `while IFS= read -r` reads the line unchanged."
+  },
+  "q3": {
+   "q": "What does `local x=1` do inside a function?",
+   "options": [
+    "Makes `x` a constant",
+    "Passes `x` on to child processes",
+    "Defines `x` system-wide",
+    "Makes `x` valid only inside the function"
+   ],
+   "explain": "`local` limits the scope to the function; a variable of the same name outside is left untouched."
+  },
+  "q4": {
+   "q": "When does `trap cleanup EXIT` run?",
+   "options": [
+    "However the script ends (including errors); except after `kill -9`",
+    "Only on Ctrl+C",
+    "Before the first line of the script",
+    "Only if `cleanup` returns 0"
+   ],
+   "explain": "The EXIT trap runs on normal exit, on errors and on most signals; SIGKILL cannot be caught."
+  }
+ },
+ "summary": [
+  "`for` runs once per list item, `while` as long as the condition is true; choose a safe source.",
+  "Read files with `while IFS= read -r line; do ... done < file`, not with `$(cat)`.",
+  "`case ... esac` routes arguments and menus readably; `*)` is the default branch.",
+  "Use `local` in functions; walk arrays with `\"${arr[@]}\"`.",
+  "Create temporary files with `mktemp` and clean up with `trap cleanup EXIT`.",
+  "Quote every variable; write `\"${DIR:?}\"` when deleting and test with `echo` first.",
+  "`bash -n`, `bash -x` and `shellcheck` show errors without running or step by step."
+ ],
+ "glossary": [
+  {"term": "loop", "meaning": "A construct that repeats a block of commands: `for`, `while`."},
+  {"term": "word splitting", "meaning": "Splitting an unquoted variable at whitespace."},
+  {"term": "IFS", "meaning": "The characters the shell uses to separate words (field separator)."},
+  {"term": "case", "meaning": "Multi-way branch that compares a value with patterns."},
+  {"term": "local", "meaning": "Keyword that limits a variable to a function."},
+  {"term": "array", "meaning": "A Bash variable holding several values under one name."},
+  {"term": "trap", "meaning": "Defines a command to run on a signal or at exit."},
+  {"term": "mktemp", "meaning": "Creates a temporary file or directory with a unique name."},
+  {"term": "shellcheck", "meaning": "Static analysis tool for shell scripts."},
+  {"term": "bash -x", "meaning": "Trace mode that prints every command with its expansions before running it."}
+ ]
+}

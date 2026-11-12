@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0.2 Setting up your own Linux VM — Linux Foundations Academy</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","en")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="0.2">
+<header class="top"><a class="brand" href="index.html">Linux Foundations Academy</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (optional)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-0.2.html" hreflang="tr" lang="tr" data-switch="tr">TR</a><a href="../de/modul-0.2.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-0.2.html" hreflang="en" lang="en" data-switch="en" aria-current="true">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Theme" aria-label="Theme">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Overall progress"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#why">Why your own VM?</a></li><li><a href="#iso">Download the ISO and verify it</a></li><li><a href="#create">Create the VM and install</a></li><li><a href="#snapshot">Snapshots: your undo button</a></li><li><a href="#network">Networking basics</a></li><li><a href="#ssh">Connect with SSH</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>Contents</summary><ol><li><a href="#why">Why your own VM?</a></li><li><a href="#iso">Download the ISO and verify it</a></li><li><a href="#create">Create the VM and install</a></li><li><a href="#snapshot">Snapshots: your undo button</a></li><li><a href="#network">Networking basics</a></li><li><a href="#ssh">Connect with SSH</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> Level 0</p>
+<h1><span class="module-id">0.2</span> Setting up your own Linux VM</h1>
+<p class="lead">Install Rocky/Alma Linux or Ubuntu in VirtualBox, UTM or WSL, verify the download, take a snapshot and connect over SSH.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>What will you learn in this module?</h2><ul><li>You pick the right tool for your computer (VirtualBox, UTM or WSL).</li><li>You verify the ISO with a SHA-256 checksum before installing.</li><li>You create a VM, take a snapshot and connect to it over SSH.</li></ul></section>
+<section id="why"><h2>Why your own VM?</h2>
+<p>Real skills come from a <strong>real Linux</strong>. A virtual machine (VM) is a complete computer inside your computer: you can break it, reinstall it and nothing on your real system is touched.</p>
+<p>Pick the tool that fits your hardware: <strong>VirtualBox</strong> (Windows, Intel Mac, Linux), <strong>UTM</strong> (Apple Silicon Macs, needs an ARM64 ISO) or <strong>WSL 2</strong> (Windows 10/11, fastest to start, Ubuntu only). For distributions use <strong>Rocky Linux 9 / AlmaLinux 9</strong> (the RHEL family used in companies) and optionally <strong>Ubuntu 24.04 LTS</strong>.</p>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Plan for 2 CPU cores, 4 GB RAM and 25 GB disk per VM.</p></aside>
+</section>
+<section id="iso"><h2>Download the ISO and verify it</h2>
+<p>Download the ISO only from the official site of the distribution (rockylinux.org, almalinux.org, ubuntu.com). Next to the ISO there is a <strong>checksum</strong> (SHA-256). Compute the checksum of your file and compare: if one character differs, the file is damaged or tampered with — download again.</p>
+<article class="cmd"><h3><code>sha256sum (Linux/macOS: shasum -a 256)</code></h3><dl><dt>What is it for?</dt><dd>Computes the SHA-256 checksum of a file.</dd><dt>Where is it used?</dt><dd>On your host machine after the download.</dd><dt>Why does it matter?</dt><dd>Proves the ISO is complete and unmodified.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> Rocky-9-latest-x86_64-minimal.iso</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum Rocky-9-latest-x86_64-minimal.iso">Copy</button></div></div></article>
+<article class="cmd"><h3><code>Get-FileHash (Windows PowerShell)</code></h3><dl><dt>What is it for?</dt><dd>Same checksum on Windows.</dd><dt>Where is it used?</dt><dd>PowerShell on Windows hosts.</dd><dt>Why does it matter?</dt><dd>Windows has no sha256sum.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">Get-FileHash</span> .\Rocky-9-latest-x86_64-minimal.iso <span class="tf">-Algorithm</span> SHA256</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="Get-FileHash .\Rocky-9-latest-x86_64-minimal.iso -Algorithm SHA256">Copy</button></div></div></article>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Never install from an ISO whose checksum does not match, even if the installer starts.</p></aside>
+</section>
+<section id="create"><h2>Create the VM and install</h2>
+<p>In VirtualBox/UTM create a new VM, attach the ISO and give it 2 CPUs, 4 GB RAM and 25 GB disk. Start it and follow the installer: choose your language, select the disk (automatic partitioning is fine), set a root password, <strong>create a normal user and tick &quot;administrator&quot;</strong> (this adds the user to the <code>wheel</code>/<code>sudo</code> group).</p>
+<p>Choose the <strong>Minimal</strong> install first; you will add tools yourself. After the reboot remove the ISO and log in with your normal user. Finish with <code>cat /etc/os-release</code> to see which system you built.</p>
+<p>On <strong>WSL</strong> this is one command in PowerShell (administrator): <code>wsl --install -d Ubuntu-24.04</code>. Then restart and create your user name when asked.</p>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Choose a short lowercase user name without spaces; you will type it a lot.</p></aside>
+</section>
+<section id="snapshot"><h2>Snapshots: your undo button</h2>
+<p>A <strong>snapshot</strong> saves the complete state of the VM. Take one called <code>clean-install</code> right after the first successful boot and before every risky experiment. If you break something, restore the snapshot in seconds.</p>
+<p>In VirtualBox: Machine ▸ Take Snapshot; in UTM: clone the VM or use the QEMU snapshot option. For WSL export a backup: <code>wsl --export Ubuntu-24.04 backup.tar</code>.</p>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p>A snapshot is not a backup of your real files; if the host disk fails, snapshots are lost with it.</p></aside>
+</section>
+<section id="network"><h2>Networking basics</h2>
+<p><strong>NAT</strong> (default) lets the VM reach the internet but hides it from your network; use port forwarding to reach it. <strong>Bridged</strong> puts the VM on your LAN with its own IP address. <strong>Host-only</strong> connects only the VM and your computer.</p>
+<p>For learning, NAT with a port-forward rule (host port 2222 → guest port 22) or bridged are both fine. Inside the VM check your address with <code>ip -brief a</code>.</p>
+<article class="cmd"><h3><code>ip -brief a</code></h3><dl><dt>What is it for?</dt><dd>Shows interfaces with state and IP address.</dd><dt>Where is it used?</dt><dd>Inside the VM.</dd><dt>Why does it matter?</dt><dd>You need the IP address to connect over SSH.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ip</span> <span class="tf">-brief</span> a</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ip -brief a">Copy</button></div></div></article>
+</section>
+<section id="ssh"><h2>Connect with SSH</h2>
+<p>The VM window is clumsy. Connect from your host terminal over <strong>SSH</strong> instead: copy/paste works and it is how servers are managed in real life. First make sure the SSH service is running in the VM (<code>sudo systemctl enable --now sshd</code> on Rocky/Alma, <code>ssh</code> on Ubuntu).</p>
+<p>Then from your host: <code>ssh user@IP</code> (bridged) or <code>ssh -p 2222 user@127.0.0.1</code> (NAT with port forward). Accept the host key with <code>yes</code>.</p>
+<article class="cmd"><h3><code>ssh user@host</code></h3><dl><dt>What is it for?</dt><dd>Opens a secure remote shell.</dd><dt>Where is it used?</dt><dd>From your host to the VM or any server.</dd><dt>Why does it matter?</dt><dd>Standard way to administer Linux.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ssh</span> student@192.168.1.50</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh student@192.168.1.50">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ssh-keygen -t ed25519</code></h3><dl><dt>What is it for?</dt><dd>Creates a key pair for password-less login.</dd><dt>Where is it used?</dt><dd>Once on your host.</dd><dt>Why does it matter?</dt><dd>Safer and more convenient than passwords.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ssh-keygen</span> <span class="tf">-t</span> ed25519</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh-keygen -t ed25519">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ssh-copy-id user@host</code></h3><dl><dt>What is it for?</dt><dd>Installs your public key on the VM.</dd><dt>Where is it used?</dt><dd>After ssh-keygen.</dd><dt>Why does it matter?</dt><dd>Next logins need no password.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ssh-copy-id</span> student@192.168.1.50</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh-copy-id student@192.168.1.50">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Take a snapshot after SSH works — it is the best state to return to.</p></aside>
+</section>
+<section id="vm"><h2>Do it on your own VM <span class="gcount" data-g="vm"></span></h2><p>The real practice happens on real Linux: run the commands in your own virtual machine (VirtualBox, UTM or WSL) and compare the output.</p><p>This is the main path of this module: work through the steps on your computer. Tick &quot;Done&quot; or paste an output to be checked.</p>
+<article class="vmt card" data-vm="v01" data-expect="0"><header><h3>Download the ISO</h3><span class="status" aria-hidden="true"></span></header><p>Download Rocky Linux 9 or AlmaLinux 9 (minimal ISO; ARM64 for Apple Silicon) or Ubuntu 24.04 and note the published SHA-256 value.</p>
+<details class="differs"><summary>My output looks different</summary><ul><li>Apple Silicon needs the aarch64/arm64 ISO; x86_64 will not boot in UTM natively.</li></ul></details>
+<p><button type="button" class="btn primary done">Done</button> <button type="button" class="btn undo" hidden>Undo</button></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Verify the checksum</h3><span class="status" aria-hidden="true"></span></header><p>Compute the SHA-256 of your ISO and paste the output. Compare it manually with the published value.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> Rocky-9-latest-x86_64-minimal.iso</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum Rocky-9-latest-x86_64-minimal.iso">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">3f2b...c9a1  Rocky-9-latest-x86_64-minimal.iso</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">shasum</span> <span class="tf">-a</span> 256 Rocky-9-latest-aarch64-minimal.iso</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="shasum -a 256 Rocky-9-latest-aarch64-minimal.iso">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">(macOS) 64 hex characters followed by the file name</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>64 hexadecimal characters are expected; a shorter output means the command failed.</li><li>Windows: <code>Get-FileHash file.iso -Algorithm SHA256</code> prints a table; paste the Hash column.</li><li>Different from the published value? Delete the file and download again.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="0"><header><h3>Create and install the VM</h3><span class="status" aria-hidden="true"></span></header><p>Create the VM (2 CPU, 4 GB RAM, 25 GB disk), install the system, create an administrator user and boot into the login prompt.</p>
+<details class="differs"><summary>My output looks different</summary><ul><li>Boot loop or &quot;no bootable medium&quot;: check the ISO is attached and the boot order starts with the optical drive.</li><li>VirtualBox on Windows: enable virtualization (VT-x/AMD-V) in the BIOS and disable Hyper-V conflicts.</li></ul></details>
+<p><button type="button" class="btn primary done">Done</button> <button type="button" class="btn undo" hidden>Undo</button></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>First login</h3><span class="status" aria-hidden="true"></span></header><p>Log in with your user and show which system you installed. Paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/os-release">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">NAME=&quot;Rocky Linux&quot;
+VERSION=&quot;9.4 (Blue Onyx)&quot;</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>On Ubuntu <code>NAME=&quot;Ubuntu&quot;</code> appears; both are fine for this course.</li><li>On WSL the file exists too; the text is the same.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="0"><header><h3>Take a snapshot</h3><span class="status" aria-hidden="true"></span></header><p>Shut down cleanly with <code>sudo poweroff</code>, take a snapshot named <code>clean-install</code>, then start the VM again.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> poweroff</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo poweroff">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">(the VM window closes)</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>Snapshots greyed out? Power the VM off first (in VirtualBox the snapshot button is in the machine tools).</li></ul></details>
+<p><button type="button" class="btn primary done">Done</button> <button type="button" class="btn undo" hidden>Undo</button></p>
+</article>
+<article class="vmt card" data-vm="v06" data-expect="1"><header><h3>Find the IP address</h3><span class="status" aria-hidden="true"></span></header><p>Show your interfaces and paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ip</span> <span class="tf">-brief</span> a</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ip -brief a">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">lo     UNKNOWN  127.0.0.1/8
+enp0s3 UP       10.0.2.15/24</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>10.0.2.15</code> means NAT; use the port-forward rule to reach it from the host.</li><li>No IPv4 address on enp0s3? Run <code>nmcli device</code> and connect the interface, or check the VM network adapter is enabled.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v07" data-expect="1"><header><h3>Connect over SSH</h3><span class="status" aria-hidden="true"></span></header><p>Connect from your host terminal to the VM and run the command below. Paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ssh</span> student@192.168.1.50</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh student@192.168.1.50">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">(you get a prompt on the VM)</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="tp">$SSH_CONNECTION</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo $SSH_CONNECTION">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">192.168.1.10 51234 192.168.1.50 22</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>Connection refused</code>: sshd is not running (<code>sudo systemctl enable --now sshd</code>).</li><li><code>Connection timed out</code>: wrong IP or no port-forward rule (NAT).</li><li><code>Permission denied</code>: wrong user name or password.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v08" data-expect="0"><header><h3>Update the system</h3><span class="status" aria-hidden="true"></span></header><p>Bring the system up to date, reboot and tick &quot;Done&quot; when the update finished without errors.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> dnf <span class="tf">-y</span> update   <span class="tc"># Rocky/Alma</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo dnf -y update">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">Complete!</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> apt update <span class="to">&amp;&amp;</span> <span class="tk">sudo</span> apt <span class="tf">-y</span> upgrade   <span class="tc"># Ubuntu</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo apt update &amp;&amp; sudo apt -y upgrade">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">(no E: errors)</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>Could not resolve host</code>: the VM has no internet; check the network adapter.</li></ul></details>
+<p><button type="button" class="btn primary done">Done</button> <button type="button" class="btn undo" hidden>Undo</button></p>
+</article>
+</section>
+<section id="lab"><h2>Quick exercises (simulator)</h2><p>Optional: warm up before the VM, or practise without one, in the in-browser virtual terminal. Tasks are verified automatically.</p><p>Tasks get harder from warm-up to ticket. Badges show the difficulty.</p><p><button type="button" class="btn" data-openterm>&gt;_ Open terminal (optional)</button></p>
+<h3 class="kind k-warmup">Warm-up <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Warm-up: in the simulator read <code>cat /etc/os-release</code> to see what an installed system tells you.</p><details><summary>Hint</summary><p>The file name has a hyphen.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/os-release">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Warm-up: run <code>id</code> and see your user, uid and groups (<code>wheel</code> means administrator).</p><details><summary>Hint</summary><p>Just <code>id</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">id</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="id">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Guided lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t03" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Guided: run <code>hostname</code> and then <code>uname -r</code> — the first facts to note after any installation.</p><details><summary>Hint</summary><p>Two separate commands.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">hostname</span></span>
+<span class="ln"><span class="tk">uname</span> <span class="tf">-r</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="hostname
+uname -r">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Predict <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: what will <code>sudo whoami</code> print? Think, then run it.</p><details><summary>Hint</summary><p>sudo runs the command as root.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> whoami</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo whoami">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Debug <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t05" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: <code>cat /etc/os_release</code> fails. Run it, read the error, then run the correct command.</p><details><summary>Hint</summary><p>Underscore vs hyphen; <code>ls /etc</code> helps.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os_release</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/os_release
+cat /etc/os-release">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini project <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t06" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d2">Medium</span></p><p>Mini project: save the distribution name line into <code>~/vm-summary.txt</code> with <code>grep PRETTY_NAME /etc/os-release &gt; ~/vm-summary.txt</code>.</p><details><summary>Hint</summary><p><code>&gt;</code> writes the output to a file.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> PRETTY_NAME <span class="tp">/etc/os-release</span> <span class="to">&gt;</span> <span class="tk">~/vm-summary.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep PRETTY_NAME /etc/os-release &gt; ~/vm-summary.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Challenge <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t07" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: create <code>~/vm-lab/snapshots</code> and <code>~/vm-lab/notes</code> with one <code>mkdir -p</code> command.</p><details><summary>Hint</summary><p>Brace expansion: <code>~/vm-lab/{snapshots,notes}</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/vm-lab/{snapshots,notes}</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/vm-lab/{snapshots,notes}">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t08" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>TICKET #3001 — The lab needs a VM report: write hostname, kernel version and user name (in that order) into <code>~/vm-report.txt</code>, one per line.</p><details><summary>Hint</summary><p>First command with <code>&gt;</code>, the next two with <code>&gt;&gt;</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">hostname</span> <span class="to">&gt;</span> <span class="tk">~/vm-report.txt</span></span>
+<span class="ln"><span class="tk">uname</span> <span class="tf">-r</span> <span class="to">&gt;&gt;</span> <span class="tk">~/vm-report.txt</span></span>
+<span class="ln"><span class="tk">whoami</span> <span class="to">&gt;&gt;</span> <span class="tk">~/vm-report.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="hostname &gt; ~/vm-report.txt
+uname -r &gt;&gt; ~/vm-report.txt
+whoami &gt;&gt; ~/vm-report.txt">Copy</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Reset lab</button></p></section>
+<section id="quiz"><h2>Self-test</h2>
+<div class="q card" data-q="q1"><p><strong>What does a matching SHA-256 checksum tell you?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">The ISO is the newest version</button><button type="button" class="opt" data-i="1">The file is complete and unmodified</button><button type="button" class="opt" data-i="2">The ISO is free of cost</button><button type="button" class="opt" data-i="3">The VM will boot faster</button></div><p class="explain" hidden>A checksum is a fingerprint; equal fingerprints mean the file is identical to the published one.</p></div>
+<div class="q card" data-q="q2"><p><strong>Which network mode hides the VM from your LAN but allows internet access?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Bridged</button><button type="button" class="opt" data-i="1">Host-only</button><button type="button" class="opt" data-i="2">NAT</button><button type="button" class="opt" data-i="3">None</button></div><p class="explain" hidden>NAT shares the host connection; use port forwarding to reach the VM.</p></div>
+<div class="q card" data-q="q3"><p><strong>When should you take a snapshot?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Before a risky experiment</button><button type="button" class="opt" data-i="1">Never; it wastes disk space</button><button type="button" class="opt" data-i="2">Only after deleting the VM</button><button type="button" class="opt" data-i="3">Only on WSL</button></div><p class="explain" hidden>A snapshot is a quick undo point; take one before changes you may regret.</p></div>
+<div class="q card" data-q="q4"><p><strong>Which tool is the usual choice on an Apple Silicon Mac?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">VirtualBox with x86 ISO</button><button type="button" class="opt" data-i="1">WSL 2</button><button type="button" class="opt" data-i="2">Windows Hyper-V</button><button type="button" class="opt" data-i="3">UTM with an ARM64 ISO</button></div><p class="explain" hidden>Apple Silicon is ARM; UTM runs ARM64 guests natively.</p></div>
+</section>
+<section id="summary" class="card"><h2>Summary</h2><ul><li>A VM is a safe, disposable Linux that you can fully control.</li><li>Always verify the ISO checksum before installing.</li><li>Snapshot after a clean install and before experiments.</li><li>SSH from the host terminal is the professional way to work.</li></ul></section>
+<section id="glossary"><h2>Key terms</h2><dl class="gl"><dt>VM</dt><dd>Virtual machine: a complete computer simulated by software.</dd><dt>ISO</dt><dd>Disk image file of an installation medium.</dd><dt>checksum</dt><dd>Fingerprint of a file used to detect damage or tampering.</dd><dt>snapshot</dt><dd>Saved state of a VM you can return to.</dd><dt>SSH</dt><dd>Secure Shell: encrypted remote terminal protocol.</dd><dt>NAT</dt><dd>Network address translation: VM shares the host connection.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-0.1.html">← Previous</a><a class="btn primary" href="modul-0.3.html">Next →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (optional)</strong><button type="button" class="ibtn" id="termclose" aria-label="Close terminal">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "en", "module": "0.2", "setup": {}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^cat /etc/os-release$", "ok": true}}, {"id": "t02", "kind": "warmup", "check": {"cmd": "^id$", "ok": true}}, {"id": "t03", "kind": "guided", "check": {"seq": ["^hostname$", "^uname -r$"], "ok": true}}, {"id": "t04", "kind": "predict", "check": {"out": "root", "of": "^sudo whoami$"}}, {"id": "t05", "kind": "debug", "check": [{"cmd": "^cat /etc/os_release$", "ok": false}, {"cmd": "^cat /etc/os-release$", "ok": true}]}, {"id": "t06", "kind": "mini", "check": [{"exists": "~/vm-summary.txt", "type": "f"}, {"contains": ["~/vm-summary.txt", "PRETTY_NAME"]}]}, {"id": "t07", "kind": "challenge", "check": [{"exists": "~/vm-lab/snapshots", "type": "d"}, {"exists": "~/vm-lab/notes", "type": "d"}]}, {"id": "t08", "kind": "ticket", "check": [{"linesMin": ["~/vm-report.txt", 3]}, {"contains": ["~/vm-report.txt", "linux-lab"]}, {"contains": ["~/vm-report.txt", "student"]}]}], "vm": [{"id": "v01", "expect": null}, {"id": "v02", "expect": "[0-9a-f]{64}"}, {"id": "v03", "expect": null}, {"id": "v04", "expect": "(Rocky|Alma|Ubuntu|Red Hat|Fedora|Debian|CentOS)"}, {"id": "v05", "expect": null}, {"id": "v06", "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+"}, {"id": "v07", "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+ \\d+ \\d+\\.\\d+\\.\\d+\\.\\d+ 22"}, {"id": "v08", "expect": null}], "quiz": {"q1": 1, "q2": 2, "q3": 0, "q4": 3}, "ui": {"correct": "Correct!", "wrong": "Not quite, try again.", "taskDone": "Task complete", "moduleDone": "Module complete! 🎉", "tasksDone": "done", "welcome": "Virtual Linux terminal — commands only affect this page's virtual file system. Type 'help' to list commands, Tab to complete, ↑/↓ for history.", "sandboxNote": "Safe sandbox: your real system is never touched.", "resetConfirm": "This module's virtual file system and command history will be reset. Your progress (completed tasks) is kept. Continue?", "openTerminal": "Open terminal (optional)", "closeTerminal": "Close terminal", "continue": "Continue", "startPath": "Start learning", "noResult": "No matching module or command.", "soon": "Coming soon", "overall": "Overall progress", "copied": "Copied ✓", "pasteOk": "Your output matches the expected pattern ✓", "pasteBad": "No match yet. See the tips under \"My output looks different\" and paste the complete output.", "iDidIt": "Done", "undo": "Undo", "groupDone": "done", "vmDone": "VM tasks"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

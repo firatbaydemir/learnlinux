@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3.7 Karşılaştırma: diff, cmp, comm, patch — Temel Linux Akademisi</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","tr")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="3.7">
+<header class="top"><a class="brand" href="index.html">Temel Linux Akademisi</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (isteğe bağlı)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-3.7.html" hreflang="tr" lang="tr" data-switch="tr" aria-current="true">TR</a><a href="../de/modul-3.7.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-3.7.html" hreflang="en" lang="en" data-switch="en">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Tema" aria-label="Tema">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Genel ilerleme"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><ol><li><a href="#diff">diff: satır satır fark</a></li><li><a href="#dirs">Dizinleri karşılaştırma</a></li><li><a href="#bytes">cmp ve sağlama toplamı</a></li><li><a href="#lists">Listeleri karşılaştırma: comm, uniq</a></li><li><a href="#patch">Yama üret ve uygula: patch</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>İçindekiler</summary><ol><li><a href="#diff">diff: satır satır fark</a></li><li><a href="#dirs">Dizinleri karşılaştırma</a></li><li><a href="#bytes">cmp ve sağlama toplamı</a></li><li><a href="#lists">Listeleri karşılaştırma: comm, uniq</a></li><li><a href="#patch">Yama üret ve uygula: patch</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Ana sayfa</a> <span aria-hidden="true">/</span> Seviye 3</p>
+<h1><span class="module-id">3.7</span> Karşılaştırma: diff, cmp, comm, patch</h1>
+<p class="lead">İki dosyayı, iki dizini ve iki listeyi karşılaştır; farkı oku, yama (patch) üret ve uygula, çıkış kodlarını betiklerde kullan.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>Bu modülde neler öğreneceksin?</h2><ul><li><code>diff</code> çıktısını (normal ve <code>-u</code> unified) okur, <code>@@</code> bloklarını ve <code>+</code>/<code>-</code> satırlarını yorumlarsın.</li><li><code>diff -r</code>, <code>diff -q</code>, <code>cmp</code> ve <code>sha256sum -c</code> ile dizinleri ve dosyaları hızlıca karşılaştırırsın.</li><li><code>comm</code> ile sıralı listeleri, <code>sort | uniq -d/-u</code> ile ortak ve tekil satırları bulursun.</li><li><code>diff -u</code> ile yama üretir, <code>patch</code> ile uygular ve <code>-R</code> ile geri alırsın; çıkış kodlarına (0/1/2) bakarsın.</li></ul></section>
+<section id="diff"><h2>diff: satır satır fark</h2>
+<p><code>diff old new</code> iki metin dosyasını satır satır karşılaştırır ve eskiyi yeniye çevirmek için gereken değişiklikleri yazar. Normal çıktıda <code>2c2</code> gibi bir komut satırı görürsün (2. satır değişti), <code>&lt;</code> ilk dosyadan, <code>&gt;</code> ikinci dosyadan gelen satırdır.</p>
+<p>Pratikte <strong>unified</strong> biçim (<code>-u</code>) daha çok kullanılır: <code>---</code> ilk, <code>+++</code> ikinci dosyadır; <code>@@ -1,3 +1,4 @@</code> bloğu (hunk) ilk dosyada 1. satırdan 3 satır, ikincide 1. satırdan 4 satır demektir. <code>-</code> ile başlayan satır yalnızca eskide, <code>+</code> ile başlayan yalnızca yenide vardır; boşlukla başlayan satırlar bağlamdır. Git ve yama sistemleri bu biçimi kullanır.</p>
+<p><strong>Çıkış kodu:</strong> <code>0</code> dosyalar aynı, <code>1</code> fark var, <code>2</code> hata (dosya yok, okunamadı). Yani <code>diff</code> farkı bulduğunda &#x27;başarısız&#x27; sayılır; bu hata değildir. Bu simülatörde <code>diff</code>, <code>cmp</code>, <code>comm</code> ve <code>patch</code> çalışmaz; komutları kendi VM&#x27;inde dene, simülatör burada yalnızca komutu yazdığını ve dosya hazırlığını denetler.</p>
+<article class="cmd"><h3><code>diff</code></h3><dl><dt>Ne işe yarar?</dt><dd>İki dosyanın farkını normal biçimde (<code>&lt;</code> ve <code>&gt;</code> satırlarıyla) gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Yapılandırma dosyasının iki sürümünü karşılaştırırken.</dd><dt>Neden önemli?</dt><dd>Neyin değiştiğini tüm dosyayı okumadan görürsün.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff v1.txt v2.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>diff -u</code></h3><dl><dt>Ne işe yarar?</dt><dd>Unified biçim: <code>---</code>/<code>+++</code> başlıkları, <code>@@</code> blokları ve <code>+</code>/<code>-</code> satırları.</dd><dt>Nerede kullanılır?</dt><dd>Değişikliği paylaşırken, kod incelemede, yama üretirken.</dd><dt>Neden önemli?</dt><dd>Bağlam satırları sayesinde değişikliğin nerede olduğu net olur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -u v1.txt v2.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>diff -q</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca &#x27;Files ... differ&#x27; der veya hiçbir şey yazmaz.</dd><dt>Nerede kullanılır?</dt><dd>Aynı mı değil mi sorusu yeterliyken; betiklerde.</dd><dt>Neden önemli?</dt><dd>Uzun fark çıktısı üretmez, çıkış kodu yine 0/1 olur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-q</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -q v1.txt v2.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>diff -y</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yan yana iki sütun gösterir; farklı satırları <code>|</code>, <code>&lt;</code>, <code>&gt;</code> ile işaretler.</dd><dt>Nerede kullanılır?</dt><dd>Kısa dosyaları gözle karşılaştırırken.</dd><dt>Neden önemli?</dt><dd>Değişikliği iki sürümün yan yana hâlinde görürsün.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-y</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -y v1.txt v2.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>diff -w</code></h3><dl><dt>Ne işe yarar?</dt><dd>Boşluk farklarını (girinti, sondaki boşluk) yok sayar.</dd><dt>Nerede kullanılır?</dt><dd>Biçimlendirme değişmiş ama içerik aynı olabilecek dosyalarda.</dd><dt>Neden önemli?</dt><dd>Gürültüyü atar, gerçek içerik farkı kalır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-w</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -w v1.txt v2.txt">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Hangisi &#x27;eski&#x27;, hangisi &#x27;yeni&#x27;? Sıra önemlidir: <code>diff old new</code>. Sırayı değiştirirsen <code>+</code> ve <code>-</code> yer değiştirir.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>Windows&#x27;ta oluşmuş dosyalar satır sonunda <code>\r</code> (CRLF) taşır; her satır farklı görünür. <code>tr -d &#x27;\r&#x27; &lt; win.txt &gt; fixed.txt</code> ile temizle ya da <code>diff --strip-trailing-cr</code> kullan.</p></aside>
+</section>
+<section id="dirs"><h2>Dizinleri karşılaştırma</h2>
+<p><code>diff -r dir_a dir_b</code> iki dizin ağacını özyinelemeli karşılaştırır. Yalnızca birinde olan dosya için <code>Only in dir_a: extra.txt</code> satırı, içeriği farklı dosyalar için fark çıktısı verir. <code>-q</code> (veya <code>-rq</code>) ile sadece hangi dosyaların farklı olduğunu görürsün; çok dosyalı yedek denetiminde en kullanışlısı budur.</p>
+<p>Komut çıktısını başka bir komutun çıktısıyla da kıyaslayabilirsin: <code>diff &lt;(sort a.txt) &lt;(sort b.txt)</code> yazımı (process substitution, <strong>bash</strong> özelliği) iki komutun çıktısını geçici dosya gibi verir. Basit <code>sh</code> ile çalışmaz.</p>
+<article class="cmd"><h3><code>diff -r</code></h3><dl><dt>Ne işe yarar?</dt><dd>İki dizini alt dizinleriyle birlikte karşılaştırır.</dd><dt>Nerede kullanılır?</dt><dd>Proje klasörünün iki sürümünü veya yedeği kıyaslarken.</dd><dt>Neden önemli?</dt><dd>Eksik, fazla ve değişmiş dosyaları tek seferde görürsün.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-r</span> dir_a dir_b</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -r dir_a dir_b">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>diff -rq</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca farklı olan veya tek tarafta bulunan dosyaları listeler.</dd><dt>Nerede kullanılır?</dt><dd>Yedek doğrularken, büyük ağaçlarda.</dd><dt>Neden önemli?</dt><dd>Kısa özet verir; ayrıntıya sonra tek dosya için bakarsın.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-rq</span> dir_a dir_b</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -rq dir_a dir_b">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>diff &lt;( )</code></h3><dl><dt>Ne işe yarar?</dt><dd>İki komutun çıktısını dosya gibi karşılaştırır (bash).</dd><dt>Nerede kullanılır?</dt><dd>Sıralanmış listeleri veya iki ortamın çıktısını kıyaslarken.</dd><dt>Neden önemli?</dt><dd>Ara dosya oluşturmadan karşılaştırırsın.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="to">&lt;</span><span class="tk">(sort</span> list_a.txt) <span class="to">&lt;</span><span class="tk">(sort</span> list_b.txt)</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff &lt;(sort list_a.txt) &lt;(sort list_b.txt)">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Yön önemli değil ama okuma kolaylığı için hep &#x27;referans&#x27; dizini ilk yaz.</p></aside>
+</section>
+<section id="bytes"><h2>cmp ve sağlama toplamı</h2>
+<p><code>cmp</code> dosyaları <strong>bayt bayt</strong> karşılaştırır; ilk farkın bayt ve satır numarasını söyler. İkili (binary) dosyalarda <code>diff</code> yalnızca &#x27;Binary files differ&#x27; der; <code>cmp</code> ise tam yeri gösterir. <code>cmp -s</code> hiçbir şey yazmaz, yalnızca çıkış kodu verir (0 aynı, 1 farklı, 2 hata). Betikte <code>if cmp -s a b; then echo aynı; fi</code> kalıbıyla kullanılır.</p>
+<p>Dosyalar farklı makinelerdeyse içeriği doğrudan kıyaslayamazsın; <strong>sağlama toplamı</strong> (checksum) hesapla. <code>sha256sum notes.txt</code> bir özet üretir; aynı içerik aynı özeti verir. <code>sha256sum -c sums.txt</code> kayıtlı özetleri yeniden hesaplayıp <code>OK</code> veya <code>FAILED</code> yazar. İndirilen dosyanın bozulmadığını bu şekilde doğrularsın. <code>md5sum</code> eskidir; güvenlik için <code>sha256sum</code> kullan.</p>
+<article class="cmd"><h3><code>cmp</code></h3><dl><dt>Ne işe yarar?</dt><dd>İki dosyayı bayt bayt karşılaştırır, ilk farkın konumunu yazar.</dd><dt>Nerede kullanılır?</dt><dd>İkili dosyalarda ve kopya doğrulamada.</dd><dt>Neden önemli?</dt><dd>Metin olmayan dosyalarda da kesin sonuç verir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cmp</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cmp v1.txt v2.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>cmp -s</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sessiz karşılaştırma; sonuç yalnızca çıkış kodundadır.</dd><dt>Nerede kullanılır?</dt><dd>Betiklerde <code>if</code> koşulu olarak.</dd><dt>Neden önemli?</dt><dd>Çıktı üretmeden &#x27;aynı mı?&#x27; kararı verir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cmp</span> <span class="tf">-s</span> v1.txt v1.bak; echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cmp -s v1.txt v1.bak; echo $?">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sha256sum</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosyanın SHA-256 özetini hesaplar.</dd><dt>Nerede kullanılır?</dt><dd>İndirme ve yedek doğrulamada.</dd><dt>Neden önemli?</dt><dd>İki dosyayı yan yana tutmadan içeriklerini karşılaştırabilirsin.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> v1.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum v1.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sha256sum -c</code></h3><dl><dt>Ne işe yarar?</dt><dd>Kayıtlı özet listesini denetler; her dosya için <code>OK</code> veya <code>FAILED</code> yazar.</dd><dt>Nerede kullanılır?</dt><dd>Dağıtım ISO&#x27;su veya yedek doğrularken.</dd><dt>Neden önemli?</dt><dd>Bozulma veya değişiklik olup olmadığını otomatik gösterir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> <span class="tf">-c</span> sums.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum -c sums.txt">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Çıkış kodunu görmek için komuttan hemen sonra <code>echo $?</code> yaz; araya başka komut girerse değer kaybolur.</p></aside>
+</section>
+<section id="lists"><h2>Listeleri karşılaştırma: comm, uniq</h2>
+<p><code>comm a b</code> <strong>sıralı</strong> iki dosyayı üç sütunda gösterir: 1. sütun yalnızca a&#x27;da, 2. yalnızca b&#x27;de, 3. her ikisinde olan satırlar. <code>-1</code>, <code>-2</code>, <code>-3</code> ilgili sütunu gizler: <code>comm -12</code> ortak satırlar, <code>comm -23</code> yalnızca a&#x27;dakiler, <code>comm -13</code> yalnızca b&#x27;dekiler demektir.</p>
+<p><strong>Tuzak:</strong> girdi sıralı değilse <code>comm</code> yanlış sonuç verir ve &#x27;file 2 is not in sorted order&#x27; uyarısı yazar. Önce <code>sort</code> uygula: <code>sort list_b.txt &gt; sorted_b.txt</code>.</p>
+<p><code>comm</code> yoksa <code>sort a b | uniq -d</code> her iki listede de bulunan (tekrarlanan) satırları, <code>sort a b | uniq -u</code> yalnızca bir kez geçenleri verir. Listelerin her biri kendi içinde tekrarsız olmalı; aksi hâlde tekrar sayımı bozulur. Bu iki komut simülatörde de çalışır.</p>
+<article class="cmd"><h3><code>comm</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sıralı iki dosyayı üç sütunda karşılaştırır.</dd><dt>Nerede kullanılır?</dt><dd>Kullanıcı, paket veya IP listelerini kıyaslarken.</dd><dt>Neden önemli?</dt><dd>Ortak ve tekil satırları tek komutta ayırır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm list_a.txt sorted_b.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>comm -12</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca iki dosyada da bulunan satırları gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Kesişim gerektiğinde.</dd><dt>Neden önemli?</dt><dd>1. ve 2. sütunları gizler, ortak olan kalır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> -12 list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm -12 list_a.txt sorted_b.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>comm -23</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca ilk dosyada olan satırları gösterir.</dd><dt>Nerede kullanılır?</dt><dd>&#x27;Bende var, sende yok&#x27; sorgusunda.</dd><dt>Neden önemli?</dt><dd>Eksik veya fazla kayıtları bulur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> -23 list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm -23 list_a.txt sorted_b.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sort | uniq -d</code></h3><dl><dt>Ne işe yarar?</dt><dd>Birleştirilmiş sıralı satırlardan tekrarlananları (ortak olanları) yazar.</dd><dt>Nerede kullanılır?</dt><dd><code>comm</code> yokken veya hızlı kesişimde.</dd><dt>Neden önemli?</dt><dd>Her yerde bulunan temel araçlarla çalışır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-d</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sort list_a.txt list_b.txt | uniq -d" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -d">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sort | uniq -u</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca bir kez geçen satırları yazar (simetrik fark).</dd><dt>Nerede kullanılır?</dt><dd>İki listede yalnızca birinde olanları ararken.</dd><dt>Neden önemli?</dt><dd>Ortak olanları eler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-u</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sort list_a.txt list_b.txt | uniq -u" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -u">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Hızlı kural: <code>comm</code> için önce <code>sort</code>; sıralamadan sonra bile aynı yerel ayar (<code>LC_ALL=C</code>) kullan, yoksa sıralama uyuşmayabilir.</p></aside>
+</section>
+<section id="patch"><h2>Yama üret ve uygula: patch</h2>
+<p><code>diff -u old new &gt; change.patch</code> farkı dosyaya yazar. Başkası bu dosyayı <code>patch</code> ile uygulayarak kendi eski kopyasını yeniye çevirir: <code>patch work.txt &lt; change.patch</code>. Dizin ağaçları için <code>diff -ruN old/ new/ &gt; all.patch</code> üretilir; uygularken <code>-p1</code> yol başındaki ilk bileşeni (<code>old/</code>) atar, <code>-p0</code> yolları olduğu gibi kullanır.</p>
+<p>Uygulamadan önce <code>patch --dry-run &lt; change.patch</code> ile denemek iyi alışkanlıktır: hiçbir şeyi değiştirmez, hunk&#x27;ların uyup uymadığını söyler. Hata olursa <code>.rej</code> dosyası oluşur. <code>patch -R &lt; change.patch</code> yamayı geri alır.</p>
+<p>Yama bağlam satırlarına dayanır; dosya o arada başka yerden değiştiyse uygulama reddedilebilir veya kayar (<code>fuzz</code>).</p>
+<article class="cmd"><h3><code>diff -u &gt; file.patch</code></h3><dl><dt>Ne işe yarar?</dt><dd>Farkı unified biçimde bir yama dosyasına yazar.</dd><dt>Nerede kullanılır?</dt><dd>Değişikliği başkasına göndermek için.</dd><dt>Neden önemli?</dt><dd>Yalnızca değişen satırlar taşınır; dosyanın tamamı değil.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -u v1.txt v2.txt &gt; change.patch">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>patch</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yama dosyasındaki değişiklikleri dosyaya uygular.</dd><dt>Nerede kullanılır?</dt><dd>Aldığın yamayı kopyana işlerken.</dd><dt>Neden önemli?</dt><dd>Dosyanın tamamını değiştirmeden yalnızca farkı uygular.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">patch</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="patch work.txt &lt; change.patch">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>patch --dry-run</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yamayı gerçekten uygulamadan dener.</dd><dt>Nerede kullanılır?</dt><dd>Önemli bir dosyada yama uygulamadan önce.</dd><dt>Neden önemli?</dt><dd>Uyumsuzluğu değişiklik yapmadan yakalarsın.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">patch</span> <span class="tf">--dry-run</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="patch --dry-run work.txt &lt; change.patch">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>patch -R</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yamayı tersine çevirir (geri alır).</dd><dt>Nerede kullanılır?</dt><dd>Uygulanan yama sorun çıkardığında.</dd><dt>Neden önemli?</dt><dd>Dosyayı yama öncesi hâline getirir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">patch</span> <span class="tf">-R</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="patch -R work.txt &lt; change.patch">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Yama bir dizin ağacı içinse proje kökünde çalıştır ve önce <code>--dry-run</code> dene.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p><code>patch</code> dosyaları yerinde değiştirir. Önemli dosyalarda önce <code>cp work.txt work.txt.orig</code> ile yedek al, VM&#x27;inde de önce snapshot al.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p>Kök dizin (<code>/</code>) veya sistem yapılandırması üzerinde yama uygulama; yalnızca kendi deneme klasöründe çalış. Yanlış <code>-p</code> değeri yanlış dosyaları değiştirir.</p></aside>
+</section>
+<section id="vm"><h2>Kendi VM&#x27;inde yap <span class="gcount" data-g="vm"></span></h2><p>Asıl uygulama gerçek Linux&#x27;ta yapılır: kendi sanal makinende (VirtualBox, UTM veya WSL) komutları çalıştır, çıktıyı karşılaştır.</p><p>Aşağıdaki komutları kendi VM&#x27;inde <code>~/lab</code> klasöründe çalıştır. Hepsi yalnızca bu deneme klasöründe dosya oluşturur; sistem ayarlarına dokunmaz.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>diff: normal ve unified</h3><span class="status" aria-hidden="true"></span></header><p>İki küçük dosya oluştur ve farkı iki biçimde gör. Unified çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/lab</span> <span class="to">&amp;&amp;</span> <span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;port=80\nhost=linux-lab\nmode=prod\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">v1.txt</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">v2.txt</span></span>
+<span class="ln"><span class="tk">diff</span> v1.txt v2.txt</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/lab &amp;&amp; cd ~/lab
+printf &#x27;port=80\nhost=linux-lab\nmode=prod\n&#x27; &gt; v1.txt
+printf &#x27;port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n&#x27; &gt; v2.txt
+diff v1.txt v2.txt
+diff -u v1.txt v2.txt">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">1c1
+&lt; port=80
+---
+&gt; port=8080
+3a4
+&gt; debug=on
+--- v1.txt	2026-11-12 10:00:00
++++ v2.txt	2026-11-12 10:00:01
+@@ -1,3 +1,4 @@
+-port=80
++port=8080
+ host=linux-lab
+ mode=prod
++debug=on</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Tarih ve saatler farklı olacak; önemli olan <code>@@</code>, <code>-</code> ve <code>+</code> satırlarıdır.</li><li>Hiç çıktı yoksa dosyalar aynıdır; <code>printf</code> satırlarını tekrar kontrol et.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Çıkış kodları</h3><span class="status" aria-hidden="true"></span></header><p><code>diff -q</code>, <code>cmp -s</code> ve çıkış kodlarını gör. Çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-q</span> v1.txt v2.txt; echo <span class="ts">&quot;exit=$?&quot;</span></span>
+<span class="ln"><span class="tk">cp</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">cmp</span> <span class="tf">-s</span> v1.txt same.txt; echo <span class="ts">&quot;exit=$?&quot;</span></span>
+<span class="ln"><span class="tk">diff</span> v1.txt missing.txt; echo <span class="ts">&quot;exit=$?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+diff -q v1.txt v2.txt; echo &quot;exit=$?&quot;
+cp v1.txt same.txt
+cmp -s v1.txt same.txt; echo &quot;exit=$?&quot;
+diff v1.txt missing.txt; echo &quot;exit=$?&quot;">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">Files v1.txt and v2.txt differ
+exit=1
+exit=0
+diff: missing.txt: No such file or directory
+exit=2</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Sistemin dili farklıysa mesaj çevrilmiş olabilir; <code>exit=</code> değerleri aynı olmalı.</li><li>İlk satırda <code>exit=0</code> görürsen <code>v2.txt</code> oluşmamıştır; v01&#x27;i tekrar çalıştır.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>comm ve uniq</h3><span class="status" aria-hidden="true"></span></header><p>İki isim listesini karşılaştır. Önce sırasız <code>comm</code> uyarısını gör, sonra doğru yolu uygula.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;alice\nbob\ncarol\ndave\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">list_a.txt</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;erin\nbob\ncarol\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">list_b.txt</span></span>
+<span class="ln"><span class="tk">comm</span> -12 list_a.txt list_b.txt</span>
+<span class="ln"><span class="tk">sort</span> list_b.txt <span class="to">&gt;</span> <span class="tk">sorted_b.txt</span></span>
+<span class="ln"><span class="tk">comm</span> -12 list_a.txt sorted_b.txt</span>
+<span class="ln"><span class="tk">comm</span> -23 list_a.txt sorted_b.txt</span>
+<span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-d</span></span>
+<span class="ln"><span class="tk">diff</span> <span class="to">&lt;</span><span class="tk">(sort</span> list_a.txt) <span class="to">&lt;</span><span class="tk">(sort</span> list_b.txt)</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+printf &#x27;alice\nbob\ncarol\ndave\n&#x27; &gt; list_a.txt
+printf &#x27;erin\nbob\ncarol\n&#x27; &gt; list_b.txt
+comm -12 list_a.txt list_b.txt
+sort list_b.txt &gt; sorted_b.txt
+comm -12 list_a.txt sorted_b.txt
+comm -23 list_a.txt sorted_b.txt
+sort list_a.txt list_b.txt | uniq -d
+diff &lt;(sort list_a.txt) &lt;(sort list_b.txt)">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">comm: file 2 is not in sorted order
+bob
+carol
+alice
+dave
+bob
+carol
+1d0
+&lt; alice
+...</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Sırasız girdide <code>comm</code> uyarısı çıkmayabilir veya çıktı eksik olabilir; sonuç tanımsızdır, bu yüzden her zaman önce <code>sort</code> kullan.</li><li><code>diff &lt;(...)</code> satırı <code>syntax error</code> verirse kabuğun bash değildir; <code>bash</code> yazıp tekrar dene.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>Yama üret, dene, uygula, geri al</h3><span class="status" aria-hidden="true"></span></header><p><code>v1.txt</code> kopyasını yama ile <code>v2.txt</code> hâline getir ve geri al. Çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">cp</span> v1.txt work.txt</span>
+<span class="ln"><span class="tk">patch</span> <span class="tf">--dry-run</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">patch</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">cat</span> work.txt</span>
+<span class="ln"><span class="tk">patch</span> <span class="tf">-R</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">cat</span> work.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+diff -u v1.txt v2.txt &gt; change.patch
+cp v1.txt work.txt
+patch --dry-run work.txt &lt; change.patch
+patch work.txt &lt; change.patch
+cat work.txt
+patch -R work.txt &lt; change.patch
+cat work.txt">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">checking file work.txt
+patching file work.txt
+port=8080
+host=linux-lab
+mode=prod
+debug=on
+patching file work.txt
+port=80
+host=linux-lab
+mode=prod</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>patch: command not found</code> görürsen: Ubuntu&#x27;da <code>sudo apt install patch</code>, Rocky/Alma&#x27;da <code>sudo dnf install patch</code>.</li><li><code>--dry-run</code> desteklenmezse (çok eski sürüm) o satırı atla.</li><li><code>Hunk #1 FAILED</code> görürsen <code>work.txt</code>, <code>v1.txt</code> ile aynı değildir; <code>cp v1.txt work.txt</code> ile yeniden başla.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Sağlama toplamı</h3><span class="status" aria-hidden="true"></span></header><p>Özet hesapla, sonra dosyayı değiştirip <code>sha256sum -c</code> ile bozulmayı yakala. Çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">sha256sum</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">sha256sum</span> v1.txt <span class="to">&gt;</span> <span class="tk">sums.txt</span></span>
+<span class="ln"><span class="tk">sha256sum</span> <span class="tf">-c</span> sums.txt</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;x&#x27;</span> <span class="to">&gt;&gt;</span> <span class="tk">v1.txt</span></span>
+<span class="ln"><span class="tk">sha256sum</span> <span class="tf">-c</span> sums.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+sha256sum v1.txt same.txt
+sha256sum v1.txt &gt; sums.txt
+sha256sum -c sums.txt
+echo &#x27;x&#x27; &gt;&gt; v1.txt
+sha256sum -c sums.txt">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">&lt;64 hex karakter&gt;  v1.txt
+&lt;64 hex karakter&gt;  same.txt
+v1.txt: OK
+v1.txt: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>İlk iki özet birbirinin aynı olmalı (<code>v1.txt</code> ve <code>same.txt</code> aynı içerik).</li><li>Türkçe/Almanca sistemde uyarı metni çevrilmiş olabilir; <code>OK</code> ve <code>FAILED</code> sözcükleri değişmez.</li><li><code>same.txt</code> yoksa v02 adımını çalıştır.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Hızlı alıştırmalar (simülatör)</h2><p>İsteğe bağlı: VM&#x27;e geçmeden önce ısınmak veya VM&#x27;in yokken denemek için tarayıcıdaki sanal terminali kullan. Görevler otomatik doğrulanır.</p><p>Görevler ısınmadan ticket&#x27;a doğru zorlaşır. Rozetler zorluğu gösterir.</p><p><button type="button" class="btn" data-openterm>&gt;_ Terminali aç (isteğe bağlı)</button></p>
+<h3 class="kind k-warmup">Isınma <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>v1.txt</code> ve <code>v2.txt</code> dosyalarını <code>diff v1.txt v2.txt</code> ile karşılaştır.</p><details><summary>İpucu</summary><p>Simülatörde diff yoktur; komutu yazman yeterli, gerçek çıktıyı VM&#x27;inde göreceksin.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff v1.txt v2.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Aynı iki dosyayı unified biçimde karşılaştır: <code>diff -u v1.txt v2.txt</code>.</p><details><summary>İpucu</summary><p><code>-u</code> unified demektir; çıktıda <code>@@</code> blokları olur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -u v1.txt v2.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>cmp v1.txt v2.txt</code> ile bayt bayt karşılaştır.</p><details><summary>İpucu</summary><p>cmp ilk farkın bayt ve satır numarasını yazar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cmp</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cmp v1.txt v2.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Adım adım lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d1">Kolay</span></p><p><code>v1.txt</code> dosyasını <code>cp v1.txt v1.bak</code> ile kopyala, sonra <code>diff -q v1.txt v1.bak</code> ile aynı olduklarını doğrula.</p><details><summary>İpucu</summary><p>Aynıysa <code>diff -q</code> hiçbir şey yazmaz ve çıkış kodu 0&#x27;dır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v1.txt v1.bak</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-q</span> v1.txt v1.bak</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v1.txt v1.bak
+diff -q v1.txt v1.bak">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>dir_a</code> ve <code>dir_b</code> dizinlerini <code>diff -rq dir_a dir_b</code> ile karşılaştır.</p><details><summary>İpucu</summary><p><code>-r</code> özyinelemeli, <code>-q</code> kısa özet. <code>-r dir_a dir_b</code> de kabul edilir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-rq</span> dir_a dir_b</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -rq dir_a dir_b">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>list_b.txt</code> sıralı değil. <code>comm</code> için <code>sort list_b.txt &gt; sorted_b.txt</code> ile sıralı kopyasını oluştur.</p><details><summary>İpucu</summary><p>Yönlendirme <code>&gt;</code> sıralı çıktıyı yeni dosyaya yazar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_b.txt <span class="to">&gt;</span> <span class="tk">sorted_b.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_b.txt &gt; sorted_b.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>comm -12 list_a.txt sorted_b.txt</code> ile iki listede ortak olan satırları iste.</p><details><summary>İpucu</summary><p><code>-12</code> birinci ve ikinci sütunu gizler; ortak sütun kalır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> -12 list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm -12 list_a.txt sorted_b.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t14" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>cp v1.txt same.txt</code> ile kopya yap, <code>cmp -s v1.txt same.txt</code> çalıştır ve hemen ardından <code>echo $?</code> yaz.</p><details><summary>İpucu</summary><p>Tek satırda <code>cmp -s v1.txt same.txt ; echo $?</code> da olur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">cmp</span> <span class="tf">-s</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">echo</span> <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v1.txt same.txt
+cmp -s v1.txt same.txt
+echo $?">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Tahmin et <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t08" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et, sonra çalıştır: <code>sort list_a.txt list_b.txt | uniq -d</code>. Hangi isimler çıkar?</p><details><summary>İpucu</summary><p><code>uniq -d</code> yalnızca birden fazla geçen satırı yazar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-d</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -d">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et, sonra çalıştır: <code>sort list_a.txt list_b.txt | uniq -u</code>. Hangi isimler çıkar?</p><details><summary>İpucu</summary><p><code>-u</code> yalnızca bir kez geçenleri yazar: iki listeden yalnızca birinde olanlar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-u</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -u">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>grep -q debug v1.txt ; echo $?</code> ne yazar? Çalıştırıp doğrula.</p><details><summary>İpucu</summary><p><code>grep -q</code> bulursa 0, bulamazsa 1 verir; <code>v1.txt</code> içinde debug yok.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-q</span> debug v1.txt <span class="to">;</span> <span class="tk">echo</span> <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -q debug v1.txt ; echo $?">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t15" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d3">Zor</span></p><p>Tahmin et, sonra çalıştır: <code>cut -d= -f1 v1.txt</code>. Hangi anahtarlar listelenir?</p><details><summary>İpucu</summary><p><code>-d=</code> ayraç, <code>-f1</code> birinci alan: <code>=</code> işaretinden öncesi.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cut</span> <span class="tf">-d=</span> <span class="tf">-f1</span> v1.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cut -d= -f1 v1.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Hata ayıkla <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t11" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>win.txt</code> her satırda farklı görünüyor çünkü Windows satır sonu (<code>\r</code>) taşıyor. <code>tr -d &#x27;\r&#x27; &lt; win.txt &gt; fixed.txt</code> ile temiz kopya üret.</p><details><summary>İpucu</summary><p><code>tr -d</code> verilen karakteri siler; girdi <code>&lt;</code>, çıktı <code>&gt;</code> ile yönlendirilir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">tr</span> <span class="tf">-d</span> <span class="ts">&#x27;\r&#x27;</span> <span class="to">&lt;</span> <span class="tk">win.txt</span> <span class="to">&gt;</span> <span class="tk">fixed.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="tr -d &#x27;\r&#x27; &lt; win.txt &gt; fixed.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini proje <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t12" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d2">Orta</span></p><p>Mini proje: <code>cp v1.txt work.txt</code> ile kopya yap, <code>diff -u v1.txt v2.txt &gt; change.patch</code> ile yama üret, sonra <code>patch work.txt &lt; change.patch</code> ile uygula.</p><details><summary>İpucu</summary><p>Üç komut sırayla yazılmalı; diff ve patch simülatörde çalışmaz, VM&#x27;inde dene.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v1.txt work.txt</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">patch</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v1.txt work.txt
+diff -u v1.txt v2.txt &gt; change.patch
+patch work.txt &lt; change.patch">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Meydan okuma <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: yalnızca <code>list_a.txt</code> içinde olan isimleri (<code>list_b.txt</code>&#x27;de olmayanları) <code>only_a.txt</code> dosyasına yaz. <code>comm</code> kullanma; ipucu: <code>list_b.txt</code>&#x27;yi iki kez ver.</p><details><summary>İpucu</summary><p><code>sort list_a.txt list_b.txt list_b.txt | uniq -u &gt; only_a.txt</code>: b&#x27;dekiler en az iki kez geçer, a&#x27;ya özgüler bir kez.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-u</span> <span class="to">&gt;</span> <span class="tk">only_a.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt list_b.txt | uniq -u &gt; only_a.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t16" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>TICKET #3701 — Değişiklik incelemesi: <code>v2.txt</code> için <code>v2.bak</code> yedeğini al, <code>v1.txt</code> ile farkı <code>diff -u v1.txt v2.txt &gt; review.patch</code> olarak kaydet ve <code>report.txt</code> dosyasına <code>review done</code> yaz.</p><details><summary>İpucu</summary><p>Üç adım: <code>cp</code>, <code>diff -u ... &gt; review.patch</code>, <code>echo review done &gt; report.txt</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v2.txt v2.bak</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">review.patch</span></span>
+<span class="ln"><span class="tk">echo</span> review done <span class="to">&gt;</span> <span class="tk">report.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v2.txt v2.bak
+diff -u v1.txt v2.txt &gt; review.patch
+echo review done &gt; report.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Laboratuvarı sıfırla</button></p></section>
+<section id="quiz"><h2>Öz test</h2>
+<div class="q card" data-q="q1"><p><strong><code>diff a b</code> iki dosya farklıysa hangi çıkış koduyla biter?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">0</button><button type="button" class="opt" data-i="1">1</button><button type="button" class="opt" data-i="2">2</button><button type="button" class="opt" data-i="3">127</button></div><p class="explain" hidden>0 aynı, 1 fark var, 2 hata. Fark bulmak hata değildir ama sıfır da değildir.</p></div>
+<div class="q card" data-q="q2"><p><strong><code>comm</code> doğru çalışmak için girdi dosyalarında neye ihtiyaç duyar?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Sıralı olmalarına</button><button type="button" class="opt" data-i="1">Root yetkisine</button><button type="button" class="opt" data-i="2">Aynı boyutta olmalarına</button><button type="button" class="opt" data-i="3">İkili (binary) olmalarına</button></div><p class="explain" hidden>comm sıralı girdi bekler; sırasızsa yanlış sonuç verir. Önce <code>sort</code> uygula.</p></div>
+<div class="q card" data-q="q3"><p><strong>Unified diff çıktısında <code>+</code> ile başlayan satır ne anlama gelir?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Satır yalnızca eski dosyada vardı</button><button type="button" class="opt" data-i="1">Satır bir yorumdur</button><button type="button" class="opt" data-i="2">Satır yalnızca yeni dosyada var (eklendi)</button><button type="button" class="opt" data-i="3">Satır başka yere taşındı</button></div><p class="explain" hidden><code>-</code> eski dosyadan silinen, <code>+</code> yeni dosyaya eklenen satırdır; boşlukla başlayanlar bağlamdır.</p></div>
+<div class="q card" data-q="q4"><p><strong>Uygulanmış bir yamayı geri almak için hangi komut kullanılır?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">diff -R change.patch</button><button type="button" class="opt" data-i="1">patch -u change.patch</button><button type="button" class="opt" data-i="2">cmp -r change.patch</button><button type="button" class="opt" data-i="3">patch -R &lt; change.patch</button></div><p class="explain" hidden><code>patch -R</code> yamayı tersine çevirir; yama dosyası standart girdiden okunur.</p></div>
+</section>
+<section id="summary" class="card"><h2>Özet</h2><ul><li><code>diff -u old new</code> değişikliği gösterir; çıkış kodu 0 aynı, 1 fark, 2 hata.</li><li><code>diff -rq</code> dizinleri, <code>cmp</code> bayt düzeyinde, <code>sha256sum -c</code> içerik bütünlüğünü denetler.</li><li><code>comm</code> yalnızca sıralı girdide çalışır; alternatif <code>sort | uniq -d</code> (ortak) ve <code>uniq -u</code> (tekil).</li><li><code>diff -u &gt; change.patch</code> ile yama üret, <code>patch --dry-run</code> ile dene, <code>patch</code> ile uygula, <code>patch -R</code> ile geri al.</li><li>Tuzaklar: sırasız <code>comm</code>, CRLF satır sonları, ikili dosyalarda <code>diff</code>.</li></ul></section>
+<section id="glossary"><h2>Terimler</h2><dl class="gl"><dt>hunk</dt><dd>Unified diff içinde <code>@@</code> ile başlayan, bağlam satırlarıyla birlikte tek bir değişiklik bloğu.</dd><dt>unified diff</dt><dd><code>diff -u</code> biçimi: <code>---</code>/<code>+++</code> başlıkları, <code>@@</code> blokları, <code>+</code>/<code>-</code> satırları.</dd><dt>yama (patch)</dt><dd>Bir diff çıktısını taşıyan dosya; <code>patch</code> komutu onu dosyalara uygular.</dd><dt>çıkış kodu</dt><dd>Komutun bitiş durumu; <code>$?</code> ile okunur. diff için 0 aynı, 1 farklı, 2 hata.</dd><dt>sağlama toplamı (checksum)</dt><dd>İçerikten hesaplanan özet değer; içerik değişirse özet de değişir.</dd><dt>CRLF</dt><dd>Windows satır sonu (<code>\r\n</code>); Linux yalnızca <code>\n</code> kullanır.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-3.6.html">← Önceki</a><a class="btn primary" href="modul-3.8.html">Sonraki →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (isteğe bağlı)</strong><button type="button" class="ibtn" id="termclose" aria-label="Terminali kapat">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "tr", "module": "3.7", "setup": {"dirs": ["/home/student/lab", "/home/student/lab/dir_a", "/home/student/lab/dir_b"], "files": {"/home/student/lab/v1.txt": "port=80\nhost=linux-lab\nmode=prod\n", "/home/student/lab/v2.txt": "port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n", "/home/student/lab/list_a.txt": "alice\nbob\ncarol\ndave\n", "/home/student/lab/list_b.txt": "erin\nbob\ncarol\n", "/home/student/lab/win.txt": "port=80\r\nhost=linux-lab\r\nmode=prod\r\n", "/home/student/lab/dir_a/app.conf": "level=1\n", "/home/student/lab/dir_a/readme.txt": "hello\n", "/home/student/lab/dir_b/app.conf": "level=2\n", "/home/student/lab/dir_b/extra.txt": "extra\n"}, "cwd": "/home/student/lab"}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^diff v1\\.txt v2\\.txt$"}}, {"id": "t02", "kind": "warmup", "check": {"cmd": "^diff\\s+(-\\S+\\s+)*-u\\s+v1\\.txt v2\\.txt$"}}, {"id": "t03", "kind": "warmup", "check": {"cmd": "^cmp\\s+v1\\.txt v2\\.txt$"}}, {"id": "t04", "kind": "guided", "check": [{"exists": "/home/student/lab/v1.bak", "type": "f"}, {"cmd": "^diff\\s+-q\\s+v1\\.txt v1\\.bak$"}]}, {"id": "t05", "kind": "guided", "check": {"cmd": "^diff\\s+-\\w*r\\w*\\s+dir_a/? dir_b/?$"}}, {"id": "t06", "kind": "guided", "check": {"equals": ["/home/student/lab/sorted_b.txt", "bob\ncarol\nerin\n"]}}, {"id": "t07", "kind": "guided", "check": {"cmd": "^comm\\s+(-12|-21|-1\\s+-2|-2\\s+-1)\\s+list_a\\.txt sorted_b\\.txt$"}}, {"id": "t08", "kind": "predict", "check": {"out": "bob\\s+carol", "of": "uniq -d"}}, {"id": "t09", "kind": "predict", "check": {"out": "alice\\s+dave\\s+erin", "of": "uniq -u"}}, {"id": "t10", "kind": "predict", "check": {"out": "1", "of": "grep -q debug v1\\.txt.*echo \\$\\?"}}, {"id": "t11", "kind": "debug", "check": [{"contains": ["/home/student/lab/fixed.txt", "^port=80\\nhost=linux-lab\\nmode=prod\\n$"]}, {"contains": ["/home/student/lab/fixed.txt", "^[^\\r]+$"]}]}, {"id": "t12", "kind": "mini", "check": [{"exists": "/home/student/lab/work.txt", "type": "f"}, {"seq": ["^cp v1\\.txt work\\.txt$", "^diff\\s+-u\\s+v1\\.txt v2\\.txt\\s*>\\s*change\\.patch$", "^patch\\s+(--dry-run\\s+)?work\\.txt\\s*<\\s*change\\.patch$"]}]}, {"id": "t13", "kind": "challenge", "check": {"equals": ["/home/student/lab/only_a.txt", "alice\ndave\n"]}}, {"id": "t14", "kind": "guided", "check": [{"exists": "/home/student/lab/same.txt", "type": "f"}, {"seq": ["^cp v1\\.txt same\\.txt$", "^cmp\\s+-s\\s+v1\\.txt same\\.txt", "echo \\$\\?$"]}]}, {"id": "t15", "kind": "predict", "check": {"out": "port\\s+host\\s+mode", "of": "^cut"}}, {"id": "t16", "kind": "ticket", "check": [{"exists": "/home/student/lab/v2.bak", "type": "f"}, {"cmd": "^diff\\s+-\\w*u\\w*\\s+v1\\.txt v2\\.txt\\s*>\\s*review\\.patch$"}, {"equals": ["/home/student/lab/report.txt", "review done\n"]}]}], "vm": [{"id": "v01", "expect": "@@"}, {"id": "v02", "expect": "exit=1"}, {"id": "v03", "expect": "bob"}, {"id": "v04", "expect": "patching file|Hunk|hunk"}, {"id": "v05", "expect": "OK"}], "quiz": {"q1": 1, "q2": 0, "q3": 2, "q4": 3}, "ui": {"correct": "Doğru!", "wrong": "Yanlış, tekrar dene.", "taskDone": "Görev tamamlandı", "moduleDone": "Modül tamamlandı! 🎉", "tasksDone": "tamamlandı", "welcome": "Sanal Linux terminali — komutlar yalnızca bu sayfadaki sanal dosya sisteminde çalışır. 'help' yazarak komutları gör, Tab ile tamamla, ↑/↓ ile geçmişte gez.", "sandboxNote": "Güvenli kum havuzu: gerçek sistemine dokunulmaz.", "resetConfirm": "Bu modülün sanal dosya sistemi ve komut geçmişi sıfırlanacak. İlerlemen (tamamlanan görevler) korunur. Devam?", "openTerminal": "Terminali aç (isteğe bağlı)", "closeTerminal": "Terminali kapat", "continue": "Devam et", "startPath": "Öğrenmeye başla", "noResult": "Eşleşen modül veya komut yok.", "soon": "Yakında", "overall": "Genel ilerleme", "copied": "Kopyalandı ✓", "pasteOk": "Çıktın beklenen kalıpla eşleşti ✓", "pasteBad": "Henüz eşleşmedi. \"Çıktım farklı çıktı\" ipuçlarına bak ve çıktının tamamını yapıştır.", "iDidIt": "Yaptım", "undo": "Geri al", "groupDone": "tamam", "vmDone": "VM görevleri"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

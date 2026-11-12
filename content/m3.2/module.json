@@ -1,0 +1,42 @@
+{
+ "id": "3.2",
+ "level": 3,
+ "setup": {
+  "dirs": ["/home/student/logs", "/home/student/data"],
+  "files": {
+   "/home/student/logs/app.log": "INFO start\nERROR disk full\nINFO user alice login\nERROR timeout\nWARN slow response\nERROR disk full\n",
+   "/home/student/data/fruits.txt": "apple\nbanana\napple\ncherry\nbanana\napple\n",
+   "/home/student/data/nums.txt": "10\n9\n100\n2\n",
+   "/home/student/data/unsorted.txt": "b\na\nb\na\n",
+   "/home/student/data/access.txt": "alice\nbob\nalice\ncarol\nbob\nalice\n"
+  },
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^cat \\S*app\\.log \\| wc -l$", "out": "6"}, "solution": ["cat logs/app.log | wc -l"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^sort \\S*fruits\\.txt$", "ok": true}, "solution": ["sort data/fruits.txt"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls -1 \\S+ \\| wc -l$", "out": "4"}, "solution": ["ls -1 data | wc -l"]},
+  {"id": "t04", "kind": "guided", "diff": 2, "check": {"cmd": "^grep ERROR \\S*app\\.log \\| wc -l$", "out": "3"}, "solution": ["grep ERROR logs/app.log | wc -l"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^sort \\S*fruits\\.txt \\| uniq$", "out": "cherry"}, "solution": ["sort data/fruits.txt | uniq"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cmd": "^sort \\S*fruits\\.txt \\| uniq -c$", "out": "3 apple"}, "solution": ["sort data/fruits.txt | uniq -c"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": [{"contains": ["~/errors.txt", "disk full"]}, {"contains": ["~/errors.txt", "timeout"]}], "solution": ["grep ERROR logs/app.log > errors.txt"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"cmd": "^sort \\S*nums\\.txt \\| head -n? ?1$", "out": "10"}, "solution": ["sort data/nums.txt | head -n 1"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"cmd": "^sort -n \\S*nums\\.txt \\| tail -n? ?1$", "out": "100"}, "solution": ["sort -n data/nums.txt | tail -n 1"]},
+  {"id": "t10", "kind": "debug", "diff": 2, "check": {"equals": ["~/unique.txt", "a\nb\n"]}, "solution": ["sort data/unsorted.txt | uniq > unique.txt"]},
+  {"id": "t11", "kind": "mini", "diff": 3, "check": [{"contains": ["~/report.txt", "2 ERROR disk full"]}, {"contains": ["~/report.txt", "1 ERROR timeout"]}], "solution": ["grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [{"cmd": "tee \\S*all_errors\\.txt \\| wc -l$", "out": "3"}, {"contains": ["~/all_errors.txt", "disk full"]}], "solution": ["grep ERROR logs/app.log | tee all_errors.txt | wc -l"]},
+  {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/users_count.txt", "3"]}, "solution": ["sort data/access.txt | uniq | wc -l > users_count.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "\\d+"},
+  {"id": "v02", "expect": "[a-z_]+"},
+  {"id": "v03", "expect": "\\d+\\s+\\S+"},
+  {"id": "v04", "expect": null}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 0},
+  {"id": "q2", "answer": 3},
+  {"id": "q3", "answer": 1},
+  {"id": "q4", "answer": 2}
+ ]
+}

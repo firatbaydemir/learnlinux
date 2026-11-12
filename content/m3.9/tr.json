@@ -1,0 +1,196 @@
+{
+ "title": "İleri Temel",
+ "lead": "Tek tek değil, toplu çalış: `find` ile dosyaları bul, `xargs` ile işle, akışları yönlendir, boru hatları kur ve ilk küçük betiğini yaz.",
+ "objectives": [
+  "`find` ile ad, tür, boyut, zaman ve izne göre dosya bulmak",
+  "`-exec ... {} \\;` ile `-exec ... {} +` ve `xargs` farkını bilmek; `-delete` öncesi önce listelemek",
+  "stdout/stderr yönlendirmesi: `>`, `>>`, `2>`, `2>&1`, `/dev/null`, here-document ve `tee`",
+  "`sort | uniq -c | sort -nr` gibi boru hatlarıyla logları özetlemek",
+  "Tırnak (`'...'` ve `\"...\"`), glob ve süslü parantez genişletmesinin tuzaklarını tanımak",
+  "Çıkış kodu, `&&`/`||`, shebang, `chmod +x` ve `./script.sh` ile küçük betik çalıştırmak"
+ ],
+ "sections": [
+  {
+   "id": "find",
+   "title": "find: derinlemesine arama",
+   "body": [
+    "`find <başlangıç> <koşullar> <eylem>` dizin ağacını gezer ve koşulları sağlayan her yolu işler. Koşul verilmezse hepsini listeler. Eylem verilmezse varsayılan `-print`'tir.",
+    "Önemli kural: desenleri **tırnak içine al**. `find . -name *.log` yazarsan kabuk `*.log`'u `find` çalışmadan önce, bulunduğun dizindeki dosyalara genişletir ve sonuç şaşırtıcı olur.",
+    "Önce listele, sonra işle: tehlikeli bir eylemden (`-delete`, `-exec rm`) önce aynı komutu eylemsiz çalıştırıp çıktıya bak."
+   ],
+   "commands": [
+    {"cmd": "find -name / -iname", "what": "Dosya adını desene göre arar; `-iname` büyük/küçük harfe bakmaz.", "where": "Bir projede belirli uzantıdaki dosyaları bulurken.", "why": "Elle gezmeden tüm ağacı saniyede tararsın.", "example": "find . -name \"*.log\""},
+    {"cmd": "find -type", "what": "Türe göre süzer: `f` dosya, `d` dizin, `l` sembolik bağ.", "where": "Yalnızca dizinleri veya yalnızca dosyaları listelemek için.", "why": "`chmod -R` yerine dizin ve dosyalara ayrı izin vermeni sağlar.", "example": "find . -type d"},
+    {"cmd": "find -size / -mtime / -perm / -user", "what": "Boyut (`-size +1M`), değişiklik günü (`-mtime +7` = 7 günden eski), izin (`-perm 644`) veya sahip (`-user alice`) ile süzer.", "where": "Disk temizliğinde, güvenlik denetiminde, eski logları ararken.", "why": "Doğru dosyayı bulmak, yanlış dosyayı silmekten ucuzdur.", "example": "find /var/log -name \"*.log\" -mtime +7", "nosim": true},
+    {"cmd": "find -exec ... {} \\;", "what": "Bulunan HER dosya için komutu ayrı ayrı çalıştırır; `{}` yerine yol gelir. `+` ile bitirirsen yollar toplanıp tek komuta verilir.", "where": "Her dosyaya `chmod`, `ls -l`, `wc` gibi bir işlem uygularken.", "why": "Döngü yazmadan toplu işlem; `+` sürümü çok daha az süreç başlatır.", "example": "find project -name \"*.tmp\" -exec ls -l {} \\;", "nosim": true},
+    {"cmd": "find -delete", "what": "Eşleşenleri doğrudan siler; geri dönüşü yoktur.", "where": "Geçici dosya temizliğinde.", "why": "`-exec rm` yerine tek süreçle hızlı siler. Koşulları `-delete`'ten ÖNCE yaz, yoksa her şey silinir.", "example": "find project -name \"*.tmp\" -delete", "nosim": true}
+   ],
+   "tip": "Alışkanlık: önce `find ... -print`, çıktıyı oku, sonra komutun sonuna `-delete` veya `-exec` ekle.",
+   "danger": "`find . -delete` koşulsuz çalışırsa bulunduğun ağaçtaki HER ŞEYİ siler. Koşul sırası önemlidir: `-name` önce, `-delete` en sonda."
+  },
+  {
+   "id": "xargs",
+   "title": "xargs ve komut yerine koyma",
+   "body": [
+    "`rm`, `cp`, `wc` dosya adlarını **argüman** olarak ister; borudan (stdin) okumaz. `xargs` stdin'deki satırları bu komutun argümanına çevirir.",
+    "Dosya adında boşluk veya satır sonu olabilir. Güvenli yol: `find ... -print0 | xargs -0 ...`; adları NUL karakteriyle ayırır. Düz `| xargs rm` boşluklu adlarda yanlış dosyaya dokunur.",
+    "`$(komut)` komutun çıktısını komut satırına koyar. Bu, `xargs`'a alternatiftir ama çok uzun listelerde argüman sınırına takılabilir."
+   ],
+   "commands": [
+    {"cmd": "xargs", "what": "Stdin'den gelen girdiyi bir komutun argümanları olarak çalıştırır.", "where": "`find` veya `grep -l` çıktısını `rm`, `wc`, `chmod` gibi komutlara bağlarken.", "why": "Borunun kapatamadığı boşluğu doldurur: çıktıyı argümana çevirir.", "example": "find . -name \"*.txt\" | xargs wc -l", "nosim": true},
+    {"cmd": "find -print0 | xargs -0", "what": "Adları NUL ile ayırıp xargs'a verir; boşluklu ve garip adlarda güvenlidir.", "where": "Silme ve taşıma gibi geri dönüşsüz toplu işlerde.", "why": "Adı `my file.txt` olan dosya iki ayrı argüman sayılmaz.", "example": "find . -name \"*.tmp\" -print0 | xargs -0 rm", "nosim": true},
+    {"cmd": "$(...)", "what": "Komut yerine koyma: iç komutun çıktısı dış komutun parçası olur.", "where": "Tarihi dosya adına, `hostname` çıktısını mesaja eklerken.", "why": "Dinamik değerlerle komut kurarsın.", "example": "echo \"host: $(hostname)\""}
+   ],
+   "warn": "`xargs` boş girdide bile komutu bir kez çalıştırabilir (GNU: `-r` ile engelle). Tehlikeli komutlarda önce `xargs echo rm` ile ne çalışacağını gör."
+  },
+  {
+   "id": "stream",
+   "title": "Akışlar, yönlendirme ve boru hatları",
+   "body": [
+    "Her işlemin üç akışı var: 0 stdin, 1 stdout, 2 stderr. `>` stdout'u (1) yönlendirir, `2>` stderr'i. `2>&1` \"stderr'i şu an stdout'un gittiği yere gönder\" demektir; **sıra önemli**: `cmd > f 2>&1` ikisini dosyaya yazar, `cmd 2>&1 > f` hatayı ekranda bırakır.",
+    "Gürültüyü `/dev/null`'a at: `cmd 2> /dev/null`. Bash'te `&>` hem stdout hem stderr'i yönlendirir; taşınabilir yazım `> f 2>&1`'dir.",
+    "Log özetinin klasik kalıbı: `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr`. `uniq` yalnızca yan yana duran satırları birleştirir, bu yüzden önce `sort` gerekir."
+   ],
+   "commands": [
+    {"cmd": "2> ve 2>&1", "what": "`2> f` hataları dosyaya yazar; `> f 2>&1` hem çıktıyı hem hatayı aynı dosyaya yazar.", "where": "Betik çıktısını log dosyasına alırken.", "why": "Hataları kaybetmeden kaydedersin; sıra önemlidir.", "example": "ls missing.txt notes.txt > both.txt 2>&1"},
+    {"cmd": "> /dev/null", "what": "Çıktıyı çöpe atar.", "where": "Sadece çıkış koduna bakıp çıktıyı görmek istemediğinde.", "why": "Ekran kirlenmez: `grep -q` veya `cmd 2> /dev/null`.", "example": "ls missing.txt 2> /dev/null"},
+    {"cmd": "<<EOF (here-document)", "what": "Birden çok satırı komutun stdin'ine yazar; `EOF` tek başına satıra gelince biter.", "where": "Betik veya yapılandırma dosyası oluştururken.", "why": "Tırnaklı `<<'EOF'` değişkenleri genişletmez; metin olduğu gibi gider.", "example": "cat > notes2.txt <<'EOF'\nline one\nline two\nEOF", "nosim": true},
+    {"cmd": "tee", "what": "Stdin'i hem ekrana hem dosyaya yazar; `-a` ekler.", "where": "Boru hattının ortasında ara sonucu kaydederken.", "why": "Hem görür hem saklarsın. `sudo cmd > f` ile ilgili yetki sorununu `| sudo tee f` çözer.", "example": "grep ERROR run.log | tee errors.txt"},
+    {"cmd": "sort | uniq -c | sort -nr", "what": "Satırları sayar ve çoktan aza sıralar.", "where": "Log, IP ve hata sıklığı analizinde.", "why": "Tek satırda \"en çok hangisi\" cevabı; `| head -n 3` ile ilk üçü al.", "example": "cut -d' ' -f2 run.log | sort | uniq -c | sort -nr"}
+   ],
+   "tip": "`wc -l` satır sayar; `head -n 1` ilk satırı, `tail -n 5` son beş satırı verir. Üçü birleşince hızlı log incelemesi olur."
+  },
+  {
+   "id": "quoting",
+   "title": "Tırnak, genişletme ve çıkış kodları",
+   "body": [
+    "Kabuk komutu çalıştırmadan önce genişletir: `$DEĞİŞKEN`, `$(...)`, glob (`*.log`) ve süslü parantez (`{a,b}`). Genişletmeyi kontrol eden tırnaktır.",
+    "Çift tırnak `\"...\"` değişken ve `$(...)`'i genişletir ama globu engeller. Tek tırnak `'...'` hiçbir şeyi genişletmez. Boşluklu değerleri her zaman çift tırnakla koru.",
+    "Her komut bir çıkış kodu döndürür: 0 başarı, 0'dan farklı hata. `$?` sonuncuyu verir. `&&` yalnızca başarıda, `||` yalnızca hatada devam eder."
+   ],
+   "commands": [
+    {"cmd": "'...' ve \"...\"", "what": "Tek tırnak metni olduğu gibi bırakır; çift tırnak `$` genişletmesine izin verir.", "where": "Değişken, boşluklu ad ve desen yazarken.", "why": "`echo \"$HOME\"` yolu, `echo '$HOME'` düz `$HOME` yazısını basar.", "example": "echo \"$HOME\" '$HOME'"},
+    {"cmd": "* ? [ ] glob", "what": "Kabuk deseni dosya adlarına genişletir; `*` her şey, `?` tek karakter.", "where": "Birden çok dosyayı tek komutla seçerken.", "why": "Tırnaksız desen `find -name` gibi komutlara bozuk gider; `*.log` bir şey bulamazsa olduğu gibi kalır.", "example": "ls logs/*.log"},
+    {"cmd": "{a,b} brace expansion", "what": "Kabuk `{a,b,c}`'yi üç kelimeye çevirir; dosya aramaz, sadece metin üretir.", "where": "Birden çok dosya veya dizin oluştururken.", "why": "`mkdir -p project/{src,docs}` iki dizini bir komutta açar.", "example": "touch report_{1,2,3}.txt"},
+    {"cmd": "&& ve ||", "what": "`a && b`: a başarılıysa b. `a || b`: a başarısızsa b. `;` her durumda devam eder.", "where": "Önkoşullu işlerde: `cd dir && rm ...`.", "why": "`cd` başarısız olursa sonraki silme yanlış dizinde çalışmaz.", "example": "grep -q FATAL run.log || echo none"}
+   ],
+   "warn": "`cd logs; rm *.tmp` yerine `cd logs && rm *.tmp` yaz: `cd` hata verirse `;` yine de `rm`'yi bulunduğun dizinde çalıştırır."
+  },
+  {
+   "id": "script",
+   "title": "İlk betiğin: shebang ve çalıştırma",
+   "body": [
+    "Betik, komutları içeren bir metin dosyasıdır. İlk satır **shebang** (`#!/bin/bash`) hangi yorumlayıcının kullanılacağını söyler. Çalıştırmak için dosyaya `x` izni gerekir.",
+    "`./script.sh` dosyayı bulunduğun dizinden çalıştırır. `script.sh` tek başına yazarsan kabuk onu yalnızca `PATH`'teki dizinlerde arar; geçerli dizin `PATH`'te yoktur (bilinçli güvenlik önlemi). `bash script.sh` ise `x` izni olmadan da çalışır.",
+    "Betik argümanları `$1`, `$2`…, çıkış kodu `$?`'dir. Küçük betiklerde `name=\"${1:-world}\"` ile varsayılan değer verebilirsin."
+   ],
+   "commands": [
+    {"cmd": "#!/bin/bash", "what": "Betiğin ilk satırı; çekirdeğe yorumlayıcıyı söyler.", "where": "Her çalıştırılabilir betiğin başında.", "why": "Hangi kabukla çalışacağı açık olur; dağıtımlar arası tutarlılık sağlar.", "example": "printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh"},
+    {"cmd": "chmod +x", "what": "Dosyaya çalıştırma izni ekler.", "where": "Yazdığın betiği doğrudan çalıştırmadan önce.", "why": "`x` yoksa `./script.sh` \"Permission denied\" verir.", "example": "chmod +x greet.sh"},
+    {"cmd": "./script.sh", "what": "Betiği yol belirterek çalıştırır; argümanlar sonuna gelir.", "where": "Geçerli dizindeki betikler için.", "why": "`PATH`'te arama yapmaz, tam olarak seçtiğin dosyayı çalıştırır.", "example": "./greet.sh alice"},
+    {"cmd": "echo $?", "what": "Son komutun çıkış kodunu gösterir (0 = başarı).", "where": "Bir komutun başarısını betikte veya elle sınarken.", "why": "`&&`, `||` ve `if` hep bu kodu kullanır.", "example": "grep -q ERROR run.log; echo $?"}
+   ],
+   "tip": "Kendi betiklerin için `~/bin` dizinini `PATH`'e ekleyebilirsin: `export PATH=\"$HOME/bin:$PATH\"`. Kalıcı yapmak için `~/.bashrc`'ye yaz."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`lab` dizinindeyken tüm `.tmp` dosyalarını `find` ile listele: `find . -name \"*.tmp\"`.", "hint": "Deseni çift tırnak içine al."},
+  "t02": {"text": "`run.log` içindeki `ERROR` satırlarını say ve sayıyı `count.txt` dosyasına yaz: `grep -c ERROR run.log > count.txt`.", "hint": "`-c` eşleşen satır sayısını verir."},
+  "t03": {"text": "`who.txt` dosyasına `host: ` ve makine adını yaz: `echo \"host: $(hostname)\" > who.txt`.", "hint": "Çift tırnak içinde `$(hostname)` genişler."},
+  "t04": {"text": "`backup` dizinini oluştur, sonra `logs` içindeki tüm `.log` dosyalarını glob ile oraya kopyala: `cp logs/*.log backup/`.", "hint": "Önce `mkdir backup`; sonra `cp` hedef dizini sonda alır."},
+  "t05": {"text": "Önce hatayı `err.txt` dosyasına yaz: `ls missing.txt 2> err.txt`. Sonra `ls missing.txt notes.txt` çıktısını VE hatasını birlikte `both.txt` dosyasına yaz.", "hint": "`> both.txt 2>&1`; sıra: önce `>`, sonra `2>&1`."},
+  "t06": {"text": "`printf` ile `greet.sh` betiğini yaz (shebang + `echo \"Hello $1\"`), `chmod +x greet.sh` ile çalıştırılabilir yap, `./greet.sh alice > greet.out` ile çalıştır.", "hint": "`printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh`; metni tek tırnakla koru, yoksa `$1` hemen genişler."},
+  "t07": {"text": "TAHMİN: `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr` en çok hangi seviyeyi ve kaç kez gösterir? Önce tahmin et, sonra çalıştır.", "hint": "İkinci alan seviyedir (`INFO`, `WARN`, `ERROR`). Listeyi say."},
+  "t08": {"text": "TAHMİN: `echo \"$HOME\" '$HOME'` ne basar? Tahmin et, sonra çalıştır.", "hint": "Çift tırnak genişletir, tek tırnak genişletmez."},
+  "t09": {"text": "TAHMİN: `grep -q FATAL run.log || echo none` ne basar? Tahmin et, sonra çalıştır.", "hint": "`FATAL` yoksa `grep` 1 döner; `||` o zaman sağdaki komutu çalıştırır."},
+  "t10": {"text": "HATA BUL: Biri `find . -name *.log` yazdı ve yalnızca `run.log` çıktı; `logs/` altındakiler yok. Komutu düzelt ve tam listeyi `all_logs.txt` dosyasına yaz.", "hint": "Önce `find . -name *.log` ile hatayı gör: kabuk `*.log`'u `run.log`'a genişletti. Deseni tırnakla."},
+  "t11": {"text": "HATA BUL: `./hello.sh` \"Permission denied\" veriyor. Düzelt ve çalıştır; sonuç `hello.out` dosyasına yazılmalı.", "hint": "`ls -l hello.sh` ile izne bak; `chmod +x hello.sh`."},
+  "t12": {"text": "MİNİ PROJE: `ERROR` satırlarını süzüp hem ekranda göster hem `errors.txt` dosyasına yaz (`tee`), sonra `wc -l errors.txt` çıktısını `summary.txt` dosyasına ekle (`>>`).", "hint": "`grep ERROR run.log | tee errors.txt`, sonra `wc -l errors.txt >> summary.txt`."},
+  "t13": {"text": "ZORLUK: `project` altındaki tüm `.tmp` dosyalarını silmek için `find` ve `-exec rm {} \\;` kullan. (Simülatör `-exec`'i çalıştırmaz; komutun doğru yazımı kontrol edilir.)", "hint": "`find project -name \"*.tmp\" -exec rm {} \\;` ; `\\;` kaçışı önemli. Gerçek VM'de önce `-print` ile dene."},
+  "t14": {"text": "ZORLUK: Tüm `.txt` dosyalarının satır sayısını güvenli yolla bul: `-print0` ile `xargs -0` ve `wc -l`. (`xargs` simülatörde yok; yazım kontrol edilir.)", "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."},
+  "t15": {"text": "ZORLUK: `access.log` içinde en çok görünen IP'yi ve sayısını bul, yalnızca o tek satırı `top.txt` dosyasına yaz.", "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."},
+  "t16": {"text": "TICKET #3901 — Destek: \"Sabah toplantısı için `run.log` içindeki `ERROR` ve `WARN` satırlarını sıralı olarak `problems.txt` dosyasına yazan bir betiğe ihtiyacımız var, her gün çalıştıracağız.\" `check.sh` betiğini yaz (shebang + `grep -E ... | sort > problems.txt`), çalıştırılabilir yap ve çalıştır.", "hint": "`printf` veya `echo` ile tek tırnak içinde yaz, `chmod +x check.sh`, `./check.sh`."}
+ },
+ "vm": {
+  "intro": "Aşağıdaki işlemleri kendi VM'inde (Ubuntu, Rocky veya Alma) yap. Her şeyi `~/adv` altında dene; gerçek verilerin olduğu yerde asla `-delete` veya `rm -r` kullanma.",
+  "tasks": {
+   "v01": {
+    "title": "Deneme alanı kur ve find ile ara",
+    "text": "Bir deneme ağacı kur, sonra `find` ile ad, tür ve boyuta göre ara. Çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/adv/logs ~/adv/project/src\ntouch ~/adv/logs/app.log ~/adv/logs/old.log ~/adv/project/a.tmp ~/adv/project/src/b.tmp\necho data > ~/adv/project/src/main.txt\nfind ~/adv -name \"*.log\"\nfind ~/adv -type d\nfind ~/adv -type f -size -1k", "expected": "/home/student/adv/logs/app.log\n/home/student/adv/logs/old.log\n/home/student/adv\n/home/student/adv/logs\n..."}
+    ],
+    "differs": [
+     "`find` çıktı sırası dosya sistemine göre değişebilir; önemli olan tüm `.log` dosyalarının görünmesi.",
+     "Kullanıcı adın `student` değilse yol başı farklı olur; sorun değil."
+    ]
+   },
+   "v02": {
+    "title": "-exec, + ve xargs",
+    "text": "Aynı dosyalara önce `-exec ... \\;`, sonra `-exec ... +` ve `xargs -0` ile işlem uygula. Farkı gör: `\\;` her dosya için ayrı komut, `+` toplu.",
+    "blocks": [
+     {"cmd": "find ~/adv -name \"*.tmp\" -exec ls -l {} \\;\nfind ~/adv -name \"*.tmp\" -exec ls -l {} +\nfind ~/adv -name \"*.tmp\" -print0 | xargs -0 ls -l", "expected": "-rw-r--r-- 1 student student 0 Nov 12 10:00 /home/student/adv/project/a.tmp\n-rw-r--r-- 1 student student 0 Nov 12 10:00 /home/student/adv/project/src/b.tmp"}
+    ],
+    "differs": [
+     "`+` ile `ls -l` çıktısı genelde yol sırasına göre sıralı gelir; `\\;` ile bulma sırasına göre. İçerik aynıdır.",
+     "`find: missing argument to '-exec'` hatası: sonundaki `\\;` veya `+` eksik."
+    ]
+   },
+   "v03": {
+    "title": "Önce listele, sonra sil",
+    "text": "Önce VM'inin **snapshot**'ını al. `-delete` geri dönüşsüzdür: önce neyin silineceğini gör, sonra yalnızca `~/adv` içinde sil. Bitince \"Yaptım\" de.",
+    "blocks": [
+     {"cmd": "# Önce kuru deneme\nfind ~/adv -name \"*.tmp\" -print\n# Doğruysa sil (koşul -delete'ten ÖNCE)\nfind ~/adv -name \"*.tmp\" -delete\nfind ~/adv -name \"*.tmp\"", "expected": "(son komut hiçbir şey yazmaz)"}
+    ],
+    "differs": [
+     "Son komut hâlâ dosya listeliyorsa `-delete` sonra yazılmamış olabilir veya yanlış dizindesin; `pwd` ile bak."
+    ]
+   },
+   "v04": {
+    "title": "Log özeti: here-document ve boru hattı",
+    "text": "Here-document ile örnek bir log yaz, sonra seviye sayımını çıkar ve hata akışını yönlendir.",
+    "blocks": [
+     {"cmd": "cat > ~/adv/run.log <<'EOF'\n10:01 INFO start\n10:02 ERROR disk full\n10:03 WARN slow disk\n10:04 INFO retry\n10:05 ERROR timeout\n10:06 INFO ok\nEOF\ncut -d' ' -f2 ~/adv/run.log | sort | uniq -c | sort -nr\nls /nonexistent ~/adv/run.log > ~/adv/both.txt 2>&1\ncat ~/adv/both.txt", "expected": "      3 INFO\n      2 ERROR\n      1 WARN\nls: cannot access '/nonexistent': No such file or directory\n/home/student/adv/run.log"}
+    ],
+    "differs": [
+     "Sayılar ve boşluklar farklıysa log satırlarını kontrol et: her satırın ikinci alanı seviye olmalı.",
+     "Hata mesajı dilin Türkçe/Almanca ise çeviri görürsün; `No such file` yerine yerel metin olabilir."
+    ]
+   },
+   "v05": {
+    "title": "İlk betiğin",
+    "text": "Betiği yaz, `x` izni olmadan çalıştırmayı dene, izin ver, çalıştır ve çıkış kodunu gör.",
+    "blocks": [
+     {"cmd": "cd ~/adv\ncat > hello.sh <<'EOF'\n#!/bin/bash\nname=\"${1:-world}\"\necho \"Hello, $name\"\nEOF\n./hello.sh\nchmod +x hello.sh\n./hello.sh student\necho $?", "expected": "bash: ./hello.sh: Permission denied\nHello, student\n0"}
+    ],
+    "differs": [
+     "İlk `./hello.sh` çalışırsa dosya sistemin (ör. bazı WSL bağlamaları) `x` iznini zaten veriyor olabilir.",
+     "`hello.sh: command not found` görürsen `./` önekini unutmuşsun; geçerli dizin `PATH`'te değildir."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "`find ... -exec rm {} \\;` ile `find ... -exec rm {} +` arasındaki fark nedir?", "options": ["`\\;` yalnızca dizinlere, `+` yalnızca dosyalara uygulanır", "`\\;` her dosya için ayrı komut çalıştırır, `+` yolları toplayıp birkaç komuta verir", "`+` komutu hiç çalıştırmaz, sadece listeler", "Fark yoktur, yalnızca yazım tarzıdır"], "explain": "`\\;` her eşleşme için bir süreç başlatır; `+` argümanları toplar ve çok daha az süreçle çalışır."},
+  "q2": {"q": "`find . -name *.log` (tırnaksız) neden sorunludur?", "options": ["`find` desen kabul etmez", "`-name` yalnızca büyük harfle çalışır", "Kabuk `*.log`'u `find` çalışmadan önce bulunduğun dizindeki adlara genişletir", "Komut tüm diski siler"], "explain": "Genişletmeyi kabuk yapar. Desen `\"*.log\"` biçiminde tırnaklanmalı ki `find`'a olduğu gibi ulaşsın."},
+  "q3": {"q": "Hem çıktıyı hem hatayı `out.txt` dosyasına yazmak için doğru komut hangisidir?", "options": ["`cmd > out.txt 2>&1`", "`cmd 2>&1 > out.txt`", "`cmd 2> out.txt 1> out.txt`", "`cmd | out.txt`"], "explain": "Önce stdout dosyaya yönlendirilir, sonra stderr 'stdout'un şimdiki yerine' gider. Ters sırada hata ekranda kalır."},
+  "q4": {"q": "Adında boşluk olan dosyalarla `find` sonucunu güvenle `rm`'ye vermek için hangisi doğrudur?", "options": ["`find . | xargs rm`", "`rm $(find .)`", "`find . -name x | rm`", "`find ... -print0 | xargs -0 rm`"], "explain": "`-print0` ve `xargs -0` adları NUL ile ayırır; boşluk veya satır sonu içeren adlar bölünmez."}
+ },
+ "summary": [
+  "`find` = ağaç gezer; desenleri tırnakla, önce listele sonra `-delete`/`-exec` ekle.",
+  "`-exec ... \\;` her dosya için, `-exec ... +` ve `xargs` toplu çalışır; güvenli ikili: `-print0 | xargs -0`.",
+  "`>` stdout, `2>` stderr, `2>&1` birleştirir (sıra önemli), `/dev/null` çöptür, `tee` hem gösterir hem kaydeder.",
+  "`sort | uniq -c | sort -nr` en sık geçenleri bulur; `head`/`tail`/`wc -l` ile birleşir.",
+  "Çift tırnak genişletir, tek tırnak genişletmez; `&&` başarıda, `||` hatada devam eder.",
+  "Betik = shebang + `chmod +x` + `./script.sh`; çıkış kodu `$?`."
+ ],
+ "glossary": [
+  {"term": "glob", "meaning": "`*`, `?`, `[...]` gibi dosya adı desenleri; kabuk tarafından genişletilir."},
+  {"term": "stdout / stderr", "meaning": "Standart çıktı (1) ve standart hata (2) akışları."},
+  {"term": "here-document", "meaning": "`<<EOF` ile çok satırlı metni komutun girdisi yapma yöntemi."},
+  {"term": "pipe (boru)", "meaning": "`|` ile bir komutun çıktısını diğerinin girdisine bağlama."},
+  {"term": "shebang", "meaning": "Betiğin ilk satırındaki `#!/bin/bash`; yorumlayıcıyı belirtir."},
+  {"term": "çıkış kodu", "meaning": "Komutun bitince döndürdüğü sayı; 0 başarı, diğerleri hata. `$?` ile okunur."},
+  {"term": "NUL ayracı", "meaning": "Adları birbirinden ayırmak için kullanılan `\\0` baytı; `-print0` ve `xargs -0` bunu kullanır."}
+ ]
+}

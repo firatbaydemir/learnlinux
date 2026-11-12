@@ -1,0 +1,198 @@
+{
+ "id": "0.2",
+ "level": 0,
+ "setup": {},
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^cat /etc/os-release$",
+    "ok": true
+   },
+   "solution": [
+    "cat /etc/os-release"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^id$",
+    "ok": true
+   },
+   "solution": [
+    "id"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "seq": [
+     "^hostname$",
+     "^uname -r$"
+    ],
+    "ok": true
+   },
+   "solution": [
+    "hostname",
+    "uname -r"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "root",
+    "of": "^sudo whoami$"
+   },
+   "solution": [
+    "sudo whoami"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "debug",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^cat /etc/os_release$",
+     "ok": false
+    },
+    {
+     "cmd": "^cat /etc/os-release$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "cat /etc/os_release",
+    "cat /etc/os-release"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/vm-summary.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/vm-summary.txt",
+      "PRETTY_NAME"
+     ]
+    }
+   ],
+   "solution": [
+    "grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "exists": "~/vm-lab/snapshots",
+     "type": "d"
+    },
+    {
+     "exists": "~/vm-lab/notes",
+     "type": "d"
+    }
+   ],
+   "solution": [
+    "mkdir -p ~/vm-lab/{snapshots,notes}"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "linesMin": [
+      "~/vm-report.txt",
+      3
+     ]
+    },
+    {
+     "contains": [
+      "~/vm-report.txt",
+      "linux-lab"
+     ]
+    },
+    {
+     "contains": [
+      "~/vm-report.txt",
+      "student"
+     ]
+    }
+   ],
+   "solution": [
+    "hostname > ~/vm-report.txt",
+    "uname -r >> ~/vm-report.txt",
+    "whoami >> ~/vm-report.txt"
+   ]
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": null
+  },
+  {
+   "id": "v02",
+   "expect": "[0-9a-f]{64}"
+  },
+  {
+   "id": "v03",
+   "expect": null
+  },
+  {
+   "id": "v04",
+   "expect": "(Rocky|Alma|Ubuntu|Red Hat|Fedora|Debian|CentOS)"
+  },
+  {
+   "id": "v05",
+   "expect": null
+  },
+  {
+   "id": "v06",
+   "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+"
+  },
+  {
+   "id": "v07",
+   "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+ \\d+ \\d+\\.\\d+\\.\\d+\\.\\d+ 22"
+  },
+  {
+   "id": "v08",
+   "expect": null
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 2
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ]
+}

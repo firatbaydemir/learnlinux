@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2.2 Yollar ve Türler — Temel Linux Akademisi</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","tr")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="2.2">
+<header class="top"><a class="brand" href="index.html">Temel Linux Akademisi</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (isteğe bağlı)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-2.2.html" hreflang="tr" lang="tr" data-switch="tr" aria-current="true">TR</a><a href="../de/modul-2.2.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-2.2.html" hreflang="en" lang="en" data-switch="en">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Tema" aria-label="Tema">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Genel ilerleme"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><ol><li><a href="#paths">Mutlak ve göreli yollar</a></li><li><a href="#shortcuts">Özel yol kısayolları: . .. ~</a></li><li><a href="#types">Dosya türlerini okumak</a></li><li><a href="#links">Sembolik linkler</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>İçindekiler</summary><ol><li><a href="#paths">Mutlak ve göreli yollar</a></li><li><a href="#shortcuts">Özel yol kısayolları: . .. ~</a></li><li><a href="#types">Dosya türlerini okumak</a></li><li><a href="#links">Sembolik linkler</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Ana sayfa</a> <span aria-hidden="true">/</span> Seviye 2</p>
+<h1><span class="module-id">2.2</span> Yollar ve Türler</h1>
+<p class="lead">Mutlak ve göreli yolları doğru oku, ls -l ile dosya türünü tanı ve sembolik link (kısayol) oluştur.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>Bu modülde neler öğreneceksin?</h2><ul><li>Mutlak (<code>/</code> ile başlar) ve göreli yolu ayırt eder, <code>.</code>, <code>..</code> ve <code>~</code> kısayollarını kullanırsın.</li><li><code>ls -l</code> çıktısının ilk harfinden dosya türünü (<code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>) okursun.</li><li><code>ln -s</code> ile sembolik link kurar ve linkin neye işaret ettiğini görürsün.</li></ul></section>
+<section id="paths"><h2>Mutlak ve göreli yollar</h2>
+<p>Linux&#x27;ta bir dosyaya ulaşmanın tek yolu <strong>yol</strong> (path) vermektir. <strong>Mutlak yol</strong> kök dizinden (<code>/</code>) başlar ve nerede olursan ol aynı yeri gösterir: <code>/etc/hostname</code>.</p>
+<p><strong>Göreli yol</strong> <code>/</code> ile başlamaz ve <strong>bulunduğun dizinden</strong> hesaplanır. <code>/etc</code> içindeyken <code>hostname</code> yeterlidir; home dizinindeyken aynı ad hata verir, çünkü orada böyle bir dosya yoktur.</p>
+<p>Önce <code>pwd</code> ile nerede olduğuna bak. Göreli yolun anlamı her zaman bulunduğun dizine bağlıdır.</p>
+<article class="cmd"><h3><code>pwd</code></h3><dl><dt>Ne işe yarar?</dt><dd>Bulunduğun dizinin mutlak yolunu yazar.</dd><dt>Nerede kullanılır?</dt><dd>Göreli yol kullanmadan önce.</dd><dt>Neden önemli?</dt><dd>Yanlış dizinde işlem yapmamak için.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">pwd</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="pwd" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="pwd">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>cd</code></h3><dl><dt>Ne işe yarar?</dt><dd>Çalışma dizinini değiştirir; mutlak veya göreli yol alır.</dd><dt>Nerede kullanılır?</dt><dd>Dizinler arasında gezerken.</dd><dt>Neden önemli?</dt><dd>Sonraki komutlarda kısa göreli yollar kullanabilmek için.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">/etc</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cd /etc" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="cd /etc">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>cat</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosyanın içeriğini yazar.</dd><dt>Nerede kullanılır?</dt><dd>Küçük metin dosyalarını okurken.</dd><dt>Neden önemli?</dt><dd>Yolun doğru dosyayı gösterdiğini denemek için.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cat /etc/hostname" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="cat /etc/hostname">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Emin değilsen mutlak yol yaz; her dizinden çalışır.</p></aside>
+</section>
+<section id="shortcuts"><h2>Özel yol kısayolları: . .. ~</h2>
+<p><code>.</code> bulunduğun dizindir, <code>..</code> bir üst dizindir, <code>~</code> home dizinindir (<code>/home/student</code>). Bunları yollarda birleştirebilirsin: <code>../config.txt</code>, <code>~/Documents/report.txt</code>.</p>
+<p>Adı <code>.</code> ile başlayan dosyalar <strong>gizlidir</strong>; <code>ls</code> onları göstermez, <code>ls -a</code> gösterir. Her dizinde <code>.</code> ve <code>..</code> girdileri de listelenir.</p>
+<article class="cmd"><h3><code>cd ..</code></h3><dl><dt>Ne işe yarar?</dt><dd>Bir üst dizine çıkar.</dd><dt>Nerede kullanılır?</dt><dd>Alt dizinden geri dönerken.</dd><dt>Neden önemli?</dt><dd>Tam yolu yazmadan hızlıca yukarı gitmek için.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> ..</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cd .." title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="cd ..">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ls -a</code></h3><dl><dt>Ne işe yarar?</dt><dd>Gizli dosyalar dahil hepsini listeler.</dd><dt>Nerede kullanılır?</dt><dd>Yapılandırma dosyalarını ararken.</dd><dt>Neden önemli?</dt><dd>Gizli dosyalar normal listede görünmez.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-a</span> <span class="tp">~</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -a ~" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -a ~">Kopyala</button></div></div></article>
+</section>
+<section id="types"><h2>Dosya türlerini okumak</h2>
+<p>Linux&#x27;ta her şey bir dosyadır: metin, klasör, aygıt, kısayol. <code>ls -l</code> çıktısında satırın <strong>ilk harfi</strong> türü söyler.</p>
+<p><code>-</code> normal dosya, <code>d</code> dizin, <code>l</code> sembolik link, <code>c</code> karakter aygıtı (<code>/dev/null</code>), <code>b</code> blok aygıtı (disk), <code>s</code> soket, <code>p</code> named pipe. Sonraki dokuz karakter izinlerdir (sonraki modüllerde).</p>
+<article class="cmd"><h3><code>ls -l</code></h3><dl><dt>Ne işe yarar?</dt><dd>Uzun listeleme: tür, izin, sahip, boyut, tarih, ad.</dd><dt>Nerede kullanılır?</dt><dd>Bir şeyin türünü anlamak için.</dd><dt>Neden önemli?</dt><dd>Silmeden veya okumadan önce ne olduğunu bilmek için.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/dev/null</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -l /dev/null" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -l /dev/null">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>stat</code></h3><dl><dt>Ne işe yarar?</dt><dd>Bir dosyanın ayrıntılı bilgisini ve türünü gösterir.</dd><dt>Nerede kullanılır?</dt><dd>Tür veya zaman damgası gerektiğinde.</dd><dt>Neden önemli?</dt><dd>Tür adını harf yerine kelime olarak verir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">stat</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="stat /etc/hostname" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="stat /etc/hostname">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p><code>/dev</code> altındaki dosyalar gerçek veri değil donanım arayüzüdür; <code>cat</code> ile rastgele okuma.</p></aside>
+</section>
+<section id="links"><h2>Sembolik linkler</h2>
+<p><strong>Sembolik link</strong> başka bir yolu gösteren küçük bir kısayol dosyasıdır. <code>ls -l</code> onu <code>l</code> ile ve <code>link -&gt; hedef</code> biçiminde gösterir. Linki okumak hedefi okumak demektir.</p>
+<p>Hedef silinir veya taşınırsa link <strong>kırık</strong> kalır. Göreli hedefli link (<code>../docs/readme.txt</code>) <strong>linkin bulunduğu dizinden</strong> hesaplanır, bulunduğun dizinden değil.</p>
+<article class="cmd"><h3><code>ln -s</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sembolik link oluşturur: <code>ln -s HEDEF LINK</code>.</dd><dt>Nerede kullanılır?</dt><dd>Kısa bir yoldan uzun bir yola erişmek için.</dd><dt>Neden önemli?</dt><dd>Dosyayı kopyalamadan tek yerde tutarsın.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/Documents/report.txt</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ln -s ~/Documents/report.txt ~/link.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ln -s ~/Documents/report.txt ~/link.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>readlink</code></h3><dl><dt>Ne işe yarar?</dt><dd>Linkin gösterdiği hedefi yazar.</dd><dt>Nerede kullanılır?</dt><dd>Linkin nereye gittiğini görmek için.</dd><dt>Neden önemli?</dt><dd><code>ls -l</code> yerine yalnızca hedefi almak için.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">readlink</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="readlink ~/link.txt">Kopyala</button></div></div></article>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p><code>ln -s</code> argüman sırası: önce HEDEF, sonra LINK. Ters yazarsan kırık link oluşur. <code>ln -sf</code> var olan bir dosyanın üzerine yazar; dikkat et.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p>Link bir dizini gösterirken <code>rm -r link/</code> (sonunda <code>/</code>) hedef dizinin içeriğini silebilir. Linki silmek için <code>rm link</code> yaz ve önce <code>ls -l</code> ile kontrol et.</p></aside>
+</section>
+<section id="vm"><h2>Kendi VM&#x27;inde yap <span class="gcount" data-g="vm"></span></h2><p>Asıl uygulama gerçek Linux&#x27;ta yapılır: kendi sanal makinende (VirtualBox, UTM veya WSL) komutları çalıştır, çıktıyı karşılaştır.</p><p>Kendi VM&#x27;inde mutlak/göreli yolları dene, <code>/dev</code> dosya türlerine bak ve bir sembolik link kur. Hepsi zararsız komutlardır.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>Mutlak ve göreli yol</h3><span class="status" aria-hidden="true"></span></header><p>Aynı dosyayı önce göreli, sonra yanlış dizinden dene ve çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">pwd</span></span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">/etc</span></span>
+<span class="ln"><span class="tk">pwd</span></span>
+<span class="ln"><span class="tk">cat</span> hostname</span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">cat</span> hostname</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="pwd
+cd /etc
+pwd
+cat hostname
+cd ~
+cat hostname">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">/home/student
+/etc
+linux-lab
+cat: hostname: No such file or directory</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Host adın <code>linux-lab</code> değilse sorun yok; kendi host adın görünür.</li><li>Eve dönünce <code>cat hostname</code> hata vermiyorsa home içinde <code>hostname</code> adlı bir dosya oluşturmuşsundur.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Dosya türlerini oku</h3><span class="status" aria-hidden="true"></span></header><p>Bir dosya, bir dizin ve bir aygıtın türünü gör; ilk harflere bak.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">/etc</span> <span class="tp">/etc/hostname</span> <span class="tp">/dev/null</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -ld /etc /etc/hostname /dev/null">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">drwxr-xr-x. ... /etc
+-rw-r--r--. ... /etc/hostname
+crw-rw-rw-. ... /dev/null</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Bazı dağıtımlarda <code>/etc/hostname</code> yoktur; yerine <code>/etc/os-release</code> dene.</li><li>İzin sonundaki <code>.</code> veya <code>+</code> SELinux/ACL işaretidir, önemli değil.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Sembolik link kur</h3><span class="status" aria-hidden="true"></span></header><p>Home içinde bir dosya ve ona link oluştur, linki oku.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/practice</span></span>
+<span class="ln"><span class="tk">echo</span> hello linux <span class="to">&gt;</span> <span class="tk">~/practice/notes.txt</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/practice/notes.txt</span> <span class="tp">~/practice/link.txt</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">~/practice</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">~/practice/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/practice
+echo hello linux &gt; ~/practice/notes.txt
+ln -s ~/practice/notes.txt ~/practice/link.txt
+ls -l ~/practice
+cat ~/practice/link.txt">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">lrwxrwxrwx. 1 student student ... link.txt -&gt; /home/student/practice/notes.txt
+hello linux</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>link.txt</code> kırmızı veya <code>-&gt;</code> yoksa argüman sırasını ters yazmış olabilirsin: önce HEDEF, sonra LINK.</li><li><code>File exists</code> hatasında <code>~/practice/link.txt</code> zaten var; önce <code>rm ~/practice/link.txt</code> ile sil.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>stat ile tür adı</h3><span class="status" aria-hidden="true"></span></header><p><code>stat</code> ile türü kelime olarak gör, sonra alıştırma klasörünü sil.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">stat</span> <span class="tf">-c</span> <span class="ts">&#x27;%F&#x27;</span> <span class="tp">/etc</span> <span class="tp">/etc/hostname</span> <span class="tp">/dev/null</span> <span class="tp">~/practice/link.txt</span></span>
+<span class="ln"><span class="tc"># temizlik: önce ls -l ~/practice ile bak, sonra</span></span>
+<span class="ln"><span class="tk">rm</span> <span class="tf">-r</span> <span class="tp">~/practice</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="stat -c &#x27;%F&#x27; /etc /etc/hostname /dev/null ~/practice/link.txt
+# temizlik: önce ls -l ~/practice ile bak, sonra
+rm -r ~/practice">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">directory
+regular file
+character special file
+symbolic link</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>macOS veya BSD benzeri araçta <code>-c</code> yoktur; bu bir Linux VM&#x27;inde çalışır.</li><li><code>rm: cannot remove ... Is a directory</code> görürsen <code>-r</code> unutulmuş.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Hızlı alıştırmalar (simülatör)</h2><p>İsteğe bağlı: VM&#x27;e geçmeden önce ısınmak veya VM&#x27;in yokken denemek için tarayıcıdaki sanal terminali kullan. Görevler otomatik doğrulanır.</p><p>Görevler ısınmadan ticket&#x27;a doğru zorlaşır. Rozetler zorluğu gösterir.</p><p><button type="button" class="btn" data-openterm>&gt;_ Terminali aç (isteğe bağlı)</button></p>
+<h3 class="kind k-warmup">Isınma <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Mutlak yolla <code>cat /etc/hostname</code> çalıştır.</p><details><summary>İpucu</summary><p>Hangi dizindeysen çalışır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/hostname">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>cd /etc</code> ile <code>/etc</code> dizinine geç.</p><details><summary>İpucu</summary><p>Mutlak yol <code>/</code> ile başlar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">/etc</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd /etc">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t16" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Gizli dosyaları da görmek için <code>ls -la ~</code> çalıştır.</p><details><summary>İpucu</summary><p><code>-a</code> gizli dosyaları, <code>-l</code> ayrıntıyı getirir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-la</span> <span class="tp">~</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -la ~">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Adım adım lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t03" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d1">Kolay</span></p><p><code>/etc</code> içindeyken göreli yolla <code>cat hostname</code> yaz.</p><details><summary>İpucu</summary><p>Dosya bulunduğun dizinde.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> hostname</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat hostname">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d1">Kolay</span></p><p><code>/home/student</code> içindeyken <code>cd ..</code> ile bir üst dizine çık.</p><details><summary>İpucu</summary><p><code>pwd</code> ile <code>/home</code> yazdığını doğrula.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> ..</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ..">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p>Şimdi göreli yolla <code>cd student/Documents</code> yaz.</p><details><summary>İpucu</summary><p>Başında <code>/</code> yok.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">student/Documents</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd student/Documents">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d1">Kolay</span></p><p><code>ls -l /etc/hostname</code> çalıştır. İlk karakter ne?</p><details><summary>İpucu</summary><p><code>-</code> normal dosya demektir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l /etc/hostname">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>ln -s ~/Documents/report.txt ~/link.txt</code> ile <code>~/link.txt</code> sembolik linkini oluştur.</p><details><summary>İpucu</summary><p>Önce HEDEF, sonra LINK adı.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/Documents/report.txt</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~
+ln -s ~/Documents/report.txt ~/link.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>ls -l ~/link.txt</code> ile linki incele. Okun (<code>-&gt;</code>) ucunda ne var?</p><details><summary>İpucu</summary><p>Satır <code>l</code> ile başlar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l ~/link.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Tahmin et <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d1">Kolay</span></p><p><code>cd ~</code> ile eve dön ve <code>cat hostname</code> komutunu tekrar çalıştır. Ne olur, neden?</p><details><summary>İpucu</summary><p>Home içinde hostname dosyası yok; hata beklenir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">cat</span> hostname</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~
+cat hostname">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t08" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p><code>ls -l /dev/null</code> çalıştır ve tahmin et: ilk harf ne olacak?</p><details><summary>İpucu</summary><p>Karakter aygıtı için <code>c</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/dev/null</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l /dev/null">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t11" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p><code>cat ~/link.txt</code> çıktısı ne olur? Tahmin et, sonra çalıştır.</p><details><summary>İpucu</summary><p>Link hedefi okur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat ~/link.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Hata ayıkla <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Debug: <code>~/projects/app</code> içindeyken <code>config.txt</code> bulunamıyor; dosya bir üst dizinde. Göreli yol <code>../</code> kullanarak <code>cat</code> ile oku.</p><details><summary>İpucu</summary><p>Önce <code>cd ~/projects/app</code>, sonra <code>cat ../config.txt</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/projects/app</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">../config.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/projects/app
+cat ../config.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini proje <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d2">Orta</span></p><p>Mini proje: <code>~/lab/docs</code> ve <code>~/lab/bin</code> dizinlerini kur, <code>echo hello linux &gt; ~/lab/docs/readme.txt</code> ile dosya yaz, <code>~/lab/bin/readme-link</code> adında ona sembolik link ver.</p><details><summary>İpucu</summary><p><code>mkdir -p</code>, <code>echo ... &gt;</code> ve <code>ln -s HEDEF LINK</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/lab/docs</span> <span class="tp">~/lab/bin</span></span>
+<span class="ln"><span class="tk">echo</span> hello linux <span class="to">&gt;</span> <span class="tk">~/lab/docs/readme.txt</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/lab/docs/readme.txt</span> <span class="tp">~/lab/bin/readme-link</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/lab/docs ~/lab/bin
+echo hello linux &gt; ~/lab/docs/readme.txt
+ln -s ~/lab/docs/readme.txt ~/lab/bin/readme-link">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Meydan okuma <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t14" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Zor görev: <code>~/lab/bin</code> içine geç ve <strong>göreli hedefle</strong> (<code>../docs/readme.txt</code>) <code>rel-link</code> linkini oluştur; sonra <code>cat rel-link</code> ile oku.</p><details><summary>İpucu</summary><p>Göreli hedef linkin bulunduğu dizinden hesaplanır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab/bin</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">../docs/readme.txt</span> rel-link</span>
+<span class="ln"><span class="tk">cat</span> rel-link</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab/bin
+ln -s ../docs/readme.txt rel-link
+cat rel-link">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>Ticket: Uygulama yapılandırmayı <code>~/app/current/config.txt</code> yolunda arıyor, gerçek dosya <code>~/releases/v2/config.txt</code> içinde. <code>~/app/current</code> sembolik linkini <code>~/releases/v2</code> dizinine kur ve <code>cat ~/app/current/config.txt</code> ile doğrula.</p><details><summary>İpucu</summary><p><code>mkdir -p ~/app</code>, sonra <code>ln -s ~/releases/v2 ~/app/current</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/app</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/releases/v2</span> <span class="tp">~/app/current</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">~/app/current/config.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/app
+ln -s ~/releases/v2 ~/app/current
+cat ~/app/current/config.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Laboratuvarı sıfırla</button></p></section>
+<section id="quiz"><h2>Öz test</h2>
+<div class="q card" data-q="q1"><p><strong>Hangisi mutlak yoldur?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Documents/report.txt</button><button type="button" class="opt" data-i="1">/home/student/Documents/report.txt</button><button type="button" class="opt" data-i="2">../report.txt</button><button type="button" class="opt" data-i="3">~report.txt</button></div><p class="explain" hidden>Mutlak yol kök dizinden <code>/</code> ile başlar ve her dizinden aynı dosyayı gösterir.</p></div>
+<div class="q card" data-q="q2"><p><strong><code>ls -l</code> çıktısında satır <code>l</code> ile başlıyorsa bu nedir?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Normal dosya</button><button type="button" class="opt" data-i="1">Dizin</button><button type="button" class="opt" data-i="2">Aygıt</button><button type="button" class="opt" data-i="3">Sembolik link</button></div><p class="explain" hidden><code>l</code> symbolic link demektir; <code>-</code> normal dosya, <code>d</code> dizindir.</p></div>
+<div class="q card" data-q="q3"><p><strong><code>/etc</code> içindeyken <code>cd ..</code> sonrası neredesin?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">/</button><button type="button" class="opt" data-i="1">/home</button><button type="button" class="opt" data-i="2">/etc/..</button><button type="button" class="opt" data-i="3">~</button></div><p class="explain" hidden><code>..</code> bir üst dizindir; <code>/etc</code> içinden <code>/</code> dizinine çıkarsın.</p></div>
+<div class="q card" data-q="q4"><p><strong>Sembolik linkin hedefi silinirse ne olur?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Link de silinir</button><button type="button" class="opt" data-i="1">Link hedefi kopyalar</button><button type="button" class="opt" data-i="2">Link kırık kalır</button><button type="button" class="opt" data-i="3">Hedef geri gelir</button></div><p class="explain" hidden>Link yalnızca bir yol tutar; hedef kaybolunca link var ama kırıktır.</p></div>
+</section>
+<section id="summary" class="card"><h2>Özet</h2><ul><li>Mutlak yol <code>/</code> ile başlar, göreli yol bulunduğun dizinden hesaplanır.</li><li><code>.</code> mevcut, <code>..</code> üst dizin, <code>~</code> home dizinidir.</li><li><code>ls -l</code> çıktısının ilk harfi türü verir: <code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>.</li><li><code>ln -s HEDEF LINK</code> sembolik link kurar; hedef kaybolursa link kırılır.</li></ul></section>
+<section id="glossary"><h2>Terimler</h2><dl class="gl"><dt>mutlak yol</dt><dd>Kök dizinden (<code>/</code>) başlayan tam adres.</dd><dt>göreli yol</dt><dd>Bulunduğun dizinden hesaplanan adres.</dd><dt>sembolik link</dt><dd>Başka bir yolu gösteren kısayol dosyası.</dd><dt>aygıt dosyası</dt><dd><code>/dev</code> altında donanımı temsil eden özel dosya.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-2.1.html">← Önceki</a><a class="btn primary" href="modul-2.3.html">Sonraki →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (isteğe bağlı)</strong><button type="button" class="ibtn" id="termclose" aria-label="Terminali kapat">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "tr", "module": "2.2", "setup": {"dirs": ["/home/student/projects/app"], "files": {"/home/student/Documents/report.txt": "quarterly report\n", "/home/student/projects/config.txt": "port=8080\n", "/home/student/releases/v2/config.txt": "version=2\n"}}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^cat /etc/hostname$", "ok": true}}, {"id": "t02", "kind": "warmup", "check": {"cwd": "/etc"}}, {"id": "t03", "kind": "guided", "check": {"cmd": "^cat hostname$", "ok": true}}, {"id": "t04", "kind": "predict", "check": {"cmd": "^cat hostname$", "ok": false}}, {"id": "t05", "kind": "guided", "check": {"cwd": "/home"}}, {"id": "t06", "kind": "guided", "check": {"cwd": "~/Documents"}}, {"id": "t07", "kind": "guided", "check": [{"cmd": "^ls -l /etc/hostname$", "ok": true}, {"out": "-rw"}]}, {"id": "t08", "kind": "predict", "check": [{"cmd": "^ls -l /dev/null$", "ok": true}, {"out": "crw"}]}, {"id": "t09", "kind": "guided", "check": {"exists": "~/link.txt", "type": "l", "link": true}}, {"id": "t10", "kind": "guided", "check": [{"cmd": "^ls -l(a)? ~/link\\.txt$", "ok": true}, {"out": "->"}]}, {"id": "t11", "kind": "predict", "check": [{"cmd": "^cat ~/link\\.txt$", "ok": true}, {"out": "quarterly report"}]}, {"id": "t12", "kind": "debug", "check": {"cmd": "^cat (\\.\\./config\\.txt|~/projects/config\\.txt|/home/student/projects/config\\.txt)$", "ok": true}}, {"id": "t13", "kind": "mini", "check": [{"exists": "~/lab/docs", "type": "d"}, {"exists": "~/lab/bin", "type": "d"}, {"contains": ["~/lab/docs/readme.txt", "hello linux"]}, {"exists": "~/lab/bin/readme-link", "type": "l", "link": true}]}, {"id": "t14", "kind": "challenge", "check": [{"exists": "~/lab/bin/rel-link", "type": "l", "link": true}, {"cmd": "^cat rel-link$", "ok": true}, {"out": "hello linux", "of": "cat rel-link"}]}, {"id": "t15", "kind": "ticket", "check": [{"exists": "~/app/current", "type": "l", "link": true}, {"cmd": "^cat ~/app/current/config\\.txt$", "ok": true}, {"out": "version=2", "of": "cat ~/app/current/config.txt"}]}, {"id": "t16", "kind": "warmup", "check": {"cmd": "^ls -(la|al|a)\\s+~$", "ok": true}}], "vm": [{"id": "v01", "expect": "/etc"}, {"id": "v02", "expect": "crw"}, {"id": "v03", "expect": "->"}, {"id": "v04", "expect": "regular|directory|symbolic|character|block"}], "quiz": {"q1": 1, "q2": 3, "q3": 0, "q4": 2}, "ui": {"correct": "Doğru!", "wrong": "Yanlış, tekrar dene.", "taskDone": "Görev tamamlandı", "moduleDone": "Modül tamamlandı! 🎉", "tasksDone": "tamamlandı", "welcome": "Sanal Linux terminali — komutlar yalnızca bu sayfadaki sanal dosya sisteminde çalışır. 'help' yazarak komutları gör, Tab ile tamamla, ↑/↓ ile geçmişte gez.", "sandboxNote": "Güvenli kum havuzu: gerçek sistemine dokunulmaz.", "resetConfirm": "Bu modülün sanal dosya sistemi ve komut geçmişi sıfırlanacak. İlerlemen (tamamlanan görevler) korunur. Devam?", "openTerminal": "Terminali aç (isteğe bağlı)", "closeTerminal": "Terminali kapat", "continue": "Devam et", "startPath": "Öğrenmeye başla", "noResult": "Eşleşen modül veya komut yok.", "soon": "Yakında", "overall": "Genel ilerleme", "copied": "Kopyalandı ✓", "pasteOk": "Çıktın beklenen kalıpla eşleşti ✓", "pasteBad": "Henüz eşleşmedi. \"Çıktım farklı çıktı\" ipuçlarına bak ve çıktının tamamını yapıştır.", "iDidIt": "Yaptım", "undo": "Geri al", "groupDone": "tamam", "vmDone": "VM görevleri"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

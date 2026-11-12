@@ -1,0 +1,307 @@
+{
+ "id": "3.7",
+ "level": 3,
+ "setup": {
+  "dirs": [
+   "/home/student/lab",
+   "/home/student/lab/dir_a",
+   "/home/student/lab/dir_b"
+  ],
+  "files": {
+   "/home/student/lab/v1.txt": "port=80\nhost=linux-lab\nmode=prod\n",
+   "/home/student/lab/v2.txt": "port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n",
+   "/home/student/lab/list_a.txt": "alice\nbob\ncarol\ndave\n",
+   "/home/student/lab/list_b.txt": "erin\nbob\ncarol\n",
+   "/home/student/lab/win.txt": "port=80\r\nhost=linux-lab\r\nmode=prod\r\n",
+   "/home/student/lab/dir_a/app.conf": "level=1\n",
+   "/home/student/lab/dir_a/readme.txt": "hello\n",
+   "/home/student/lab/dir_b/app.conf": "level=2\n",
+   "/home/student/lab/dir_b/extra.txt": "extra\n"
+  },
+  "cwd": "/home/student/lab"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^diff v1\\.txt v2\\.txt$"
+   },
+   "solution": [
+    "diff v1.txt v2.txt"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^diff\\s+(-\\S+\\s+)*-u\\s+v1\\.txt v2\\.txt$"
+   },
+   "solution": [
+    "diff -u v1.txt v2.txt"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^cmp\\s+v1\\.txt v2\\.txt$"
+   },
+   "solution": [
+    "cmp v1.txt v2.txt"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 1,
+   "check": [
+    {
+     "exists": "/home/student/lab/v1.bak",
+     "type": "f"
+    },
+    {
+     "cmd": "^diff\\s+-q\\s+v1\\.txt v1\\.bak$"
+    }
+   ],
+   "solution": [
+    "cp v1.txt v1.bak",
+    "diff -q v1.txt v1.bak"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^diff\\s+-\\w*r\\w*\\s+dir_a/? dir_b/?$"
+   },
+   "solution": [
+    "diff -rq dir_a dir_b"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "equals": [
+     "/home/student/lab/sorted_b.txt",
+     "bob\ncarol\nerin\n"
+    ]
+   },
+   "solution": [
+    "sort list_b.txt > sorted_b.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^comm\\s+(-12|-21|-1\\s+-2|-2\\s+-1)\\s+list_a\\.txt sorted_b\\.txt$"
+   },
+   "solution": [
+    "comm -12 list_a.txt sorted_b.txt"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "bob\\s+carol",
+    "of": "uniq -d"
+   },
+   "solution": [
+    "sort list_a.txt list_b.txt | uniq -d"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "alice\\s+dave\\s+erin",
+    "of": "uniq -u"
+   },
+   "solution": [
+    "sort list_a.txt list_b.txt | uniq -u"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "1",
+    "of": "grep -q debug v1\\.txt.*echo \\$\\?"
+   },
+   "solution": [
+    "grep -q debug v1.txt ; echo $?"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "/home/student/lab/fixed.txt",
+      "^port=80\\nhost=linux-lab\\nmode=prod\\n$"
+     ]
+    },
+    {
+     "contains": [
+      "/home/student/lab/fixed.txt",
+      "^[^\\r]+$"
+     ]
+    }
+   ],
+   "solution": [
+    "tr -d '\\r' < win.txt > fixed.txt"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "/home/student/lab/work.txt",
+     "type": "f"
+    },
+    {
+     "seq": [
+      "^cp v1\\.txt work\\.txt$",
+      "^diff\\s+-u\\s+v1\\.txt v2\\.txt\\s*>\\s*change\\.patch$",
+      "^patch\\s+(--dry-run\\s+)?work\\.txt\\s*<\\s*change\\.patch$"
+     ]
+    }
+   ],
+   "solution": [
+    "cp v1.txt work.txt",
+    "diff -u v1.txt v2.txt > change.patch",
+    "patch work.txt < change.patch"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {
+    "equals": [
+     "/home/student/lab/only_a.txt",
+     "alice\ndave\n"
+    ]
+   },
+   "solution": [
+    "sort list_a.txt list_b.txt list_b.txt | uniq -u > only_a.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "/home/student/lab/same.txt",
+     "type": "f"
+    },
+    {
+     "seq": [
+      "^cp v1\\.txt same\\.txt$",
+      "^cmp\\s+-s\\s+v1\\.txt same\\.txt",
+      "echo \\$\\?$"
+     ]
+    }
+   ],
+   "solution": [
+    "cp v1.txt same.txt",
+    "cmp -s v1.txt same.txt",
+    "echo $?"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "predict",
+   "diff": 3,
+   "check": {
+    "out": "port\\s+host\\s+mode",
+    "of": "^cut"
+   },
+   "solution": [
+    "cut -d= -f1 v1.txt"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "exists": "/home/student/lab/v2.bak",
+     "type": "f"
+    },
+    {
+     "cmd": "^diff\\s+-\\w*u\\w*\\s+v1\\.txt v2\\.txt\\s*>\\s*review\\.patch$"
+    },
+    {
+     "equals": [
+      "/home/student/lab/report.txt",
+      "review done\n"
+     ]
+    }
+   ],
+   "solution": [
+    "cp v2.txt v2.bak",
+    "diff -u v1.txt v2.txt > review.patch",
+    "echo review done > report.txt"
+   ]
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "@@"
+  },
+  {
+   "id": "v02",
+   "expect": "exit=1"
+  },
+  {
+   "id": "v03",
+   "expect": "bob"
+  },
+  {
+   "id": "v04",
+   "expect": "patching file|Hunk|hunk"
+  },
+  {
+   "id": "v05",
+   "expect": "OK"
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 0
+  },
+  {
+   "id": "q3",
+   "answer": 2
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "1.2",
+  "level": 1,
+  "setup": {
+    "dirs": [],
+    "files": {
+      "/home/student/kernel.txt": "4.18.0-305.el8.x86_64\n"
+    }
+  },
+  "tasks": [
+    {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^whoami$", "ok": true}, "solution": ["whoami"]},
+    {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^hostname$", "ok": true}, "solution": ["hostname"]},
+    {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^uname -r$", "ok": true}, "solution": ["uname -r"]},
+    {"id": "t04", "kind": "guided", "diff": 1, "check": {"cmd": "^id$", "ok": true}, "solution": ["id"]},
+    {"id": "t05", "kind": "guided", "diff": 1, "check": {"cmd": "^groups$", "ok": true}, "solution": ["groups"]},
+    {"id": "t06", "kind": "guided", "diff": 1, "check": {"cmd": "^cat /etc/os-release$", "ok": true}, "solution": ["cat /etc/os-release"]},
+    {"id": "t07", "kind": "guided", "diff": 1, "check": {"cmd": "^uptime$", "ok": true}, "solution": ["uptime"]},
+    {"id": "t08", "kind": "guided", "diff": 1, "check": {"cmd": "^df -h$", "ok": true}, "solution": ["df -h"]},
+    {"id": "t09", "kind": "guided", "diff": 1, "check": {"cmd": "^free -h$", "ok": true}, "solution": ["free -h"]},
+    {"id": "t10", "kind": "guided", "diff": 2, "check": {"out": "USER=student", "of": "^env \\| grep USER$"}, "solution": ["env | grep USER"]},
+    {"id": "t11", "kind": "predict", "diff": 2, "check": {"out": "devs", "of": "^groups$"}, "solution": ["groups"]},
+    {"id": "t12", "kind": "predict", "diff": 2, "check": {"out": "student@linux-lab", "of": "^echo \"?\\$USER@\\$\\(hostname\\)\"?$"}, "solution": ["echo \"$USER@$(hostname)\""]},
+    {"id": "t13", "kind": "debug", "diff": 2, "check": [{"contains": ["~/kernel.txt", "5\\.14\\.0"]}, {"cmd": "uname", "ok": true}], "solution": ["uname -r > ~/kernel.txt"]},
+    {"id": "t14", "kind": "mini", "diff": 2, "check": [{"contains": ["~/me.txt", "student"]}, {"contains": ["~/me.txt", "uid=1000"]}, {"contains": ["~/me.txt", "linux-lab"]}, {"linesMin": ["~/me.txt", 3]}], "solution": ["whoami > ~/me.txt", "id >> ~/me.txt", "hostname >> ~/me.txt"]},
+    {"id": "t15", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/distro.txt", "Red Hat Enterprise Linux 9\\.4"]}, {"cmd": "^grep", "ok": true}], "solution": ["grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt"]},
+    {"id": "t16", "kind": "challenge", "diff": 3, "check": [{"equals": ["~/major.txt", "5\n"]}, {"cmd": "^uname -r", "ok": true}], "solution": ["uname -r | cut -d. -f1 > ~/major.txt"]},
+    {"id": "t17", "kind": "ticket", "diff": 3, "check": [{"linesMin": ["~/sysinfo.txt", 4]}, {"contains": ["~/sysinfo.txt", "linux-lab"]}, {"contains": ["~/sysinfo.txt", "5\\.14\\.0"]}, {"contains": ["~/sysinfo.txt", "student"]}, {"contains": ["~/sysinfo.txt", "Filesystem"]}], "solution": ["hostname > ~/sysinfo.txt", "uname -r >> ~/sysinfo.txt", "whoami >> ~/sysinfo.txt", "df -h >> ~/sysinfo.txt"]},
+    {"id": "t18", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/admin_check.txt", "wheel"]}, {"cmd": "^id", "ok": true}], "solution": ["id | grep wheel > ~/admin_check.txt"]}
+  ],
+  "quiz": [
+    {"id": "q1", "answer": 1},
+    {"id": "q2", "answer": 2},
+    {"id": "q3", "answer": 0},
+    {"id": "q4", "answer": 3}
+  ],
+  "vm": [
+    {"id": "v01", "expect": "uid=\\d+"},
+    {"id": "v02", "expect": "Linux"},
+    {"id": "v03", "expect": "(PRETTY_NAME|NAME=|VERSION)"},
+    {"id": "v04", "expect": "(load average|up )"},
+    {"id": "v05", "expect": "(?=[\\s\\S]*Filesystem)(?=[\\s\\S]*Mem)"},
+    {"id": "v06", "expect": "USER=\\w+"},
+    {"id": "v07", "expect": "root"}
+  ]
+}

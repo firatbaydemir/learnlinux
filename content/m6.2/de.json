@@ -1,0 +1,177 @@
+{
+ "title": "SELinux — Labels, Booleans, AVC",
+ "lead": "SELinux gibt jeder Datei und jedem Prozess ein Label. Läuft ein Dienst nicht, ist oft ein falsches Label schuld; finde die Ursache, statt SELinux abzuschalten.",
+ "objectives": [
+  "Du liest die SELinux-Modi (enforcing, permissive, disabled) und erklärst, warum dauerhaftes Abschalten schlecht ist.",
+  "Du liest Dateilabels mit `ls -Z` und korrigierst sie dauerhaft mit `chcon`, `semanage fcontext` und `restorecon`.",
+  "Du verwaltest Booleans mit `getsebool` und `setsebool -P` und löst AVC-Denials mit `ausearch` und `sealert`.",
+  "Du liest das Debian/Ubuntu-Pendant AppArmor mit `aa-status` und unterscheidest complain von enforce."
+ ],
+ "sections": [
+  {
+   "id": "modes",
+   "title": "Was SELinux ist, Modi",
+   "body": [
+    "Klassische Rechte (rwx) schauen auf den Besitzer. **SELinux** ist eine zusätzliche Schicht: Jeder Prozess und jede Datei hat ein **Label (Context)**, und die Policy legt fest, welches Label was mit welchem tun darf. Ein Label sieht so aus: `user:role:type:level`; im Alltag zählt vor allem das Feld **type** (z. B. `httpd_t`, `httpd_sys_content_t`).",
+    "Es gibt drei Modi: **enforcing** (Verstöße werden blockiert und geloggt), **permissive** (nur geloggt, nicht blockiert; zum Debuggen) und **disabled** (aus). RHEL/Rocky/Alma starten standardmäßig mit enforcing. Debian/Ubuntu nutzen stattdessen **AppArmor**."
+   ],
+   "commands": [
+    {"cmd": "getenforce", "what": "Gibt den laufenden SELinux-Modus aus.", "where": "Erste Prüfung, wenn ein Dienst spinnt.", "why": "Grenzt ein, ob SELinux beteiligt ist.", "example": "getenforce", "nosim": true},
+    {"cmd": "sestatus", "what": "Zeigt Modus, Policy-Typ und den Modus in der Konfigurationsdatei.", "where": "Für eine Gesamtübersicht.", "why": "Du siehst den Unterschied zwischen laufendem und dauerhaftem Modus.", "example": "sestatus", "nosim": true},
+    {"cmd": "setenforce 0", "what": "Schaltet vorübergehend auf permissive (nach Neustart zurückgesetzt).", "where": "Zum kurzen Test, ob SELinux die Ursache ist.", "why": "Verschwindet das Problem in permissive, ist SELinux schuld; mit `setenforce 1` wieder einschalten.", "example": "setenforce 0", "nosim": true},
+    {"cmd": "/etc/selinux/config", "what": "Datei mit dem dauerhaften Modus (`SELINUX=enforcing`).", "where": "Wenn der Modus über Neustarts hinweg gelten soll.", "why": "Bei `disabled` veralten die Labels, und das Wiedereinschalten braucht ein langes Relabel.", "example": "cat /etc/selinux/config", "nosim": true}
+   ],
+   "tip": "Reihenfolge bei der Fehlersuche: `getenforce`, Test mit `setenforce 0`, Log lesen, beheben, dann `setenforce 1`.",
+   "warn": "Mach `setenforce 0` und `SELINUX=disabled` nicht zur Gewohnheit. Nutze permissive nur für den kurzen Test und für die dauerhafte Lösung das richtige Label oder Boolean."
+  },
+  {
+   "id": "labels",
+   "title": "Labels: ls -Z, chcon, semanage, restorecon",
+   "body": [
+    "`ls -Z` zeigt das Label einer Datei. Der Webserver (`httpd_t`) darf nur Dateien mit Web-Typ wie `httpd_sys_content_t` lesen. Verschiebst du eine Datei per `mv` aus dem Home-Verzeichnis, behält sie das alte Label `user_home_t` und der Zugriff wird verweigert.",
+    "`chcon` ändert das Label sofort, aber **nicht dauerhaft**: `restorecon` oder ein Relabel löscht es. Der dauerhafte Weg hat zwei Schritte: erst die Regel mit `semanage fcontext` in die Policy schreiben, dann mit `restorecon` anwenden."
+   ],
+   "commands": [
+    {"cmd": "ls -Z", "what": "Listet die SELinux-Labels von Dateien auf.", "where": "Wenn du nach einem Denial den Dateityp prüfst.", "why": "Du vergleichst erwarteten und tatsächlichen Typ.", "example": "ls -Z /var/www/html", "nosim": true},
+    {"cmd": "chcon -t", "what": "Ändert den Typ einer Datei vorübergehend.", "where": "Für schnelle Experimente.", "why": "Beweist, dass das Label das Problem löst; ist aber nicht dauerhaft.", "example": "chcon -t httpd_sys_content_t /srv/web/index.html", "nosim": true},
+    {"cmd": "semanage fcontext -a", "what": "Fügt eine dauerhafte Label-Regel für ein Pfadmuster hinzu.", "where": "Bei nicht standardmäßigem Verzeichnis (z. B. /srv/web).", "why": "Die Regel bleibt in der Policy und überlebt ein Relabel.", "example": "semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"", "nosim": true},
+    {"cmd": "restorecon -Rv", "what": "Stellt Labels laut Policy wieder her (-R rekursiv, -v ausführlich).", "where": "Nach `semanage fcontext` oder nach dem Verschieben von Dateien.", "why": "Wendet die Regel auf die echten Dateien an.", "example": "restorecon -Rv /srv/web", "nosim": true}
+   ],
+   "tip": "Eine mit `cp` kopierte Datei übernimmt das Label des Zielverzeichnisses; eine mit `mv` verschobene behält ihr altes Label. Führe nach dem Verschieben `restorecon` aus.",
+   "warn": "Führe `restorecon -R /` oder andere riesige Pfade nicht aus; das dauert lange und kann überraschen. Schau erst mit `-n` (Probelauf)."
+  },
+  {
+   "id": "booleans",
+   "title": "Booleans",
+   "body": [
+    "Schalter, die häufige Verhaltensweisen ohne Policy-Umbau ein- und ausschalten, heißen **Booleans**: `httpd_can_network_connect` erlaubt dem Webserver Netzwerkverbindungen, `httpd_enable_homedirs` öffnet Home-Verzeichnisse.",
+    "`setsebool` allein ändert den **laufenden** Zustand und geht beim Neustart verloren. Mit `-P` wird es dauerhaft. Schalte nur ein, was nötig ist; jedes Boolean ist ein Loch in der Mauer."
+   ],
+   "commands": [
+    {"cmd": "getsebool -a", "what": "Listet alle Booleans und ihren Zustand auf.", "where": "Wenn du den passenden Schalter suchst (`| grep httpd`).", "why": "Das richtige Boolean erspart dir Label-Gefummel.", "example": "getsebool -a | grep httpd", "nosim": true},
+    {"cmd": "getsebool", "what": "Zeigt den Zustand eines Booleans.", "where": "Zum Prüfen vor und nach einer Änderung.", "why": "Du siehst, dass die Änderung wirkt.", "example": "getsebool httpd_can_network_connect", "nosim": true},
+    {"cmd": "setsebool -P", "what": "Schaltet ein Boolean dauerhaft ein oder aus.", "where": "Wenn ein Dienst ins Netz oder auf Home-Verzeichnisse zugreifen muss.", "why": "Ohne `-P` geht die Einstellung beim Neustart verloren.", "example": "setsebool -P httpd_can_network_connect on", "nosim": true},
+    {"cmd": "semanage boolean -l", "what": "Listet Booleans mit Beschreibung und dauerhaftem/laufendem Zustand.", "where": "Um zu lernen, was ein Boolean tut.", "why": "Die Beschreibung bewahrt dich vor dem falschen Schalter.", "example": "semanage boolean -l | grep httpd_can_network", "nosim": true}
+   ],
+   "tip": "Ein neuer Port braucht evtl. mehr als ein Boolean: Füge ihn mit `semanage port -a -t http_port_t -p tcp 8888` dem Diensttyp hinzu.",
+   "warn": "Wähle das engste Boolean; breite Schalter wie `httpd_unified` geben sehr viel frei."
+  },
+  {
+   "id": "avc",
+   "title": "AVC-Denials: ausearch, sealert, audit.log",
+   "body": [
+    "Blockiert SELinux etwas, landet ein **AVC**-Eintrag (Access Vector Cache) in `/var/log/audit/audit.log`. Er enthält das Quell-Label (`scontext`), das Ziel-Label (`tcontext`), die Klasse (`tclass`) und die blockierte Berechtigung (`{ read }`). Bei `permissive=1` wurde der Zugriff nicht blockiert, nur geloggt.",
+    "Leserichtung: wer (`comm`, `scontext`), worauf (`name`, `tcontext`), was wollte er tun (`{ ... }`). Dann die Lösung: falsches Label heißt `restorecon`, Verhaltenserlaubnis heißt Boolean, neuer Port heißt `semanage port`. Ein Modul mit `audit2allow` ist der letzte Ausweg."
+   ],
+   "commands": [
+    {"cmd": "ausearch -m AVC -ts recent", "what": "Sucht im Audit-Log nach aktuellen AVC-Einträgen.", "where": "Direkt nach einem Denial.", "why": "Findet die passenden Einträge, ohne das Rohlog zu durchwühlen.", "example": "ausearch -m AVC -ts recent", "nosim": true},
+    {"cmd": "sealert -a", "what": "Analysiert das Log und schlägt eine Lösung vor (Paket setroubleshoot).", "where": "Wenn du eine Ursache-und-Lösung-Zusammenfassung willst.", "why": "Schlägt oft den passenden `restorecon`- oder `setsebool`-Befehl vor.", "example": "sealert -a /var/log/audit/audit.log", "nosim": true},
+    {"cmd": "grep AVC", "what": "Filtert AVC-Zeilen im Audit-Log.", "where": "Ohne ausearch oder bei einer Log-Kopie.", "why": "Die einfachste Methode, die überall funktioniert.", "example": "grep AVC lab/audit.log"},
+    {"cmd": "grep -c denied", "what": "Zählt die abgelehnten Einträge.", "where": "Um die Größe des Problems zu messen.", "why": "Zeigt, ob es ein wiederholtes Denial oder viele Quellen sind.", "example": "grep -c denied lab/audit.log"}
+   ],
+   "tip": "Ohne auditd stehen Einträge evtl. in `journalctl -t setroubleshoot` oder `dmesg`.",
+   "warn": "Lade nicht für jedes AVC ein Modul mit `audit2allow -M`. Probiere zuerst Label und Boolean; ein Modul kann unnötig weite Rechte geben."
+  },
+  {
+   "id": "apparmor",
+   "title": "Debian/Ubuntu: AppArmor",
+   "body": [
+    "Ubuntu und Debian nutzen **AppArmor** statt SELinux. Statt Labels hat jedes Programm ein **pfadbasiertes Profil**. Ein Profil kann im Modus **enforce** (Regeln gelten) oder **complain** (nur loggen, wie permissive bei SELinux) sein.",
+    "Die Logik ist gleich: Status lesen, ein Profil bei Bedarf auf complain setzen, im Log sehen, was blockiert wurde, Profil anpassen und wieder enforce setzen. Denials erscheinen in `/var/log/syslog` oder `journalctl` als `apparmor=\"DENIED\"`."
+   ],
+   "commands": [
+    {"cmd": "aa-status", "what": "Listet geladene Profile und ihre Modi (enforce/complain).", "where": "Für die Statusprüfung.", "why": "Du siehst, welche Programme eingeschränkt sind.", "example": "sudo aa-status", "nosim": true},
+    {"cmd": "aa-complain", "what": "Setzt ein Profil in den complain-Modus.", "where": "Wenn ein Profil etwas blockiert, für einen kurzen Test.", "why": "Loggt ohne zu blockieren; du siehst, was nötig ist.", "example": "sudo aa-complain /usr/sbin/nginx", "nosim": true},
+    {"cmd": "aa-enforce", "what": "Setzt ein Profil zurück in den enforce-Modus.", "where": "Nach dem Test.", "why": "Der Schutz ist wieder aktiv.", "example": "sudo aa-enforce /usr/sbin/nginx", "nosim": true},
+    {"cmd": "grep DENIED", "what": "Filtert AppArmor-Denial-Zeilen im Log.", "where": "Beim Untersuchen eines Denials.", "why": "Zeigt, welcher Pfad blockiert wurde.", "example": "sudo grep DENIED /var/log/syslog", "nosim": true}
+   ],
+   "tip": "Rocky und Ubuntu im Vergleich: `getenforce` entspricht `aa-status`, `setenforce 0` entspricht `aa-complain`, `setenforce 1` entspricht `aa-enforce`.",
+   "danger": "Ein Profil mit `aa-disable` abzuschalten oder SELinux dauerhaft auf disabled zu setzen, entfernt eine Sicherheitsschicht. Finde die Ursache stattdessen mit complain/permissive."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Lies den dauerhaften SELinux-Modus mit `cat ~/lab/selinux_config`.", "hint": "Schau auf die Zeile `SELINUX=`."},
+  "t02": {"text": "Zähle die abgelehnten Einträge im Audit-Log mit `grep -c denied ~/lab/audit.log`.", "hint": "-c gibt die Zeilenzahl aus."},
+  "t03": {"text": "Liste die httpd-Booleans mit `grep httpd ~/lab/booleans.txt` auf.", "hint": "Die Datei hat die Form `name --> zustand`."},
+  "t04": {"text": "Wechsle mit `cd ~/lab` ins Lab-Verzeichnis.", "hint": "Dann brauchst du in den nächsten Aufgaben keinen Pfad."},
+  "t05": {"text": "Das Label in `context.txt` hat die Form `user:role:type:level`. Gib das Feld **type** mit `cut -d: -f3 context.txt` aus.", "hint": "Trenner ist der Doppelpunkt, type ist Feld drei. Sei zuerst im Lab-Verzeichnis."},
+  "t06": {"text": "Schreibe nur die httpd-Einträge mit `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt` nach `httpd_denials.txt`.", "hint": "Einfache Anführungszeichen um ein Muster mit doppelten; > leitet die Ausgabe in eine Datei um."},
+  "t07": {"text": "Finde mit `grep complain aa_status.txt` die AppArmor-Zeile im complain-Modus.", "hint": "Erwartet wird eine Zeile mit 'complain mode'."},
+  "t08": {"text": "Vorhersage: Wie viele Einträge in `audit.log` haben `permissive=1` (nicht blockiert)? Prüfe dann mit `grep -c permissive=1 audit.log`.", "hint": "Schau auf den permissive-Wert am Zeilenende."},
+  "t09": {"text": "Vorhersage: Wie viele Booleans in `booleans.txt` sind aus (off)? Prüfe dann mit `grep -c ' off$' booleans.txt`.", "hint": "$ markiert das Zeilenende."},
+  "t10": {"text": "Debuggen: `broken_config` enthält `SELINUX=disabled`. Schreibe die Datei so neu, dass `SELINUX=enforcing` und `SELINUXTYPE=targeted` drinstehen.", "hint": "`printf 'SELINUX=enforcing\\nSELINUXTYPE=targeted\\n' > broken_config`"},
+  "t11": {"text": "Debuggen: `runbook.sh` nutzt `setenforce 0` und macht das Boolean nicht dauerhaft. Schreibe es mit der einen Zeile `setsebool -P httpd_can_network_connect on` neu.", "hint": "`echo '...' > runbook.sh` überschreibt den bisherigen Inhalt."},
+  "t12": {"text": "Mini-Projekt: Schreibe ein Skript `fix_web.sh`. Zeile 1: `semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"`, Zeile 2: `restorecon -Rv /srv/web`. Mach es dann mit `chmod 755` ausführbar.", "hint": "Nimm `>` für die erste und `>>` für die zweite Zeile."},
+  "t13": {"text": "Mini-Projekt: Führe `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` aus, um in `top_comm.txt` zu schreiben, wie oft jedes Programm abgelehnt wurde.", "hint": "Feld 10 ist `comm=...`; `uniq -c` braucht vorher `sort`."},
+  "t14": {"text": "Challenge: Schreibe die Zeilen aus `webfiles.txt`, die nicht den Web-Typ (`httpd_sys_content_t`) haben, nach `wrong_labels.txt`.", "hint": "`grep -v` wählt nicht passende Zeilen."},
+  "t15": {"text": "Challenge: Schreibe die Booleans aus `booleans.txt`, die an (on) sind, nach `booleans_on.txt`.", "hint": "Zeilen enden mit `on`: `' on$'`."},
+  "t16": {"text": "Ticket: Die Website liefert 403. Nach Prüfung von `webfiles.txt` und `audit.log`: `about.html` hat das Label `user_home_t`. Schreibe eine einzeilige Notiz in `ticket.txt`: falscher Typ `user_home_t`, richtiger Typ `httpd_sys_content_t`, Lösung `restorecon`.", "hint": "`echo '...' > ticket.txt`; alle drei Begriffe aufnehmen."},
+  "t17": {"text": "Ticket: Die Web-App kann Port 8888 nicht erreichen; im Log stehen `name_connect` und `unreserved_port_t`. Schreibe diesen Befehl in `fix_port.sh`: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Schreibe den Befehl mit `echo` in einfachen Anführungszeichen und leite mit `>` um."}
+ },
+ "vm": {
+  "intro": "Mach diesen Teil auf einer Rocky/Alma-VM (dort ist SELinux dabei). Unter Ubuntu geh zu v06. Mach vor allem anderen einen **VM-Snapshot** (Modul 0.2). Arbeite in einem frischen Lab, nicht auf einem Live-Server.",
+  "tasks": {
+   "v01": {
+    "title": "Modus lesen",
+    "text": "Finde den laufenden und den dauerhaften SELinux-Modus. Ändere den Modus in dieser Aufgabe nicht.",
+    "blocks": [{"cmd": "getenforce\nsestatus | head -5\ngrep ^SELINUX= /etc/selinux/config", "expected": "Enforcing"}],
+    "differs": ["Bei `command not found` bist du auf Ubuntu; geh zu v06.", "Bei `Disabled` ist SELinux in der VM aus; nimm ein Rocky/Alma-Image."]
+   },
+   "v02": {
+    "title": "Labels ansehen",
+    "text": "Lies Datei- und Prozesslabels. Vergleiche das Web-Inhaltsverzeichnis mit deinem Home-Verzeichnis.",
+    "blocks": [{"cmd": "ls -Zd /etc /home/student /var/www\nls -Z ~/\nps -eZ | head -5", "expected": "unconfined_u:object_r:user_home_dir_t:s0 /home/student"}],
+    "differs": ["Fehlt `/var/www`, ist httpd nicht installiert; installiere mit `sudo dnf install -y httpd` und versuche es erneut.", "Ein anderes `:s0`-Ende (MLS) ist normal."]
+   },
+   "v03": {
+    "title": "Dauerhafte Label-Regel",
+    "text": "Definiere und wende ein dauerhaftes Label für ein nicht standardmäßiges Verzeichnis an. Stelle sicher, dass du vorher einen Snapshot gemacht hast; arbeite nur in diesem Testverzeichnis.",
+    "blocks": [{"cmd": "sudo mkdir -p /srv/web\necho hello | sudo tee /srv/web/index.html\nls -Zd /srv/web/index.html\nsudo semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"\nsudo restorecon -Rv /srv/web\nls -Zd /srv/web/index.html", "expected": "Relabeled /srv/web/index.html from ...:var_t:s0 to ...:httpd_sys_content_t:s0"}],
+    "differs": ["Bei `semanage: command not found` führe `sudo dnf install -y policycoreutils-python-utils` aus.", "Existiert die Regel schon, nimm `-m` statt `-a`."]
+   },
+   "v04": {
+    "title": "Boolean ändern",
+    "text": "Lies ein Boolean, schalte es dauerhaft ein und prüfe es. Setze am Ende den alten Wert zurück.",
+    "blocks": [{"cmd": "getsebool httpd_can_network_connect\nsudo setsebool -P httpd_can_network_connect on\ngetsebool httpd_can_network_connect\nsudo setsebool -P httpd_can_network_connect off", "expected": "httpd_can_network_connect --> on"}],
+    "differs": ["`-P` kann langsam sein (Policy wird neu gebaut); warte eine Minute.", "Wird das Boolean nicht gefunden, such mit `getsebool -a | grep httpd`."]
+   },
+   "v05": {
+    "title": "AVC-Eintrag finden",
+    "text": "Suche im Audit-Log nach Denials. Gibt es keine, ist das in Ordnung; ein Label absichtlich zu zerstören, um eines zu erzeugen, ist optional.",
+    "blocks": [{"cmd": "sudo ausearch -m AVC -ts recent\nsudo grep -c AVC /var/log/audit/audit.log\nsudo sealert -a /var/log/audit/audit.log | head -20", "expected": "type=AVC msg=audit(...): avc:  denied  { read } ..."}],
+    "differs": ["`<no matches>` ist auf einem sauberen System normal.", "Fehlt `sealert`, führe `sudo dnf install -y setroubleshoot-server` aus."]
+   },
+   "v06": {
+    "title": "AppArmor (Ubuntu)",
+    "text": "Lies auf einer Ubuntu/Debian-VM den AppArmor-Status. Ändere keine Profilmodi (optional: `aa-complain`, dann `aa-enforce`).",
+    "blocks": [{"cmd": "sudo aa-status | head -15\nsudo apparmor_status | head -3", "expected": "apparmor module is loaded.\n12 profiles are loaded."}],
+    "differs": ["Bei `aa-status: command not found` führe `sudo apt install -y apparmor-utils` aus.", "Rocky hat kein AppArmor; v01-v05 sind deine Aufgaben."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Ein Dienst scheitert wegen SELinux. Was ist der beste erste Diagnoseschritt?", "options": ["`SELINUX=disabled` schreiben und neu starten", "Den Modus mit `getenforce` ansehen, mit vorübergehendem `setenforce 0` testen, dann das Log lesen", "Allen Dateien `chmod 777` geben", "Den Dienst löschen"], "explain": "Bestimme zuerst Modus und ob SELinux die Ursache ist, per vorübergehendem permissive, dann finde den Grund im AVC-Log. Dauerhaftes Abschalten entfernt die Sicherheitsschicht."},
+  "q2": {"q": "Das Label von `/srv/web` soll ein Relabel überleben. Welcher Weg ist richtig?", "options": ["Nur `chcon -t httpd_sys_content_t`", "`setsebool -P`", "`semanage fcontext -a ...` dann `restorecon -R`", "`setenforce 1`"], "explain": "`chcon` ist nicht dauerhaft. `semanage fcontext` schreibt die Regel in die Policy, `restorecon` wendet sie auf die Dateien an."},
+  "q3": {"q": "Du hast `setsebool httpd_can_network_connect on` ausgeführt, nach dem Neustart war es weg. Warum?", "options": ["Es fehlte `-P`, die Einstellung lebte nur im laufenden System", "Das Boolean war ein nicht existierender Schalter", "SELinux war disabled", "Das Audit-Log war voll"], "explain": "`-P` macht die Einstellung dauerhaft. Ohne gilt die Änderung nur im laufenden System."},
+  "q4": {"q": "Wie setzt du unter Ubuntu ein Profil vorübergehend auf nur Loggen?", "options": ["`setenforce 0`", "`getsebool -P`", "Das Profil mit `aa-disable` löschen", "`aa-complain <profile>`"], "explain": "Bei AppArmor loggt ein Profil nach `aa-complain` nur, wie permissive bei SELinux; mit `aa-enforce` geht es zurück."}
+ },
+ "summary": [
+  "SELinux arbeitet mit Labels; das Hauptfeld ist der type (`httpd_t`, `httpd_sys_content_t`).",
+  "Modi: enforcing, permissive, disabled. Für Tests `setenforce 0`, nie dauerhaft abschalten.",
+  "Labels: mit `ls -Z` lesen, dauerhaft mit `semanage fcontext` + `restorecon` beheben; `chcon` ist nicht dauerhaft.",
+  "Booleans: `getsebool`, dauerhaft mit `setsebool -P`; für einen neuen Port `semanage port`.",
+  "AVC: `ausearch -m AVC`, `sealert -a`, `audit.log`; lies wer, worauf, was wollte er tun.",
+  "Unter Ubuntu AppArmor: `aa-status`, `aa-complain`, `aa-enforce`."
+ ],
+ "glossary": [
+  {"term": "SELinux", "meaning": "Labelbasierte zwingende Zugriffskontrolle (MAC); zusätzliche Schicht über den klassischen Rechten."},
+  {"term": "Context (Label)", "meaning": "Sicherheitslabel der Form `user:role:type:level`; das Schlüsselfeld ist type."},
+  {"term": "Type", "meaning": "Das Label-Feld, für das die Policy Regeln schreibt, z. B. `httpd_sys_content_t`."},
+  {"term": "Enforcing", "meaning": "Modus, der Verstöße blockiert und loggt."},
+  {"term": "Permissive", "meaning": "Debug-Modus, der Verstöße nur loggt, ohne zu blockieren."},
+  {"term": "Boolean", "meaning": "Policy-Schalter für ein häufiges Verhalten; dauerhaft mit `-P`."},
+  {"term": "AVC", "meaning": "Access Vector Cache; der Audit-Log-Eintrag zu einem SELinux-Denial."},
+  {"term": "restorecon", "meaning": "Befehl, der ein Dateilabel auf den Wert der Policy-Regel zurücksetzt."},
+  {"term": "AppArmor", "meaning": "Pfadbasiertes Profilsystem unter Debian/Ubuntu; hat die Modi enforce und complain."}
+ ]
+}

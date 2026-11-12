@@ -1,0 +1,177 @@
+{
+ "title": "SELinux — Etiketler, Booleanlar, AVC",
+ "lead": "SELinux her dosya ve sürece bir etiket verir. Bir servis çalışmıyorsa suçlu çoğu zaman yanlış etikettir; kapatmak yerine nedenini bulmayı öğren.",
+ "objectives": [
+  "SELinux modlarını (enforcing, permissive, disabled) okur ve kalıcı kapatmanın neden kötü olduğunu açıklarsın.",
+  "`ls -Z`, `chcon`, `semanage fcontext` ve `restorecon` ile dosya etiketlerini okur ve kalıcı olarak düzeltirsin.",
+  "`getsebool` ve `setsebool -P` ile booleanları yönetir, AVC reddini `ausearch` ve `sealert` ile çözersin.",
+  "Debian/Ubuntu'daki karşılığı AppArmor'u `aa-status` ile okur, complain/enforce modlarını ayırt edersin."
+ ],
+ "sections": [
+  {
+   "id": "modes",
+   "title": "SELinux nedir, modlar",
+   "body": [
+    "Klasik izinler (rwx) sahibe bakar. **SELinux** ek bir katmandır: her süreç ve dosyanın bir **etiketi (context)** vardır ve politika hangi etiketin hangisine ne yapabileceğini söyler. Etiket `user:role:type:level` biçimindedir; günlük işte en önemlisi **type** alanıdır (ör. `httpd_t`, `httpd_sys_content_t`).",
+    "Üç mod vardır: **enforcing** (ihlal engellenir ve loglanır), **permissive** (sadece loglanır, engellenmez; hata ayıklama için) ve **disabled** (kapalı). RHEL/Rocky/Alma'da varsayılan enforcing'dir. Debian/Ubuntu'da SELinux yerine **AppArmor** gelir."
+   ],
+   "commands": [
+    {"cmd": "getenforce", "what": "Çalışan SELinux modunu yazar.", "where": "Bir servis sorununda ilk kontrolde.", "why": "Sorunun SELinux kaynaklı olup olmadığını daraltır.", "example": "getenforce", "nosim": true},
+    {"cmd": "sestatus", "what": "Mod, politika türü ve yapılandırma dosyası modunu gösterir.", "where": "Genel durum özeti gerektiğinde.", "why": "Çalışan mod ile kalıcı mod farkını görürsün.", "example": "sestatus", "nosim": true},
+    {"cmd": "setenforce 0", "what": "Modu o an için permissive yapar (yeniden başlatınca sıfırlanır).", "where": "Sorunun SELinux olup olmadığını geçici test ederken.", "why": "Permissive'de sorun kaybolursa suçlu SELinux'tur; sonra `setenforce 1` ile geri aç.", "example": "setenforce 0", "nosim": true},
+    {"cmd": "/etc/selinux/config", "what": "Kalıcı modu tutan dosya (`SELINUX=enforcing`).", "where": "Yeniden başlatma sonrası modu kalıcı ayarlarken.", "why": "`disabled` yazarsan etiketler eskir ve geri açmak uzun bir relabel gerektirir.", "example": "cat /etc/selinux/config", "nosim": true}
+   ],
+   "tip": "Sorun giderirken sıra: `getenforce`, sonra `setenforce 0` ile test, sonra log oku, sonra düzelt, sonra `setenforce 1`.",
+   "warn": "`setenforce 0` ve `SELINUX=disabled` alışkanlık olmasın. Geçici test için permissive, kalıcı çözüm için doğru etiket veya boolean kullan."
+  },
+  {
+   "id": "labels",
+   "title": "Etiketler: ls -Z, chcon, semanage, restorecon",
+   "body": [
+    "`ls -Z` dosyanın etiketini gösterir. Web sunucusu (`httpd_t`) yalnızca `httpd_sys_content_t` gibi web tipli dosyaları okuyabilir. Dosyayı ev dizininden `mv` ile taşırsan eski `user_home_t` etiketi kalır ve erişim reddedilir.",
+    "`chcon` etiketi anlık değiştirir ama **kalıcı değildir**: `restorecon` veya relabel onu siler. Kalıcı yol iki adımdır: önce `semanage fcontext` ile kuralı politikaya yaz, sonra `restorecon` ile uygula."
+   ],
+   "commands": [
+    {"cmd": "ls -Z", "what": "Dosyaların SELinux etiketini listeler.", "where": "Erişim reddinde dosya tipine bakarken.", "why": "Beklenen tip ile gerçek tipi karşılaştırırsın.", "example": "ls -Z /var/www/html", "nosim": true},
+    {"cmd": "chcon -t", "what": "Dosyanın tipini geçici değiştirir.", "where": "Hızlı deneme yaparken.", "why": "Etiketin sorunu çözdüğünü kanıtlar; ama kalıcı değildir.", "example": "chcon -t httpd_sys_content_t /srv/web/index.html", "nosim": true},
+    {"cmd": "semanage fcontext -a", "what": "Yol deseni için kalıcı etiket kuralı ekler.", "where": "Standart dışı dizin (ör. /srv/web) kullanırken.", "why": "Kural politikada kalır, relabel sonrası da korunur.", "example": "semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"", "nosim": true},
+    {"cmd": "restorecon -Rv", "what": "Etiketleri politikadaki kurala göre geri yükler (-R özyinelemeli, -v ayrıntılı).", "where": "`semanage fcontext` veya dosya taşıma sonrası.", "why": "Kuralı gerçek dosyalara uygular.", "example": "restorecon -Rv /srv/web", "nosim": true}
+   ],
+   "tip": "Dosyayı `cp` ile kopyalarsan hedef dizinin etiketini alır; `mv` ile taşırsan eski etiketi korur. Taşıdıktan sonra `restorecon` çalıştır.",
+   "warn": "`restorecon -R /` gibi geniş yollarda çalıştırma; büyük sistemde uzun sürer ve beklenmedik sonuç verebilir. Önce `-n` (kuru çalıştırma) ile bak."
+  },
+  {
+   "id": "booleans",
+   "title": "Booleanlar",
+   "body": [
+    "Politikayı yeniden yazmadan yaygın davranışları açıp kapatan anahtarlara **boolean** denir: `httpd_can_network_connect` web sunucusunun ağa bağlanmasına izin verir, `httpd_enable_homedirs` ev dizinlerini açar.",
+    "`setsebool` tek başına **çalışan** durumu değiştirir ve yeniden başlatınca kaybolur. Kalıcı olması için `-P` ekle. Sadece gerekeni aç; her boolean bir güvenlik deliğidir."
+   ],
+   "commands": [
+    {"cmd": "getsebool -a", "what": "Tüm booleanları ve durumlarını listeler.", "where": "Hangi anahtar olduğunu ararken (`| grep httpd`).", "why": "Doğru booleanı bulursan etiketle uğraşmazsın.", "example": "getsebool -a | grep httpd", "nosim": true},
+    {"cmd": "getsebool", "what": "Tek booleanın durumunu gösterir.", "where": "Değiştirmeden önce ve sonra doğrularken.", "why": "Değişikliğin uygulandığını görürsün.", "example": "getsebool httpd_can_network_connect", "nosim": true},
+    {"cmd": "setsebool -P", "what": "Booleanı kalıcı olarak açar/kapatır.", "where": "Servisin ağa/ev dizinine erişmesi gerektiğinde.", "why": "`-P` olmadan ayar yeniden başlatmada kaybolur.", "example": "setsebool -P httpd_can_network_connect on", "nosim": true},
+    {"cmd": "semanage boolean -l", "what": "Booleanları açıklamalı ve kalıcı/çalışan durumuyla listeler.", "where": "Booleanın ne yaptığını öğrenirken.", "why": "Açıklama yanlış anahtarı açmanı önler.", "example": "semanage boolean -l | grep httpd_can_network", "nosim": true}
+   ],
+   "tip": "Yeni port sorunu için boolean yetmeyebilir: `semanage port -a -t http_port_t -p tcp 8888` ile portu servisin tipine ekle.",
+   "warn": "Boolean seçerken en dar olanı seç; `httpd_unified` gibi geniş anahtarlar çok yetki verir."
+  },
+  {
+   "id": "avc",
+   "title": "AVC reddi: ausearch, sealert, audit.log",
+   "body": [
+    "SELinux bir şeyi engellediğinde **AVC** (Access Vector Cache) kaydı `/var/log/audit/audit.log` dosyasına düşer. Kayıtta kaynak etiket (`scontext`), hedef etiket (`tcontext`), sınıf (`tclass`) ve engellenen izin (`{ read }`) bulunur. `permissive=1` ise ihlal engellenmemiş, sadece loglanmıştır.",
+    "Okuma sırası: kim (`comm`, `scontext`), neye (`name`, `tcontext`), ne yapmaya çalıştı (`{ ... }`). Sonra çözüm: etiket yanlışsa `restorecon`, davranış izniyse boolean, yeni port ise `semanage port`. `audit2allow` ile modül üretmek son çaredir."
+   ],
+   "commands": [
+    {"cmd": "ausearch -m AVC -ts recent", "what": "Son AVC kayıtlarını denetim logundan arar.", "where": "Servis reddinden hemen sonra.", "why": "İlgili kayıtları ham logu karıştırmadan bulursun.", "example": "ausearch -m AVC -ts recent", "nosim": true},
+    {"cmd": "sealert -a", "what": "Logu analiz edip çözüm önerisi yazar (setroubleshoot paketi).", "where": "Neden ve çözüm özeti istediğinde.", "why": "Genellikle uygun `restorecon` veya `setsebool` komutunu önerir.", "example": "sealert -a /var/log/audit/audit.log", "nosim": true},
+    {"cmd": "grep AVC", "what": "Audit logunda AVC satırlarını süzer.", "where": "ausearch yoksa veya log kopyasını incelerken.", "why": "Her yerde çalışan en basit yöntemdir.", "example": "grep AVC lab/audit.log"},
+    {"cmd": "grep -c denied", "what": "Reddedilen kayıtları sayar.", "where": "Sorunun boyutunu ölçerken.", "why": "Tek tekrarlayan reddi mi, çok kaynaklı sorunu mu gördüğünü anlarsın.", "example": "grep -c denied lab/audit.log"}
+   ],
+   "tip": "Auditd yoksa kayıtlar `journalctl -t setroubleshoot` veya `dmesg` içinde olabilir.",
+   "warn": "Her AVC için `audit2allow -M` ile modül yükleme. Önce etiketi ve booleanı dene; modül gereksiz geniş izin verebilir."
+  },
+  {
+   "id": "apparmor",
+   "title": "Debian/Ubuntu: AppArmor",
+   "body": [
+    "Ubuntu ve Debian'da SELinux yerine **AppArmor** kullanılır. Etiket yerine her program için **yol tabanlı profil** vardır. Profil **enforce** (kuralları uygular) veya **complain** (sadece loglar, SELinux'taki permissive gibi) modunda olabilir.",
+    "Mantık aynıdır: önce durumu oku, gerekirse bir profili complain'e al, logdan neyin engellendiğini gör, profili düzelt ve tekrar enforce yap. Reddler `/var/log/syslog` veya `journalctl` içinde `apparmor=\"DENIED\"` olarak geçer."
+   ],
+   "commands": [
+    {"cmd": "aa-status", "what": "Yüklü profilleri ve modlarını (enforce/complain) listeler.", "where": "Durum kontrolünde.", "why": "Hangi programın kısıtlı olduğunu görürsün.", "example": "sudo aa-status", "nosim": true},
+    {"cmd": "aa-complain", "what": "Profili complain moduna alır.", "where": "Profil bir şeyi engelliyorsa geçici test için.", "why": "Engellemeden loglar; neyin gerektiğini görürsün.", "example": "sudo aa-complain /usr/sbin/nginx", "nosim": true},
+    {"cmd": "aa-enforce", "what": "Profili enforce moduna döndürür.", "where": "Test bittikten sonra.", "why": "Koruma tekrar aktif olur.", "example": "sudo aa-enforce /usr/sbin/nginx", "nosim": true},
+    {"cmd": "grep DENIED", "what": "Logda AppArmor reddi satırlarını süzer.", "where": "Reddi incelerken.", "why": "Hangi yolun engellendiğini gösterir.", "example": "sudo grep DENIED /var/log/syslog", "nosim": true}
+   ],
+   "tip": "Rocky ve Ubuntu eşleşmesi: `getenforce` karşılığı `aa-status`, `setenforce 0` karşılığı `aa-complain`, `setenforce 1` karşılığı `aa-enforce`.",
+   "danger": "Profili `aa-disable` ile kapatmak veya SELinux'u kalıcı disabled yapmak güvenlik katmanını siler. Kapatmak yerine complain/permissive ile nedeni bul."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`cat ~/lab/selinux_config` ile kalıcı SELinux modunu oku.", "hint": "Dosyada `SELINUX=` satırına bak."},
+  "t02": {"text": "`grep -c denied ~/lab/audit.log` ile audit logundaki reddedilen kayıtları say.", "hint": "-c satır sayısını yazar."},
+  "t03": {"text": "`grep httpd ~/lab/booleans.txt` ile httpd booleanlarını listele.", "hint": "Dosya `isim --> durum` biçiminde."},
+  "t04": {"text": "`cd ~/lab` ile lab dizinine geç.", "hint": "Sonraki görevlerde yol yazmak zorunda kalmazsın."},
+  "t05": {"text": "`context.txt` içindeki etiket `user:role:type:level` biçiminde. `cut -d: -f3 context.txt` ile **type** alanını yazdır.", "hint": "Ayraç iki nokta, üçüncü alan type. Önce lab dizininde ol."},
+  "t06": {"text": "Yalnızca httpd kayıtlarını `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt` ile `httpd_denials.txt` dosyasına yaz.", "hint": "Tek tırnak içinde çift tırnaklı desen; > çıktıyı dosyaya yönlendirir."},
+  "t07": {"text": "`grep complain aa_status.txt` ile AppArmor'da complain modundaki satırı bul.", "hint": "Çıktıda 'complain mode' geçen satır beklenir."},
+  "t08": {"text": "Tahmin et: `audit.log` içinde kaç kayıt `permissive=1` (engellenmemiş)? Sonra `grep -c permissive=1 audit.log` ile doğrula.", "hint": "Satırların sonundaki permissive değerine bak."},
+  "t09": {"text": "Tahmin et: `booleans.txt` içinde kaç boolean kapalı (off)? Sonra `grep -c ' off$' booleans.txt` ile doğrula.", "hint": "$ satır sonunu belirtir."},
+  "t10": {"text": "Hata ayıkla: `broken_config` dosyasında `SELINUX=disabled` var. Dosyayı `SELINUX=enforcing` ve `SELINUXTYPE=targeted` olacak şekilde yeniden yaz.", "hint": "`printf 'SELINUX=enforcing\\nSELINUXTYPE=targeted\\n' > broken_config`"},
+  "t11": {"text": "Hata ayıkla: `runbook.sh` hem `setenforce 0` kullanıyor hem boolean'ı kalıcı yapmıyor. Dosyayı tek satırlık `setsebool -P httpd_can_network_connect on` içeriğiyle yeniden yaz.", "hint": "`echo '...' > runbook.sh` mevcut içeriğin üzerine yazar."},
+  "t12": {"text": "Mini proje: `fix_web.sh` betiği yaz. Satır 1: `semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"`, satır 2: `restorecon -Rv /srv/web`. Sonra çalıştırılabilir yap: `chmod 755`.", "hint": "İlk satır için `>`, ikinci için `>>` kullan."},
+  "t13": {"text": "Mini proje: `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` ile hangi programın kaç kez reddedildiğini `top_comm.txt` dosyasına yaz.", "hint": "10. alan `comm=...`; `uniq -c` saymadan önce `sort` gerekir."},
+  "t14": {"text": "Meydan okuma: `webfiles.txt` içinde web tipi (`httpd_sys_content_t`) olmayan satırları `wrong_labels.txt` dosyasına yaz.", "hint": "`grep -v` eşleşmeyenleri seçer."},
+  "t15": {"text": "Meydan okuma: `booleans.txt` içinde açık (on) olan booleanları `booleans_on.txt` dosyasına yaz.", "hint": "Satır sonu `on` ile bitiyor: `' on$'`."},
+  "t16": {"text": "Ticket: Web sitesi 403 veriyor. `webfiles.txt` ve `audit.log` incelendi: `about.html` dosyası `user_home_t` etiketli. `ticket.txt` dosyasına tek satırlık not yaz: yanlış tip `user_home_t`, doğru tip `httpd_sys_content_t`, çözüm `restorecon`.", "hint": "`echo '...' > ticket.txt`; üç terimi de içersin."},
+  "t17": {"text": "Ticket: Web uygulaması 8888 portuna bağlanamıyor; logda `name_connect` ve `unreserved_port_t` var. `fix_port.sh` dosyasına şu komutu yaz: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Komutu tek tırnak içinde `echo` ile yaz ve `>` ile yönlendir."}
+ },
+ "vm": {
+  "intro": "Bu bölümü Rocky/Alma VM'inde yap (SELinux orada gelir). Ubuntu kullanıyorsan v06'ya git. Her şeyden önce **VM snapshot'ı** al (modül 0.2). Sıfırdan kurulu bir laboratuvarda çalış, canlı sunucuda değil.",
+  "tasks": {
+   "v01": {
+    "title": "Modu oku",
+    "text": "SELinux'un çalışan ve kalıcı modunu bul. Bu görevde modu değiştirme.",
+    "blocks": [{"cmd": "getenforce\nsestatus | head -5\ngrep ^SELINUX= /etc/selinux/config", "expected": "Enforcing"}],
+    "differs": ["`command not found` alıyorsan Ubuntu'dasın; v06'ya geç.", "`Disabled` çıkıyorsa VM'de SELinux kapalı; Rocky/Alma imajı kullan."]
+   },
+   "v02": {
+    "title": "Etiketleri gör",
+    "text": "Dosya ve süreç etiketlerini oku. Web içerik dizini ve ev dizinini karşılaştır.",
+    "blocks": [{"cmd": "ls -Zd /etc /home/student /var/www\nls -Z ~/\nps -eZ | head -5", "expected": "unconfined_u:object_r:user_home_dir_t:s0 /home/student"}],
+    "differs": ["`/var/www` yoksa httpd kurulu değildir; `sudo dnf install -y httpd` ile kur ve tekrar dene.", "Etiket sonunda `:s0` farklı çıkabilir (MLS), normaldir."]
+   },
+   "v03": {
+    "title": "Kalıcı etiket kuralı",
+    "text": "Standart dışı bir dizin için kalıcı etiket tanımla ve uygula. Önce snapshot aldığından emin ol; yalnızca bu deneme dizininde çalış.",
+    "blocks": [{"cmd": "sudo mkdir -p /srv/web\necho hello | sudo tee /srv/web/index.html\nls -Zd /srv/web/index.html\nsudo semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"\nsudo restorecon -Rv /srv/web\nls -Zd /srv/web/index.html", "expected": "Relabeled /srv/web/index.html from ...:var_t:s0 to ...:httpd_sys_content_t:s0"}],
+    "differs": ["`semanage: command not found` ise `sudo dnf install -y policycoreutils-python-utils`.", "Kural zaten varsa `-a` yerine `-m` kullan."]
+   },
+   "v04": {
+    "title": "Boolean değiştir",
+    "text": "Bir booleanın durumunu oku, kalıcı aç ve doğrula. Sonunda eski haline döndür.",
+    "blocks": [{"cmd": "getsebool httpd_can_network_connect\nsudo setsebool -P httpd_can_network_connect on\ngetsebool httpd_can_network_connect\nsudo setsebool -P httpd_can_network_connect off", "expected": "httpd_can_network_connect --> on"}],
+    "differs": ["`-P` yavaş olabilir (politika yeniden derlenir); 1 dakika bekle.", "Boolean bulunamazsa `getsebool -a | grep httpd` ile adı ara."]
+   },
+   "v05": {
+    "title": "AVC kaydı bul",
+    "text": "Audit logunda reddi ara. Yoksa kasıtlı küçük bir red üretmek için etiketi bozmayı deneyebilirsin ama bu zorunlu değil.",
+    "blocks": [{"cmd": "sudo ausearch -m AVC -ts recent\nsudo grep -c AVC /var/log/audit/audit.log\nsudo sealert -a /var/log/audit/audit.log | head -20", "expected": "type=AVC msg=audit(...): avc:  denied  { read } ..."}],
+    "differs": ["`<no matches>` temiz bir sistemde normaldir.", "`sealert` yoksa `sudo dnf install -y setroubleshoot-server`."]
+   },
+   "v06": {
+    "title": "AppArmor (Ubuntu)",
+    "text": "Ubuntu/Debian VM'inde AppArmor durumunu oku. Profil modunu değiştirme (opsiyonel: `aa-complain` sonra `aa-enforce`).",
+    "blocks": [{"cmd": "sudo aa-status | head -15\nsudo apparmor_status | head -3", "expected": "apparmor module is loaded.\n12 profiles are loaded."}],
+    "differs": ["`aa-status: command not found` ise `sudo apt install -y apparmor-utils`.", "Rocky'da AppArmor yoktur; v01-v05 senin görevin."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Bir servis SELinux yüzünden çalışmıyor. En doğru ilk teşhis adımı hangisi?", "options": ["`SELINUX=disabled` yazıp yeniden başlatmak", "`getenforce` ile modu görüp geçici `setenforce 0` ile test etmek, sonra logu okumak", "Tüm dosyalara `chmod 777` vermek", "Servisi silmek"], "explain": "Önce modu ve sorunun SELinux olup olmadığını geçici permissive ile belirle, sonra AVC logundan nedeni bul. Kalıcı kapatmak güvenlik katmanını siler."},
+  "q2": {"q": "`/srv/web` dizini için etiketi relabel sonrasında da korumak istiyorsun. Doğru yol hangisi?", "options": ["Yalnızca `chcon -t httpd_sys_content_t`", "`setsebool -P`", "`semanage fcontext -a ...` sonra `restorecon -R`", "`setenforce 1`"], "explain": "`chcon` kalıcı değildir. `semanage fcontext` kuralı politikaya yazar, `restorecon` onu dosyalara uygular."},
+  "q3": {"q": "`setsebool httpd_can_network_connect on` yazdın, yeniden başlatınca ayar gitti. Neden?", "options": ["`-P` bayrağı yoktu, ayar sadece çalışan sistemde kaldı", "Boolean var olmayan bir anahtardı", "SELinux disabled idi", "Audit log doldu"], "explain": "`-P` ayarı kalıcı yapar. Onsuz değişiklik yalnızca çalışan sistemde geçerlidir."},
+  "q4": {"q": "Ubuntu'da bir profili geçici olarak sadece loglayacak şekilde nasıl ayarlarsın?", "options": ["`setenforce 0`", "`getsebool -P`", "`aa-disable` ile profili silmek", "`aa-complain <profile>`"], "explain": "AppArmor'da `aa-complain` profili SELinux'taki permissive gibi sadece loglar; `aa-enforce` ile geri döner."}
+ },
+ "summary": [
+  "SELinux etiketle çalışır; ana alan type'dır (`httpd_t`, `httpd_sys_content_t`).",
+  "Modlar: enforcing, permissive, disabled. Test için `setenforce 0`, kalıcı kapatma yok.",
+  "Etiket: `ls -Z` oku, kalıcı düzelt `semanage fcontext` + `restorecon`; `chcon` kalıcı değil.",
+  "Boolean: `getsebool`, `setsebool -P` ile kalıcı aç; yeni port için `semanage port`.",
+  "AVC: `ausearch -m AVC`, `sealert -a`, `audit.log`; kim, neye, ne yapmak istedi diye oku.",
+  "Ubuntu'da AppArmor: `aa-status`, `aa-complain`, `aa-enforce`."
+ ],
+ "glossary": [
+  {"term": "SELinux", "meaning": "Etiket tabanlı zorunlu erişim denetimi (MAC); klasik izinlere ek katman."},
+  {"term": "Context (etiket)", "meaning": "`user:role:type:level` biçimli güvenlik etiketi; en önemli alanı type."},
+  {"term": "Type", "meaning": "Politikanın kuralları yazdığı etiket alanı, ör. `httpd_sys_content_t`."},
+  {"term": "Enforcing", "meaning": "İhlalleri engelleyen ve loglayan mod."},
+  {"term": "Permissive", "meaning": "İhlalleri sadece loglayan, engellemeyen hata ayıklama modu."},
+  {"term": "Boolean", "meaning": "Politikada yaygın davranışı açıp kapatan anahtar; `-P` ile kalıcı olur."},
+  {"term": "AVC", "meaning": "Access Vector Cache; SELinux reddinin audit log kaydı."},
+  {"term": "restorecon", "meaning": "Dosya etiketini politikadaki kurala göre geri yükleyen komut."},
+  {"term": "AppArmor", "meaning": "Debian/Ubuntu'daki yol tabanlı profil sistemi; enforce ve complain modları vardır."}
+ ]
+}

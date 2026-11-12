@@ -1,0 +1,48 @@
+{
+ "id": "1.1",
+ "level": 1,
+ "setup": {
+  "dirs": [
+   "/home/student/projects/website/css",
+   "/home/student/projects/website/images"
+  ],
+  "files": {
+   "/home/student/projects/website/index.html": "<h1>Hello</h1>\n",
+   "/home/student/projects/website/.htaccess": "# config\n",
+   "/home/student/projects/website/css/style.css": "body { margin: 0; }\n",
+   "/home/student/Documents/.hidden_notes.txt": "secret todo\n"
+  },
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^pwd$", "ok": true}, "solution": ["pwd"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls$", "ok": true}, "solution": ["ls"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cwd": "~/Documents"}, "solution": ["cd Documents"]},
+  {"id": "t04", "kind": "guided", "diff": 1, "check": {"cmd": "^ls -\\w*l\\w*$", "ok": true}, "solution": ["ls -l"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^ls -\\w*a\\w*$", "ok": true}, "solution": ["ls -a"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cwd": "~/projects/website"}, "solution": ["cd ~/projects/website"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": {"cwd": "~/projects/website/css"}, "solution": ["cd css"]},
+  {"id": "t08", "kind": "guided", "diff": 2, "check": {"cwd": "~/projects/website/images"}, "solution": ["cd ../images"]},
+  {"id": "t09", "kind": "guided", "diff": 2, "check": {"cmd": "^cd -$", "ok": true}, "solution": ["cd -"]},
+  {"id": "t10", "kind": "guided", "diff": 2, "check": [{"cwd": "~"}, {"cmd": "^cd( ~)?$", "ok": true}], "solution": ["cd"]},
+  {"id": "t11", "kind": "predict", "diff": 2, "check": {"seq": ["^cd /usr/bin/\\.\\./\\.\\.$", "^pwd$"], "ok": true}, "solution": ["cd /usr/bin/../..", "pwd"]},
+  {"id": "t12", "kind": "predict", "diff": 2, "check": {"out": "-rw-r--r-- 1 root root", "of": "^ls -l /etc/hostname$"}, "solution": ["ls -l /etc/hostname"]},
+  {"id": "t13", "kind": "debug", "diff": 2, "check": {"cwd": "~/Downloads"}, "solution": ["cd ~/Downloads"]},
+  {"id": "t14", "kind": "mini", "diff": 2, "check": [{"seq": ["^cd \\S*css$", "^ls\\b", "^cd \\.\\./\\.\\.$"], "ok": true}, {"cwd": "~/projects"}], "solution": ["cd ~/projects/website/css", "ls -l", "cd ../.."]},
+  {"id": "t15", "kind": "challenge", "diff": 3, "check": {"out": "(?=[\\s\\S]*\\.hidden_notes\\.txt)(?=[\\s\\S]*\\.htaccess)", "of": "^ls -\\w*a\\w* "}, "solution": ["cd ~", "ls -a ~/Documents ~/projects/website"]},
+  {"id": "t16", "kind": "ticket", "diff": 3, "check": [{"seq": ["^cd \\S*website/images$", "^pwd$", "^cd( ~)?$"], "ok": true}, {"cwd": "~"}], "solution": ["cd ~/projects/website/images", "pwd", "cd"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "/home/\\w+|/root"},
+  {"id": "v02", "expect": "\\.bashrc"},
+  {"id": "v03", "expect": "(?=[\\s\\S]*/var/log)(?=[\\s\\S]*/etc)"},
+  {"id": "v04", "expect": "-rw-r--r--[\\s\\S]*root"},
+  {"id": "v05", "expect": null}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

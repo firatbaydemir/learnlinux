@@ -1,0 +1,44 @@
+{
+ "id": "1.4",
+ "level": 1,
+ "setup": {
+  "dirs": [],
+  "files": {
+   "/home/student/notes.txt": "hello world\n",
+   "/home/student/locked.txt": "secret data\n"
+  },
+  "modes": [
+   ["/home/student/locked.txt", "000"]
+  ],
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"seq": ["^pwd$", "^echo \\$\\?$"]}, "solution": ["pwd", "echo $?"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls /nonexistent$", "out": "No such file|Datei oder Verzeichnis"}, "solution": ["ls /nonexistent"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"seq": ["^false$", "^echo \\$\\?$"]}, "solution": ["false", "echo $?"]},
+  {"id": "t04", "kind": "guided", "diff": 2, "check": {"cwd": "~/lab", "cmd": "^mkdir lab && cd lab$", "ok": true}, "solution": ["mkdir lab && cd lab", "cd ~"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^cd /nonexistent \\|\\| echo \\S+", "out": "\\S"}, "solution": ["cd /nonexistent || echo failed"]},
+  {"id": "t06", "kind": "predict", "diff": 2, "check": {"cmd": "^cat missing\\.txt; echo \\$\\?$", "out": "missing\\.txt[\\s\\S]*1"}, "solution": ["cat missing.txt; echo $?"]},
+  {"id": "t07", "kind": "predict", "diff": 2, "check": {"cmd": "^test -f notes\\.txt && echo yes \\|\\| echo no$", "out": "yes"}, "solution": ["test -f notes.txt && echo yes || echo no"]},
+  {"id": "t08", "kind": "debug", "diff": 2, "check": {"seq": ["^chmod \\S+ locked\\.txt$", "^cat locked\\.txt$"], "out": "secret data"}, "solution": ["chmod u+r locked.txt", "cat locked.txt"]},
+  {"id": "t09", "kind": "debug", "diff": 2, "check": {"exists": "~/backup/notes.txt", "type": "f"}, "solution": ["mkdir backup && cp notes.txt backup/"]},
+  {"id": "t10", "kind": "mini", "diff": 3, "check": [{"contains": ["~/errors.txt", "No such file"]}, {"contains": ["~/files.txt", "notes\\.txt"]}, {"cmd": "^echo \\$\\?$"}], "solution": ["ls /nonexistent 2> errors.txt", "ls ~ > files.txt", "echo $?"]},
+  {"id": "t11", "kind": "mini", "diff": 2, "check": [{"exists": "~/project/main.txt", "type": "f"}, {"cwd": "~/project"}, {"cmd": "&&"}], "solution": ["mkdir -p project && cd project && touch main.txt && echo built", "cd ~"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [{"exists": "~/backup/notes.txt", "type": "f"}, {"contains": ["~/status.txt", "saved"]}, {"cmd": "\\|\\|"}], "solution": ["test -d backup || mkdir backup", "cp notes.txt backup/ && echo saved > status.txt || echo failed > status.txt"]},
+  {"id": "t13", "kind": "challenge", "diff": 3, "check": {"cmd": "^grep .*hello.* notes\\.txt.* && echo found.* \\|\\| echo missing", "out": "found"}, "solution": ["grep hello notes.txt > /dev/null && echo found || echo missing"]},
+  {"id": "t14", "kind": "ticket", "diff": 3, "check": [{"cmd": "^cat (Documents|~/Documents|/home/student/Documents)/report\\.txt", "ok": true}, {"contains": ["~/exit.txt", "^0"]}], "solution": ["ls Documents", "cat Documents/report.txt; echo $? > exit.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*\\b0\\b)(?=[\\s\\S]*\\b[12]\\b)"},
+  {"id": "v02", "expect": "\\b127\\b"},
+  {"id": "v03", "expect": "(?=[\\s\\S]*\\bok\\b)(?=[\\s\\S]*\\bfallback\\b)"},
+  {"id": "v04", "expect": "Permission denied|Zugriff verweigert|Erişim engellendi|Keine Berechtigung"},
+  {"id": "v05", "expect": "(?=[\\s\\S]*\\byes\\b)(?=[\\s\\S]*\\bno\\b)"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

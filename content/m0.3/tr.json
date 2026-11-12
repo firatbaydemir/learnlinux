@@ -1,0 +1,282 @@
+{
+ "title": "Terminal ve ilk adımlar",
+ "lead": "Prompt'u okumayı, ilk komutları yazmayı ve takıldığında yardım almayı öğren.",
+ "objectives": [
+  "Prompt'taki kullanıcı, makine ve dizin bilgisini okuyabilirsin.",
+  "whoami, hostname, pwd, ls gibi güvenli ilk komutları çalıştırırsın.",
+  "man, --help ve hata mesajlarıyla kendi kendine yardım bulursun."
+ ],
+ "sections": [
+  {
+   "id": "prompt",
+   "title": "Terminal ve prompt",
+   "body": [
+    "**Terminal**, bilgisayara metinle komut verdiğin penceredir. İçinde çalışan program **kabuk** (shell) olarak adlandırılır; en yaygını `bash`'tir. Kabuk, yazdığın satırı okur, çalıştırır ve sonucu ekrana yazar.",
+    "Her satırın başındaki **prompt** sana üç şeyi söyler: kim olduğunu, hangi makinede çalıştığını ve hangi dizinde olduğunu. Örnek: `student@linux-lab:~$` — kullanıcı `student`, makine `linux-lab`, `~` ev dizini demektir. Sondaki `$` normal kullanıcıyı, `#` ise yönetici (root) kullanıcıyı gösterir."
+   ],
+   "tip": "Bir komutu yazıp Enter'a basana kadar hiçbir şey çalışmaz. Hata yaparsan Backspace ile düzeltebilirsin."
+  },
+  {
+   "id": "first",
+   "title": "İlk komutlar: ben kimim, neredeyim?",
+   "body": [
+    "Bir sisteme dokunmadan önce önce kim olduğunu ve nerede olduğunu bilmelisin. Aşağıdaki komutlar yalnızca bilgi okur; hiçbir şeyi değiştirmez. Kutulara tıklayınca komut terminale yazılır."
+   ],
+   "commands": [
+    {
+     "cmd": "whoami",
+     "what": "Hangi kullanıcıyla çalıştığını yazar.",
+     "where": "Giriş yaptıktan sonra, sudo kullanmadan önce ve sonra.",
+     "why": "Yanlış kullanıcıyla işlem yapmayı önler.",
+     "example": "whoami"
+    },
+    {
+     "cmd": "hostname",
+     "what": "Makinenin adını yazar.",
+     "where": "Birden çok sunucuya bağlanırken.",
+     "why": "Doğru makinede olduğundan emin olursun.",
+     "example": "hostname"
+    },
+    {
+     "cmd": "pwd",
+     "what": "Bulunduğun dizinin tam yolunu yazar.",
+     "where": "Kaybolduğunu hissettiğinde.",
+     "why": "Dosya işlemlerinden önce konumunu bilmek hataları önler.",
+     "example": "pwd"
+    },
+    {
+     "cmd": "ls",
+     "what": "Bulunduğun dizindeki dosya ve klasörleri listeler. -l ayrıntı verir.",
+     "where": "Her yerde, en sık kullanılan komuttur.",
+     "why": "Çevrende ne olduğunu görmeden hareket etme.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "echo",
+     "what": "Yazdığın metni ekrana basar; $USER gibi değişkenleri açar.",
+     "where": "Betiklerde ve hızlı denemelerde.",
+     "why": "Değişkenlerin değerini görmek için en basit yol.",
+     "example": "echo $USER"
+    }
+   ]
+  },
+  {
+   "id": "help",
+   "title": "Yardım almak ve hatayı okumak",
+   "body": [
+    "Linux'ta her komutun kılavuzu vardır: `man komut` tam kılavuzu, `komut --help` kısa özeti verir. Var olmayan bir komut yazarsan kabuk `command not found` der; bu bir hata değil bilgidir — yazım hatası yapmış olabilirsin.",
+    "Kabuk ayrıca zaman kazandırır: **Tab** yarım yazdığın komutu veya dosya adını tamamlar, **↑ / ↓** önceki komutları getirir, `history` hepsini numaralı listeler, `clear` ekranı temizler."
+   ],
+   "commands": [
+    {
+     "cmd": "man",
+     "what": "Bir komutun kılavuz sayfasını gösterir.",
+     "where": "Bir komutun seçeneklerini öğrenirken.",
+     "why": "İnternete bakmadan, kendi sistemindeki doğru bilgiye ulaşırsın.",
+     "example": "man ls"
+    },
+    {
+     "cmd": "--help",
+     "what": "Komutun kısa kullanım özetini verir.",
+     "where": "Hızlı hatırlamak için.",
+     "why": "man'den daha kısadır, çoğu zaman yeter.",
+     "example": "ls --help"
+    },
+    {
+     "cmd": "history",
+     "what": "Daha önce yazdığın komutları numaralı listeler.",
+     "where": "Eski bir komutu tekrar bulmak için.",
+     "why": "Aynı komutu baştan yazmak zorunda kalmazsın.",
+     "example": "history"
+    }
+   ],
+   "tip": "Tab'a iki kez basarsan olası tamamlamaların listesi çıkar. Örnek: `whoa` yazıp Tab'a bas."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`whoami` yaz ve hangi kullanıcıyla çalıştığını oku.",
+   "hint": "Sadece komutun adını yazıp Enter'a bas."
+  },
+  "t02": {
+   "text": "`hostname` ile makinenin adını öğren.",
+   "hint": "Çıktı prompt'taki @ işaretinden sonraki kelimeyle aynı olmalı."
+  },
+  "t03": {
+   "text": "`pwd` ile bulunduğun dizinin tam yolunu yazdır.",
+   "hint": "Yol / ile başlar; bu mutlak yoldur."
+  },
+  "t04": {
+   "text": "`echo \"Hello Linux\"` komutuyla ekrana bu metni yazdır.",
+   "hint": "Metni çift tırnak içine al."
+  },
+  "t05": {
+   "text": "`ls -l` ile dizini ayrıntılı listele. İlk sütundaki `d` harfi neyi gösterir?",
+   "hint": "d dizin (directory), - ise normal dosya demektir."
+  },
+  "t06": {
+   "text": "`man ls` ile `ls` komutunun kılavuzunu aç.",
+   "hint": "man komutundan sonra komut adı gelir."
+  },
+  "t07": {
+   "text": "`ls --help` ile kısa kullanım özetini göster.",
+   "hint": "İki tire, bitişik: --help"
+  },
+  "t08": {
+   "text": "Bilerek var olmayan bir komut yaz (örneğin `lss`) ve hata mesajını oku.",
+   "hint": "Mesaj command not found olmalı; yazım hatasının işareti."
+  },
+  "t09": {
+   "text": "`uname -r` ile çalışan çekirdek (kernel) sürümünü göster.",
+   "hint": "-r release (sürüm) demektir."
+  },
+  "t10": {
+   "text": "`echo $USER` yaz. Çıktı `whoami` ile aynı mı?",
+   "hint": "Dolar işareti değişkenin değerini açar."
+  },
+  "t11": {
+   "text": "Sırayla çalıştır: `pwd`, `ls`, `cd Documents`, `pwd`. Konumun nasıl değişti?",
+   "hint": "Dört ayrı satır; her biri Enter ile."
+  },
+  "t12": {
+   "text": "`history` ile bu oturumda yazdığın komutları listele.",
+   "hint": "Numaralı liste çıkar."
+  },
+  "t13": {
+   "text": "`clear` ile ekranı temizle.",
+   "hint": "Kısayol: Ctrl+L"
+  },
+  "t14": {
+   "text": "Meydan okuma: ev dizininde `echo Hello > first.txt` ile bir dosya oluştur, sonra `cat first.txt` ile içeriğini oku.",
+   "hint": "> işareti çıktıyı dosyaya yazar. Önce `cd ~` ile ev dizinine dön."
+  },
+  "t15": {
+   "text": "Tahmin et: `cd ~/Documents`, sonra `cd ..`, sonra `pwd`. Çalıştırmadan önce hangi yolu göreceğini tahmin et, sonra doğrula.",
+   "hint": "`..` bir üst dizin demektir."
+  },
+  "t16": {
+   "text": "Hata ayıkla: bir meslektaşın `cat nots.txt` yazınca hata aldı. Ev dizininde `ls` ile doğru adı bul ve dosyayı `cat` ile oku.",
+   "hint": "Yanlış yazılan dosya adı `No such file` hatası verir; `ls` çıktısındaki adı kullan."
+  },
+  "t17": {
+   "text": "Mini proje: `whoami > hello.txt` ile kullanıcı adını bir dosyaya yaz, sonra `cat hello.txt` ile oku.",
+   "hint": "`>` komutun çıktısını dosyaya yönlendirir. Önce `cd ~`."
+  },
+  "t18": {
+   "text": "TICKET #1001 — Destek ekibi sistem bilgisi istiyor: ev dizininde `info.txt` dosyasına önce çekirdek sürümünü (`uname -r`), sonra makine adını (`hostname`) yaz. Dosyada 2 satır olmalı.",
+   "hint": "İlkinde `>`, ikincisinde `>>` (ekle) kullan; yoksa ilk satır silinir."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Prompt'un sonunda `#` işareti görüyorsun. Bu ne anlama gelir?",
+   "options": [
+    "Komut yorum satırı olarak yazıldı",
+    "Yönetici (root) olarak çalışıyorsun",
+    "Dosya gizli",
+    "Terminal bozuk"
+   ],
+   "explain": "`$` normal kullanıcı, `#` root içindir. Root olarak yanlış komut büyük zarar verebilir; dikkatli ol."
+  },
+  "q2": {
+   "q": "Bir komutun kullanım kılavuzunu hangisiyle açarsın?",
+   "options": [
+    "help komut",
+    "manual komut",
+    "man komut",
+    "read komut"
+   ],
+   "explain": "`man komut` tam kılavuzu açar; `komut --help` kısa özet verir."
+  },
+  "q3": {
+   "q": "`command not found` hatası çoğunlukla ne demektir?",
+   "options": [
+    "Komutun adını yanlış yazmış veya komut kurulu değil",
+    "Bilgisayar kapanacak",
+    "Disk dolu",
+    "İnternet yok"
+   ],
+   "explain": "Önce yazımı kontrol et; sonra komutun kurulu olup olmadığına bak."
+  },
+  "q4": {
+   "q": "Yarım yazdığın komutu veya dosya adını tamamlayan tuş hangisi?",
+   "options": [
+    "Esc",
+    "Ctrl+Z",
+    "Tab",
+    "Alt"
+   ],
+   "explain": "Tab tamamlar; iki kez basarsan seçenekleri listeler."
+  }
+ },
+ "summary": [
+  "Prompt sana kullanıcıyı, makineyi ve dizini gösterir; `$` normal, `#` root demektir.",
+  "`whoami`, `hostname`, `pwd`, `ls` güvenli keşif komutlarıdır.",
+  "Yardım için `man komut` ve `komut --help` kullan; hata mesajları ipucudur.",
+  "Tab, ↑/↓ ve `history` zaman kazandırır."
+ ],
+ "glossary": [
+  {
+   "term": "terminal",
+   "meaning": "Komut yazdığın pencere."
+  },
+  {
+   "term": "kabuk (shell)",
+   "meaning": "Yazdığın komutları çalıştıran program, örn. bash."
+  },
+  {
+   "term": "prompt",
+   "meaning": "Her satırın başındaki kullanıcı@makine:dizin bilgisi."
+  },
+  {
+   "term": "ev dizini",
+   "meaning": "Kullanıcıya ait klasör; ~ işaretiyle gösterilir."
+  }
+ ],
+ "vm": {
+  "intro": "Aşağıdaki görevleri kendi Linux VM'inde (Rocky/Alma veya Ubuntu) yap. Henüz VM'in yoksa önce modül 0.2'ye bak.",
+  "tasks": {
+   "v01": {
+    "title": "Çekirdek sürümünü bul",
+    "text": "VM'inde terminali aç ve çalışan çekirdeğin sürümünü yazdır. Çıktıyı aşağıya yapıştır.",
+    "blocks": [
+     {
+      "cmd": "uname -r",
+      "expected": "5.14.0-427.13.1.el9_4.x86_64"
+     }
+    ],
+    "differs": [
+     "Sürüm numaran farklı olabilir; önemli olan `5.14.0` gibi nokta ayrımlı bir sürümün görünmesi.",
+     "`command not found` görüyorsan komutu doğru yazdığından emin ol (küçük harf, boşluk)."
+    ]
+   },
+   "v02": {
+    "title": "Dağıtımını tanı",
+    "text": "`/etc/os-release` dosyası dağıtımın adını ve sürümünü söyler.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\""
+     }
+    ],
+    "differs": [
+     "Ubuntu'da `NAME=\"Ubuntu\"` görürsün; bu normaldir.",
+     "`No such file` çıkıyorsa WSL/konteyner yerine gerçek bir dağıtımda olduğundan emin ol."
+    ]
+   },
+   "v03": {
+    "title": "İlk dosyan",
+    "text": "Ev dizininde bir dosya yaz ve oku. Çıktıda `Hello` görmelisin, sonra \"Yaptım\" de.",
+    "blocks": [
+     {
+      "cmd": "cd ~ && echo Hello > first.txt && cat first.txt",
+      "expected": "Hello"
+     }
+    ],
+    "differs": [
+     "Hiçbir şey yazmıyorsa `ls -l first.txt` ile dosyanın oluştuğunu kontrol et."
+    ]
+   }
+  }
+ }
+}

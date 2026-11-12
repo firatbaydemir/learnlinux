@@ -1,0 +1,434 @@
+{
+ "title": "Süreç Temelleri",
+ "lead": "Çalışan sisteme mikroskopla bak: süreç nedir, onu kim başlattı ve hangi durumda?",
+ "objectives": [
+  "Sürecin ne olduğunu, PID ve PPID'nin ne anlama geldiğini ve PID 1'in neden özel olduğunu açıklarsın.",
+  "Süreçleri ps aux, ps -ef ve ps -o ile listeler, pgrep ile bulursun.",
+  "Ebeveyn/çocuk ilişkisini pstree ve ps --forest ile gösterir, /proc/<pid> içine bakarsın.",
+  "Süreç durumlarını (R, S, D, T, Z) tanır, zombinin ne olduğunu ve ne olmadığını bilirsin."
+ ],
+ "sections": [
+  {
+   "id": "concept",
+   "title": "Süreç nedir?",
+   "body": [
+    "Diskteki bir program (örneğin `bash`) yalnızca bir dosyadır. Başlattığında çekirdek onu belleğe yükler ve o bir **süreç** (process) olur. Aynı anda yüzlerce süreç çalışır.",
+    "Her sürecin benzersiz bir numarası vardır: **PID**. Ayrıca onu kimin başlattığını bilir: **PPID** (parent PID, ebeveyn). Süreçler birbirini doğurur: kabuğun `ps` komutunu başlatır, `ps` kabuğun çocuğudur. En tepede **PID 1** vardır: sistemin ilk süreci, bugün genelde `systemd`. Diğerlerinin hepsi ondan türer.",
+    "Kabuk kendi PID'sini bilir: `$$`. Simülatörde her zaman 4242 yazar."
+   ],
+   "commands": [
+    {
+     "cmd": "echo $$",
+     "what": "Mevcut kabuğun PID'sini yazar.",
+     "where": "Betiklerde ve kendi PID'ne ihtiyaç duyduğunda, örneğin /proc/$$ için.",
+     "why": "Kendi sürecini aramadan inceleyebilirsin.",
+     "example": "echo $$"
+    },
+    {
+     "cmd": "ps",
+     "what": "Yalnızca mevcut terminalinin süreçlerini listeler.",
+     "where": "Hızlı bakış için: normalde sadece `bash` ve `ps` kendisi.",
+     "why": "En küçük anlık görüntü; PID, terminal, CPU süresi ve komutu gösterir.",
+     "example": "ps"
+    }
+   ],
+   "tip": "`ps` bir **anlık görüntüdür**, canlı izleme değil. Canlı izleme için `top` kullanılır (sonraki modüller)."
+  },
+  {
+   "id": "ps",
+   "title": "ps ile okumak",
+   "body": [
+    "`ps` iki stilde vardır. `ps aux` **BSD stilidir** (tiresiz): tüm kullanıcılar, %CPU ve %MEM ile. `ps -ef` **UNIX stilidir** (tireli): tüm süreçler ve **PPID** sütunu. `ps aux`'te PPID sütunu yoktur; ilişki için `ps -ef` veya `-o` kullan.",
+    "`-o` ile sütunları kendin seçersin: `ps -o pid,ppid,stat,cmd`. Betikler için en temiz yol ve tam ihtiyacın olanı okumanın en iyi yoludur.",
+    "Rocky/Alma/Ubuntu'da `ps` zaten kuruludur (paket `procps` / `procps-ng`)."
+   ],
+   "commands": [
+    {
+     "cmd": "ps aux",
+     "what": "Tüm kullanıcıların tüm süreçleri: kullanıcı, %CPU, %MEM, durum ve komut.",
+     "where": "Sistemi kimin ne kadar kullandığını sorarken.",
+     "why": "En yaygın genel bakış; `grep` veya `sort` ile birleştirilir.",
+     "example": "ps aux | head -n 10",
+     "nosim": true
+    },
+    {
+     "cmd": "ps -ef",
+     "what": "Tüm süreçler UNIX biçiminde, PPID sütunuyla.",
+     "where": "Ebeveynin kim olduğunu öğrenmek istediğinde.",
+     "why": "İlişkiyi gösterir; PPID 1 süreç doğrudan init/systemd altında demektir.",
+     "example": "ps -ef | head -n 10",
+     "nosim": true
+    },
+    {
+     "cmd": "ps -o",
+     "what": "Yalnızca yazdığın sütunları gösterir.",
+     "where": "Betiklerde ve odaklı sorularda.",
+     "why": "Kısa, okunaklı ve kararlı çıktı.",
+     "example": "ps -o pid,ppid,stat,comm"
+    },
+    {
+     "cmd": "ps -p",
+     "what": "Yalnızca verilen PID'li süreci gösterir.",
+     "where": "PID'yi bildiğinde ve kontrol etmek istediğinde.",
+     "why": "grep gerekmez; `-o` ile birleşir.",
+     "example": "ps -o pid,ppid,stat,cmd -p $$"
+    }
+   ],
+   "tip": "`ps aux | grep sshd` grep sürecini de bulur. `pgrep` bunu önler.",
+   "warn": "`ps aux`'te COMMAND alanı için sütun konumuna güvenme: boşluk içerir. Betiklerde `ps -o` kullan."
+  },
+  {
+   "id": "tree",
+   "title": "Ağaç ve arama: pstree ve pgrep",
+   "body": [
+    "`pstree` aile ağacını çizer: kökte systemd, sonra servisler, SSH oturumun, kabuğun ve komutların. `ps -ef --forest` aynısını PPID sütunuyla gösterir.",
+    "`pgrep` isme göre arar ve yalnızca PID yazar. Betikler için yapılmıştır: `pgrep -x sshd`, `sshd` çalışıyorsa PID'yi yazar, çalışmıyorsa 1 ile çıkar.",
+    "`pstree`, her zaman kurulu olmayan `psmisc` paketinden gelir. Rocky/Alma: `sudo dnf install psmisc`. Debian/Ubuntu: `sudo apt install psmisc`. `pgrep` procps'ye aittir ve her zaman vardır."
+   ],
+   "commands": [
+    {
+     "cmd": "pstree -p",
+     "what": "Süreç ağacını PID'lerle gösterir.",
+     "where": "Kimin kimi başlattığını anlamak için.",
+     "why": "Tek bakışta: her şey PID 1 (systemd) altında asılı.",
+     "example": "pstree -p | head -n 15",
+     "nosim": true
+    },
+    {
+     "cmd": "ps -ef --forest",
+     "what": "ps listesini PPID ile ağaç biçiminde gösterir.",
+     "where": "psmisc kurulu olmadığında.",
+     "why": "Ağaç artı `ps -ef`'in tüm sütunları.",
+     "example": "ps -ef --forest | head -n 20",
+     "nosim": true
+    },
+    {
+     "cmd": "pgrep -l",
+     "what": "Süreçleri isme göre bulur, PID ve isim yazar.",
+     "where": "Betiklerde, bir servisin çalışıp çalışmadığını kontrol etmek için.",
+     "why": "`ps | grep`'ten temiz; `-x` tam ismi eşleştirir.",
+     "example": "pgrep -l sshd",
+     "nosim": true
+    },
+    {
+     "cmd": "pgrep -a",
+     "what": "PID ve tam komut satırını yazar.",
+     "where": "Aynı isimde birden çok süreç olduğunda.",
+     "why": "Argümanları görüp doğru PID'yi seçersin.",
+     "example": "pgrep -a bash",
+     "nosim": true
+    }
+   ],
+   "tip": "Paket kurulumu: Rocky `sudo dnf install psmisc`, Ubuntu `sudo apt install psmisc`."
+  },
+  {
+   "id": "proc",
+   "title": "/proc/<pid> içinde",
+   "body": [
+    "`/proc` bir **sanal dosya sistemidir**: diskte durmaz, çekirdek üretir. Her sürecin bir `/proc/<pid>/` dizini vardır. `ps`'in kendisi de buradan okur.",
+    "Faydalı dosyalar: `status` (isim, durum, PID, PPID, UID), `exe` (programa bağlantı), `cwd` (çalışma dizini), `fd/` (açık dosyalar), `cmdline` (komut satırı). Normal kullanıcı olarak kendi süreçlerini okuyabilirsin; başkalarının bazı dosyaları kısıtlıdır.",
+    "`/proc/self` her zaman onu okuyan süreç demektir. Yani `cat /proc/self/status`, `cat` sürecinin durumunu gösterir."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /proc/$$/status",
+     "what": "Kabuğunun adını, durumunu, PID, PPID ve UID'sini gösterir.",
+     "where": "ps'in göstermediği ayrıntılar için.",
+     "why": "Ham kaynak: State ve PPid satırları hikayeyi anlatır.",
+     "example": "head -n 9 /proc/$$/status",
+     "nosim": true
+    },
+    {
+     "cmd": "ls -l /proc/$$/exe",
+     "what": "Sürecin çalıştırılabilir dosyasına bağlantı.",
+     "where": "Gerçekte hangi ikili dosyanın çalıştığını sorarken.",
+     "why": "Yeniden adlandırılmış veya silinmiş programları ortaya çıkarır.",
+     "example": "ls -l /proc/$$/exe",
+     "nosim": true
+    },
+    {
+     "cmd": "ls /proc/$$/fd",
+     "what": "Açık dosya tanımlayıcılarını (0, 1, 2 ...) listeler.",
+     "where": "Açık dosyaları hata ayıklarken.",
+     "why": "0 = stdin, 1 = stdout, 2 = stderr; fazlası açık dosya demektir.",
+     "example": "ls -l /proc/$$/fd",
+     "nosim": true
+    }
+   ],
+   "tip": "`cat /proc/self/status`, /proc'un çalıştığının hızlı testidir; WSL'de de."
+  },
+  {
+   "id": "states",
+   "title": "Durumlar, zombiler ve sinyaller",
+   "body": [
+    "**STAT** sütunu durumu gösterir: `R` çalışıyor, `S` uyuyor (bekliyor, kesilebilir), `D` kesilemez uyku (genelde disk/ağ bekliyor; öldürülemez), `T` durdurulmuş (Ctrl+Z), `Z` **zombi**. Ek harfler: `s` oturum lideri, `+` ön plan, `<` yüksek öncelik.",
+    "**Zombi** zaten bitmiş bir süreçtir. Yalnızca süreç tablosundaki kaydı kalır, çünkü ebeveyn çıkış durumunu henüz okumamıştır (`wait`). Zombi CPU kullanmaz, neredeyse bellek de kullanmaz ve **onu `kill -9` ile bile öldüremezsin**, çünkü zaten ölüdür. Çözüm: ebeveyn onu toplamalı veya ebeveyni durdurup yeniden başlatırsın; yetim kalanı init devralır ve temizler.",
+    "Sinyaller: `kill` sinyal gönderir, varsayılan `SIGTERM` (15, kibar rica, program temizlik yapabilir). `SIGKILL` (9) yakalanamaz; çekirdek süreci temizlik yapmadan hemen bitirir. **PID 1** özeldir: işleyicisi olmayan sinyaller onun için yok sayılır, kullanıcı alanından gelen SIGKILL bile. Bu, sistemi yanlışlıkla öldürmeden korur.",
+    "Yük ortalaması (`uptime`) 1/5/15 dakikada çalışmaya hazır süreçleri gösterir. Onu **çekirdek sayısına göre** (`nproc`) oku: 4 çekirdekte 4.0 yük doludur, 2 çekirdekte aşırı yüktür."
+   ],
+   "commands": [
+    {
+     "cmd": "ps -eo pid,ppid,stat,cmd",
+     "what": "Tüm süreçleri durum ve ebeveynle gösterir.",
+     "where": "Zombi (STAT Z) veya takılmış süreç (D) ararken.",
+     "why": "Hızlı filtre için `grep` veya `sort` ile birleştir.",
+     "example": "ps -eo pid,ppid,stat,cmd | head -n 10"
+    },
+    {
+     "cmd": "uptime",
+     "what": "Çalışma süresini ve 1, 5, 15 dakikalık yük ortalamasını gösterir.",
+     "where": "'Sunucu yavaş mı?' sorusunda ilk bakış olarak.",
+     "why": "Yükü çekirdek sayısıyla karşılaştır.",
+     "example": "uptime"
+    },
+    {
+     "cmd": "nproc",
+     "what": "CPU çekirdek sayısını yazar.",
+     "where": "Yük ortalamasını doğru okumak için.",
+     "why": "8 çekirdekte 2.0 yük iyidir, 2 çekirdekte meşguldür.",
+     "example": "nproc",
+     "nosim": true
+    },
+    {
+     "cmd": "kill -15",
+     "what": "Bir PID'ye SIGTERM (kibar durdurma) gönderir.",
+     "where": "Bir süreci bitirmek için ilk tercih.",
+     "why": "Program veriyi kaydedip temizlik yapabilir.",
+     "example": "kill -15 4242",
+     "nosim": true
+    },
+    {
+     "cmd": "kill -9",
+     "what": "SIGKILL gönderir; süreç hemen bitirilir.",
+     "where": "Yalnızca SIGTERM işe yaramadıysa.",
+     "why": "Son çare; temizlik yok, veri kaybolabilir.",
+     "example": "kill -9 4242",
+     "nosim": true
+    }
+   ],
+   "tip": "Durdurma sırası: `kill -15`, birkaç saniye bekle, `ps -p PID` ile kontrol et, ancak sonra `kill -9`.",
+   "warn": "Öldürmeden önce PID'yi iki kez kontrol et. `pkill isim` ve `killall isim` o isimdeki **tüm** süreçleri öldürür, istemediklerini de.",
+   "danger": "Tanımadığın süreçleri öldürme, özellikle root olarak: `sshd`, `systemd-journald` veya bir veritabanına `kill -9` seni dışarıda bırakabilir veya veriyi bozabilir. Yalnızca kendi `sleep` süreçlerinle çalış."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Terminalinin süreçlerini `ps` ile listele. Hangi iki süreci görüyorsun?",
+   "hint": "Sadece `ps`, seçenek yok. `bash` ve `ps` görürsün."
+  },
+  "t02": {
+   "text": "Kabuğunun PID'sini `echo $$` ile yazdır.",
+   "hint": "İki dolar işareti. Simülatörde her zaman 4242."
+  },
+  "t03": {
+   "text": "Tüm süreç görünümünü BSD stilinde çalıştır: `ps aux`.",
+   "hint": "`aux` için tire yok. (`ps -ef` de kabul edilir.)"
+  },
+  "t04": {
+   "text": "`ps -o pid,ppid,comm` ile sütunlarını seç.",
+   "hint": "Sütunlar virgülle ayrılır, boşluk yok."
+  },
+  "t05": {
+   "text": "Anlık görüntünün yalnızca başlık satırını `head -n 1 ~/lab/ps_snapshot.txt` ile oku. CPU kullanımı hangi sütun?",
+   "hint": "`ps_snapshot.txt`, `~/lab` içinde kayıtlı bir `ps aux` çıktısıdır. Sütun %CPU."
+  },
+  "t06": {
+   "text": "Anlık görüntüde alice'in tüm süreçlerini göster: `grep alice ~/lab/ps_snapshot.txt`. Hangi program meşgul?",
+   "hint": "%CPU sütununa bak; süreç `python3 worker.py`."
+  },
+  "t07": {
+   "text": "alice'in süreçlerini say: `grep alice ~/lab/ps_snapshot.txt | wc -l`.",
+   "hint": "`wc -l` pipe'tan sonra satırları sayar."
+  },
+  "t08": {
+   "text": "Anlık görüntüdeki zombiyi `grep defunct ~/lab/ps_snapshot.txt` ile bul. Hangi PID, hangi kullanıcı?",
+   "hint": "Zombiler STAT `Z` ve `<defunct>` gösterir. bob'un PID 1701 süreci."
+  },
+  "t09": {
+   "text": "`~/lab/proc_status.txt`, `/proc/1701/status` kopyasıdır. Ebeveyni bul: `grep PPid ~/lab/proc_status.txt`.",
+   "hint": "PPid ebeveynin PID'sidir; ilgilenmen gereken o, zombi değil."
+  },
+  "t10": {
+   "text": "Önce tahmin et: `ps | wc -l` kaç satır yazar? Sonra çalıştırıp doğrula.",
+   "hint": "Başlık artı bash artı ps = 3."
+  },
+  "t11": {
+   "text": "Önce tahmin et: 1 dakikalık yük ortalaması düşük mü? `uptime` ile doğrula. Unutma: yükü `nproc`'a göre oku.",
+   "hint": "'load average:' sonrasındaki üç sayıya bak."
+  },
+  "t12": {
+   "text": "Anlık görüntüyü CPU'ya göre büyükten küçüğe sırala ve iki satır göster: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 2`.",
+   "hint": "`-k3` = üçüncü sütun, `-n` sayısal, `-r` ters."
+  },
+  "t13": {
+   "text": "Mini proje: tüm root süreçlerinin PID'lerini `~/lab/root_pids.txt` dosyasına yaz. `grep ^root` ile filtrele, `tr -s ' '` ile boşlukları sıkıştır, `cut -d' ' -f2` ile 2. sütunu al, `>` ile yönlendir.",
+   "hint": "Tek pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`."
+  },
+  "t14": {
+   "text": "Hata ayıkla: `~/lab/fix.txt` içinde `kill -9 1701` yazıyor. Bu yanlış, zombi öldürülemez. Dosyanın üzerine daha iyi komutu yaz: ebeveyne sinyal gönder, örn. `kill -s SIGCHLD 1500`.",
+   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. Ebeveyn PID'si 1500 (bkz. t09)."
+  },
+  "t15": {
+   "text": "Zor görev: anlık görüntüde en yüksek CPU kullanan süreci `sort` ile bul. Onun için **kibar** durdurma komutunu `~/lab/decision.txt` dosyasına yaz (çalıştırma).",
+   "hint": "PID 1620. Kibar, sinyal 15 demek: `echo \"kill -15 1620\" > ~/lab/decision.txt`."
+  },
+  "t16": {
+   "text": "TICKET #5110 — Sunucu yavaş. Alice'in işinden şüpheleniliyor. En meşgul sürecin kullanıcısını, PID'sini ve komutunu `~/lab/report.txt` dosyasına yaz.",
+   "hint": "Anlık görüntüde `sort` veya `grep` kullan; sonra `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`."
+  },
+  "t17": {
+   "text": "Kabuk PID'ni bir dosyaya kaydet: `echo $$ > ~/lab/mypid.txt`.",
+   "hint": "`>` echo çıktısını dosyaya yazar."
+  }
+ },
+ "vm": {
+  "intro": "Bu adımları kendi VM'inde çalıştır (Ubuntu, Rocky, Alma veya WSL). 1-4. adımlar yalnızca okur. 5. adım bir süreci durdurur: önce **snapshot** al ve yalnızca kendi `sleep` sürecine dokun.",
+  "tasks": {
+   "v01": {
+    "title": "Kendi sürecin",
+    "text": "Kabuğunun PID'sini yazdır, sonra PID, PPID ve durumunu ps ile göster. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "echo $$\nps -o pid,ppid,stat,cmd -p $$",
+      "expected": "2100\n    PID    PPID STAT CMD\n   2100    2050 Ss   -bash"
+     }
+    ],
+    "differs": [
+     "Sayılar sistemine göre farklıdır; başlıkta `PPID` olmalı.",
+     "SSH ile açılan terminalde ebeveyn `sshd`, masaüstü terminalinde terminal programıdır."
+    ]
+   },
+   "v02": {
+    "title": "ps aux ve ps -ef",
+    "text": "İki stili karşılaştır. Hangisinde PPID sütunu var?",
+    "blocks": [
+     {
+      "cmd": "ps aux | head -n 5\nps -ef | head -n 5",
+      "expected": "USER  PID %CPU %MEM ... COMMAND\nroot    1  0.0  0.3 ... /usr/lib/systemd/systemd\nUID   PID  PPID  C STIME TTY TIME CMD\nroot    1     0  0 08:00 ?   00:00:02 /usr/lib/systemd/systemd"
+     }
+    ],
+    "differs": [
+     "WSL1'de veya konteynerde PID 1 `init` ya da başka bir şey olabilir.",
+     "PPID yalnızca `ps -ef`'te var; `ps aux`'te %CPU ve %MEM var."
+    ]
+   },
+   "v03": {
+    "title": "Süreç ağacı",
+    "text": "Gerekirse `psmisc` kur ve ağaca bak. Kökte kim var? İlk satırları yapıştır.",
+    "blocks": [
+     {
+      "cmd": "# Rocky/Alma: sudo dnf install -y psmisc\n# Ubuntu/Debian: sudo apt install -y psmisc\npstree -p | head -n 8\nps -ef --forest | head -n 15",
+      "expected": "systemd(1)-+-sshd(412)---sshd(2050)---sshd(2090)---bash(2100)-+-pstree(2200)\n           |-crond(650)\n..."
+     }
+    ],
+    "differs": [
+     "`pstree: command not found` psmisc'in kurulu olmadığı anlamına gelir; yukarıdaki kurulum satırını kullan.",
+     "WSL'de systemd yerine `init(1)` veya `SessionLeader` görebilirsin."
+    ]
+   },
+   "v04": {
+    "title": "/proc'a bak",
+    "text": "Kabuğunun durumunu doğrudan /proc'tan oku ve programın nerede durduğunu göster.",
+    "blocks": [
+     {
+      "cmd": "head -n 9 /proc/$$/status\nls -l /proc/$$/exe\nls -l /proc/$$/fd",
+      "expected": "Name:\tbash\nUmask:\t0022\nState:\tS (sleeping)\n...\nPPid:\t2050\n...\nlrwxrwxrwx 1 student student 0 ... /proc/2100/exe -> /usr/bin/bash"
+     }
+    ],
+    "differs": [
+     "`Name:`, `State:` ve `PPid:` satırları olmalı; diğer satırların sırası farklı olabilir.",
+     "Bazı sistemlerde `exe` `/bin/bash` gösterebilir (/usr/bin'e bağlantı)."
+    ]
+   },
+   "v05": {
+    "title": "Bir süreci güvenle başlat ve durdur",
+    "text": "**Önce snapshot.** Kendi `sleep` sürecini arka planda başlat, pgrep ile bul, SIGTERM ile kibarca durdur ve gittiğini kontrol et. Tanımadığın süreçlerde asla `pkill` veya `kill -9` kullanma.",
+    "blocks": [
+     {
+      "cmd": "sleep 600 &\npgrep -l sleep\nkill -15 $!\nsleep 1\npgrep -l sleep || echo gone",
+      "expected": "[1] 2300\n2300 sleep\n[1]+  Terminated   sleep 600\ngone"
+     }
+    ],
+    "differs": [
+     "`$!` son arka plan sürecinin PID'sidir.",
+     "`pgrep` hâlâ bir satır yazıyorsa başka bir `sleep` çalışıyordur; bir şey öldürmeden önce `pgrep -a sleep` ile bak."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Bir Linux sisteminin ilk süreci (bugün genelde systemd) hangi PID'ye sahiptir?",
+   "options": [
+    "0",
+    "1",
+    "2",
+    "100"
+   ],
+   "explain": "PID 1'i çekirdek başlatır; diğer tüm süreçler ondan türer. İşleyicisi olmayan sinyalleri, kullanıcı alanından gelen SIGKILL dahil, yok sayar."
+  },
+  "q2": {
+   "q": "Zombi süreç (STAT Z) için hangisi doğrudur?",
+   "options": [
+    "Çok CPU kullanır",
+    "Disk G/Ç'sini bekler",
+    "Bitmiştir; ebeveyn çıkış durumunu toplamamıştır ve `kill -9` işe yaramaz",
+    "Ctrl+Z ile durdurulmuştur"
+   ],
+   "explain": "Zombi zaten ölüdür; yalnızca tablo kaydı kalır. Ebeveyn wait çağırmalı ya da ebeveyni yeniden başlatırsın."
+  },
+  "q3": {
+   "q": "Kabukta `$$` ne anlama gelir?",
+   "options": [
+    "Mevcut kabuğun PID'si",
+    "Son arka plan işinin PID'si",
+    "Son komutun çıkış kodu",
+    "Süreç sayısı"
+   ],
+   "explain": "`$$` kabuğun kendi PID'sidir. Son arka plan PID'si `$!`, çıkış kodu `$?`."
+  },
+  "q4": {
+   "q": "Hangi komut varsayılan olarak PPID sütunu gösterir?",
+   "options": [
+    "ps",
+    "ps aux",
+    "uptime",
+    "ps -ef"
+   ],
+   "explain": "`ps -ef` (UNIX stili) PPID gösterir. `ps aux` (BSD stili) göstermez; onun için `ps -o pid,ppid,...` kullan."
+  }
+ },
+ "summary": [
+  "Süreç, PID'si olan çalışan bir programdır; ebeveyninin numarası PPID'dir; PID 1 (systemd) hepsinin atasıdır.",
+  "`ps aux` (BSD) CPU/MEM, `ps -ef` PPID gösterir, `ps -o` sütun seçer, `pgrep` isme göre bulur.",
+  "`pstree` (paket psmisc) ve `ps -ef --forest` ağacı gösterir; `/proc/<pid>` çekirdeğin ayrıntıları sunduğu yerdir.",
+  "Zombi (Z) ölüdür ve öldürülemez; ebeveyni düzelt. Önce `kill -15`, en son `kill -9`, tanımadığın süreçlerde asla.",
+  "Yük ortalamasını `nproc`'a göre oku."
+ ],
+ "glossary": [
+  {
+   "term": "süreç (process)",
+   "meaning": "Kendi PID'si ve belleği olan, bir programın çalışan örneği."
+  },
+  {
+   "term": "PID / PPID",
+   "meaning": "Süreç kimliği ve ebeveyn sürecin kimliği."
+  },
+  {
+   "term": "zombi",
+   "meaning": "Bitmiş ama çıkış durumu ebeveyni tarafından henüz toplanmamış süreç (STAT Z)."
+  },
+  {
+   "term": "sinyal",
+   "meaning": "Bir sürece gönderilen mesaj, örn. SIGTERM (15) veya SIGKILL (9)."
+  },
+  {
+   "term": "/proc",
+   "meaning": "Çekirdeğin süreç ve sistem bilgisini sunduğu sanal dosya sistemi."
+  },
+  {
+   "term": "yük ortalaması",
+   "meaning": "1, 5 ve 15 dakikada çalışmaya hazır süreçlerin ortalaması; CPU çekirdek sayısına göre okunur."
+  }
+ ]
+}

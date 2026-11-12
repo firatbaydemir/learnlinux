@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4.4 İzin Temelleri — Temel Linux Akademisi</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","tr")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="4.4">
+<header class="top"><a class="brand" href="index.html">Temel Linux Akademisi</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (isteğe bağlı)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-4.4.html" hreflang="tr" lang="tr" data-switch="tr" aria-current="true">TR</a><a href="../de/modul-4.4.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-4.4.html" hreflang="en" lang="en" data-switch="en">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Tema" aria-label="Tema">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Genel ilerleme"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><ol><li><a href="#read">ls -l çıktısını okumak</a></li><li><a href="#meaning">r, w, x: dosyada ve klasörde</a></li><li><a href="#chmod">chmod: izinleri değiştirmek</a></li><li><a href="#owner">chown ve chgrp: sahip ve grup</a></li><li><a href="#umask">umask: varsayılan izinler</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>İçindekiler</summary><ol><li><a href="#read">ls -l çıktısını okumak</a></li><li><a href="#meaning">r, w, x: dosyada ve klasörde</a></li><li><a href="#chmod">chmod: izinleri değiştirmek</a></li><li><a href="#owner">chown ve chgrp: sahip ve grup</a></li><li><a href="#umask">umask: varsayılan izinler</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Ana sayfa</a> <span aria-hidden="true">/</span> Seviye 4</p>
+<h1><span class="module-id">4.4</span> İzin Temelleri</h1>
+<p class="lead"><code>ls -l</code> çıktısını oku, <code>chmod</code>, <code>chown</code> ve <code>umask</code> ile dosya ve klasör izinlerini doğru yönet.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>Bu modülde neler öğreneceksin?</h2><ul><li><code>ls -l</code> çıktısındaki tür karakterini, üç izin üçlüsünü, sahibi ve grubu okursun.</li><li>r, w, x izinlerinin dosyada ve klasörde farklı anlamlar taşıdığını açıklarsın.</li><li>Bir dosyayı silmenin dosyanın değil, <strong>üst klasörün</strong> w+x iznine bağlı olduğunu bilirsin.</li><li><code>chmod</code> ile sekizlik ve sembolik izin verir, <code>chown</code>/<code>chgrp</code> ile sahibi değiştirirsin.</li><li><code>umask</code> değerinin çıkarma değil, bit maskesi olduğunu hesaplayarak gösterirsin.</li></ul></section>
+<section id="read"><h2>ls -l çıktısını okumak</h2>
+<p><code>ls -l</code> her dosya için bir satır verir: <code>-rw-r----- 1 student devs 120 Nov 12 10:00 report.txt</code>. İlk karakter <strong>türü</strong> gösterir: <code>-</code> dosya, <code>d</code> klasör, <code>l</code> sembolik bağ. Sonraki dokuz karakter üç üçlüdür: <strong>sahip (u)</strong>, <strong>grup (g)</strong>, <strong>diğerleri (o)</strong>. Her üçlü <code>rwx</code> sırasıyla okuma, yazma, çalıştırma; yoksa <code>-</code> yazar.</p>
+<p>Sayıdan sonra gelen iki isim sahibi ve grubu verir (<code>student devs</code>); aradaki <code>1</code> sabit bağ sayısıdır. Sistem seni sırayla kontrol eder: sahipsen yalnızca sahip üçlüsü, değilsen ama grup üyesiysen grup üçlüsü, ikisi de değilse diğerleri üçlüsü geçerlidir. <strong>root</strong> ve uygun yeteneklere sahip süreçler klasik DAC izinlerini çoğunlukla aşabilir; SELinux veya salt okunur bağlama gibi başka denetimler yine de erişimi engelleyebilir.</p>
+<p>Hangi gruplara üye olduğunu <code>id</code> gösterir. Yeni bir grup üyeliği ancak yeniden oturum açınca (veya <code>newgrp</code> ile) sürecine yansır.</p>
+<article class="cmd"><h3><code>ls -l</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosyaları tür, izin, sahip, grup, boyut ve tarihle listeler.</dd><dt>Nerede kullanılır?</dt><dd>İzin sorunlarında ilk bakılacak yer.</dd><dt>Neden önemli?</dt><dd>Kimin neyi yapabildiğini tek bakışta gösterir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -l" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -l">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ls -ld</code></h3><dl><dt>Ne işe yarar?</dt><dd>Klasörün kendi iznini gösterir (içindekileri değil).</dd><dt>Nerede kullanılır?</dt><dd>Klasör izinlerini kontrol ederken.</dd><dt>Neden önemli?</dt><dd><code>ls -l shared</code> içeriği listeler; klasörün kendisi için <code>-d</code> gerekir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> shared</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -ld shared" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -ld shared">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>stat</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosya ayrıntılarını gösterir; izin hem sekizlik hem sembolik yazılır.</dd><dt>Nerede kullanılır?</dt><dd>Sekizlik değeri doğrulamak istediğinde.</dd><dt>Neden önemli?</dt><dd><code>ls -l</code> ile sekizlik arasında çeviri yapmana gerek kalmaz.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">stat</span> secret.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="stat secret.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="stat secret.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>id</code></h3><dl><dt>Ne işe yarar?</dt><dd>Kullanıcı ve grup kimliklerini gösterir.</dd><dt>Nerede kullanılır?</dt><dd>&#x27;Neden erişemiyorum?&#x27; sorusunda.</dd><dt>Neden önemli?</dt><dd>Hangi üçlünün sana uygulandığını belirler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">id</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="id" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="id">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>İzin dizesini üçer üçer böl: <code>rw- r-- ---</code> yani sahip okur-yazar, grup okur, diğerleri hiçbir şey.</p></aside>
+</section>
+<section id="meaning"><h2>r, w, x: dosyada ve klasörde</h2>
+<p><strong>Dosyada:</strong> <code>r</code> içeriği okur, <code>w</code> içeriği değiştirir, <code>x</code> dosyayı program olarak çalıştırır. Yeni dosyalar <strong>asla çalıştırılabilir</strong> oluşmaz; <code>./script.sh</code> için önce <code>chmod +x</code> gerekir.</p>
+<p><strong>Klasörde:</strong> <code>r</code> içindeki isimleri listeler, <code>x</code> klasöre girmeyi ve içindeki ada erişmeyi sağlar (<code>cd</code>, <code>cat vault/data.txt</code>), <code>w</code> içinde dosya oluşturmayı, silmeyi ve yeniden adlandırmayı sağlar. <code>w</code> tek başına işe yaramaz; <strong>w ile birlikte x gerekir</strong>. Bir yola erişmek için yolun üzerindeki <strong>her klasörde x</strong> gerekir.</p>
+<p><strong>Önemli kural:</strong> bir dosyayı silmek veya taşımak için dosyanın kendi izni değil, <strong>üst klasörün w+x izni</strong> gerekir. Dosyanın izni yalnızca içeriği okumayı ve yazmayı belirler. Bu yüzden <code>555</code> klasördeki <code>644</code> dosya silinemez, <code>777</code> dosya ise <code>555</code> klasörde yine silinemez.</p>
+<article class="cmd"><h3><code>cat</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosya içeriğini okur; dosyada r ve yoldaki klasörlerde x ister.</dd><dt>Nerede kullanılır?</dt><dd>Okuma iznini denerken.</dd><dt>Neden önemli?</dt><dd>Yetkisiz okuma <code>Permission denied</code> ile durur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> secret.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cat secret.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="cat secret.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>rm</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosyayı siler; başarı üst klasörün w+x iznine bağlıdır.</dd><dt>Nerede kullanılır?</dt><dd>Silme hatasını anlarken.</dd><dt>Neden önemli?</dt><dd>Dosya izni değil klasör izni belirleyicidir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="rm locked/old.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="rm locked/old.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>cd</code></h3><dl><dt>Ne işe yarar?</dt><dd>Klasöre girer; klasörde x ister.</dd><dt>Nerede kullanılır?</dt><dd>Erişim sorunlarında.</dd><dt>Neden önemli?</dt><dd>x olmayan klasöre girilemez.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> vault</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cd vault" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="cd vault">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>&#x27;Silemiyorum&#x27; dediğinde dosyaya değil, <code>ls -ld .</code> ile <strong>klasöre</strong> bak.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p><code>chmod -R 777</code> bir çözüm değildir. Herkese yazma ve çalıştırma izni verir, sorunun nedenini gizler ve güvenlik açığı açar. Önce <code>ls -l</code> ve <code>id</code> ile gerçek nedeni bul.</p></aside>
+</section>
+<section id="chmod"><h2>chmod: izinleri değiştirmek</h2>
+<p>Sekizlik gösterimde <strong>r=4, w=2, x=1</strong> değerleri toplanır: <code>7</code>=rwx, <code>6</code>=rw-, <code>5</code>=r-x, <code>4</code>=r--, <code>0</code>=---. Üç rakam sırayla sahip, grup, diğerleri içindir. Yaygın değerler: <code>644</code> (normal dosya), <code>755</code> (program ve klasör), <code>600</code> (özel dosya), <code>700</code> (özel klasör), <code>664</code> ve <code>775</code> (grup çalışması).</p>
+<p>Sembolik gösterimde kim (<code>u</code>, <code>g</code>, <code>o</code>, <code>a</code>), işlem (<code>+</code>, <code>-</code>, <code>=</code>) ve izin (<code>r</code>, <code>w</code>, <code>x</code>) yazılır: <code>chmod g+w,o-rx shared</code>. <strong>Büyük <code>X</code></strong> yalnızca klasörlere ve zaten çalıştırılabilir dosyalara x verir; <code>chmod -R u=rwX,go=rX data</code> klasörleri 755, önceden çalıştırılabilir olmayan dosyaları 644 yapar ve mevcut çalıştırılabilir dosyaların x bitlerini korur.</p>
+<p>Yalnızca dosyanın <strong>sahibi</strong> (veya root) izin değiştirebilir; başkasının dosyasında <code>Operation not permitted</code> alırsın.</p>
+<article class="cmd"><h3><code>chmod 640</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sekizlik izin atar: sahip rw-, grup r--, diğerleri ---.</dd><dt>Nerede kullanılır?</dt><dd>İzni tek seferde belirlerken.</dd><dt>Neden önemli?</dt><dd>Sonuç açık ve tekrarlanabilirdir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 640 notes.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod 640 notes.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod 640 notes.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>chmod +x</code></h3><dl><dt>Ne işe yarar?</dt><dd>Çalıştırma izni ekler.</dd><dt>Nerede kullanılır?</dt><dd>Betiği çalıştırılabilir yaparken.</dd><dt>Neden önemli?</dt><dd>Diğer izinlere dokunmadan yalnızca x ekler (umask&#x27;a göre).</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x script.sh</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod +x script.sh" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod +x script.sh">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>chmod g+w,o-rx</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sembolik: gruba yazma ekler, diğerlerinden okuma ve çalıştırmayı alır.</dd><dt>Nerede kullanılır?</dt><dd>Küçük düzeltmelerde.</dd><dt>Neden önemli?</dt><dd>Yalnızca belirtilen bitleri değiştirir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> g+w,o-rx shared</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod g+w,o-rx shared" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod g+w,o-rx shared">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>chmod -R u=rwX,go=rX</code></h3><dl><dt>Ne işe yarar?</dt><dd>Ağacı özyinelemeli düzeltir: dosyalar 644, klasörler 755.</dd><dt>Nerede kullanılır?</dt><dd>Toplu düzeltmede.</dd><dt>Neden önemli?</dt><dd><code>X</code> sayesinde dosyalara gereksiz x vermezsin.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> <span class="tf">-R</span> u=rwX,go=rX data</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod -R u=rwX,go=rX data" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="chmod -R u=rwX,go=rX data">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Önce <code>ls -l</code> ile hedefi gör, <code>-R</code> kullanıyorsan yol sonuna dikkat et.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p><code>chmod -R</code> komutunu <code>/</code> veya <code>~</code> üzerinde yanlış değerle çalıştırmak sistemi veya ev dizinini bozar (ör. sshd özel anahtar izinleri, sudo). VM&#x27;de denemeden önce <strong>snapshot</strong> al ve yalnızca deneme klasöründe çalış.</p></aside>
+</section>
+<section id="owner"><h2>chown ve chgrp: sahip ve grup</h2>
+<p>Her dosyanın bir sahibi ve bir grubu vardır. <strong>Sahibi yalnızca root değiştirebilir</strong> (<code>sudo chown</code>). Sıradan kullanıcı kendi dosyasının grubunu ancak üyesi olduğu bir gruba çevirebilir; simülatörde bunun için <code>sudo chgrp</code> kullanırız.</p>
+<p><code>chown alice:devs report.txt</code> sahibi ve grubu birlikte ayarlar. Takım çalışması için tipik düzen: dosya grubu <code>devs</code>, izin <code>660</code> veya klasör <code>770</code>; yalnızca <code>devs</code> üyeleri erişir. Daha ince kurallar (kullanıcı başına izin) ACL ile yapılır (<code>getfacl</code>/<code>setfacl</code>); bu sonraki modüllerde işlenir.</p>
+<article class="cmd"><h3><code>sudo chown</code></h3><dl><dt>Ne işe yarar?</dt><dd>Sahibini (ve istersen grubunu) değiştirir.</dd><dt>Nerede kullanılır?</dt><dd>Dosyayı başka kullanıcıya devrederken.</dd><dt>Neden önemli?</dt><dd>Yalnızca root yapabilir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chown alice:devs report.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sudo chown alice:devs report.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="sudo chown alice:devs report.txt">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>sudo chgrp</code></h3><dl><dt>Ne işe yarar?</dt><dd>Yalnızca grubu değiştirir.</dd><dt>Nerede kullanılır?</dt><dd>Ortak klasör için grup atarken.</dd><dt>Neden önemli?</dt><dd>Sahibi korur, grup erişimini ayarlar.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chgrp devs team.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sudo chgrp devs team.txt" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="sudo chgrp devs team.txt">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Gerçek sistemde <code>chown -R</code> ile de dikkatli ol; önce yolu <code>ls -ld</code> ile doğrula.</p></aside>
+</section>
+<section id="umask"><h2>umask: varsayılan izinler</h2>
+<p>Yeni dosya <code>666</code> ile, yeni klasör <code>777</code> ile <strong>başlar</strong>; <code>umask</code> bu izinlerden bit <strong>maskeleyerek</strong> düşürür: <strong>yeni izin = taban &amp; ~umask</strong>. Bu çıkarma değildir. Örnekler (dosya, taban 666): umask <code>022</code> → <code>644</code>; <code>027</code> → <code>640</code>; <code>077</code> → <code>600</code>; <code>002</code> → <code>664</code>.</p>
+<p>Fark ancak umask&#x27;ta taban dışı bitler olunca görünür: <code>025</code> için <code>666 &amp; ~025 = 642</code>, çıkarma <code>641</code> derdi (yanlış). <code>001</code> için sonuç <code>666</code>, çıkarma <code>665</code> verirdi. Dosyada x biti tabanda olmadığı için dosyalar asla çalıştırılabilir doğmaz.</p>
+<p><code>umask</code> <strong>sürece özeldir</strong>: yalnızca o kabukta ve ondan başlayan programlarda geçerlidir. Kalıcı yapmak için <code>~/.bashrc</code> (kullanıcı) veya <code>/etc/profile</code> (sistem) içine yazılır.</p>
+<article class="cmd"><h3><code>umask</code></h3><dl><dt>Ne işe yarar?</dt><dd>Geçerli maskeyi sekizlik gösterir (ör. <code>0022</code>).</dd><dt>Nerede kullanılır?</dt><dd>Yeni dosya izinlerini anlamak için.</dd><dt>Neden önemli?</dt><dd>Dosyaların neden 644 doğduğunu açıklar.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">umask</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="umask" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="umask">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>umask -S</code></h3><dl><dt>Ne işe yarar?</dt><dd>Maskeyi sembolik gösterir: <code>u=rwx,g=rx,o=rx</code>.</dd><dt>Nerede kullanılır?</dt><dd>İzin biçimini okumak istediğinde.</dd><dt>Neden önemli?</dt><dd>İzin verilen bitleri doğrudan gösterir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> <span class="tf">-S</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask -S">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>umask 027</code></h3><dl><dt>Ne işe yarar?</dt><dd>Bu kabuk için maskeyi ayarlar: yeni dosya 640, klasör 750.</dd><dt>Nerede kullanılır?</dt><dd>Grup dışına kapalı çalışırken.</dd><dt>Neden önemli?</dt><dd>Sonraki tüm yeni dosyaları etkiler.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 027</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="umask 027" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="umask 027">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Ortak proje klasörlerinde <code>umask 002</code> kullan: yeni dosyalar <code>664</code>, klasörler <code>775</code> olur.</p></aside>
+</section>
+<section id="vm"><h2>Kendi VM&#x27;inde yap <span class="gcount" data-g="vm"></span></h2><p>Asıl uygulama gerçek Linux&#x27;ta yapılır: kendi sanal makinende (VirtualBox, UTM veya WSL) komutları çalıştır, çıktıyı karşılaştır.</p><p>Kendi VM&#x27;inde <code>~/permlab</code> deneme klasöründe çalış. Komutları sırayla yapıştır, çıktıyı bu sayfaya yapıştır. Yıkıcı adımlardan önce snapshot al.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>İzinleri oku</h3><span class="status" aria-hidden="true"></span></header><p>Sistem dosyalarının izin dizesini oku ve kimliğini kontrol et.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/etc/passwd</span> <span class="tp">/etc/shadow</span> <span class="tp">/usr/bin/passwd</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">/tmp</span> <span class="tp">/home</span></span>
+<span class="ln"><span class="tk">id</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l /etc/passwd /etc/shadow /usr/bin/passwd
+ls -ld /tmp /home
+id">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">-rw-r--r-- 1 root root  2345 Nov 12 10:00 /etc/passwd
+-rw-r----- 1 root shadow 1234 Nov 12 10:00 /etc/shadow
+-rwsr-xr-x 1 root root 59976 Nov 12 10:00 /usr/bin/passwd
+drwxrwxrwt 15 root root 4096 Nov 12 10:00 /tmp</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Rocky/Alma&#x27;da <code>/etc/shadow</code> izni <code>----------</code> olabilir; bu normaldir (root bypass).</li><li><code>s</code> (setuid) ve <code>t</code> (sticky) özel bitleridir; şimdilik yalnızca &#x27;x benzeri&#x27; olarak not et.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>chmod ile deneme</h3><span class="status" aria-hidden="true"></span></header><p>Deneme klasörü ve dosyası oluştur, izni <code>640</code> yap ve sonucu göster.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">touch</span> notes.txt</span>
+<span class="ln"><span class="tk">chmod</span> 640 notes.txt</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> notes.txt</span>
+<span class="ln"><span class="tk">stat</span> <span class="tf">-c</span> <span class="ts">&#x27;%a %A %U:%G&#x27;</span> notes.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/permlab
+cd ~/permlab
+touch notes.txt
+chmod 640 notes.txt
+ls -l notes.txt
+stat -c &#x27;%a %A %U:%G&#x27; notes.txt">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">-rw-r----- 1 student student 0 Nov 12 10:00 notes.txt
+640 -rw-r----- student:student</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>stat -c</code> yalnızca GNU stat&#x27;te vardır; macOS/BSD&#x27;de çalışmaz, yok sayabilirsin.</li><li>Kullanıcı adın <code>student</code> değilse kendi adın görünür; sorun değil.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Silme klasör iznine bağlı</h3><span class="status" aria-hidden="true"></span></header><p>Klasörü <code>555</code> yap, içindeki dosyayı silmeyi dene, sonra klasör iznini geri ver.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">mkdir</span> locked</span>
+<span class="ln"><span class="tk">touch</span> <span class="tp">locked/old.txt</span></span>
+<span class="ln"><span class="tk">chmod</span> 555 locked</span>
+<span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> locked</span>
+<span class="ln"><span class="tk">chmod</span> 755 locked</span>
+<span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+<span class="ln"><span class="tk">ls</span> locked</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/permlab
+mkdir locked
+touch locked/old.txt
+chmod 555 locked
+rm locked/old.txt
+ls -ld locked
+chmod 755 locked
+rm locked/old.txt
+ls locked">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">rm: cannot remove &#x27;locked/old.txt&#x27;: Permission denied
+dr-xr-xr-x 2 student student 4096 Nov 12 10:00 locked</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>root olarak çalışıyorsan silme başarılı olur, çünkü root izinleri atlar; normal kullanıcıyla dene.</li><li>Mesaj sisteminde çevrilmiş olabilir (<code>Erişim engellendi</code>, <code>Zugriff verweigert</code>).</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>umask etkisi</h3><span class="status" aria-hidden="true"></span></header><p>Maskeyi <code>027</code> yap ve yeni dosya ile klasörün izinlerini gör. Not: bu değişiklik yalnızca bu terminal oturumunu etkiler.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">umask</span></span>
+<span class="ln"><span class="tk">umask</span> 027</span>
+<span class="ln"><span class="tk">touch</span> f027.txt</span>
+<span class="ln"><span class="tk">mkdir</span> d027</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> f027.txt d027</span>
+<span class="ln"><span class="tk">umask</span> 022</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/permlab
+umask
+umask 027
+touch f027.txt
+mkdir d027
+ls -ld f027.txt d027
+umask 022">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">0022
+-rw-r----- 1 student student 0 Nov 12 10:00 f027.txt
+drwxr-x--- 2 student student 4096 Nov 12 10:00 d027</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Başlangıç umask&#x27;ın <code>0002</code> olabilir (Ubuntu&#x27;da kullanıcıya özel grup varsa); bu normaldir.</li><li>Yeni bir terminal açınca umask eski değerine döner: süreç başına geçerlidir.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>chown ve temizlik</h3><span class="status" aria-hidden="true"></span></header><p>Dosyanın sahibini root yap, sonra klasörü sil: üst klasörde yazma izni olduğundan root&#x27;a ait dosya da silinir.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">touch</span> owned.txt</span>
+<span class="ln"><span class="tk">sudo</span> chown root:root owned.txt</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> owned.txt</span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">rm</span> <span class="tf">-r</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tp">~/permlab</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/permlab
+touch owned.txt
+sudo chown root:root owned.txt
+ls -l owned.txt
+cd ~
+rm -r ~/permlab
+ls ~/permlab">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">-rw-r--r-- 1 root root 0 Nov 12 10:00 owned.txt
+ls: cannot access &#x27;/home/student/permlab&#x27;: No such file or directory</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>sudo</code> parola isterse kendi parolanı yaz.</li><li><code>rm: remove write-protected regular file?</code> diye sorarsa <code>y</code> yaz: root&#x27;a ait dosyayı silmek klasör iznine bağlıdır, dosya iznine değil.</li><li><code>rm -r</code> yolunu dikkatle yaz; <code>/</code> veya <code>~</code> üzerinde asla deneme.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Hızlı alıştırmalar (simülatör)</h2><p>İsteğe bağlı: VM&#x27;e geçmeden önce ısınmak veya VM&#x27;in yokken denemek için tarayıcıdaki sanal terminali kullan. Görevler otomatik doğrulanır.</p><p>Görevler ısınmadan ticket&#x27;a doğru zorlaşır. Rozetler zorluğu gösterir.</p><p><button type="button" class="btn" data-openterm>&gt;_ Terminali aç (isteğe bağlı)</button></p>
+<h3 class="kind k-warmup">Isınma <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>ls -l</code> ile <code>lab</code> klasöründeki dosyaların izinlerini listele.</p><details><summary>İpucu</summary><p>Satırın başındaki 10 karakteri oku: tür + üç üçlü.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>script.sh</code> dosyasını <code>chmod +x script.sh</code> ile çalıştırılabilir yap.</p><details><summary>İpucu</summary><p>Sonra <code>ls -l script.sh</code> ile x bitlerini gör.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x script.sh</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod +x script.sh">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p><code>umask</code> komutuyla geçerli maskeyi göster.</p><details><summary>İpucu</summary><p>Varsayılan çıktı <code>0022</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Adım adım lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>notes.txt</code> için sahip rw-, grup r--, diğerleri --- olacak şekilde <code>chmod 640 notes.txt</code> çalıştır.</p><details><summary>İpucu</summary><p>6=rw-, 4=r--, 0=---.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 640 notes.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 640 notes.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>shared</code> klasörünün modunu sembolik olarak <code>770</code> yap: gruba yazma ekle, diğerlerinden okuma ve çalıştırmayı al (<code>chmod g+w,o-rx shared</code>).</p><details><summary>İpucu</summary><p>İki işlem virgülle ayrılır, boşluk yok.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> g+w,o-rx shared</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod g+w,o-rx shared">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>team.txt</code> dosyasının sahibini <code>sudo chown alice team.txt</code> ile <code>alice</code> yap.</p><details><summary>İpucu</summary><p>Sahibi yalnızca root değiştirebilir, <code>sudo</code> gerekir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chown alice team.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo chown alice team.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>team.txt</code> dosyasının grubunu <code>sudo chgrp devs team.txt</code> ile <code>devs</code> yap.</p><details><summary>İpucu</summary><p><code>ls -l team.txt</code> çıktısı <code>alice devs</code> göstermeli.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chgrp devs team.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo chgrp devs team.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t08" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p><code>umask 027</code> ayarla, sonra <code>touch new.txt</code> ile dosya oluştur. Dosya hangi izinle doğar?</p><details><summary>İpucu</summary><p>666 &amp; ~027 = 640.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 027</span>
+<span class="ln"><span class="tk">touch</span> new.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 027
+touch new.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Tahmin et <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t09" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>locked</code> klasörü <code>555</code>, içindeki <code>old.txt</code> <code>644</code>. <code>rm locked/old.txt</code> çalışır mı? Çalıştırarak doğrula.</p><details><summary>İpucu</summary><p>Silme için üst klasörde w gerekir; <code>ls -ld locked</code> ile bak.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="rm locked/old.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d3">Zor</span></p><p>Tahmin et: <code>umask 025</code> ayarlayıp <code>touch predict.txt</code> yaparsan izin ne olur? Önce hesapla (666 &amp; ~025), sonra çalıştırıp <code>ls -l predict.txt</code> ile doğrula.</p><details><summary>İpucu</summary><p>Çıkarma 641 verir; doğru maske hesabı 642.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 025</span>
+<span class="ln"><span class="tk">touch</span> predict.txt</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> predict.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 025
+touch predict.txt
+ls -l predict.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t11" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>./deploy.sh</code> çalışır mı? Çalıştırarak doğrula.</p><details><summary>İpucu</summary><p>Dosya 644 ve x biti yok: <code>Permission denied</code> beklenir.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">./deploy.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="./deploy.sh">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Hata ayıkla <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>locked/old.txt</code> silinemiyor. Sorunu düzeltip dosyayı sil.</p><details><summary>İpucu</summary><p>Dosyaya değil klasöre bak: <code>chmod u+w locked</code>, sonra <code>rm</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> u+w locked</span>
+<span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod u+w locked
+rm locked/old.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t13" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>cat vault/data.txt</code> başarısız oluyor. Düzeltip dosyayı oku.</p><details><summary>İpucu</summary><p><code>vault</code> klasörü <code>600</code>: x yok, içine girilemez. <code>chmod u+x vault</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> u+x vault</span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">vault/data.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod u+x vault
+cat vault/data.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini proje <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t14" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d2">Orta</span></p><p>Mini proje: <code>team</code> klasörü ve içinde <code>plan.txt</code> oluştur; klasör <code>770</code>, dosya <code>660</code> olsun; klasörün grubunu <code>sudo chgrp devs team</code> ile <code>devs</code> yap.</p><details><summary>İpucu</summary><p>Sıra: <code>mkdir</code>, <code>touch</code>, iki <code>chmod</code>, bir <code>chgrp</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> team</span>
+<span class="ln"><span class="tk">touch</span> <span class="tp">team/plan.txt</span></span>
+<span class="ln"><span class="tk">chmod</span> 770 team</span>
+<span class="ln"><span class="tk">chmod</span> 660 <span class="tp">team/plan.txt</span></span>
+<span class="ln"><span class="tk">sudo</span> chgrp devs team</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir team
+touch team/plan.txt
+chmod 770 team
+chmod 660 team/plan.txt
+sudo chgrp devs team">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Meydan okuma <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: <code>data</code> ağacındaki her şey <code>777</code>. Klasörleri <code>755</code>, dosyaları <code>644</code> yap (<code>data/a.txt</code>, <code>data/sub/b.txt</code>).</p><details><summary>İpucu</summary><p>Büyük <code>X</code> kullan: <code>chmod -R u=rwX,go=rX data</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> <span class="tf">-R</span> u=rwX,go=rX data</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod -R u=rwX,go=rX data">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t16" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>TICKET #4401 — Alice <code>report.txt</code> dosyasını düzenleyecek, <code>devs</code> grubu da yazabilecek, başkaları erişmeyecek. Sahibi <code>alice</code>, grubu <code>devs</code>, modu <code>660</code> yap.</p><details><summary>İpucu</summary><p>Önce <code>chmod 660</code>, sonra <code>sudo chown alice:devs</code>; sahip değişince artık sen chmod yapamazsın.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 660 report.txt</span>
+<span class="ln"><span class="tk">sudo</span> chown alice:devs report.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 660 report.txt
+sudo chown alice:devs report.txt">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t17" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>TICKET #4402 — <code>shared</code> klasöründe ekip yeni dosyalar açıyor ve grup yazamıyor. <code>umask 002</code> ayarla ve <code>touch shared/log.txt</code> ile <code>664</code> dosya oluştur.</p><details><summary>İpucu</summary><p>666 &amp; ~002 = 664.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 002</span>
+<span class="ln"><span class="tk">touch</span> <span class="tp">shared/log.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 002
+touch shared/log.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Laboratuvarı sıfırla</button></p></section>
+<section id="quiz"><h2>Öz test</h2>
+<div class="q card" data-q="q1"><p><strong><code>notes.txt</code> dosyasını silmek için hangi izin gerekir?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Dosyada w</button><button type="button" class="opt" data-i="1">Üst klasörde w ve x</button><button type="button" class="opt" data-i="2">Dosyada r</button><button type="button" class="opt" data-i="3">Yalnızca dosya sahibi olmak</button></div><p class="explain" hidden>Silme klasör girdisini kaldırır; bu yüzden üst klasörde w+x gerekir. Dosyanın kendi izni belirleyici değildir.</p></div>
+<div class="q card" data-q="q2"><p><strong><code>umask 027</code> iken yeni dosya hangi izinle oluşur?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">750</button><button type="button" class="opt" data-i="1">600</button><button type="button" class="opt" data-i="2">640</button><button type="button" class="opt" data-i="3">027</button></div><p class="explain" hidden>666 &amp; ~027 = 640. Klasör için 777 &amp; ~027 = 750.</p></div>
+<div class="q card" data-q="q3"><p><strong>Klasörde <code>x</code> izni ne sağlar?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">İçine girmeyi ve içindeki adlara erişmeyi</button><button type="button" class="opt" data-i="1">İçindeki dosyaları çalıştırmayı</button><button type="button" class="opt" data-i="2">Klasörü silmeyi</button><button type="button" class="opt" data-i="3">İçindeki isimleri listelemeyi</button></div><p class="explain" hidden>Klasörde x geçiş iznidir (<code>cd</code>, yoldan geçme). Listeleme r ile yapılır.</p></div>
+<div class="q card" data-q="q4"><p><strong>Bir &#x27;Permission denied&#x27; hatasını <code>chmod -R 777</code> ile çözmek neden yanlıştır?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Komut zaten çalışmaz</button><button type="button" class="opt" data-i="1">Yalnızca root kullanabilir</button><button type="button" class="opt" data-i="2">Sahibi değiştirir</button><button type="button" class="opt" data-i="3">Herkese tam yetki verir ve gerçek nedeni gizler</button></div><p class="explain" hidden>777 herkese okuma, yazma ve çalıştırma verir; güvenliği bozar. Önce <code>ls -l</code> ve <code>id</code> ile nedeni bul, gereken en az izni ver.</p></div>
+</section>
+<section id="summary" class="card"><h2>Özet</h2><ul><li><code>ls -l</code>: tür karakteri + sahip/grup/diğerleri üçlüleri; r=4, w=2, x=1.</li><li>Klasörde r=listele, w=oluştur/sil/adlandır (x ile), x=gir/eriş; dosya silme üst klasörün w+x iznine bağlıdır.</li><li><code>chmod</code> sekizlik (<code>640</code>) veya sembolik (<code>g+w</code>, <code>u=rwX</code>) çalışır; <code>chown</code> sadece root&#x27;tadır.</li><li>umask çıkarma değil maskedir: yeni izin = taban &amp; ~umask (dosya 666, klasör 777).</li><li><code>chmod -R 777</code> çözüm değildir; en az yetki ilkesini uygula.</li></ul></section>
+<section id="glossary"><h2>Terimler</h2><dl class="gl"><dt>izin üçlüsü</dt><dd>Sahip, grup ve diğerleri için ayrı rwx kümesi.</dd><dt>sekizlik mod</dt><dd>r=4, w=2, x=1 toplamıyla yazılan izin, ör. 644.</dd><dt>umask</dt><dd>Yeni dosya ve klasörlerden hangi izin bitlerinin kapatılacağını belirleyen bit maskesi.</dd><dt>sahip (owner)</dt><dd>Dosyanın kullanıcı kimliği; izin değiştirebilir.</dd><dt>grup</dt><dd>Aynı izinleri paylaşan kullanıcı topluluğu, ör. devs.</dd><dt>geçiş izni</dt><dd>Klasördeki x biti; yoldan geçmeye ve ada erişmeye izin verir.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-4.3.html">← Önceki</a><a class="btn primary" href="modul-4.5.html">Sonraki →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (isteğe bağlı)</strong><button type="button" class="ibtn" id="termclose" aria-label="Terminali kapat">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "tr", "module": "4.4", "setup": {"dirs": ["/home/student/lab", "/home/student/lab/shared", "/home/student/lab/locked", "/home/student/lab/vault", "/home/student/lab/data", "/home/student/lab/data/sub"], "files": {"/home/student/lab/secret.txt": "top secret\n", "/home/student/lab/script.sh": "echo hello\n", "/home/student/lab/deploy.sh": "echo deploy\n", "/home/student/lab/report.txt": "quarterly report\n", "/home/student/lab/notes.txt": "my notes\n", "/home/student/lab/team.txt": "team list\n", "/home/student/lab/locked/old.txt": "old data\n", "/home/student/lab/vault/data.txt": "vault data\n", "/home/student/lab/data/a.txt": "file a\n", "/home/student/lab/data/sub/b.txt": "file b\n"}, "modes": [["/home/student/lab/secret.txt", "600"], ["/home/student/lab/locked", "555"], ["/home/student/lab/vault", "600"], ["/home/student/lab/data/a.txt", "777"], ["/home/student/lab/data/sub/b.txt", "777"], ["/home/student/lab/data/sub", "777"], ["/home/student/lab/data", "777"]], "cwd": "/home/student/lab"}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^ls -\\w*l", "ok": true}}, {"id": "t02", "kind": "warmup", "check": {"mode": ["~/lab/script.sh", "755"]}}, {"id": "t03", "kind": "warmup", "check": {"cmd": "^umask$", "ok": true}}, {"id": "t04", "kind": "guided", "check": {"mode": ["~/lab/notes.txt", "640"]}}, {"id": "t05", "kind": "guided", "check": {"mode": ["~/lab/shared", "770"]}}, {"id": "t06", "kind": "guided", "check": {"owner": ["~/lab/team.txt", "alice"]}}, {"id": "t07", "kind": "guided", "check": {"owner": ["~/lab/team.txt", "alice", "devs"]}}, {"id": "t08", "kind": "guided", "check": [{"cmd": "^umask 0?27$", "ok": true}, {"mode": ["~/lab/new.txt", "640"]}]}, {"id": "t09", "kind": "predict", "check": {"cmd": "^rm locked/old\\.txt$", "ok": false}}, {"id": "t10", "kind": "predict", "check": [{"cmd": "^umask 0?25$", "ok": true}, {"mode": ["~/lab/predict.txt", "642"]}]}, {"id": "t11", "kind": "predict", "check": {"cmd": "^\\./deploy\\.sh$", "ok": false}}, {"id": "t12", "kind": "debug", "check": {"absent": "~/lab/locked/old.txt"}}, {"id": "t13", "kind": "debug", "check": {"cmd": "^cat (\\./)?vault/data\\.txt$", "ok": true}}, {"id": "t14", "kind": "mini", "check": [{"mode": ["~/lab/team", "770"]}, {"mode": ["~/lab/team/plan.txt", "660"]}, {"owner": ["~/lab/team", "student", "devs"]}]}, {"id": "t15", "kind": "challenge", "check": [{"mode": ["~/lab/data", "755"]}, {"mode": ["~/lab/data/sub", "755"]}, {"mode": ["~/lab/data/a.txt", "644"]}, {"mode": ["~/lab/data/sub/b.txt", "644"]}]}, {"id": "t16", "kind": "ticket", "check": [{"owner": ["~/lab/report.txt", "alice", "devs"]}, {"mode": ["~/lab/report.txt", "660"]}]}, {"id": "t17", "kind": "ticket", "check": [{"cmd": "^umask 0?02$", "ok": true}, {"mode": ["~/lab/shared/log.txt", "664"]}]}], "vm": [{"id": "v01", "expect": "[-d][rwx-]{9}"}, {"id": "v02", "expect": "-rw-r-----"}, {"id": "v03", "expect": "Permission denied|Erişim engellendi|Zugriff verweigert|Keine Berechtigung"}, {"id": "v04", "expect": "(?=[\\s\\S]*-rw-r-----)(?=[\\s\\S]*drwxr-x---)"}, {"id": "v05", "expect": "root\\s+root"}], "quiz": {"q1": 1, "q2": 2, "q3": 0, "q4": 3}, "ui": {"correct": "Doğru!", "wrong": "Yanlış, tekrar dene.", "taskDone": "Görev tamamlandı", "moduleDone": "Modül tamamlandı! 🎉", "tasksDone": "tamamlandı", "welcome": "Sanal Linux terminali — komutlar yalnızca bu sayfadaki sanal dosya sisteminde çalışır. 'help' yazarak komutları gör, Tab ile tamamla, ↑/↓ ile geçmişte gez.", "sandboxNote": "Güvenli kum havuzu: gerçek sistemine dokunulmaz.", "resetConfirm": "Bu modülün sanal dosya sistemi ve komut geçmişi sıfırlanacak. İlerlemen (tamamlanan görevler) korunur. Devam?", "openTerminal": "Terminali aç (isteğe bağlı)", "closeTerminal": "Terminali kapat", "continue": "Devam et", "startPath": "Öğrenmeye başla", "noResult": "Eşleşen modül veya komut yok.", "soon": "Yakında", "overall": "Genel ilerleme", "copied": "Kopyalandı ✓", "pasteOk": "Çıktın beklenen kalıpla eşleşti ✓", "pasteBad": "Henüz eşleşmedi. \"Çıktım farklı çıktı\" ipuçlarına bak ve çıktının tamamını yapıştır.", "iDidIt": "Yaptım", "undo": "Geri al", "groupDone": "tamam", "vmDone": "VM görevleri"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

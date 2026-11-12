@@ -1,0 +1,138 @@
+{
+ "title": "File information",
+ "lead": "Use file, stat, ls -l, ln -s, readlink and realpath to read a file's real type, size, times and link target.",
+ "objectives": [
+  "You know that on Linux an extension is just a name and `file` shows the real type.",
+  "You read size, permissions, owner and times with `stat` and `ls -l`.",
+  "You create symbolic links and find their target with `ls -l`, `readlink` and `realpath`."
+ ],
+ "sections": [
+  {
+   "id": "type",
+   "title": "Real type: file",
+   "body": [
+    "On Windows you tell the type from the extension. On Linux `.jpg` is only a name; the content can be something else entirely. `file` ignores the extension and looks at the first bytes of the content.",
+    "This helps with downloaded files: a file called `image.jpg` may really be an executable program."
+   ],
+   "commands": [
+    {"cmd": "file", "what": "Tells the real file type from its content.", "where": "On downloaded or suspicious files.", "why": "Exposes wrong extensions and disguised files.", "example": "file /etc/hostname", "nosim": true},
+    {"cmd": "file -i", "what": "Prints the type as a MIME type (e.g. text/plain).", "where": "In scripts and web server configuration.", "why": "Gives a short, machine-readable type.", "example": "file -i /etc/hostname", "nosim": true}
+   ],
+   "tip": "In the output, `ASCII text` means text, `ELF` an executable program and `directory` a folder."
+  },
+  {
+   "id": "details",
+   "title": "Details: stat and ls -l",
+   "body": [
+    "`ls -l` shows type, permissions, owner, size and date on one line. `stat` gives more: inode, link count and three timestamps.",
+    "Times: **Access** last read, **Modify** last change of the content, **Change** last change of metadata such as permissions or owner. The first character shows the type: `-` file, `d` folder, `l` symbolic link."
+   ],
+   "commands": [
+    {"cmd": "stat", "what": "Shows all technical details of a file.", "where": "When you need exact size, permissions and times.", "why": "More detailed than `ls -l`.", "example": "stat ~/info/data.txt"},
+    {"cmd": "ls -l", "what": "Prints a long-format listing.", "where": "For a quick look into a folder.", "why": "Type, permissions, owner, size and date on one line.", "example": "ls -l ~/info"},
+    {"cmd": "ls -lh", "what": "Shows sizes in readable KB/MB.", "where": "With larger files.", "why": "A readable size instead of a byte count.", "example": "ls -lh ~/info"},
+    {"cmd": "ls -ld", "what": "Lists the folder itself, not its contents.", "where": "When checking a folder's permissions.", "why": "Folder info without opening it.", "example": "ls -ld ~/info"}
+   ],
+   "tip": "`ls -lh` rounds; for exact bytes use `stat` or `wc -c`."
+  },
+  {
+   "id": "links",
+   "title": "Symbolic links and the real path",
+   "body": [
+    "A symbolic link (symlink) is a small file that points to another path. `ls -l` shows it as `link.txt -> data.txt`. If the target is missing the link is **broken**: it exists, but opening it gives an error.",
+    "Deleting a link does not delete the target; `rm link.txt` removes only the link. `readlink` prints the target one step, `realpath` the fully resolved absolute path."
+   ],
+   "commands": [
+    {"cmd": "ln -s", "what": "Creates a symbolic link: target first, then link name.", "where": "For shortcuts or version markers.", "why": "Access under a second name without copying.", "example": "ln -s data.txt ~/info/link.txt"},
+    {"cmd": "readlink", "what": "Prints the target a link points to.", "where": "When you want to know where a link goes.", "why": "In scripts you get the target cleanly.", "example": "readlink ~/info/link.txt", "nosim": true},
+    {"cmd": "realpath", "what": "Prints the absolute path with all links resolved.", "where": "With relative paths or chains of links.", "why": "Shows the file's real location on disk.", "example": "realpath ~/info/link.txt", "nosim": true}
+   ],
+   "warn": "The target path is relative to the link's folder. `ln -s data.txt ~/info/link.txt` works; `ln -s data.txt ~/link.txt` from another folder creates a broken link."
+  },
+  {
+   "id": "names",
+   "title": "Name and size: basename, dirname, wc",
+   "body": [
+    "`basename` returns the last part of a path, `dirname` the folder part. Both are common in scripts for splitting paths.",
+    "`wc -c` gives the size in bytes, `wc -l` the number of lines."
+   ],
+   "commands": [
+    {"cmd": "basename", "what": "Prints the last component (file name) of a path.", "where": "In scripts when you only need the name.", "why": "No need to cut the path by hand.", "example": "basename ~/info/data.txt"},
+    {"cmd": "dirname", "what": "Prints the folder part of a path.", "where": "To find the folder of a file.", "why": "You get the folder without the file name.", "example": "dirname ~/info/data.txt"},
+    {"cmd": "wc -c", "what": "Prints the byte count of a file.", "where": "When you need the exact size.", "why": "Exact size without rounding.", "example": "wc -c ~/info/data.txt"}
+   ]
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Run `stat` on `~/info/data.txt` and find the Size and Modify lines.", "hint": "`stat ~/info/data.txt`"},
+  "t02": {"text": "List the folder `~/info` in long format.", "hint": "`ls -l ~/info`"},
+  "t03": {"text": "Print only the file name of the path `~/info/data.txt` with `basename`.", "hint": "The output must be `data.txt`."},
+  "t04": {"text": "Print the folder part of the same path with `dirname`.", "hint": "The output must be `/home/student/info`."},
+  "t05": {"text": "List the contents of `~/info` with readable sizes.", "hint": "`ls -lh ~/info`"},
+  "t06": {"text": "How many bytes is `data.txt`? Find out with `wc -c`.", "hint": "Three lines: alpha, beta, gamma; each has a line ending."},
+  "t07": {"text": "Find the number of lines of `data.txt` with `wc -l`.", "hint": "`wc -l ~/info/data.txt`"},
+  "t08": {"text": "Create the symbolic link `~/info/link.txt` with the target `data.txt`.", "hint": "`ln -s data.txt ~/info/link.txt`; the target is relative to the link's folder."},
+  "t09": {"text": "Predict: how does the link look in the output of `ls -l ~/info`? Run it and check.", "hint": "You see `link.txt -> data.txt` and an `l` at the start."},
+  "t10": {"text": "Read the link's type with `stat ~/info/link.txt`.", "hint": "The output says `symbolic link`."},
+  "t11": {"text": "Predict: which letter does the line of `ls -ld ~/info` start with? Run it.", "hint": "A folder starts with `d`: `drwx...`."},
+  "t12": {"text": "Predict: what does `stat` do for the non-existent `~/info/missing.txt`? Run it.", "hint": "It fails: No such file or directory."},
+  "t13": {"text": "Try a broken link: create a link without target using `ln -s nothing.txt ~/broken`, then run `cat ~/broken`.", "hint": "The link exists, the target does not; `cat` reports an error."},
+  "t14": {"text": "Debug: `~/info/picture.jpg` is really plain text. Rename it to `picture.txt`.", "hint": "Look inside with `cat`, then rename with `mv`."},
+  "t15": {"text": "Mini project: create the folder `~/inventory`, write a file with `echo version1 > ~/inventory/v1.txt`, create the link `current` with target `v1.txt` and verify with `ls -l ~/inventory`.", "hint": "Order: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`."},
+  "t16": {"text": "Hard task: create `~/shortcut` as a link to `~/info/data.txt`, inspect it with `ls -l ~/shortcut` and `stat ~/shortcut`, then delete the link. `data.txt` must remain.", "hint": "`rm` removes only the link and does not touch the target."},
+  "t17": {"text": "Ticket #2520: The audit team wants the size of `~/info/data.txt` in bytes in the file `~/size.txt`. Redirect the output into the file.", "hint": "`wc -c ~/info/data.txt > ~/size.txt`"}
+ },
+ "vm": {
+  "intro": "Try it on your VM. There are no destructive commands here; you only create small test files in your home directory.",
+  "tasks": {
+   "v01": {
+    "title": "Find the real type",
+    "text": "Run `file` on a text file, a program and a folder and paste the output.",
+    "blocks": [{"cmd": "file /etc/hostname /usr/bin/ls /etc", "expected": "/etc/hostname: ASCII text\n/usr/bin/ls:  ELF 64-bit LSB pie executable, x86-64, ...\n/etc:         directory"}],
+    "differs": ["The location of `ls` depends on the distribution; find it with `which ls`.", "If `file` is missing, install it with `sudo apt install file` on Ubuntu or `sudo dnf install file` on Rocky/Alma."]
+   },
+   "v02": {
+    "title": "The lying extension",
+    "text": "Give a text file the name `.jpg` and see what `file` says.",
+    "blocks": [{"cmd": "echo hello > ~/fake.jpg\nfile ~/fake.jpg", "expected": "/home/student/fake.jpg: ASCII text"}],
+    "differs": ["Your path may be `/home/alice/fake.jpg`; the word `text` is what matters."]
+   },
+   "v03": {
+    "title": "Details with stat",
+    "text": "Find the Size, Modify and Change lines in the `stat` output.",
+    "blocks": [{"cmd": "stat ~/fake.jpg", "expected": "  File: /home/student/fake.jpg\n  Size: 6   Blocks: 8   regular file\nAccess: (0644/-rw-r--r--) ...\nModify: 2026-01-01 10:00:00 ..."}],
+    "differs": ["On a localised system labels may be translated; `LANG=C stat ~/fake.jpg` prints English.", "The Birth line is `-` on some file systems."]
+   },
+   "v04": {
+    "title": "Link and real path",
+    "text": "Create a symbolic link and find the target with `ls -l`, `readlink` and `realpath`.",
+    "blocks": [{"cmd": "ln -s fake.jpg ~/pic_link\nls -l ~/pic_link\nreadlink ~/pic_link\nrealpath ~/pic_link", "expected": "lrwxrwxrwx 1 student student 8 ... /home/student/pic_link -> fake.jpg\nfake.jpg\n/home/student/fake.jpg"}],
+    "differs": ["If `->` is missing in the `ls -l` output, check the order of `ln -s` (target first, then link name).", "If `realpath` is missing, `readlink -f ~/pic_link` does the same."]
+   },
+   "v05": {
+    "title": "Clean up",
+    "text": "Delete the test files. If there were no errors, press \"Done\".",
+    "blocks": [{"cmd": "ls -l ~/fake.jpg ~/pic_link\nrm ~/pic_link ~/fake.jpg"}],
+    "differs": ["`rm` removes the link first, then the target file. In reverse order the link stays broken, which is harmless."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What does `file image.jpg` use to determine a file's type?", "options": ["Its extension", "The first bytes of its content", "Its size", "Its owner"], "explain": "On Linux the extension is only a name; `file` checks the content."},
+  "q2": {"q": "What does the Modify time in `stat` output show?", "options": ["The last read", "The last permission change", "The last content change", "The deletion of the file"], "explain": "Modify is the content time, Change the metadata time, Access the last read."},
+  "q3": {"q": "What happens when you run `rm link.txt` on a symbolic link?", "options": ["Only the link is deleted", "The target file is deleted", "Both are deleted", "It gives an error"], "explain": "A link is its own entry; deleting it does not touch the target."},
+  "q4": {"q": "Which command prints the absolute path with all links resolved?", "options": ["basename", "dirname", "wc -c", "realpath"], "explain": "`realpath` resolves relative paths and link chains into the real absolute path."}
+ },
+ "summary": [
+  "An extension is only a name; use `file` for the real type.",
+  "`ls -l` is the quick overview, `stat` the details; Modify is content time, Change metadata time.",
+  "`ln -s target link` creates a symbolic link; `ls -l` shows `->`.",
+  "`readlink` shows the target, `realpath` the full absolute path; `rm link` does not delete the target."
+ ],
+ "glossary": [
+  {"term": "symlink", "meaning": "A special file that points to another path."},
+  {"term": "inode", "meaning": "The metadata record of a file in the file system."},
+  {"term": "dangling link", "meaning": "A symbolic link whose target does not exist."},
+  {"term": "MIME type", "meaning": "A label for the content type, e.g. text/plain."}
+ ]
+}

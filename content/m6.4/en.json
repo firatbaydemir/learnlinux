@@ -1,0 +1,172 @@
+{
+  "title": "LVM — PV, VG, LV and Extending",
+  "lead": "No panic when the disk fills up: grow the volume. Practise first in a safe loop-device lab.",
+  "objectives": [
+    "You explain the PV → VG → LV layers and what each one does.",
+    "You build a pool with pvcreate, vgcreate, lvcreate and read it with pvs/vgs/lvs/lvdisplay.",
+    "You grow a volume and its filesystem together with lvextend -r, and you know XFS cannot shrink.",
+    "You practise only on file-backed loop devices in a snapshotted VM."
+  ],
+  "sections": [
+    {
+      "id": "concepts",
+      "title": "Concepts: PV, VG, LV",
+      "body": [
+        "With classic partitions the size is fixed. **LVM** (Logical Volume Manager) pools disks and cuts volumes of any size from the pool. There are three layers: a **PV** (Physical Volume) is the LVM signature on a disk or partition, a **VG** (Volume Group) is the pool made of PVs, an **LV** (Logical Volume) is a volume cut from the pool that looks like a disk.",
+        "Order: disk → PV → VG → LV → filesystem (XFS/ext4) → mount. Example names: pool `vg_data`, volume `lv_web`, path `/dev/vg_data/lv_web`. To read the state, these commands are enough; none of them changes anything."
+      ],
+      "commands": [
+        {"cmd": "pvs", "what": "Lists Physical Volumes in a short table.", "where": "To see which disks belong to a pool.", "why": "The PFree column shows free space on the PV.", "example": "sudo pvs", "nosim": true},
+        {"cmd": "vgs", "what": "Lists Volume Groups; VSize is the total, VFree the free space.", "where": "Before extending, to check the pool has room.", "why": "If VFree is 0 you must add a PV with vgextend first.", "example": "sudo vgs", "nosim": true},
+        {"cmd": "lvs", "what": "Lists Logical Volumes.", "where": "Which volume is in which VG and how big?", "why": "Gives a quick overview.", "example": "sudo lvs", "nosim": true},
+        {"cmd": "lvdisplay", "what": "Shows details of an LV (path, size, status).", "where": "When inspecting a single volume.", "why": "Lets you verify the LV Path and LV Size fields.", "example": "sudo lvdisplay /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "lsblk -f", "what": "Shows disks, LVM layers, filesystems and mount points as a tree.", "where": "Before every LVM operation.", "why": "Makes sure you pick the right device.", "example": "lsblk -f", "nosim": true}
+      ],
+      "tip": "**Read first, write second**: pvs, vgs, lvs and lsblk -f change nothing; run them before every command that does."
+    },
+    {
+      "id": "safe-lab",
+      "title": "Safe lab: loop devices",
+      "body": [
+        "Never touch a real disk. You create a file with `truncate` and attach it with `losetup` as a **loop device** (`/dev/loop0`); LVM treats it as a real disk, but a mistake costs you at most one file.",
+        "First **take a VM snapshot** (module 0.2). Install the tools: on Rocky/Alma `sudo dnf install lvm2 xfsprogs`, on Debian/Ubuntu `sudo apt install lvm2 xfsprogs`. Files live in `~/lvm-lab`; the loop number may differ, so use the `--show` output."
+      ],
+      "commands": [
+        {"cmd": "truncate -s 300M", "what": "Creates a sparse file of the given size.", "where": "For a fake disk image.", "why": "A safe stand-in for a real disk.", "example": "truncate -s 300M ~/lvm-lab/disk1.img", "nosim": true},
+        {"cmd": "losetup -f --show", "what": "Attaches the file to the first free loop device and prints its name.", "where": "When turning an image into a block device.", "why": "pvcreate only works on block devices.", "example": "sudo losetup -f --show ~/lvm-lab/disk1.img", "nosim": true},
+        {"cmd": "losetup -a", "what": "Lists active loop devices and their files.", "where": "To confirm which loop belongs to which file.", "why": "Prevents writing to the wrong device.", "example": "losetup -a", "nosim": true},
+        {"cmd": "losetup -d", "what": "Detaches a loop device.", "where": "When cleaning up the lab.", "why": "The device must be released before the file is deleted.", "example": "sudo losetup -d /dev/loop0", "nosim": true}
+      ],
+      "warn": "`pvcreate`, `vgcreate` and `mkfs` erase the target. Check the device name with `losetup -a` before the command; never type real disk names like `/dev/sda` in this module.",
+      "tip": "A sparse image shows 300M in `ls -lh` but uses almost no disk space."
+    },
+    {
+      "id": "create",
+      "title": "Creating PV, VG and LV",
+      "body": [
+        "The order is always the same: `pvcreate` → `vgcreate` → `lvcreate` → filesystem → mount. In the example below the variable `LOOP1` holds the `losetup` output.",
+        "`lvcreate -L 200M` means a fixed size, `-l 100%FREE` means all remaining space. The RHEL family defaults to **XFS**, Debian/Ubuntu usually to **ext4**; both work."
+      ],
+      "commands": [
+        {"cmd": "pvcreate", "what": "Writes an LVM signature to the device, making it a PV.", "where": "Before adding a disk to a pool.", "why": "A VG is built only from PVs.", "example": "sudo pvcreate $LOOP1", "nosim": true},
+        {"cmd": "vgcreate", "what": "Creates a VG from one or more PVs.", "where": "When building the pool.", "why": "Volumes are cut from this pool.", "example": "sudo vgcreate vg_data $LOOP1", "nosim": true},
+        {"cmd": "lvcreate", "what": "Cuts a named LV from a VG.", "where": "When giving an application its own volume.", "why": "-n sets the name, -L the size.", "example": "sudo lvcreate -L 200M -n lv_web vg_data", "nosim": true},
+        {"cmd": "mkfs.xfs", "what": "Creates an XFS filesystem on the LV (mkfs.ext4 for ext4).", "where": "When preparing a new volume for use.", "why": "Without a filesystem it cannot be mounted.", "example": "sudo mkfs.xfs /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "mount", "what": "Attaches the volume to a directory.", "where": "Before you start writing data.", "why": "Files appear in the directory it is mounted on.", "example": "sudo mount /dev/vg_data/lv_web /mnt/web", "nosim": true}
+      ],
+      "danger": "`mkfs` destroys existing data. Never run it on an existing LV or disk; first confirm with `lsblk -f` that the target is empty and a loop device."
+    },
+    {
+      "id": "extend",
+      "title": "Extending: lvextend -r",
+      "body": [
+        "When a volume fills up you need two steps: grow the LV, then grow the filesystem. `lvextend -r` does both. By hand use `xfs_growfs <mountpoint>` for XFS or `resize2fs <device>` for ext4; both can grow while **mounted**.",
+        "If the VG has no free space (VFree), first make the new device a PV with `pvcreate`, add it with `vgextend`, then run `lvextend`. Shrinking is **problematic**: XFS **can never shrink**; ext4 only when unmounted and after a backup."
+      ],
+      "commands": [
+        {"cmd": "lvextend -r", "what": "Grows the LV and the filesystem in one go.", "where": "When extending a full volume online.", "why": "Removes the risk of forgetting the second step.", "example": "sudo lvextend -r -L +100M /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "xfs_growfs", "what": "Grows a mounted XFS up to the LV size.", "where": "When you did not use lvextend -r.", "why": "XFS takes the mount point as argument.", "example": "sudo xfs_growfs /mnt/web", "nosim": true},
+        {"cmd": "resize2fs", "what": "Grows an ext4 filesystem up to the LV size.", "where": "When growing an ext4 volume by hand.", "why": "Takes the device path as argument.", "example": "sudo resize2fs /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "vgextend", "what": "Adds a new PV to an existing VG.", "where": "When VFree runs out.", "why": "Grows the pool so the LV can grow.", "example": "sudo vgextend vg_data $LOOP2", "nosim": true}
+      ],
+      "tip": "`-L +100M` adds to the current size, `-L 300M` sets the total size. To take all free space write `-l +100%FREE`."
+    },
+    {
+      "id": "safety",
+      "title": "Persistent mounts, removal and warnings",
+      "body": [
+        "To have the volume back after a reboot you need an `/etc/fstab` line: `/dev/vg_data/lv_web /srv/web xfs defaults 0 0`. A typo can break booting; back up the file before editing, then test with `sudo mount -a`. You do not need fstab in the loop lab.",
+        "Removal goes in reverse: `umount` → `lvremove` → `vgremove` → `pvremove` → `losetup -d`. These commands ask for confirmation and destroy data irrecoverably. Always see the name first with `lvs`/`vgs`."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/fstab", "what": "Shows the filesystems mounted at boot.", "where": "When checking a persistent mount.", "why": "A wrong line can block booting.", "example": "cat /etc/fstab"},
+        {"cmd": "lvremove", "what": "Deletes an LV and its data.", "where": "Only when cleaning up the lab.", "why": "There is no way back; umount first.", "example": "sudo lvremove /dev/vg_data/lv_web", "nosim": true},
+        {"cmd": "vgreduce", "what": "Removes a PV from a VG.", "where": "When detaching a disk from the pool.", "why": "If the PV holds data, move it first with pvmove.", "example": "sudo vgreduce vg_data $LOOP2", "nosim": true},
+        {"cmd": "pvremove", "what": "Wipes the LVM signature from a device.", "where": "Last step of the lab.", "why": "The device is no longer a PV; refused if still in a VG.", "example": "sudo pvremove $LOOP1", "nosim": true}
+      ],
+      "warn": "`lvremove`, `vgreduce` and `pvremove` can destroy production data on a real server. Take a snapshot/backup first and check the name twice.",
+      "danger": "On a real system with a separate disk a wrong name loses everything. In this module use loop devices only; never try to shrink an XFS volume. The way is backup, recreate, restore."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Read the sample output `~/lvm/vgs.txt` with `cat`. Which VG has free space?", "hint": "`cat ~/lvm/vgs.txt` — look at the VFree column."},
+    "t02": {"text": "Show only the `vg_data` volumes from `~/lvm/lvs.txt` using `grep`.", "hint": "`grep vg_data ~/lvm/lvs.txt`"},
+    "t03": {"text": "Back up before editing: copy `~/lvm/fstab.test` to `~/lvm/fstab.bak`.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak`"},
+    "t04": {"text": "Create `~/lvm/lab.sh`: first line `truncate -s 300M ~/lvm-lab/disk1.img`, second line `sudo losetup -f --show ~/lvm-lab/disk1.img` (append the second with `>>`).", "hint": "Use `printf '...\\n' > ~/lvm/lab.sh` for the first line, `>>` for the next ones."},
+    "t05": {"text": "Append two lines to `lab.sh`: `sudo pvcreate /dev/loop0` and `sudo vgcreate vg_data /dev/loop0`.", "hint": "`printf '...\\n' >> ~/lvm/lab.sh` twice."},
+    "t06": {"text": "Append `sudo lvcreate -L 200M -n lv_web vg_data` and `sudo mkfs.xfs /dev/vg_data/lv_web` to `lab.sh`.", "hint": "Append with `>>`; `>` would reset the file."},
+    "t07": {"text": "Predict: what will `grep -c vg_data ~/lvm/lvs.txt` print? Then run it to verify.", "hint": "`-c` counts matching lines."},
+    "t08": {"text": "Predict: what does `grep xfs ~/lvm/fs.txt` say about shrinking XFS? Run it to verify.", "hint": "XFS grows but never shrinks."},
+    "t09": {"text": "Debug: the `lvextend` in `~/lvm/grow.sh` does not grow the filesystem. Fix the line by adding `-r`: `lvextend -r -L +2G /dev/vg_data/lv_web`.", "hint": "Rewrite the file with `echo '...' > ~/lvm/grow.sh`."},
+    "t10": {"text": "Debug: `~/lvm/fstab.test` has a wrong device name (`lv_wb`). Fix the line to `/dev/vg_data/lv_web /srv/web xfs defaults 0 0`.", "hint": "First `cat ~/lvm/fstab.test`, then rewrite the single line."},
+    "t11": {"text": "Mini project: select the `vg_data` lines from `lvs.txt`, cut only the first column (LV name) and write it to `~/lvm/data-lvs.txt`.", "hint": "`grep ... | cut -d' ' -f1 > file`"},
+    "t12": {"text": "Mini project: create `~/lvm/check.sh` containing `pvs`, `vgs`, `lvs` in that order. Then make it executable (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` then `chmod 755`."},
+    "t13": {"text": "Challenge: write to `~/lvm/runbook.txt` the commands `pvcreate`, `vgcreate`, `lvcreate`, `mkfs.xfs` and `lvextend -r` in that order, one per line. Device `/dev/loop0`, VG `vg_data`, LV `lv_web`.", "hint": "One `printf` with `\\n` separators works."},
+    "t14": {"text": "Challenge: how many LVs does each VG have in `lvs.txt`? Squeeze spaces (`tr -s`), cut the VG column, then count with `sort` and `uniq -c`.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c`"},
+    "t15": {"text": "Ticket: `vg_sys` is full (VFree 0) and `lv_root` needs 5G more. Write to `~/lvm/ticket-fix.sh` in order: new PV `/dev/loop1`, `vgextend vg_sys /dev/loop1`, `lvextend -r -L +5G /dev/vg_sys/lv_root`.", "hint": "Three lines: `pvcreate`, `vgextend`, `lvextend -r`."},
+    "t16": {"text": "Prepare the mount point: create the directory `~/mnt/web` and put an empty `index.html` in it.", "hint": "`mkdir -p` and `touch`."}
+  },
+  "vm": {
+    "intro": "Do these tasks on your VM. **Take a snapshot** first. Use loop devices only; never type a real disk name.",
+    "tasks": {
+      "v01": {
+        "title": "Read the current LVM state",
+        "text": "Without changing anything, list the existing disks and LVM layers. Paste the output.",
+        "blocks": [
+          {"cmd": "lsblk -f\nsudo pvs\nsudo vgs\nsudo lvs", "expected": "VG   #PV #LV #SN Attr   VSize  VFree\nrl     1   2   0 wz--n- <19.00g 0"}
+        ],
+        "differs": ["If LVM is missing run `sudo dnf install lvm2` (Rocky/Alma) or `sudo apt install lvm2` (Debian/Ubuntu).", "If a default Ubuntu install does not use LVM, empty output is normal; it still proves the commands work."]
+      },
+      "v02": {
+        "title": "Build PV, VG and LV on loop devices",
+        "text": "After the snapshot, create two fake disks, build a VG and LV, format with XFS and mount. Paste the output.",
+        "blocks": [
+          {"cmd": "mkdir -p ~/lvm-lab\ntruncate -s 300M ~/lvm-lab/disk1.img\ntruncate -s 300M ~/lvm-lab/disk2.img\nLOOP1=$(sudo losetup -f --show ~/lvm-lab/disk1.img)\nLOOP2=$(sudo losetup -f --show ~/lvm-lab/disk2.img)\necho $LOOP1 $LOOP2\nsudo pvcreate $LOOP1\nsudo vgcreate vg_data $LOOP1\nsudo lvcreate -L 200M -n lv_web vg_data\nsudo mkfs.xfs /dev/vg_data/lv_web\nsudo mkdir -p /mnt/web\nsudo mount /dev/vg_data/lv_web /mnt/web\nsudo vgs vg_data", "expected": "VG      #PV #LV #SN Attr   VSize    VFree\nvg_data   1   1   0 wz--n- 296.00m 96.00m"}
+        ],
+        "differs": ["The loop number may not be `/dev/loop0`; the `$LOOP1` variable handles that.", "If `mkfs.xfs` is missing on Debian/Ubuntu run `sudo apt install xfsprogs`, or use `mkfs.ext4`.", "In another terminal the variables are gone; find the names with `losetup -a` and type them by hand."]
+      },
+      "v03": {
+        "title": "Grow the volume online",
+        "text": "The first disk has 96M free: grow the LV by 90M, then add the second disk to the pool and grow again with the remaining free space. Verify the size with `df`.",
+        "blocks": [
+          {"cmd": "sudo lvextend -r -L +90M /dev/vg_data/lv_web\ndf -h /mnt/web\nsudo vgextend vg_data $LOOP2\nsudo lvextend -r -l +100%FREE /dev/vg_data/lv_web\nsudo lvs vg_data\ndf -h /mnt/web", "expected": "LV     VG      Attr       LSize\nlv_web vg_data -wi-ao---- 592.00m"}
+        ],
+        "differs": ["If `-r` fails check that the volume is mounted; grow by hand with `sudo xfs_growfs /mnt/web` (`resize2fs` for ext4).", "`Insufficient free space` means VFree is used up; run `vgextend` first."]
+      },
+      "v04": {
+        "title": "Clean up the lab",
+        "text": "Unmount, remove LV, VG and PVs in order, detach the loop devices and delete the images. If there were no errors, press \"Done\".",
+        "blocks": [
+          {"cmd": "sudo umount /mnt/web\nsudo lvremove -y /dev/vg_data/lv_web\nsudo vgremove vg_data\nsudo pvremove $LOOP1 $LOOP2\nsudo losetup -d $LOOP1 $LOOP2\nrm ~/lvm-lab/disk1.img ~/lvm-lab/disk2.img", "expected": "Logical volume \"lv_web\" successfully removed."}
+        ],
+        "differs": ["On `target is busy` run `cd ~` first and leave no open shell inside `/mnt/web`.", "If `$LOOP1` is empty in another terminal, find the names with `losetup -a` and type them by hand.", "If unsure, revert to the snapshot."]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {"q": "What is the correct order of the LVM layers?", "options": ["Disk → LV → VG → PV", "Disk → PV → VG → LV", "VG → Disk → LV → PV", "LV → PV → Disk → VG"], "explain": "A disk becomes a PV, PVs form the VG pool, volumes (LV) are cut from the pool."},
+    "q2": {"q": "Which statement is true?", "options": ["ext4 can never shrink", "XFS shrinks online", "XFS and ext4 shrink together", "XFS cannot be shrunk"], "explain": "XFS only grows; to shrink it, back up, recreate and restore."},
+    "q3": {"q": "What does `lvextend -r -L +100M /dev/vg_data/lv_web` do?", "options": ["Grows the LV and the filesystem", "Grows only the VG", "Shrinks the LV to 100M", "Creates a new PV"], "explain": "-r (resizefs) grows the filesystem together with the LV."},
+    "q4": {"q": "What is the correct order when cleaning up the loop lab?", "options": ["pvremove → vgremove → lvremove → umount", "lvremove → umount → pvremove → vgremove", "umount → lvremove → vgremove → pvremove", "vgremove → umount → pvremove → lvremove"], "explain": "Unmount first, then remove from the top down: LV, VG, PV."}
+  },
+  "summary": [
+    "LVM: disk → PV → VG → LV → filesystem → mount.",
+    "Read commands: pvs, vgs, lvs, lvdisplay, lsblk -f.",
+    "Create: pvcreate, vgcreate, lvcreate, mkfs, mount.",
+    "Grow: lvextend -r (vgextend first if needed).",
+    "XFS cannot shrink; lvremove/vgreduce/pvremove destroy data.",
+    "Practise only on loop devices in a snapshotted VM."
+  ],
+  "glossary": [
+    {"term": "PV", "meaning": "Physical Volume: a disk or partition carrying an LVM signature."},
+    {"term": "VG", "meaning": "Volume Group: a storage pool made of PVs."},
+    {"term": "LV", "meaning": "Logical Volume: a volume cut from a VG and used like a disk."},
+    {"term": "VFree", "meaning": "Free space in a VG not yet assigned to any LV."},
+    {"term": "loop device", "meaning": "A kernel feature that presents a file as a block device."},
+    {"term": "sparse file", "meaning": "A file that looks large but uses little real disk space."},
+    {"term": "lvextend -r", "meaning": "Grows the LV and the filesystem on it together."},
+    {"term": "xfs_growfs", "meaning": "Grows a mounted XFS filesystem."},
+    {"term": "resize2fs", "meaning": "Resizes an ext2/3/4 filesystem."},
+    {"term": "fstab", "meaning": "The list of filesystems mounted at boot: /etc/fstab."}
+  ]
+}

@@ -1,0 +1,149 @@
+{
+ "title": "User information: who, where, when?",
+ "lead": "Use whoami, id, who, w, last, lastb and getent to see who exists on the system, who is logged in, and where accounts are stored.",
+ "objectives": [
+  "You read your own identity (UID, GID, groups) with `whoami`, `id` and `groups`.",
+  "You know what `/etc/passwd`, `/etc/group` and `/etc/shadow` hold and what their fields mean.",
+  "You see who is connected now with `who` and `w`, successful logins with `last` and failed ones with `lastb`.",
+  "You query accounts with `getent`, no matter whether they live in a file or a central directory (LDAP/SSSD)."
+ ],
+ "sections": [
+  {
+   "id": "me",
+   "title": "Who am I? whoami, id, groups",
+   "body": [
+    "Linux is a multi-user system. Every process runs as some user and permissions depend on it. To understand why a command fails, first find out **who you are** and which groups you belong to.",
+    "The `id` output looks like `uid=1000(student) gid=1000(student) groups=...`. The UID is the numeric identity of the user; the kernel works with **numbers**, not names. `root` is always UID 0. Usually UIDs from 1000 up belong to human users and lower ones to system accounts."
+   ],
+   "commands": [
+    {"cmd": "whoami", "what": "Prints the effective user name.", "where": "To confirm who you are after sudo or su.", "why": "Prevents working as the wrong user.", "example": "whoami"},
+    {"cmd": "id", "what": "Shows UID, primary GID and all groups.", "where": "For permission problems and checking new accounts.", "why": "Shows which groups give a user access.", "example": "id alice"},
+    {"cmd": "groups", "what": "Lists the names of the groups you belong to.", "where": "For a quick group check.", "why": "Gives a more readable summary than id.", "example": "groups"}
+   ],
+   "tip": "`id username` also works for other users; if the account does not exist you get `no such user`. It is the quickest way to test whether an account exists."
+  },
+  {
+   "id": "files",
+   "title": "Account files: passwd, group, shadow",
+   "body": [
+    "Local accounts live in three plain-text files. **/etc/passwd** is world-readable; each line has 7 colon-separated fields: `name:x:UID:GID:comment:home:shell`. The `x` means the password is not stored here.",
+    "Password hashes are in **/etc/shadow**, readable only by root. **/etc/group** holds group name, GID and members. The `/sbin/nologin` shell means the account cannot log in interactively (a service account).",
+    "`getent` queries the same information from all configured sources (files, LDAP, SSSD). In corporate environments users may not be in `/etc/passwd` at all, so scripts should prefer `getent passwd` over `cat /etc/passwd`."
+   ],
+   "commands": [
+    {"cmd": "cat /etc/passwd", "what": "Shows the local account list.", "where": "When you need home directory and shell information.", "why": "Shows how accounts are defined.", "example": "cat /etc/passwd"},
+    {"cmd": "cut -d: -f1", "what": "Extracts field 1 (user name) from colon-separated data.", "where": "To list only the names.", "why": "Pulls the column you need from large files.", "example": "cut -d: -f1 /etc/passwd"},
+    {"cmd": "grep", "what": "Finds the line of one specific user.", "where": "When checking a single account record.", "why": "Faster than reading the whole list.", "example": "grep student /etc/passwd"},
+    {"cmd": "getent passwd", "what": "Looks the account up in all sources (file, LDAP, SSSD).", "where": "On corporate servers and in scripts.", "why": "Also finds users from the central directory.", "example": "getent passwd student", "nosim": true},
+    {"cmd": "getent group", "what": "Queries a group and its members.", "where": "To check who is in which group.", "why": "Helps solve access problems.", "example": "getent group devs", "nosim": true}
+   ],
+   "tip": "`cut -d: -f1,7 /etc/passwd` shows user name and shell side by side; entries with `nologin` are service accounts.",
+   "warn": "Do not edit `/etc/passwd` or `/etc/shadow` by hand in a text editor. One wrong character can break everyone's login. Manage accounts with tools like `useradd` and `usermod` (module 4.2)."
+  },
+  {
+   "id": "online",
+   "title": "Who is connected now? who and w",
+   "body": [
+    "Before maintenance, a reboot or stopping a service, check whether someone else is working on the server. `who` shows connected users, their terminal (`tty1`, `pts/0`) and login time; for remote logins the IP appears in parentheses.",
+    "`w` is more detailed: the first line shows uptime and the **load average**, then for each session the idle time (IDLE) and the command being run (WHAT)."
+   ],
+   "commands": [
+    {"cmd": "who", "what": "Shows logged-in users, terminals and times.", "where": "Before maintenance.", "why": "You will not interrupt someone's work by accident.", "example": "who", "nosim": true},
+    {"cmd": "w", "what": "Shows sessions, idle time, running command and load average.", "where": "When the server is slow or you look for suspicious sessions.", "why": "Answers who is doing what in one command.", "example": "w", "nosim": true}
+   ],
+   "tip": "If only one session is open on your VM, only you appear. Open a second terminal tab and run `who` again; the count goes up."
+  },
+  {
+   "id": "history",
+   "title": "Login history: last and lastb",
+   "body": [
+    "`last` reads `/var/log/wtmp` and lists **successful** logins, logouts and reboots (`reboot`). A common mistake: searching `last` for failed attempts. Failed logins do not appear in `last`.",
+    "Failed login attempts are stored in `/var/log/btmp` and read with `lastb`; only root can read it. If you suspect brute-forcing, run `sudo lastb | head` first. On some distributions the btmp file may not exist and the command errors; that can simply mean no failed attempts were ever recorded."
+   ],
+   "commands": [
+    {"cmd": "last", "what": "Lists successful logins/logouts and reboot records.", "where": "When investigating who logged in at night.", "why": "Reveals account misuse.", "example": "last -n 10", "nosim": true},
+    {"cmd": "lastb", "what": "Lists failed login attempts (needs root).", "where": "During security audits.", "why": "Shows attack attempts.", "example": "sudo lastb -n 10", "nosim": true}
+   ],
+   "tip": "`last -n 5 student` shows only the last 5 logins of the `student` account.",
+   "warn": "Login records are sensitive (user names, IP addresses). Remove IPs and names before sharing output on public forums."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Find out which user you are running as with `whoami`.", "hint": "The output should be `student`."},
+  "t02": {"text": "Show your UID, GID and group list with `id`.", "hint": "Groups are in the `groups=` part."},
+  "t03": {"text": "Print your groups with the `groups` command.", "hint": "The `wheel` group means sudo rights."},
+  "t04": {"text": "Look at another user's identity with `id alice`.", "hint": "Pass the user name as the argument."},
+  "t05": {"text": "Read the account file with `cat /etc/passwd`.", "hint": "The file is readable by everyone."},
+  "t06": {"text": "Find only the line of the `student` account with `grep student /etc/passwd`.", "hint": "Field 6 of the line is the home directory."},
+  "t07": {"text": "List only the user names with `cut -d: -f1 /etc/passwd`.", "hint": "-d sets the delimiter, -f the field number."},
+  "t08": {"text": "Count how many accounts exist with `wc -l /etc/passwd`.", "hint": "-l counts lines; each line is one account."},
+  "t09": {"text": "Predict: how many lines (groups) does `/etc/group` have? Guess first, then verify with `wc -l /etc/group`.", "hint": "Count the groups root, wheel, student, alice, devs."},
+  "t10": {"text": "Predict: what does `cat /etc/shadow` do as a normal user? Think first, then run it.", "hint": "Password hashes are root-only: Permission denied|Erişim engellendi|Zugriff verweigert."},
+  "t11": {"text": "Predict: what does `id bob` return for a user that does not exist? Run it and read the error.", "hint": "Expect a `no such user` error; the exit code is not 0."},
+  "t12": {"text": "Debug: a ticket says `alice` cannot log in. In `~/Documents/accounts.txt` find alice's line and write her shell (field 7) into `~/alice_shell.txt`.", "hint": "`grep alice FILE | cut -d: -f7 > TARGET`. A `nologin` shell blocks interactive login."},
+  "t13": {"text": "Mini project: write the names of accounts whose shell ends in `/bin/bash` in `/etc/passwd` into `~/shell_users.txt`.", "hint": "`grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt`; `$` means end of line."},
+  "t14": {"text": "Challenge: put your user name (`whoami`) and then the `id` output into `~/me.txt`. It must show `student`, `uid=1000` and `wheel`.", "hint": "Use `>` for the first command and `>>` for the second."},
+  "t15": {"text": "Challenge: how many accounts in `/etc/passwd` have the `nologin` shell? Write the number into `~/nologin_count.txt`.", "hint": "`grep -c` counts matching lines; redirect the output with `>`."},
+  "t16": {"text": "TICKET #4107: The auditor wants the UID and groups of `alice`. Save the information in `~/alice_info.txt`.", "hint": "`id alice > ~/alice_info.txt`; the output must contain `uid=1001` and `devs`."}
+ },
+ "vm": {
+  "intro": "These commands only read, so you can run them safely on your VM. `lastb` needs `sudo`. Remove IPs and user names before sharing output.",
+  "tasks": {
+   "v01": {
+    "title": "Who is connected?",
+    "text": "Paste the output of `who` and `w`.",
+    "blocks": [{"cmd": "who\nw", "expected": "student  pts/0   2026-11-12 09:00 (192.168.1.10)\n 09:20:01 up 1 day,  2:30,  1 user,  load average: 0.00, 0.01, 0.05\nUSER     TTY      FROM      LOGIN@   IDLE   WHAT\n..."}],
+    "differs": ["If there are no lines you may be in a graphical session's fake terminal; try a real terminal.", "On WSL `who` may be empty; the load average line of `w` is enough."]
+   },
+   "v02": {
+    "title": "Successful logins",
+    "text": "List the latest logins and paste the output.",
+    "blocks": [{"cmd": "last -n 5", "expected": "student  pts/0  192.168.1.10  Wed Nov 12 09:00   still logged in\nreboot   system boot  5.14.0  Wed Nov 12 08:55 still running\n\nwtmp begins Mon Nov 10 08:00:00 2026"}],
+    "differs": ["If you see `command not found`: `sudo apt install util-linux` (Ubuntu) or `sudo dnf install util-linux` (Rocky/Alma).", "In containers or WSL wtmp may be empty; the final `wtmp begins` line is enough."]
+   },
+   "v03": {
+    "title": "Failed logins",
+    "text": "Look at the `lastb` output. The list may be empty; that is normal. Then press \"Done\".",
+    "blocks": [{"cmd": "sudo lastb -n 5", "expected": "(if empty) btmp begins Wed Nov 12 08:55:00 2026"}],
+    "differs": ["`No such file or directory` (no btmp): no failed login was ever recorded.", "You can generate an entry by entering a wrong password in a second terminal (e.g. `su - alice`) and looking again."]
+   },
+   "v04": {
+    "title": "Query an account with getent",
+    "text": "Get the record of the `student` account; numbers and home directory must be visible.",
+    "blocks": [{"cmd": "getent passwd student", "expected": "student:x:1000:1000:Student:/home/student:/bin/bash"}],
+    "differs": ["If your user name is not `student`, use your own: `getent passwd $(whoami)`.", "If the output is empty that account does not exist; check your name with `whoami`."]
+   },
+   "v05": {
+    "title": "Your identity",
+    "text": "Paste your `id` output.",
+    "blocks": [{"cmd": "id", "expected": "uid=1000(student) gid=1000(student) groups=1000(student),10(wheel)"}],
+    "differs": ["On Ubuntu the sudo group is called `sudo`; on Rocky/Alma it is `wheel`.", "If the UID is 0 you are running as root; switch to a normal user."]
+   },
+   "v06": {
+    "title": "Account list and shells",
+    "text": "List user name and shell side by side (first 8 lines).",
+    "blocks": [{"cmd": "getent passwd | cut -d: -f1,7 | head -n 8", "expected": "root:/bin/bash\nbin:/sbin/nologin\ndaemon:/sbin/nologin\n..."}],
+    "differs": ["On Ubuntu the shell path may be `/usr/sbin/nologin`.", "If `cut` fails, make sure you wrote the delimiter as `-d:` (no space)."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Which command shows failed login attempts?", "options": ["last", "lastb", "who", "w"], "explain": "`last` shows only successful logins; failed attempts are in `/var/log/btmp` and read with `lastb`."},
+  "q2": {"q": "What does field 7 of a `/etc/passwd` line show?", "options": ["The home directory", "The login shell", "The password hash", "The UID"], "explain": "Fields: name, x, UID, GID, comment, home, shell. Field 7 is the shell (e.g. /bin/bash or /sbin/nologin)."},
+  "q3": {"q": "In which file are password hashes stored?", "options": ["/etc/passwd", "/etc/shadow", "/etc/group", "/var/log/wtmp"], "explain": "Hashes are in /etc/shadow, readable only by root; the x in passwd indicates this."},
+  "q4": {"q": "Why do scripts prefer `getent passwd`?", "options": ["It also finds LDAP/SSSD users besides the local file", "It is always faster", "It needs no permissions and shows passwords", "It only works as root"], "explain": "getent queries all sources through NSS, so it returns users from the central directory too."}
+ },
+ "summary": [
+  "`whoami`, `id` and `groups` show who you are and which groups you are in.",
+  "`/etc/passwd` has 7 fields (name, x, UID, GID, comment, home, shell); password hashes are in `/etc/shadow`.",
+  "`who` and `w` show current sessions, `last` successful and `lastb` failed past logins.",
+  "`getent` queries accounts without caring whether they come from a file or a central directory."
+ ],
+ "glossary": [
+  {"term": "UID / GID", "meaning": "Numeric identity of a user and a group; root has UID 0."},
+  {"term": "nologin", "meaning": "A shell that blocks interactive login; used for service accounts."},
+  {"term": "wtmp / btmp", "meaning": "Log files of successful and failed logins (`last` / `lastb`)."},
+  {"term": "load average", "meaning": "Average system load over the last 1, 5 and 15 minutes."},
+  {"term": "NSS / getent", "meaning": "The layer that resolves account info from files or directory services, and the command to query it."}
+ ]
+}

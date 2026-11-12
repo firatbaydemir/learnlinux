@@ -1,0 +1,202 @@
+{
+ "id": "6.6",
+ "level": 6,
+ "setup": {
+  "dirs": [
+   "/home/student/scripts",
+   "/home/student/lab"
+  ],
+  "files": {
+   "/home/student/lab/servers.txt": "web01\nweb02\ndb01\ncache01\nmail01\n",
+   "/home/student/lab/app.log": "2026-03-01 10:00:01 INFO web01 started\n2026-03-01 10:00:05 ERROR web02 disk full\n2026-03-01 10:01:10 WARN db01 slow query\n2026-03-01 10:02:30 ERROR db01 connection lost\n2026-03-01 10:03:00 ERROR web02 timeout\n",
+   "/home/student/scripts/hello.sh": "echo hello\n",
+   "/home/student/scripts/count.sh": "echo step 1\necho step 2\necho step 3\n",
+   "/home/student/scripts/clean.sh": "#!/usr/bin/env bash\nDIR=/home/student/tmpwork\nrm -rf $DIR/*\n",
+   "/home/student/scripts/list_files.sh": "#!/usr/bin/env bash\nfor f in $(ls *.txt); do\n  echo \"$f\"\ndone\n"
+  },
+  "modes": [
+   ["/home/student/scripts/hello.sh", "644"],
+   ["/home/student/scripts/count.sh", "755"]
+  ]
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"contains": ["~/scripts/loop.sh", "#!/usr/bin/env bash"]},
+   "solution": ["printf '#!/usr/bin/env bash\\n' > ~/scripts/loop.sh"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^wc -l \\S*servers\\.txt$", "ok": true, "out": "\\b5\\b"},
+   "solution": ["wc -l ~/lab/servers.txt"]
+  },
+  {
+   "id": "t03",
+   "kind": "guided",
+   "diff": 1,
+   "check": [
+    {"contains": ["~/scripts/loop.sh", "for \\w+ in .+; do"]},
+    {"contains": ["~/scripts/loop.sh", "done"]}
+   ],
+   "solution": ["printf 'for i in 1 2 3; do\\n  echo \"n=$i\"\\ndone\\n' >> ~/scripts/loop.sh"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 1,
+   "check": {"mode": ["~/scripts/loop.sh", "755"]},
+   "solution": ["chmod 755 ~/scripts/loop.sh"]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/scripts/readlines.sh", "while IFS= read -r \\w+; do"]},
+    {"contains": ["~/scripts/readlines.sh", "done < \\S*servers\\.txt"]}
+   ],
+   "solution": ["printf '#!/usr/bin/env bash\\nwhile IFS= read -r host; do\\n  echo \"checking $host\"\\ndone < ~/lab/servers.txt\\n' > ~/scripts/readlines.sh"]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"cmd": "touch \"\\$F\"", "ok": true},
+    {"exists": "~/my notes.txt", "type": "f"}
+   ],
+   "solution": ["F=\"my notes.txt\"", "touch \"$F\""]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/scripts/arr.sh", "hosts=\\(web01 web02 db01\\)"]},
+    {"contains": ["~/scripts/arr.sh", "\"\\$\\{hosts\\[@\\]\\}\""]}
+   ],
+   "solution": ["printf 'hosts=(web01 web02 db01)\\nfor h in \"${hosts[@]}\"; do\\n  echo \"$h\"\\ndone\\n' > ~/scripts/arr.sh"]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 1,
+   "check": {"cmd": "count\\.sh \\| wc -l$", "ok": true, "out": "\\b3\\b"},
+   "solution": ["./scripts/count.sh | wc -l"]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^echo \"rm -rf \\$DIR/\"$", "ok": true, "out": "rm -rf /"},
+   "solution": ["DIR=", "echo \"rm -rf $DIR/\""]
+  },
+  {
+   "id": "t10",
+   "kind": "debug",
+   "diff": 1,
+   "check": [
+    {"mode": ["~/scripts/hello.sh", "755"]},
+    {"cmd": "hello\\.sh$", "ok": true, "out": "hello"}
+   ],
+   "solution": ["chmod +x ~/scripts/hello.sh", "~/scripts/hello.sh"]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"contains": ["~/scripts/clean.sh", "rm -rf \"\\$\\{DIR:\\?\\}/?\"\\*?"]},
+   "solution": ["printf '#!/usr/bin/env bash\\nDIR=/home/student/tmpwork\\nrm -rf \"${DIR:?}/\"*\\n' > ~/scripts/clean.sh"]
+  },
+  {
+   "id": "t12",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"contains": ["~/scripts/list_files.sh", "for f in (\\./)?\\*\\.txt; do"]},
+   "solution": ["printf '#!/usr/bin/env bash\\nfor f in ./*.txt; do\\n  echo \"$f\"\\ndone\\n' > ~/scripts/list_files.sh"]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"contains": ["~/scripts/menu.sh", "case \"\\$1\" in"]},
+    {"contains": ["~/scripts/menu.sh", "start\\)"]},
+    {"contains": ["~/scripts/menu.sh", "\\*\\)"]},
+    {"contains": ["~/scripts/menu.sh", "esac"]},
+    {"mode": ["~/scripts/menu.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/usr/bin/env bash\\ncase \"$1\" in\\n  start) echo starting ;;\\n  stop) echo stopping ;;\\n  *) echo \"usage: $0 start|stop\" ;;\\nesac\\n' > ~/scripts/menu.sh",
+    "chmod 755 ~/scripts/menu.sh"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "mini",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/scripts/safe.sh", "mktemp"]},
+    {"contains": ["~/scripts/safe.sh", "trap \\w+ EXIT"]},
+    {"contains": ["~/scripts/safe.sh", "local \\w+"]},
+    {"contains": ["~/scripts/safe.sh", "\\w+\\(\\) \\{"]}
+   ],
+   "solution": ["printf '#!/usr/bin/env bash\\ntmp=$(mktemp -d)\\ncleanup() {\\n  rm -rf \"${tmp:?}\"\\n}\\ntrap cleanup EXIT\\nlog() {\\n  local msg=$1\\n  echo \"$msg\"\\n}\\nlog \"work in $tmp\"\\n' > ~/scripts/safe.sh"]
+  },
+  {
+   "id": "t15",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {"equals": ["~/lab/failed_hosts.txt", "db01\nweb02\n"]},
+   "solution": ["grep ERROR ~/lab/app.log | cut -d' ' -f4 | sort -u > ~/lab/failed_hosts.txt"]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/scripts/cleanup.sh", "set -euo pipefail"]},
+    {"contains": ["~/scripts/cleanup.sh", "\\$\\{DIR:\\?\\}"]},
+    {"contains": ["~/scripts/cleanup.sh", "trap .+ EXIT"]},
+    {"mode": ["~/scripts/cleanup.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/usr/bin/env bash\\nset -euo pipefail\\nDIR=/home/student/tmpwork\\ntrap \"echo cleanup done\" EXIT\\nrm -rf \"${DIR:?}/\"*\\n' > ~/scripts/cleanup.sh",
+    "chmod 755 ~/scripts/cleanup.sh"
+   ]
+  },
+  {
+   "id": "t17",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"contains": ["~/scripts/check_all.sh", "check_host\\(\\) \\{"]},
+    {"contains": ["~/scripts/check_all.sh", "local \\w+"]},
+    {"contains": ["~/scripts/check_all.sh", "while IFS= read -r \\w+; do"]},
+    {"contains": ["~/scripts/check_all.sh", "done < \\S*servers\\.txt"]},
+    {"mode": ["~/scripts/check_all.sh", "755"]}
+   ],
+   "solution": [
+    "printf '#!/usr/bin/env bash\\ncheck_host() {\\n  local h=$1\\n  echo \"check $h\"\\n}\\nwhile IFS= read -r host; do\\n  [ -n \"$host\" ] || continue\\n  check_host \"$host\"\\ndone < ~/lab/servers.txt\\n' > ~/scripts/check_all.sh",
+    "chmod 755 ~/scripts/check_all.sh"
+   ]
+  }
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 2},
+  {"id": "q2", "answer": 1},
+  {"id": "q3", "answer": 3},
+  {"id": "q4", "answer": 0}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "n=1[\\s\\S]*n=3"},
+  {"id": "v02", "expect": "web01[\\s\\S]*mail01"},
+  {"id": "v03", "expect": "work in|cleanup|removed"},
+  {"id": "v04", "expect": "SC2086|double quote|Double quote"},
+  {"id": "v05", "expect": "\\+ "}
+ ]
+}

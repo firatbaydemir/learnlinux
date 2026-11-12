@@ -1,0 +1,344 @@
+{
+ "title": "Setting up your own Linux VM",
+ "lead": "Install Rocky/Alma Linux or Ubuntu in VirtualBox, UTM or WSL, verify the download, take a snapshot and connect over SSH.",
+ "objectives": [
+  "You pick the right tool for your computer (VirtualBox, UTM or WSL).",
+  "You verify the ISO with a SHA-256 checksum before installing.",
+  "You create a VM, take a snapshot and connect to it over SSH."
+ ],
+ "sections": [
+  {
+   "id": "why",
+   "title": "Why your own VM?",
+   "body": [
+    "Real skills come from a **real Linux**. A virtual machine (VM) is a complete computer inside your computer: you can break it, reinstall it and nothing on your real system is touched.",
+    "Pick the tool that fits your hardware: **VirtualBox** (Windows, Intel Mac, Linux), **UTM** (Apple Silicon Macs, needs an ARM64 ISO) or **WSL 2** (Windows 10/11, fastest to start, Ubuntu only). For distributions use **Rocky Linux 9 / AlmaLinux 9** (the RHEL family used in companies) and optionally **Ubuntu 24.04 LTS**."
+   ],
+   "tip": "Plan for 2 CPU cores, 4 GB RAM and 25 GB disk per VM."
+  },
+  {
+   "id": "iso",
+   "title": "Download the ISO and verify it",
+   "body": [
+    "Download the ISO only from the official site of the distribution (rockylinux.org, almalinux.org, ubuntu.com). Next to the ISO there is a **checksum** (SHA-256). Compute the checksum of your file and compare: if one character differs, the file is damaged or tampered with — download again."
+   ],
+   "commands": [
+    {
+     "cmd": "sha256sum (Linux/macOS: shasum -a 256)",
+     "what": "Computes the SHA-256 checksum of a file.",
+     "where": "On your host machine after the download.",
+     "why": "Proves the ISO is complete and unmodified.",
+     "example": "sha256sum Rocky-9-latest-x86_64-minimal.iso",
+     "nosim": true
+    },
+    {
+     "cmd": "Get-FileHash (Windows PowerShell)",
+     "what": "Same checksum on Windows.",
+     "where": "PowerShell on Windows hosts.",
+     "why": "Windows has no sha256sum.",
+     "example": "Get-FileHash .\\Rocky-9-latest-x86_64-minimal.iso -Algorithm SHA256",
+     "nosim": true
+    }
+   ],
+   "warn": "Never install from an ISO whose checksum does not match, even if the installer starts."
+  },
+  {
+   "id": "create",
+   "title": "Create the VM and install",
+   "body": [
+    "In VirtualBox/UTM create a new VM, attach the ISO and give it 2 CPUs, 4 GB RAM and 25 GB disk. Start it and follow the installer: choose your language, select the disk (automatic partitioning is fine), set a root password, **create a normal user and tick \"administrator\"** (this adds the user to the `wheel`/`sudo` group).",
+    "Choose the **Minimal** install first; you will add tools yourself. After the reboot remove the ISO and log in with your normal user. Finish with `cat /etc/os-release` to see which system you built.",
+    "On **WSL** this is one command in PowerShell (administrator): `wsl --install -d Ubuntu-24.04`. Then restart and create your user name when asked."
+   ],
+   "tip": "Choose a short lowercase user name without spaces; you will type it a lot."
+  },
+  {
+   "id": "snapshot",
+   "title": "Snapshots: your undo button",
+   "body": [
+    "A **snapshot** saves the complete state of the VM. Take one called `clean-install` right after the first successful boot and before every risky experiment. If you break something, restore the snapshot in seconds.",
+    "In VirtualBox: Machine ▸ Take Snapshot; in UTM: clone the VM or use the QEMU snapshot option. For WSL export a backup: `wsl --export Ubuntu-24.04 backup.tar`."
+   ],
+   "danger": "A snapshot is not a backup of your real files; if the host disk fails, snapshots are lost with it."
+  },
+  {
+   "id": "network",
+   "title": "Networking basics",
+   "body": [
+    "**NAT** (default) lets the VM reach the internet but hides it from your network; use port forwarding to reach it. **Bridged** puts the VM on your LAN with its own IP address. **Host-only** connects only the VM and your computer.",
+    "For learning, NAT with a port-forward rule (host port 2222 → guest port 22) or bridged are both fine. Inside the VM check your address with `ip -brief a`."
+   ],
+   "commands": [
+    {
+     "cmd": "ip -brief a",
+     "what": "Shows interfaces with state and IP address.",
+     "where": "Inside the VM.",
+     "why": "You need the IP address to connect over SSH.",
+     "example": "ip -brief a",
+     "nosim": true
+    }
+   ]
+  },
+  {
+   "id": "ssh",
+   "title": "Connect with SSH",
+   "body": [
+    "The VM window is clumsy. Connect from your host terminal over **SSH** instead: copy/paste works and it is how servers are managed in real life. First make sure the SSH service is running in the VM (`sudo systemctl enable --now sshd` on Rocky/Alma, `ssh` on Ubuntu).",
+    "Then from your host: `ssh user@IP` (bridged) or `ssh -p 2222 user@127.0.0.1` (NAT with port forward). Accept the host key with `yes`."
+   ],
+   "commands": [
+    {
+     "cmd": "ssh user@host",
+     "what": "Opens a secure remote shell.",
+     "where": "From your host to the VM or any server.",
+     "why": "Standard way to administer Linux.",
+     "example": "ssh student@192.168.1.50",
+     "nosim": true
+    },
+    {
+     "cmd": "ssh-keygen -t ed25519",
+     "what": "Creates a key pair for password-less login.",
+     "where": "Once on your host.",
+     "why": "Safer and more convenient than passwords.",
+     "example": "ssh-keygen -t ed25519",
+     "nosim": true
+    },
+    {
+     "cmd": "ssh-copy-id user@host",
+     "what": "Installs your public key on the VM.",
+     "where": "After ssh-keygen.",
+     "why": "Next logins need no password.",
+     "example": "ssh-copy-id student@192.168.1.50",
+     "nosim": true
+    }
+   ],
+   "tip": "Take a snapshot after SSH works — it is the best state to return to."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Warm-up: in the simulator read `cat /etc/os-release` to see what an installed system tells you.",
+   "hint": "The file name has a hyphen."
+  },
+  "t02": {
+   "text": "Warm-up: run `id` and see your user, uid and groups (`wheel` means administrator).",
+   "hint": "Just `id`."
+  },
+  "t03": {
+   "text": "Guided: run `hostname` and then `uname -r` — the first facts to note after any installation.",
+   "hint": "Two separate commands."
+  },
+  "t04": {
+   "text": "Predict: what will `sudo whoami` print? Think, then run it.",
+   "hint": "sudo runs the command as root."
+  },
+  "t05": {
+   "text": "Debug: `cat /etc/os_release` fails. Run it, read the error, then run the correct command.",
+   "hint": "Underscore vs hyphen; `ls /etc` helps."
+  },
+  "t06": {
+   "text": "Mini project: save the distribution name line into `~/vm-summary.txt` with `grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt`.",
+   "hint": "`>` writes the output to a file."
+  },
+  "t07": {
+   "text": "Challenge: create `~/vm-lab/snapshots` and `~/vm-lab/notes` with one `mkdir -p` command.",
+   "hint": "Brace expansion: `~/vm-lab/{snapshots,notes}`."
+  },
+  "t08": {
+   "text": "TICKET #3001 — The lab needs a VM report: write hostname, kernel version and user name (in that order) into `~/vm-report.txt`, one per line.",
+   "hint": "First command with `>`, the next two with `>>`."
+  }
+ },
+ "vm": {
+  "intro": "This is the main path of this module: work through the steps on your computer. Tick \"Done\" or paste an output to be checked.",
+  "tasks": {
+   "v01": {
+    "title": "Download the ISO",
+    "text": "Download Rocky Linux 9 or AlmaLinux 9 (minimal ISO; ARM64 for Apple Silicon) or Ubuntu 24.04 and note the published SHA-256 value.",
+    "blocks": [],
+    "differs": [
+     "Apple Silicon needs the aarch64/arm64 ISO; x86_64 will not boot in UTM natively."
+    ]
+   },
+   "v02": {
+    "title": "Verify the checksum",
+    "text": "Compute the SHA-256 of your ISO and paste the output. Compare it manually with the published value.",
+    "blocks": [
+     {
+      "cmd": "sha256sum Rocky-9-latest-x86_64-minimal.iso",
+      "expected": "3f2b...c9a1  Rocky-9-latest-x86_64-minimal.iso"
+     },
+     {
+      "cmd": "shasum -a 256 Rocky-9-latest-aarch64-minimal.iso",
+      "expected": "(macOS) 64 hex characters followed by the file name"
+     }
+    ],
+    "differs": [
+     "64 hexadecimal characters are expected; a shorter output means the command failed.",
+     "Windows: `Get-FileHash file.iso -Algorithm SHA256` prints a table; paste the Hash column.",
+     "Different from the published value? Delete the file and download again."
+    ]
+   },
+   "v03": {
+    "title": "Create and install the VM",
+    "text": "Create the VM (2 CPU, 4 GB RAM, 25 GB disk), install the system, create an administrator user and boot into the login prompt.",
+    "blocks": [],
+    "differs": [
+     "Boot loop or \"no bootable medium\": check the ISO is attached and the boot order starts with the optical drive.",
+     "VirtualBox on Windows: enable virtualization (VT-x/AMD-V) in the BIOS and disable Hyper-V conflicts."
+    ]
+   },
+   "v04": {
+    "title": "First login",
+    "text": "Log in with your user and show which system you installed. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\""
+     }
+    ],
+    "differs": [
+     "On Ubuntu `NAME=\"Ubuntu\"` appears; both are fine for this course.",
+     "On WSL the file exists too; the text is the same."
+    ]
+   },
+   "v05": {
+    "title": "Take a snapshot",
+    "text": "Shut down cleanly with `sudo poweroff`, take a snapshot named `clean-install`, then start the VM again.",
+    "blocks": [
+     {
+      "cmd": "sudo poweroff",
+      "expected": "(the VM window closes)"
+     }
+    ],
+    "differs": [
+     "Snapshots greyed out? Power the VM off first (in VirtualBox the snapshot button is in the machine tools)."
+    ]
+   },
+   "v06": {
+    "title": "Find the IP address",
+    "text": "Show your interfaces and paste the output.",
+    "blocks": [
+     {
+      "cmd": "ip -brief a",
+      "expected": "lo     UNKNOWN  127.0.0.1/8\nenp0s3 UP       10.0.2.15/24"
+     }
+    ],
+    "differs": [
+     "`10.0.2.15` means NAT; use the port-forward rule to reach it from the host.",
+     "No IPv4 address on enp0s3? Run `nmcli device` and connect the interface, or check the VM network adapter is enabled."
+    ]
+   },
+   "v07": {
+    "title": "Connect over SSH",
+    "text": "Connect from your host terminal to the VM and run the command below. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "ssh student@192.168.1.50",
+      "expected": "(you get a prompt on the VM)"
+     },
+     {
+      "cmd": "echo $SSH_CONNECTION",
+      "expected": "192.168.1.10 51234 192.168.1.50 22"
+     }
+    ],
+    "differs": [
+     "`Connection refused`: sshd is not running (`sudo systemctl enable --now sshd`).",
+     "`Connection timed out`: wrong IP or no port-forward rule (NAT).",
+     "`Permission denied`: wrong user name or password."
+    ]
+   },
+   "v08": {
+    "title": "Update the system",
+    "text": "Bring the system up to date, reboot and tick \"Done\" when the update finished without errors.",
+    "blocks": [
+     {
+      "cmd": "sudo dnf -y update   # Rocky/Alma",
+      "expected": "Complete!"
+     },
+     {
+      "cmd": "sudo apt update && sudo apt -y upgrade   # Ubuntu",
+      "expected": "(no E: errors)"
+     }
+    ],
+    "differs": [
+     "`Could not resolve host`: the VM has no internet; check the network adapter."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "What does a matching SHA-256 checksum tell you?",
+   "options": [
+    "The ISO is the newest version",
+    "The file is complete and unmodified",
+    "The ISO is free of cost",
+    "The VM will boot faster"
+   ],
+   "explain": "A checksum is a fingerprint; equal fingerprints mean the file is identical to the published one."
+  },
+  "q2": {
+   "q": "Which network mode hides the VM from your LAN but allows internet access?",
+   "options": [
+    "Bridged",
+    "Host-only",
+    "NAT",
+    "None"
+   ],
+   "explain": "NAT shares the host connection; use port forwarding to reach the VM."
+  },
+  "q3": {
+   "q": "When should you take a snapshot?",
+   "options": [
+    "Before a risky experiment",
+    "Never; it wastes disk space",
+    "Only after deleting the VM",
+    "Only on WSL"
+   ],
+   "explain": "A snapshot is a quick undo point; take one before changes you may regret."
+  },
+  "q4": {
+   "q": "Which tool is the usual choice on an Apple Silicon Mac?",
+   "options": [
+    "VirtualBox with x86 ISO",
+    "WSL 2",
+    "Windows Hyper-V",
+    "UTM with an ARM64 ISO"
+   ],
+   "explain": "Apple Silicon is ARM; UTM runs ARM64 guests natively."
+  }
+ },
+ "summary": [
+  "A VM is a safe, disposable Linux that you can fully control.",
+  "Always verify the ISO checksum before installing.",
+  "Snapshot after a clean install and before experiments.",
+  "SSH from the host terminal is the professional way to work."
+ ],
+ "glossary": [
+  {
+   "term": "VM",
+   "meaning": "Virtual machine: a complete computer simulated by software."
+  },
+  {
+   "term": "ISO",
+   "meaning": "Disk image file of an installation medium."
+  },
+  {
+   "term": "checksum",
+   "meaning": "Fingerprint of a file used to detect damage or tampering."
+  },
+  {
+   "term": "snapshot",
+   "meaning": "Saved state of a VM you can return to."
+  },
+  {
+   "term": "SSH",
+   "meaning": "Secure Shell: encrypted remote terminal protocol."
+  },
+  {
+   "term": "NAT",
+   "meaning": "Network address translation: VM shares the host connection."
+  }
+ ]
+}
