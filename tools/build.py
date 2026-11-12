@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Builds v3/<lang>/*.html and v3/index.html from v3/content. Run: python3 v3/tools/build.py"""
+"""Builds the static pages and PWA precache manifest. Run: python3 tools/build.py"""
+import hashlib
 import html
 import json
 import re
@@ -52,7 +53,13 @@ def head(lang, title, depth_shared="../shared"):
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>%s</title>\n'
             '<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;'
             'localStorage.setItem("tla3:lang","%s")}catch(e){}</script>\n'
-            '<link rel="stylesheet" href="%s/app.css">\n</head>\n') % (lang, esc(title), lang, depth_shared)
+            '<meta name="theme-color" content="#172033">\n'
+            '<link rel="manifest" href="../manifest.webmanifest">\n'
+            '<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">\n'
+            '<link rel="apple-touch-icon" href="../icons/icon-192.png">\n'
+            '<script defer src="%s/pwa.js"></script>\n'
+            '<link rel="stylesheet" href="%s/app.css">\n</head>\n') % (
+                lang, esc(title), lang, depth_shared, depth_shared)
 
 
 def topbar(lang, ui, page, extra=""):
@@ -282,12 +289,32 @@ def build_module(lang, ui, mods_meta, mid, built):
 def build_root(ui_all):
     links = "".join('<a class="btn primary" href="%s/index.html" hreflang="%s" lang="%s">%s</a>' % (l, l, l, LANG_NAMES[l]) for l in LANGS)
     return ('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>Linux Academy — Choose your language</title><link rel="stylesheet" href="shared/app.css">'
+            '<title>Linux Academy — Choose your language</title><meta name="theme-color" content="#172033">'
+            '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg" type="image/svg+xml">'
+            '<link rel="apple-touch-icon" href="icons/icon-192.png">'
+            '<link rel="stylesheet" href="shared/app.css"><script defer src="shared/pwa.js"></script>'
             '</head><body class="page-root"><main class="wrap chooser" aria-labelledby="language-title">'
             '<div class="chooser-mark">%s</div><p class="hero-kicker"><span></span>LINUX • LEARN BY DOING</p>'
             '<h1 id="language-title">Hoş geldin / Willkommen / Welcome</h1>'
             '<p class="chooser-prompt">Dilini seç <span>• Sprache wählen • Choose your language</span></p>'
             '<div class="heroact">%s</div></main></body></html>\n' % (linux_icon(), links))
+
+
+def write_precache_manifest():
+    urls = ["./", "index.html", "manifest.webmanifest", "service-worker.js"]
+    urls.extend(sorted(str(p.relative_to(V3)) for lang in LANGS for p in (V3 / lang).glob("*.html")))
+    urls.extend(sorted(str(p.relative_to(V3)) for folder in ("shared", "icons")
+                       for p in (V3 / folder).rglob("*") if p.is_file()))
+    revision = hashlib.sha256()
+    for url in urls:
+        if url == "./":
+            continue
+        path = V3 / url
+        revision.update(url.encode("utf-8"))
+        revision.update(path.read_bytes())
+    manifest = "self.PRECACHE_REVISION = %s;\nself.PRECACHE_URLS = %s;\n" % (
+        json.dumps(revision.hexdigest()[:16]), json.dumps(urls))
+    (V3 / "precache-manifest.js").write_text(manifest, encoding="utf-8")
 
 
 def main():
@@ -305,6 +332,7 @@ def main():
             (d / mod_file(mid)).write_text(build_module(lang, ui, mods_meta, mid, built), encoding="utf-8")
             n += 1
     (V3 / "index.html").write_text(build_root(ui_all), encoding="utf-8")
+    write_precache_manifest()
     print("built %d pages (modules: %s)" % (n + 1, ", ".join(built)))
 
 

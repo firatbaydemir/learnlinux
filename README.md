@@ -26,6 +26,9 @@ Tarayıcıda <http://localhost:8000/> adresini aç. Tux ikonlu dil seçicisinden
 ├── tr/ de/ en/             # Üretilmiş dil sayfaları
 ├── content/                # Modül kaynakları ve çeviriler
 ├── shared/                 # Tarayıcı arayüzü ve terminal simülatörü
+├── manifest.webmanifest    # PWA kurulumu ve uygulama bilgileri
+├── service-worker.js       # Çevrimdışı önbellek
+├── icons/                  # Uygulama simgesi
 ├── tools/build.py          # Kaynak içerikten sayfa üretimi
 ├── tools/validate.py       # İçerik, sayfa ve dil doğrulaması
 └── tests/test_terminal.js  # Terminal motoru testleri
@@ -55,6 +58,12 @@ jsc shared/terminal.js tests/test_terminal.js
 ```
 
 Doğrulayıcı JSON şemalarını, üç dildeki modül eşleşmelerini, üretilmiş sayfaları ve bağlantıları denetler; kullanılabilir bir JavaScript çalışma zamanı varsa motor öz testini de çalıştırır.
+
+## Masaüstüne yükleme ve çevrimdışı kullanım
+
+Site HTTPS üzerinden (ör. GitHub Pages) veya `localhost` üzerinde açıldığında PWA olarak yüklenebilir. Siteyi ilk kez çevrimiçiyken açıp önbelleğin kurulmasını bekle; ardından tarayıcının **Uygulamayı yükle** seçeneğini kullan. Modül sayfaları, stiller ve betikler çevrimdışı kullanım için önbelleğe alınır.
+
+İçeriği yeniden oluşturduğunda `python3 tools/build.py`, çevrimdışı önbellek listesini de günceller. `precache-manifest.js` dosyasını değişikliklerle birlikte yayımla.
 
 ## GitHub Pages'de yayınlama
 
