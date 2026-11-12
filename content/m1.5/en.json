@@ -1,0 +1,552 @@
+{
+ "title": "Shell Tools and Environment",
+ "lead": "Make the shell work for you: history, completion, shortcuts, quoting, variables, PATH, wildcards and command substitution.",
+ "objectives": [
+  "You reuse old commands with history, !! and Ctrl+R.",
+  "You work fast with Tab completion and the Ctrl+C/L/A/E shortcuts.",
+  "You know the difference between double quotes, single quotes and the backslash.",
+  "You define variables, pass them on with export, and read and extend PATH.",
+  "You shorten commands with wildcards (*, ?, []), brace expansion and $()."
+ ],
+ "sections": [
+  {
+   "id": "history",
+   "title": "Command history",
+   "body": [
+    "The shell remembers what you type. `history` shows a numbered list; `history 5` shows only the last 5 commands. The Up arrow (↑) recalls the previous command.",
+    "`!!` runs the previous command again. Its most common use is `sudo !!`, which adds the `sudo` you forgot. `Ctrl+R` **searches** the history: type a few letters, the matching old command appears, press Enter to run it."
+   ],
+   "commands": [
+    {
+     "cmd": "history",
+     "what": "Lists the commands you ran, with numbers.",
+     "where": "When you want to recall a long command from yesterday.",
+     "why": "Saves retyping and shows what you did.",
+     "example": "history"
+    },
+    {
+     "cmd": "history 5",
+     "what": "Shows only the last 5 commands.",
+     "where": "When a short overview is enough.",
+     "why": "You don't drown in a long list.",
+     "example": "history 5"
+    },
+    {
+     "cmd": "!!",
+     "what": "Runs the previous command again, unchanged.",
+     "where": "Like `sudo !!` after a permission error.",
+     "why": "No need to retype the same command.",
+     "example": "echo hello",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+R",
+     "what": "Searches backwards through the history.",
+     "where": "Finding a very old, long command.",
+     "why": "Much faster than scrolling with the arrow key.",
+     "example": "history",
+     "nosim": true
+    }
+   ],
+   "tip": "After pressing Ctrl+R, press Ctrl+R again to jump to the next older match."
+  },
+  {
+   "id": "shortcuts",
+   "title": "Tab completion and shortcuts",
+   "body": [
+    "The `Tab` key completes command, file and folder names. With one match it completes; with several, press Tab twice to list the options. It saves time and prevents typos.",
+    "A few shortcuts cover half of daily work: `Ctrl+C` stops a running command, `Ctrl+L` clears the screen (same as `clear`), `Ctrl+A` jumps to the start of the line, `Ctrl+E` to the end. With `alias` you can give long commands a short name."
+   ],
+   "commands": [
+    {
+     "cmd": "Tab",
+     "what": "Completes the name you typed or lists the options.",
+     "where": "Long file and folder names.",
+     "why": "Speed and accuracy.",
+     "example": "ls Doc",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+C",
+     "what": "Interrupts the running command (sends SIGINT).",
+     "where": "A command that hangs or never ends.",
+     "why": "You leave the command without closing the terminal.",
+     "example": "sleep 100",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+A / Ctrl+E",
+     "what": "Moves the cursor to the start / end of the line.",
+     "where": "Editing a long command.",
+     "why": "Faster than stepping with the arrow keys.",
+     "example": "ls -l Documents",
+     "nosim": true
+    },
+    {
+     "cmd": "clear",
+     "what": "Clears the screen; Ctrl+L does the same.",
+     "where": "When the screen gets cluttered.",
+     "why": "Keeps output readable.",
+     "example": "clear"
+    },
+    {
+     "cmd": "alias",
+     "what": "Gives a command a short alias.",
+     "where": "Commands you type often.",
+     "why": "Less typing. To make it permanent, put it in `~/.bashrc`.",
+     "example": "alias ll='ls -l'",
+     "nosim": true
+    }
+   ],
+   "tip": "Never type a long file name by hand; type the first letters and press Tab."
+  },
+  {
+   "id": "quoting",
+   "title": "Quotes and escaping",
+   "body": [
+    "Before running a command the shell interprets special characters. Quotes control that. Inside **double quotes** `$variable` and `$(command)` are expanded. Inside **single quotes** everything stays literal. A **backslash** (`\\`) removes the special meaning of one character.",
+    "File names with spaces also need quotes: `cat \"my notes.txt\"`. Without quotes the shell sees two separate arguments."
+   ],
+   "commands": [
+    {
+     "cmd": "echo \"...\"",
+     "what": "Double quotes: variables expand, spaces are kept.",
+     "where": "Messages with variables.",
+     "why": "Flexible and safe.",
+     "example": "echo \"Hello $USER\""
+    },
+    {
+     "cmd": "echo '...'",
+     "what": "Single quotes: nothing expands, text is printed literally.",
+     "where": "Fixed text that contains `$`.",
+     "why": "Stops the shell from interfering.",
+     "example": "echo 'Hello $USER'"
+    },
+    {
+     "cmd": "\\",
+     "what": "Removes the special meaning of the next character.",
+     "where": "Protecting a single `$` or space.",
+     "why": "A short alternative to quotes.",
+     "example": "echo \\$HOME"
+    }
+   ],
+   "tip": "When in doubt, put variables in double quotes: `\"$FILE\"` also works with names containing spaces."
+  },
+  {
+   "id": "variables",
+   "title": "Variables and export",
+   "body": [
+    "Define a variable with `NAME=alice`; **no spaces around the equals sign**. Read it with `$NAME`. A variable defined this way lives only in this shell.",
+    "To let programs you start see it, use `export NAME=alice`. `env` shows all exported **environment variables** (`HOME`, `USER`, `PATH`, `SHELL`...). Changes made with `export` are lost when the terminal closes; to keep them, write them into `~/.bashrc`."
+   ],
+   "commands": [
+    {
+     "cmd": "NAME=alice",
+     "what": "Defines a shell variable (no spaces).",
+     "where": "Values you will reuse.",
+     "why": "You don't retype the same value.",
+     "example": "NAME=alice"
+    },
+    {
+     "cmd": "echo $NAME",
+     "what": "Prints the value of the variable.",
+     "where": "Checking a value.",
+     "why": "Confirms what the shell sees.",
+     "example": "echo $HOME"
+    },
+    {
+     "cmd": "export",
+     "what": "Passes the variable on to child programs.",
+     "where": "Settings that programs read.",
+     "why": "Without export the variable stays in this shell only.",
+     "example": "export GREETING=hello"
+    },
+    {
+     "cmd": "env",
+     "what": "Lists environment variables.",
+     "where": "Inspecting or debugging the environment.",
+     "why": "Shows which setting is active.",
+     "example": "env | grep GREETING"
+    },
+    {
+     "cmd": "unset",
+     "what": "Removes a variable.",
+     "where": "Dropping a variable you no longer need.",
+     "why": "Keeps the environment clean.",
+     "example": "unset GREETING",
+     "nosim": true
+    }
+   ],
+   "tip": "Don't write `NAME = alice` (with spaces): the shell looks for a command called `NAME` and fails."
+  },
+  {
+   "id": "path",
+   "title": "PATH: where commands are found",
+   "body": [
+    "When you type a command, the shell searches the folders in the `PATH` variable in order. Folders are separated by `:`. `which ls` shows the path found, `type ls` shows the kind of command (program, builtin).",
+    "To add a folder with your own tools, append it to `PATH`. Keep the old value: `export PATH=$PATH:~/bin`. If you only write `PATH=~/bin`, even `ls` can no longer be found."
+   ],
+   "commands": [
+    {
+     "cmd": "echo $PATH",
+     "what": "Shows the search folders.",
+     "where": "First place to look on 'command not found'.",
+     "why": "You see why a command isn't found.",
+     "example": "echo $PATH"
+    },
+    {
+     "cmd": "which",
+     "what": "Shows the full path of a command.",
+     "where": "Finding out which program runs.",
+     "why": "Avoids mixing up programs with the same name.",
+     "example": "which ls"
+    },
+    {
+     "cmd": "type",
+     "what": "Tells whether a command is a program or a builtin.",
+     "where": "Builtins such as `cd`.",
+     "why": "Explains differences in behaviour.",
+     "example": "type cd"
+    },
+    {
+     "cmd": "export PATH=$PATH:~/bin",
+     "what": "Adds `~/bin` to the search path.",
+     "where": "Calling your own scripts by name.",
+     "why": "No need to type the full path each time.",
+     "example": "export PATH=$PATH:~/bin"
+    }
+   ],
+   "warn": "Never assign something like `PATH=/new/dir` that throws away the old value; no command, `ls` included, will be found. Close and reopen the terminal to recover.",
+   "tip": "To make it permanent, add the same `export` line to `~/.bashrc`."
+  },
+  {
+   "id": "globbing",
+   "title": "Wildcards (globbing)",
+   "body": [
+    "The **shell** expands wildcards, not the command. `*` matches anything (including nothing), `?` exactly one character, `[abc]` one of the characters in brackets. For `ls *.txt` the shell first turns the pattern into file names, then hands them to `ls`.",
+    "If nothing matches, the shell leaves the pattern as it is. Before delete commands, test the pattern with `echo`: `echo *.log`."
+   ],
+   "commands": [
+    {
+     "cmd": "*",
+     "what": "Any sequence of characters.",
+     "where": "Selecting files of the same type.",
+     "why": "Many files with one command.",
+     "example": "echo lab/*.txt"
+    },
+    {
+     "cmd": "?",
+     "what": "Exactly one character.",
+     "where": "Names of fixed length.",
+     "why": "Matches more narrowly than `*`.",
+     "example": "echo lab/?.txt"
+    },
+    {
+     "cmd": "[ ]",
+     "what": "One of the characters in brackets.",
+     "where": "Selecting a few specific files.",
+     "why": "Gives full control.",
+     "example": "echo lab/[ab].txt"
+    }
+   ],
+   "warn": "`rm *` deletes every file in the current folder. First check what matches with `echo *`, then run `rm`.",
+   "tip": "Hidden files (starting with `.`) are not matched by `*`."
+  },
+  {
+   "id": "expansion",
+   "title": "Brace expansion and command substitution",
+   "body": [
+    "Brace expansion generates text: `file{1,2,3}.txt` becomes three names, `f{1..3}` becomes `f1 f2 f3`. The files don't have to exist, which makes it ideal for bulk `touch` and `mkdir`.",
+    "`$(command)` runs the command and substitutes its **output**: `echo \"Today: $(date)\"`. You can also store output in a variable: `USERNAME=$(whoami)`."
+   ],
+   "commands": [
+    {
+     "cmd": "{a,b,c}",
+     "what": "Multiplies a comma-separated list.",
+     "where": "Creating many files and folders.",
+     "why": "Three files in one line.",
+     "example": "touch ~/lab/file{1,2,3}.txt"
+    },
+    {
+     "cmd": "{1..3}",
+     "what": "Generates a number or letter range.",
+     "where": "Numbered names.",
+     "why": "No manual typing.",
+     "example": "echo f{1..3}"
+    },
+    {
+     "cmd": "$(...)",
+     "what": "Puts a command's output inside another command.",
+     "where": "Dynamic values like date, user, host name.",
+     "why": "You use the live value instead of hard-coding it.",
+     "example": "echo \"User: $(whoami)\""
+    }
+   ],
+   "tip": "The old `` `command` `` form works too, but `$()` is far more readable when nested."
+  },
+  {
+   "id": "output",
+   "title": "echo, printf and exit code",
+   "body": [
+    "`echo` prints text and variables. For formatted output use `printf`: `%s` is text, `%d` a number, `\\n` a newline. `printf` adds no newline automatically.",
+    "Every command leaves an **exit code**: `0` means success, anything else an error. Read the last one with `$?`. In scripts this is how you check for success."
+   ],
+   "commands": [
+    {
+     "cmd": "echo",
+     "what": "Prints text or a variable's value.",
+     "where": "Giving messages and quick checks.",
+     "why": "The simplest output tool.",
+     "example": "echo \"Hello Linux\""
+    },
+    {
+     "cmd": "printf",
+     "what": "Produces formatted output.",
+     "where": "Aligned output or exact control over newlines.",
+     "why": "More predictable than echo.",
+     "example": "printf \"Name: %s\\n\" alice"
+    },
+    {
+     "cmd": "echo $?",
+     "what": "Prints the exit code of the last command.",
+     "where": "Telling whether a command succeeded.",
+     "why": "`0` is success, non-zero is an error.",
+     "example": "echo $?"
+    }
+   ]
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Print a message with `echo \"Hello Linux\"`.",
+   "hint": "Put the text in double quotes."
+  },
+  "t02": {
+   "text": "Show the command history.",
+   "hint": "Type `history`."
+  },
+  "t03": {
+   "text": "Print the `HOME` variable, which holds your home directory, with `echo`.",
+   "hint": "Put `$` in front of the variable: `echo $HOME`."
+  },
+  "t04": {
+   "text": "Export the variable `GREETING=hello` with `export`, then find it in the `env` output with `grep`.",
+   "hint": "`export GREETING=hello`, then `env | grep GREETING`."
+  },
+  "t05": {
+   "text": "List the `.txt` files in the `lab` folder with a wildcard: run `echo lab/*.txt`.",
+   "hint": "`*` matches any name; don't forget the `.txt` suffix."
+  },
+  "t06": {
+   "text": "With brace expansion, create `file1.txt`, `file2.txt` and `file3.txt` in `lab` with one command.",
+   "hint": "`touch ~/lab/file{1,2,3}.txt`."
+  },
+  "t07": {
+   "text": "Create the folder `~/bin` and add it to `PATH` while keeping the old value.",
+   "hint": "`mkdir ~/bin`, then `export PATH=$PATH:~/bin`."
+  },
+  "t08": {
+   "text": "Predict: what does `echo '$HOME'` print? Run the single-quoted version to check.",
+   "hint": "Variables are not expanded inside single quotes."
+  },
+  "t09": {
+   "text": "Predict: what does `echo \"User: $(whoami)\"` print? Run it to check.",
+   "hint": "The output of the command inside `$()` is substituted."
+  },
+  "t10": {
+   "text": "Predict: what does `echo f{1..3}` print? Run it to check.",
+   "hint": "Brace expansion produces three words separated by spaces."
+  },
+  "t11": {
+   "text": "Debug: your home folder contains a file called `my notes.txt`, and `cat my notes.txt` fails. Show the file's content with the correct syntax.",
+   "hint": "Quote the name: `cat \"my notes.txt\"`."
+  },
+  "t12": {
+   "text": "Mini project: create the folder `~/projects`, create `a.txt` and `b.txt` in it with one command, then write the output of `$(whoami)` into `owner.txt`.",
+   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt`."
+  },
+  "t13": {
+   "text": "Challenge: write exactly `host: linux-lab user: student` into `~/info.txt`. Produce the values with `$(hostname)` and `$(whoami)`.",
+   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt`."
+  },
+  "t14": {
+   "text": "Ticket: The team wants to call the scripts in `~/tools` by name. Add the folder to `PATH` in this session and append the setting to the end of `~/.bashrc` so it is permanent.",
+   "hint": "`export PATH=$PATH:~/tools`, then append the same line with single quotes and `>>` to `~/.bashrc`."
+  },
+  "t15": {
+   "text": "Print the line `Name: alice` with `printf`; use `%s` and `\\n`.",
+   "hint": "`printf \"Name: %s\\n\" alice`."
+  },
+  "t16": {
+   "text": "List a file that doesn't exist (`ls nofile`), then show the exit code with `echo $?`.",
+   "hint": "After an error `$?` is a non-zero number."
+  }
+ },
+ "vm": {
+  "intro": "Run the commands below on your own VM (Ubuntu, Rocky, Alma or WSL). The commands in this module are harmless; still, extend `PATH` with `export` and never overwrite it with `PATH=`.",
+  "tasks": {
+   "v01": {
+    "title": "Explore the history",
+    "text": "Run a few commands, then show the last lines of the history. Then try `!!` and `Ctrl+R`.",
+    "blocks": [
+     {
+      "cmd": "echo one\necho two\nhistory | tail -n 5",
+      "expected": "  101  echo one\n  102  echo two\n  103  history | tail -n 5"
+     },
+     {
+      "cmd": "# Press Ctrl+R, type 'echo', press Enter; then:\n!!"
+     }
+    ],
+    "differs": [
+     "The numbers will differ with your history; the order of the lines matters.",
+     "If `!!` doesn't work, make sure you are in Bash: `echo $SHELL`."
+    ]
+   },
+   "v02": {
+    "title": "Variable and export",
+    "text": "Define a variable, export it, and check whether a child shell can see it.",
+    "blocks": [
+     {
+      "cmd": "MYVAR=hello\nbash -c 'echo \"child: [$MYVAR]\"'\nexport MYVAR\nbash -c 'echo \"child: [$MYVAR]\"'\nenv | grep MYVAR",
+      "expected": "child: []\nchild: [hello]\nMYVAR=hello"
+     }
+    ],
+    "differs": [
+     "If the first line isn't `child: []`, `MYVAR` was exported earlier; reopen the terminal.",
+     "Copy all three lines when pasting the output."
+    ]
+   },
+   "v03": {
+    "title": "Quote difference",
+    "text": "Print the same text with double and single quotes and see the difference.",
+    "blocks": [
+     {
+      "cmd": "echo \"Hello $USER\"\necho 'Hello $USER'\necho Hello \\$USER",
+      "expected": "Hello student\nHello $USER\nHello $USER"
+     }
+    ],
+    "differs": [
+     "If your user isn't `student`, your own name appears; that is normal.",
+     "If `$USER` is empty, try `echo $LOGNAME`."
+    ]
+   },
+   "v04": {
+    "title": "Wildcards and braces",
+    "text": "In a safe folder, create files with braces and match them with wildcards.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab\ntouch ~/lab/{a,b,c}.txt ~/lab/d.log\necho ~/lab/*.txt\necho ~/lab/?.log\necho ~/lab/[ab].txt",
+      "expected": "/home/student/lab/a.txt /home/student/lab/b.txt /home/student/lab/c.txt\n/home/student/lab/d.log\n/home/student/lab/a.txt /home/student/lab/b.txt"
+     }
+    ],
+    "differs": [
+     "If your home isn't `/home/student`, the path looks different; the file names must be the same.",
+     "In `WSL`, `~` is your Linux home, not the Windows side."
+    ]
+   },
+   "v05": {
+    "title": "Add your own tool to PATH",
+    "text": "Write a tiny script, add its folder to `PATH` and call it by name.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/tools\nprintf '#!/bin/bash\\necho tool works\\n' > ~/tools/hello\nchmod +x ~/tools/hello\nexport PATH=$PATH:~/tools\nhello\nwhich hello",
+      "expected": "tool works\n/home/student/tools/hello"
+     }
+    ],
+    "differs": [
+     "On `command not found`, check with `echo $PATH` that the `tools` path was added.",
+     "On `Permission denied`, run `chmod +x ~/tools/hello` again."
+    ]
+   },
+   "v06": {
+    "title": "Try the shortcuts",
+    "text": "Type `sleep 100` and stop it with `Ctrl+C`. Then type a long command and move around with `Ctrl+A` and `Ctrl+E`, clear the screen with `Ctrl+L`. Type `~/Doc` and complete it with Tab. When finished, press \"Done\".",
+    "blocks": [
+     {
+      "cmd": "sleep 100\n# Ctrl+C\nls ~/Doc\n# Tab"
+     }
+    ],
+    "differs": [
+     "If your terminal emulator grabs Ctrl+L, type `clear` instead.",
+     "If Tab does nothing, press it twice; with several matches they are listed."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "What does `!!` do?",
+   "options": [
+    "Deletes the history",
+    "Lists the history",
+    "Runs the previous command again",
+    "Closes the shell"
+   ],
+   "explain": "`!!` is replaced by the previous command; `sudo !!` is very common."
+  },
+  "q2": {
+   "q": "What does `echo '$HOME'` print?",
+   "options": [
+    "/home/student",
+    "$HOME",
+    "An empty line",
+    "An error"
+   ],
+   "explain": "Variables are not expanded inside single quotes; the text is printed as is."
+  },
+  "q3": {
+   "q": "Which command makes a variable visible to child programs?",
+   "options": [
+    "export",
+    "unset",
+    "echo",
+    "history"
+   ],
+   "explain": "`export` puts the variable into the environment; `env` then shows it."
+  },
+  "q4": {
+   "q": "What is the output of `echo f{1..3}`?",
+   "options": [
+    "f{1..3}",
+    "f",
+    "f1f2f3",
+    "f1 f2 f3"
+   ],
+   "explain": "The shell performs brace expansion and produces three separate words."
+  }
+ },
+ "summary": [
+  "`history`, `!!` and `Ctrl+R` let you reuse commands.",
+  "`Tab` completes; `Ctrl+C` interrupts, `Ctrl+L` clears, `Ctrl+A/E` move within the line.",
+  "`$` expands in double quotes, not in single quotes, and `\\` protects one character.",
+  "`NAME=value` has no spaces; child programs need `export`.",
+  "`PATH` holds the folders searched for commands; extend it with `export PATH=$PATH:...`.",
+  "`*`, `?`, `[]` are wildcards; `{a,b}` is brace expansion; `$()` substitutes command output."
+ ],
+ "glossary": [
+  {
+   "term": "history",
+   "meaning": "The list of commands the shell remembers."
+  },
+  {
+   "term": "environment variable",
+   "meaning": "A variable carrying settings for the shell and child programs (HOME, PATH, USER)."
+  },
+  {
+   "term": "PATH",
+   "meaning": "A `:`-separated list of folders searched for commands."
+  },
+  {
+   "term": "globbing",
+   "meaning": "Expansion of `*`, `?`, `[]` patterns into file names."
+  },
+  {
+   "term": "command substitution",
+   "meaning": "Replacing `$(command)` with the command's output."
+  },
+  {
+   "term": "exit code",
+   "meaning": "The number a command leaves behind; `0` is success, anything else an error."
+  }
+ ]
+}

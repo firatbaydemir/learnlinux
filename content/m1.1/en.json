@@ -1,0 +1,186 @@
+{
+ "title": "Navigating the Terminal: pwd, ls, cd",
+ "lead": "See where you are, get to know your surroundings, reach your target: move around the file system safely with `pwd`, `ls` and `cd`.",
+ "objectives": [
+  "You see your current directory with `pwd` and know that the `~` in the prompt is the home directory.",
+  "You list directory contents with `ls` and its options (`-l`, `-a`, `-h`) and find hidden files.",
+  "You move between directories with `cd` using the shortcuts `~`, `-`, `..` and `.`.",
+  "You know the difference between absolute and relative paths, read the columns in `ls -l` output and use Tab completion."
+ ],
+ "sections": [
+  {
+   "id": "where",
+   "title": "Where am I? pwd and the home directory",
+   "body": [
+    "In Linux everything lives in a single tree whose root is `/`. In the terminal you are always somewhere in this tree: your **current working directory**. Most commands act there unless told otherwise.",
+    "`pwd` (print working directory) prints your current directory as a **full path**. A command run in the wrong directory can cause data loss, so check with `pwd` especially before deleting or copying.",
+    "When you log in you land in your **home directory**, such as `/home/student`. It is written `~` for short; that is the `~` in the prompt."
+   ],
+   "commands": [
+    {"cmd": "pwd", "what": "Shows your current directory as a full path.", "where": "Before any operation, especially deleting and copying.", "why": "Prevents wrong operations in the wrong directory.", "example": "pwd"},
+    {"cmd": "echo ~", "what": "Prints the expansion of the `~` shortcut, i.e. the full path of your home directory.", "where": "When you want to know the path of your home directory.", "why": "`~` is expanded by the shell; commands see the real path.", "example": "echo ~"}
+   ],
+   "tip": "A `~` in the prompt means you are in your home directory; in any other directory only the last folder name, such as `Documents`, is shown."
+  },
+  {
+   "id": "ls",
+   "title": "What is inside? ls",
+   "body": [
+    "`ls` lists the contents of your current directory. If you give it a directory as a path, it lists that one without entering it: `ls /etc`. Look first, then decide.",
+    "Options start with `-` and can be combined: `-l` detailed list, `-a` including hidden files, `-h` human-readable sizes (K, M, G). `ls -lah` gives all three at once."
+   ],
+   "commands": [
+    {"cmd": "ls", "what": "Lists the files and folders in your current directory.", "where": "After entering a directory or when checking whether something exists.", "why": "Working where you don't know what is there is dangerous.", "example": "ls"},
+    {"cmd": "ls /etc", "what": "Lists the contents of the given directory without entering it.", "where": "To look at another directory.", "why": "You look without changing your working directory.", "example": "ls /etc"},
+    {"cmd": "ls -a", "what": "Also shows hidden files whose names start with a dot.", "where": "When looking for configuration files.", "why": "Hidden files do not appear in normal `ls` output.", "example": "ls -a"},
+    {"cmd": "ls -lh", "what": "Detailed list; prints sizes as K/M/G.", "where": "When looking at file sizes.", "why": "Easier than reading byte counts.", "example": "ls -lh ~"}
+   ],
+   "tip": "If `ls` output is long in a directory with many files, use `ls -l | head` to see the first lines."
+  },
+  {
+   "id": "cd",
+   "title": "Reach your target: cd",
+   "body": [
+    "`cd` (change directory) changes your working directory. On success it prints nothing; you see the result in the prompt or with `pwd`. If the directory does not exist, you get an error.",
+    "Shortcuts: `cd` (without an argument) and `cd ~` take you to your home directory, `cd ..` goes up one directory, `cd -` returns to the previous directory. `.` is the current directory; `cd .` stays where you are.",
+    "Case matters: `Documents` and `documents` are different names. If a name contains a space, use quotes: `cd \"My Files\"`."
+   ],
+   "commands": [
+    {"cmd": "cd Documents", "what": "Enters the `Documents` folder in your current directory.", "where": "When going down into a subfolder.", "why": "Relative path: starts from where you are.", "example": "cd Documents"},
+    {"cmd": "cd ..", "what": "Goes up one directory.", "where": "When leaving a folder.", "why": "`..` points to the parent directory in every directory.", "example": "cd .."},
+    {"cmd": "cd ~", "what": "Goes to the home directory.", "where": "When you are lost.", "why": "Works wherever you are.", "example": "cd ~"},
+    {"cmd": "cd -", "what": "Returns to the previous directory and prints its path.", "where": "When switching back and forth between two directories.", "why": "Saves you from retyping long paths.", "example": "cd -"},
+    {"cmd": "cd", "what": "Typed without an argument, goes to the home directory.", "where": "To get home quickly.", "why": "Same as `cd ~`, but shorter.", "example": "cd"}
+   ],
+   "tip": "If you get lost, type `cd`, then check with `pwd`: you are back in your home directory."
+  },
+  {
+   "id": "paths",
+   "title": "Absolute and relative paths",
+   "body": [
+    "An **absolute path** starts with `/` and is the full address from the root: `/usr/bin`. It always leads to the same place regardless of where you are. `~/Documents` also counts as absolute, because `~` expands to a full path.",
+    "A **relative path** does not start with `/` and is computed from your current directory: `Documents`, `../Downloads`, `./notes.txt`. The same spelling leads to different places in different directories.",
+    "`..` is the parent directory and `.` is the current directory; they can be chained: `cd ../..` goes up two directories. When you are in `/usr/bin`, `cd ../..` takes you to the root `/`."
+   ],
+   "commands": [
+    {"cmd": "cd /usr/bin", "what": "Goes straight to `/usr/bin` using an absolute path.", "where": "When heading to a target regardless of where you are.", "why": "The result is always the same.", "example": "cd /usr/bin"},
+    {"cmd": "cd ../..", "what": "Goes up two directories.", "where": "When leaving a deep folder quickly.", "why": "In relative paths `..` can be chained.", "example": "cd ../.."}
+   ],
+   "tip": "If you are unsure, type the absolute path; for short distances a relative path is faster."
+  },
+  {
+   "id": "hidden",
+   "title": "Hidden files",
+   "body": [
+    "Files and folders whose names **start with a dot** are hidden: `.bashrc`, `.profile`, `.config`. Normal `ls` does not show them, `ls -a` does. Settings are usually kept in these files.",
+    "In `ls -a` output you see two special entries: `.` (the current directory) and `..` (the parent directory). They are not real files but shortcuts present in every directory."
+   ],
+   "commands": [
+    {"cmd": "ls -a ~", "what": "Lists everything in the home directory, including hidden files.", "where": "When looking for configuration files.", "why": "Files like `.bashrc` only show up this way.", "example": "ls -a ~"},
+    {"cmd": "ls -A", "what": "Shows hidden files without `.` and `..`.", "where": "For a cleaner list (on a real VM).", "why": "Same as `-a`, but without the two shortcut entries.", "example": "ls -A ~", "nosim": true}
+   ],
+   "warn": "Do not delete or damage configuration files such as `.bashrc` and `.profile`; your shell environment may break."
+  },
+  {
+   "id": "longlist",
+   "title": "Reading ls -l output",
+   "body": [
+    "`ls -l` gives one line per file. Example: `-rw-r--r-- 1 student student 35 Nov 12 10:32 notes.txt`. From left to right:",
+    "**1st character:** type. `-` regular file, `d` directory, `l` symbolic link. **Next 9 characters:** permissions (`rw-r--r--`: owner reads/writes, group and others read). **Number:** link count. **Two names:** owner user and group. **Number:** size in bytes. **Date:** last modification. **Last:** name.",
+    "The `total` line at the top is the sum of disk blocks used. You will see the details of permissions in later modules."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Detailed list showing type, permissions, owner, size, date and name.", "where": "When checking a file's owner or permissions.", "why": "All the basic information about a file in one line.", "example": "ls -l"},
+    {"cmd": "ls -ld ~", "what": "Shows a directory itself (not its contents) in detail.", "where": "When checking a directory's permissions or owner.", "why": "Without `-d`, `ls` looks inside the directory.", "example": "ls -ld ~"}
+   ],
+   "tip": "If the line starts with `d` it is a folder, if it starts with `-` it is a file."
+  },
+  {
+   "id": "tab",
+   "title": "Tab completion",
+   "body": [
+    "Don't type long names by hand in the terminal: type the first letters of the name and press **Tab**. If there is a single match, the shell completes the name. If there are several matches, press Tab **twice**; the options are listed.",
+    "It works for commands as well as file and folder names. It saves time and prevents typos: if Tab does not complete, that name does not exist or you are in the wrong directory.",
+    "Extra shortcut: the **↑/↓** keys recall previous commands. These features work in a real shell (on your VM)."
+   ],
+   "commands": [
+    {"cmd": "cd Doc + Tab", "what": "Typing `Doc` and pressing Tab completes it to `Documents/`.", "where": "In every command, when typing file and folder names.", "why": "You type less and make fewer mistakes.", "example": "cd Doc", "nosim": true}
+   ],
+   "tip": "Make it a habit: press Tab before typing a name from start to finish."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Show your current directory with `pwd`.", "hint": "The output is a full path starting with `/`."},
+  "t02": {"text": "List the contents of your home directory with `ls`.", "hint": "`ls` without an argument looks at your current directory."},
+  "t03": {"text": "Enter the `Documents` folder with `cd Documents`.", "hint": "The directory name in the prompt should change."},
+  "t04": {"text": "List in detail with `ls -l`.", "hint": "`-l` is a lowercase L."},
+  "t05": {"text": "List including hidden files with `ls -a`.", "hint": "`.hidden_notes.txt` should be visible."},
+  "t06": {"text": "Go to the `~/projects/website` directory using an absolute path.", "hint": "`cd ~/projects/website`."},
+  "t07": {"text": "Enter the `css` subfolder using a relative path.", "hint": "You are already inside `website`: `cd css`."},
+  "t08": {"text": "While inside `css`, use `..` to move to the sibling folder `images`.", "hint": "First up, then down: `cd ../images`."},
+  "t09": {"text": "Return to the previous directory with `cd -`.", "hint": "Don't forget the dash character."},
+  "t10": {"text": "Return to your home directory with `cd` without an argument.", "hint": "`cd` or `cd ~`."},
+  "t11": {"text": "Predict: if you type `cd /usr/bin/../..` from a command in `/usr/bin`, where do you end up? Think first, then run the command and verify with `pwd`.", "hint": "Each `..` goes up one directory: `/usr/bin` → `/usr` → `/`."},
+  "t12": {"text": "Predict: what are the type, owner and permissions of the file `/etc/hostname`? Verify with `ls -l /etc/hostname`.", "hint": "If the first character is `-` it is a regular file; the owner will be `root`."},
+  "t13": {"text": "Debug: a friend types `cd ~/downloads` and gets `No such file or directory`. Go to the `Downloads` folder using the correct name.", "hint": "Case matters in Linux: `Downloads`."},
+  "t14": {"text": "Mini project: go to the `~/projects/website/css` directory, list its contents, then go up two directories and finish in `~/projects`.", "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."},
+  "t15": {"text": "Challenge: list the contents of both `~/Documents` and `~/projects/website`, including hidden files, with a single `ls` command.", "hint": "`ls` can take multiple paths; use it together with `-a`."},
+  "t16": {"text": "TICKET #1101 — A colleague wants the full path of the `images` folder in the `website` project. Go to the folder, show the path with `pwd`, then return to your home directory.", "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."}
+ },
+ "vm": {
+  "intro": "Run these tasks on your own VM (Ubuntu, Rocky, Alma or WSL). They are all read-only; they change nothing.",
+  "tasks": {
+   "v01": {
+    "title": "Where am I?",
+    "text": "Open the terminal; print your current directory and the path of your home directory, and paste the output.",
+    "blocks": [{"cmd": "pwd\necho ~", "expected": "/home/student\n/home/student"}],
+    "differs": ["If your username is not `student`, your own name appears in the path; that is normal.", "If the output is `/root`, you are running as root; switch to a normal user."]
+   },
+   "v02": {
+    "title": "Find hidden files",
+    "text": "List your home directory including hidden files and find the `.bashrc` file.",
+    "blocks": [{"cmd": "ls -a ~", "expected": ".  ..  .bash_logout  .bashrc  .profile  Desktop  Documents ..."}],
+    "differs": ["You may see many hidden folders (`.cache`, `.config`); that is normal.", "On WSL, `.bashrc` is still in the home directory; make sure you look under `~`."]
+   },
+   "v03": {
+    "title": "Absolute, relative and cd -",
+    "text": "Go to `/var/log` using an absolute path, go up with `..`, return with `cd -` and print the paths.",
+    "blocks": [{"cmd": "cd /var/log\npwd\ncd ..\npwd\ncd -\ncd /etc\npwd", "expected": "/var/log\n/var\n/var/log\n/etc"}],
+    "differs": ["`cd -` also prints the previous path by itself; seeing an extra line is normal.", "If `/var/log` does not exist (very minimal image), try `cd /usr/bin` instead."]
+   },
+   "v04": {
+    "title": "Read ls -l",
+    "text": "List the file `/etc/passwd` in detail; read its type, permissions, owner and size.",
+    "blocks": [{"cmd": "ls -l /etc/passwd", "expected": "-rw-r--r-- 1 root root 1234 Nov 12 10:32 /etc/passwd"}],
+    "differs": ["A `.` or `+` at the end of the permissions (SELinux/ACL) is normal.", "Size and date vary depending on your system."]
+   },
+   "v05": {
+    "title": "Tab completion",
+    "text": "Type `cd Doc` and press Tab without pressing Enter; it should complete to `Documents/`. Then type `cd ~/` and press Tab twice to see the list. When done, say \"Done\".",
+    "blocks": [{"cmd": "cd Doc<Tab>"}],
+    "differs": ["If it does not complete, the `Documents` folder does not exist or you are not in your home directory; check with `pwd`.", "On some minimal systems the `bash-completion` package is needed for completion."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What does the `pwd` command do?", "options": ["Lists files", "Shows the current directory as a full path", "Changes directory", "Changes the password"], "explain": "`pwd` (print working directory) prints the working directory."},
+  "q2": {"q": "What does `cd ..` do?", "options": ["Goes to the home directory", "Stays in place", "Goes up one directory", "Returns to the previous directory"], "explain": "`..` is the parent directory; use `cd ~` for home and `cd -` for the previous one."},
+  "q3": {"q": "Which one is used to see hidden files?", "options": ["ls -a", "ls -l", "ls -h", "ls -r"], "explain": "`-a` shows files whose names start with a dot."},
+  "q4": {"q": "In `ls -l` output, what does it mean if a line starts with `d`?", "options": ["Deleted file", "Executable file", "Symbolic link", "Directory"], "explain": "The first character shows the type: `d` directory, `-` file, `l` symbolic link."}
+ },
+ "summary": [
+  "`pwd` tells you where you are, `ls` what is there, `cd` where to go.",
+  "`~` is the home directory, `..` the parent directory, `.` the current directory, `cd -` the previous directory.",
+  "An absolute path starts with `/`; a relative path is computed from your current directory.",
+  "`ls -a` shows hidden files, `ls -l` shows type, permissions, owner, size and date.",
+  "Complete with Tab; mind upper and lower case."
+ ],
+ "glossary": [
+  {"term": "working directory", "meaning": "The directory you are currently in, where commands run by default."},
+  {"term": "home directory", "meaning": "The directory that belongs to the user; abbreviated `~`, for example `/home/student`."},
+  {"term": "absolute path", "meaning": "A full address starting from the `/` root."},
+  {"term": "relative path", "meaning": "A path starting from your current directory."},
+  {"term": "hidden file", "meaning": "A file whose name starts with a dot, visible with `ls -a`."},
+  {"term": "Tab completion", "meaning": "Typing the start of a name and pressing Tab to have the shell complete it."}
+ ]
+}

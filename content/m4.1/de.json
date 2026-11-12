@@ -1,0 +1,149 @@
+{
+ "title": "Benutzerinformationen: wer, wo, wann?",
+ "lead": "Mit whoami, id, who, w, last, lastb und getent siehst du, welche Benutzer es gibt, wer eingeloggt ist und wo Konten gespeichert sind.",
+ "objectives": [
+  "Du liest deine eigene Identität (UID, GID, Gruppen) mit `whoami`, `id` und `groups`.",
+  "Du weißt, was `/etc/passwd`, `/etc/group` und `/etc/shadow` enthalten und welche Felder sie haben.",
+  "Du siehst mit `who` und `w`, wer gerade verbunden ist, mit `last` erfolgreiche und mit `lastb` fehlgeschlagene Logins.",
+  "Du fragst Konten mit `getent` ab, egal ob sie in einer Datei oder einem zentralen Verzeichnis (LDAP/SSSD) liegen."
+ ],
+ "sections": [
+  {
+   "id": "me",
+   "title": "Wer bin ich? whoami, id, groups",
+   "body": [
+    "Linux ist ein Mehrbenutzersystem. Jeder Prozess läuft als ein Benutzer, und die Rechte hängen davon ab. Um zu verstehen, warum ein Befehl scheitert, finde zuerst heraus, **wer du bist** und in welchen Gruppen du bist.",
+    "Die Ausgabe von `id` sieht so aus: `uid=1000(student) gid=1000(student) groups=...`. Die UID ist die numerische Identität des Benutzers; der Kernel arbeitet mit **Zahlen**, nicht mit Namen. `root` hat immer UID 0. Meist gehören UIDs ab 1000 echten Benutzern, niedrigere Systemkonten."
+   ],
+   "commands": [
+    {"cmd": "whoami", "what": "Gibt den aktuellen Benutzernamen aus.", "where": "Um nach sudo oder su zu prüfen, wer du bist.", "why": "Verhindert Arbeit unter dem falschen Benutzer.", "example": "whoami"},
+    {"cmd": "id", "what": "Zeigt UID, primäre GID und alle Gruppen.", "where": "Bei Rechteproblemen und zur Prüfung neuer Konten.", "why": "Zeigt, über welche Gruppen ein Benutzer Zugriff hat.", "example": "id alice"},
+    {"cmd": "groups", "what": "Listet die Namen deiner Gruppen auf.", "where": "Für eine schnelle Gruppenprüfung.", "why": "Liefert eine lesbarere Übersicht als id.", "example": "groups"}
+   ],
+   "tip": "`id benutzername` funktioniert auch für andere Benutzer; existiert das Konto nicht, kommt `no such user`. So testest du am schnellsten, ob ein Konto existiert."
+  },
+  {
+   "id": "files",
+   "title": "Kontodateien: passwd, group, shadow",
+   "body": [
+    "Lokale Konten stehen in drei Textdateien. **/etc/passwd** ist für alle lesbar; jede Zeile hat 7 durch Doppelpunkt getrennte Felder: `name:x:UID:GID:Kommentar:home:shell`. Das `x` bedeutet, dass das Passwort hier nicht steht.",
+    "Passwort-Hashes stehen in **/etc/shadow**, nur für root lesbar. **/etc/group** enthält Gruppenname, GID und Mitglieder. Die Shell `/sbin/nologin` bedeutet, dass das Konto sich nicht interaktiv anmelden kann (Dienstkonto).",
+    "`getent` fragt dieselben Informationen aus allen konfigurierten Quellen ab (Dateien, LDAP, SSSD). In Firmenumgebungen stehen Benutzer oft gar nicht in `/etc/passwd`; Skripte sollten deshalb `getent passwd` statt `cat /etc/passwd` nutzen."
+   ],
+   "commands": [
+    {"cmd": "cat /etc/passwd", "what": "Zeigt die lokale Kontenliste.", "where": "Wenn du Home- und Shell-Infos brauchst.", "why": "Zeigt, wie Konten definiert sind.", "example": "cat /etc/passwd"},
+    {"cmd": "cut -d: -f1", "what": "Holt Feld 1 (Benutzername) aus durch Doppelpunkt getrennten Daten.", "where": "Um nur die Namen aufzulisten.", "why": "Zieht die gewünschte Spalte aus großen Dateien.", "example": "cut -d: -f1 /etc/passwd"},
+    {"cmd": "grep", "what": "Findet die Zeile eines bestimmten Benutzers.", "where": "Beim Prüfen eines einzelnen Kontos.", "why": "Schneller als die ganze Liste zu lesen.", "example": "grep student /etc/passwd"},
+    {"cmd": "getent passwd", "what": "Sucht das Konto in allen Quellen (Datei, LDAP, SSSD).", "where": "Auf Firmenservern und in Skripten.", "why": "Findet auch Benutzer aus dem zentralen Verzeichnis.", "example": "getent passwd student", "nosim": true},
+    {"cmd": "getent group", "what": "Fragt eine Gruppe und ihre Mitglieder ab.", "where": "Um zu prüfen, wer in welcher Gruppe ist.", "why": "Hilft bei Zugriffsproblemen.", "example": "getent group devs", "nosim": true}
+   ],
+   "tip": "`cut -d: -f1,7 /etc/passwd` zeigt Benutzername und Shell nebeneinander; Einträge mit `nologin` sind Dienstkonten.",
+   "warn": "Bearbeite `/etc/passwd` und `/etc/shadow` nicht von Hand im Texteditor. Ein falsches Zeichen kann die Anmeldung aller Benutzer zerstören. Verwalte Konten mit Werkzeugen wie `useradd` und `usermod` (Modul 4.2)."
+  },
+  {
+   "id": "online",
+   "title": "Wer ist gerade verbunden? who und w",
+   "body": [
+    "Prüfe vor Wartung, Neustart oder dem Stoppen eines Dienstes, ob jemand anderes auf dem Server arbeitet. `who` zeigt verbundene Benutzer, ihr Terminal (`tty1`, `pts/0`) und die Anmeldezeit; bei Remote-Logins steht die IP in Klammern.",
+    "`w` ist detaillierter: Die erste Zeile zeigt Laufzeit und **Load Average** (Systemlast), dann pro Sitzung die Leerlaufzeit (IDLE) und den aktuellen Befehl (WHAT)."
+   ],
+   "commands": [
+    {"cmd": "who", "what": "Zeigt angemeldete Benutzer, Terminals und Zeiten.", "where": "Vor Wartungsarbeiten.", "why": "Du unterbrichst niemanden versehentlich.", "example": "who", "nosim": true},
+    {"cmd": "w", "what": "Zeigt Sitzungen, Leerlaufzeit, laufenden Befehl und Load Average.", "where": "Wenn der Server langsam ist oder du verdächtige Sitzungen suchst.", "why": "Beantwortet in einem Befehl, wer was tut.", "example": "w", "nosim": true}
+   ],
+   "tip": "Ist auf deiner VM nur eine Sitzung offen, erscheinst nur du. Öffne einen zweiten Terminal-Tab und führe `who` erneut aus; die Zahl steigt."
+  },
+  {
+   "id": "history",
+   "title": "Login-Verlauf: last und lastb",
+   "body": [
+    "`last` liest `/var/log/wtmp` und listet **erfolgreiche** Logins, Logouts und Neustarts (`reboot`). Ein häufiger Fehler: In `last` nach fehlgeschlagenen Versuchen suchen. Fehlgeschlagene Logins erscheinen dort nicht.",
+    "Fehlgeschlagene Anmeldeversuche stehen in `/var/log/btmp` und werden mit `lastb` gelesen; nur root darf das. Bei Verdacht auf Brute-Force führe zuerst `sudo lastb | head` aus. Auf manchen Distributionen fehlt die btmp-Datei und der Befehl meldet einen Fehler; das kann einfach bedeuten, dass nie ein Fehlversuch protokolliert wurde."
+   ],
+   "commands": [
+    {"cmd": "last", "what": "Listet erfolgreiche Logins/Logouts und Reboot-Einträge.", "where": "Wenn du untersuchst, wer nachts eingeloggt war.", "why": "Deckt Kontenmissbrauch auf.", "example": "last -n 10", "nosim": true},
+    {"cmd": "lastb", "what": "Listet fehlgeschlagene Anmeldeversuche (braucht root).", "where": "Bei Sicherheitsprüfungen.", "why": "Zeigt Angriffsversuche.", "example": "sudo lastb -n 10", "nosim": true}
+   ],
+   "tip": "`last -n 5 student` zeigt nur die letzten 5 Logins des Kontos `student`.",
+   "warn": "Login-Protokolle sind sensibel (Benutzernamen, IP-Adressen). Entferne IPs und Namen, bevor du Ausgaben in öffentlichen Foren teilst."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Finde mit `whoami` heraus, unter welchem Benutzer du arbeitest.", "hint": "Die Ausgabe sollte `student` sein."},
+  "t02": {"text": "Zeige mit `id` deine UID, GID und Gruppenliste.", "hint": "Die Gruppen stehen im Teil `groups=`."},
+  "t03": {"text": "Gib mit dem Befehl `groups` deine Gruppen aus.", "hint": "Die Gruppe `wheel` bedeutet sudo-Rechte."},
+  "t04": {"text": "Sieh dir mit `id alice` die Identität eines anderen Benutzers an.", "hint": "Der Benutzername wird als Argument übergeben."},
+  "t05": {"text": "Lies die Kontodatei mit `cat /etc/passwd`.", "hint": "Die Datei ist für alle lesbar."},
+  "t06": {"text": "Finde mit `grep student /etc/passwd` nur die Zeile des Kontos `student`.", "hint": "Feld 6 der Zeile ist das Home-Verzeichnis."},
+  "t07": {"text": "Liste mit `cut -d: -f1 /etc/passwd` nur die Benutzernamen auf.", "hint": "-d legt das Trennzeichen fest, -f die Feldnummer."},
+  "t08": {"text": "Zähle mit `wc -l /etc/passwd`, wie viele Konten es gibt.", "hint": "-l zählt Zeilen; jede Zeile ist ein Konto."},
+  "t09": {"text": "Vorhersage: Wie viele Zeilen (Gruppen) hat `/etc/group`? Erst raten, dann mit `wc -l /etc/group` prüfen.", "hint": "Zähle die Gruppen root, wheel, student, alice, devs."},
+  "t10": {"text": "Vorhersage: Was macht `cat /etc/shadow` als normaler Benutzer? Erst nachdenken, dann ausführen.", "hint": "Passwort-Hashes sind nur für root: Permission denied|Erişim engellendi|Zugriff verweigert."},
+  "t11": {"text": "Vorhersage: Was liefert `id bob` für einen nicht existierenden Benutzer? Führe es aus und lies die Fehlermeldung.", "hint": "Erwartet wird der Fehler `no such user`; der Exit-Code ist nicht 0."},
+  "t12": {"text": "Fehlersuche: Ein Ticket sagt, `alice` kann sich nicht anmelden. Finde in `~/Documents/accounts.txt` alices Zeile und schreibe ihre Shell (Feld 7) in `~/alice_shell.txt`.", "hint": "`grep alice FILE | cut -d: -f7 > TARGET`. Eine `nologin`-Shell blockiert die interaktive Anmeldung."},
+  "t13": {"text": "Mini-Projekt: Schreibe die Namen der Konten, deren Shell in `/etc/passwd` auf `/bin/bash` endet, in `~/shell_users.txt`.", "hint": "`grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt`; `$` steht für das Zeilenende."},
+  "t14": {"text": "Challenge: Schreibe deinen Benutzernamen (`whoami`) und danach die `id`-Ausgabe in `~/me.txt`. Sichtbar sein müssen `student`, `uid=1000` und `wheel`.", "hint": "Nutze `>` für den ersten und `>>` für den zweiten Befehl."},
+  "t15": {"text": "Challenge: Wie viele Konten in `/etc/passwd` haben die Shell `nologin`? Schreibe die Zahl in `~/nologin_count.txt`.", "hint": "`grep -c` zählt passende Zeilen; leite die Ausgabe mit `>` um."},
+  "t16": {"text": "TICKET #4107: Der Prüfer möchte UID und Gruppen von `alice`. Speichere die Information in `~/alice_info.txt`.", "hint": "`id alice > ~/alice_info.txt`; die Ausgabe muss `uid=1001` und `devs` enthalten."}
+ },
+ "vm": {
+  "intro": "Diese Befehle lesen nur, du kannst sie gefahrlos auf deiner VM ausführen. `lastb` braucht `sudo`. Entferne IPs und Benutzernamen, bevor du Ausgaben teilst.",
+  "tasks": {
+   "v01": {
+    "title": "Wer ist verbunden?",
+    "text": "Füge die Ausgabe von `who` und `w` ein.",
+    "blocks": [{"cmd": "who\nw", "expected": "student  pts/0   2026-11-12 09:00 (192.168.1.10)\n 09:20:01 up 1 day,  2:30,  1 user,  load average: 0.00, 0.01, 0.05\nUSER     TTY      FROM      LOGIN@   IDLE   WHAT\n..."}],
+    "differs": ["Gibt es keine Zeilen, bist du evtl. in einem Pseudo-Terminal einer grafischen Sitzung; probiere ein echtes Terminal.", "Unter WSL kann `who` leer sein; die Load-Average-Zeile von `w` reicht."]
+   },
+   "v02": {
+    "title": "Erfolgreiche Logins",
+    "text": "Liste die letzten Logins auf und füge die Ausgabe ein.",
+    "blocks": [{"cmd": "last -n 5", "expected": "student  pts/0  192.168.1.10  Wed Nov 12 09:00   still logged in\nreboot   system boot  5.14.0  Wed Nov 12 08:55 still running\n\nwtmp begins Mon Nov 10 08:00:00 2026"}],
+    "differs": ["Bei `command not found`: `sudo apt install util-linux` (Ubuntu) oder `sudo dnf install util-linux` (Rocky/Alma).", "In Containern oder WSL kann wtmp leer sein; die letzte Zeile `wtmp begins` genügt."]
+   },
+   "v03": {
+    "title": "Fehlgeschlagene Logins",
+    "text": "Sieh dir die Ausgabe von `lastb` an. Die Liste kann leer sein; das ist normal. Dann bestätige mit \"Erledigt\".",
+    "blocks": [{"cmd": "sudo lastb -n 5", "expected": "(falls leer) btmp begins Wed Nov 12 08:55:00 2026"}],
+    "differs": ["`No such file or directory` (keine btmp): Es wurde nie ein Fehlversuch protokolliert.", "Du kannst einen Eintrag erzeugen, indem du in einem zweiten Terminal ein falsches Passwort eingibst (z. B. `su - alice`) und erneut nachsiehst."]
+   },
+   "v04": {
+    "title": "Konto mit getent abfragen",
+    "text": "Hole den Eintrag des Kontos `student`; Zahlen und Home-Verzeichnis müssen sichtbar sein.",
+    "blocks": [{"cmd": "getent passwd student", "expected": "student:x:1000:1000:Student:/home/student:/bin/bash"}],
+    "differs": ["Heißt dein Benutzer nicht `student`, nimm deinen eigenen: `getent passwd $(whoami)`.", "Ist die Ausgabe leer, existiert das Konto nicht; prüfe deinen Namen mit `whoami`."]
+   },
+   "v05": {
+    "title": "Deine Identität",
+    "text": "Füge deine `id`-Ausgabe ein.",
+    "blocks": [{"cmd": "id", "expected": "uid=1000(student) gid=1000(student) groups=1000(student),10(wheel)"}],
+    "differs": ["Unter Ubuntu heißt die sudo-Gruppe `sudo`; unter Rocky/Alma `wheel`.", "Ist die UID 0, arbeitest du als root; wechsle zu einem normalen Benutzer."]
+   },
+   "v06": {
+    "title": "Kontenliste und Shells",
+    "text": "Liste Benutzername und Shell nebeneinander auf (erste 8 Zeilen).",
+    "blocks": [{"cmd": "getent passwd | cut -d: -f1,7 | head -n 8", "expected": "root:/bin/bash\nbin:/sbin/nologin\ndaemon:/sbin/nologin\n..."}],
+    "differs": ["Unter Ubuntu kann der Shell-Pfad `/usr/sbin/nologin` lauten.", "Schlägt `cut` fehl, achte darauf, das Trennzeichen als `-d:` (ohne Leerzeichen) zu schreiben."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Welcher Befehl zeigt fehlgeschlagene Anmeldeversuche?", "options": ["last", "lastb", "who", "w"], "explain": "`last` zeigt nur erfolgreiche Logins; Fehlversuche stehen in `/var/log/btmp` und werden mit `lastb` gelesen."},
+  "q2": {"q": "Was zeigt Feld 7 einer Zeile in `/etc/passwd`?", "options": ["Das Home-Verzeichnis", "Die Login-Shell", "Den Passwort-Hash", "Die UID"], "explain": "Felder: Name, x, UID, GID, Kommentar, Home, Shell. Feld 7 ist die Shell (z. B. /bin/bash oder /sbin/nologin)."},
+  "q3": {"q": "In welcher Datei werden Passwort-Hashes gespeichert?", "options": ["/etc/passwd", "/etc/shadow", "/etc/group", "/var/log/wtmp"], "explain": "Hashes stehen in /etc/shadow, nur für root lesbar; das x in passwd weist darauf hin."},
+  "q4": {"q": "Warum bevorzugen Skripte `getent passwd`?", "options": ["Es findet neben der lokalen Datei auch LDAP/SSSD-Benutzer", "Es ist immer schneller", "Es braucht keine Rechte und zeigt Passwörter", "Es funktioniert nur als root"], "explain": "getent fragt über NSS alle Quellen ab und liefert so auch Benutzer aus dem zentralen Verzeichnis."}
+ },
+ "summary": [
+  "`whoami`, `id` und `groups` zeigen, wer du bist und in welchen Gruppen du bist.",
+  "`/etc/passwd` hat 7 Felder (Name, x, UID, GID, Kommentar, Home, Shell); Passwort-Hashes stehen in `/etc/shadow`.",
+  "`who` und `w` zeigen aktuelle Sitzungen, `last` erfolgreiche und `lastb` fehlgeschlagene frühere Logins.",
+  "`getent` fragt Konten ab, egal ob sie aus einer Datei oder einem zentralen Verzeichnis stammen."
+ ],
+ "glossary": [
+  {"term": "UID / GID", "meaning": "Numerische Identität eines Benutzers bzw. einer Gruppe; root hat UID 0."},
+  {"term": "nologin", "meaning": "Eine Shell, die interaktive Anmeldung blockiert; für Dienstkonten."},
+  {"term": "wtmp / btmp", "meaning": "Protokolldateien erfolgreicher und fehlgeschlagener Logins (`last` / `lastb`)."},
+  {"term": "Load Average", "meaning": "Durchschnittliche Systemlast der letzten 1, 5 und 15 Minuten."},
+  {"term": "NSS / getent", "meaning": "Die Schicht, die Kontoinformationen aus Dateien oder Verzeichnisdiensten auflöst, und der Befehl zur Abfrage."}
+ ]
+}

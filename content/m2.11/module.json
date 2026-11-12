@@ -1,0 +1,34 @@
+{
+  "id": "2.11",
+  "level": 2,
+  "setup": {
+    "dirs": ["/home/student/schedule", "/home/student/reports"],
+    "files": {
+      "/home/student/schedule/cron.sample": "# minute hour day month weekday command\n0 3 * * * /usr/local/bin/backup\n*/15 * * * 1-5 /usr/local/bin/check-status\n",
+      "/home/student/schedule/wrong-entry.txt": "60 25 * * * /usr/local/bin/backup\n",
+      "/home/student/schedule/backup.sh": "#!/bin/sh\nprintf '%s\\n' \"backup started\"\n"
+    }
+  },
+  "tasks": [
+    {"id":"t01","kind":"warmup","diff":1,"check":{"cmd":"^ls ~/schedule$","ok":true},"solution":["ls ~/schedule"]},
+    {"id":"t02","kind":"warmup","diff":1,"check":{"out":"0 3","of":"^cat ~/schedule/cron.sample$"},"solution":["cat ~/schedule/cron.sample"]},
+    {"id":"t03","kind":"guided","diff":1,"check":{"out":"minute hour day month weekday","of":"^head -n 1 ~/schedule/cron.sample$"},"solution":["head -n 1 ~/schedule/cron.sample"]},
+    {"id":"t04","kind":"guided","diff":2,"check":{"out":"\\*/15","of":"^grep check-status ~/schedule/cron.sample$"},"solution":["grep check-status ~/schedule/cron.sample"]},
+    {"id":"t05","kind":"predict","diff":2,"check":{"out":"60 25","of":"^cat ~/schedule/wrong-entry.txt$"},"solution":["cat ~/schedule/wrong-entry.txt"]},
+    {"id":"t06","kind":"debug","diff":2,"check":{"absent":"~/schedule/wrong-entry.txt"},"solution":["rm ~/schedule/wrong-entry.txt"]},
+    {"id":"t07","kind":"mini","diff":2,"check":[{"contains":["~/schedule/backup-plan.txt","0 3"]},{"contains":["~/schedule/backup-plan.txt","/usr/local/bin/backup"]}],"solution":["echo \"0 3 * * * /usr/local/bin/backup\" > ~/schedule/backup-plan.txt"]},
+    {"id":"t08","kind":"challenge","diff":3,"check":[{"contains":["~/schedule/job-notes.txt","crontab -e"]},{"contains":["~/schedule/job-notes.txt","crontab -l"]}],"solution":["echo \"Edit with crontab -e; verify with crontab -l.\" > ~/schedule/job-notes.txt"]},
+    {"id":"t09","kind":"ticket","diff":3,"check":[{"contains":["~/reports/cron-ticket.txt","PATH"]},{"contains":["~/reports/cron-ticket.txt","log"]}],"solution":["echo \"Use absolute paths, set PATH explicitly, and redirect output to a log.\" > ~/reports/cron-ticket.txt"]}
+  ],
+  "vm": [
+    {"id":"v01","expect":null},
+    {"id":"v02","expect":"active|inactive|loaded|not-found|Unit"},
+    {"id":"v03","expect":"NEXT|LEFT|UNIT|No timers"}
+  ],
+  "quiz": [
+    {"id":"q1","answer":2},
+    {"id":"q2","answer":0},
+    {"id":"q3","answer":1},
+    {"id":"q4","answer":3}
+  ]
+}

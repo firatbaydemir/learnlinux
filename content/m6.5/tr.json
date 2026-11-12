@@ -1,0 +1,487 @@
+{
+ "title": "Bash Script 1 — Değişken, Argüman, Koşul",
+ "lead": "İlk Bash script'ini yaz, çalıştırılabilir yap; değişkenler, argümanlar, çıkış kodları ve koşullarla çalış.",
+ "objectives": [
+  "Shebang'li bir script yazar, chmod +x ile çalıştırılabilir yapar ve ./script.sh ile başlatırsın.",
+  "Değişken atar; tek ve çift tırnak farkını, read, $(komut) ve $(( )) kullanımını bilirsin.",
+  "Argümanları $1, $# ve \"$@\" ile okur, çıkış kodlarını $? ve exit ile kontrol edersin.",
+  "if/elif/else, [[ ]] ve test ile karar verir, set -euo pipefail'i güvenlik ağı olarak kullanırsın."
+ ],
+ "sections": [
+  {
+   "id": "first",
+   "title": "İlk script: shebang ve çalıştırma izni",
+   "body": [
+    "Script, komutlar içeren bir metin dosyasıdır. İlk satırdaki **shebang** `#!/bin/bash`, dosyayı hangi yorumlayıcının çalıştıracağını söyler. **Çalıştırma biti** (x) yoksa dosya doğrudan başlatılamaz: `./hello.sh` o zaman *Permission denied* verir.",
+    "`./` 'bu klasördeki dosya' demektir. Linux komutları bulunduğun klasörde aramaz; bu yüzden yalnızca `hello.sh` yazarsan *command not found* alırsın. Bu modülde script'leri `printf` ile (VM'inde heredoc ile) oluşturuyorsun; böylece dosyada tam olarak ne olduğunu görürsün."
+   ],
+   "commands": [
+    {
+     "cmd": "#!/bin/bash",
+     "what": "Shebang: dosyanın ilk satırı, yorumlayıcıyı belirtir.",
+     "where": "Her Bash script'inin en başında.",
+     "why": "Script, sh gibi başka bir kabukla değil Bash ile çalışır.",
+     "example": "printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh"
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Dosyaya çalıştırma bitini ekler.",
+     "where": "Bir script oluşturduktan sonra bir kez.",
+     "why": "Olmazsa `./script.sh` Permission denied hatası verir.",
+     "example": "chmod +x ~/bin/hello.sh"
+    },
+    {
+     "cmd": "./script.sh",
+     "what": "Çalıştırılabilir script'i yoluyla başlatır.",
+     "where": "Kendi script'lerini başlatırken.",
+     "why": "Yol (`./` ya da tam yol) kabuğa dosyanın nerede olduğunu söyler.",
+     "example": "~/bin/hello.sh"
+    },
+    {
+     "cmd": "bash script.sh",
+     "what": "Script'i çalıştırma biti olmadan doğrudan Bash ile çalıştırır.",
+     "where": "Hızlı denemelerde ve noexec bağlanmış disklerde.",
+     "why": "Hata ayıklamada işe yarar; shebang yok sayılır.",
+     "example": "bash ~/bin/hello.sh",
+     "nosim": true
+    }
+   ],
+   "tip": "Kendi script'lerini `~/bin` içine koy. Ubuntu ve Rocky'de bu klasör, varsa, oturum açılışında `PATH`'e eklenir; böylece script'i adıyla başlatabilirsin.",
+   "warn": "İndirdiğin veya anlamadığın bir script'i asla çalıştırma. Önce `cat script.sh` ile oku. Özellikle `curl ... | bash` ve ilk denemede `sudo` konusunda çok dikkatli ol."
+  },
+  {
+   "id": "vars",
+   "title": "Değişkenler, tırnaklar ve aritmetik",
+   "body": [
+    "Değişken `NAME=value` ile atanır — **`=` çevresinde boşluk olmaz**. Değeri `$NAME` ile okursun. `NAME = value` çalışmaz: Bash `NAME`'i bir komut sanır.",
+    "**Çift tırnak** `\"...\"` değişkenleri açar, **tek tırnak** `'...'` açmaz: `echo '$HOME'` metni `$HOME` olarak yazar. Değişkenleri hep tırnak içine al (`\"$NAME\"`); boşluklu dosya adları tek kelime kalsın.",
+    "`$(komut)` komutun çıktısını yerleştirir, `$(( ))` tamsayı hesaplar, `read` kullanıcıdan girdi ister (yalnızca VM)."
+   ],
+   "commands": [
+    {
+     "cmd": "NAME=value",
+     "what": "Değişken atar (eşittir çevresinde boşluk yok).",
+     "where": "Script başında ayarlar ve yollar için.",
+     "why": "Bir değeri on yerde değil, tek yerde değiştirirsin.",
+     "example": "NAME=student; echo \"Hello $NAME\""
+    },
+    {
+     "cmd": "\"$VAR\" ve '$VAR'",
+     "what": "Çift tırnak değişkeni açar, tek tırnak metni olduğu gibi bırakır.",
+     "where": "Değişken kullanan her komutta.",
+     "why": "Tırnak, değerdeki boşluk ve joker karakterlerden korur.",
+     "example": "echo '$HOME' \"$HOME\""
+    },
+    {
+     "cmd": "read -r -p",
+     "what": "Bir satır girdiyi değişkene okur.",
+     "where": "Soru soran etkileşimli script'lerde.",
+     "why": "`-r` ters eğik çizgileri korur, `-p` istem metni gösterir.",
+     "example": "read -r -p \"Name: \" NAME",
+     "nosim": true
+    },
+    {
+     "cmd": "$(command)",
+     "what": "Kendi yerine komutun çıktısını koyar.",
+     "where": "Çıktıyı değişkende saklamak veya metne katmak için.",
+     "why": "Script'ler sistem durumuna tepki verebilir.",
+     "example": "echo \"Host: $(hostname)\""
+    },
+    {
+     "cmd": "$(( ))",
+     "what": "Tamsayı aritmetiği.",
+     "where": "Sayaçlar, boyutlar, basit hesaplar.",
+     "why": "Bash'te ondalık yoktur; onlar için `bc` kullanılır.",
+     "example": "echo $((6 * 7))",
+     "nosim": true
+    }
+   ],
+   "tip": "Varsayılan değer `${NAME:-default}` yazılır: `NAME` boş ya da tanımsızsa o değer kullanılır."
+  },
+  {
+   "id": "args",
+   "title": "Argümanlar ve çıkış kodları",
+   "body": [
+    "Script argüman alabilir: `$0` script adı, `$1`, `$2`, ... argümanlar, `$#` sayıları, `\"$@\"` hepsinin listesidir ve her biri tek kelime kalır. `\"$@\"`'yi tırnakla; yoksa `my file` iki kelimeye bölünür.",
+    "Her komut bir **çıkış koduyla** biter: `0` başarı, diğer her sayı hatadır. `$?` son komutun kodunu tutar. Script'te `exit 0` ya da `exit 1` ile bitirirsin. Simülatör script içindeki argümanları güvenilir çalıştıramaz; gerçek denemeler VM bölümünde."
+   ],
+   "commands": [
+    {
+     "cmd": "$0 $1 $2",
+     "what": "Script adı ve ilk argümanlar.",
+     "where": "Script çağıranın girdisine ihtiyaç duyduğunda.",
+     "why": "Tek script birçok dosya veya isimle çalışır.",
+     "example": "./args.sh alice bob",
+     "nosim": true
+    },
+    {
+     "cmd": "$# ve \"$@\"",
+     "what": "Argüman sayısı ve tüm argümanların listesi.",
+     "where": "Sayıyı kontrol etmek veya argümanlar üzerinde döngü kurmak için.",
+     "why": "`\"$@\"` boşluklu olsa bile her argümanı bozmadan korur.",
+     "example": "./args.sh \"my file\" bob",
+     "nosim": true
+    },
+    {
+     "cmd": "${1:-guest}",
+     "what": "İlk argüman; verilmediyse `guest`.",
+     "where": "İsteğe bağlı argümanlar için.",
+     "why": "Argüman eksik olunca script bozulmaz.",
+     "example": "NAME=\"${1:-guest}\"",
+     "nosim": true
+    },
+    {
+     "cmd": "$? ve exit",
+     "what": "`$?` son çıkış kodu, `exit N` script'i N koduyla bitirir.",
+     "where": "Kontrol etmek istediğin komutlardan sonra ve script sonunda.",
+     "why": "Başka script'ler, cron ve CI bu koda göre karar verir.",
+     "example": "false; echo $?"
+    }
+   ],
+   "tip": "`grep` eşleşme bulamazsa 1 döndürür. Bu programın hatası değil, sadece bir 'hayır' cevabıdır: `grep carol ~/users.txt; echo $?` çıktısı `1`'dir."
+  },
+  {
+   "id": "cond",
+   "title": "Koşullar: if, elif, else",
+   "body": [
+    "`if` bir komutu çalıştırır ve çıkış koduna bakar. Komut genelde `[ ... ]` (`test` ile aynı) ya da Bash'in `[[ ... ]]` yapısıdır. Parantez içindeki boşluklar zorunludur: `[ -f \"$1\" ]`.",
+    "Sık testler: `-f` normal dosya, `-d` klasör, `-x` çalıştırılabilir, `-z` metin boş, `-n` metin boş değil. Sayılar için `-eq -ne -lt -le -gt -ge`, metin için `==` ve `!=`. `[[ ]]`, `[ ]`'den daha güvenlidir (kelime bölme yok) ama yalnızca Bash'te vardır, düz `sh`'de yoktur.",
+    "Kısa biçimler: `cmd1 && cmd2` ikinciyi yalnızca başarıda, `cmd1 || cmd2` yalnızca hatada çalıştırır."
+   ],
+   "commands": [
+    {
+     "cmd": "if / elif / else / fi",
+     "what": "Bir teste göre farklı komutlar çalıştırır.",
+     "where": "Script'in karar vermesi gereken her yerde.",
+     "why": "Script körlemesine değil, girdiye ve duruma göre çalışır.",
+     "example": "if [ -f \"$1\" ]; then echo exists; else echo missing; fi",
+     "nosim": true
+    },
+    {
+     "cmd": "[ ] / test",
+     "what": "Dosya, metin ve sayı testi yapar; sonuç çıkış koduyla gelir.",
+     "where": "`if` koşulunda ya da tek başına `&&` / `||` ile.",
+     "why": "Her kabukta çalışan taşınabilir biçim.",
+     "example": "test -f ~/notes.txt && echo yes"
+    },
+    {
+     "cmd": "[[ ]]",
+     "what": "Desen ve içinde `&&` / `||` destekleyen Bash koşulu.",
+     "where": "`#!/bin/bash` ile başlayan script'lerde.",
+     "why": "`[ ]`'den daha az tırnak tuzağı vardır.",
+     "example": "[[ $score -ge 50 && -n $name ]] && echo ok",
+     "nosim": true
+    },
+    {
+     "cmd": "&& ve ||",
+     "what": "Komutları başarı ya da hataya göre zincirler.",
+     "where": "Tek satırlık kısa kontrollerde.",
+     "why": "Tam bir `if`'e hızlı alternatif.",
+     "example": "test -d ~/Documents && echo dir || echo nodir"
+    }
+   ],
+   "tip": "Önce kontrol et, sonra işlem yap: `[ -f \"$1\" ] || { echo \"no such file\"; exit 1; }` açık bir mesajla erken durur."
+  },
+  {
+   "id": "strict",
+   "title": "Güvenli script: set -euo pipefail ve hata ayıklama",
+   "body": [
+    "Bash varsayılan olarak **hatadan sonra devam eder**. En üstteki `set -euo pipefail` satırı bunu değiştirir: `-e` ilk başarısız komutta durur, `-u` tanımsız değişkeni hata sayar, `-o pipefail` boru hattının herhangi bir parçası başarısızsa hattı başarısız yapar.",
+    "Hata ayıklamak için `bash -n script.sh` (yalnızca sözdizimi kontrolü) ve `bash -x script.sh` (her komutu çalışmadan önce başına `+` koyup yazar) kullan. `shellcheck` tipik hataları script'i çalıştırmadan bulur. Debian/Ubuntu'da `sudo apt install shellcheck`, RHEL/Rocky'de `sudo dnf install epel-release && sudo dnf install ShellCheck` ile kurulur.",
+    "Sıkılaştırılmış sistemlerde `chmod +x` yapılsa bile script çalışmayabilir: klasör `noexec` bağlanmış olabilir ya da bir servis başlattığında SELinux (RHEL/Rocky) / AppArmor (Ubuntu) engelleyebilir. O zaman test için `bash script.sh` kullan ve audit/journal kayıtlarına bak."
+   ],
+   "commands": [
+    {
+     "cmd": "set -euo pipefail",
+     "what": "Katı mod: hata, tanımsız değişken ve başarısız boru hattında durur.",
+     "where": "Hemen her script'in ikinci satırı.",
+     "why": "Hatalar sessizce geçilmez, script daha az zarar verir.",
+     "example": "set -euo pipefail",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -n / bash -x",
+     "what": "`-n` sözdizimini denetler, `-x` her komutu izler.",
+     "where": "Script yanlış davrandığında.",
+     "why": "Hangi satırın hangi değerlerle çalıştığını görürsün.",
+     "example": "bash -x ~/bin/hello.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "shellcheck",
+     "what": "Kabuk script'leri için statik analiz.",
+     "where": "Script'i paylaşmadan veya zamanlamadan önce.",
+     "why": "Tırnak hatalarını ve yazım hatalarını erken bulur.",
+     "example": "shellcheck ~/bin/vars.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "${VAR:?message}",
+     "what": "Değişken boş ya da tanımsızsa mesajla durdurur.",
+     "where": "Değişken kullanan yıkıcı komutlardan önce.",
+     "why": "`rm`'nin yanlış yolda çalışmasını önler.",
+     "example": "rm -r \"${TARGET:?TARGET is not set}/cache\"",
+     "nosim": true
+    }
+   ],
+   "tip": "Önce yazdır, sonra sil: test çalıştırmasında `rm` yerine `echo rm` yaz ve yolları gözünle kontrol et.",
+   "warn": "Tek başına `-e` garanti değildir: koşulların (`if`, `&&`, `||`) içinde yok sayılır. Her script'i önce zararsız örnek verilerle dene.",
+   "danger": "Boş değişken tehlikelidir: `DIR` boşsa `rm -rf \"$DIR\"/*` komutu `rm -rf /*` olur. `set -u` ve `${DIR:?}` kullan, VM'de dene ve önce **snapshot** al (modül 0.2)."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Ev dizininde script'lerin için klasörü oluştur: `mkdir ~/bin`.",
+   "hint": "`~` ev dizinindir."
+  },
+  "t02": {
+   "text": "İlk script'ini `printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh` ile yaz.",
+   "hint": "`\\n` satır sonudur; dosya iki satır olur. `cat ~/bin/hello.sh` ile kontrol et."
+  },
+  "t03": {
+   "text": "Script'i `chmod +x ~/bin/hello.sh` ile çalıştırılabilir yap.",
+   "hint": "`ls -l ~/bin/hello.sh` çıktısında izinlerde artık `x` var."
+  },
+  "t04": {
+   "text": "Script'i yoluyla çalıştır: `~/bin/hello.sh`.",
+   "hint": "Ya da önce `cd ~/bin`, sonra `./hello.sh`."
+  },
+  "t05": {
+   "text": "`~/bin/vars.sh` dosyasını `#!/bin/bash`, `NAME=student` ve `echo \"Hello $NAME\"` satırlarıyla yaz (`printf` kullan), çalıştırılabilir yap ve çalıştır.",
+   "hint": "Üç komut: `printf ... > ~/bin/vars.sh`, `chmod +x`, sonra çalıştır. Çıktı: `Hello student`."
+  },
+  "t06": {
+   "text": "Tahmin et: `'$HOME'` ve `\"$HOME\"` ne yazdırır? Sonra `echo '$HOME' \"$HOME\"` ile kontrol et.",
+   "hint": "Tek tırnak metni korur, çift tırnak değişkeni açar."
+  },
+  "t07": {
+   "text": "Eşleşme bulamayan bir aramanın çıkış kodunu tahmin et. `grep carol ~/users.txt; echo $?` çalıştır.",
+   "hint": "grep bu dosyada hiçbir şey bulamaz ve sıfırdan farklı bir kodla cevap verir."
+  },
+  "t08": {
+   "text": "`~/bin/check.sh` yaz (shebang, sonra `if [ -f \"$1\" ]; then`, `echo \"exists\"`, `else`, `echo \"missing\"`, `fi`) ve çalıştırılabilir yap. Simülatör `if` çalıştıramaz; VM'de çalıştıracaksın.",
+   "hint": "Satırlar arasına `\\n` koyarak tek `printf` kullan, sonra `chmod +x`."
+  },
+  "t09": {
+   "text": "`test` veya `[ ]` ile iki kontrol yap: `~/notes.txt` bir dosya mı (`-f`) ve `~/Documents` bir klasör mü (`-d`)? Sonucu görmek için `&& echo ok` ekle.",
+   "hint": "`test -f ~/notes.txt && echo file` ve `[ -d ~/Documents ] && echo dir`."
+  },
+  "t10": {
+   "text": "Tahmin et: `~/notes.txt` çalıştırılabilir mi? `test -x ~/notes.txt; echo $?` çalıştır ve kodu oku.",
+   "hint": "Çıkış kodu 0 doğru, 1 yanlış demektir."
+  },
+  "t11": {
+   "text": "Hata ayıkla: `~/scripts/broken.sh` dosyasında shebang ve çalıştırma izni yok. İkisini de düzelt (içindeki iki komutu koru), sonra çalıştır; `~/backup.done` oluşmalı.",
+   "hint": "Dosyayı `printf` ile yeniden yaz, ilk satır `#!/bin/bash` olsun, sonra `chmod +x`."
+  },
+  "t12": {
+   "text": "Hata ayıkla: `~/scripts/greet.sh` `Hello alice` yazdırmalı ama `Hello $NAME` metnini yazdırıyor. İki hatayı bul (`=` çevresinde boşluk, tek tırnak), düzelt ve script'i çalıştır.",
+   "hint": "Boşluksuz `NAME=alice` ve çift tırnaklı `echo \"Hello $NAME\"`."
+  },
+  "t13": {
+   "text": "Mini proje: shebang'li ve `$1`, `$#`, `\"$@\"` kullanan üç `echo` satırlı `~/bin/args.sh` yaz. Çalıştırılabilir yap.",
+   "hint": "Örnek satır: `echo \"Count: $#\"`. Tek `printf` kullan, satırlar arasında `\\n` olsun."
+  },
+  "t14": {
+   "text": "Mini proje: `~/bin/backup.sh` yaz: shebang, `set -euo pipefail`, `SRC=\"$HOME/Documents\"`, `DEST=\"$HOME/backup\"`, `mkdir -p \"$DEST\"` ve `cp \"$SRC/report.txt\" \"$DEST/\"`. Çalıştırılabilir yap.",
+   "hint": "Her değişkeni tırnakla. Simülatör `set` çalıştıramaz; yalnızca dosyayı oluştur."
+  },
+  "t15": {
+   "text": "Meydan okuma: `~/bin/need_arg.sh` oluştur. Argüman yoksa `Usage: need_arg.sh NAME` yazdırır ve `exit 1` ile biter; varsa `Hello, $1` yazdırır ve `exit 0` ile biter. Çalıştırılabilir yap.",
+   "hint": "`-z \"$1\"` ile test et; `if ... then ... fi` kullan."
+  },
+  "t16": {
+   "text": "Meydan okuma: tek komutu `test -f /home/student/missing.txt` olan `~/bin/probe.sh` oluştur. Çalıştırılabilir yap, çalıştır ve çıkış kodunu `echo $? > ~/code.txt` ile `~/code.txt` dosyasına yaz.",
+   "hint": "Script, son komutunun çıkış kodunu döndürür. Script'ten hemen sonra `echo $?` çalıştır."
+  },
+  "t17": {
+   "text": "Ticket: Yeni çalışan ekibi `~/bin/welcome.sh` istiyor. İsim verilirse `Welcome, NAME` yazdırır; argüman yoksa `guest` kullanmalı. `${1:-guest}` kullan, shebang ekle ve çalıştırılabilir yap.",
+   "hint": "`NAME=\"${1:-guest}\"` ve ardından `echo \"Welcome, $NAME\"`."
+  },
+  "t18": {
+   "text": "Ticket: Bir meslektaşın `~/scripts/report.sh` dosyasının 'Permission denied' ile başarısız olduğunu söylüyor. En küçük değişiklikle düzelt ve çalıştır; `~/report.done` oluşmalı.",
+   "hint": "Dosyada çalıştırma biti eksik; içeriğini değiştirmen gerekmez."
+  }
+ },
+ "vm": {
+  "intro": "VM'inde (Ubuntu veya Rocky) script'leri gerçekten çalıştırırsın. Yalnızca kendi `~/bin` klasörünü ve zararsız test verilerini kullan. Yıkıcı denemelerden önce snapshot al (modül 0.2).",
+  "tasks": {
+   "v01": {
+    "title": "İlk script ve çalıştırma biti",
+    "text": "Script'i heredoc ile oluştur, `chmod +x` öncesinde ve sonrasında çalıştırmayı dene ve çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/bin\ncat > ~/bin/hello.sh <<'EOF'\n#!/bin/bash\necho \"Hello, Linux!\"\nEOF\n~/bin/hello.sh\nchmod +x ~/bin/hello.sh\nls -l ~/bin/hello.sh\n~/bin/hello.sh",
+      "expected": "bash: /home/student/bin/hello.sh: Permission denied\n-rwxr-xr-x. 1 student student 38 Nov 12 10:00 /home/student/bin/hello.sh\nHello, Linux!"
+     }
+    ],
+    "differs": [
+     "Ubuntu'da `ls -l` izinlerden sonra nokta göstermez; Rocky'de (SELinux bağlamı) nokta vardır.",
+     "İlk çalıştırma zaten başarılıysa umask'in veya dosya sistemin çalıştırma biti veriyor demektir; sorun değil."
+    ]
+   },
+   "v02": {
+    "title": "Değişken, tırnak, read ve aritmetik",
+    "text": "Tırnak farkını gösteren, bir sayı okuyup ikiyle çarpan script yaz. Sayıyı boru ile ver.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/vars.sh <<'EOF'\n#!/bin/bash\nNAME=\"student\"\necho 'single: $NAME'\necho \"double: $NAME\"\nread -r -p \"Number: \" N\necho \"Double: $((N * 2))\"\necho \"Year: $(date +%Y)\"\nEOF\nchmod +x ~/bin/vars.sh\necho 21 | ~/bin/vars.sh",
+      "expected": "single: $NAME\ndouble: student\nDouble: 42\nYear: 2026"
+     }
+    ],
+    "differs": [
+     "Girdi boru ile geldiği için `Number:` istemi görünmez; bu normaldir.",
+     "`unbound variable` veya `syntax error` görürsen `=` çevresinde boşluk olmadığından emin ol."
+    ]
+   },
+   "v03": {
+    "title": "Boşluklu argümanlar",
+    "text": "Argüman sayısını ve her argümanı yazdıran bir script yaz, sonra boşluk içeren bir dosya adıyla çağır.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/args.sh <<'EOF'\n#!/bin/bash\necho \"Script: $0\"\necho \"Count: $#\"\necho \"First: $1\"\nfor item in \"$@\"; do\n  echo \"Arg: $item\"\ndone\nEOF\nchmod +x ~/bin/args.sh\n~/bin/args.sh \"my file\" bob",
+      "expected": "Script: /home/student/bin/args.sh\nCount: 2\nFirst: my file\nArg: my file\nArg: bob"
+     }
+    ],
+    "differs": [
+     "`Count` 3 ise `my file` çevresine tırnak koymadan çağırmışsındır.",
+     "`\"$@\"` yerine `$@` yazıp tekrar çalıştır: `my` ve `file` ayrı argüman olur."
+    ]
+   },
+   "v04": {
+    "title": "if / elif / else ve çıkış kodları",
+    "text": "`[[ ]]` ile küçük bir not script'i yaz, üç girdiyle çalıştır ve `test` çıkış kodlarına bak.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/grade.sh <<'EOF'\n#!/bin/bash\nscore=\"${1:-0}\"\nif [[ $score -ge 90 ]]; then\n  echo \"top\"\nelif [[ $score -ge 50 ]]; then\n  echo \"pass\"\nelse\n  echo \"fail\"\nfi\nEOF\nchmod +x ~/bin/grade.sh\n~/bin/grade.sh 95\n~/bin/grade.sh 60\n~/bin/grade.sh\ntest -f /etc/passwd; echo \"rc=$?\"\ntest -f /nonexistent; echo \"rc=$?\"",
+      "expected": "top\npass\nfail\nrc=0\nrc=1"
+     }
+    ],
+    "differs": [
+     "`[[: not found` alırsan script'i `sh script.sh` ile başlatmışsındır; `bash` kullan veya doğrudan çalıştır.",
+     "Her girdi `fail` yazıyorsa `[[ ... ]]` içindeki boşlukları kontrol et."
+    ]
+   },
+   "v05": {
+    "title": "Katı mod iş başında",
+    "text": "`set -euo pipefail`'in başarısız bir komutta ve tanımsız bir değişkende ne yaptığını karşılaştır.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/strict.sh <<'EOF'\n#!/bin/bash\nset -euo pipefail\necho \"before\"\nfalse\necho \"after\"\nEOF\nchmod +x ~/bin/strict.sh\n~/bin/strict.sh; echo \"exit=$?\"\nbash -c 'set -u; echo \"$UNDEFINED_VAR\"'; echo \"exit=$?\"",
+      "expected": "before\nexit=1\nbash: line 1: UNDEFINED_VAR: unbound variable\nexit=1"
+     }
+    ],
+    "differs": [
+     "`after` görünmemeli. Görünüyorsa `set` satırını kontrol et.",
+     "`unbound variable` mesajının tam metni Bash sürümüne göre değişir."
+    ]
+   },
+   "v06": {
+    "title": "Hata ayıklama: bash -n, bash -x, shellcheck",
+    "text": "Sözdizimini kontrol et, bir script'i izle ve ShellCheck'i kur (dağıtımını seç). Kurulum mümkün değilse üçüncü bloğu atla ve ilk iki çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "bash -n ~/bin/hello.sh; echo \"syntax=$?\"\nbash -x ~/bin/hello.sh",
+      "expected": "syntax=0\n+ echo 'Hello, Linux!'\nHello, Linux!"
+     },
+     {
+      "cmd": "# Ubuntu / Debian\nsudo apt install -y shellcheck\n# Rocky / RHEL\nsudo dnf install -y epel-release && sudo dnf install -y ShellCheck\nshellcheck ~/bin/vars.sh",
+      "expected": "(çıktı yoksa bulgu yok demektir)"
+     }
+    ],
+    "differs": [
+     "`syntax=0` sözdiziminin doğru olduğunu gösterir; başka bir sayı sözdizimi hatasıdır ve Bash satırı yazar.",
+     "ShellCheck SC2086 gibi ipuçları veriyorsa bunlar genelde değişken çevresinde eksik tırnağı gösterir."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`echo '$HOME'` ne yazdırır?",
+   "options": [
+    "/home/student",
+    "$HOME",
+    "Boş bir satır",
+    "HOME"
+   ],
+   "explain": "Tek tırnak açılımı engeller; `$HOME` metni yazdırılır. Değişkenleri yalnızca çift tırnak açar."
+  },
+  "q2": {
+   "q": "Bir script içinde `$#` neyi tutar?",
+   "options": [
+    "Argüman sayısını",
+    "Script'in adını",
+    "Son komutun çıkış kodunu",
+    "Tüm argümanları tek metin olarak"
+   ],
+   "explain": "`$#` argüman sayısıdır; `$0` script adı, `$?` son çıkış kodu, `\"$@\"` argüman listesidir."
+  },
+  "q3": {
+   "q": "`set -euo pipefail` ne yapar?",
+   "options": [
+    "Script'i root olarak başlatır",
+    "Her komutu çalışmadan önce yazdırır",
+    "Tüm hataları yok sayar",
+    "Hata, tanımsız değişken ve başarısız boru parçasında durur"
+   ],
+   "explain": "`-e` hatada, `-u` tanımsız değişkende, `pipefail` başarısız boru parçasında durdurur. Komutları yazdırmak `-x`'tir."
+  },
+  "q4": {
+   "q": "`./run.sh` başlatıyorsun ve dosyada çalıştırma biti yok. Ne olur?",
+   "options": [
+    "command not found",
+    "Sözdizimi hatası",
+    "Permission denied",
+    "Script normal çalışır"
+   ],
+   "explain": "x biti yoksa çekirdek dosyayı başlatmaz: Permission denied. `chmod +x run.sh` ile düzeltilir."
+  }
+ },
+ "summary": [
+  "Script, `#!/bin/bash` shebang'i ile başlar, `chmod +x` ister ve `./script.sh` ile başlatılır.",
+  "Değişken: boşluksuz `NAME=value`; `\"$NAME\"` açar, `'$NAME'` açmaz. Hep tırnakla.",
+  "`$1`, `$#` ve `\"$@\"` argümanları okur; `${1:-default}` varsayılan değer verir.",
+  "`$?` son çıkış kodudur (0 = başarı); `exit N` script'i bir kodla bitirir.",
+  "`if` ile `[ ]`, `[[ ]]` veya `test` karar verir; en sık testler `-f -d -z -eq`.",
+  "`set -euo pipefail`, `bash -x` ve `shellcheck` script'leri daha güvenli ve ayıklaması kolay yapar."
+ ],
+ "glossary": [
+  {
+   "term": "shebang",
+   "meaning": "İlk satır `#!/bin/bash`; script'in yorumlayıcısını belirtir."
+  },
+  {
+   "term": "çalıştırma biti",
+   "meaning": "Dosyanın program olarak başlatılmasına izin veren x yetkisi."
+  },
+  {
+   "term": "değişken",
+   "meaning": "`NAME=value` ile atanan, `$NAME` ile okunan adlandırılmış değer."
+  },
+  {
+   "term": "tırnaklama",
+   "meaning": "Tek tırnak metni olduğu gibi korur, çift tırnak değişkenleri açar."
+  },
+  {
+   "term": "konumsal argüman",
+   "meaning": "Script'e verilen değer: `$1`, `$2`, ..."
+  },
+  {
+   "term": "çıkış kodu",
+   "meaning": "Bir komutun döndürdüğü sayı; 0 başarı, diğerleri hatadır."
+  },
+  {
+   "term": "test / [ ]",
+   "meaning": "Bir koşulu değerlendirip çıkış koduyla cevap veren komut."
+  },
+  {
+   "term": "katı mod",
+   "meaning": "`set -euo pipefail`: hata, tanımsız değişken ve başarısız boru hattında durur."
+  },
+  {
+   "term": "heredoc",
+   "meaning": "`<<'EOF'` birkaç satır metni bir komuta verir; çoğunlukla dosya oluşturmak için kullanılır."
+  }
+ ]
+}

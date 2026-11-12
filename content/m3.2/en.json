@@ -1,0 +1,102 @@
+{
+ "title": "Redirection and Pipes",
+ "lead": "A pipe connects the output of one command to the input of the next. Small tools combined this way solve big problems.",
+ "objectives": [
+  "You chain commands with `|` into pipelines.",
+  "You count, sort and deduplicate with `wc`, `sort` and `uniq`.",
+  "You combine pipes and redirection, and split a stream with `tee`."
+ ],
+ "sections": [
+  {
+   "id": "pipe",
+   "title": "The pipe: command | command",
+   "body": [
+    "`|` connects **stdout** of the left command to **stdin** of the right one. Nothing is written to disk in between. Each tool does one thing; the pipe combines them.",
+    "Only stdout travels through a pipe. Error messages (stderr) still go to the screen unless you add `2>&1` before the pipe."
+   ],
+   "commands": [
+    {"cmd": "wc -l", "what": "Counts lines.", "where": "At the end of a pipeline to count results.", "why": "Answers 'how many?'.", "example": "cat logs/app.log | wc -l"},
+    {"cmd": "grep", "what": "Keeps only lines that match a pattern.", "where": "To filter logs and lists.", "why": "Reduces a big stream to the interesting lines.", "example": "grep ERROR logs/app.log | wc -l"},
+    {"cmd": "head / tail", "what": "Shows the first / last lines.", "where": "To see the top or bottom of a result.", "why": "Keeps output short.", "example": "sort -n data/nums.txt | tail -n 1"}
+   ],
+   "tip": "Build a pipeline step by step: run the first command, check the output, then add the next `|`."
+  },
+  {
+   "id": "sortuniq",
+   "title": "sort, uniq and tee",
+   "body": [
+    "`uniq` only collapses **adjacent** duplicate lines, so you almost always run `sort` first. `uniq -c` prefixes each line with its count; `sort -rn` then ranks them by that number.",
+    "`sort` compares text by default, so `10` comes before `9`. Use `sort -n` for numbers. `tee file` writes the stream to a file **and** passes it on, like a T-junction."
+   ],
+   "commands": [
+    {"cmd": "sort", "what": "Sorts lines; `-n` numeric, `-r` reverse, `-u` unique.", "where": "Before `uniq` or to rank values.", "why": "Brings similar lines together.", "example": "sort data/fruits.txt"},
+    {"cmd": "uniq -c", "what": "Collapses adjacent duplicates and counts them.", "where": "To build frequency tables.", "why": "Shows how often each line occurs.", "example": "sort data/fruits.txt | uniq -c"},
+    {"cmd": "tee", "what": "Saves the stream to a file and also passes it on.", "where": "To keep an intermediate result of a pipeline.", "why": "You see and store the data in one go.", "example": "grep ERROR logs/app.log | tee all_errors.txt | wc -l"}
+   ],
+   "tip": "The classic ranking: `sort | uniq -c | sort -rn`.",
+   "warn": "`uniq` without `sort` leaves duplicates that are not next to each other."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Count the lines of `logs/app.log` with `cat logs/app.log | wc -l`.", "hint": "The pipe feeds the file content to `wc -l`."},
+  "t02": {"text": "Sort `data/fruits.txt` alphabetically with `sort`.", "hint": "Equal lines appear next to each other."},
+  "t03": {"text": "Count how many entries the `data` folder has with `ls -1 data | wc -l`.", "hint": "`-1` writes each name on its own line; `wc -l` counts the lines."},
+  "t04": {"text": "Count the ERROR lines of `logs/app.log` with `grep ERROR logs/app.log | wc -l`.", "hint": "grep filters, `wc -l` counts."},
+  "t05": {"text": "Remove duplicates from `data/fruits.txt` with `sort data/fruits.txt | uniq`.", "hint": "Sort first so duplicates are adjacent."},
+  "t06": {"text": "Count each fruit with `sort data/fruits.txt | uniq -c`.", "hint": "The number in front is the count."},
+  "t07": {"text": "Save all ERROR lines of the log to `errors.txt` with `grep ERROR logs/app.log > errors.txt`.", "hint": "Check with `cat errors.txt`."},
+  "t08": {"text": "Predict: what is the first line of `sort data/nums.txt | head -n 1`? `2` or `10`? Run it to verify.", "hint": "Plain `sort` compares text, not numbers."},
+  "t09": {"text": "Predict: which number does `sort -n data/nums.txt | tail -n 1` print? Run it to verify.", "hint": "`-n` sorts numerically; the last line is the largest."},
+  "t10": {"text": "Debug: `uniq data/unsorted.txt` still shows duplicates. Write the unique lines (`a`, `b`) to `~/unique.txt`.", "hint": "`sort data/unsorted.txt | uniq > unique.txt`."},
+  "t11": {"text": "Mini project: build the report `report.txt` with the ERROR lines of the log counted and ranked: `grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt`.", "hint": "Four stages: filter, sort, count, rank; then redirect."},
+  "t12": {"text": "Challenge: in a single pipeline save all ERROR lines to `all_errors.txt` and also print how many there are (use `tee`).", "hint": "`grep ... | tee all_errors.txt | wc -l`."},
+  "t13": {"text": "Ticket: Management wants to know how many different users appear in `data/access.txt`. Write only the number into `~/users_count.txt`.", "hint": "`sort | uniq | wc -l`, then redirect with `>`."}
+ },
+ "vm": {
+  "intro": "On your VM these pipelines only read; the only files written are ones you create in your home directory.",
+  "tasks": {
+   "v01": {
+    "title": "Count with a pipe",
+    "text": "Count how many entries `/etc` has and paste the number.",
+    "blocks": [{"cmd": "ls /etc | wc -l", "expected": "187"}],
+    "differs": ["The number depends on your system; any number is fine."]
+   },
+   "v02": {
+    "title": "Extract and sort users",
+    "text": "Take the first field of `/etc/passwd`, sort it and show the first five names.",
+    "blocks": [{"cmd": "cut -d: -f1 /etc/passwd | sort | head -n 5", "expected": "_apt\nbackup\nbin\ndaemon\ngames"}],
+    "differs": ["Names differ per distribution; only the alphabetical order matters. Use `| grep root` to check that `root` exists."]
+   },
+   "v03": {
+    "title": "Frequency table",
+    "text": "Count which login shells are used in `/etc/passwd` and rank them.",
+    "blocks": [{"cmd": "cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn", "expected": "     24 /usr/sbin/nologin\n      3 /bin/bash\n      1 /bin/sync"}],
+    "differs": ["Counts and shells vary per system.", "If you see only one line, check that `sort` comes before `uniq -c`."]
+   },
+   "v04": {
+    "title": "Keep a copy with tee",
+    "text": "Save a listing with `tee` while counting it; check the file. If it worked press \"Done\".",
+    "blocks": [{"cmd": "ls /etc | tee ~/etc_list.txt | wc -l\nhead -n 3 ~/etc_list.txt"}],
+    "differs": ["If `etc_list.txt` is empty, check that you wrote `~/etc_list.txt` after `tee`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What does the pipe `|` connect?", "options": ["stdout of the left command to stdin of the right command", "A file to a command", "stderr to stdout", "Two files"], "explain": "The pipe feeds the left command's stdout into the right command's stdin."},
+  "q2": {"q": "Why is `sort` used before `uniq`?", "options": ["`uniq` needs a file", "`sort` makes it faster", "`uniq` only works on numbers", "`uniq` only collapses adjacent duplicates"], "explain": "Sorting makes identical lines adjacent."},
+  "q3": {"q": "What does `tee out.txt` do in a pipeline?", "options": ["Deletes the stream", "Writes the stream to a file and passes it on", "Only shows errors", "Sorts the stream"], "explain": "`tee` splits the stream like a T-piece."},
+  "q4": {"q": "Which command prints the largest number of a file with one number per line?", "options": ["`sort file | head -n 1`", "`sort -r file | tail -n 1`", "`sort -n file | tail -n 1`", "`uniq -c file`"], "explain": "`sort -n` ranks numerically; the last line is the largest."}
+ },
+ "summary": [
+  "`cmd1 | cmd2` passes stdout of cmd1 as stdin to cmd2.",
+  "`sort | uniq -c | sort -rn` builds a frequency ranking.",
+  "`sort -n` sorts numerically; plain `sort` sorts as text.",
+  "`tee` stores a stream in a file while passing it on."
+ ],
+ "glossary": [
+  {"term": "pipe", "meaning": "Connects the output of one command to the input of another."},
+  {"term": "pipeline", "meaning": "A chain of commands joined by pipes."},
+  {"term": "filter", "meaning": "A command that reads stdin and writes a changed stream to stdout."},
+  {"term": "tee", "meaning": "Writes a stream to a file and to stdout."}
+ ]
+}

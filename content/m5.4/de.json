@@ -1,0 +1,83 @@
+{
+  "title": "Job-Kontrolle",
+  "lead": "Verwalte Shell-Jobs im Vorder- oder Hintergrund, brich sie mit Ctrl+C ab, pausiere sie mit Ctrl+Z und nutze bei Bedarf nohup.",
+  "objectives": [
+    "Du unterscheidest Vordergrund-, Hintergrund- und angehaltene Shell-Jobs.",
+    "Du verwaltest Jobs der aktuellen Shell mit `jobs`, `bg` und `fg`.",
+    "Du weißt, was `nohup` leistet und was es nicht ersetzt."
+  ],
+  "sections": [
+    {
+      "id": "signals",
+      "title": "Vordergrund, Ctrl+C und Ctrl+Z",
+      "body": [
+        "Ein Vordergrundbefehl belegt das Terminal. `Ctrl+C` sendet meist SIGINT und bricht den Befehl ab; `Ctrl+Z` sendet SIGTSTP und **pausiert** den Job. Ein angehaltener Job ist nicht beendet und kann weiterhin Ressourcen belegen.",
+        "Ein `&` am Befehlsende startet ihn direkt im Hintergrund. Das macht den Job nicht unabhängig vom Terminal; beim Schließen der Sitzung kann er betroffen sein."
+      ],
+      "commands": [
+        {"cmd": "sleep 300", "what": "Wartet fünf Minuten im Vordergrund und belegt dabei das Terminal.", "where": "Zum sicheren Ausprobieren eines Vordergrundjobs.", "why": "Damit lassen sich Ctrl+C und Ctrl+Z demonstrieren.", "example": "sleep 300", "nosim": true},
+        {"cmd": "sleep 300 &", "what": "Startet den Wartebefehl im Hintergrund.", "where": "Wenn du im Terminal weitere Befehle ausführen willst.", "why": "Die Shell zeigt Jobnummer und PID an.", "example": "sleep 300 &", "nosim": true}
+      ],
+      "tip": "Vergiss angehaltene Jobs nicht: Finde sie mit `jobs -l` und setze sie fort oder beende sie passend zum Zweck."
+    },
+    {
+      "id": "jobs",
+      "title": "jobs, bg und fg",
+      "body": [
+        "`jobs -l` listet nur Jobs der aktuellen Shell-Sitzung. `bg %1` setzt einen Job im Hintergrund fort; `fg %1` holt ihn in den Vordergrund. `%1` ist die Shell-Jobnummer aus der Ausgabe von `jobs`, nicht die PID.",
+        "Ein Hintergrundjob kann weiterhin ins Terminal schreiben. Nach Abschluss meldet die Shell den Status. Rate die Jobnummer nicht, sondern prüfe zuerst `jobs`."
+      ],
+      "commands": [
+        {"cmd": "jobs -l", "what": "Listet Jobs der aktuellen Shell mit Status und PIDs auf.", "where": "Beim Suchen angehaltener oder im Hintergrund laufender Jobs.", "why": "Du siehst Jobnummer und Status und kannst den richtigen Job wählen.", "example": "jobs -l", "nosim": true},
+        {"cmd": "bg %1 / fg %1", "what": "Setzt den gewählten Job im Hintergrund fort oder holt ihn in den Vordergrund.", "where": "Beim Fortsetzen oder Zurückholen der Terminalkontrolle.", "why": "Ändert die Art, wie derselbe Job mit dem Terminal interagiert.", "example": "bg %1", "nosim": true}
+      ],
+      "tip": "`jobs` zeigt die Jobnummer; `ps` oder `jobs -l` zeigt die PID. Beides ist nicht austauschbar."
+    },
+    {
+      "id": "nohup",
+      "title": "Sitzungsunabhängigkeit: nohup",
+      "body": [
+        "`nohup` startet einen Befehl so, dass er SIGHUP ignoriert; dadurch kann er nach dem Schließen der Sitzung weiterlaufen. Üblich sind eine Umleitung der Ausgabe in eine Datei und `&` zum Start im Hintergrund.",
+        "`nohup` ist weder Jobüberwachung noch Service-Manager. Für dauerhafte Produktionsdienste eignet sich `systemd`; für interaktive Arbeit in getrennten SSH-Sitzungen eher `tmux` oder `screen`. Beende Testjobs und prüfe ihre Ausgaben."
+      ],
+      "commands": [
+        {"cmd": "nohup command > job.log 2>&1 &", "what": "Schützt den Befehl vor SIGHUP, leitet die Ausgabe in eine Datei und startet ihn im Hintergrund.", "where": "Wenn ein kurzer, nicht-interaktiver Job eine Sitzung überdauern soll.", "why": "Die Terminalausgabe bleibt erhalten und die Shell ist wieder frei.", "example": "nohup ./backup.sh > backup.log 2>&1 &", "nosim": true},
+        {"cmd": "tail -n 20 job.log", "what": "Zeigt die letzten Ausgabezeilen des Jobs.", "where": "Beim Prüfen des Fortschritts oder von Fehlermeldungen.", "why": "Du kannst die Logdatei lesen, ohne den Job in den Vordergrund zu holen.", "example": "tail -n 20 backup.log"}
+      ],
+      "warn": "Teste nur in deiner eigenen Test-VM und mit einem kurzen Job. `nohup` beendet den Job nicht automatisch; verfolge PID und Logdatei."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Finde den Status des `sleep`-Jobs in der Momentaufnahme.", "hint": "In `grep sleep ~/lab/jobs_snapshot.txt` sollte `Stopped` stehen."},
+    "t02": {"text": "Zeige den aktuellen Status des Jobs `backup.sh`.", "hint": "Die Zeile von `grep backup ~/lab/jobs_snapshot.txt` enthält `Running`."},
+    "t03": {"text": "Schätze die Zahl angehaltener Jobs in der Momentaufnahme und prüfe sie mit `grep -c`.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` zählt sie."},
+    "t04": {"text": "Speichere in `~/lab/job_plan.txt` die Fortsetzung von Job 1 mit `bg %1` und anschließend die Kontrolle mit `jobs -l`.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt`"},
+    "t05": {"text": "Ergänze im Plan das Zurückholen in den Vordergrund und die Bereinigung nach Abschluss.", "hint": "Füge `fg %1` und `kill %1` in die Datei ein."},
+    "t06": {"text": "Schreibe ein nohup-Beispiel nach `~/lab/persistent_job.txt`, das die Ausgabe nach `backup.log` umleitet.", "hint": "`nohup ./backup.sh > backup.log 2>&1 &`"},
+    "t07": {"text": "Ergänze Ticket #5401 um eine Prüfung mit `jobs -l` und einen Hinweis zu nohup, um die Sitzungsabhängigkeit zu beurteilen.", "hint": "Speichere die kurze Notiz in `~/lab/ticket_5401.txt`."}
+  },
+  "vm": {
+    "intro": "Führe die Beispiele in deiner Test-VM aus. Ein Shell-Job gehört zu dieser Shell-Sitzung; beende nicht mehr benötigte Testjobs.",
+    "tasks": {
+      "v01": {"title": "Einen Job anhalten", "text": "Starte `sleep` im Vordergrund. Drücke währenddessen `Ctrl+Z` und prüfe dann den Shell-Job mit dem folgenden Befehl.", "blocks": [{"cmd": "sleep 300\n# Nach Ctrl+Z:\njobs -l", "expected": "[1]+ Stopped sleep 300"}], "differs": ["Die Jobnummer muss nicht 1 sein; maßgeblich ist deine Ausgabe von `jobs -l`.", "Prüfe, ob dein Terminalemulator Ctrl+Z an die Shell weitergibt."]},
+      "v02": {"title": "In den Hintergrund schicken und bereinigen", "text": "Prüfe zuerst die Jobnummer mit `jobs -l`. Ersetze `%1` im Beispiel durch die richtige Nummer, starte den Job im Hintergrund und bereinige ihn anschließend.", "blocks": [{"cmd": "bg %1\njobs -l\nkill %1", "expected": "Der Job wird als Running angezeigt."}], "differs": ["Wenn deine Jobnummer anders ist, ersetze `%1`.", "`kill %1` sendet ein Signal an diesen Shell-Job; nutze es nur für den Testjob `sleep`."]},
+      "v03": {"title": "Kurzer nohup-Job", "text": "Leite die Ausgabe eines kurzen Befehls mit `nohup` in eine Datei um, warte auf den Abschluss und lies die Datei.", "blocks": [{"cmd": "nohup sh -c 'sleep 2; echo done' > ~/job-output.txt 2>&1 &\nsleep 3\ncat ~/job-output.txt", "expected": "done"}], "differs": ["Falls der Befehl noch läuft, warte einige Sekunden und führe `cat ~/job-output.txt` erneut aus.", "Bei Pfad- oder Berechtigungsfehlern muss das Zielverzeichnis in deinem Home liegen."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "Was passiert mit einem Job bei `Ctrl+Z`?", "options": ["Er wird dauerhaft gelöscht", "Er wird angehalten", "Er startet als root", "Das Terminal wird geschlossen"], "explain": "Ctrl+Z sendet meist SIGTSTP; der Job pausiert, ist aber nicht abgeschlossen."},
+    "q2": {"q": "Wofür steht `%1` in `bg %1`?", "options": ["Die Shell-Jobnummer", "PID 1", "Eine Sekunde", "Der Nice-Wert"], "explain": "Die Prozentzahl ist die Shell-Jobnummer aus der Ausgabe von `jobs`."},
+    "q3": {"q": "Was bewirkt `nohup`?", "options": ["Es macht den Job zu einem systemd-Dienst", "Es plant den Job automatisch", "Es begrenzt den Speicher", "Es hilft, den Job gegen SIGHUP zu schützen"], "explain": "nohup startet einen Befehl so, dass er SIGHUP ignoriert; es ist allein kein Service-Manager."},
+    "q4": {"q": "Was unterscheidet Jobnummer und PID?", "options": ["Es gibt keinen Unterschied", "Nur root hat Jobnummern", "Die Jobnummer gehört zur Shell, die PID zum Prozess", "Eine PID gibt es nur bei Hintergrundjobs"], "explain": "Die Shell-Jobnummer gehört zur aktuellen Sitzung; die PID identifiziert den systemweiten Prozess."}
+  },
+  "summary": [
+    "`Ctrl+C` bricht einen Job meist ab; `Ctrl+Z` hält ihn an.",
+    "`jobs`, `bg` und `fg` verwalten Jobs der aktuellen Shell; `%N` ist die Shell-Jobnummer.",
+    "`nohup` schützt vor SIGHUP, ersetzt aber keinen Service-Manager; leite Ausgaben um und überwache den Job."
+  ],
+  "glossary": [
+    {"term": "foreground", "meaning": "Interaktiver Vordergrundjob, der die Terminalkontrolle besitzt."},
+    {"term": "background job", "meaning": "Job, der in der Shell ohne Terminalkontrolle läuft."},
+    {"term": "SIGHUP", "meaning": "Signal, das Prozesse beim Schließen einer Sitzung oder Terminalverbindung erhalten können."}
+  ]
+}

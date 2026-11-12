@@ -1,0 +1,87 @@
+{
+  "title": "Arama: grep ve find",
+  "lead": "grep dosyaların içindeki satırları, find ise dizin ağacındaki dosya ve klasörleri arar. İkisini birleştirerek logları ve proje dosyalarını hızla incele.",
+  "objectives": [
+    "`grep` ile dosya içeriğinde metin ararsın.",
+    "`-i`, `-n`, `-v` ve `-c` seçeneklerinin etkisini açıklarsın.",
+    "`find` ile ada ve türe göre dosya bulursun.",
+    "Arama sonuçlarını pipe ve yönlendirmeyle kullanırsın."
+  ],
+  "sections": [
+    {
+      "id": "grep",
+      "title": "Dosya içeriğinde grep ile ara",
+      "body": [
+        "`grep DESEN DOSYA` eşleşen satırları yazar. Desen basit bir metin veya düzenli ifade olabilir. Büyük/küçük harfi yok saymak için `-i`, satır numarası için `-n`, eşleşmeyen satırlar için `-v`, eşleşme sayısı için `-c` kullan.",
+        "`grep` bir dosya adı verilmeden pipe üzerinden gelen metni de okuyabilir. Böylece `komut | grep desen` biçiminde uzun çıktıları süzersin."
+      ],
+      "commands": [
+        {"cmd":"grep -n","what":"Eşleşen satırların numarasını da gösterir.","where":"Bir dosyada bulduğun satırın yerini belirlerken.","why":"Sonucu dosyada bulup incelemeyi kolaylaştırır.","example":"grep -n ERROR logs/app.log"},
+        {"cmd":"grep -i","what":"Büyük/küçük harf farkını yok sayar.","where":"Loglarda farklı biçimde yazılmış hata sözcüklerini ararken.","why":"`error`, `Error` ve `ERROR` eşleşir.","example":"grep -i error logs/app.log"},
+        {"cmd":"grep -v","what":"Desenle eşleşmeyen satırları gösterir.","where":"İstenmeyen satırları sonuçtan çıkarırken.","why":"Bir akışın tersini süzer.","example":"grep -v INFO logs/app.log"},
+        {"cmd":"grep -c","what":"Eşleşen satırların sayısını yazar.","where":"Bir logda olay adedini ölçerken.","why":"Satırları tek tek yazmadan toplamı verir.","example":"grep -c ERROR logs/app.log"}
+      ],
+      "tip":"Deseni ve dosyayı ayrı argümanlar olarak ver. Özel karakter içeren bir arama metnini tırnakla."
+    },
+    {
+      "id": "find",
+      "title": "Dosya sisteminde find ile ara",
+      "body": [
+        "`find BAŞLANGIÇ ...` verilen dizinden aşağı doğru canlı tarama yapar. `-name` ad desenini, `-type f` normal dosyayı ve `-type d` klasörü seçer. Dosya adı desenlerini tırnaklamak, kabuğun aramadan önce `*` karakterini genişletmesini önler.",
+        "`find` yalnızca ad bulmakla kalmaz; çıktısı başka bir komuta pipe edilebilir. `locate` ise önceden oluşturulmuş bir dosya adı dizinini arar; hızlıdır ama yeni dosyalar henüz dizine eklenmemiş olabilir. Aramayı dar bir başlangıç dizininden yapmak gereksiz sistem dizinlerini taramayı önler."
+      ],
+      "commands": [
+        {"cmd":"find . -name","what":"Bulunduğun dizin ağacında ada göre arar.","where":"Proje içinde adı veya uzantısı bilinen dosyaları ararken.","why":"Alt dizinleri de tarar.","example":"find project -name \"*.conf\""},
+        {"cmd":"find . -type f","what":"Yalnızca normal dosyaları seçer.","where":"Dosyaları klasörlerden ayırman gerektiğinde.","why":"Arama sonucunu belirli bir nesne türüyle sınırlar.","example":"find project -type f -name \"*.txt\""},
+        {"cmd":"find . -type d","what":"Yalnızca dizinleri seçer.","where":"Bir proje içindeki klasörleri bulurken.","why":"Dosya adlarıyla klasör adlarını karıştırmazsın.","example":"find project -type d"},
+        {"cmd":"locate","what":"Dizinlenmiş dosya adları veritabanında hızlı arama yapar.","where":"Sistem genelinde bilinen bir dosyanın yolunu ararken.","why":"Dizin güncelse hızlı sonuç verir; yeni dosyalar hemen görünmeyebilir.","example":"locate sshd_config","nosim":true}
+      ],
+      "warn":"`find /` tüm sistemi tarayabilir ve izin uyarıları üretebilir. Önce kendi proje veya home dizinin gibi dar bir başlangıç yolu seç."
+    },
+    {
+      "id": "combine",
+      "title": "Aramaları birleştir ve sonuçları kaydet",
+      "body": [
+        "`grep` ve `find` farklı soruları yanıtlar: grep dosyanın içindeki metni, find ise dosyanın adını ve konumunu bulur. Arama sonuçlarını `>` ile bir dosyada saklayabilir veya `|` ile başka bir filtreye aktarabilirsin.",
+        "Önemli bir dosyada değişiklik yapmadan önce arama sonucunu incele. Bu modüldeki komutlar arama ve okuma yapar; yönlendirme yalnızca kendi çalışma klasöründe rapor dosyası oluşturur."
+      ],
+      "commands": [
+        {"cmd":"grep -r","what":"Bir dizindeki dosyaların içeriğini özyinelemeli arar.","where":"Bir ayar veya sözcüğün projede nerelerde geçtiğini bulurken.","why":"Dosyaları tek tek açma ihtiyacını azaltır.","example":"grep -r TODO project"},
+        {"cmd":"find . -type f -name \"*.txt\" > list.txt","what":"Bulunan metin dosyalarının yollarını bir listeye yazar.","where":"Arama sonucunu sonra incelemek istediğinde.","why":"Sonucu kalıcı ve tekrar kullanılabilir hale getirir.","example":"find project -type f -name \"*.txt\" > text_files.txt"}
+      ],
+      "tip":"Önce aramayı ekranda çalıştırıp sonucu kontrol et; sonra gerekirse `>` ile bir rapora yönlendir."
+    }
+  ],
+  "tasks": {
+    "t01":{"text":"`logs/app.log` içindeki `ERROR` satırlarını `grep` ile göster.","hint":"Desen ve dosya adını ver: `grep ERROR logs/app.log`."},
+    "t02":{"text":"`logs/app.log` içinde `warn` sözcüğünü harf duyarsız ara.","hint":"`grep -i warn logs/app.log` kullan."},
+    "t03":{"text":"Erişim kaydındaki `404` satırını satır numarasıyla bul.","hint":"`grep -n 404 logs/access.log`."},
+    "t04":{"text":"`project` ağacında `.conf` ile biten adları bul.","hint":"`find project -name \"*.conf\"`; deseni tırnakla."},
+    "t05":{"text":"`project` içinde yalnızca normal `.txt` dosyalarını bul.","hint":"`find project -type f -name \"*.txt\"`."},
+    "t06":{"text":"Tahmin et: `grep -c ERROR logs/app.log` kaç eşleşen satır verir? Sonra doğrula.","hint":"Komut eşleşen satırları değil, toplam adedi yazar."},
+    "t07":{"text":"Tahmin et: erişim kayıtlarından yalnızca `200` içeren satırlar nasıl süzülür? Pipe kullan.","hint":"`cat logs/access.log | grep 200`."},
+    "t08":{"text":"Hata ayıklama: `ERROR` satırlarını home dizinindeki `errors.txt` dosyasına kaydet.","hint":"`grep ERROR logs/app.log > errors.txt` ile stdout'u yönlendir."},
+    "t09":{"text":"`INFO` içermeyen log satırlarını göster.","hint":"`-v`, eşleşmeyen satırları seçer: `grep -v INFO logs/app.log`."},
+    "t10":{"text":"Mini görev: `project` dosyalarında `TODO` ifadesinin geçtiği satırları ara.","hint":"Dizin içinde özyinelemeli arama için `grep -r TODO project`."},
+    "t11":{"text":"Mini görev: `logs` ağacında `.log` ile biten normal dosyaları bul.","hint":"`find logs -type f -name \"*.log\"`."},
+    "t12":{"text":"Meydan okuma: `project` içinde `todo` sözcüğünü harf duyarsız ve satır numaralı ara.","hint":"`grep -rin todo project` seçenekleri birleştirebilirsin."},
+    "t13":{"text":"Ticket: Projedeki tüm `.txt` yollarını `text_files.txt` adlı rapora kaydet.","hint":"`find . -type f -name \"*.txt\" > text_files.txt`."}
+  },
+  "vm": {
+    "intro":"Kendi VM'inde var olan metinleri ve dosya yollarını oku. Komutlar sistem dosyalarını değiştirmez; rapor oluştururken home dizinini kullan.",
+    "tasks": {
+      "v01":{"title":"Logda metin ara","text":"Sistem logunda `error` sözcüğünü harf duyarsız ara ve eşleşen satırlardan birini yapıştır.","blocks":[{"cmd":"grep -i error /var/log/messages | head -n 3","expected":"error"}],"differs":["Dosya yoksa dağıtımındaki bir log dosyasını seç veya `~/lab/app.log` oluşturup örnek satırlar yaz."]},
+      "v02":{"title":"Satır numarasını gör","text":"`/etc/passwd` içinde `root` satırını satır numarasıyla bul.","blocks":[{"cmd":"grep -n '^root:' /etc/passwd","expected":"1:root:"}],"differs":["Satır numarası sistemine göre değişebilir; çıktıda `root` ve önünde bir numara olması yeterlidir."]},
+      "v03":{"title":"Dosya adıyla ara","text":"`/etc` altında adı `hostname` olan dosyayı bul.","blocks":[{"cmd":"find /etc -type f -name hostname","expected":"/etc/hostname"}],"differs":["Çıktı tam yol içermelidir. `find` başlangıç dizinini ve adı ayrı argümanlar olarak alır."]},
+      "v04":{"title":"Sonuçları güvenle kaydet","text":"Home dizininde `lab` oluştur ve yalnızca orada `.txt` dosyalarını listeleyen bir rapor üret. Raporun içeriğini kontrol et.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["Rapor boşsa `cd ~/lab` adımının ve dosya adlarının doğru olduğuna bak. Aramayı tüm sistemde çalıştırma."]}
+    }
+  },
+  "quiz": {
+    "q1":{"q":"`grep -i error file` ne yapar?","options":["Yalnızca ilk satırı gösterir","Dosyayı siler","Büyük/küçük harf farkı olmadan eşleşen satırları gösterir","Dosya adını değiştirir"],"explain":"`-i` harf duyarsız arama yapar."},
+    "q2":{"q":"`grep -n` çıktısına ne ekler?","options":["Satır numarası","Dosya boyutu","Sahip adı","Son değiştirme zamanı"],"explain":"`-n` her eşleşmenin satır numarasını gösterir."},
+    "q3":{"q":"`find project -type f -name '*.txt'` ne arar?","options":["Yalnızca klasörleri","Tüm sistemdeki günlükleri","İçeriğinde txt geçen satırları","project altında adı .txt ile biten normal dosyaları"],"explain":"Başlangıç yolu `project`, tür normal dosya, ad deseni `.txt` son ekidir."},
+    "q4":{"q":"Bir dosya ağacında `TODO` metnini aramak için hangi komut uygundur?","options":["`find project -type d`","`grep -r TODO project`","`sort TODO project`","`cut TODO project`"],"explain":"`grep -r` bir dizin ağacındaki dosya içeriklerinde özyinelemeli arama yapar."}
+  },
+  "summary":["`grep` dosya içeriğini arar; `find` dizin ağacında dosya ve klasör bulur.","`grep -i` harf duyarsız arar, `-n` satır numarası, `-v` ters eşleşme, `-c` adet verir.","`find -name` ad deseni, `-type f` normal dosya, `-type d` dizin seçer.","Dosya adı desenlerinde `*` kabuk tarafından genişletilmesin diye tırnak kullan.","Büyük dizinler yerine dar bir başlangıç yolunda ara."],
+  "glossary":[{"term":"grep","meaning":"Metin dosyalarında eşleşen satırları bulan arama aracı."},{"term":"find","meaning":"Bir başlangıç dizininden aşağı doğru dosya sistemi aracı."},{"term":"düzenli ifade","meaning":"Metin desenini tanımlayan eşleştirme sözdizimi."},{"term":"özyinelemeli arama","meaning":"Bir dizinin alt dizinlerini de tarayan arama."}]
+}

@@ -1,0 +1,235 @@
+{
+  "title": "Identity and System — whoami, id, uname",
+  "lead": "Before you touch a system, answer two questions: Who am I? Which machine am I on? This module teaches you how, using safe read-only commands.",
+  "objectives": [
+    "You read your user identity, UID/GID values and group memberships with `whoami`, `id` and `groups`.",
+    "You find the machine name, kernel version and architecture with `hostname` and `uname`.",
+    "You identify the distribution and its version with `/etc/os-release`.",
+    "You see the time and how long the system has been running with `date` and `uptime`.",
+    "You read disk and memory usage with `df -h` and `free -h`.",
+    "You use environment variables with `env` and `$USER`."
+  ],
+  "sections": [
+    {
+      "id": "identity",
+      "title": "Who am I? whoami, id, groups",
+      "body": [
+        "Before you run a command you should know which account you are using: a normal user or an administrator? A command run with the wrong account either fails or does more damage than intended because of excess privileges.",
+        "`whoami` prints only the user name. `id` says more: the numeric user ID **UID**, the primary group ID **GID** and all groups you belong to. Linux permissions look at these numbers, not at names. UID 0 is always **root** (the administrator); normal users usually start at 1000.",
+        "`groups` lists the same groups, names only. In this course the user `student` belongs to the groups `student`, `wheel` and `devs`. `wheel` is the administrator group that allows `sudo` on the RHEL family (on Ubuntu this group is called `sudo`)."
+      ],
+      "commands": [
+        {"cmd": "whoami", "what": "Prints the current user name.", "where": "After logging in, after using `sudo`, or inside a script.", "why": "Prevents actions with the wrong user.", "example": "whoami"},
+        {"cmd": "id", "what": "Shows UID, GID and all groups.", "where": "When investigating `Permission denied` errors.", "why": "Permissions are checked by numbers and group membership.", "example": "id"},
+        {"cmd": "groups", "what": "Lists the names of the groups you belong to.", "where": "To check whether you can reach a file through a group.", "why": "Shorter and easier to read than `id`.", "example": "groups"},
+        {"cmd": "id -u", "what": "Prints only the UID number.", "where": "In scripts, to test whether you are root (0 = root).", "why": "A single number is easy to compare in a script.", "example": "id -u", "nosim": true}
+      ],
+      "tip": "`whoami` gives a name, `id` gives the numbers the system really uses. When in doubt, run `id`."
+    },
+    {
+      "id": "host",
+      "title": "Which machine? hostname and uname",
+      "body": [
+        "When you have several servers or VMs, their command lines all look alike. `hostname` tells you the machine's name on the network; it is the cheapest way to confirm you are on the right machine before a destructive command.",
+        "`uname` reports on the kernel. `uname -r` prints the kernel release, `uname -m` the architecture (`x86_64` = 64-bit Intel/AMD, `aarch64` = ARM) and `uname -a` everything in one line. You are asked for these values when opening a support ticket or downloading software."
+      ],
+      "commands": [
+        {"cmd": "hostname", "what": "Prints the machine's name.", "where": "To tell servers apart, when writing a ticket.", "why": "Prevents working on the wrong machine.", "example": "hostname"},
+        {"cmd": "uname -r", "what": "Prints the running kernel version.", "where": "For bug reports or driver compatibility checks.", "why": "The kernel version decides which features exist.", "example": "uname -r"},
+        {"cmd": "uname -m", "what": "Prints the machine architecture.", "where": "Before downloading a package or ISO.", "why": "Packages are built per architecture.", "example": "uname -m"},
+        {"cmd": "uname -a", "what": "Prints all system information on one line.", "where": "To paste into a support request.", "why": "Name, kernel and architecture at once.", "example": "uname -a"},
+        {"cmd": "hostname -I", "what": "Prints the machine's IP address(es).", "where": "When you want to connect to your VM via SSH.", "why": "The shortest way to find the address.", "example": "hostname -I", "nosim": true}
+      ],
+      "tip": "The `student@linux-lab` part of the prompt is user@machine; `whoami` and `hostname` give the same information."
+    },
+    {
+      "id": "distro",
+      "title": "Which distribution? /etc/os-release",
+      "body": [
+        "Even with the same kernel, distributions differ. The distribution name and version are stored as plain text in `/etc/os-release`, in the same format on Ubuntu, Rocky, Alma and others. You read it with `cat`; you do not change it.",
+        "`NAME` and `VERSION` give the readable name, `PRETTY_NAME` a one-line summary, and `ID_LIKE` the family (`debian` or `rhel fedora`). The family tells you which package manager to use: `apt` or `dnf`."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/os-release", "what": "Shows the complete distribution information.", "where": "As the first step on a new system.", "why": "Decides which commands and packages apply.", "example": "cat /etc/os-release"},
+        {"cmd": "grep PRETTY_NAME /etc/os-release", "what": "Shows only the readable distribution name.", "where": "To put a single line into a ticket.", "why": "Filters the one line you need out of a longer file.", "example": "grep PRETTY_NAME /etc/os-release"},
+        {"cmd": "grep ID_LIKE /etc/os-release", "what": "Shows the family the distribution belongs to.", "where": "When you are unsure whether to use `apt` or `dnf`.", "why": "The family determines the package manager.", "example": "grep ID_LIKE /etc/os-release"}
+      ],
+      "tip": "WSL has the same file; it shows the Linux distribution inside, not Windows."
+    },
+    {
+      "id": "time",
+      "title": "Time and uptime: date, uptime",
+      "body": [
+        "`date` prints the system time and time zone. You need it when reading logs and when putting dates in backup file names. You can change the format with a pattern starting with `+`: `date +%F` → `2026-11-12`.",
+        "`uptime` gives three things on one line: the time, how long the system has been running and the **load average** for the last 1, 5 and 15 minutes. If the load is far above the number of CPU cores, the system is slow. You also notice unexpected reboots here."
+      ],
+      "commands": [
+        {"cmd": "date", "what": "Prints the current date and time.", "where": "When matching log entries to times.", "why": "A wrong clock is a common cause of certificate and log problems.", "example": "date"},
+        {"cmd": "date +%F", "what": "Prints the date as YYYY-MM-DD.", "where": "When adding a date to file names (`backup-2026-11-12`).", "why": "A consistent format that sorts alphabetically.", "example": "date +%F", "nosim": true},
+        {"cmd": "uptime", "what": "Shows uptime and load average.", "where": "The first place to look when the system is slow.", "why": "Quickly shows load and the last reboot.", "example": "uptime"},
+        {"cmd": "uptime -p", "what": "Prints uptime in readable form (`up 2 days, 3 hours`).", "where": "To report the duration briefly.", "why": "Gives only the duration, without load figures.", "example": "uptime -p", "nosim": true}
+      ],
+      "tip": "Compare the load average with the core count: on 4 cores, 4.0 means fully busy."
+    },
+    {
+      "id": "resources",
+      "title": "Disk and memory: df -h, free -h",
+      "body": [
+        "`df` (disk free) shows how full the mounted file systems are. `-h` (human-readable) uses units like `G` and `M` instead of bytes. If the `Use%` column goes above 90%, take care: a full disk makes services crash.",
+        "`free` shows memory (RAM) and swap. The important column is `available`: the memory that can be given to new programs. A small `free` value is normal, because Linux uses spare memory as cache (`buff/cache`).",
+        "Both only read; neither changes anything."
+      ],
+      "commands": [
+        {"cmd": "df -h", "what": "Shows size and usage of all file systems.", "where": "On a `No space left on device` error.", "why": "Finds out which partition is full.", "example": "df -h"},
+        {"cmd": "df -h /", "what": "Shows only the root file system.", "where": "When checking a single partition.", "why": "Keeps the output short.", "example": "df -h /"},
+        {"cmd": "free -h", "what": "Shows memory and swap usage in readable units.", "where": "When the system is slow.", "why": "The `available` column shows the memory that is really free.", "example": "free -h"}
+      ],
+      "warn": "`df` measures file systems, `du` measures folders; do not mix them up. You find a full disk with `df -h` and look for the cause with tools you will meet in later modules.",
+      "tip": "Do not worry about a small value in the `free` column of `free` output; look at `available`."
+    },
+    {
+      "id": "env",
+      "title": "Environment variables: env and $USER",
+      "body": [
+        "The shell stores information in **environment variables**. `$USER` holds the user name, `$HOME` the home directory, `$SHELL` the shell and `$HOSTNAME` the machine name. You use a value by putting `$` in front: `echo $USER`.",
+        "`env` lists all variables as `NAME=value`. To pick a single one from the long output, combine it with `grep` using `|` (pipe): `env | grep USER`.",
+        "Variables are handy in scripts: `echo \"$USER@$(hostname)\"` combines the user and the machine. The output of the command inside `$(...)` is inserted in its place."
+      ],
+      "commands": [
+        {"cmd": "env", "what": "Lists all environment variables.", "where": "When investigating where a setting comes from.", "why": "Shows the values you are running with.", "example": "env"},
+        {"cmd": "echo $USER", "what": "Prints the value of the user name variable.", "where": "In scripts and file names.", "why": "You do not have to type the user name by hand.", "example": "echo $USER"},
+        {"cmd": "echo $HOME", "what": "Prints the path of the home directory.", "where": "To write portable paths.", "why": "Works for every user instead of a fixed `/home/student`.", "example": "echo $HOME"},
+        {"cmd": "env | grep USER", "what": "Filters the variables whose name contains USER.", "where": "To find one variable in a long list.", "why": "A pipe and `grep` narrow down the output.", "example": "env | grep USER"},
+        {"cmd": "echo \"$USER@$(hostname)\"", "what": "Combines user and machine name.", "where": "When building a report line or log message.", "why": "Shows how a variable and command output are combined.", "example": "echo \"$USER@$(hostname)\""},
+        {"cmd": "printenv USER", "what": "Prints the value of a single variable.", "where": "In a script when you need only the value.", "why": "No `grep` needed, the output is just the value.", "example": "printenv USER", "nosim": true}
+      ],
+      "tip": "Variable names are case-sensitive: `$USER` works, `$user` is empty."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Find out which user you are with `whoami`.", "hint": "Just type `whoami` and press Enter."},
+    "t02": {"text": "Find out the machine's name with `hostname`.", "hint": "It should match the part after `@` in the prompt."},
+    "t03": {"text": "Print the kernel version with `uname -r`.", "hint": "`-r` stands for release."},
+    "t04": {"text": "Run `id` to see UID, GID and all groups.", "hint": "If `uid=` is 1000 you are a normal user, if 0 you are root."},
+    "t05": {"text": "List your groups with `groups` and compare with the `id` output.", "hint": "`groups` prints names only, no numbers."},
+    "t06": {"text": "Read the distribution information with `cat /etc/os-release`.", "hint": "The `PRETTY_NAME` line is the summary."},
+    "t07": {"text": "See how long the system has been running and the load average with `uptime`.", "hint": "The last three numbers are the 1, 5 and 15 minute load."},
+    "t08": {"text": "Run `df -h` to see disk usage in readable units.", "hint": "Look at the `Use%` column."},
+    "t09": {"text": "Show the memory status with `free -h`.", "hint": "The really free memory is in the `available` column."},
+    "t10": {"text": "Among the environment variables, filter only those containing USER: `env | grep USER`.", "hint": "The `|` sign passes the output of `env` to `grep`."},
+    "t11": {"text": "Predict: is the user `student` in the group `devs`? Then verify with `groups`.", "hint": "Say your guess first, then run the command."},
+    "t12": {"text": "Predict: what does `echo \"$USER@$(hostname)\"` print? Verify by running it.", "hint": "`$USER` and `$(hostname)` are replaced by their values before the command runs."},
+    "t13": {"text": "The file `~/kernel.txt` contains an old kernel version. Fix it so it holds the real kernel version.", "hint": "`uname -r > ~/kernel.txt` overwrites the old content. Then check with `cat ~/kernel.txt`."},
+    "t14": {"text": "Create `~/me.txt` containing, in order, the output of `whoami`, `id` and `hostname` (3 lines).", "hint": "Use `>` for the first and `>>` for the others: `whoami > ~/me.txt`, `id >> ~/me.txt`."},
+    "t15": {"text": "Write the readable distribution name, without the `PRETTY_NAME=` prefix, into `~/distro.txt`.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` takes what follows the `=` sign."},
+    "t16": {"text": "Write only the major number (first number) of the kernel version into `~/major.txt`.", "hint": "Take the output of `uname -r`, split it at the dot with `cut -d. -f1` and keep the first field."},
+    "t17": {"text": "Ticket: Support wants system information. Write the machine name, kernel version, user name and the `df -h` output, in that order, into `~/sysinfo.txt`.", "hint": "Start with `hostname > ~/sysinfo.txt`, then append the other four outputs with `>>`."},
+    "t18": {"text": "Ticket: The administrator asks whether the account `student` is in the `wheel` group. As evidence, save only the output containing `wheel` into `~/admin_check.txt`.", "hint": "`id | grep wheel > ~/admin_check.txt`"}
+  },
+  "vm": {
+    "intro": "All commands in this section are read-only; you can run them safely on your VM. Output may differ by distribution; what matters is that you recognise the structure.",
+    "tasks": {
+      "v01": {
+        "title": "Find your identity",
+        "text": "Show your user name, UID/GID values and groups; paste the `id` output.",
+        "blocks": [
+          {"cmd": "whoami\nid\ngroups", "expected": "student\nuid=1000(student) gid=1000(student) groups=1000(student),10(wheel)\nstudent wheel"}
+        ],
+        "differs": [
+          "On Ubuntu the administrator group is called `sudo`, not `wheel`; in the `id` output you see `27(sudo)`.",
+          "Your user name may not be `student`; that is fine, just see your own name."
+        ]
+      },
+      "v02": {
+        "title": "Machine and kernel",
+        "text": "Show the machine name and the full kernel information; paste the `uname -a` output.",
+        "blocks": [
+          {"cmd": "hostname\nuname -r\nuname -m\nuname -a", "expected": "linux-lab\n5.14.0-427.el9.x86_64\nx86_64\nLinux linux-lab 5.14.0-427.el9.x86_64 #1 SMP PREEMPT_DYNAMIC ... x86_64 GNU/Linux"}
+        ],
+        "differs": [
+          "Your kernel version may differ (`6.8...` on Ubuntu 24.04); what matters is that the output starts with `Linux`.",
+          "On a VM on Apple Silicon the architecture shows `aarch64`."
+        ]
+      },
+      "v03": {
+        "title": "Know your distribution",
+        "text": "Read the distribution information and paste the output.",
+        "blocks": [
+          {"cmd": "cat /etc/os-release\ngrep ID_LIKE /etc/os-release", "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nPRETTY_NAME=\"Rocky Linux 9.4 (Blue Onyx)\"\nID_LIKE=\"rhel centos fedora\""}
+        ],
+        "differs": [
+          "On Ubuntu you see `ID_LIKE=debian`; on Rocky/Alma it contains `rhel`.",
+          "Some distributions have no `ID_LIKE` line at all (for example Debian itself); `grep` then prints nothing."
+        ]
+      },
+      "v04": {
+        "title": "Time and uptime",
+        "text": "Show the date and how long the system has been running; paste the `uptime` output.",
+        "blocks": [
+          {"cmd": "date\ndate +%F\nuptime", "expected": "Thu Nov 12 10:28:55 CET 2026\n2026-11-12\n 10:28:55 up 2 days,  3:12,  1 user,  load average: 0.08, 0.03, 0.01"}
+        ],
+        "differs": [
+          "On a freshly started VM the uptime is shown in minutes (`up 12 min`).",
+          "The date format and time zone can vary with the system language."
+        ]
+      },
+      "v05": {
+        "title": "Disk and memory",
+        "text": "Show disk and memory status in readable units; paste both outputs together.",
+        "blocks": [
+          {"cmd": "df -h\nfree -h", "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/mapper/rhel-root  20G  4.1G  16G  21% /\n...\n               total        used        free  ...\nMem:           3.8Gi       612Mi       2.4Gi ..."}
+        ],
+        "differs": [
+          "On WSL the `df -h` output also lists the Windows drives (`C:\\`).",
+          "The memory columns show different numbers depending on your VM settings."
+        ]
+      },
+      "v06": {
+        "title": "Environment variables",
+        "text": "Print the user variable and filter it from the `env` output.",
+        "blocks": [
+          {"cmd": "echo $USER\necho $HOME\nenv | grep USER\necho \"$USER@$(hostname)\"", "expected": "student\n/home/student\nUSER=student\nstudent@linux-lab"}
+        ],
+        "differs": [
+          "`env | grep USER` may return several lines (for example ones matching `XDG_SESSION_...`); look for the `USER=` line.",
+          "On some systems `$USER` is empty (for example inside a container); `whoami` still works."
+        ]
+      },
+      "v07": {
+        "title": "See the administrator identity",
+        "text": "Run `whoami` with `sudo`: the command now runs as root. If it asks for a password, type your account's password (it is not shown while typing).",
+        "blocks": [
+          {"cmd": "whoami\nsudo whoami\nwhoami", "expected": "student\nroot\nstudent"}
+        ],
+        "differs": [
+          "If you get `student is not in the sudoers file`, your account is not in the administrator group; try the user you created during installation.",
+          "`root` must appear in the middle; `sudo` elevates only that one command, afterwards you are a normal user again."
+        ]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {"q": "You see `uid=0(...)` in the `id` output. What does it mean?", "options": ["The account is disabled", "The user is root (administrator)", "The user is a guest", "The user belongs to no group"], "explain": "UID 0 always belongs to root. Normal users usually get a UID of 1000 or higher."},
+    "q2": {"q": "Which command shows the running kernel version?", "options": ["`hostname`", "`whoami`", "`uname -r`", "`df -h`"], "explain": "`uname -r` prints the kernel version. `hostname` shows the machine name, `whoami` the user, `df -h` the disk."},
+    "q3": {"q": "Which command shows disk usage in readable units (GB, MB)?", "options": ["`df -h`", "`free -h`", "`uptime`", "`id`"], "explain": "`df -h` shows file systems. `free -h` shows memory, `uptime` the running time."},
+    "q4": {"q": "Which environment variable holds the current user's name?", "options": ["`$HOST`", "`$NAME`", "`$WHO`", "`$USER`"], "explain": "`$USER` holds the user name; `$HOME` holds the home directory, `$SHELL` the shell."}
+  },
+  "summary": [
+    "`whoami`, `id`, `groups`: show who you are and which permissions you have; UID 0 = root.",
+    "`hostname` and `uname -r/-m/-a`: machine name, kernel version and architecture.",
+    "`/etc/os-release`: distribution name, version and family (`ID_LIKE`).",
+    "`date` and `uptime`: the time, and the uptime with the load average.",
+    "`df -h` and `free -h`: disk and memory status; for memory look at the `available` column.",
+    "`env`, `$USER`, `$HOME`: environment variables; you use a value with `$`.",
+    "Before starting any task, check who you are and which machine you are on."
+  ],
+  "glossary": [
+    {"term": "UID", "meaning": "User number; permission checks use this number, not names. 0 = root."},
+    {"term": "GID", "meaning": "Group number; identifies the user's primary group."},
+    {"term": "wheel", "meaning": "The administrator group that grants `sudo` on the RHEL family (`sudo` on Ubuntu)."},
+    {"term": "kernel", "meaning": "The Linux core that manages the hardware; its version is shown by `uname -r`."},
+    {"term": "hostname", "meaning": "The machine's name on the network."},
+    {"term": "load average", "meaning": "Average system load over the last 1, 5 and 15 minutes; shown by `uptime`."},
+    {"term": "environment variable", "meaning": "A `NAME=value` pair kept by the shell, for example `USER` or `HOME`."}
+  ]
+}

@@ -1,0 +1,42 @@
+{
+ "id": "4.2",
+ "level": 4,
+ "setup": {
+  "files": {
+   "/home/student/offboard.sh": "#!/bin/bash\nsudo userdel -r alice\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^sudo whoami$", "ok": true}, "solution": ["sudo whoami"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^grep (-w )?alice /etc/passwd$", "ok": true}, "solution": ["grep alice /etc/passwd"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls /home$", "ok": true}, "solution": ["ls /home"]},
+  {"id": "t04", "kind": "guided", "diff": 1, "check": {"cmd": "^sudo cat /etc/shadow$", "ok": true}, "solution": ["sudo cat /etc/shadow"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^sudo ls -(ld|dl) /home/alice$", "ok": true}, "solution": ["sudo ls -ld /home/alice"]},
+  {"id": "t06", "kind": "guided", "diff": 1, "check": {"cmd": "^cat /etc/group$", "ok": true}, "solution": ["cat /etc/group"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": {"cmd": "^grep (-w )?devs /etc/group$", "ok": true}, "solution": ["grep devs /etc/group"]},
+  {"id": "t08", "kind": "guided", "diff": 2, "check": {"cmd": "^sudo ls -(la|al) /home/alice$", "ok": true}, "solution": ["sudo ls -la /home/alice"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"cmd": "^cat /etc/shadow$", "ok": false}, "solution": ["cat /etc/shadow"]},
+  {"id": "t10", "kind": "predict", "diff": 2, "check": {"out": "drwx------", "of": "ls -ld /home/alice"}, "solution": ["sudo ls -ld /home/alice"]},
+  {"id": "t11", "kind": "predict", "diff": 2, "check": {"cmd": "^id carol$", "ok": false}, "solution": ["id carol"]},
+  {"id": "t12", "kind": "debug", "diff": 2, "check": [{"contains": ["~/offboard.sh", "userdel alice"]}, {"contains": ["~/offboard.sh", "^sudo"]}], "solution": ["echo 'sudo userdel alice' > ~/offboard.sh"]},
+  {"id": "t13", "kind": "mini", "diff": 2, "check": [{"contains": ["~/new_user_plan.txt", "useradd -m -s /bin/bash carol"]}, {"contains": ["~/new_user_plan.txt", "passwd carol"]}, {"contains": ["~/new_user_plan.txt", "usermod -aG devs carol"]}], "solution": ["echo 'sudo useradd -m -s /bin/bash carol' > ~/new_user_plan.txt", "echo 'sudo passwd carol' >> ~/new_user_plan.txt", "echo 'sudo usermod -aG devs carol' >> ~/new_user_plan.txt"]},
+  {"id": "t14", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/onboard.sh", "useradd.* -G devs.* dave"]}, {"contains": ["~/onboard.sh", "chage -d 0 dave"]}, {"mode": ["~/onboard.sh", "750"]}], "solution": ["echo 'sudo useradd -m -s /bin/bash -G devs dave' > ~/onboard.sh", "echo 'sudo chage -d 0 dave' >> ~/onboard.sh", "chmod 750 ~/onboard.sh"]},
+  {"id": "t15", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/offboard_eve.txt", "usermod -L eve"]}, {"contains": ["~/offboard_eve.txt", "userdel eve"]}], "solution": ["echo 'sudo usermod -L eve' > ~/offboard_eve.txt", "echo 'sudo userdel eve' >> ~/offboard_eve.txt"]},
+  {"id": "t16", "kind": "ticket", "diff": 3, "check": {"contains": ["~/frank.txt", "usermod -aG wheel frank"]}, "solution": ["echo 'sudo usermod -aG wheel frank' > ~/frank.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "testuser:\\S*:\\d+:\\d+:.*:/home/testuser:"},
+  {"id": "v02", "expect": "password updated successfully|all authentication tokens updated"},
+  {"id": "v03", "expect": "labteam"},
+  {"id": "v04", "expect": "testuser\\s+(L|LK)\\b"},
+  {"id": "v05", "expect": "Last password change"},
+  {"id": "v06", "expect": "drwx"},
+  {"id": "v07", "expect": null}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 0}
+ ]
+}

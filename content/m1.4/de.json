@@ -1,0 +1,179 @@
+{
+ "title": "Befehlserfolg: $?, &&, || und Fehlermeldungen",
+ "lead": "Keine Ausgabe bedeutet nicht Fehler. Jeder Befehl hinterlässt einen Exit-Status; in diesem Modul lernst du, ihn zu lesen, Befehle darauf aufbauend zu verketten und Fehlermeldungen zu verstehen.",
+ "objectives": [
+  "Du liest den Exit-Status des letzten Befehls mit `echo $?` und unterscheidest 0 von ungleich 0.",
+  "Du verkettest Befehle bedingt mit `true`, `false`, `&&`, `||` und `;`.",
+  "Du kennst den Unterschied zwischen stdout und stderr und trennst Fehler mit `2>`.",
+  "Du liest `Permission denied`, `No such file or directory` und `command not found` und findest die Ursache.",
+  "Du prüfst Dateien, Zahlen und Zeichenketten mit `test` und `[ ]`."
+ ],
+ "sections": [
+  {
+   "id": "status",
+   "title": "Exit-Status: $?",
+   "body": [
+    "Wenn ein Befehl endet, erzeugt er einen **Exit-Status**. **0 = Erfolg**, jede andere Zahl = Fehler. Ein stiller Befehl (z. B. `mkdir`) kann erfolgreich oder fehlgeschlagen sein; um sicher zu sein, tippe `echo $?`.",
+    "Häufige Codes: `1` allgemeiner Fehler, `2` falsche Verwendung oder fehlender Pfad (`ls`), `126` nicht ausführbar, `127` Befehl nicht gefunden, `130` mit Strg+C abgebrochen.",
+    "Achtung: `$?` wird nach jedem Befehl überschrieben. Ein direkt danach getipptes `echo $?` hinterlässt sein eigenes Ergebnis (0); lies den Code **unmittelbar nach dem betreffenden Befehl**."
+   ],
+   "commands": [
+    {"cmd": "echo $?", "what": "Gibt den Exit-Status des letzten Befehls aus.", "where": "Beim Prüfen von Befehlen ohne Ausgabe.", "why": "Zeigt mit einer Zahl, ob der Befehl wirklich funktioniert hat.", "example": "pwd; echo $?"},
+    {"cmd": "true", "what": "Tut nichts und endet immer mit 0.", "where": "Beim Testen von Ketten, wenn ein „erfolgreicher“ Befehl nötig ist.", "why": "Erzeugt den Erfolgszustand mühelos.", "example": "true; echo $?"},
+    {"cmd": "false", "what": "Tut nichts und endet immer mit 1.", "where": "Beim Ausprobieren des Fehlerpfads.", "why": "Erzeugt den Fehlerzustand mühelos.", "example": "false; echo $?"}
+   ],
+   "tip": "Keine Ausgabe ist kein Fehler. Die meisten Unix-Befehle schweigen bei Erfolg."
+  },
+  {
+   "id": "chain",
+   "title": "Verketten: &&, || und ;",
+   "body": [
+    "`A && B`: B läuft nur, wenn A **erfolgreich** war (0). `A || B`: B läuft nur, wenn A **fehlgeschlagen** ist. `A ; B`: B läuft in jedem Fall.",
+    "Das klassische Muster: `mkdir lab && cd lab` (wechsle in den Ordner, wenn er angelegt wurde). `A && B || C` verhält sich wie ein if/else; schlägt aber B fehl, läuft auch C – nutze es nur für einfache Fälle."
+   ],
+   "commands": [
+    {"cmd": "&&", "what": "Führt die rechte Seite aus, wenn die linke erfolgreich war.", "where": "Bei Schritten, die voneinander abhängen.", "why": "Verhindert das Weitermachen nach einem fehlgeschlagenen Schritt.", "example": "mkdir lab && cd lab"},
+    {"cmd": "||", "what": "Führt die rechte Seite aus, wenn die linke fehlgeschlagen ist.", "where": "Für Fehlermeldungen oder Ersatzpläne.", "why": "Reagiert automatisch auf Fehler.", "example": "cd /nonexistent || echo failed"},
+    {"cmd": ";", "what": "Führt Befehle der Reihe nach aus, unabhängig vom Erfolg.", "where": "Wenn du unabhängige Befehle in eine Zeile schreibst.", "why": "Die Reihenfolge bleibt, das Ergebnis wird ignoriert.", "example": "pwd; whoami; hostname"}
+   ],
+   "warn": "Bei Ketten wie `rm -r old_project ; ...` läuft der zerstörerische Befehl mit `;` auch dann, wenn der vorherige Schritt fehlschlug. Verbinde zerstörerische Schritte mit `&&`."
+  },
+  {
+   "id": "streams",
+   "title": "stdout und stderr",
+   "body": [
+    "Jeder Befehl hat zwei Ausgabekanäle: **stdout** (Kanal 1, normale Ausgabe) und **stderr** (Kanal 2, Fehlermeldungen). Beide erscheinen auf dem Bildschirm, lassen sich aber getrennt umleiten.",
+    "`>` leitet nur stdout in eine Datei; der Fehler bleibt auf dem Bildschirm. `2>` leitet Fehler in eine Datei. `2>/dev/null` wirft Fehler weg. `2>&1` schickt stderr dorthin, wohin stdout geht. Beachte: Umleitung **ändert den Exit-Status nicht**; auch wenn der Fehler versteckt ist, ist der Befehl fehlgeschlagen."
+   ],
+   "commands": [
+    {"cmd": "2>", "what": "Schreibt Fehlermeldungen (stderr) in eine Datei.", "where": "Um Fehler später zu untersuchen.", "why": "Trennt normale Ausgabe von Fehlern.", "example": "ls /nonexistent 2> errors.txt"},
+    {"cmd": "2>/dev/null", "what": "Verwirft Fehlermeldungen.", "where": "Um erwartete, harmlose Fehler zu unterdrücken.", "why": "Hält die Ausgabe sauber, versteckt aber auch echte Probleme.", "example": "ls /nonexistent 2>/dev/null; echo $?"},
+    {"cmd": "2>&1", "what": "Leitet stderr an denselben Ort wie stdout.", "where": "Um Ausgabe und Fehler in einer Datei oder Pipeline zu sammeln.", "why": "Hält das vollständige Protokoll an einem Ort.", "example": "ls ~ /nonexistent > all.txt 2>&1"}
+   ]
+  },
+  {
+   "id": "errors",
+   "title": "Fehlermeldungen lesen",
+   "body": [
+    "Eine Fehlermeldung hat meist die Form `Programm: Argument: Grund`. Das erste Wort ist das Programm, das scheiterte, das zweite der problematische Pfad, das letzte der Grund.",
+    "**No such file or directory**: Der Pfad existiert nicht oder hat einen Tippfehler; prüfe mit `ls` und `pwd`, wo du bist. **Permission denied**: Der Pfad existiert, aber dir fehlt die Berechtigung; schau dir `ls -l` an. **command not found** (Code 127): falscher Befehlsname oder nicht installiert; prüfe mit `type` / `which`. **Is a directory**: Du hast einem Befehl, der eine Datei erwartet, einen Ordner gegeben."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Zeigt Dateirechte und Besitzer.", "where": "Bei der Suche nach der Ursache von Permission denied.", "why": "Du siehst, welche Berechtigung fehlt.", "example": "ls -l locked.txt"},
+    {"cmd": "type", "what": "Sagt, ob ein Name Befehl, Builtin oder Alias ist.", "where": "Bei command not found.", "why": "Zeigt, ob der Befehl existiert.", "example": "type ls"}
+   ],
+   "danger": "Tippe bei Permission denied nicht reflexartig `sudo` oder `chmod 777`. Verstehe zuerst die Ursache; unnötig weite Rechte sind eine Sicherheitslücke."
+  },
+  {
+   "id": "test",
+   "title": "Bedingungen prüfen: test und [ ]",
+   "body": [
+    "`test` (und das Gleiche als `[ ... ]`) prüft eine Bedingung und gibt nichts aus; das Ergebnis meldet es nur über den Exit-Status: 0 bei wahr, 1 bei falsch. Darum passt es so gut zu `&&` / `||`.",
+    "Häufig: `-f` normale Datei, `-d` Verzeichnis, `-e` existiert, `-r`/`-w`/`-x` lesbar/schreibbar/ausführbar, `-z` Zeichenkette leer. Für Zahlen `-eq -ne -gt -lt`, für Text `=` und `!=`. In `[ ]` sind die **Leerzeichen** neben den Klammern Pflicht."
+   ],
+   "commands": [
+    {"cmd": "test -f", "what": "Erfolgreich, wenn der Pfad existiert und eine normale Datei ist.", "where": "Beim Prüfen, ob eine Datei existiert.", "why": "Du führst keinen Befehl auf einer fehlenden Datei aus und bekommst keinen Fehler.", "example": "test -f notes.txt && echo yes"},
+    {"cmd": "[ -d ]", "what": "Erfolgreich, wenn der Pfad ein Verzeichnis ist.", "where": "Z. B. um einen Ordner nur anzulegen, wenn er fehlt.", "why": "Ermöglicht bedingtes Handeln.", "example": "[ -d Documents ] && echo dir"},
+    {"cmd": "[ -gt ]", "what": "Vergleicht Zahlen (-eq -ne -gt -lt).", "where": "Bei numerischen Prüfungen.", "why": "Macht numerische Bedingungen zum Exit-Status.", "example": "[ 3 -gt 2 ] && echo gt"}
+   ],
+   "tip": "Klassisches Muster: `test -d backup || mkdir backup`. Es legt den Ordner an, falls er fehlt, und lässt ihn sonst in Ruhe."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Führe zuerst `pwd` aus und lies den Exit-Status sofort danach mit `echo $?`.", "hint": "Tippe zwei getrennte Zeilen; der Code sollte 0 sein."},
+  "t02": {"text": "Liste einen nicht existierenden Pfad auf: `ls /nonexistent`, und lies die Fehlermeldung.", "hint": "Der Fehler geht nach stderr; er erscheint trotzdem auf dem Bildschirm."},
+  "t03": {"text": "Führe `false` aus und lies den Status mit `echo $?`. Welche Zahl bekommst du?", "hint": "`false` schlägt immer fehl."},
+  "t04": {"text": "Schreibe in einer Zeile `mkdir lab && cd lab`, um den Ordner anzulegen und zu betreten.", "hint": "`&&` führt den zweiten Befehl nur aus, wenn der erste erfolgreich war."},
+  "t05": {"text": "Tippe `cd /nonexistent || echo failed` und überlege, warum `failed` ausgegeben wird.", "hint": "Wenn `cd` fehlschlägt, führt `||` die rechte Seite aus."},
+  "t06": {"text": "Vorhersage: Was gibt `cat missing.txt; echo $?` aus und welcher Code erscheint? Führe es dann zur Kontrolle aus.", "hint": "`cat` gibt einen Fehler aus, wenn es die Datei nicht findet, und endet mit 1."},
+  "t07": {"text": "Vorhersage: Was gibt `test -f notes.txt && echo yes || echo no` aus? Führe es zur Kontrolle aus.", "hint": "`notes.txt` existiert im Home und ist eine normale Datei."},
+  "t08": {"text": "`cat locked.txt` meldet „Permission denied“. Finde den Grund, behebe ihn mit `chmod` und lies die Datei.", "hint": "Gib dir selbst Leserecht: `chmod u+r locked.txt`."},
+  "t09": {"text": "`cp notes.txt backup/` schlägt fehl, weil `backup` nicht existiert. Verkette: Ordner anlegen und Datei kopieren.", "hint": "`mkdir backup && cp notes.txt backup/`."},
+  "t10": {"text": "Mini-Projekt: (1) Schreibe den Fehler von `ls /nonexistent` in `errors.txt`, (2) schreibe die Ausgabe von `ls ~` in `files.txt`, (3) lies den Status des letzten Befehls mit `echo $?`.", "hint": "Nutze `2>` für den Fehler und `>` für die Ausgabe."},
+  "t11": {"text": "Mini-Projekt: Lege in einer Zeile den Ordner `project` an, wechsle hinein, erstelle die Datei `main.txt` und gib zum Schluss `built` aus.", "hint": "Verbinde vier Befehle mit `&&`; du kannst `mkdir -p project` nutzen."},
+  "t12": {"text": "Herausforderung: Lege den Ordner `backup` an, falls er fehlt; kopiere `notes.txt` hinein; war das Kopieren erfolgreich, schreibe `saved` in `status.txt`, sonst `failed`.", "hint": "`test -d backup || mkdir backup` und `cp ... && echo saved > status.txt || echo failed > status.txt`."},
+  "t13": {"text": "Herausforderung: Enthält `notes.txt` das Wort `hello`? Prüfe es in einer Zeile und gib `found` oder `missing` aus; wirf die eigene Ausgabe von grep nach `/dev/null`.", "hint": "`grep hello notes.txt > /dev/null && echo found || echo missing`."},
+  "t14": {"text": "Ticket: Ein Kollege sagt „Ich kann meinen Bericht nicht lesen“ und hat `cat Documents/raport.txt` versucht. Finde den richtigen Namen mit `ls Documents`, lies die Datei mit `cat` und schreibe den Exit-Status in `exit.txt`.", "hint": "Der richtige Name ist `report.txt`. `cat Documents/report.txt; echo $? > exit.txt`."}
+ },
+ "vm": {
+  "intro": "Führe die folgenden Befehle auf deiner eigenen VM (Ubuntu/Rocky/Alma oder WSL) aus; wir nutzen nur sichere, lesende Befehle. Füge die Ausgabe ein und prüfe sie.",
+  "tasks": {
+   "v01": {
+    "title": "Erfolgs- und Fehlercode",
+    "text": "Führe einen erfolgreichen und einen fehlschlagenden Befehl aus und lies jeweils danach den Code. Füge die gesamte Ausgabe ein.",
+    "blocks": [
+     {"cmd": "ls /\necho $?\nls /nonexistent\necho $?", "expected": "bin  boot  dev  etc ...\n0\nls: cannot access '/nonexistent': No such file or directory\n2"}
+    ],
+    "differs": [
+     "Ein fehlgeschlagenes `ls` liefert 2 (GNU ls); andere Befehle liefern evtl. 1. Das ist in Ordnung, wichtig ist, dass es nicht 0 ist.",
+     "Ist die Meldung lokalisiert, kann sie in einer anderen Sprache erscheinen; der Code bleibt gleich."
+    ]
+   },
+   "v02": {
+    "title": "command not found: 127",
+    "text": "Führe einen nicht existierenden Befehl aus und lies den Exit-Status.",
+    "blocks": [
+     {"cmd": "nonexistentcmd\necho $?", "expected": "bash: nonexistentcmd: command not found\n127"}
+    ],
+    "differs": [
+     "Ubuntu schlägt bei „Command not found“ manchmal ein Paket vor; der Code ist trotzdem 127.",
+     "Wenn du `echo $?` zweimal tippst, ist das zweite Ergebnis 0; lies es nur direkt nach dem ersten Befehl."
+    ]
+   },
+   "v03": {
+    "title": "Verhalten von && und ||",
+    "text": "Probiere die Ketten aus und sieh, welche Seite läuft.",
+    "blocks": [
+     {"cmd": "true && echo ok\nfalse && echo never\nfalse || echo fallback\ntrue ; echo always", "expected": "ok\nfallback\nalways"}
+    ],
+    "differs": [
+     "Erscheint `never`, hast du evtl. `;` statt `&&` getippt.",
+     "Wird nichts ausgegeben, suche nach einem Anführungszeichen- oder Leerzeichenfehler."
+    ]
+   },
+   "v04": {
+    "title": "Permission denied",
+    "text": "Öffne als normaler Benutzer eine Datei, die du nicht lesen darfst, und füge Fehler und Status ein (nur lesend, nichts ändert sich).",
+    "blocks": [
+     {"cmd": "cat /etc/shadow\necho $?", "expected": "cat: /etc/shadow: Permission denied\n1"}
+    ],
+    "differs": [
+     "Bist du root, wird die Datei geöffnet; wechsle zu einem normalen Benutzer (`su - student` oder ein neuer Benutzer).",
+     "Auf älteren Systemen kannst du statt `/etc/shadow` `/etc/sudoers` versuchen."
+    ]
+   },
+   "v05": {
+    "title": "Bedingungen mit test",
+    "text": "Prüfe Datei- und Verzeichnisbedingungen. Füge das Ergebnis als `yes` / `no` ein.",
+    "blocks": [
+     {"cmd": "test -d /etc && echo yes || echo no\ntest -f /etc/nonexistent && echo yes || echo no", "expected": "yes\nno"}
+    ],
+    "differs": [
+     "Erscheint zweimal `yes`, hast du evtl. `-e` statt `-f` getippt.",
+     "Bei `[ -d /etc ]` die Leerzeichen um `[` und `]` nicht vergessen."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Welchen Exit-Status hat ein erfolgreich beendeter Befehl?", "options": ["1", "0", "127", "255"], "explain": "0 bedeutet Erfolg; jeder Wert ungleich 0 zeigt einen Fehler an."},
+  "q2": {"q": "Wann läuft B in der Zeile `A && B`?", "options": ["Immer", "Nur wenn A fehlschlägt", "Nur wenn A erfolgreich ist (0)", "Nie"], "explain": "`&&` verhält sich wie UND; B läuft nur, wenn A mit 0 endet."},
+  "q3": {"q": "Was zeigt der Exit-Status 127 an?", "options": ["Befehl nicht gefunden", "Zugriff verweigert", "Mit Strg+C abgebrochen", "Datei nicht gefunden"], "explain": "127 = command not found. Ein Rechteproblem ist 126, Strg+C ist 130."},
+  "q4": {"q": "Was bewirkt `ls /nonexistent 2>/dev/null; echo $?`?", "options": ["Zeigt die Fehlermeldung und gibt 0 aus", "Legt den Ordner an", "Gibt überhaupt nichts aus", "Versteckt die Fehlermeldung, aber der Status bleibt ungleich 0"], "explain": "`2>/dev/null` verwirft nur die Meldung; der Befehl ist trotzdem fehlgeschlagen und `$?` ist nicht 0."}
+ },
+ "summary": [
+  "Exit-Status: 0 ist Erfolg, alles andere ist ein Fehler. Lies ihn sofort mit `echo $?`.",
+  "`&&` macht bei Erfolg weiter, `||` bei Fehler, `;` in jedem Fall.",
+  "stdout wird mit `>`, stderr mit `2>` umgeleitet; Umleitung ändert den Exit-Status nicht.",
+  "Fehlermeldung: Programm, Pfad, Grund. 127 = Befehl fehlt, Permission denied = keine Berechtigung.",
+  "`test` und `[ ]` machen Bedingungen zum Exit-Status."
+ ],
+ "glossary": [
+  {"term": "Exit-Status", "meaning": "Die Zahl, die ein Befehl beim Beenden hinterlässt; 0 = Erfolg."},
+  {"term": "stdout", "meaning": "Standardausgabe (Kanal 1); normale Ergebnisse."},
+  {"term": "stderr", "meaning": "Standardfehlerausgabe (Kanal 2); Fehlermeldungen."},
+  {"term": "&&", "meaning": "Operator, der die rechte Seite ausführt, wenn die linke erfolgreich war."},
+  {"term": "||", "meaning": "Operator, der die rechte Seite ausführt, wenn die linke fehlgeschlagen ist."},
+  {"term": "/dev/null", "meaning": "Eine Spezialdatei, die alles Geschriebene verschluckt."}
+ ]
+}

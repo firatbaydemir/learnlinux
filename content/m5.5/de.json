@@ -1,0 +1,84 @@
+{
+  "title": "Paketverwaltung",
+  "lead": "Suche, installiere, aktualisiere und entferne Software mit dem Paketmanager deiner Distribution; unterscheide Paketquellen und installierte Paketdatenbank.",
+  "objectives": [
+    "Du weißt, dass Debian-Systeme apt/dpkg und RHEL-Systeme dnf/rpm verwenden.",
+    "Du führst Suche, Informationsabfrage, Installation, Aktualisierung und Entfernung aus.",
+    "Du prüfst Änderungen vor der Installation und schützt kritische Pakete."
+  ],
+  "sections": [
+    {
+      "id": "families",
+      "title": "Distributionen und Paketwerkzeuge",
+      "body": [
+        "Paketmanager laden Software aus signierten Repositories, lösen Abhängigkeiten auf und aktualisieren die installierte Paketdatenbank. Ubuntu und Debian verwenden `apt` als übergeordnetes Werkzeug und `dpkg` für Abfragen auf niedrigerer Ebene; Rocky, Alma und Fedora verwenden `dnf` und `rpm`.",
+        "Der Paketname derselben Software kann je nach Distribution abweichen: Apache HTTP Server heißt in der RHEL-Familie meist `httpd`, in der Debian-Familie `apache2`. Finde zuerst die Distribution und den richtigen Paketnamen heraus."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/os-release", "what": "Zeigt Name, Version und Kennung der Distribution.", "where": "Bevor du einen Paketbefehl oder Dienstnamen wählst.", "why": "Damit bestätigst du, ob das System zur Debian- oder RHEL-Familie gehört.", "example": "cat /etc/os-release"},
+        {"cmd": "apt search / dnf search", "what": "Sucht in konfigurierten Repositories nach Namen oder Beschreibung.", "where": "Wenn du den Paketnamen nicht kennst.", "why": "Das senkt das Risiko, das falsche Paket zu installieren.", "example": "dnf search nginx", "nosim": true}
+      ],
+      "tip": "Wähle `apt` oder `dnf` passend zur Systemfamilie; gehe nicht davon aus, dass derselbe Befehl überall verfügbar ist."
+    },
+    {
+      "id": "install",
+      "title": "Suche, Installation und Aktualisierung",
+      "body": [
+        "Prüfe vor der Installation Beschreibung und Herkunft des Pakets. `apt update` aktualisiert in der Debian-Familie die Paketlisten, führt aber nicht selbst ein Paketupgrade aus. `dnf check-update` prüft, ob Aktualisierungen verfügbar sind.",
+        "Die Installation von Paketen und Systemupdates erfordert Administratorrechte. Lies im Bestätigungsdialog die Pakete, die installiert, entfernt oder aktualisiert werden sollen. Brich ab, wenn kritische unerwartete Änderungen aufgeführt sind."
+      ],
+      "commands": [
+        {"cmd": "sudo apt install package / sudo dnf install package", "what": "Installiert ein Paket aus dem Repository samt benötigten Abhängigkeiten.", "where": "Nachdem Paketname und Quelle geprüft wurden.", "why": "Die Paketdatenbank bleibt konsistent, statt Dateien manuell herunterzuladen und abzulegen.", "example": "sudo dnf install cowsay", "nosim": true},
+        {"cmd": "sudo apt update / sudo dnf check-update", "what": "Aktualisiert Paketinformationen oder prüft verfügbare Updates.", "where": "Vor Installationen auf Debian-Systemen oder bei der Updateprüfung.", "why": "Der Paketmanager nutzt aktuelle Repositoryinformationen.", "example": "sudo apt update", "nosim": true}
+      ],
+      "tip": "`apt update` aktualisiert die Paketlisten; installierte Pakete aktualisierst du separat mit `apt upgrade`."
+    },
+    {
+      "id": "remove",
+      "title": "Entfernen und Pakete prüfen",
+      "body": [
+        "`apt remove` und `dnf remove` können beim Entfernen eines Pakets auch Abhängigkeiten betreffen. `apt purge` entfernt zusätzlich die Paketkonfiguration; `autoremove` findet nicht mehr benötigte Abhängigkeiten. Prüfe die vorgeschlagene Entfernung sorgfältig.",
+        "`dpkg -l` oder `rpm -qa` listet installierte Pakete auf. Diese Werkzeuge auf niedriger Ebene eignen sich zum Abfragen, nicht zur Installation. Verwende dafür `apt` oder `dnf`."
+      ],
+      "commands": [
+        {"cmd": "sudo apt remove / sudo dnf remove", "what": "Entfernt ein Paket über den Paketmanager.", "where": "Wenn ein Testpaket nicht mehr benötigt wird.", "why": "Paketdatenbank und Abhängigkeiten werden kontrolliert aktualisiert.", "example": "sudo apt remove cowsay", "nosim": true},
+        {"cmd": "dpkg -l / rpm -qa", "what": "Fragt die Liste installierter Pakete ab.", "where": "Zum Prüfen, ob ein Paket installiert ist.", "why": "Der Installationsstatus wird aus der Paketdatenbank angezeigt.", "example": "rpm -qa | grep cowsay", "nosim": true}
+      ],
+      "warn": "Das Installieren oder Entfernen ändert das System. Übe nur in deiner eigenen VM; entferne keine kritischen Pakete wie `kernel`, `systemd`, SSH oder Netzwerkwerkzeuge. Prüfe die Bestätigungsliste."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Finde in den Paketnotizen den übergeordneten Paketmanager für die RHEL-Familie.", "hint": "Die Zeile von `grep RHEL ~/lab/package_notes.txt` enthält `dnf`."},
+    "t02": {"text": "Finde den übergeordneten Paketmanager für Ubuntu/Debian.", "hint": "Die Zeile von `grep Ubuntu ~/lab/package_notes.txt` enthält `apt`."},
+    "t03": {"text": "Schätze, in wie vielen Zeilen `package` vorkommt, und prüfe es mit `grep -c`.", "hint": "`grep -c package ~/lab/package_notes.txt`"},
+    "t04": {"text": "Schreibe in `~/lab/install_plan.txt`, dass Ubuntu/Debian vor der Installation die Paketlisten auffrischen sollte.", "hint": "Speichere den Ausdruck `sudo apt update`."},
+    "t05": {"text": "Ergänze Installationsbefehle für `cowsay` für die RHEL- und die Debian-Familie.", "hint": "`sudo dnf install cowsay` und `sudo apt install cowsay`."},
+    "t06": {"text": "Schreibe einen Bereinigungsplan mit dem Hinweis, vor dem Entfernen eines Testpakets die `autoremove`-Vorschläge zu prüfen.", "hint": "Speichere den Hinweis in `~/lab/cleanup_plan.txt`."},
+    "t07": {"text": "Erstelle für Ticket #5501 eine Notiz: Distribution prüfen; das Webpaket heißt je nach Familie `httpd` oder `apache2`.", "hint": "Schreibe die Notiz nach `~/lab/ticket_5501.txt`."}
+  },
+  "vm": {
+    "intro": "Installation und Entfernung ändern das System. Arbeite nur in deiner eigenen Test-VM, nicht auf einem Produktionssystem, und lies Bestätigungsdialoge immer sorgfältig.",
+    "tasks": {
+      "v01": {"title": "Distribution erkennen", "text": "Prüfe die Distributionskennung und die verfügbaren Paketwerkzeuge.", "blocks": [{"cmd": "cat /etc/os-release\ncommand -v apt\ndnf --version", "expected": "Die Zeile ID= zeigt die Distribution; apt oder dnf ist für deine Familie verfügbar."}], "differs": ["Es müssen nicht beide Paketmanager vorhanden sein; nutze den passenden.", "ID oder ID_LIKE hilft bei der Bestimmung der Distributionsfamilie."]},
+      "v02": {"title": "Paket vor der Installation prüfen", "text": "Zeige zuerst Informationen über das Paket `cowsay` an. Führe nur den passenden Befehl für deine Distribution aus.", "blocks": [{"cmd": "apt-cache policy cowsay", "expected": "Candidate oder Paketversion"}, {"cmd": "dnf info cowsay", "expected": "Available Packages oder Paketinformationen"}], "differs": ["Verwende apt-cache unter Debian/Ubuntu und dnf unter Rocky/Alma/Fedora.", "Wird das Paket nicht gefunden, sind eventuell Paketlisten veraltet oder das Repository nicht aktiviert."]},
+      "v03": {"title": "Testpaket installieren", "text": "Installiere das kleine Paket `cowsay` nur in deiner eigenen Test-VM mit dem passenden Befehl. Prüfe die Änderungen im Bestätigungsdialog.", "blocks": [{"cmd": "sudo apt install cowsay", "expected": "Setting up cowsay oder Installation abgeschlossen"}, {"cmd": "sudo dnf install cowsay", "expected": "Complete! oder Installed: cowsay"}], "differs": ["Führe nur einen Block aus: apt für Debian/Ubuntu, dnf für die RHEL-Familie.", "Wenn das Paket nicht gefunden wird, prüfe zuerst Repository und Paketnamen, statt die Installation zu erzwingen."]},
+      "v04": {"title": "Testpaket entfernen", "text": "Entferne `cowsay` nach dem Test mit demselben Paketmanager und prüfe das Ergebnis. Lies die Liste der zu entfernenden Pakete vor der Bestätigung.", "blocks": [{"cmd": "sudo apt remove cowsay", "expected": "Removing cowsay oder cowsay wurde entfernt"}, {"cmd": "sudo dnf remove cowsay", "expected": "Removing: cowsay oder Complete!"}], "differs": ["Verwende nur den Befehl der Distributionsfamilie, mit der du das Paket installiert hast.", "Wenn unerwartete wichtige Pakete aufgeführt werden, bestätige nicht; brich mit `n` ab."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "Welches übergeordnete Paketwerkzeug wird üblicherweise auf Ubuntu und Debian verwendet?", "options": ["apt", "dnf", "rpm", "systemctl"], "explain": "`apt` verwaltet auf Debian-Systemen Repositories und Paketinstallationen."},
+    "q2": {"q": "Wie heißt das Paket für Apache HTTP Server in der RHEL-Familie üblicherweise?", "options": ["apache2", "nginx", "httpd", "openssh"], "explain": "In der RHEL-Familie heißt es meist httpd, in der Debian-Familie apache2."},
+    "q3": {"q": "Was bewirkt `apt update`?", "options": ["Es aktualisiert den Kernel", "Es aktualisiert die Paketlisten", "Es entfernt alle Pakete", "Es startet das System neu"], "explain": "apt update erneuert lokale Repository-Indizes; für Paketupgrades brauchst du apt upgrade."},
+    "q4": {"q": "Was solltest du im Bestätigungsdialog einer Installation tun?", "options": ["Immer bestätigen", "Kritische Pakete ignorieren", "Enter drücken, ohne die Ausgabe anzusehen", "Pakete prüfen, die hinzugefügt oder entfernt werden"], "explain": "Die Abhängigkeitsauflösung kann weitere Pakete ändern; prüfe die Liste vor der Ausführung."}
+  },
+  "summary": [
+    "Ubuntu/Debian: apt/dpkg; Rocky/Alma/Fedora: dnf/rpm. Prüfe Distribution und Paketnamen zuerst.",
+    "`apt update` erneuert Paketlisten; Installation und Upgrade sind getrennte Vorgänge.",
+    "Prüfe vor Entfernung und `autoremove` die vorgeschlagenen Änderungen und bewahre kritische Systempakete."
+  ],
+  "glossary": [
+    {"term": "repository", "meaning": "Softwarequelle, in der eine Distribution Pakete und Paketinformationen veröffentlicht."},
+    {"term": "dependency", "meaning": "Ein weiteres Paket, das ein Paket zum Installieren oder Ausführen benötigt."},
+    {"term": "package manager", "meaning": "Werkzeug zum Installieren, Aktualisieren und Entfernen von Paketen samt Abhängigkeiten."}
+  ]
+}

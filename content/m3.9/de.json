@@ -1,0 +1,196 @@
+{
+ "title": "Fortgeschritten",
+ "lead": "Nicht einzeln, sondern in Serie: Dateien mit `find` finden, mit `xargs` verarbeiten, Datenströme umleiten, Pipelines bauen und dein erstes kleines Skript schreiben.",
+ "objectives": [
+  "Dateien mit `find` nach Name, Typ, Größe, Zeit und Rechten finden",
+  "Den Unterschied zwischen `-exec ... {} \\;`, `-exec ... {} +` und `xargs` kennen; vor `-delete` erst auflisten",
+  "stdout/stderr umleiten: `>`, `>>`, `2>`, `2>&1`, `/dev/null`, Here-Document und `tee`",
+  "Logs mit Pipelines wie `sort | uniq -c | sort -nr` zusammenfassen",
+  "Die Fallen von Quoting (`'...'` und `\"...\"`), Glob und Klammer-Expansion erkennen",
+  "Exit-Code, `&&`/`||`, Shebang, `chmod +x` und `./script.sh` für kleine Skripte nutzen"
+ ],
+ "sections": [
+  {
+   "id": "find",
+   "title": "find: gezielt suchen",
+   "body": [
+    "`find <Start> <Bedingungen> <Aktion>` durchläuft den Verzeichnisbaum und verarbeitet jeden Pfad, der die Bedingungen erfüllt. Ohne Bedingungen listet es alles auf. Ohne Aktion gilt `-print`.",
+    "Wichtige Regel: **Muster in Anführungszeichen setzen**. Bei `find . -name *.log` expandiert die Shell `*.log` schon vor dem Start von `find` zu den Dateien im aktuellen Verzeichnis, und das Ergebnis überrascht dich.",
+    "Erst auflisten, dann handeln: Vor einer gefährlichen Aktion (`-delete`, `-exec rm`) denselben Befehl ohne Aktion ausführen und die Ausgabe lesen."
+   ],
+   "commands": [
+    {"cmd": "find -name / -iname", "what": "Sucht Dateinamen nach Muster; `-iname` ignoriert Groß-/Kleinschreibung.", "where": "Wenn du in einem Projekt Dateien mit bestimmter Endung suchst.", "why": "Du durchsuchst den ganzen Baum in Sekunden, ohne manuell zu navigieren.", "example": "find . -name \"*.log\""},
+    {"cmd": "find -type", "what": "Filtert nach Typ: `f` Datei, `d` Verzeichnis, `l` Symlink.", "where": "Wenn du nur Verzeichnisse oder nur Dateien brauchst.", "why": "So vergibst du Rechte für Verzeichnisse und Dateien getrennt, statt pauschal `chmod -R`.", "example": "find . -type d"},
+    {"cmd": "find -size / -mtime / -perm / -user", "what": "Filtert nach Größe (`-size +1M`), Änderungstag (`-mtime +7` = älter als 7 Tage), Rechten (`-perm 644`) oder Besitzer (`-user alice`).", "where": "Bei Aufräumarbeiten, Sicherheitsprüfungen, der Suche nach alten Logs.", "why": "Die richtige Datei zu finden ist billiger, als die falsche zu löschen.", "example": "find /var/log -name \"*.log\" -mtime +7", "nosim": true},
+    {"cmd": "find -exec ... {} \\;", "what": "Führt den Befehl für JEDEN Treffer einzeln aus; `{}` wird durch den Pfad ersetzt. Endet er mit `+`, werden die Pfade gesammelt und an einen Aufruf übergeben.", "where": "Wenn du jede Datei mit `chmod`, `ls -l`, `wc` o. Ä. bearbeitest.", "why": "Massenverarbeitung ohne Schleife; die `+`-Variante startet viel weniger Prozesse.", "example": "find project -name \"*.tmp\" -exec ls -l {} \\;", "nosim": true},
+    {"cmd": "find -delete", "what": "Löscht Treffer direkt; es gibt kein Zurück.", "where": "Beim Aufräumen temporärer Dateien.", "why": "Schneller als `-exec rm`, da nur ein Prozess. Bedingungen müssen VOR `-delete` stehen, sonst wird alles gelöscht.", "example": "find project -name \"*.tmp\" -delete", "nosim": true}
+   ],
+   "tip": "Gewohnheit: erst `find ... -print`, Ausgabe lesen, dann `-delete` oder `-exec` anhängen.",
+   "danger": "`find . -delete` ohne Bedingung löscht ALLES im aktuellen Baum. Die Reihenfolge zählt: `-name` zuerst, `-delete` ganz zuletzt."
+  },
+  {
+   "id": "xargs",
+   "title": "xargs und Befehlsersetzung",
+   "body": [
+    "`rm`, `cp`, `wc` erwarten Dateinamen als **Argumente** und lesen sie nicht aus der Pipe (stdin). `xargs` macht aus den Zeilen von stdin Argumente für diesen Befehl.",
+    "Dateinamen können Leerzeichen oder Zeilenumbrüche enthalten. Der sichere Weg: `find ... -print0 | xargs -0 ...`; die Namen werden mit dem NUL-Zeichen getrennt. Ein einfaches `| xargs rm` trifft bei Namen mit Leerzeichen die falsche Datei.",
+    "`$(Befehl)` setzt die Ausgabe eines Befehls in die Kommandozeile ein. Das ist eine Alternative zu `xargs`, stößt aber bei sehr langen Listen an die Argumentgrenze."
+   ],
+   "commands": [
+    {"cmd": "xargs", "what": "Führt einen Befehl aus und übergibt ihm die Eingabe von stdin als Argumente.", "where": "Wenn du die Ausgabe von `find` oder `grep -l` an `rm`, `wc`, `chmod` weitergibst.", "why": "Schließt die Lücke der Pipe: Ausgabe wird zu Argumenten.", "example": "find . -name \"*.txt\" | xargs wc -l", "nosim": true},
+    {"cmd": "find -print0 | xargs -0", "what": "Trennt Namen mit NUL und übergibt sie an xargs; sicher bei Leerzeichen und Sonderzeichen.", "where": "Bei unumkehrbaren Massenaktionen wie Löschen und Verschieben.", "why": "Eine Datei `my file.txt` wird nicht in zwei Argumente zerlegt.", "example": "find . -name \"*.tmp\" -print0 | xargs -0 rm", "nosim": true},
+    {"cmd": "$(...)", "what": "Befehlsersetzung: Die Ausgabe des inneren Befehls wird Teil des äußeren.", "where": "Wenn du ein Datum in einen Dateinamen oder `hostname` in eine Meldung einfügst.", "why": "Du baust Befehle mit dynamischen Werten.", "example": "echo \"host: $(hostname)\""}
+   ],
+   "warn": "`xargs` kann bei leerer Eingabe den Befehl trotzdem einmal ausführen (GNU: mit `-r` verhindern). Bei gefährlichen Befehlen erst `xargs echo rm` nutzen, um zu sehen, was laufen würde."
+  },
+  {
+   "id": "stream",
+   "title": "Datenströme, Umleitung und Pipelines",
+   "body": [
+    "Jeder Prozess hat drei Ströme: 0 stdin, 1 stdout, 2 stderr. `>` leitet stdout (1) um, `2>` stderr. `2>&1` heißt „stderr dorthin, wohin stdout gerade geht“; **die Reihenfolge zählt**: `cmd > f 2>&1` schreibt beides in die Datei, `cmd 2>&1 > f` lässt Fehler auf dem Bildschirm.",
+    "Rauschen wirfst du nach `/dev/null`: `cmd 2> /dev/null`. In Bash leitet `&>` stdout und stderr um; portabel ist `> f 2>&1`.",
+    "Das klassische Muster für Log-Auswertung: `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr`. `uniq` fasst nur direkt aufeinanderfolgende Zeilen zusammen, deshalb muss vorher `sort` laufen."
+   ],
+   "commands": [
+    {"cmd": "2> und 2>&1", "what": "`2> f` schreibt Fehler in eine Datei; `> f 2>&1` schreibt Ausgabe und Fehler in dieselbe Datei.", "where": "Wenn du Skriptausgaben in eine Logdatei sammelst.", "why": "Du speicherst Fehler, ohne sie zu verlieren; die Reihenfolge ist entscheidend.", "example": "ls missing.txt notes.txt > both.txt 2>&1"},
+    {"cmd": "> /dev/null", "what": "Wirft die Ausgabe weg.", "where": "Wenn dich nur der Exit-Code interessiert, nicht die Ausgabe.", "why": "Der Bildschirm bleibt sauber: `grep -q` oder `cmd 2> /dev/null`.", "example": "ls missing.txt 2> /dev/null"},
+    {"cmd": "<<EOF (Here-Document)", "what": "Schreibt mehrere Zeilen in stdin des Befehls; endet, wenn `EOF` allein in einer Zeile steht.", "where": "Beim Erstellen von Skripten oder Konfigurationsdateien.", "why": "Mit `<<'EOF'` in Quotes werden Variablen nicht expandiert; der Text bleibt wörtlich.", "example": "cat > notes2.txt <<'EOF'\nline one\nline two\nEOF", "nosim": true},
+    {"cmd": "tee", "what": "Schreibt stdin auf den Bildschirm und in eine Datei; `-a` hängt an.", "where": "Wenn du mitten in einer Pipeline ein Zwischenergebnis sichern willst.", "why": "Du siehst und speicherst zugleich. Das Rechteproblem bei `sudo cmd > f` löst `| sudo tee f`.", "example": "grep ERROR run.log | tee errors.txt"},
+    {"cmd": "sort | uniq -c | sort -nr", "what": "Zählt Zeilen und sortiert absteigend nach Häufigkeit.", "where": "Bei Auswertungen von Logs, IPs und Fehlerhäufigkeit.", "why": "Eine Zeile beantwortet „was kommt am häufigsten vor“; mit `| head -n 3` die ersten drei.", "example": "cut -d' ' -f2 run.log | sort | uniq -c | sort -nr"}
+   ],
+   "tip": "`wc -l` zählt Zeilen; `head -n 1` liefert die erste, `tail -n 5` die letzten fünf Zeilen. Kombiniert ergibt das schnelle Log-Checks."
+  },
+  {
+   "id": "quoting",
+   "title": "Quoting, Expansion und Exit-Codes",
+   "body": [
+    "Die Shell expandiert vor dem Ausführen: `$VARIABLE`, `$(...)`, Globs (`*.log`) und Klammern (`{a,b}`). Anführungszeichen steuern diese Expansion.",
+    "Doppelte Anführungszeichen `\"...\"` expandieren Variablen und `$(...)`, verhindern aber Globbing. Einfache `'...'` expandieren nichts. Werte mit Leerzeichen schützt du immer mit doppelten Quotes.",
+    "Jeder Befehl liefert einen Exit-Code: 0 bedeutet Erfolg, alles andere Fehler. `$?` zeigt den letzten. `&&` macht nur bei Erfolg weiter, `||` nur bei Fehler."
+   ],
+   "commands": [
+    {"cmd": "'...' und \"...\"", "what": "Einfache Quotes lassen Text unverändert; doppelte erlauben die `$`-Expansion.", "where": "Beim Schreiben von Variablen, Namen mit Leerzeichen und Mustern.", "why": "`echo \"$HOME\"` gibt den Pfad aus, `echo '$HOME'` den Text `$HOME`.", "example": "echo \"$HOME\" '$HOME'"},
+    {"cmd": "* ? [ ] Glob", "what": "Die Shell expandiert das Muster zu Dateinamen; `*` alles, `?` ein Zeichen.", "where": "Wenn du mehrere Dateien mit einem Befehl auswählst.", "why": "Ohne Quotes kommt das Muster bei `find -name` verfälscht an; findet `*.log` nichts, bleibt es unverändert stehen.", "example": "ls logs/*.log"},
+    {"cmd": "{a,b} Klammer-Expansion", "what": "Die Shell macht aus `{a,b,c}` drei Wörter; sie sucht keine Dateien, sie erzeugt nur Text.", "where": "Beim Anlegen mehrerer Dateien oder Verzeichnisse.", "why": "`mkdir -p project/{src,docs}` legt zwei Verzeichnisse mit einem Befehl an.", "example": "touch report_{1,2,3}.txt"},
+    {"cmd": "&& und ||", "what": "`a && b`: b nur wenn a erfolgreich. `a || b`: b nur wenn a fehlschlägt. `;` macht immer weiter.", "where": "Bei Aufgaben mit Vorbedingung: `cd dir && rm ...`.", "why": "Scheitert `cd`, läuft das folgende Löschen nicht im falschen Verzeichnis.", "example": "grep -q FATAL run.log || echo none"}
+   ],
+   "warn": "Schreibe `cd logs && rm *.tmp` statt `cd logs; rm *.tmp`: Schlägt `cd` fehl, führt `;` das `rm` trotzdem im aktuellen Verzeichnis aus."
+  },
+  {
+   "id": "script",
+   "title": "Dein erstes Skript: Shebang und Start",
+   "body": [
+    "Ein Skript ist eine Textdatei mit Befehlen. Die erste Zeile, der **Shebang** (`#!/bin/bash`), nennt den Interpreter. Zum Ausführen braucht die Datei das `x`-Recht.",
+    "`./script.sh` startet die Datei aus dem aktuellen Verzeichnis. Schreibst du nur `script.sh`, sucht die Shell sie ausschließlich in den Verzeichnissen von `PATH`; das aktuelle Verzeichnis gehört bewusst nicht dazu (Sicherheit). `bash script.sh` läuft auch ohne `x`-Recht.",
+    "Skript-Argumente sind `$1`, `$2` …, der Exit-Code ist `$?`. In kleinen Skripten gibst du mit `name=\"${1:-world}\"` einen Standardwert vor."
+   ],
+   "commands": [
+    {"cmd": "#!/bin/bash", "what": "Erste Zeile des Skripts; sagt dem Kernel den Interpreter.", "where": "Am Anfang jedes ausführbaren Skripts.", "why": "Es ist klar, mit welcher Shell das Skript läuft; das sorgt für Konsistenz zwischen Distributionen.", "example": "printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh"},
+    {"cmd": "chmod +x", "what": "Fügt der Datei das Ausführungsrecht hinzu.", "where": "Bevor du dein Skript direkt startest.", "why": "Ohne `x` meldet `./script.sh` „Permission denied“.", "example": "chmod +x greet.sh"},
+    {"cmd": "./script.sh", "what": "Startet das Skript über einen Pfad; Argumente folgen dahinter.", "where": "Für Skripte im aktuellen Verzeichnis.", "why": "Keine Suche in `PATH`; genau die gewählte Datei läuft.", "example": "./greet.sh alice"},
+    {"cmd": "echo $?", "what": "Zeigt den Exit-Code des letzten Befehls (0 = Erfolg).", "where": "Wenn du den Erfolg eines Befehls prüfst, von Hand oder im Skript.", "why": "`&&`, `||` und `if` arbeiten mit diesem Code.", "example": "grep -q ERROR run.log; echo $?"}
+   ],
+   "tip": "Für eigene Skripte kannst du `~/bin` in `PATH` aufnehmen: `export PATH=\"$HOME/bin:$PATH\"`. Dauerhaft machst du das in `~/.bashrc`."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Liste im Verzeichnis `lab` alle `.tmp`-Dateien mit `find` auf: `find . -name \"*.tmp\"`.", "hint": "Setze das Muster in doppelte Anführungszeichen."},
+  "t02": {"text": "Zähle die `ERROR`-Zeilen in `run.log` und schreibe die Zahl in die Datei `count.txt`: `grep -c ERROR run.log > count.txt`.", "hint": "`-c` liefert die Anzahl der passenden Zeilen."},
+  "t03": {"text": "Schreibe `host: ` und den Rechnernamen in die Datei `who.txt`: `echo \"host: $(hostname)\" > who.txt`.", "hint": "In doppelten Quotes wird `$(hostname)` expandiert."},
+  "t04": {"text": "Lege das Verzeichnis `backup` an und kopiere dann mit Glob alle `.log`-Dateien aus `logs` dorthin: `cp logs/*.log backup/`.", "hint": "Erst `mkdir backup`; bei `cp` steht das Ziel am Ende."},
+  "t05": {"text": "Schreibe zuerst den Fehler in `err.txt`: `ls missing.txt 2> err.txt`. Schreibe dann Ausgabe UND Fehler von `ls missing.txt notes.txt` gemeinsam in `both.txt`.", "hint": "`> both.txt 2>&1`; Reihenfolge: erst `>`, dann `2>&1`."},
+  "t06": {"text": "Schreibe mit `printf` das Skript `greet.sh` (Shebang + `echo \"Hello $1\"`), mache es mit `chmod +x greet.sh` ausführbar und starte es mit `./greet.sh alice > greet.out`.", "hint": "`printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh`; Text in einfache Quotes, sonst wird `$1` sofort expandiert."},
+  "t07": {"text": "VORHERSAGE: Welche Stufe zeigt `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr` am häufigsten und wie oft? Erst raten, dann ausführen.", "hint": "Das zweite Feld ist die Stufe (`INFO`, `WARN`, `ERROR`). Zähle die Zeilen."},
+  "t08": {"text": "VORHERSAGE: Was gibt `echo \"$HOME\" '$HOME'` aus? Raten, dann ausführen.", "hint": "Doppelte Quotes expandieren, einfache nicht."},
+  "t09": {"text": "VORHERSAGE: Was gibt `grep -q FATAL run.log || echo none` aus? Raten, dann ausführen.", "hint": "Ohne `FATAL` liefert `grep` 1; dann führt `||` den rechten Befehl aus."},
+  "t10": {"text": "FEHLER SUCHEN: Jemand tippte `find . -name *.log` und bekam nur `run.log`; die Dateien unter `logs/` fehlen. Korrigiere den Befehl und schreibe die vollständige Liste in `all_logs.txt`.", "hint": "Führe erst `find . -name *.log` aus: Die Shell hat `*.log` zu `run.log` expandiert. Setze das Muster in Quotes."},
+  "t11": {"text": "FEHLER SUCHEN: `./hello.sh` meldet „Permission denied“. Behebe das und starte es; das Ergebnis soll in `hello.out` stehen.", "hint": "Prüfe mit `ls -l hello.sh` die Rechte; dann `chmod +x hello.sh`."},
+  "t12": {"text": "MINI-PROJEKT: Filtere die `ERROR`-Zeilen, zeige sie an und speichere sie zugleich in `errors.txt` (`tee`); hänge dann die Ausgabe von `wc -l errors.txt` mit `>>` an `summary.txt` an.", "hint": "`grep ERROR run.log | tee errors.txt`, danach `wc -l errors.txt >> summary.txt`."},
+  "t13": {"text": "HERAUSFORDERUNG: Lösche alle `.tmp`-Dateien unter `project` mit `find` und `-exec rm {} \\;`. (Der Simulator führt `-exec` nicht aus; die korrekte Schreibweise wird geprüft.)", "hint": "`find project -name \"*.tmp\" -exec rm {} \\;`; das `\\;` ist wichtig. Auf der echten VM erst mit `-print` testen."},
+  "t14": {"text": "HERAUSFORDERUNG: Ermittle die Zeilenzahl aller `.txt`-Dateien auf dem sicheren Weg: `-print0` mit `xargs -0` und `wc -l`. (`xargs` gibt es im Simulator nicht; die Schreibweise wird geprüft.)", "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."},
+  "t15": {"text": "HERAUSFORDERUNG: Finde in `access.log` die häufigste IP samt Anzahl und schreibe nur diese eine Zeile in `top.txt`.", "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."},
+  "t16": {"text": "TICKET #3901 — Support: „Für das Morgenmeeting brauchen wir ein Skript, das die `ERROR`- und `WARN`-Zeilen aus `run.log` sortiert nach `problems.txt` schreibt; wir führen es täglich aus.“ Schreibe `check.sh` (Shebang + `grep -E ... | sort > problems.txt`), mache es ausführbar und starte es.", "hint": "Mit `printf` oder `echo` in einfachen Quotes schreiben, `chmod +x check.sh`, `./check.sh`."}
+ },
+ "vm": {
+  "intro": "Führe die folgenden Schritte auf deiner eigenen VM aus (Ubuntu, Rocky oder Alma). Probiere alles unter `~/adv`; nutze `-delete` oder `rm -r` niemals dort, wo echte Daten liegen.",
+  "tasks": {
+   "v01": {
+    "title": "Übungsbereich anlegen und mit find suchen",
+    "text": "Lege einen Übungsbaum an und suche dann mit `find` nach Name, Typ und Größe. Füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/adv/logs ~/adv/project/src\ntouch ~/adv/logs/app.log ~/adv/logs/old.log ~/adv/project/a.tmp ~/adv/project/src/b.tmp\necho data > ~/adv/project/src/main.txt\nfind ~/adv -name \"*.log\"\nfind ~/adv -type d\nfind ~/adv -type f -size -1k", "expected": "/home/student/adv/logs/app.log\n/home/student/adv/logs/old.log\n/home/student/adv\n/home/student/adv/logs\n..."}
+    ],
+    "differs": [
+     "Die Reihenfolge der `find`-Ausgabe hängt vom Dateisystem ab; wichtig ist, dass alle `.log`-Dateien erscheinen.",
+     "Heißt dein Benutzer nicht `student`, ist der Pfadanfang anders; das ist in Ordnung."
+    ]
+   },
+   "v02": {
+    "title": "-exec, + und xargs",
+    "text": "Wende auf dieselben Dateien erst `-exec ... \\;`, dann `-exec ... +` und `xargs -0` an. Beachte: `\\;` startet pro Datei einen Befehl, `+` sammelt.",
+    "blocks": [
+     {"cmd": "find ~/adv -name \"*.tmp\" -exec ls -l {} \\;\nfind ~/adv -name \"*.tmp\" -exec ls -l {} +\nfind ~/adv -name \"*.tmp\" -print0 | xargs -0 ls -l", "expected": "-rw-r--r-- 1 student student 0 Nov 12 10:00 /home/student/adv/project/a.tmp\n-rw-r--r-- 1 student student 0 Nov 12 10:00 /home/student/adv/project/src/b.tmp"}
+    ],
+    "differs": [
+     "Mit `+` kommt die `ls -l`-Ausgabe meist nach Pfad sortiert, mit `\\;` in Fundreihenfolge. Der Inhalt ist gleich.",
+     "Die Meldung `find: missing argument to '-exec'` bedeutet: `\\;` oder `+` am Ende fehlt."
+    ]
+   },
+   "v03": {
+    "title": "Erst auflisten, dann löschen",
+    "text": "Mache zuerst einen **Snapshot** deiner VM. `-delete` ist unumkehrbar: Sieh erst, was gelöscht würde, und lösche dann nur in `~/adv`. Danach „Erledigt“ klicken.",
+    "blocks": [
+     {"cmd": "# Erst Trockenlauf\nfind ~/adv -name \"*.tmp\" -print\n# Wenn korrekt, löschen (Bedingung VOR -delete)\nfind ~/adv -name \"*.tmp\" -delete\nfind ~/adv -name \"*.tmp\"", "expected": "(der letzte Befehl gibt nichts aus)"}
+    ],
+    "differs": [
+     "Listet der letzte Befehl noch Dateien, fehlt vielleicht `-delete` oder du bist im falschen Verzeichnis; prüfe mit `pwd`."
+    ]
+   },
+   "v04": {
+    "title": "Log-Auswertung: Here-Document und Pipeline",
+    "text": "Schreibe mit einem Here-Document ein Beispiel-Log, zähle dann die Stufen und leite den Fehlerstrom um.",
+    "blocks": [
+     {"cmd": "cat > ~/adv/run.log <<'EOF'\n10:01 INFO start\n10:02 ERROR disk full\n10:03 WARN slow disk\n10:04 INFO retry\n10:05 ERROR timeout\n10:06 INFO ok\nEOF\ncut -d' ' -f2 ~/adv/run.log | sort | uniq -c | sort -nr\nls /nonexistent ~/adv/run.log > ~/adv/both.txt 2>&1\ncat ~/adv/both.txt", "expected": "      3 INFO\n      2 ERROR\n      1 WARN\nls: cannot access '/nonexistent': No such file or directory\n/home/student/adv/run.log"}
+    ],
+    "differs": [
+     "Weichen Zahlen oder Abstände ab, prüfe die Log-Zeilen: Das zweite Feld jeder Zeile muss die Stufe sein.",
+     "Auf einem deutschsprachigen System ist die Fehlermeldung übersetzt; statt `No such file` steht dann ein lokaler Text."
+    ]
+   },
+   "v05": {
+    "title": "Dein erstes Skript",
+    "text": "Schreibe das Skript, starte es ohne `x`-Recht, vergib das Recht, starte es erneut und sieh dir den Exit-Code an.",
+    "blocks": [
+     {"cmd": "cd ~/adv\ncat > hello.sh <<'EOF'\n#!/bin/bash\nname=\"${1:-world}\"\necho \"Hello, $name\"\nEOF\n./hello.sh\nchmod +x hello.sh\n./hello.sh student\necho $?", "expected": "bash: ./hello.sh: Permission denied\nHello, student\n0"}
+    ],
+    "differs": [
+     "Läuft das erste `./hello.sh` doch, vergibt dein Dateisystem (z. B. manche WSL-Einbindungen) das `x`-Recht schon.",
+     "Siehst du `hello.sh: command not found`, fehlt das Präfix `./`; das aktuelle Verzeichnis steht nicht in `PATH`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Was ist der Unterschied zwischen `find ... -exec rm {} \\;` und `find ... -exec rm {} +`?", "options": ["`\\;` gilt nur für Verzeichnisse, `+` nur für Dateien", "`\\;` startet den Befehl je Datei einzeln, `+` sammelt die Pfade und übergibt sie an wenige Aufrufe", "`+` führt den Befehl nie aus, es listet nur", "Es gibt keinen Unterschied, nur eine Schreibweise"], "explain": "`\\;` startet für jeden Treffer einen Prozess; `+` sammelt Argumente und kommt mit viel weniger Prozessen aus."},
+  "q2": {"q": "Warum ist `find . -name *.log` (ohne Quotes) problematisch?", "options": ["`find` akzeptiert keine Muster", "`-name` funktioniert nur mit Großbuchstaben", "Die Shell expandiert `*.log` zu Namen im aktuellen Verzeichnis, bevor `find` startet", "Der Befehl löscht die ganze Platte"], "explain": "Die Shell expandiert. Das Muster muss als `\"*.log\"` in Quotes stehen, damit es unverändert bei `find` ankommt."},
+  "q3": {"q": "Welcher Befehl schreibt Ausgabe und Fehler beide nach `out.txt`?", "options": ["`cmd > out.txt 2>&1`", "`cmd 2>&1 > out.txt`", "`cmd 2> out.txt 1> out.txt`", "`cmd | out.txt`"], "explain": "Erst wird stdout in die Datei umgeleitet, dann geht stderr „dorthin, wo stdout jetzt hingeht“. In umgekehrter Reihenfolge bleibt der Fehler auf dem Bildschirm."},
+  "q4": {"q": "Wie gibst du das Ergebnis von `find` bei Dateien mit Leerzeichen sicher an `rm` weiter?", "options": ["`find . | xargs rm`", "`rm $(find .)`", "`find . -name x | rm`", "`find ... -print0 | xargs -0 rm`"], "explain": "`-print0` und `xargs -0` trennen Namen mit NUL; Namen mit Leerzeichen oder Zeilenumbrüchen werden nicht zerlegt."}
+ },
+ "summary": [
+  "`find` durchläuft Bäume; Muster in Quotes, erst auflisten, dann `-delete`/`-exec` ergänzen.",
+  "`-exec ... \\;` je Datei, `-exec ... +` und `xargs` gesammelt; sicheres Paar: `-print0 | xargs -0`.",
+  "`>` stdout, `2>` stderr, `2>&1` vereint (Reihenfolge!), `/dev/null` ist der Mülleimer, `tee` zeigt und speichert.",
+  "`sort | uniq -c | sort -nr` findet die häufigsten Einträge; kombinierbar mit `head`/`tail`/`wc -l`.",
+  "Doppelte Quotes expandieren, einfache nicht; `&&` bei Erfolg, `||` bei Fehler.",
+  "Skript = Shebang + `chmod +x` + `./script.sh`; Exit-Code `$?`."
+ ],
+ "glossary": [
+  {"term": "Glob", "meaning": "Dateinamenmuster wie `*`, `?`, `[...]`, die von der Shell expandiert werden."},
+  {"term": "stdout / stderr", "meaning": "Standardausgabe (1) und Standardfehlerausgabe (2)."},
+  {"term": "Here-Document", "meaning": "Mit `<<EOF` mehrzeiligen Text als Eingabe eines Befehls übergeben."},
+  {"term": "Pipe", "meaning": "`|` verbindet die Ausgabe eines Befehls mit der Eingabe des nächsten."},
+  {"term": "Shebang", "meaning": "Die erste Skriptzeile `#!/bin/bash`; sie nennt den Interpreter."},
+  {"term": "Exit-Code", "meaning": "Zahl, die ein Befehl am Ende zurückgibt; 0 Erfolg, sonst Fehler. Lesbar mit `$?`."},
+  {"term": "NUL-Trenner", "meaning": "Das Byte `\\0`, das Namen voneinander trennt; `-print0` und `xargs -0` nutzen es."}
+ ]
+}

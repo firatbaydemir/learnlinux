@@ -1,0 +1,407 @@
+{
+ "title": "Editörler",
+ "lead": "Terminalde metin dosyası düzenle: hızlı başlangıç için nano, her yerde ve hızlı olması gerektiğinde vi/vim.",
+ "objectives": [
+  "nano ile dosya açar, düzenler, kaydeder ve kapatırsın.",
+  "vim'in modlarını bilir ve vim'den her zaman çıkabilirsin (:q!, :wq).",
+  "Temel vim komutlarını kullanırsın: ekleme, satır silme, geri alma, arama.",
+  "Yapılandırma dosyalarını güvenle düzenlersin: önce yedek, sudo yalnızca gerekirse."
+ ],
+ "sections": [
+  {
+   "id": "nano",
+   "title": "nano: kolay editör",
+   "body": [
+    "`nano` yeni başlayanlar için uygundur: hemen yazmaya başlarsın, kısayollar ekranın altında listelenir. `^` işareti **Ctrl** tuşudur; yani `^X` Ctrl+X demektir.",
+    "Dosya yoksa `nano dosya` boş bir tampon açar ve kaydedince dosyayı oluşturur. Ubuntu'da nano genelde kuruludur; Rocky/Alma'da gerekirse `sudo dnf install nano` ile kur."
+   ],
+   "commands": [
+    {
+     "cmd": "nano file",
+     "what": "Dosyayı nano editöründe açar (yoksa kaydedince oluşturur).",
+     "where": "Metin ve yapılandırma dosyalarını hızlıca düzenlerken.",
+     "why": "Basittir, yardım altta görünür.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+O",
+     "what": "Dosyayı yazar (kaydeder); adı ENTER ile onayla.",
+     "where": "nano içinde, kaydetmek istediğinde.",
+     "why": "Editörden çıkmadan çalışmanı kaydeder.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+X",
+     "what": "nano'dan çıkar; kaydedilmemiş değişiklik varsa sorar (Y/N).",
+     "where": "nano içinde, işin bitince.",
+     "why": "Çıkış yolu: Y kaydeder, N atar.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+K / Ctrl+U",
+     "what": "Geçerli satırı keser / geri yapıştırır.",
+     "where": "Satır silmek, taşımak veya çoğaltmak için.",
+     "why": "Fare olmadan hızlı satır düzenleme.",
+     "example": "nano todo.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Diğer nano tuşları: `Ctrl+W` arama, `Ctrl+G` yardım, `Alt+U` geri al, `Ctrl+_` satıra git."
+  },
+  {
+   "id": "vim",
+   "title": "vi / vim: modlar",
+   "body": [
+    "`vi` neredeyse her Linux sisteminde kuruludur, `vim` onun geliştirilmiş sürümüdür (bazı minimal sistemlerde `vi` aslında vim'dir). Temelleri bir kez öğren, her durumda sunucuyu kurtarabilirsin.",
+    "Ana fikir: vim'in **modları** vardır. **Normal modda** (açılışta varsayılan) tuşlar komuttur — `dd` yazmak metin yazmaz, satırı siler. `i` ile **Insert (ekleme) moduna** geçip normal yazarsın; `Esc` geri döndürür. `:` ile `:w`, `:q`, `:wq`, `:q!` için **komut satırı moduna** girersin.",
+    "Yeni başlayanın bir numaralı hatası: Normal moddayken metin yazmaya çalışmak. Garip şeyler olursa bir-iki kez `Esc`'ye bas, sonra devam et."
+   ],
+   "commands": [
+    {
+     "cmd": "vim file",
+     "what": "Dosyayı vim'de açar (Normal modda başlar).",
+     "where": "Yapılandırma dosyaları, betikler ve nano olmayan sunucularda.",
+     "why": "Her yerde bulunur, öğrenince çok hızlıdır.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "i / Esc",
+     "what": "`i` Insert moduna geçirir, `Esc` Normal moda döndürür.",
+     "where": "Yazma ile komut verme arasında geçerken.",
+     "why": "`i` olmadan metin yazamazsın; `Esc` olmadan komut veremezsin.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": ":wq",
+     "what": "Dosyayı yazar ve çıkar (`ZZ` veya `:x` de olur).",
+     "where": "Normal moddan `:` yazdıktan sonra.",
+     "why": "Tek adımda kaydedip çıkar.",
+     "example": "vim todo.txt",
+     "nosim": true
+    }
+   ],
+   "danger": "vim'de takıldın mı? `Esc`'ye bas, sonra `:q!` ve ENTER yaz: KAYDETMEDEN çıkar; kaydetmek için `:wq`. Ctrl+C veya Ctrl+X vim'den çıkarmaz."
+  },
+  {
+   "id": "vimcmds",
+   "title": "Temel vim komutları",
+   "body": [
+    "Bu Normal mod komutları günlük işlerin çoğunu karşılar. Ok tuşları çalışır, ama `h j k l` (sol, aşağı, yukarı, sağ) ellerini ana sırada tutar.",
+    "Birçok komut sayı alır: `3dd` üç satırı siler, `5j` beş satır aşağı iner. `gg` başa, `G` sona, `:42` 42. satıra gider. `:set number` satır numaralarını gösterir."
+   ],
+   "commands": [
+    {
+     "cmd": "dd",
+     "what": "Geçerli satırı siler (keser); `p` altına yapıştırır.",
+     "where": "Normal modda.",
+     "why": "Satır silmek, taşımak veya çoğaltmak için (`yy` kopyalar).",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "u",
+     "what": "Son değişikliği geri alır; `Ctrl+R` yeniden yapar.",
+     "where": "Normal modda.",
+     "why": "Yanlışlıkla yapılan düzenlemeleri düzeltir.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "/text",
+     "what": "`text` için ileri doğru arar; `n` sonraki eşleşmeye atlar.",
+     "where": "Normal modda.",
+     "why": "Uzun yapılandırma dosyalarında ayar bulur.",
+     "example": "vim server.log",
+     "nosim": true
+    },
+    {
+     "cmd": ":q!",
+     "what": "Çıkar ve kaydedilmemiş tüm değişiklikleri atar.",
+     "where": "Normal moddan, işi bozduğunda veya sadece baktığında.",
+     "why": "Acil çıkış; düz `:q` değişiklik varsa çıkmayı reddeder.",
+     "example": "vim todo.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Bir kez `vimtutor` çalıştır (yaklaşık 30 dakika) — vim ile gelen en iyi etkileşimli vim kursu."
+  },
+  {
+   "id": "safe",
+   "title": "Güvenli düzenleme",
+   "body": [
+    "Sistem yapılandırma dosyaları `/etc` altındadır ve root'a aittir. Normal kullanıcı olarak okuyabilirsin ama değişiklik kaydedemezsin: `sudo nano /etc/dosya` yalnızca gerekince kullan. **Önce yedek al**, hata olursa geri yüklersin.",
+    "Editör gerektirmeyen yollar: `echo \"metin\" >> dosya` satır ekler, `echo \"metin\" > dosya` tüm dosyanın **üzerine yazar**. `cp dosya dosya.bak` bir saniyede yedek oluşturur.",
+    "vim çöktüyse veya terminal kapandıysa artık bir takas dosyası (`.dosya.swp`) kalabilir ve vim bir sonraki açılışta uyarır. Dosyayı başka kimse düzenlemiyorsa takas dosyasını silebilirsin."
+   ],
+   "commands": [
+    {
+     "cmd": "cp file file.bak",
+     "what": "Düzenlemeden önce yedek kopya oluşturur.",
+     "where": "Önemli bir dosyada her değişiklikten önce.",
+     "why": "Eski hâli `cp file.bak file` ile geri yüklersin.",
+     "example": "cp app.conf app.conf.bak"
+    },
+    {
+     "cmd": "sudoedit",
+     "what": "root'a ait dosyayı geçici kopya üzerinden kendi editörünle düzenler.",
+     "where": "`/etc` içindeki dosyalar için.",
+     "why": "Editörün tamamını root olarak çalıştırmaktan daha güvenlidir.",
+     "example": "sudoedit /etc/hosts",
+     "nosim": true
+    },
+    {
+     "cmd": "export EDITOR",
+     "what": "`sudoedit` ve `crontab -e` gibi araçların kullandığı varsayılan editörü ayarlar.",
+     "where": "Kabukta veya `~/.bashrc` içinde.",
+     "why": "Araçlar tanımadığın bir editör yerine nano'yu açar.",
+     "example": "export EDITOR=nano",
+     "nosim": true
+    },
+    {
+     "cmd": "cat file",
+     "what": "Editör açmadan dosya içeriğini gösterir.",
+     "where": "Düzenleme sonucunu doğrulamak için.",
+     "why": "Dosyanın beklediğin içeriği taşıdığını hızlıca kontrol eder.",
+     "example": "cat todo.txt"
+    }
+   ],
+   "warn": "`/etc` altındaki bir dosyayı düzenlemeden önce yedek al (`sudo cp dosya dosya.bak`). Bozuk bir `/etc/fstab` veya `/etc/ssh/sshd_config` makineyi açılmaz veya erişilmez yapabilir.",
+   "tip": "`>` üzerine yazar, `>>` ekler. Eksik bir `>` dosyayı boşaltabilir — sonra `cat` ile kontrol et."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Editörsüz dosya oluştur: `echo \"hello editor\" > hello.txt`.",
+   "hint": "`>` dosyayı oluşturur veya üzerine yazar."
+  },
+  "t02": {
+   "text": "`cat hello.txt` ile dosyanın içeriğini göster.",
+   "hint": "hello editor görmelisin."
+  },
+  "t03": {
+   "text": "`todo.txt` dosyasını düzenlemeden önce yedekle: `cp todo.txt todo.txt.bak`.",
+   "hint": "Önce kaynak, sonra yedek adı."
+  },
+  "t04": {
+   "text": "Editörsüz `todo.txt` sonuna satır ekle: `echo \"buy bread\" >> todo.txt`.",
+   "hint": "Eklemek için iki tane `>` kullan."
+  },
+  "t05": {
+   "text": "`cat -n todo.txt` ile `todo.txt` dosyasını satır numaralarıyla göster.",
+   "hint": "vim'de bunları `:set number` ile görürsün."
+  },
+  "t06": {
+   "text": "`report` geçen satırı numarasıyla bul: `grep -n report todo.txt`.",
+   "hint": "`-n` satır numarasını başa yazar."
+  },
+  "t07": {
+   "text": "Tahmin et: `todo.txt` şimdi kaç satır? `wc -l todo.txt` ile kontrol et.",
+   "hint": "3 satırdı ve bir tane ekledin."
+  },
+  "t08": {
+   "text": "Tahmin et: normal kullanıcı `echo test > /etc/motd` çalıştırırsa ne olur? Dene.",
+   "hint": "Permission denied beklenir; sistem dosyalarını düzenlemek sudo (ve yedek) ister."
+  },
+  "t09": {
+   "text": "Hata ayıklama: kötü bir düzenleme `app.conf` dosyasını bozdu (`mode=debug` yazıyor). Eski sürümü `app.conf.bak` dosyasından geri yükle.",
+   "hint": "Yedeği `cp` ile dosyanın üzerine kopyala."
+  },
+  "t10": {
+   "text": "Hata ayıklama: vim, ev dizinindeki artık `.todo.txt.swp` takas dosyası için uyarı veriyor. Dosyayı kimse düzenlemiyor; takas dosyasını sil.",
+   "hint": "Gizli dosya: `rm .todo.txt.swp`; `ls -a` ile listelenir."
+  },
+  "t11": {
+   "text": "Mini proje: `scripts` klasörünü oluştur, `scripts/hello.sh` dosyasına `#!/bin/bash` ve `echo hello` satırlarını yaz (`printf` ve `\\n` kullan), sonra modunu 755 yap.",
+   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, sonra `chmod 755 scripts/hello.sh`."
+  },
+  "t12": {
+   "text": "Zorlu görev: önce `notes.txt` dosyasını `notes.txt.bak` olarak yedekle, sonra `notes.txt` sonuna `meeting at 10` satırını ekle.",
+   "hint": "Sıra önemli: düzenlemeden önce `cp`, sonra `echo ... >>`."
+  },
+  "t13": {
+   "text": "Zorlu görev: `server.log` içinden yalnızca `ERROR` içeren satırları `errors.txt` dosyasına kaydet.",
+   "hint": "`grep` desen dosya; çıktıyı `>` ile yönlendir."
+  },
+  "t14": {
+   "text": "BİLET #2705 — Yeni çalışanlar için karşılama notu gerekiyor. `~/welcome.txt` dosyasını `Welcome to linux-lab` içeriğiyle oluştur, bir kopyasını `~/Documents/welcome.txt` olarak koy ve kopyayı herkes için salt okunur yap (mod 444).",
+   "hint": "`echo`, `cp`, `chmod 444`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "vim içindesin ve KAYDETMEDEN çıkmak istiyorsun. Ne yazarsın?",
+   "options": [
+    "Ctrl+X",
+    "Esc, sonra :q!",
+    "Ctrl+C",
+    "Esc, sonra :wq"
+   ],
+   "explain": "`:q!` çıkar ve değişiklikleri atar; `:wq` kaydederdi. Ctrl+X nano'nun çıkış tuşudur, vim'in değil."
+  },
+  "q2": {
+   "q": "vim'i açar açmaz `dd` yazdın ve bir satır kayboldu. Neden?",
+   "options": [
+    "vim bozuk",
+    "Insert modundaydın",
+    "dd dosyada yazım hatasıdır",
+    "Normal moddaydın; orada dd satırı siler"
+   ],
+   "explain": "vim Normal modda başlar; tuşlar komuttur. `dd` geçerli satırı siler, `u` geri alır."
+  },
+  "q3": {
+   "q": "nano'da `Ctrl+X` ne yapar?",
+   "options": [
+    "nano'dan çıkar ve değişiklikleri kaydetmeyi sorar",
+    "Bir satırı keser",
+    "Yardımı açar",
+    "Metin arar"
+   ],
+   "explain": "Ctrl+X çıkar; kaydedilmemiş değişiklik varsa nano Y/N sorar. Ctrl+K keser, Ctrl+G yardım, Ctrl+W arar."
+  },
+  "q4": {
+   "q": "`/etc/ssh/sshd_config` dosyasını düzenlemeden önce ne yapmalısın?",
+   "options": [
+    "Dosyayı silip yenisini oluştur",
+    "Editörü normal kullanıcı olarak çalıştır",
+    "Yedek kopyasını al",
+    "Hiçbir şey, dosya yeniden üretilebilir"
+   ],
+   "explain": "Yedek (`sudo cp dosya dosya.bak`) hata sonrası hızlı geri yükleme sağlar."
+  }
+ },
+ "summary": [
+  "`nano file` ile düzenle, `Ctrl+O` kaydeder, `Ctrl+X` çıkar.",
+  "vim'in modları vardır: Normal (komut), Insert (`i`, metin), komut satırı (`:`). `Esc` Normal moda döndürür.",
+  "vim'den çıkış: `:wq` (kaydet) veya `:q!` (at). Temeller: `dd`, `u`, `/text`, `gg`/`G`.",
+  "Sistem dosyalarını düzenlemeden önce yedekle; `sudo` yalnızca gerekince. `>` üzerine yazar, `>>` ekler."
+ ],
+ "glossary": [
+  {
+   "term": "Normal mod",
+   "meaning": "vim'in varsayılan modu; tuşlar komuttur."
+  },
+  {
+   "term": "Insert modu",
+   "meaning": "Metin yazma modu; i ile girilir, Esc ile çıkılır."
+  },
+  {
+   "term": "takas dosyası (swap)",
+   "meaning": "vim'in düzenleme sırasında oluşturduğu gizli .dosya.swp; çökmeden sonra kalır."
+  },
+  {
+   "term": "tampon (buffer)",
+   "meaning": "Kaydedene kadar düzenlediğin dosyanın bellekteki kopyası."
+  },
+  {
+   "term": "EDITOR",
+   "meaning": "Diğer araçlar için varsayılan editörü belirten ortam değişkeni."
+  }
+ ],
+ "vm": {
+  "intro": "VM'inde artık gerçek editörleri kullanıyorsun. Tüm adımları ev dizininde test dosyalarıyla yap; /etc altındaki dosyalara dokunmadan önce snapshot al.",
+  "tasks": {
+   "v01": {
+    "title": "nano ile ilk dosya",
+    "text": "nano'yu aç, metni yaz, Ctrl+O ve ENTER ile kaydet, Ctrl+X ile çık. Sonra dosyayı göster.",
+    "blocks": [
+     {
+      "cmd": "nano nano_test.txt\n# yaz: hello nano   -> Ctrl+O, ENTER, Ctrl+X\ncat nano_test.txt",
+      "expected": "hello nano"
+     }
+    ],
+    "differs": [
+     "`command not found`: nano'yu kur: `sudo apt install nano` (Ubuntu) veya `sudo dnf install nano` (Rocky/Alma).",
+     "Çıkarken nano 'Save modified buffer?' sorarsa `Y` ve ENTER'a bas."
+    ]
+   },
+   "v02": {
+    "title": "nano'da satır kes ve yapıştır",
+    "text": "nano'da `line one` ve `line two` yaz, kaydet ve çık. Yeniden aç, ilk satırı Ctrl+K ile kes, Ctrl+U ile iki kez yapıştır, kaydet. Sonucu yapıştır.",
+    "blocks": [
+     {
+      "cmd": "nano lines.txt\n# iki satır yaz, kaydet, çık\nnano lines.txt\n# bir kez Ctrl+K, iki kez Ctrl+U, Ctrl+O, ENTER, Ctrl+X\ncat -n lines.txt",
+      "expected": "     1\tline two\n     2\tline one\n     3\tline one"
+     }
+    ],
+    "differs": [
+     "Sıra farklıysa yapıştırırken imlecin yerine bağlıdır; `line one` ve `line two` ikisi de görünmeli.",
+     "Numara yoksa `cat -n` içindeki `-n`'yi unuttun."
+    ]
+   },
+   "v03": {
+    "title": "vim ile ilk dosya",
+    "text": "vim'i aç, `i`'ye bas, metni yaz, sonra Esc ve `:wq` ENTER. Dosyayı göster.",
+    "blocks": [
+     {
+      "cmd": "vim vim_test.txt\n# i  -> yaz: hello vim  -> Esc  -> :wq  -> ENTER\ncat vim_test.txt",
+      "expected": "hello vim"
+     }
+    ],
+    "differs": [
+     "Yazdığın metin yok veya garip mi? Önce `i`'ye basmadın. Esc, `:q!` ve baştan başla.",
+     "`vim: command not found`: `vi vim_test.txt` kullan veya vim'i kur (`sudo apt install vim` / `sudo dnf install vim-enhanced`)."
+    ]
+   },
+   "v04": {
+    "title": "Kaydetmeden çık",
+    "text": "Bir dosyaya `keep` yaz, sonra vim'de aç, `lose` satırı ekle ve `:q!` ile çık. Dosyada yalnızca `keep` kalmalı.",
+    "blocks": [
+     {
+      "cmd": "echo keep > discard.txt\nvim discard.txt\n# i -> yaz: lose -> Esc -> :q! -> ENTER\ncat discard.txt",
+      "expected": "keep"
+     }
+    ],
+    "differs": [
+     "Dosyada `lose` varsa `:q!` yerine `:wq` kullandın.",
+     "vim `:q` ile çıkmayı reddederse bu, kaydedilmemiş değişiklik koruması: `:q!` kullan."
+    ]
+   },
+   "v05": {
+    "title": "Satır sil ve geri al",
+    "text": "20 satırlık dosya oluştur, `5G` sonra `dd` ile 5. satırı sil, `u` ile geri al, tekrar `dd` yap ve kaydet. Satırları say.",
+    "blocks": [
+     {
+      "cmd": "seq 1 20 > numbers.txt\nvim numbers.txt\n# 5G -> dd -> u -> dd -> :wq\nwc -l numbers.txt",
+      "expected": "19 numbers.txt"
+     }
+    ],
+    "differs": [
+     "Sonuç 20: son `dd` veya kaydetme olmadı; sonuç 18: `u` yapmadan iki kez sildin.",
+     "`seq` yoksa `for i in $(seq 1 20); do echo $i; done > numbers.txt` kullan veya coreutils kur."
+    ]
+   },
+   "v06": {
+    "title": "Varsayılan editörü ayarla",
+    "text": "Bu oturum için nano'yu varsayılan editör yap ve değişkeni kontrol et.",
+    "blocks": [
+     {
+      "cmd": "export EDITOR=nano\necho $EDITOR",
+      "expected": "nano"
+     }
+    ],
+    "differs": [
+     "Kalıcı yapmak için `export EDITOR=nano` satırını `~/.bashrc` içine ekle; yeni kabukta etkili olur."
+    ]
+   },
+   "v07": {
+    "title": "/etc dosyasından önce yedek",
+    "text": "`/etc/hosts` dosyasını sudo ile yedekle, yedeği kontrol et, orijinali sudoedit veya `sudo nano` ile aç. Bak, hiçbir şeyi değiştirme, kaydetmeden çık.",
+    "blocks": [
+     {
+      "cmd": "sudo cp /etc/hosts /etc/hosts.bak\nls -l /etc/hosts.bak\nsudoedit /etc/hosts\n# bak, sonra Ctrl+X (nano) veya :q! (vim)",
+      "expected": "-rw-r--r--. 1 root root 158 ... /etc/hosts.bak"
+     }
+    ],
+    "differs": [
+     "`sudoedit` editör hakkında şikayet ederse önce `export EDITOR=nano` çalıştır veya `sudo nano /etc/hosts` kullan.",
+     "`sudo` parola isterse kendi parolanı gir (yazarken bir şey görünmez)."
+    ]
+   }
+  }
+ }
+}

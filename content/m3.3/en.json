@@ -1,0 +1,323 @@
+{
+  "title": "Wildcards and Quoting",
+  "lead": "Before a command runs, the shell expands wildcard patterns and treats spaces as separators. Select groups of files safely by using patterns and quotes correctly.",
+  "objectives": [
+    "Match filenames with `*`, `?` and `[]`.",
+    "Distinguish brace expansion from glob expansion.",
+    "Explain how single quotes, double quotes and backslashes behave.",
+    "Check matching names before running a bulk operation."
+  ],
+  "sections": [
+    {
+      "id": "globbing",
+      "title": "Wildcards: *, ? and []",
+      "body": [
+        "The shell matches wildcard patterns against names in the current directory before running a command. `*` matches zero or more characters, while `?` matches exactly one. `img?.jpg` matches names with one character in that position; `img*.jpg` also includes longer names.",
+        "`[12]` matches exactly one of the characters in the brackets; `[0-9]` matches one digit. If nothing matches, Bash usually leaves the pattern unchanged. You can notice this in the command output.",
+        "The shell expands wildcards, not `ls`. When you run `ls *.txt`, the shell passes matching names to `ls` as separate arguments."
+      ],
+      "commands": [
+        {
+          "cmd": "ls *.jpg",
+          "what": "Lists names that match `*.jpg`.",
+          "where": "When you want to inspect files with a particular extension together.",
+          "why": "You can see all matches without typing every name.",
+          "example": "ls *.jpg"
+        },
+        {
+          "cmd": "ls img?.jpg",
+          "what": "Lists `.jpg` names with exactly one character after `img`.",
+          "where": "When a specific part and length of a name should match.",
+          "why": "`?` represents one character, so `img10.jpg` does not match.",
+          "example": "ls img?.jpg"
+        },
+        {
+          "cmd": "ls img[12].jpg",
+          "what": "Matches names such as `img1.jpg` and `img2.jpg`.",
+          "where": "When only certain individual characters are allowed.",
+          "why": "It limits the pattern to characters inside the brackets.",
+          "example": "ls img[12].jpg"
+        },
+        {
+          "cmd": "ls *.{jpg,png}",
+          "what": "Expands the brace options into separate patterns.",
+          "where": "When you want to perform the same operation on multiple extensions.",
+          "why": "You can write similar patterns briefly and clearly.",
+          "example": "ls *.{jpg,png}"
+        }
+      ],
+      "tip": "If you are unsure what matches, first display the expansion with `printf '%s\\n' *.jpg`. Do not run a command that changes files yet."
+    },
+    {
+      "id": "quoting",
+      "title": "Quotes and escaping",
+      "body": [
+        "Quotes control how the shell interprets spaces and special characters. Without quotes, a name containing a space is split into multiple arguments. `\"my file.txt\"` keeps it together as one argument.",
+        "Characters inside single quotes stay literal; variables such as `$HOME` are not expanded. Double quotes preserve spaces but still expand variables and command substitutions. A backslash removes the special meaning of the character immediately after it."
+      ],
+      "commands": [
+        {
+          "cmd": "ls \"my file.txt\"",
+          "what": "Passes a name containing a space as one argument.",
+          "where": "When listing names with spaces or passing them to commands.",
+          "why": "It prevents the shell from splitting the name into two parts.",
+          "example": "ls \"my file.txt\""
+        },
+        {
+          "cmd": "echo '$HOME'",
+          "what": "Prints the literal `$HOME` text inside single quotes.",
+          "where": "When you want to display special characters without expansion.",
+          "why": "You see the text as written, not the variable's value.",
+          "example": "echo '$HOME'"
+        },
+        {
+          "cmd": "echo \"$HOME\"",
+          "what": "Expands the variable inside double quotes and prints its value.",
+          "where": "When using a variable value while preserving spaces.",
+          "why": "The value stays together while the shell still expands the variable.",
+          "example": "echo \"$HOME\""
+        },
+        {
+          "cmd": "ls my\\ file.txt",
+          "what": "Uses a backslash to remove the special meaning of the space.",
+          "where": "When you need to protect one special character.",
+          "why": "It keeps the name as one argument without using quotes.",
+          "example": "ls my\\ file.txt"
+        }
+      ],
+      "tip": "When a filename contains a variable, usually quote it as `\"$NAME\"`; this also preserves any spaces in its value."
+    },
+    {
+      "id": "safe",
+      "title": "Use wildcards safely",
+      "body": [
+        "A wildcard pattern can match multiple names. Before a delete command such as `rm *.tmp`, run the same pattern with `ls` and check which names are selected.",
+        "In particular, `*` can match a broad set of names. First use `pwd` to confirm the current directory, then list the matches. Do not test an unfamiliar pattern with a destructive command on a real system."
+      ],
+      "commands": [
+        {
+          "cmd": "ls *.tmp",
+          "what": "Shows matching names ending in `.tmp` before deletion.",
+          "where": "Immediately before a bulk operation using wildcards.",
+          "why": "You can confirm which names the command would affect.",
+          "example": "ls *.tmp"
+        },
+        {
+          "cmd": "rm -i *.tmp",
+          "what": "Asks for confirmation before deleting each matching file.",
+          "where": "When removing only temporary files you have checked.",
+          "why": "You get a chance to cancel if a match is wrong.",
+          "example": "rm -i *.tmp",
+          "nosim": true
+        }
+      ],
+      "warn": "Never use wildcards in delete commands blindly. First confirm the directory and matches with `pwd` and `ls`; test destructive commands only in a safe environment."
+    },
+    {
+      "id": "practice",
+      "title": "Apply patterns in practice tasks",
+      "body": [
+        "This module uses English ASCII names such as `img1.jpg`, `img2.jpg`, `img10.png`, `doc1.txt` and `doc2.txt`. The command examples can be tried safely in the virtual lab.",
+        "Brace expansion is not the same as globbing: `{1,2}` is split into separate strings by the shell, while `*` and `?` match existing names. Predict which names a command receives, then verify in the lab."
+      ],
+      "commands": [
+        {
+          "cmd": "echo *.txt",
+          "what": "Prints matching names with the `.txt` extension.",
+          "where": "When testing a pattern before changing anything.",
+          "why": "You can see how the shell expands the pattern.",
+          "example": "echo *.txt"
+        },
+        {
+          "cmd": "touch log_{1,2,3}.txt",
+          "what": "Creates three separate names using brace options.",
+          "where": "When you need similar test names.",
+          "why": "It avoids repeating nearly identical commands.",
+          "example": "touch log_{1,2,3}.txt"
+        }
+      ],
+      "tip": "Names containing spaces in the lab exist only in the virtual filesystem; you do not need to try the same commands on your real system."
+    }
+  ],
+  "tasks": {
+    "t01": {
+      "text": "The lab is already set up with mixed names. Run `ls *.jpg` and observe that only names ending in `.jpg` are listed.",
+      "hint": "`*` matches zero or more characters; the dot and `jpg` suffix stay fixed in the pattern."
+    },
+    "t02": {
+      "text": "Use `ls img?.jpg` to list `.jpg` names with exactly one character after `img`.",
+      "hint": "`?` matches exactly one character. Leave the pattern unquoted so the shell expands it."
+    },
+    "t03": {
+      "text": "Use `ls doc*` to list names that start with `doc`.",
+      "hint": "`*` allows zero or more characters after `doc`."
+    },
+    "t04": {
+      "text": "Run `echo *.txt`. How does the shell pass matching names to `echo`?",
+      "hint": "The shell first expands the pattern to matching names; `echo` prints those names."
+    },
+    "t05": {
+      "text": "Use `ls img[12].jpg` to list images whose character after `img` is `1` or `2`.",
+      "hint": "Each option inside the brackets represents one character."
+    },
+    "t06": {
+      "text": "Use `ls *.{jpg,png}` to match `.jpg` and `.png` names in one command.",
+      "hint": "The `jpg` and `png` brace options produce separate patterns."
+    },
+    "t07": {
+      "text": "Create a `texts` directory and copy names that start with `doc` and end in `.txt` into it. Do not copy `notes.md`.",
+      "hint": "Run `mkdir texts`, then `cp doc*.txt texts`."
+    },
+    "t08": {
+      "text": "Predict: does `echo '$HOME'` print the variable's value or the literal `$HOME` text? Run it to check.",
+      "hint": "Text inside single quotes is not expanded."
+    },
+    "t09": {
+      "text": "Predict: what does `echo *.xyz` print if no names match `*.xyz`? Verify in the lab.",
+      "hint": "By default, Bash leaves an unmatched pattern unchanged."
+    },
+    "t10": {
+      "text": "Debug: target the name `old report.txt` as one argument and remove that file.",
+      "hint": "Quote the name containing a space: `rm \"old report.txt\"`."
+    },
+    "t11": {
+      "text": "Mini project: create a `backup` directory and copy only `.jpg` and `.png` files into it.",
+      "hint": "Use `mkdir backup`, followed by `cp *.jpg *.png backup`."
+    },
+    "t12": {
+      "text": "Challenge: create the names `log_1.txt`, `log_2.txt` and `log_3.txt` with brace expansion, then remove all three with the `log_?` pattern.",
+      "hint": "Run `touch log_{1,2,3}.txt` first, then `rm log_?.txt`."
+    },
+    "t13": {
+      "text": "Ticket: Rename `my file.txt`, which contains a space, to `my_file.txt`. Make sure the original name stays one argument.",
+      "hint": "Use `mv \"my file.txt\" my_file.txt`."
+    }
+  },
+  "vm": {
+    "intro": "You can run the commands in this section in your own VM. Create files only inside `glob-lab` in your home directory; do not test wildcard deletions elsewhere.",
+    "tasks": {
+      "v01": {
+        "title": "Single-character wildcard",
+        "text": "Create `glob-lab` in your home directory. Add the names `a1.txt` and `a2.txt` inside it, then list the `a?.txt` pattern.",
+        "blocks": [
+          {
+            "cmd": "mkdir -p ~/glob-lab && cd ~/glob-lab && touch a1.txt a2.txt && ls a?.txt",
+            "expected": "a1.txt\na2.txt"
+          }
+        ],
+        "differs": [
+          "`a?.txt` matches exactly one character; both names should appear.",
+          "If the names appear on one line, use `ls -1 a?.txt` to show each on its own line."
+        ]
+      },
+      "v02": {
+        "title": "Single and double quotes",
+        "text": "In the same terminal session, first set `NAME=linux`. Then print the variable with double quotes and with single quotes. The output should contain both `linux` and `$NAME`.",
+        "blocks": [
+          {
+            "cmd": "NAME=linux\necho \"$NAME\"\necho '$NAME'",
+            "expected": "linux\n$NAME"
+          }
+        ],
+        "differs": [
+          "If both lines show `linux`, you may have used double quotes instead of single quotes.",
+          "The `NAME=linux` assignment and `echo` commands must run in the same shell session."
+        ]
+      },
+      "v03": {
+        "title": "Preserve a name with spaces",
+        "text": "Create a directory named `my docs` inside `glob-lab`. Then list it with quotes; the output should contain `my docs`.",
+        "blocks": [
+          {
+            "cmd": "mkdir -p ~/glob-lab && cd ~/glob-lab && mkdir -p \"my docs\" && ls -d \"my docs\"",
+            "expected": "my docs"
+          }
+        ],
+        "differs": [
+          "If the name is split, check the quotes in both the creation and listing commands.",
+          "`ls -d` displays the directory name instead of its contents."
+        ]
+      },
+      "v04": {
+        "title": "Check matches before deleting",
+        "text": "Create two temporary files inside `glob-lab`. First list the `*.tmp` matches and confirm that only those two names appear. Delete them only if you confirmed the correct directory and matches.",
+        "blocks": [
+          {
+            "cmd": "cd ~/glob-lab && touch sample1.tmp sample2.tmp && ls *.tmp"
+          }
+        ],
+        "differs": [
+          "If other names appear, do not run the delete command; check `pwd` and the list first.",
+          "If there are no matches, confirm you are in `glob-lab` and that the names end in `.tmp`."
+        ]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {
+      "q": "What does the `?` wildcard match?",
+      "options": [
+        "Zero or more characters",
+        "Only one file extension",
+        "All characters inside square brackets",
+        "Exactly one character"
+      ],
+      "explain": "`?` represents exactly one character; `*` can match zero or more."
+    },
+    "q2": {
+      "q": "Which form prints `$HOME` without expanding it?",
+      "options": [
+        "`echo '$HOME'`",
+        "`echo \"$HOME\"`",
+        "`echo $HOME`",
+        "`echo \\$HOME`"
+      ],
+      "explain": "Everything inside single quotes stays literal. In this example, a backslash also escapes the `$` character."
+    },
+    "q3": {
+      "q": "In Bash, what does `echo *.xyz` do by default when no names match `*.xyz`?",
+      "options": [
+        "Deletes all files",
+        "Prints nothing",
+        "Prints the unmatched `*.xyz` pattern unchanged",
+        "Changes the current directory"
+      ],
+      "explain": "By default, Bash passes an unmatched glob pattern to the command unchanged."
+    },
+    "q4": {
+      "q": "How do you correctly list the name `my file.txt`?",
+      "options": [
+        "`ls my file.txt`",
+        "`ls \"my file.txt\"`",
+        "`ls my-file.txt`",
+        "`ls *.txt`"
+      ],
+      "explain": "The quotes preserve the space and pass the name to `ls` as one argument."
+    }
+  },
+  "summary": [
+    "`*` matches zero or more characters; `?` matches exactly one.",
+    "`[abc]` matches one of the listed characters; `{a,b}` expands options into separate strings.",
+    "Single quotes preserve everything literally; double quotes preserve spaces while expanding variables.",
+    "Protect names with spaces using quotes or a backslash.",
+    "Check the directory and matches before running a destructive command with wildcards."
+  ],
+  "glossary": [
+    {
+      "term": "glob",
+      "meaning": "A wildcard pattern that the shell matches against filenames."
+    },
+    {
+      "term": "wildcard",
+      "meaning": "A special character representing one or more characters in filename patterns."
+    },
+    {
+      "term": "quoting",
+      "meaning": "Controlling how the shell interprets spaces and special characters."
+    },
+    {
+      "term": "escape character",
+      "meaning": "A backslash (`\\`) that removes the special meaning of the character after it."
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+{
+ "title": "Reading files: cat, less, head, tail, wc",
+ "lead": "There is a right tool for every file: cat for small files, less for large ones; head for the start, tail for the end and live logs, wc for counting.",
+ "objectives": [
+  "You choose the right tool by file size (cat, less, head, tail).",
+  "You read the start and end of a file with head and tail and the -n option.",
+  "You count lines, words and bytes with wc and do a small log analysis with grep -c and |."
+ ],
+ "sections": [
+  {
+   "id": "choose",
+   "title": "Choosing the right tool",
+   "body": [
+    "On Linux, settings, logs and notes are mostly plain text files. There is no single command to read them; you choose by the **size and purpose** of the file.",
+    "Small file: `cat`. Large file: `less`. Start: `head`. End: `tail`. Follow live: `tail -f`. Estimate size: `wc`. Checking the size with `wc -l` first is a good habit."
+   ],
+   "tip": "When in doubt, run `wc -l notes.txt` for the line count first, then decide."
+  },
+  {
+   "id": "cat_less",
+   "title": "Reading everything: cat and less",
+   "body": [
+    "`cat` prints the whole file at once; fast and handy for short files. `cat -n` numbers the lines.",
+    "`less` opens the file page by page and does not flood the terminal. Inside: **Space** one page down, **b** one page up, `/word` searches, **q** quits. In the simulator `less` behaves like `cat`; try the real effect on your VM."
+   ],
+   "commands": [
+    {
+     "cmd": "cat",
+     "what": "Prints the whole file.",
+     "where": "Short files (notes, /etc/hostname).",
+     "why": "The fastest way, but it cannot be paused.",
+     "example": "cat notes.txt"
+    },
+    {
+     "cmd": "cat -n",
+     "what": "Prints the file with line numbers.",
+     "where": "When you talk about a line (error on line 7).",
+     "why": "Line numbers make discussion and debugging easier.",
+     "example": "cat -n notes.txt"
+    },
+    {
+     "cmd": "less",
+     "what": "Opens the file page by page; Space, b, /search, q.",
+     "where": "Long texts and logs.",
+     "why": "Does not fill the terminal, and you can search inside.",
+     "example": "less /var/log/messages",
+     "nosim": true
+    }
+   ],
+   "warn": "If you open a huge file with `cat`, the screen scrolls for minutes. Press `Ctrl+C` to stop it and use `less` next time.",
+   "danger": "Never print program (binary) files with `cat`: the terminal becomes garbled. Type `reset` to recover. If you are unsure it is text, look with `less`."
+  },
+  {
+   "id": "head_tail",
+   "title": "Start and end: head and tail",
+   "body": [
+    "`head` shows the first 10 lines, `tail` the last 10. Change the number with `-n`: `head -n 3 notes.txt`.",
+    "New log entries are added at the end, so `tail` shows the newest events. `tail -f` **follows** the file and prints new lines instantly; quit with `Ctrl+C`. With several files each one gets a header `==> name <==`."
+   ],
+   "commands": [
+    {
+     "cmd": "head -n",
+     "what": "Shows the first n lines.",
+     "where": "For header lines or the top of a configuration.",
+     "why": "A quick look into a big file.",
+     "example": "head -n 3 logs/app.log"
+    },
+    {
+     "cmd": "tail -n",
+     "what": "Shows the last n lines.",
+     "where": "For the newest log entries.",
+     "why": "Errors are usually at the end.",
+     "example": "tail -n 4 logs/app.log"
+    },
+    {
+     "cmd": "tail -f",
+     "what": "Follows the file and prints new lines live.",
+     "where": "Watching the log of a running service.",
+     "why": "You catch the problem the moment it happens.",
+     "example": "tail -f logs/app.log",
+     "nosim": true
+    }
+   ],
+   "tip": "`tail -f` never ends on its own; it waits even if no new lines arrive. Quit with `Ctrl+C`."
+  },
+  {
+   "id": "wc",
+   "title": "Counting: wc",
+   "body": [
+    "`wc` (word count) gives lines, words and bytes. `-l` counts only lines, `-w` only words, `-c` only bytes. Without an option all three appear side by side: `3 6 33 notes.txt`.",
+    "Checking `wc -l` before opening a file prevents `cat` accidents."
+   ],
+   "commands": [
+    {
+     "cmd": "wc -l",
+     "what": "Prints the line count.",
+     "where": "To learn the length of a log or list.",
+     "why": "A quick idea of the file size.",
+     "example": "wc -l logs/app.log"
+    },
+    {
+     "cmd": "wc -w",
+     "what": "Prints the word count.",
+     "where": "Text length, one-word files.",
+     "why": "Measures the size of the content.",
+     "example": "wc -w notes.txt"
+    },
+    {
+     "cmd": "wc",
+     "what": "Prints lines, words and bytes together.",
+     "where": "When you need an overview.",
+     "why": "Three measures with one command.",
+     "example": "wc Documents/report.txt"
+    }
+   ]
+  },
+  {
+   "id": "combine",
+   "title": "Combining: pipe and redirection",
+   "body": [
+    "`|` (pipe) feeds the output of one command into the next: `head -n 6 app.log | tail -n 3` gives lines 4-6. `>` writes the output to a file instead of the screen.",
+    "`grep ERROR app.log` shows only lines containing ERROR; `grep -c` counts them. Details come in later modules; here we combine it with the reading tools."
+   ],
+   "commands": [
+    {
+     "cmd": "head | tail",
+     "what": "Selects the middle lines of a file.",
+     "where": "When you need a specific line range.",
+     "why": "Chaining both tools gives you a range.",
+     "example": "head -n 6 logs/app.log | tail -n 3"
+    },
+    {
+     "cmd": "grep -c",
+     "what": "Counts lines that contain the pattern.",
+     "where": "When asking how many errors there are.",
+     "why": "Saves you counting by hand.",
+     "example": "grep -c ERROR logs/app.log"
+    },
+    {
+     "cmd": ">",
+     "what": "Writes the output to a file.",
+     "where": "When keeping a result or attaching it to a ticket.",
+     "why": "The output is preserved.",
+     "example": "grep ERROR logs/app.log > errors.txt"
+    }
+   ],
+   "warn": "`>` erases the contents of the target file if it exists. Think twice before naming an existing file; use `>>` to append.",
+   "danger": "If you read and write the same file as in `cat notes.txt > notes.txt`, the file is emptied and the data is lost. Always redirect to a different file."
+  },
+  {
+   "id": "paths",
+   "title": "Log paths by distribution",
+   "body": [
+    "The main system log is `/var/log/syslog` on Debian/Ubuntu and `/var/log/messages` on RHEL/Rocky/Alma. A missing file gives `No such file or directory`; the problem is the path, not the command.",
+    "Many logs can only be read with `sudo` (for example `sudo less /var/log/secure`). Look first with `ls /var/log`."
+   ],
+   "tip": "If the file is missing, find the real name with `ls /var/log`. As a fallback `sudo journalctl -n 20` shows the latest entries."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Read a small file with `cat notes.txt`.",
+   "hint": "The file is short, so cat fits."
+  },
+  "t02": {
+   "text": "How many lines does `logs/app.log` have? Find out with `wc -l logs/app.log`.",
+   "hint": "The option is a lowercase L."
+  },
+  "t03": {
+   "text": "Show the first 3 lines of the log with `head -n 3 logs/app.log`.",
+   "hint": "The line count follows -n."
+  },
+  "t04": {
+   "text": "Show the last 4 lines with `tail -n 4 logs/app.log`.",
+   "hint": "The last line should be 'shutdown complete'."
+  },
+  "t05": {
+   "text": "Read the file with line numbers using `cat -n notes.txt`.",
+   "hint": "-n adds line numbers."
+  },
+  "t06": {
+   "text": "Find the word count with `wc -w notes.txt`.",
+   "hint": "Three lines with two words each."
+  },
+  "t07": {
+   "text": "See lines, words and bytes together with `wc Documents/report.txt`.",
+   "hint": "Without an option three numbers appear."
+  },
+  "t08": {
+   "text": "Show the start of two files with one command: `head -n 2 Documents/list.csv Documents/report.txt`.",
+   "hint": "Each file gets a header `==> name <==`."
+  },
+  "t09": {
+   "text": "Predict: what does `wc -l notes.txt` show? Run it and check.",
+   "hint": "Think of the line count you saw with `cat -n`."
+  },
+  "t10": {
+   "text": "Predict: what happens with `cat logs`? Run it and read the error.",
+   "hint": "logs is a directory, not a file; expect 'Is a directory'."
+  },
+  "t11": {
+   "text": "Predict: which line does `head -n 6 logs/app.log | tail -n 1` print? Run it and check.",
+   "hint": "The last of the first 6 lines, so line 6."
+  },
+  "t12": {
+   "text": "Debug: a colleague typed `tail 5 logs/app.log` and got an error because `5` is treated as a file. Show the last 5 lines with the correct command.",
+   "hint": "The line count needs `-n`."
+  },
+  "t13": {
+   "text": "Mini project: write all errors to `errors.txt` with `grep ERROR logs/app.log > errors.txt`, then count them with `wc -l errors.txt`.",
+   "hint": "There should be three ERROR lines."
+  },
+  "t14": {
+   "text": "Challenge: write only lines 4, 5 and 6 of `logs/app.log` to the file `middle.txt`.",
+   "hint": "Take the first 6 lines, then the last 3 of those, and redirect the result with `>`."
+  },
+  "t15": {
+   "text": "Ticket: 'How many errors are on the server, and which are the first two?' Save the first two ERROR lines in `first_errors.txt` and show the total number of ERROR lines with `grep -c`.",
+   "hint": "`grep ERROR logs/app.log | head -n 2 > first_errors.txt`, then `grep -c ERROR logs/app.log`."
+  }
+ },
+ "vm": {
+  "intro": "On your VM you only read; nothing is deleted. Reading system files is safe, but be careful not to overwrite files with redirection.",
+  "tasks": {
+   "v01": {
+    "title": "Read a small file with cat",
+    "text": "Print the distribution information and paste the output.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Ubuntu\"\nVERSION=\"24.04 LTS (Noble Numbat)\"\n..."
+     }
+    ],
+    "differs": [
+     "On Rocky/Alma you see `NAME=\"Rocky Linux\"`; the fields may differ.",
+     "If you get `No such file` you may be in WSL or a container; try `cat /etc/hostname`."
+    ]
+   },
+   "v02": {
+    "title": "Read the start and end",
+    "text": "Show the first 5 and last 3 lines of the user file.",
+    "blocks": [
+     {
+      "cmd": "head -n 5 /etc/passwd\ntail -n 3 /etc/passwd",
+      "expected": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n..."
+     }
+    ],
+    "differs": [
+     "The second line is `daemon` on Ubuntu and may be `bin` on RHEL.",
+     "The first line must always start with `root:x:0:0`."
+    ]
+   },
+   "v03": {
+    "title": "Count lines",
+    "text": "Find the line count of `/etc/passwd` and the three measures of `/etc/hostname`.",
+    "blocks": [
+     {
+      "cmd": "wc -l /etc/passwd\nwc /etc/hostname",
+      "expected": "32 /etc/passwd\n 1  1 10 /etc/hostname"
+     }
+    ],
+    "differs": [
+     "Your line count depends on the installation; what matters is that a number and the file name appear.",
+     "In `wc /etc/hostname` the first number is lines, the second words, the third bytes."
+    ]
+   },
+   "v04": {
+    "title": "Browse with less",
+    "text": "Open the main log: `/var/log/syslog` on Ubuntu, `/var/log/messages` on RHEL/Rocky/Alma. Try Space, b, /error and q. When done press \"Done\".",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu\nsudo less /var/log/syslog\n# Rocky / Alma\nsudo less /var/log/messages"
+     }
+    ],
+    "differs": [
+     "If the file is missing, look for its name with `ls /var/log`; some systems only have `sudo journalctl -n 50`.",
+     "If you cannot leave less, press `q`."
+    ]
+   },
+   "v05": {
+    "title": "Follow live (tail -f)",
+    "text": "Open two terminals. In the first follow the file; in the second append a line. When you see the new line, quit the first with `Ctrl+C` and paste the output.",
+    "blocks": [
+     {
+      "cmd": "# Terminal 1\ntouch ~/live.log\ntail -f ~/live.log"
+     },
+     {
+      "cmd": "# Terminal 2\necho \"new entry\" >> ~/live.log",
+      "expected": "new entry"
+     }
+    ],
+    "differs": [
+     "Terminal 1 stays empty and waits; that is normal until a line is appended.",
+     "With only one terminal do not pause `tail -f` with `Ctrl+Z`; open a second tab or window."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Which tool is suitable for safely viewing a 5 GB log file?",
+   "options": [
+    "cat: prints everything at once",
+    "less: shows it page by page",
+    "mkdir: creates a folder",
+    "rm: deletes the file"
+   ],
+   "explain": "less shows only what fits the screen and lets you search; cat streams the whole file across the screen."
+  },
+  "q2": {
+   "q": "What does `-f` do in `tail -f`?",
+   "options": [
+    "Force-deletes the file",
+    "Hides the file name",
+    "Reads faster",
+    "Follows the file and shows new lines live"
+   ],
+   "explain": "-f means 'follow'; quit with Ctrl+C."
+  },
+  "q3": {
+   "q": "Which command gives only the number of lines in a file?",
+   "options": [
+    "wc -l notes.txt",
+    "wc -w notes.txt",
+    "head notes.txt",
+    "cat -n notes.txt"
+   ],
+   "explain": "wc -l counts lines; -w counts words."
+  },
+  "q4": {
+   "q": "What does `head -n 3 notes.txt` show?",
+   "options": [
+    "The last 3 lines",
+    "The 3 words in the file",
+    "The first 3 lines",
+    "Everything except line 3"
+   ],
+   "explain": "head shows the start; -n 3 means the first three lines. For the end use tail."
+  }
+ },
+ "summary": [
+  "Small file: `cat`; large file: `less` (Space, b, /search, q).",
+  "`head -n` shows the start, `tail -n` the end; `tail -f` follows live (quit with Ctrl+C).",
+  "`wc -l`, `wc -w`, `wc` count lines, words and bytes.",
+  "`|` chains tools, `>` writes the result to a file; `>` overwrites existing files.",
+  "The log path depends on the distribution: syslog or messages."
+ ],
+ "glossary": [
+  {
+   "term": "log",
+   "meaning": "A file where a program or system writes events in order."
+  },
+  {
+   "term": "pager",
+   "meaning": "A program that shows text page by page, such as less."
+  },
+  {
+   "term": "pipe",
+   "meaning": "The | symbol; makes the output of one command the input of the next."
+  },
+  {
+   "term": "redirection",
+   "meaning": "Writing output to a file instead of the screen; > or >>."
+  },
+  {
+   "term": "follow",
+   "meaning": "Watching the end of a file live with tail -f."
+  }
+ ]
+}

@@ -1,0 +1,147 @@
+{
+ "title": "Benutzerverwaltung: anlegen, ändern, sperren, löschen",
+ "lead": "Verwalte den Lebenszyklus eines Kontos sicher mit useradd, passwd, usermod, groupadd, chage und userdel.",
+ "objectives": [
+  "Du legst mit `useradd -m -s` ein Konto mit Home-Verzeichnis und Shell an und setzt mit `passwd` das Passwort.",
+  "Du fügst Benutzer mit `usermod -aG` zu Gruppen hinzu und weißt, was passiert, wenn das `-a` fehlt.",
+  "Du sperrst Konten mit `usermod -L` und steuerst die Passwort-Richtlinie mit `chage`.",
+  "Du kennst den Unterschied zwischen `userdel` und `userdel -r` und denkst vor dem Löschen an die Datensicherung."
+ ],
+ "sections": [
+  {
+   "id": "create",
+   "title": "Konten anlegen: useradd und passwd",
+   "body": [
+    "Kommt ein neuer Mitarbeiter, legst du ein Konto für ihn an. Diese Aktionen ändern Systemdateien (`/etc/passwd`, `/etc/shadow`, `/etc/group`) und brauchen **root-Rechte**, also `sudo`.",
+    "`useradd` legt **nicht auf jeder Distribution automatisch ein Home-Verzeichnis an**, deshalb gib `-m` an. `-s /bin/bash` setzt die Login-Shell. Das neue Home wird mit Vorlagedateien aus `/etc/skel` gefüllt. `passwd` setzt das Passwort; beim Tippen wird nichts angezeigt, das ist normal.",
+    "Debian/Ubuntu haben zusätzlich den interaktiven Wrapper `adduser`; Rocky/Alma nicht (dort nutzt man `useradd`). In Skripten bevorzuge `useradd`, das überall funktioniert."
+   ],
+   "commands": [
+    {"cmd": "useradd", "what": "Legt ein neues Benutzerkonto an.", "where": "Beim Anlegen eines Mitarbeiter- oder Dienstkontos.", "why": "Jeder bekommt eigene Dateien und Rechte.", "example": "sudo useradd -m -s /bin/bash testuser", "nosim": true},
+    {"cmd": "passwd", "what": "Setzt oder ändert das Passwort des Kontos.", "where": "Nach dem Anlegen des Kontos.", "why": "Ein Konto ohne Passwort kann sich nicht anmelden.", "example": "sudo passwd testuser", "nosim": true},
+    {"cmd": "chage", "what": "Steuert die Passwort-Alterung (`-d 0` erzwingt Änderung beim ersten Login).", "where": "Um ein neues Konto beim ersten Login zur Passwortänderung zu zwingen.", "why": "Das vom Admin vergebene Startpasswort bleibt nicht dauerhaft.", "example": "sudo chage -d 0 testuser", "nosim": true},
+    {"cmd": "getent passwd", "what": "Prüft, ob das Konto existiert.", "where": "Nach jedem Anlegen.", "why": "Tippfehler fallen sofort auf.", "example": "getent passwd testuser", "nosim": true}
+   ],
+   "tip": "Halte Kontonamen klein und in ASCII (`alice`, `testuser`). Leerzeichen, Umlaute und Großbuchstaben machen Ärger.",
+   "warn": "Das Anlegen von Benutzern auf einer echten VM verändert das System. Mache vorher einen Snapshot deiner VM (Modul 0.2). Tippe Passwörter nicht in die Kommandozeile (`chpasswd` hinterlässt sie in der History)."
+  },
+  {
+   "id": "modify",
+   "title": "Ändern: usermod, groupadd, Gruppen",
+   "body": [
+    "`usermod` ändert ein bestehendes Konto. Am häufigsten: `-aG Gruppe` (zur Gruppe **hinzufügen**), `-s` (Shell), `-L` (sperren), `-U` (entsperren). Gruppen legst du mit `groupadd` an; nach einer Gruppenänderung muss sich der Benutzer **neu anmelden**.",
+    "Der klassische Fehler: `usermod -G devs alice` ohne `-a`. Das löscht alle zusätzlichen Gruppen von alice und lässt nur `devs` übrig, auch `wheel`. Der Benutzer verliert sein sudo-Recht. Nutze immer `-aG`.",
+    "Das sudo-Recht kommt durch die Mitgliedschaft in `wheel` bei Rocky/Alma und `sudo` bei Ubuntu. Bearbeite `/etc/sudoers` nicht von Hand; nutze `visudo`, das die Syntax prüft."
+   ],
+   "commands": [
+    {"cmd": "groupadd", "what": "Legt eine neue Gruppe an.", "where": "Beim Anlegen einer gemeinsamen Projektgruppe.", "why": "Du vergibst Rechte an die Gruppe, nicht an jede Person.", "example": "sudo groupadd labteam", "nosim": true},
+    {"cmd": "usermod -aG", "what": "Fügt den Benutzer einer Gruppe hinzu und behält bestehende Gruppen.", "where": "Wenn du jemanden in ein Team oder die sudo-Gruppe aufnimmst.", "why": "Ohne `-a` werden die alten Gruppen entfernt.", "example": "sudo usermod -aG labteam testuser", "nosim": true},
+    {"cmd": "usermod -L", "what": "Sperrt das Konto (Passwort-Login deaktiviert); `-U` entsperrt.", "where": "Wenn ein Mitarbeiter geht oder ein Konto verdächtig ist.", "why": "Unterbindet den Zugang sofort, die Daten bleiben erhalten.", "example": "sudo usermod -L testuser", "nosim": true},
+    {"cmd": "passwd -S", "what": "Zeigt den Kontostatus (L/LK = gesperrt).", "where": "Zur Prüfung der Sperre.", "why": "Bestätigt, dass die Sperre wirklich greift.", "example": "sudo passwd -S testuser", "nosim": true},
+    {"cmd": "id", "what": "Prüft die Gruppenänderung.", "where": "Nach jedem usermod.", "why": "Zeigt, dass die Mitgliedschaft hinzukam und alte nicht verschwanden.", "example": "id testuser"}
+   ],
+   "tip": "Nach einer Gruppenänderung nutzt eine offene Sitzung weiter die alten Gruppen; der Benutzer muss sich ab- und wieder anmelden.",
+   "danger": "`usermod -G` (ohne `-a`) entfernt alle zusätzlichen Gruppen eines Benutzers. Bei einem Admin-Konto kann das den sudo-Zugriff nehmen und dich aus dem System aussperren. Schreibe immer `-aG` und prüfe mit `id`."
+  },
+  {
+   "id": "delete",
+   "title": "Löschen: userdel und das Home-Verzeichnis",
+   "body": [
+    "`userdel NAME` entfernt das Konto aus `/etc/passwd`, `/etc/shadow` und `/etc/group`, **lässt aber das Home-Verzeichnis samt Dateien stehen**. Das Verzeichnis gehört dann einer UID ohne Besitzer. `userdel -r` löscht zusätzlich Home-Verzeichnis und Mail-Spool dauerhaft.",
+    "Die sichere Reihenfolge in der Praxis: (1) mit `usermod -L` sperren, (2) laufende Prozesse und Cron-Jobs prüfen, (3) Home-Verzeichnis sichern, (4) erst dann löschen. Dateien eines gelöschten Benutzers findest du mit `find / -user UID`.",
+    "Hat der Benutzer eine Sitzung oder einen laufenden Prozess, bricht `userdel` mit einem Fehler ab; beende zuerst die Sitzung."
+   ],
+   "commands": [
+    {"cmd": "userdel", "what": "Löscht das Konto, behält das Home-Verzeichnis.", "where": "Nachdem der Mitarbeiter gegangen und die Daten gesichert sind.", "why": "Schließt das Konto ohne Datenverlust-Risiko.", "example": "sudo userdel testuser", "nosim": true},
+    {"cmd": "userdel -r", "what": "Löscht Konto, Home-Verzeichnis und Mail-Spool dauerhaft.", "where": "Nur wenn die Daten wirklich nicht mehr gebraucht werden.", "why": "Räumt Speicherplatz und Überreste auf.", "example": "sudo userdel -r testuser", "nosim": true},
+    {"cmd": "ls -ld", "what": "Zeigt, dass das Home-Verzeichnis noch existiert.", "where": "Nach userdel.", "why": "Du siehst, dass übrig gebliebene Verzeichnisse herrenlos sind.", "example": "ls -ld /home/testuser"}
+   ],
+   "warn": "`userdel -r` lässt sich nicht rückgängig machen: Fotos, Dokumente und Schlüssel sind weg. Erst sichern, VM-Snapshot machen, Konto sperren und den Benutzernamen vor ENTER noch einmal lesen.",
+   "danger": "Bei `sudo rm -r /home/NAME` löscht ein falscher Pfad (ein verirrtes Leerzeichen oder fehlender Name) andere Daten. Führe es nur für das selbst angelegte `testuser` aus und tippe den vollständigen Pfad."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Teste dein sudo-Recht mit `sudo whoami`. Die Ausgabe muss `root` sein.", "hint": "`student` ist in der Gruppe wheel, deshalb funktioniert sudo."},
+  "t02": {"text": "Zeige den Kontoeintrag von alice mit `grep alice /etc/passwd`.", "hint": "Feld 6 ist das Home-Verzeichnis."},
+  "t03": {"text": "Liste mit `ls /home` auf, welche Benutzer ein Home-Verzeichnis haben.", "hint": "Jeder Benutzer hat einen Ordner."},
+  "t04": {"text": "Lies die Passwort-Hashes mit `sudo cat /etc/shadow`. Die Datei ist nur für root.", "hint": "Setze `sudo` davor; Hashes beginnen mit `$6$...`."},
+  "t05": {"text": "Sieh dir Rechte und Besitzer von alices Home-Verzeichnis mit `sudo ls -ld /home/alice` an.", "hint": "`-d` listet das Verzeichnis selbst, nicht seinen Inhalt."},
+  "t06": {"text": "Lies alle Gruppen mit `cat /etc/group`.", "hint": "Zeilenformat: Gruppe:x:GID:Mitglieder."},
+  "t07": {"text": "Finde mit `grep devs /etc/group` die Mitglieder der Gruppe `devs`.", "hint": "Mitglieder stehen in Feld 4, durch Komma getrennt."},
+  "t08": {"text": "Liste alices Home-Inhalt (inklusive versteckter Dateien) mit `sudo ls -la /home/alice`.", "hint": "Das Home eines anderen Benutzers lesen braucht root."},
+  "t09": {"text": "Vorhersage: Was macht `cat /etc/shadow` als normaler Benutzer? Führe es aus und prüfe.", "hint": "Erwartet wird Permission denied|Erişim engellendi|Zugriff verweigert."},
+  "t10": {"text": "Vorhersage: Wie sehen die Rechte von alices Home-Verzeichnis aus? Erst raten, dann mit `sudo ls -ld /home/alice` prüfen.", "hint": "Ein privates Home: `drwx------` (700)."},
+  "t11": {"text": "Vorhersage: Was liefert `id carol` für ein noch nicht angelegtes Konto? Führe es aus.", "hint": "Erwartet wird der Fehler `no such user`."},
+  "t12": {"text": "Fehlersuche: Das `userdel -r alice` in `~/offboard.sh` löscht das Home-Verzeichnis, das für die Prüfung erhalten bleiben muss. Schreibe das Skript so um, dass es `sudo userdel alice` ohne `-r` enthält.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Nutze einfache Anführungszeichen."},
+  "t13": {"text": "Mini-Projekt: Schreibe einen Plan mit drei Zeilen in `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` und `sudo usermod -aG devs carol`.", "hint": "Nutze `>` in der ersten Zeile und `>>` bei den übrigen."},
+  "t14": {"text": "Challenge: Das Skript `~/onboard.sh` soll `dave` mit `-m -s /bin/bash -G devs` anlegen und dann mit `chage -d 0 dave` beim ersten Login eine Passwortänderung erzwingen. Setze das Skript auf `chmod 750`.", "hint": "Zwei `echo`-Befehle und ein `chmod`; nutze `sudo`."},
+  "t15": {"text": "TICKET #4210: `eve` hat die Firma verlassen. Sperre zuerst das Konto und lösche es dann (Home-Verzeichnis bleibt erhalten). Schreibe die Befehle der Reihe nach in `~/offboard_eve.txt`.", "hint": "`sudo usermod -L eve` und `sudo userdel eve`; kein `-r`."},
+  "t16": {"text": "TICKET #4211: `frank` wird Administrator auf dem Server (Rocky/Alma). Schreibe den Befehl in `~/frank.txt`.", "hint": "`sudo usermod -aG wheel frank`; das `-a` nicht vergessen."}
+ },
+ "vm": {
+  "intro": "Dieser Abschnitt verändert das System. Mache zuerst einen Snapshot deiner VM. Arbeite nur an `testuser` und `labteam` aus diesem Abschnitt; fasse dein eigenes Konto nicht an.",
+  "tasks": {
+   "v01": {
+    "title": "Konto anlegen",
+    "text": "Lege das Konto `testuser` mit Home-Verzeichnis und bash-Shell an und füge seinen Eintrag ein.",
+    "blocks": [{"cmd": "sudo useradd -m -s /bin/bash testuser\ngetent passwd testuser", "expected": "testuser:x:1001:1001::/home/testuser:/bin/bash"}],
+    "differs": ["Bei `user already exists` wurde das Konto schon früher angelegt; `getent passwd testuser` genügt.", "Unter Ubuntu kann die UID eine andere Zahl als 1001 sein."]
+   },
+   "v02": {
+    "title": "Passwort setzen",
+    "text": "Setze ein Passwort für `testuser`. Beim Tippen wird nichts angezeigt. Füge die Erfolgsmeldung ein.",
+    "blocks": [{"cmd": "sudo passwd testuser", "expected": "passwd: password updated successfully"}],
+    "differs": ["Unter Rocky/Alma lautet die Meldung `passwd: all authentication tokens updated successfully.`", "Ein zu kurzes/einfaches Passwort löst eine Warnung aus, wird aber (als root) trotzdem akzeptiert."]
+   },
+   "v03": {
+    "title": "Zu einer Gruppe hinzufügen",
+    "text": "Lege die Gruppe `labteam` an, füge `testuser` mit **-aG** hinzu und füge die `id`-Ausgabe ein.",
+    "blocks": [{"cmd": "sudo groupadd labteam\nsudo usermod -aG labteam testuser\nid testuser", "expected": "uid=1001(testuser) gid=1001(testuser) groups=1001(testuser),1002(labteam)"}],
+    "differs": ["Existiert die Gruppe, kommt `groupadd: group 'labteam' already exists`; mache weiter.", "Fehlt `labteam` neben der Hauptgruppe, prüfe die Buchstaben `-a` und `-G`."]
+   },
+   "v04": {
+    "title": "Konto sperren",
+    "text": "Sperre `testuser` und zeige den Status.",
+    "blocks": [{"cmd": "sudo usermod -L testuser\nsudo passwd -S testuser", "expected": "testuser L 2026-11-12 0 99999 7 -1"}],
+    "differs": ["Unter Rocky/Alma steht der Status als `LK`.", "Zum Entsperren: `sudo usermod -U testuser`."]
+   },
+   "v05": {
+    "title": "Passwort-Richtlinie",
+    "text": "Füge die `chage -l`-Ausgabe ein; erzwinge die Passwortänderung beim ersten Login.",
+    "blocks": [{"cmd": "sudo chage -d 0 testuser\nsudo chage -l testuser", "expected": "Last password change                : password must be changed\nPassword expires                    : never\n..."}],
+    "differs": ["Die Ausgabe muss die Zeile `Last password change` enthalten; der Wert kann `password must be changed` oder ein Datum sein.", "Bei `chage: command not found` fehlt das Paket `shadow-utils` (Rocky) bzw. `passwd` (Ubuntu)."]
+   },
+   "v06": {
+    "title": "userdel behält das Home",
+    "text": "Lösche das Konto OHNE `-r`; zeige dann, dass das Konto weg ist, das Home-Verzeichnis aber bleibt.",
+    "blocks": [{"cmd": "sudo userdel testuser\ngetent passwd testuser\nls -ld /home/testuser", "expected": "drwx------ 2 1001 1001 62 Nov 12 10:00 /home/testuser"}],
+    "differs": ["`getent` gibt nichts aus; das Konto ist gelöscht.", "Der Besitzer des Home-Verzeichnisses wird jetzt als Zahl (1001) statt als Name angezeigt; das bedeutet ein herrenloses Verzeichnis.", "Bei `user is currently used by process` beende die Sitzung des Benutzers."]
+   },
+   "v07": {
+    "title": "Aufräumen",
+    "text": "Räume das nun unnötige Testverzeichnis und die Gruppe auf. Tippe in den Befehlen den vollen Pfad. Bestätige am Ende mit \"Erledigt\".",
+    "blocks": [{"cmd": "sudo rm -r /home/testuser\nsudo groupdel labteam\nls /home", "expected": "student"}],
+    "differs": ["`groupdel: group 'labteam' does not exist` heißt, sie ist schon weg.", "Merkst du einen Tippfehler im Pfad, drücke nicht ENTER; sei sicher über den vollen Pfad `/home/testuser`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Was bewirkt `sudo usermod -G devs alice` (ohne `-a`)?", "options": ["Fügt alice zu devs hinzu und behält die anderen", "Entfernt alle zusätzlichen Gruppen von alice und lässt nur devs übrig", "Löscht das Konto alice", "Sperrt alice"], "explain": "-G ersetzt die Liste der zusätzlichen Gruppen; ohne `-a` (append) gehen alte Gruppen wie wheel verloren."},
+  "q2": {"q": "Was passiert nach `userdel alice` (ohne `-r`)?", "options": ["Das Home-Verzeichnis wird auch gelöscht", "Nichts passiert", "Das Konto wird gelöscht, das Home-Verzeichnis bleibt", "Das Konto wird nur gesperrt"], "explain": "Die Einträge werden entfernt; `/home/alice` und die Dateien bleiben auf der Platte. Zum Löschen braucht es `-r`."},
+  "q3": {"q": "Wie unterbindest du den Zugang eines Kontos sofort, ohne es zu löschen?", "options": ["usermod -L", "userdel -r", "passwd -d", "chmod 000 /home"], "explain": "`usermod -L` deaktiviert den Passwort-Login; Konto und Daten bleiben, `-U` macht es rückgängig."},
+  "q4": {"q": "Die Mitgliedschaft in welcher Gruppe gibt unter Rocky/Alma sudo-Rechte?", "options": ["wheel", "sudoers", "admin", "root"], "explain": "In der RHEL-Familie heißt die sudo-Gruppe `wheel`; bei Debian/Ubuntu `sudo`."}
+ },
+ "summary": [
+  "`sudo useradd -m -s /bin/bash NAME` legt ein Konto an; `passwd` setzt das Passwort; `chage -d 0` erzwingt die Änderung beim ersten Login.",
+  "Beim Hinzufügen zu Gruppen immer `usermod -aG`; fehlt `-a`, gehen die alten Gruppen verloren.",
+  "`usermod -L` sperrt, `-U` entsperrt; Sperren ist der sichere erste Schritt vor dem Löschen.",
+  "`userdel` behält das Home-Verzeichnis, `userdel -r` löscht es dauerhaft; vorher sichern und Snapshot machen."
+ ],
+ "glossary": [
+  {"term": "wheel", "meaning": "Die Administratorgruppe, die in der RHEL-Familie sudo erlaubt (bei Debian `sudo`)."},
+  {"term": "/etc/skel", "meaning": "Vorlagedateien, die in ein neues Home-Verzeichnis kopiert werden."},
+  {"term": "gesperrtes Konto", "meaning": "Ein Konto, dessen Passwort-Login deaktiviert ist (`usermod -L`)."},
+  {"term": "herrenloses Verzeichnis", "meaning": "Ein Verzeichnis, das noch der UID eines gelöschten Benutzers gehört."},
+  {"term": "Snapshot", "meaning": "Ein wiederherstellbares Abbild einer VM zu einem bestimmten Zeitpunkt."}
+ ]
+}

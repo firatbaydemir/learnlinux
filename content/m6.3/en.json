@@ -1,0 +1,185 @@
+{
+ "title": "firewalld — Zone, Service, Port",
+ "lead": "Listening is not the same as reachable: learn to read firewalld, change rules safely (runtime vs permanent) and meet ufw, the Debian/Ubuntu counterpart.",
+ "objectives": [
+  "You check whether firewalld is running and read the default and active zones.",
+  "You explain runtime vs `--permanent` and what `--reload` does.",
+  "You open and close services and ports, and test rules safely with `--timeout`.",
+  "You write a simple rich rule for one source network.",
+  "You use ufw on Ubuntu and always allow SSH before enabling it."
+ ],
+ "sections": [
+  {
+   "id": "concepts",
+   "title": "Zones, services, ports",
+   "body": [
+    "With `ss` you see that a program listens. Whether others can reach it depends on the firewall in between. **firewalld** (Rocky/Alma/RHEL/Fedora) sorts every network interface into a **zone**: a trust level with its own list of allowed services and ports. `public` is the usual default; `trusted` allows everything, `drop` silently discards everything.",
+    "A **service** is a predefined bundle (`ssh` = 22/tcp, `http` = 80/tcp, `https` = 443/tcp). A **port** is an explicit number such as `8080/tcp`. Use a service when one exists, a port for non-standard numbers.",
+    "Always read before you change: first the state, then the zone, then the whole list."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --state", "what": "Prints running or not running.", "where": "As the very first check on a Rocky/Alma VM.", "why": "If the daemon is stopped, all other firewall-cmd commands fail.", "example": "sudo firewall-cmd --state", "nosim": true},
+    {"cmd": "firewall-cmd --get-default-zone", "what": "Shows the zone used for new interfaces.", "where": "Before adding any rule.", "why": "Rules without `--zone` go to the default zone.", "example": "sudo firewall-cmd --get-default-zone", "nosim": true},
+    {"cmd": "firewall-cmd --get-active-zones", "what": "Lists zones that currently have interfaces or sources.", "where": "When you wonder which zone really handles your traffic.", "why": "The default zone can differ from the active one on an interface.", "example": "sudo firewall-cmd --get-active-zones", "nosim": true},
+    {"cmd": "firewall-cmd --list-all", "what": "Shows services, ports, rich rules and interfaces of a zone.", "where": "Before and after every change.", "why": "Verify first, change, verify again.", "example": "sudo firewall-cmd --list-all", "nosim": true}
+   ],
+   "tip": "`--list-all` shows the runtime state. Add `--permanent` to see what is stored on disk."
+  },
+  {
+   "id": "runtime",
+   "title": "Runtime vs permanent, --reload, --timeout",
+   "body": [
+    "firewalld has two configurations. **Runtime** is active right now and is lost on `--reload` or reboot. **Permanent** is written to disk and survives reboots, but `--permanent` alone does **not** change the running firewall.",
+    "Typical safe workflow: test in runtime with `--timeout`, check, and only then write it permanently and run `--reload`. `--reload` applies the permanent configuration and **discards runtime-only rules**.",
+    "A good test: if a rule works in runtime and you want to keep it, use `firewall-cmd --runtime-to-permanent`."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --add-service=http --timeout=60", "what": "Adds a runtime rule that disappears after 60 seconds.", "where": "For tests, especially over SSH.", "why": "If you made a mistake, it fixes itself.", "example": "sudo firewall-cmd --add-service=http --timeout=60", "nosim": true},
+    {"cmd": "firewall-cmd --permanent --add-service=http", "what": "Writes the rule to disk only; not active yet.", "where": "For rules that must survive a reboot.", "why": "Runtime and permanent are separate lists.", "example": "sudo firewall-cmd --permanent --add-service=http", "nosim": true},
+    {"cmd": "firewall-cmd --reload", "what": "Loads the permanent configuration into runtime.", "where": "After `--permanent` changes.", "why": "Activates permanent rules; runtime-only rules are dropped.", "example": "sudo firewall-cmd --reload", "nosim": true},
+    {"cmd": "firewall-cmd --runtime-to-permanent", "what": "Saves the current runtime rules as permanent.", "where": "After you tested a rule and it works.", "why": "No need to type the rule twice.", "example": "sudo firewall-cmd --runtime-to-permanent", "nosim": true}
+   ],
+   "warn": "Take a VM snapshot first (module 0.2). On a remote machine keep a **second SSH session open** while you change firewall rules.",
+   "danger": "SSH lockout: never remove the `ssh` service from the active zone, never set the zone to `drop`, and never run `--panic-on` over SSH. Your session dies at once and you only get back in through the VM console. Test with `--timeout`, verify with `--list-all`, and keep the order: verify, change, verify."
+  },
+  {
+   "id": "ports",
+   "title": "Opening and closing ports and services",
+   "body": [
+    "For a web app on port 8080 use `--add-port=8080/tcp`. To close it again use `--remove-port` or `--remove-service`. Remember: every `--permanent` change needs `--reload`.",
+    "A port in the firewall does not start the program. Check with `ss` that something listens. On Rocky/Alma with SELinux a non-standard port may also need a label (module 6.2)."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --get-services", "what": "Lists all predefined service names.", "where": "To find the right service name.", "why": "A service is clearer than a bare number.", "example": "sudo firewall-cmd --get-services", "nosim": true},
+    {"cmd": "firewall-cmd --permanent --add-port=8080/tcp", "what": "Opens 8080/tcp permanently (after reload).", "where": "For apps on non-standard ports.", "why": "Services only cover standard ports.", "example": "sudo firewall-cmd --permanent --add-port=8080/tcp", "nosim": true},
+    {"cmd": "firewall-cmd --list-ports", "what": "Lists explicitly opened ports.", "where": "To verify a port change.", "why": "Confirms the rule is active in runtime.", "example": "sudo firewall-cmd --list-ports", "nosim": true},
+    {"cmd": "firewall-cmd --permanent --remove-port=8080/tcp", "what": "Removes the port rule from the permanent config.", "where": "When the app is gone.", "why": "Open ports you no longer need are risk.", "example": "sudo firewall-cmd --permanent --remove-port=8080/tcp", "nosim": true}
+   ],
+   "tip": "Write the commands into a small script first and read it twice before you run it."
+  },
+  {
+   "id": "rich",
+   "title": "Rich rules (briefly)",
+   "body": [
+    "A **rich rule** adds conditions: source address, port, protocol and action (`accept`, `reject`, `drop`). Example: allow PostgreSQL (5432) only from the network `192.168.1.0/24`.",
+    "Quote the whole rule in single quotes and the values inside in double quotes. Add `--timeout` while testing."
+   ],
+   "commands": [
+    {"cmd": "firewall-cmd --add-rich-rule", "what": "Adds a conditional rule.", "where": "When a port must be open only for one network.", "why": "More precise than opening the port for everyone.", "example": "sudo firewall-cmd --add-rich-rule='rule family=\"ipv4\" source address=\"192.168.1.0/24\" port port=\"5432\" protocol=\"tcp\" accept' --timeout=60", "nosim": true},
+    {"cmd": "firewall-cmd --list-rich-rules", "what": "Shows the rich rules of the zone.", "where": "To verify or audit.", "why": "Rich rules are not shown in `--list-services`.", "example": "sudo firewall-cmd --list-rich-rules", "nosim": true},
+    {"cmd": "firewall-cmd --remove-rich-rule", "what": "Removes a rich rule; give the exact same text.", "where": "When the exception is no longer needed.", "why": "Keeps the rule set small.", "example": "sudo firewall-cmd --remove-rich-rule='rule family=\"ipv4\" source address=\"192.168.1.0/24\" port port=\"5432\" protocol=\"tcp\" accept'", "nosim": true}
+   ],
+   "warn": "A `reject` or `drop` rule for your own admin network can cut your SSH session. Use `--timeout` and keep a second session."
+  },
+  {
+   "id": "ufw",
+   "title": "Debian/Ubuntu: ufw",
+   "body": [
+    "Ubuntu uses **ufw** (Uncomplicated Firewall). It is usually installed but **disabled**. The golden rule: **allow SSH first, enable second**. `ufw enable` with default `deny incoming` and no SSH rule locks you out.",
+    "`OpenSSH` is an application profile, equal to 22/tcp. Rules are active at once and persistent; there is no runtime/permanent split."
+   ],
+   "commands": [
+    {"cmd": "ufw allow OpenSSH", "what": "Allows SSH (22/tcp).", "where": "Before the very first `ufw enable`.", "why": "Prevents locking yourself out.", "example": "sudo ufw allow OpenSSH", "nosim": true},
+    {"cmd": "ufw enable", "what": "Turns the firewall on and keeps it on after reboot.", "where": "Only after SSH is allowed.", "why": "The default policy blocks incoming traffic.", "example": "sudo ufw enable", "nosim": true},
+    {"cmd": "ufw status verbose", "what": "Shows state, default policy and rules.", "where": "After each change.", "why": "Check that 22/tcp is ALLOW.", "example": "sudo ufw status verbose", "nosim": true},
+    {"cmd": "ufw delete allow 80/tcp", "what": "Removes an allow rule.", "where": "When a port is no longer needed.", "why": "Keeps exposure small.", "example": "sudo ufw delete allow 80/tcp", "nosim": true}
+   ],
+   "danger": "Never run `ufw enable` over SSH before `ufw allow OpenSSH` (or `ufw allow 22/tcp`). If your SSH port is not 22, allow that port. Snapshot the VM first."
+  },
+  {
+   "id": "analyze",
+   "title": "Reading listening ports and logs",
+   "body": [
+    "Before you open anything, find out what really listens: `ss -tulpn` on the VM. In the simulator you practise with sample files in `~/fw`: `ss.txt` is a fake `ss` output, `blocked.log` a fake firewall log.",
+    "With `grep`, `cut`, `sort` and `uniq -c` you can count and rank. This is the same technique you use on real logs."
+   ],
+   "commands": [
+    {"cmd": "ss -tulpn", "what": "Lists listening TCP/UDP sockets with the process.", "where": "To see which ports are in use.", "why": "Open firewall ports without a listener are pointless.", "example": "sudo ss -tulpn", "nosim": true},
+    {"cmd": "grep -c", "what": "Counts matching lines.", "where": "To count listeners or events.", "why": "A fast number instead of scrolling.", "example": "grep -c LISTEN ~/fw/ss.txt"},
+    {"cmd": "cut | sort | uniq -c", "what": "Extracts a column and counts equal values.", "where": "To rank blocked source addresses.", "why": "Shows the noisiest source at a glance.", "example": "cut -d' ' -f3 ~/fw/blocked.log | sort | uniq -c | sort -rn"},
+    {"cmd": "grep -i", "what": "Finds lines ignoring case.", "where": "To read ALLOW rules in a ufw status file.", "why": "No need to know the exact capitalisation.", "example": "grep -i allow ~/fw/ufw-status.txt"}
+   ],
+   "tip": "The sample scripts in `~/fw` are only text files. They are never executed against a real firewall."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Go to the practice folder with `cd ~/fw`.", "hint": "The prompt shows the new directory."},
+  "t02": {"text": "Show the fake zone output with `cat public.txt`.", "hint": "Look at the `services:` line."},
+  "t03": {"text": "Find the services line with `grep ssh public.txt`.", "hint": "The output also contains dhcpv6-client."},
+  "t04": {"text": "Write a safe test command into `test_http.sh`: `firewall-cmd --add-service=http --timeout=60`. Use `echo \"...\" > test_http.sh`.", "hint": "`--timeout` makes the rule vanish by itself."},
+  "t05": {"text": "Write `firewall-cmd --permanent --add-service=http` into `perm_http.sh` with `echo`.", "hint": "Use a single `>` to create the file."},
+  "t06": {"text": "Append `firewall-cmd --reload` to `perm_http.sh` (permanent rules need a reload).", "hint": "Append with `>>`, not `>`."},
+  "t07": {"text": "Predict, then check: how many listening sockets are in `ss.txt`? Run `grep -c LISTEN ss.txt`.", "hint": "ESTAB lines are not LISTEN."},
+  "t08": {"text": "Predict the output of `cut -d: -f1 active.txt | sort` (zone names, sorted), then run it.", "hint": "The field before the colon is the zone."},
+  "t09": {"text": "`broken.sh` has a typo and forgets `--permanent`. Fix it so it contains `firewall-cmd --permanent --add-service=http`.", "hint": "Overwrite the file with `echo \"...\" > broken.sh`."},
+  "t10": {"text": "`ufw-setup.sh` enables ufw before allowing SSH — a lockout! Rewrite it so `ufw allow OpenSSH` comes first, then `ufw enable`.", "hint": "First line with `>`, second with `>>`."},
+  "t11": {"text": "Mini project: write `web.sh` with three lines: permanent `http`, permanent `https`, then `firewall-cmd --reload`.", "hint": "Use `>` once, then `>>` twice."},
+  "t12": {"text": "Challenge: find the noisiest blocked source in `blocked.log`. Extract column 3, sort, count with `uniq -c`, rank, keep the first line and save it to `top.txt`.", "hint": "`cut -d' ' -f3`, `sort`, `uniq -c`, `sort -rn`, `head -n 1`."},
+  "t13": {"text": "Challenge: write a rich rule into `rich.sh`: `firewall-cmd --add-rich-rule=...` that accepts tcp port 5432 only from `192.168.1.0/24`.", "hint": "Single quotes around the rule, escaped double quotes inside a double-quoted `echo`."},
+  "t14": {"text": "Ticket: The app on port 8080 is not reachable from outside and must survive a reboot. Write `fix.sh` with the permanent port rule for `8080/tcp` and the reload. Do not touch ssh.", "hint": "Two lines: `--permanent --add-port=8080/tcp` and `--reload`."},
+  "t15": {"text": "Ticket: A new Ubuntu server needs SSH and web access, then the firewall must be on. Write `ufw.sh`: allow OpenSSH, allow 80/tcp, then enable — in a lockout-safe order.", "hint": "`ufw enable` must be the last line."},
+  "t16": {"text": "Predict: how many lines in `history.txt` contain `permanent`? Then verify with `grep -c permanent history.txt`.", "hint": "One command was runtime only."},
+  "t17": {"text": "Read the ufw rules with `grep -i allow ufw-status.txt`. Is 22/tcp allowed?", "hint": "Look at the first column."},
+  "t18": {"text": "Write a runtime test for port 9090 into `port.sh`: `firewall-cmd --add-port=9090/tcp --timeout=60`.", "hint": "Same pattern as for the service."}
+ },
+ "vm": {
+  "intro": "Use a Rocky/Alma VM for v01–v04 and an Ubuntu VM for v05. Take a snapshot first (module 0.2) and work from the VM console or keep a second SSH session open.",
+  "tasks": {
+   "v01": {
+    "title": "Read the firewall state",
+    "text": "Check that firewalld runs, read the default zone and the full list. Paste the output.",
+    "blocks": [{"cmd": "sudo firewall-cmd --state\nsudo firewall-cmd --get-default-zone\nsudo firewall-cmd --get-active-zones\nsudo firewall-cmd --list-all", "expected": "running\npublic\npublic\n  interfaces: enp0s3\npublic (active)\n  services: cockpit dhcpv6-client ssh\n  ports:"}],
+    "differs": ["If it says `not running`: `sudo systemctl enable --now firewalld`.", "On Ubuntu firewalld is usually not installed; use ufw (v05).", "Your zone or interface name may differ (`enp0s3`, `ens160`)."]
+   },
+   "v02": {
+    "title": "Runtime rule with a timeout",
+    "text": "Add http for 120 seconds, list the services, wait, list again. The rule vanishes by itself.",
+    "blocks": [{"cmd": "sudo firewall-cmd --add-service=http --timeout=120\nsudo firewall-cmd --list-services", "expected": "success\ncockpit dhcpv6-client http ssh"}],
+    "differs": ["`ssh` must still be in the list; if not, add it back immediately: `sudo firewall-cmd --add-service=ssh`.", "After 120 seconds `http` disappears again."]
+   },
+   "v03": {
+    "title": "Permanent vs runtime",
+    "text": "Write http permanently, compare the permanent and runtime list before and after `--reload`.",
+    "blocks": [{"cmd": "sudo firewall-cmd --permanent --add-service=http\nsudo firewall-cmd --list-services --permanent\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-services", "expected": "success\ncockpit dhcpv6-client http ssh\nsuccess\ncockpit dhcpv6-client http ssh"}],
+    "differs": ["After `--reload` the runtime list now equals the permanent list.", "Without `--reload` the runtime list would not contain `http` (unless v02 is still active)."]
+   },
+   "v04": {
+    "title": "Open and close a port",
+    "text": "Open 8080/tcp permanently, reload and check. Then remove it again and reload.",
+    "blocks": [{"cmd": "sudo firewall-cmd --permanent --add-port=8080/tcp\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-ports\nsudo firewall-cmd --permanent --remove-port=8080/tcp\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-ports", "expected": "success\nsuccess\n8080/tcp\nsuccess\nsuccess\n"}],
+    "differs": ["The last `--list-ports` output should be empty."]
+   },
+   "v05": {
+    "title": "Ubuntu: ufw with SSH first",
+    "text": "On Ubuntu allow SSH first, then enable ufw and read the status. Paste the status output.",
+    "blocks": [{"cmd": "sudo ufw allow OpenSSH\nsudo ufw enable\nsudo ufw status verbose", "expected": "Status: active\nDefault: deny (incoming), allow (outgoing)\n\nTo            Action      From\n22/tcp        ALLOW IN    Anywhere"}],
+    "differs": ["ufw may ask `Command may disrupt existing ssh connections` — fine, because SSH is allowed.", "If ufw is not found: `sudo apt install ufw`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What does `firewall-cmd --permanent --add-service=http` do on its own?", "options": ["It opens http immediately and for good", "It writes the rule to disk, active only after `--reload`", "It opens http for 60 seconds", "It removes http from runtime"], "explain": "`--permanent` only changes the stored configuration. The running firewall changes after `--reload`."},
+  "q2": {"q": "You are connected over SSH to a new Ubuntu server. What must come before `ufw enable`?", "options": ["`ufw reset`", "`ufw deny 22`", "`ufw allow OpenSSH`", "`ufw delete 1`"], "explain": "ufw blocks incoming traffic by default. Without an SSH rule you lock yourself out."},
+  "q3": {"q": "What does `--timeout=60` do with `--add-service`?", "options": ["The runtime rule disappears after 60 seconds", "The rule is permanent for 60 days", "It waits 60 seconds before adding it", "It limits connections to 60 per minute"], "explain": "Timeout rules are runtime only and remove themselves — a safety net for tests."},
+  "q4": {"q": "What happens to runtime-only rules on `firewall-cmd --reload`?", "options": ["They become permanent", "They are kept", "They block all traffic", "They are discarded"], "explain": "`--reload` reloads the permanent configuration and drops runtime-only changes."}
+ },
+ "summary": [
+  "firewalld sorts interfaces into zones; `--list-all` shows what a zone allows.",
+  "Runtime is active now; `--permanent` is stored and needs `--reload`; `--reload` drops runtime-only rules.",
+  "Test with `--timeout`, verify before and after, keep a second SSH session and a snapshot.",
+  "Use services for standard ports and `--add-port` for the rest; rich rules limit a rule to a source network.",
+  "On Ubuntu: `ufw allow OpenSSH` first, `ufw enable` second."
+ ],
+ "glossary": [
+  {"term": "zone", "meaning": "A trust level with its own allowed services and ports; each interface belongs to one zone."},
+  {"term": "service", "meaning": "A predefined firewalld bundle of ports, such as http = 80/tcp."},
+  {"term": "port", "meaning": "An explicit number plus protocol, for example 8080/tcp."},
+  {"term": "runtime", "meaning": "The configuration active right now; lost on reload or reboot."},
+  {"term": "permanent", "meaning": "The configuration stored on disk; applied by `--reload` or reboot."},
+  {"term": "--reload", "meaning": "Loads the permanent configuration and discards runtime-only rules."},
+  {"term": "--timeout", "meaning": "Makes a runtime rule expire automatically after the given time."},
+  {"term": "rich rule", "meaning": "A conditional rule with source, port, protocol and action."},
+  {"term": "ufw", "meaning": "Uncomplicated Firewall, the default front end on Ubuntu."},
+  {"term": "lockout", "meaning": "Losing your own SSH access because of a firewall change."}
+ ]
+}

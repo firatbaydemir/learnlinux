@@ -1,0 +1,176 @@
+{
+ "title": "sed ve awk",
+ "lead": "sed ile metni satır satır değiştir, sil ve seç; awk ile alanlara (sütunlara) bölüp hesapla ve log dosyalarını özetle.",
+ "objectives": [
+  "sed ile `s/old/new/`, `g` bayrağı, `-n` + `p`, adres/aralık ve `d` kullanırsın.",
+  "`sed -i` ile dosyayı yerinde değiştirmenin kalıcı olduğunu bilir, önce yedek alırsın (`-i.bak`).",
+  "awk ile alanları (`$1`, `$NF`, `-F`) seçer, koşul yazar, `BEGIN`/`END` ile toplam ve ortalama hesaplarsın.",
+  "awk dizileriyle log dosyasında değerleri sayarsın; boru hattında `cut`, `sort`, `uniq` ile birleştirirsin."
+ ],
+ "sections": [
+  {
+   "id": "sed-sub",
+   "title": "sed: yer değiştirme (s///)",
+   "body": [
+    "`sed` (stream editor) metni satır satır okur, komutu uygular ve sonucu ekrana yazar. **Dosyayı değiştirmez**; yalnızca `-i` verirsen değiştirir (üçüncü bölüm).",
+    "En sık komut `s/old/new/` ile yer değiştirmedir. Varsayılan olarak her satırda yalnızca **ilk** eşleşme değişir; hepsi için sonuna `g` (global) ekle: `s/cat/dog/g`.",
+    "Ayraç `/` olmak zorunda değil. Yol (`/usr/local`) gibi içinde `/` geçen metinlerde `|` kullan: `s|/usr/local|/opt|`. Yerine kısmında `&` bulunan eşleşmenin kendisi demektir; düz `&` istersen `\\&` yaz."
+   ],
+   "commands": [
+    {"cmd": "sed 's/old/new/'", "what": "Her satırdaki ilk eşleşmeyi değiştirir.", "where": "Hızlı bir metin düzeltmesinde.", "why": "Dosyaya dokunmadan sonucu önce görürsün.", "example": "sed 's/cat/hamster/' pets.txt"},
+    {"cmd": "sed 's/old/new/g'", "what": "Satırdaki tüm eşleşmeleri değiştirir.", "where": "Bir kelimeyi her yerde değiştirirken.", "why": "`g` olmadan satırın ikinci eşleşmesi kalır.", "example": "sed 's/cat/dog/g' pets.txt"},
+    {"cmd": "sed 's|a|b|'", "what": "Ayraç olarak `|` kullanır; `/` içeren yollar için okunaklıdır.", "where": "Yol ve URL değiştirirken.", "why": "`\\/` kaçışlarıyla uğraşmazsın.", "example": "sed 's|/usr/local|/opt|' paths.txt"},
+    {"cmd": "sed -e ... -e ...", "what": "Birden çok sed komutunu sırayla uygular.", "where": "Tek geçişte birkaç değişiklik gerektiğinde.", "why": "Dosyayı bir kez okursun.", "example": "sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv"}
+   ],
+   "tip": "Basit kalıpta `-E` (genişletilmiş regex) ile `+`, `?`, `|` ve `( )` kaçışsız çalışır: `sed -E 's/[0-9]+/N/g' access.log`.",
+   "warn": "Eşleşme **düzenli ifadedir**: `.` her karakter demektir. Nokta ararken `\\.` yaz, yoksa `s/1.2/X/` metindeki `102` ifadesini de değiştirir."
+  },
+  {
+   "id": "sed-lines",
+   "title": "sed: satır seçme ve silme",
+   "body": [
+    "sed varsayılan olarak her satırı yazar. `-n` bunu kapatır; sonra `p` (print) ile yalnızca istediğin satırları yazdırırsın. Satırı **adres** ile seçersin: numara (`2p`), aralık (`1,3p`), son satır (`$p`) veya regex (`/404/p`).",
+    "`d` (delete) satırı çıktıdan atar. `/^#/d` yorum satırlarını siler, `/^$/d` boş satırları, `1d` başlık satırını. Bunların hepsi yalnızca **çıktıyı** etkiler; dosya aynı kalır. Çıktıyı kaydetmek için yönlendirme kullan: `sed '/^#/d' server.conf > clean.conf`."
+   ],
+   "commands": [
+    {"cmd": "sed -n 'Np'", "what": "Yalnızca N. satırı yazdırır.", "where": "Büyük dosyada belirli satırı görmek için.", "why": "`head | tail` zincirinden kısadır.", "example": "sed -n '2p' pets.txt"},
+    {"cmd": "sed -n 'A,Bp'", "what": "A ile B arasındaki satırları yazdırır; `$` son satırdır.", "where": "Dosyanın bir bölümünü kesip bakarken.", "why": "Aralığı tek komutla alırsın.", "example": "sed -n '2,4p' employees.csv"},
+    {"cmd": "sed '/regex/d'", "what": "Eşleşen satırları çıktıdan siler.", "where": "Yorum veya boş satırları ayıklarken.", "why": "Yapılandırma dosyasının temiz halini üretir.", "example": "sed '/^#/d' server.conf"},
+    {"cmd": "sed '1d'", "what": "İlk satırı (ör. CSV başlığını) atar.", "where": "Başlıklı veriyi işlemeden önce.", "why": "Sonraki araçlar başlığı veri sanmaz.", "example": "sed '1d' employees.csv"}
+   ],
+   "tip": "`-n` ve `p` her zaman birlikte kullanılır. Tek başına `sed '2p'` satır 2'yi **iki kez** yazdırır (biri otomatik, biri `p`)."
+  },
+  {
+   "id": "sed-inplace",
+   "title": "sed -i: dosyayı yerinde değiştirme",
+   "body": [
+    "`sed -i` sonucu ekrana değil **dosyanın kendisine** yazar. Geri alma (undo) ve çöp kutusu yoktur: yanlış bir regex dosyanı kalıcı olarak bozar.",
+    "Kural: önce `-i` olmadan çalıştırıp çıktıya bak, sonra yedekli çalıştır. `sed -i.bak '...' file` orijinali `file.bak` adıyla saklar ve hem GNU (Linux) hem BSD (macOS) sed'de çalışır.",
+    "**GNU/BSD farkı:** Linux'ta `sed -i 's/a/b/' f` yeterlidir. macOS'ta `-i` mutlaka bir uzantı ister; uzantısız yazmak için `sed -i '' 's/a/b/' f`. Aynı komut iki sistemde farklı davranıyorsa nedeni budur."
+   ],
+   "commands": [
+    {"cmd": "sed -i.bak", "what": "Dosyayı yerinde değiştirir, orijinali `.bak` olarak yedekler.", "where": "Yapılandırma dosyasında değişiklik yaparken.", "why": "Hata olursa yedekten geri dönersin.", "example": "sed -i.bak 's/8080/9090/' server.conf"},
+    {"cmd": "cp file file.bak", "what": "Elle yedek alır.", "where": "Birden çok dosyayı değiştirmeden önce.", "why": "`-i` sonrası geri dönüş yolu bırakır.", "example": "cp app.conf app.conf.bak", "nosim": false},
+    {"cmd": "diff old new", "what": "İki dosya arasındaki farkı gösterir.", "where": "Değişikliği doğrularken.", "why": "Yalnızca istediğin satır değişti mi görürsün.", "example": "diff server.conf.bak server.conf", "nosim": true}
+   ],
+   "warn": "`sed -i` geri alınamaz. Üretim sunucusunda önce **yedek** al. Birden çok dosyada (`sed -i ... *.conf`) önce `-i` olmadan bir dosyada dene.",
+   "danger": "Yanlış kalıpla `sed -i 's/.*//' file` dosyanın tüm içeriğini boşaltır. Kendi VM'inde yıkıcı denemelerden önce **snapshot** al."
+  },
+  {
+   "id": "awk-basics",
+   "title": "awk: alanlar ve koşullar",
+   "body": [
+    "`awk` her satırı boşlukla **alanlara** böler: `$1` ilk, `$2` ikinci alan, `$NF` son alan, `$0` tüm satırdır. Ayracı `-F` ile değiştirirsin: CSV için `-F,`.",
+    "Program `kalıp { eylem }` biçimindedir. Kalıp yoksa her satıra uygulanır; kalıp varsa yalnızca eşleşen satırlara: `$3 > 5000` veya `/404/`. Eylem yoksa satır yazdırılır. `NR` satır numarası, `NF` alan sayısıdır; `NR>1` başlığı atlar.",
+    "`BEGIN { }` ilk satırdan önce, `END { }` son satırdan sonra bir kez çalışır. Toplam ve ortalama için ideal: `{ s += $3 } END { print s }`. Biçimli çıktı için `printf` kullan; satır sonunu kendin yaz (`\\n`)."
+   ],
+   "commands": [
+    {"cmd": "awk '{print $1}'", "what": "Her satırın ilk alanını yazdırır.", "where": "Log veya komut çıktısından sütun almak için.", "why": "`cut` boşluk sayısına takılır, awk takılmaz.", "example": "awk '{print $1}' access.log"},
+    {"cmd": "awk -F, '...'", "what": "Alan ayracını `,` yapar.", "where": "CSV ve `:` ayraçlı dosyalarda.", "why": "Doğru alanlara bölmenin tek yolu budur.", "example": "awk -F, 'NR>1 {print $1, $3}' employees.csv"},
+    {"cmd": "awk 'condition'", "what": "Yalnızca koşulu sağlayan satırları yazdırır.", "where": "Eşik üstü değerleri veya hata kodlarını seçerken.", "why": "`grep`'in yapamadığı sayısal karşılaştırmayı sağlar.", "example": "awk -F, 'NR>1 && $3 > 5000 {print $1}' employees.csv"},
+    {"cmd": "awk '... END {...}'", "what": "Tüm satırlar bittikten sonra sonucu yazdırır.", "where": "Toplam, ortalama, sayaç hesabında.", "why": "Tek geçişte özet çıkarırsın.", "example": "awk -F, 'NR>1 {s+=$3} END {print s}' employees.csv"}
+   ],
+   "tip": "awk programını her zaman **tek tırnak** içine yaz; yoksa kabuk `$1` gibi ifadeleri kendisi yorumlar ve awk boş program görür."
+  },
+  {
+   "id": "awk-arrays",
+   "title": "awk ile sayma ve log analizi",
+   "body": [
+    "awk'ta diziler **ilişkisel**dir (anahtar → değer) ve tanımlamadan kullanılır. `c[$2]++` her durum kodu için sayacı bir artırır; `END` bloğunda `for (k in c)` ile hepsini yazdırırsın. Dizinin sırası belirsizdir, bu yüzden sonuna `sort` ekle.",
+    "Bu kalıp boru hattıyla birleşir: `ps aux | awk 'NR>1 {print $1}' | sort | uniq -c` her kullanıcının kaç işlemi olduğunu gösterir. `awk` yerine `cut -d' ' -f2 access.log | sort | uniq -c` de çalışır; ama alanlar düzensiz boşluklu olduğunda awk daha güvenlidir."
+   ],
+   "commands": [
+    {"cmd": "awk '{c[$2]++} END {for (k in c) print k, c[k]}'", "what": "İkinci alandaki her değerin kaç kez geçtiğini sayar.", "where": "HTTP durum kodu veya IP başına sayımda.", "why": "Log'u tek komutla özetlersin.", "example": "awk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort"},
+    {"cmd": "awk '{print $NF}'", "what": "Her satırın son alanını yazdırır.", "where": "Alan sayısı değişken satırlarda.", "why": "Son sütunun numarasını bilmen gerekmez.", "example": "awk '{print $NF}' access.log"},
+    {"cmd": "awk 'BEGIN {...}'", "what": "Dosya okunmadan önce bir kez çalışır.", "where": "Başlık yazdırırken veya değişken kurarken.", "why": "Rapor çıktısına başlık ekler.", "example": "awk 'BEGIN {print \"ip status\"} {print $1, $2}' access.log"},
+    {"cmd": "awk '{printf ...}'", "what": "C tarzı biçimli çıktı verir.", "where": "Hizalı veya ondalıklı sayı yazarken.", "why": "`print` satır sonunu ve biçimi sana bırakmaz.", "example": "awk -F, 'NR>1 {printf \"%s earns %d\\n\", $1, $3}' employees.csv"}
+   ],
+   "tip": "Ortalama için bölen: `END {print s/(NR-1)}` (başlık varsa) veya ayrı bir sayaç (`n++`). Sıfıra bölmeyi boş dosyada kontrol et."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "`pets.txt` içindeki 2. satırı yalnızca sed ile yazdır: `sed -n '2p' pets.txt`.", "hint": "`-n` otomatik yazdırmayı kapatır, `2p` yalnızca satır 2'yi yazdırır. Simülatör sed'i çalıştırmaz ('not supported'); yazdığın komut kaydedilir."},
+  "t02": {"text": "`access.log` dosyasının yalnızca ilk sütununu (IP adreslerini) awk ile yazdır.", "hint": "`awk '{print $1}' access.log` — program tek tırnak içinde olmalı."},
+  "t03": {"text": "Tahmin et: `awk -F, '{print $1}'` ile aynı işi yapan `cut -d, -f1 employees.csv` hangi isimleri yazar? Önce düşün, sonra çalıştır.", "hint": "İlk sütun `name` başlığı ve 4 isimdir (anna, ben, cara, dan)."},
+  "t04": {"text": "`server.conf` içinde portu değiştireceksin. Önce `cp server.conf server.conf.bak` ile yedek al, sonra `sed -i 's/8080/9090/' server.conf` yaz.", "hint": "Sıra önemli: önce yedek, sonra `-i`. Alternatif: `sed -i.bak` yedeği kendisi alır; ama bu görevde `server.conf.bak` dosyasının var olması şart."},
+  "t05": {"text": "`server.conf` içinden yorum satırlarını (`#` ile başlayanlar) ayıklayıp ekrana yazdır: `sed '/^#/d' server.conf`.", "hint": "`^#` satır başındaki # demektir, `d` eşleşen satırı atar. Dosya değişmez."},
+  "t06": {"text": "Hatalı komut: `sed 's/usr/local/bin/opt/bin/' paths.txt` hata verir, çünkü yolun içindeki `/` ayraçla karışır. Düzelt: `/usr/local` ifadesini `/opt` ile değiştir (ayraç olarak `|` kullan).", "hint": "`sed 's|/usr/local|/opt|' paths.txt`. Ayracı ilk karakter belirler; `|`, `#` ve `,` yaygındır."},
+  "t07": {"text": "Tahmin et: `cut -d, -f2 employees.csv | sort | uniq -c` çıktısında `it` departmanı kaç kez geçer? Sonra komutu çalıştır.", "hint": "`uniq -c` her farklı satırın önüne sayısını yazar. Başlık `dept` de bir satırdır."},
+  "t08": {"text": "Mini proje: `reports` klasörü aç, `employees.csv` dosyasını oraya kopyala ve kopyada ortalama maaşı awk ile hesapla (başlığı atla): `awk -F, 'NR>1 {s+=$3; n++} END {print s/n}' reports/employees.csv`.", "hint": "Adımlar: `mkdir reports`, `cp employees.csv reports/`, sonra awk. `NR>1` başlığı atlar, `n` kaç satır olduğunu sayar."},
+  "t09": {"text": "Mini proje: `backup` klasörü aç, `app.conf` dosyasını `backup/app.conf` olarak kopyala, sonra `app.conf` içinde `mode=dev` ifadesini `sed -i` ile `mode=prod` yap.", "hint": "`mkdir backup`, `cp app.conf backup/app.conf`, `sed -i 's/mode=dev/mode=prod/' app.conf`. Yedeği `-i`'den ÖNCE al."},
+  "t10": {"text": "Tahmin et: `sed -n '3p' pets.txt` hangi hayvanı yazdırır? Aynı sonucu veren `head -n 3 pets.txt | tail -n 1` ile doğrula.", "hint": "Satırlar: cat, dog, bird, cat, fish. `head -n 3` ilk üçü alır, `tail -n 1` sonuncusunu."},
+  "t11": {"text": "Challenge: `access.log` içinde yalnızca durum kodu 404 olan satırları awk ile seç (koşul: ikinci alan 404).", "hint": "`awk '$2 == 404' access.log` — kalıp tek başına yeterlidir, eylem yazılmazsa satır yazdırılır."},
+  "t12": {"text": "Challenge: `employees.csv` içinde tek sed çağrısıyla iki değişiklik yap (iki `-e` ile): `it` yerine `IT`, `hr` yerine `HR`. Sonucu ekrana yaz, dosyayı değiştirme.", "hint": "`sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv`."},
+  "t13": {"text": "Hata ayıkla: Yanlış bir `sed -i` yüzünden `db.conf` bozuldu (içinde yalnızca `host=` kaldı). Yedek `db.conf.bak` duruyor. Dosyayı yedekten geri yükle.", "hint": "`cp db.conf.bak db.conf`. `cat db.conf` ile kontrol et: `host=localhost` ve `port=5432` olmalı."},
+  "t14": {"text": "Ticket #3601 — 'Canlı sunucu için temiz yapılandırma gerekiyor: yorum satırsız bir kopya `server.live` olarak hazırla, orijinal `server.conf.orig` adıyla saklansın.' (Simülatörde sed yok: yorumsuz çıktıyı `grep -v` ile üret; gerçek sistemde `sed '/^#/d'` aynısını yapar.)", "hint": "`cp server.conf server.conf.orig` ve `grep -v '^#' server.conf > server.live`."},
+  "t15": {"text": "Ticket #3602 — 'access.log içindeki durum kodlarının dağılımını `status_report.txt` dosyasına yaz.' (Her kod için sayı olmalı; ör. `3 200`.)", "hint": "İkinci sütunu al, sırala, say: `cut -d' ' -f2 access.log | sort | uniq -c > status_report.txt`. awk dizisi de aynısını yapardı."},
+  "t16": {"text": "Ticket #3603 — 'IT departmanının toplam maaş tutarını hesapla.' awk ile yaz: ayraç `,`, ikinci alan `it` olan satırların üçüncü alanını topla, `END` ile yazdır.", "hint": "`awk -F, '$2==\"it\" {s+=$3} END {print s}' employees.csv` (sonuç 11300)."}
+ },
+ "vm": {
+  "intro": "Bu komutları kendi Ubuntu/Rocky/Alma VM'inde çalıştır. Hepsi `~/lab` içinde, kendi oluşturduğun deneme dosyalarında kalır. sed ve awk bu dağıtımlarda hazır gelir (GNU sürümleri).",
+  "tasks": {
+   "v01": {
+    "title": "Deneme dosyalarını oluştur",
+    "text": "`~/lab` klasöründe aşağıdaki dört deneme dosyasını `printf` ile oluştur ve satır sayılarını yapıştır.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/lab && cd ~/lab\nprintf 'cat\\ndog\\nbird\\ncat\\nfish\\n' > pets.txt\nprintf 'name,dept,salary\\nanna,it,5200\\nben,hr,4100\\ncara,it,6100\\ndan,ops,3900\\n' > employees.csv\nprintf '# server config\\nport=8080\\n# debug off\\ndebug=false\\nhost=localhost\\n' > server.conf\nprintf '10.0.0.1 200\\n10.0.0.2 404\\n10.0.0.1 200\\n10.0.0.3 500\\n10.0.0.2 200\\n' > access.log\nwc -l pets.txt employees.csv server.conf access.log", "expected": "  5 pets.txt\n  5 employees.csv\n  5 server.conf\n  5 access.log\n 20 total"}
+    ],
+    "differs": ["Satır sayısı 5 değilse `printf` satırlarından birini eksik veya fazla yapıştırmışsındır; dosyayı `cat` ile kontrol edip komutu tekrar çalıştır.", "`\\n` yerine gerçek `n` harfi görürsen tırnakları (tek tırnak) kontrol et."]
+   },
+   "v02": {
+    "title": "sed: değiştir, seç, sil",
+    "text": "Üç sed komutunu çalıştır. Dosyalar değişmez, yalnızca çıktı değişir. Çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nsed 's/cat/hamster/' pets.txt\nsed -n '2,3p' pets.txt\nsed '1d' employees.csv", "expected": "hamster\ndog\nbird\nhamster\nfish\ndog\nbird\nanna,it,5200\nben,hr,4100\ncara,it,6100\ndan,ops,3900"}
+    ],
+    "differs": ["`cat pets.txt` hâlâ `cat` gösteriyorsa sorun yok: `-i` kullanmadığın için dosya değişmez.", "Hiç çıktı yoksa `cd ~/lab` başarısız olmuş olabilir; v01'i tekrar çalıştır."]
+   },
+   "v03": {
+    "title": "sed -i ile yedekli değişiklik",
+    "text": "`server.conf` içinde portu yedek alarak değiştir ve farkı göster. Çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "cd ~/lab\n# GNU sed (Ubuntu/Rocky/Alma); -i.bak yedek alır\nsed -i.bak 's/8080/9090/' server.conf\ngrep port server.conf\ndiff server.conf.bak server.conf", "expected": "port=9090\n2c2\n< port=8080\n---\n> port=9090"}
+    ],
+    "differs": ["macOS veya WSL dışı bir BSD kullanıyorsan `-i.bak` yine çalışır; uzantısız `-i` yazarsan `sed -i '' ...` gerekir.", "`diff` çıktısı boşsa değişiklik uygulanmamıştır; `8080` yazımını kontrol et.", "Geri almak için: `cp server.conf.bak server.conf`."]
+   },
+   "v04": {
+    "title": "awk: sütun, koşul, toplam",
+    "text": "`employees.csv` üzerinde üç awk komutu çalıştır: iki sütun, 5000'den büyük maaşlar, toplam ve ortalama.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nawk -F, 'NR>1 {print $1, $3}' employees.csv\nawk -F, 'NR>1 && $3 > 5000 {print $1}' employees.csv\nawk -F, 'NR>1 {s+=$3} END {printf \"total=%d avg=%.1f\\n\", s, s/(NR-1)}' employees.csv", "expected": "anna 5200\nben 4100\ncara 6100\ndan 3900\nanna\ncara\ntotal=19300 avg=4825.0"}
+    ],
+    "differs": ["Ondalık ayırıcı yerel ayara göre `4825,0` olabilir.", "`total=0` görürsen `-F,` eksik veya `$3` kabuk tarafından yorumlanmıştır; programı tek tırnak içine al."]
+   },
+   "v05": {
+    "title": "Log analizi: sayma",
+    "text": "`access.log` içindeki durum kodlarını awk dizisi ile say, 404 satırını sed ile bul ve çıktıyı yapıştır. İstersen çalışan işlemleri kullanıcıya göre say.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nawk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort\nsed -n '/404/p' access.log\nps aux | awk 'NR>1 {print $1}' | sort | uniq -c | sort -rn | head -3", "expected": "200 3\n404 1\n500 1\n10.0.0.2 404\n    120 root\n     35 student\n      4 www-data"}
+    ],
+    "differs": ["Son komutun sayıları ve kullanıcıları sistemine göre farklıdır; önemli olan her satırın `sayı kullanıcı` biçiminde olmasıdır.", "`for (k in c)` sırası belirsizdir; bu yüzden `sort` ekledik."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "`sed 's/a/b/' file` komutu `g` bayrağı olmadan ne yapar?", "options": ["Dosyadaki tüm a harflerini b yapar", "Her satırdaki yalnızca ilk a harfini b yapar", "Yalnızca ilk satırı değiştirir", "Dosyayı yerinde değiştirir"], "explain": "`g` yoksa her satırda yalnızca ilk eşleşme değişir; dosya ise `-i` olmadan hiç değişmez."},
+  "q2": {"q": "Yapılandırma dosyasını yerinde değiştirmenin en güvenli yolu hangisidir?", "options": ["`sed -n 's/a/b/p' file`", "`sed -e 's/a/b/' file`", "`sed -i 's/a/b/' file` (yedeksiz)", "`sed -i.bak 's/a/b/' file`"], "explain": "`-i.bak` orijinali `file.bak` olarak saklar; `-i` tek başına geri alınamaz."},
+  "q3": {"q": "`awk -F, '{print $NF}' employees.csv` ne yazdırır?", "options": ["Her satırın ilk alanını", "Satırdaki alan sayısını", "Her satırın son alanını", "Tüm satırı"], "explain": "`NF` alan sayısıdır, `$NF` ise son alanın değeridir."},
+  "q4": {"q": "`awk -F, 'NR>1 {s+=$3} END {print s}'` içinde `NR>1` ne işe yarar?", "options": ["İlk satırı (başlığı) atlar", "Yalnızca ilk satırı işler", "Alan sayısını 1'e eşitler", "Dosyayı sıralar"], "explain": "`NR` satır numarasıdır; `NR>1` başlık satırı dışındaki satırlarda eylemi çalıştırır."}
+ },
+ "summary": [
+  "`sed 's/old/new/g'` yer değiştirir; `-n` + `p` seçer, `d` siler. Dosya `-i` olmadan değişmez.",
+  "`sed -i` kalıcıdır: `-i.bak` ile yedek al. macOS'ta `-i ''` gerekir.",
+  "awk satırı alanlara böler: `$1`, `$NF`, `-F,`; `NR`, `NF`, `BEGIN`, `END` ile hesap yapılır.",
+  "`c[$2]++` ilişkisel dizisi ile log'ta değerleri sayarsın; çıktıyı `sort` ile sırala.",
+  "Programı her zaman tek tırnak içine yaz ve önce sonucu ekranda doğrula."
+ ],
+ "glossary": [
+  {"term": "sed", "meaning": "Metni satır satır işleyen akış (stream) düzenleyici."},
+  {"term": "awk", "meaning": "Satırları alanlara bölüp koşul, hesap ve rapor yazmaya yarayan metin işleme dili."},
+  {"term": "alan (field)", "meaning": "awk'ın bir satırı ayraçla böldüğü parça: `$1`, `$2`, … `$NF`."},
+  {"term": "adres (address)", "meaning": "sed'de komutun hangi satırlara uygulanacağını belirten numara, aralık veya regex."},
+  {"term": "yerinde düzenleme (in-place)", "meaning": "`sed -i` ile sonucun ekrana değil dosyanın kendisine yazılması."},
+  {"term": "ilişkisel dizi", "meaning": "Anahtar-değer çiftlerini tutan awk dizisi; sayaçlar için kullanılır."},
+  {"term": "regex", "meaning": "Metin kalıbı tanımlayan düzenli ifade; sed ve awk eşleştirme için kullanır."}
+ ]
+}

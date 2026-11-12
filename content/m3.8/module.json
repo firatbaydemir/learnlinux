@@ -1,0 +1,307 @@
+{
+ "id": "3.8",
+ "level": 3,
+ "setup": {
+  "dirs": [
+   "/home/student/lab/project/src",
+   "/home/student/lab/project/docs",
+   "/home/student/lab/logs"
+  ],
+  "files": {
+   "/home/student/lab/project/src/main.c": "int main(void) { return 0; }\n",
+   "/home/student/lab/project/src/util.c": "int add(int a, int b) { return a + b; }\n",
+   "/home/student/lab/project/docs/readme.txt": "Demo project\n",
+   "/home/student/lab/project/notes.txt": "todo: backup\n",
+   "/home/student/lab/logs/app.log": "start\nrunning\nstop\n",
+   "/home/student/lab/logs/web.log": "GET /\nGET /index\n",
+   "/home/student/lab/logs/db.log": "open\nquery\nquery\nclose\n",
+   "/home/student/lab/bomb1.txt": "loose file 1\n",
+   "/home/student/lab/bomb2.txt": "loose file 2\n",
+   "/home/student/lab/bomb3.txt": "loose file 3\n"
+  },
+  "modes": [],
+  "cwd": "/home/student/lab"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^ls -R project$",
+    "ok": true
+   },
+   "solution": [
+    "ls -R project"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "exists": "~/lab/backups",
+    "type": "d"
+   },
+   "solution": [
+    "mkdir backups"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^tar\\s+-{0,2}\\w*c\\w*\\s.*backups/project\\.tar\\.gz\\s+project/?$"
+   },
+   "solution": [
+    "tar -czf backups/project.tar.gz project"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^tar\\s+-{0,2}\\w*t\\w*\\s.*backups/project\\.tar\\.gz$"
+   },
+   "solution": [
+    "tar -tzf backups/project.tar.gz"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^tar\\s+-{0,2}\\w*x\\w*\\s.*backups/project\\.tar\\.gz\\s+-C\\s*restore$"
+    },
+    {
+     "exists": "~/lab/restore",
+     "type": "d"
+    }
+   ],
+   "solution": [
+    "mkdir restore",
+    "tar -xzf backups/project.tar.gz -C restore"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^gzip\\s+(-\\w*k\\w*|--keep)\\s+logs/app\\.log$"
+   },
+   "solution": [
+    "gzip -k logs/app.log"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^tar\\s+-{0,2}\\w*x\\w*\\s.*backups/project\\.tar\\.gz\\s+-C\\s*restore\\s+project/notes\\.txt$"
+   },
+   "solution": [
+    "tar -xzf backups/project.tar.gz -C restore project/notes.txt"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "\\b9\\s+total",
+    "of": "^wc -l logs/\\*\\.log$"
+   },
+   "solution": [
+    "wc -l logs/*.log"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "project/src/main\\.c\\s+project/src/util\\.c",
+    "of": "^find project .*\\| sort$"
+   },
+   "solution": [
+    "find project -name '*.c' | sort"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^tar\\s.*--exclude[= ]['\"]?\\*\\.log['\"]?\\s"
+   },
+   "solution": [
+    "tar -czf backups/lab-nologs.tar.gz --exclude='*.log' ."
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^tar\\s+-{0,2}\\w*c\\w*\\s+backups/project-\\$\\(date \\+%(F|Y-%m-%d)\\)\\.tar\\.gz\\s+project$"
+   },
+   "solution": [
+    "tar -czf backups/project-$(date +%F).tar.gz project"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "debug",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/cleanup/bomb1.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/cleanup/bomb2.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/cleanup/bomb3.txt",
+     "type": "f"
+    },
+    {
+     "absent": "~/lab/bomb1.txt"
+    },
+    {
+     "absent": "~/lab/bomb2.txt"
+    },
+    {
+     "absent": "~/lab/bomb3.txt"
+    }
+   ],
+   "solution": [
+    "mkdir cleanup",
+    "mv bomb1.txt bomb2.txt bomb3.txt cleanup/"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/lab/staging/project/src/main.c",
+     "type": "f"
+    },
+    {
+     "cmd": "^ls -R staging$",
+     "ok": true
+    },
+    {
+     "cmd": "^tar\\s+-{0,2}\\w*c\\w*\\s.*staging\\.tar\\.gz\\s+staging/?$"
+    }
+   ],
+   "solution": [
+    "mkdir staging",
+    "cp -r project staging/",
+    "ls -R staging",
+    "tar -czf staging.tar.gz staging"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {
+    "seq": [
+     "^zip\\s+-\\w*r\\w*\\s+backups/project\\.zip\\s+project/?$",
+     "^unzip\\s+-l\\s+backups/project\\.zip$",
+     "^sha256sum\\s+backups/project\\.zip$"
+    ]
+   },
+   "solution": [
+    "zip -r backups/project.zip project",
+    "unzip -l backups/project.zip",
+    "sha256sum backups/project.zip"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "exists": "~/lab/audit/web.log",
+     "type": "f"
+    },
+    {
+     "exists": "~/lab/logs/web.log",
+     "type": "f"
+    },
+    {
+     "cmd": "^gzip\\s+(-\\w+\\s+)*audit/(\\*\\.log|\\S+\\.log)"
+    }
+   ],
+   "solution": [
+    "mkdir audit",
+    "cp logs/*.log audit/",
+    "gzip audit/*.log"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "predict",
+   "diff": 1,
+   "check": {
+    "out": "\\b2\\b",
+    "of": "^ls -1 project/src \\| wc -l$"
+   },
+   "solution": [
+    "ls -1 project/src | wc -l"
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 3
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 2
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "(?=[\\s\\S]*main\\.c)(?=[\\s\\S]*readme\\.txt)(?=[\\s\\S]*notes\\.txt)"
+  },
+  {
+   "id": "v02",
+   "expect": "project/src/main\\.c"
+  },
+  {
+   "id": "v03",
+   "expect": "notes\\.txt"
+  },
+  {
+   "id": "v04",
+   "expect": "big\\.log\\.gz"
+  },
+  {
+   "id": "v05",
+   "expect": "OK|Tamam"
+  }
+ ]
+}

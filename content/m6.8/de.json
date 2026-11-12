@@ -1,0 +1,225 @@
+{
+ "title": "Abschlussprojekt — Kleiner Firmenserver",
+ "lead": "Kombiniere alles auf einem Server: Benutzer, gemeinsames Verzeichnis, Webseite, Firewall, Backup, Timer und ein geprüfter Abgabebericht.",
+ "objectives": [
+  "Du planst zuerst den ganzen Server und erstellst einen VM-Snapshot, bevor du etwas änderst.",
+  "Du richtest die Benutzer alice, bob, carol, die Gruppen staff und admins und das gemeinsame Verzeichnis /srv/company mit setgid ein.",
+  "Du veröffentlichst eine Seite mit nginx, setzt das richtige Label (SELinux) oder prüfst AppArmor und öffnest die Ports 80/443, ohne dich aus SSH auszusperren.",
+  "Du automatisierst das Backup mit einem Skript und einem systemd-Timer.",
+  "Du prüfst jeden Schritt mit einer Checkliste und schreibst einen Abgabebericht."
+ ],
+ "sections": [
+  {
+   "id": "plan",
+   "title": "1. Erst Plan und Sicherheit",
+   "body": [
+    "Das Ziel: ein kleiner Firmenserver namens `linux-lab`. Drei Personen arbeiten darauf: **alice** (Admin), **bob** und **carol**. Alles liegt unter `/srv/company`: `shared` (Teamdateien), `admin` (nur Admins), `web` (die Seite), `backup` und `scripts`.",
+    "**Arbeite in der VM, nie auf einer Produktivmaschine.** Dieses Projekt legt Benutzer an und ändert Rechte, SELinux-Labels, Firewall-Regeln und systemd-Units. Erstelle vor dem Start einen **Snapshot** (Modul 0.2). Geht ein Schritt schief, bist du in Sekunden zurück.",
+    "Das eingebaute Terminal kann `useradd`, `nginx`, `firewall-cmd` oder `systemctl` nicht ausführen. Deshalb bauen die Simulator-Aufgaben die **Dateien** des Projekts (Rechtebaum, Skript, Unit-Dateien, Bericht) unter `~/srv/company` nach, während die VM-Aufgaben das Echte in `/srv/company` tun.",
+    "Reihenfolge: 1) Plan + Snapshot, 2) Benutzer und Verzeichnisse, 3) Web, 4) Firewall, 5) Backup + Timer, 6) Prüfung + Bericht. RHEL/Rocky und Debian/Ubuntu unterscheiden sich nur in wenigen Befehlen; beide werden gezeigt."
+   ],
+   "commands": [
+    {"cmd": "cat /etc/os-release", "what": "Zeigt Distributionsname und Version.", "where": "Bevor du dnf- oder apt-Befehle wählst.", "why": "Sagt dir, welche Variante der Anleitung gilt.", "example": "cat /etc/os-release"},
+    {"cmd": "getenforce", "what": "Gibt den SELinux-Modus aus: Enforcing, Permissive oder Disabled.", "where": "RHEL, Rocky, Alma, Fedora.", "why": "Du musst den Modus kennen, bevor du das Web-Label testest; lass ihn auf Enforcing.", "example": "getenforce", "nosim": true},
+    {"cmd": "sudo aa-status", "what": "Zeigt, welche AppArmor-Profile in welchem Modus geladen sind.", "where": "Debian und Ubuntu.", "why": "Ubuntu nutzt AppArmor statt SELinux; hier prüfst du nur.", "example": "sudo aa-status", "nosim": true},
+    {"cmd": "id", "what": "Zeigt Benutzer-ID und Gruppenmitgliedschaften.", "where": "Wenn du prüfst, wer das gemeinsame Verzeichnis nutzen darf.", "why": "Die Gruppenmitgliedschaft entscheidet über den Zugriff auf `/srv/company/shared`.", "example": "id student"}
+   ],
+   "warn": "Erstelle jetzt einen VM-Snapshot und nenne ihn `before-company-project`. Führe dieses Projekt nicht auf einem echten Server aus, den andere nutzen.",
+   "tip": "Führe während der Arbeit eine Notizdatei. Jeder Befehl, den du ausführst, wird später eine Zeile im Abgabebericht."
+  },
+  {
+   "id": "users",
+   "title": "2. Benutzer, Gruppen und gemeinsames Verzeichnis",
+   "body": [
+    "Lege die Gruppen `staff` (alice, bob, carol) und `admins` (nur alice) an. Für die Benutzer nimmst du `useradd -m -G`. Benutzer löschen gehört **nicht** zu diesem Projekt (`userdel -r` entfernt auch Home-Verzeichnisse).",
+    "Ein gemeinsames Verzeichnis braucht zwei Dinge. **Setgid** (`chmod 2770`) lässt neue Dateien die Gruppe des Verzeichnisses (`staff`) erben, sodass bob die Dateien von carol bearbeiten kann. Modus `770` hält alle anderen draußen. Optional sorgt eine **Default-ACL** (`setfacl -d -m g:staff:rwx`) dafür, dass neue Dateien auch bei strenger umask für die Gruppe schreibbar sind.",
+    "Prinzip der minimalen Rechte: `web` ist `755` (nginx muss lesen), `scripts` ist `750`, `backup` ist `700`. Im Simulator übst du dieselben Modi mit `chmod` auf `~/srv/company`; ein normaler Benutzer kann dort kein `chgrp`, der Gruppenteil gibt es nur in der VM."
+   ],
+   "commands": [
+    {"cmd": "sudo useradd -m -s /bin/bash -G staff alice", "what": "Legt einen Benutzer mit Home-Verzeichnis, Shell und Zusatzgruppe an.", "where": "Einmal für alice, bob, carol.", "why": "Echte Konten mit eigenen Home-Verzeichnissen.", "example": "sudo useradd -m -s /bin/bash -G staff alice", "nosim": true},
+    {"cmd": "sudo chgrp staff /srv/company/shared", "what": "Setzt die besitzende Gruppe des Verzeichnisses.", "where": "Bei shared und admin.", "why": "Die Gruppenzugehörigkeit gibt setgid an neue Dateien weiter.", "example": "sudo chgrp staff /srv/company/shared", "nosim": true},
+    {"cmd": "chmod 2770", "what": "Setzt rwx für Besitzer und Gruppe, nichts für andere, plus das setgid-Bit.", "where": "Bei shared und admin.", "why": "Neue Dateien erben die Gruppe; Außenstehende haben keinen Zugriff.", "example": "chmod 2770 ~/srv/company/shared"},
+    {"cmd": "sudo setfacl -d -m g:staff:rwx", "what": "Setzt eine Default-ACL, die neue Dateien im Verzeichnis erben.", "where": "Am Verzeichnis shared (Paket `acl`).", "why": "Die Gruppe bleibt schreibberechtigt, auch wenn jemand umask 077 hat.", "example": "sudo setfacl -d -m g:staff:rwx /srv/company/shared", "nosim": true},
+    {"cmd": "ls -ld", "what": "Zeigt das Verzeichnis selbst, nicht seinen Inhalt.", "where": "Beim Prüfen von Modus und Gruppe.", "why": "`drwxrws---` bedeutet, dass setgid aktiv ist (das `s`).", "example": "ls -ld ~/srv/company/shared"}
+   ],
+   "tip": "Ein großes `S` in `drwxr-S---` heißt: setgid ist gesetzt, aber die Gruppe hat kein Ausführungsrecht (x); korrigiere den Modus.",
+   "warn": "Löse Rechteprobleme nie mit `chmod 777`. Dann kann jeder die Dateien ändern oder löschen."
+  },
+  {
+   "id": "web",
+   "title": "3. Webseite mit nginx, SELinux und AppArmor",
+   "body": [
+    "Installiere nginx und lass es `/srv/company/web` ausliefern. Wir legen in `/etc/nginx/conf.d/company.conf` einen Server-Block namens `company.local` an (funktioniert in beiden Familien) und testen mit einem `Host:`-Header, damit die Standardseite nicht stört.",
+    "**RHEL/Rocky:** SELinux versieht jede Datei mit einem Label. Ein neues Verzeichnis unter `/srv` bekommt ein allgemeines Label, daher liefert nginx **403 Forbidden**, obwohl die Unix-Rechte stimmen. Die Lösung ist das richtige Label: `semanage fcontext` speichert die Regel, `restorecon` wendet sie an. Nimm nicht `setenforce 0` als Abkürzung; das schaltet den Schutz des ganzen Systems ab.",
+    "**Debian/Ubuntu:** Es gibt kein Label zu setzen. AppArmor ist aktiv, aber nginx wird normalerweise nicht durch ein Profil eingeschränkt; du prüfst nur den Status mit `aa-status`. Ein 403 ist dort ein normales Rechteproblem (prüfe die Verzeichnismodi bis hoch zu `/srv`)."
+   ],
+   "commands": [
+    {"cmd": "sudo dnf install -y nginx", "what": "Installiert nginx (RHEL, Rocky, Alma). Unter Ubuntu: `sudo apt install -y nginx`.", "where": "Erster Schritt im Web-Kapitel.", "why": "Der Paketmanager erledigt Dateien und Abhängigkeiten.", "example": "sudo dnf install -y nginx", "nosim": true},
+    {"cmd": "sudo semanage fcontext -a -t httpd_sys_content_t \"/srv/company/web(/.*)?\"", "what": "Speichert eine Regel: Dateien unter web bekommen das Web-Inhalt-Label.", "where": "RHEL-Familie (Paket `policycoreutils-python-utils`).", "why": "Das Label übersteht ein Relabel; `chcon` nicht.", "example": "sudo semanage fcontext -a -t httpd_sys_content_t \"/srv/company/web(/.*)?\"", "nosim": true},
+    {"cmd": "sudo restorecon -Rv /srv/company/web", "what": "Wendet die gespeicherte Label-Regel auf vorhandene Dateien an.", "where": "Direkt nach `semanage fcontext`.", "why": "Ohne diesen Schritt existiert die Regel, aber die Dateien behalten das alte Label.", "example": "sudo restorecon -Rv /srv/company/web", "nosim": true},
+    {"cmd": "ls -Zd /srv/company/web", "what": "Zeigt das SELinux-Label des Verzeichnisses.", "where": "Zur Prüfung des Labels.", "why": "Du willst `httpd_sys_content_t` sehen.", "example": "ls -Zd /srv/company/web", "nosim": true},
+    {"cmd": "sudo nginx -t", "what": "Testet die nginx-Konfiguration ohne Neustart.", "where": "Vor jedem Start oder Reload.", "why": "Ein Tippfehler würde sonst die Seite lahmlegen.", "example": "sudo nginx -t", "nosim": true}
+   ],
+   "tip": "Warum SELinux etwas blockiert hat, siehst du mit: `sudo ausearch -m avc -ts recent`. Lies das Log, bevor du etwas änderst.",
+   "warn": "`setenforce 0` ist bestenfalls ein Diagnosewerkzeug, nie eine Lösung. Setze stattdessen das Label."
+  },
+  {
+   "id": "firewall",
+   "title": "4. Firewall: 80 und 443 öffnen, SSH behalten",
+   "body": [
+    "RHEL/Rocky nutzt **firewalld**, Ubuntu nutzt **ufw**. Beide können dich aus deinem eigenen Server aussperren, wenn du per SSH verbunden bist. Regeln: SSH bleibt erlaubt, teste zuerst mit einer **Runtime**-Regel und mache sie erst nach dem Test **dauerhaft**.",
+    "firewalld: Regeln ohne `--permanent` verschwinden beim Reload oder Neustart; mit `--timeout=300` löschen sie sich selbst. ufw: Regeln gelten sofort und werden gespeichert, also erlaube SSH **vor** `ufw enable`.",
+    "Halte beim Ändern der Firewall immer eine **zweite SSH-Sitzung offen** (oder die VM-Konsole). Sperren dich die neuen Regeln aus, funktionieren die offene Sitzung oder die Konsole weiter."
+   ],
+   "commands": [
+    {"cmd": "sudo firewall-cmd --list-services", "what": "Listet die erlaubten Dienste der aktiven Zone.", "where": "Vor und nach jeder Änderung.", "why": "Bestätigt, dass `ssh` noch da ist.", "example": "sudo firewall-cmd --list-services", "nosim": true},
+    {"cmd": "sudo firewall-cmd --permanent --add-service={http,https}", "what": "Speichert dauerhafte Regeln für die Ports 80 und 443.", "where": "Nachdem der Runtime-Test funktioniert hat.", "why": "Übersteht Reload und Neustart; anwenden mit `--reload`.", "example": "sudo firewall-cmd --permanent --add-service={http,https}", "nosim": true},
+    {"cmd": "sudo ufw allow OpenSSH", "what": "Erlaubt SSH (Port 22) in ufw.", "where": "Ubuntu, immer vor `ufw enable`.", "why": "Verhindert die Aussperrung beim Einschalten der Firewall.", "example": "sudo ufw allow OpenSSH", "nosim": true},
+    {"cmd": "sudo ufw allow 80/tcp", "what": "Erlaubt HTTP; wiederhole mit `443/tcp` für HTTPS.", "where": "Ubuntu-Webserver.", "why": "Öffnet nur die Ports, die die Seite braucht.", "example": "sudo ufw allow 80/tcp", "nosim": true},
+    {"cmd": "ss -tulpn", "what": "Listet lauschende TCP/UDP-Ports mit dem Prozess.", "where": "Um zu sehen, was der Server wirklich anbietet.", "why": "Jeder unerwartete Port ist ein Befund für deinen Bericht.", "example": "ss -tulpn", "nosim": true}
+   ],
+   "danger": "Entferne nie den Dienst `ssh` und sperre nie Port 22, solange du per SSH verbunden bist. Prüfe ssh mit `--list-services` oder `ufw status` **vor** `firewall-cmd --reload` oder `ufw enable`. Bist du ausgesperrt, nutze die VM-Konsole und stelle bei Bedarf den Snapshot wieder her.",
+   "tip": "Übe das Lesen von `ss`-Ausgaben im Simulator: Die Audit-Dateien in deinem Home-Verzeichnis enthalten eine Beispielliste, die du mit `grep` und `cut` auswerten kannst."
+  },
+  {
+   "id": "backup",
+   "title": "5. Backup-Skript und systemd-Timer",
+   "body": [
+    "Das Backup ist ein kurzes Skript (Module 6.5/6.6): Es schreibt ein datiertes `tar.gz`-Archiv von `shared`, `web` und `admin` nach `/srv/company/backup` und löscht Archive, die älter als 7 Tage sind. In der Praxis wäre eine zweite Platte oder eine Remote-Kopie besser; für das Projekt reicht ein lokaler Ordner.",
+    "systemd führt das Skript aus: Eine `.service` mit `Type=oneshot` beschreibt, was läuft, ein `.timer` beschreibt, wann (`OnCalendar=`, `Persistent=true`). Aktiviere den **Timer**, nicht den Service. Nach dem Anlegen oder Ändern von Unit-Dateien führe `systemctl daemon-reload` aus.",
+    "Auf RHEL/Rocky hat ein Skript in `/srv/company/scripts` ein allgemeines Label, und systemd kann es verweigern (Status 203/EXEC). Gib ihm das Label `bin_t` mit `semanage fcontext` und `restorecon`, wie beim Web-Verzeichnis."
+   ],
+   "commands": [
+    {"cmd": "tar -czf", "what": "Erstellt ein komprimiertes Archiv.", "where": "Im Backup-Skript.", "why": "Eine datierte Datei pro Backup lässt sich leicht ablegen und wiederherstellen.", "example": "tar -czf /srv/company/backup/company-test.tar.gz -C /srv/company shared web admin", "nosim": true},
+    {"cmd": "systemctl daemon-reload", "what": "Lässt systemd neue oder geänderte Unit-Dateien einlesen.", "where": "Nach dem Schreiben von Service und Timer.", "why": "Sonst kennt systemd die neuen Units nicht.", "example": "sudo systemctl daemon-reload", "nosim": true},
+    {"cmd": "systemctl enable --now company-backup.timer", "what": "Aktiviert den Timer beim Boot und startet ihn sofort.", "where": "Einmal, nach daemon-reload.", "why": "Das Backup läuft dann jede Nacht ohne dein Zutun.", "example": "sudo systemctl enable --now company-backup.timer", "nosim": true},
+    {"cmd": "systemctl list-timers", "what": "Zeigt Timer mit nächstem und letztem Lauf.", "where": "Zur Prüfung des Zeitplans.", "why": "Du siehst, wann das nächste Backup läuft.", "example": "systemctl list-timers company-backup.timer --no-pager", "nosim": true},
+    {"cmd": "chmod 755 backup.sh", "what": "Macht das Skript ausführbar.", "where": "Immer, wenn du ein Skript anlegst.", "why": "Ohne x-Bit kann der Service es nicht starten.", "example": "chmod 755 ~/srv/company/scripts/backup.sh"}
+   ],
+   "danger": "`find ... -delete` lässt sich nicht rückgängig machen. Teste die Zeile zuerst mit `-print` statt `-delete` und führe sie nur auf `/srv/company/backup` aus.",
+   "tip": "Starte den Service einmal von Hand mit `sudo systemctl start company-backup.service` und sieh dir `ls -l /srv/company/backup` an, bevor du auf den Timer wartest."
+  },
+  {
+   "id": "verify",
+   "title": "6. Prüf-Checkliste und Abgabebericht",
+   "body": [
+    "Ein Server ist erst fertig, wenn du **Belege** hast. Gehe die Checkliste durch: Benutzer und Gruppen, setgid-Verzeichnis, Seite antwortet mit 200, SELinux-Label oder AppArmor-Status, Firewall hat ssh/80/443, Timer aktiv, Backup-Datei vorhanden, Backup-Verzeichnis `700`.",
+    "Ein kleines Skript gibt pro Prüfung `OK:` oder `FAIL:` aus, damit das Ergebnis leicht zu lesen und einzufügen ist. Der **Abgabebericht** `/srv/company/REPORT.txt` enthält Hostnamen, Datum, die Prüfausgabe und die lauschenden Ports. Das gibst du ab.",
+    "Sagt eine Zeile FAIL, gehe zum passenden Kapitel zurück und behebe es. Bearbeite den Bericht nicht von Hand, um einen Fehler zu verstecken."
+   ],
+   "commands": [
+    {"cmd": "getent group staff", "what": "Zeigt den Gruppeneintrag mit Mitgliedern.", "where": "Um die Gruppenmitgliedschaft zu belegen.", "why": "Liest aus der echten Benutzerdatenbank.", "example": "getent group staff", "nosim": true},
+    {"cmd": "stat -c '%A %U:%G %n' /srv/company/shared", "what": "Gibt Rechte, Besitzer und Gruppe in einer Zeile aus.", "where": "In Prüfungen und im Bericht.", "why": "Kurzer Beleg, dass der Modus `drwxrws---` ist.", "example": "stat -c '%A %U:%G %n' /srv/company/shared", "nosim": true},
+    {"cmd": "curl -I", "what": "Holt nur die HTTP-Header.", "where": "Zum lokalen Testen der Webseite.", "why": "`200 OK` zeigt, dass nginx lokal geantwortet hat und Dateirechte/Labels den Zugriff erlauben; prüfe Firewall-Regeln separat und teste nach Möglichkeit von einem anderen Rechner.", "example": "curl -I -H 'Host: company.local' http://localhost", "nosim": true},
+    {"cmd": "wc -l", "what": "Zählt Zeilen.", "where": "Um zu prüfen, dass der Bericht nicht leer ist.", "why": "Ein Bericht braucht echten Inhalt.", "example": "wc -l ~/srv/company/REPORT.txt"}
+   ],
+   "tip": "Führe die Checkliste auch nach einem Neustart aus. Ein Dienst, der nur bis zum nächsten Neustart läuft, ist nicht fertig."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Lege die Projektwurzel in deinem Home-Verzeichnis an: `mkdir -p ~/srv/company` (in der VM ist das `/srv/company`).", "hint": "`-p` legt auch das fehlende Elternverzeichnis `srv` an."},
+  "t02": {"text": "Lege die fünf Unterverzeichnisse `shared`, `admin`, `web`, `backup` und `scripts` in `~/srv/company` mit einem einzigen `mkdir`-Befehl an.", "hint": "Klammerexpansion: `mkdir ~/srv/company/{shared,admin,web,backup,scripts}`."},
+  "t03": {"text": "Setze für die Projektarbeit eine strenge umask: `umask 027`.", "hint": "027 entzieht bei neuen Dateien allen anderen jedes Recht und der Gruppe das Schreibrecht."},
+  "t04": {"text": "Gib dem gemeinsamen Verzeichnis den Modus `2770` (setgid, rwx für Besitzer und Gruppe, nichts für andere).", "hint": "`chmod 2770 ~/srv/company/shared`."},
+  "t05": {"text": "Mache `web` für alle lesbar (`755`) und `backup` privat (`700`).", "hint": "Zwei `chmod`-Befehle, einer pro Verzeichnis."},
+  "t06": {"text": "Schreibe die Seite: Setze den Text `<h1>Small Company</h1>` in `~/srv/company/web/index.html`.", "hint": "Nimm `echo \"...\" > file`; setze den Text wegen `<` und `>` in Anführungszeichen."},
+  "t07": {"text": "Schreibe den nginx-Server-Block nach `~/srv/company/company.conf`: die Zeilen `server {`, `listen 80;`, `server_name company.local;`, `root /srv/company/web;` und `}`.", "hint": "`printf` mit `\\n` schreibt mehrere Zeilen auf einmal; setze den Text in einfache Anführungszeichen."},
+  "t08": {"text": "Vorhersage: Welche Rechtezeichenkette zeigt `ls -ld ~/srv/company/shared`? Schreibe sie auf und führe dann den Befehl aus.", "hint": "Das `s` ersetzt das `x` der Gruppe: `drwxrws---`."},
+  "t09": {"text": "Vorhersage: Welche Mitglieder hat die Gruppe `admins` in `~/audit/group.txt`? Bestätige mit `grep admins ~/audit/group.txt | cut -d: -f4`.", "hint": "Feld 4 der Gruppendatei ist die Mitgliederliste."},
+  "t10": {"text": "Vorhersage: Wie viele Zeilen in `~/audit/ss.txt` enthalten `LISTEN`? Prüfe mit `grep -c LISTEN ~/audit/ss.txt`.", "hint": "Die UDP-Zeile enthält `UNCONN`, nicht `LISTEN`."},
+  "t11": {"text": "Fehlersuche: Die Testseite in `~/srv/site` würde bei nginx ein 403 liefern. Das Verzeichnis hat Modus `700`, `index.html` hat `600`. Setze sie auf `755` und `644`.", "hint": "Prüfe mit `ls -ld ~/srv/site` und `ls -l ~/srv/site`."},
+  "t12": {"text": "Fehlersuche: `~/srv/broken/backup.sh` bricht mit Permission denied ab. Repariere es und führe es aus, sodass `~/srv/broken/out/notes.bak` existiert.", "hint": "Das Skript braucht das x-Bit: `chmod 755`, dann mit Pfad ausführen."},
+  "t13": {"text": "Mini-Projekt: Schreibe `~/srv/company/scripts/backup.sh` mit der Zeile `#!/bin/bash` und einer `cp`-Zeile, die `~/srv/company/web/index.html` nach `~/srv/company/backup/index.html.bak` kopiert. Mache es ausführbar und führe es aus.", "hint": "`printf` für die Datei, `chmod 755`, dann `~/srv/company/scripts/backup.sh`."},
+  "t14": {"text": "Mini-Projekt: Schreibe die Unit-Dateien `company-backup.service` (`Type=oneshot`, `ExecStart=/srv/company/scripts/backup.sh`) und `company-backup.timer` (`[Timer]`, `OnCalendar=*-*-* 02:00:00`, `Persistent=true`, `[Install]`, `WantedBy=timers.target`) nach `~/srv/company/scripts`.", "hint": "Zwei `printf`-Befehle mit `\\n`; der Service braucht `[Unit]` und `[Service]`, der Timer `[Unit]`, `[Timer]` und `[Install]`."},
+  "t15": {"text": "Challenge: Schreibe den Firewall-Plan `~/srv/company/firewall-plan.txt`, ein Befehl pro Zeile, in sicherer Reihenfolge: `firewall-cmd --permanent --add-service=` zuerst für ssh, dann http, dann https und zuletzt `firewall-cmd --reload`.", "hint": "Beginne die Datei mit `>`, hänge Zeilen mit `>>` an. SSH muss zuerst kommen."},
+  "t16": {"text": "Challenge: Schreibe den Abgabebericht `~/srv/company/REPORT.txt` mit mindestens 8 Zeilen: Titel, Hostname (nutze `$(hostname)`), Datum, Benutzer alice bob carol, Gruppen staff admins, gemeinsames Verzeichnis, Web-Ports 80 und 443, backup.", "hint": "Beginne mit `echo \"...\" > file`, hänge Zeilen mit `>>` an. `echo \"Host: $(hostname)\"` setzt den Hostnamen ein."},
+  "t17": {"text": "Ticket: Der Auditor meldet, der Server könnte auf unerwarteten Ports lauschen. Nutze `~/audit/ss.txt` und schreibe alle Zeilen, deren Port nicht 22, 80 oder 443 ist, nach `~/audit/unexpected.txt`.", "hint": "`grep -v -E ':(22|80|443) ' file > result`; das Leerzeichen nach der schließenden Klammer ist wichtig."},
+  "t18": {"text": "Ticket: Die Leitung möchte die Teamliste. Schreibe aus `~/audit/passwd.txt` die Namen der echten Benutzer (Home-Verzeichnis unter `/home/`) sortiert, einen pro Zeile, nach `~/audit/team.txt`.", "hint": "`grep /home/ file | cut -d: -f1 | sort > ~/audit/team.txt`."}
+ },
+ "vm": {
+  "intro": "Mache das echte Projekt in deiner VM in dieser Reihenfolge. Erstelle zuerst einen Snapshot: Geht etwas schief, gehst du zurück. Füge die Ausgabe ein, wenn eine Aufgabe es verlangt. Bei Befehlen für RHEL oder Ubuntu führst du nur deine Variante aus.",
+  "tasks": {
+   "v01": {
+    "title": "Snapshot und Ausgangszustand",
+    "text": "Erstelle in deinem VM-Programm einen VM-Snapshot namens `before-company-project` (Modul 0.2). Prüfe dann das System und füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "grep -E '^(ID|PRETTY_NAME)=' /etc/os-release\n# RHEL / Rocky / Alma:\ngetenforce\n# Debian / Ubuntu:\nsudo aa-status | head -n 3", "expected": "ID=rocky\nPRETTY_NAME=\"Rocky Linux 9.4 (Blue Onyx)\"\nEnforcing"}
+    ],
+    "differs": ["`getenforce: command not found` unter Ubuntu ist normal; nimm die Zeile mit `aa-status`.", "Sagt SELinux Permissive oder Disabled, notiere es und mache weiter, ändere den Modus aber nicht mit `setenforce`."]
+   },
+   "v02": {
+    "title": "Benutzer, Gruppen, gemeinsames Verzeichnis",
+    "text": "Lege Gruppen, Benutzer und den Verzeichnisbaum mit setgid an. Beweise es dann und füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "sudo groupadd staff\nsudo groupadd admins\nfor u in alice bob carol; do sudo useradd -m -s /bin/bash -G staff $u; done\nsudo usermod -aG admins alice\nsudo mkdir -p /srv/company/{shared,admin,web,backup,scripts}\nsudo chgrp staff /srv/company/shared\nsudo chgrp admins /srv/company/admin\nsudo chmod 2770 /srv/company/shared /srv/company/admin\nsudo chmod 755 /srv/company/web\nsudo chmod 750 /srv/company/scripts\nsudo chmod 700 /srv/company/backup"},
+     {"cmd": "sudo -u bob touch /srv/company/shared/from_bob.txt\nls -ld /srv/company/shared\nls -l /srv/company/shared\ngetent group staff\nid alice\nsudo -u carol ls /srv/company/admin", "expected": "drwxrws--- 2 root staff 4096 ... /srv/company/shared\n-rw-r--r-- 1 bob staff 0 ... from_bob.txt\nstaff:x:1002:alice,bob,carol\nuid=1001(alice) gid=1001(alice) groups=1001(alice),1002(staff),1003(admins)\nls: cannot open directory '/srv/company/admin': Permission denied"}
+    ],
+    "differs": ["Gruppen-IDs unterscheiden sich zwischen Systemen; nur die Namen müssen stimmen.", "Hat `from_bob.txt` die Gruppe `bob` statt `staff`, fehlt das setgid-Bit: wiederhole `chmod 2770`.", "Optionale Default-ACL (installiere zuerst das Paket `acl`): `sudo setfacl -d -m g:staff:rwx /srv/company/shared`."]
+   },
+   "v03": {
+    "title": "Webseite mit dem richtigen Label",
+    "text": "Installiere nginx, füge Server-Block und Seite hinzu, teste, korrigiere das Label (RHEL) oder prüfe AppArmor (Ubuntu) und füge die letzte curl-Ausgabe ein.",
+    "blocks": [
+     {"cmd": "# RHEL / Rocky / Alma:\nsudo dnf install -y nginx policycoreutils-python-utils\n# Debian / Ubuntu:\nsudo apt install -y nginx"},
+     {"cmd": "echo '<h1>Small Company</h1>' | sudo tee /srv/company/web/index.html\nsudo tee /etc/nginx/conf.d/company.conf <<'EOF'\nserver {\n    listen 80;\n    server_name company.local;\n    root /srv/company/web;\n}\nEOF\nsudo nginx -t\nsudo systemctl enable --now nginx\ncurl -sI -H 'Host: company.local' http://localhost | head -n 1", "expected": "HTTP/1.1 403 Forbidden   (RHEL before the label fix)\nHTTP/1.1 200 OK          (Ubuntu)"},
+     {"cmd": "# RHEL / Rocky / Alma only:\nls -Zd /srv/company/web\nsudo semanage fcontext -a -t httpd_sys_content_t \"/srv/company/web(/.*)?\"\nsudo restorecon -Rv /srv/company/web\nls -Zd /srv/company/web\n# Debian / Ubuntu only:\nsudo aa-status | grep -i nginx\n# both:\ncurl -sI -H 'Host: company.local' http://localhost | head -n 1\ncurl -s -H 'Host: company.local' http://localhost", "expected": "unconfined_u:object_r:default_t:s0 /srv/company/web\n... httpd_sys_content_t ...\nHTTP/1.1 200 OK\n<h1>Small Company</h1>"}
+    ],
+    "differs": ["403 nach der Label-Korrektur unter RHEL: prüfe `ls -Zd` erneut und die Modi von `/srv` und `/srv/company` (andere brauchen `x`).", "`semanage: command not found`: installiere `policycoreutils-python-utils`.", "Connection refused: `sudo systemctl status nginx`; Port 80 könnte von einem anderen Dienst belegt sein (`ss -tulpn`)."]
+   },
+   "v04": {
+    "title": "Firewall ohne Aussperren",
+    "text": "Halte eine zweite SSH-Sitzung oder die Konsole offen. Erlaube die Web-Ports, ohne SSH zu verlieren, und füge dann die Regelliste ein.",
+    "blocks": [
+     {"cmd": "# RHEL / Rocky / Alma (firewalld):\nsudo firewall-cmd --list-services\nsudo firewall-cmd --add-service={http,https} --timeout=300\ncurl -sI http://localhost | head -n 1\nsudo firewall-cmd --permanent --add-service={http,https}\nsudo firewall-cmd --reload\nsudo firewall-cmd --list-services", "expected": "cockpit dhcpv6-client http https ssh"},
+     {"cmd": "# Debian / Ubuntu (ufw): SSH FIRST!\nsudo ufw allow OpenSSH\nsudo ufw allow 80/tcp\nsudo ufw allow 443/tcp\nsudo ufw enable\nsudo ufw status", "expected": "Status: active\nOpenSSH                    ALLOW       Anywhere\n80/tcp                     ALLOW       Anywhere\n443/tcp                    ALLOW       Anywhere"}
+    ],
+    "differs": ["Kein `ssh` in der Liste unter RHEL: füge es sofort hinzu mit `sudo firewall-cmd --permanent --add-service=ssh` und Reload.", "`ufw: command not found` unter Rocky ist in Ordnung; dort nutzt du firewalld.", "Ausgesperrt? Nutze die VM-Konsole oder stelle den Snapshot wieder her."]
+   },
+   "v05": {
+    "title": "Backup-Skript und Timer",
+    "text": "Erstelle das Backup-Skript und die systemd-Units, aktiviere den Timer, führe ein Backup von Hand aus und füge die Timer-Liste ein.",
+    "blocks": [
+     {"cmd": "sudo tee /srv/company/scripts/backup.sh >/dev/null <<'EOF'\n#!/bin/bash\nset -euo pipefail\nDEST=/srv/company/backup\ntar -czf \"$DEST/company-$(date +%F_%H%M).tar.gz\" -C /srv/company shared web admin\nfind \"$DEST\" -name 'company-*.tar.gz' -mtime +7 -delete\nEOF\nsudo chmod 750 /srv/company/scripts/backup.sh"},
+     {"cmd": "sudo tee /etc/systemd/system/company-backup.service >/dev/null <<'EOF'\n[Unit]\nDescription=Company backup\n\n[Service]\nType=oneshot\nExecStart=/srv/company/scripts/backup.sh\nEOF\nsudo tee /etc/systemd/system/company-backup.timer >/dev/null <<'EOF'\n[Unit]\nDescription=Daily company backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\nEOF"},
+     {"cmd": "# RHEL / Rocky / Alma only (script label):\nsudo semanage fcontext -a -t bin_t \"/srv/company/scripts(/.*)?\"\nsudo restorecon -Rv /srv/company/scripts\n# both:\nsudo systemd-analyze verify /etc/systemd/system/company-backup.service\nsudo systemctl daemon-reload\nsudo systemctl enable --now company-backup.timer\nsudo systemctl start company-backup.service\nsudo ls -l /srv/company/backup\nsystemctl list-timers company-backup.timer --no-pager", "expected": "-rw-r--r-- 1 root root 2048 ... company-2026-11-12_0215.tar.gz\nNEXT                        LEFT   LAST PASSED UNIT                 ACTIVATES\nFri 2026-11-13 02:00:00 CET 23h    -    -      company-backup.timer company-backup.service"}
+    ],
+    "differs": ["`status=203/EXEC` in `systemctl status company-backup.service`: setze unter RHEL das Label `bin_t` (erste Zeilen dieses Blocks) und prüfe das x-Bit.", "Teste die Zeile mit `find ... -delete` nicht auf anderen Verzeichnissen; im Zweifel ersetze `-delete` durch `-print`.", "Ist der Timer nicht aufgelistet, hast du wohl `daemon-reload` vergessen."]
+   },
+   "v06": {
+    "title": "Prüf-Checkliste und Abgabebericht",
+    "text": "Schreibe das Checklisten-Skript, führe es als root aus und erzeuge den Abgabebericht. Alle Zeilen müssen OK sagen. Füge die verify-Ausgabe ein.",
+    "blocks": [
+     {"cmd": "sudo tee /srv/company/scripts/verify.sh >/dev/null <<'EOF'\n#!/bin/bash\nset -o pipefail\nchk() { local label=$1; shift; if \"$@\" >/dev/null 2>&1; then echo \"OK: $label\"; else echo \"FAIL: $label\"; fi; }\nstaff_ok() { id -nG alice | grep -qw staff && id -nG bob | grep -qw staff && id -nG carol | grep -qw staff; }\nsite_ok() { curl -fsS -H 'Host: company.local' http://localhost | grep -q Company; }\nselinux_ok() { if ! command -v getenforce >/dev/null 2>&1 || [ \"$(getenforce)\" = Disabled ]; then return 0; fi; ls -Zd /srv/company/web | grep -q httpd_sys_content_t; }\nfirewall_ok() {\n  if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then\n    local services\n    services=$(firewall-cmd --list-services) || return 1\n    for service in ssh http https; do [[ \" $services \" == *\" $service \"* ]] || return 1; done\n  elif command -v ufw >/dev/null 2>&1; then\n    local status\n    status=$(ufw status) || return 1\n    grep -q '^Status: active' <<<\"$status\" && grep -Eq '^OpenSSH[[:space:]]+ALLOW' <<<\"$status\" && grep -Eq '^80/tcp[[:space:]]+ALLOW' <<<\"$status\" && grep -Eq '^443/tcp[[:space:]]+ALLOW' <<<\"$status\"\n  else\n    return 1\n  fi\n}\nbackup_ok() { compgen -G '/srv/company/backup/company-*.tar.gz' >/dev/null; }\nbackup_mode_ok() { [[ $(stat -c %a /srv/company/backup) == 700 ]]; }\nchk \"alice bob carol are in staff\" staff_ok\nchk \"shared has setgid\" test -g /srv/company/shared\nchk \"site answers with Small Company\" site_ok\nchk \"nginx enabled\" systemctl is-enabled --quiet nginx\nchk \"web label (SELinux) or no SELinux\" selinux_ok\nchk \"firewall allows SSH, HTTP and HTTPS\" firewall_ok\nchk \"timer enabled\" systemctl is-enabled --quiet company-backup.timer\nchk \"backup archive exists\" backup_ok\nchk \"backup dir is 700\" backup_mode_ok\nEOF\nsudo bash /srv/company/scripts/verify.sh", "expected": "OK: alice bob carol are in staff\nOK: shared has setgid\nOK: site answers with Small Company\nOK: nginx enabled\nOK: web label (SELinux) or no SELinux\nOK: firewall allows SSH, HTTP and HTTPS\nOK: timer enabled\nOK: backup archive exists\nOK: backup dir is 700"},
+     {"cmd": "{ echo \"Company server delivery report\"; echo \"Host: $(hostname)\"; echo \"Date: $(date)\"; echo \"--- verification ---\"; sudo bash /srv/company/scripts/verify.sh; echo \"--- listening ports ---\"; ss -tulpn; } | sudo tee /srv/company/REPORT.txt\nwc -l /srv/company/REPORT.txt"}
+    ],
+    "differs": ["Jede `FAIL:`-Zeile: gehe zum passenden Kapitel zurück, behebe es und führe das Skript erneut aus.", "Die Zeile `[ ... = 700 ]` braucht den Backslash vor `$(stat` genau wie geschrieben, sonst expandiert die Shell zu früh.", "Starte zum Schluss neu und führe das verify-Skript noch einmal aus: Alles muss weiterhin OK sein."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Auf Rocky Linux liefert nginx 403 für Dateien in /srv/company/web, obwohl der Modus 755 ist. Was ist die wahrscheinlichste Ursache?", "options": ["nginx ist nicht installiert", "Die Dateien haben das falsche SELinux-Label (nicht httpd_sys_content_t)", "Port 80 ist in der Firewall geschlossen", "Die Gruppe staff fehlt"], "explain": "Ein geschlossener Port ergibt einen Timeout, kein 403. Ein allgemeines Label unter /srv blockiert nginx; behebe es mit semanage fcontext und restorecon, nicht mit setenforce 0."},
+  "q2": {"q": "Du bist per SSH mit einem Ubuntu-Server verbunden. Wie schaltest du ufw sicher ein?", "options": ["Zuerst ufw enable, dann Regeln hinzufügen", "Server neu starten und hoffen", "Zuerst ufw allow OpenSSH, dann ufw enable", "SSH abschalten und die Konsole nutzen"], "explain": "ufw-Regeln gelten sofort. Ohne erlaubte SSH-Regel trennt das Einschalten der Firewall deine Sitzung."},
+  "q3": {"q": "Warum bekommt das gemeinsame Verzeichnis den Modus 2770 (setgid)?", "options": ["Neue Dateien erben die Gruppe staff, sodass das Team an den Dateien der anderen arbeiten kann", "Alle dürfen die Dateien lesen", "Die Dateien werden verschlüsselt", "Nur root darf schreiben"], "explain": "Das setgid-Bit an einem Verzeichnis gibt dessen Gruppe an neue Dateien weiter. 770 hält andere draußen."},
+  "q4": {"q": "Du hast company-backup.service und company-backup.timer angelegt. Was musst du tun, damit das nächtliche Backup läuft?", "options": ["Neu starten und sonst nichts tun", "chmod 777 auf die Unit-Dateien", "Nichts, systemd findet sie von allein", "systemctl daemon-reload, dann systemctl enable --now company-backup.timer"], "explain": "systemd muss die Unit-Dateien neu einlesen (daemon-reload), und die Timer-Unit muss aktiviert und gestartet werden; den Service startet der Timer."}
+ },
+ "summary": [
+  "Erst planen, VM-Snapshot erstellen, nur in der Test-VM arbeiten.",
+  "Gemeinsames Verzeichnis: Gruppe staff, Modus 2770 (setgid); sonst minimale Rechte: web 755, scripts 750, backup 700.",
+  "nginx braucht unter RHEL das Label httpd_sys_content_t (semanage fcontext + restorecon); unter Ubuntu prüfst du AppArmor.",
+  "Firewall: ssh behalten, mit Runtime-Regeln oder --timeout testen, zweite Sitzung offen halten; bei ufw allow OpenSSH vor enable.",
+  "Backup: Skript + Service (oneshot) + Timer; daemon-reload, den Timer mit enable --now aktivieren; unter RHEL das Skript mit bin_t labeln.",
+  "Zum Schluss Checkliste (OK/FAIL) und Abgabebericht als Beleg."
+ ],
+ "glossary": [
+  {"term": "Snapshot", "meaning": "Ein gespeicherter Zustand der VM, zu dem du zurückkehren kannst, wenn ein Schritt schiefgeht."},
+  {"term": "setgid (am Verzeichnis)", "meaning": "Neue Dateien erben die Gruppe des Verzeichnisses statt der Primärgruppe des Erstellers."},
+  {"term": "Default-ACL", "meaning": "Eine Zugriffsregel an einem Verzeichnis, die neue Dateien erben."},
+  {"term": "SELinux-Label", "meaning": "Ein Sicherheitskontext (etwa httpd_sys_content_t) an Dateien; er bestimmt, worauf ein Prozess zugreifen darf."},
+  {"term": "semanage fcontext", "meaning": "Speichert eine dauerhafte Label-Regel für Dateien; restorecon wendet sie an."},
+  {"term": "AppArmor", "meaning": "Pfadbasiertes Sicherheitssystem von Debian/Ubuntu; Prüfung mit aa-status."},
+  {"term": "firewalld / ufw", "meaning": "Firewall-Frontends der RHEL-Familie und von Ubuntu."},
+  {"term": "Runtime vs. dauerhaft", "meaning": "Runtime-Regeln verschwinden bei Reload oder Neustart; dauerhafte Regeln bleiben gespeichert."},
+  {"term": "systemd-Timer", "meaning": "Eine Unit, die einen Service nach Zeitplan startet (OnCalendar=)."},
+  {"term": "Abgabebericht", "meaning": "Die Datei, die den fertigen Server und die Prüfergebnisse dokumentiert."}
+ ]
+}

@@ -1,0 +1,212 @@
+{
+ "title": "Help and discovery",
+ "lead": "Use man, --help, which, type, find and history to research an unfamiliar command on your own, without the internet.",
+ "objectives": [
+  "You open a man page, navigate it, search it and quit; you recognise the section numbers (1, 5, 8).",
+  "You get a quick summary with --help and help, and read SYNOPSIS notation ([ ], | and ...).",
+  "You find where a command is and what type it is with which and type, and search for files with find.",
+  "You review old commands with history and systematically resolve 'command not found' errors (exit code 127)."
+ ],
+ "sections": [
+  {
+   "id": "man",
+   "title": "man: manual pages",
+   "body": [
+    "Linux has hundreds of commands; even professionals don't memorise them all, they **know where to look**. The most reliable source is the system's own manual, the `man` pages: `man ls`.",
+    "The page opens in a pager: **Space** goes down a page, **b** goes up, **/kernel** + Enter searches the text, **n** jumps to the next match, **q** quits. Page headings are always the same: NAME (short name), SYNOPSIS (usage form), DESCRIPTION, OPTIONS, EXAMPLES, SEE ALSO.",
+    "The manual is split into **sections**: 1 = user commands, 5 = file formats (e.g. `/etc/passwd`), 8 = administration commands. The same name can appear in several sections: `man passwd` shows the command, `man 5 passwd` shows the file format. In the simulator the pages are short and section numbers are not supported; on a real VM you see the full page."
+   ],
+   "commands": [
+    {"cmd": "man", "what": "Opens the manual page of a command.", "where": "When learning a new command or option.", "why": "It is accurate information that ships with your system and matches its version.", "example": "man ls"},
+    {"cmd": "man <section>", "what": "Opens a specific manual section.", "where": "When the same name is both a command and a file format.", "why": "You reach the right page directly.", "example": "man 5 passwd", "nosim": true},
+    {"cmd": "whatis", "what": "Gives a one-line description of a command.", "where": "To quickly remember what a command does.", "why": "You get a summary without opening the page.", "example": "whatis ls", "nosim": true},
+    {"cmd": "apropos", "what": "Searches manual pages by keyword.", "where": "When you don't know the command's name but know what it does.", "why": "Searching for 'copy file' lets you find cp.", "example": "apropos copy", "nosim": true}
+   ],
+   "tip": "If you get lost in a page, leave with `q`. To search, type `/`, enter the word, press Enter; the next match is `n`.",
+   "warn": "`whatis` and `apropos` rely on an index (mandb); on freshly installed minimal systems they may return nothing. In that case run `sudo mandb`."
+  },
+  {
+   "id": "help",
+   "title": "--help and help: quick summary",
+   "body": [
+    "If you don't want to read the whole manual, `ls --help` prints a short usage summary. If the output is long, limit it with `| head` or `| less`: `ls --help | head -n 5`.",
+    "**Shell built-in** commands like `cd` have no separate program, so `man cd` sometimes doesn't exist. For them Bash has the `help` command: `help cd`. On its own, `help` lists the known commands (in the simulator this list is short).",
+    "Quick rule: for an external program use `--help` first, `man` for details; for a shell built-in use `help`."
+   ],
+   "commands": [
+    {"cmd": "--help", "what": "Prints a short usage summary of the command.", "where": "To quickly recall an option.", "why": "It is much faster than man.", "example": "ls --help"},
+    {"cmd": "help", "what": "Gives help about Bash's own (built-in) commands.", "where": "For commands like cd, type, history.", "why": "These commands may not have a separate man page.", "example": "help"},
+    {"cmd": "less", "what": "Shows long output page by page.", "where": "For long --help or file output.", "why": "The navigation keys are the same as in man.", "example": "ls --help | less", "nosim": true}
+   ],
+   "tip": "When help is printed, don't miss the top line: the `Usage:` line gives you the usage form."
+  },
+  {
+   "id": "synopsis",
+   "title": "Reading SYNOPSIS notation",
+   "body": [
+    "The SYNOPSIS line gives the command's 'pattern'. Example: `ls [OPTION]... [FILE]...`. Read it like this:",
+    "Anything inside `[ ]` is **optional**. `...` means the previous part can be written **more than once**. `a | b` means **either a or b**. `< >` or UPPERCASE (FILE, DIR) is a value you substitute. Parts written in bold are typed exactly as shown.",
+    "Example: `cp [OPTION]... SOURCE... DEST` → options are optional, at least one source and one destination are required. `ls` also works with no arguments because everything is in square brackets."
+   ],
+   "commands": [
+    {"cmd": "ls --help", "what": "Shows the usage pattern (Usage).", "where": "To learn the order of arguments.", "why": "If you can read the pattern, you can figure out any new command.", "example": "ls --help"},
+    {"cmd": "man cat", "what": "Opens the page that contains the SYNOPSIS section.", "where": "A simple example to practise with.", "why": "You see square brackets and ... in a real page.", "example": "man cat"}
+   ],
+   "tip": "To find what is mandatory, look at the parts outside the square brackets."
+  },
+  {
+   "id": "where",
+   "title": "which and type: where is the command?",
+   "body": [
+    "When you type a command, the shell searches the directories in the `PATH` variable in order. `which ls` prints the **path** it finds (e.g. `/usr/bin/ls`).",
+    "`type` is more informative: it tells you whether the command is an **external program**, a **shell built-in (builtin)**, an alias or a function. `type cd` → `cd is a shell builtin`. Use it to understand which one runs when several commands share the same name.",
+    "To see the contents of `PATH`, use `echo $PATH`. `alias` and `command -v` also work on a real VM, but not in the simulator."
+   ],
+   "commands": [
+    {"cmd": "which", "what": "Shows the file path of the command.", "where": "To find out where a program is installed.", "why": "You verify that you are running the right version.", "example": "which ls"},
+    {"cmd": "type", "what": "Tells the type of the command (program, builtin, alias).", "where": "When investigating unexpected behaviour.", "why": "You tell a builtin from an external program.", "example": "type cd"},
+    {"cmd": "echo $PATH", "what": "Prints the directories where commands are searched.", "where": "When investigating 'command not found'.", "why": "You see whether the program's directory is in PATH.", "example": "echo $PATH"},
+    {"cmd": "command -v", "what": "Prints the path/name if the command exists; stays silent otherwise.", "where": "In scripts, to check 'is it installed?'.", "why": "It is a portable existence check.", "example": "command -v ls", "nosim": true},
+    {"cmd": "alias", "what": "Lists defined shortcuts.", "where": "To understand where commands like `ll` come from.", "why": "You see the source of what type calls an 'alias'.", "example": "alias", "nosim": true}
+   ],
+   "tip": "If a command behaves strangely, first check its type with `type command`."
+  },
+  {
+   "id": "find",
+   "title": "find: file search basics",
+   "body": [
+    "`find <start> <conditions>` walks a directory tree and prints what matches the conditions. The two most common conditions: `-name` (by name) and `-type` (`f` file, `d` directory).",
+    "Put the wildcard **in quotes**: `find . -name \"*.txt\"`. Without quotes the shell expands the pattern itself first and the result is misleading. The start point `.` is the current directory, `~` is home.",
+    "You can count the result with `| wc -l` and save it with `> file`. `-maxdepth 1` limits the depth on a real system (the simulator ignores it)."
+   ],
+   "commands": [
+    {"cmd": "find", "what": "Searches the directory tree for files matching a condition.", "where": "When you forgot where a file is.", "why": "It scans the tree by name, type or size.", "example": "find . -name \"*.txt\""},
+    {"cmd": "find -type", "what": "Finds only files (f) or directories (d).", "where": "To count directories separately.", "why": "You narrow the result.", "example": "find ~ -type d"},
+    {"cmd": "find | wc -l", "what": "Gives the number of items found.", "where": "To know how many matches there are.", "why": "You get a number without reading a long list.", "example": "find ~ -name \"*.txt\" | wc -l"}
+   ],
+   "tip": "To hide error messages on a real system, add `2>/dev/null`.",
+   "warn": "Don't delete with `find ... -delete` or `-exec rm`; first view the list with plain `find`, then decide."
+  },
+  {
+   "id": "history",
+   "title": "history: past commands",
+   "body": [
+    "`history` lists the commands you typed in this and earlier sessions with numbers. If it is long, take the last ten commands with `history | tail -n 10`.",
+    "In real Bash, **up arrow** brings back the previous command, **Ctrl+R** searches the history, `!!` re-runs the last command, `!42` re-runs command number 42. The simulator does not support `!!`; the arrow keys work.",
+    "Commands that contain secrets (passwords) are written to the history; don't forget that."
+   ],
+   "commands": [
+    {"cmd": "history", "what": "Lists past commands with numbers.", "where": "To remember what you typed earlier.", "why": "You find a long command without retyping it.", "example": "history"},
+    {"cmd": "history | tail", "what": "Shows only the most recent commands.", "where": "In a long history.", "why": "The list stays short.", "example": "history | tail -n 5"},
+    {"cmd": "!!", "what": "Re-runs the last command.", "where": "`sudo !!` for a privileged retry.", "why": "It saves time.", "example": "!!", "nosim": true}
+   ],
+   "tip": "Press Ctrl+R and type part of the command: Bash brings back the match."
+  },
+  {
+   "id": "notfound",
+   "title": "Dealing with 'command not found'",
+   "body": [
+    "If you type a command that doesn't exist you get `nosuchcmd: command not found` and the exit code is **127**: `nosuchcmd; echo $?` → `127`. Code 127 means 'command not found'.",
+    "Systematic check: (1) Is it a typo? (`ls` instead of `lss`) (2) Upper/lower case: Linux is case-sensitive. (3) Check whether it exists with `type command`. (4) If the program isn't installed, install the package (Ubuntu `sudo apt install`, Rocky/Alma `sudo dnf install`). (5) If it is installed, check the directory with `echo $PATH`.",
+    "This differs from the 'No such file or directory' error: there the command was found but the file you gave doesn't exist."
+   ],
+   "commands": [
+    {"cmd": "echo $?", "what": "Prints the exit code of the last command.", "where": "When checking whether a command succeeded.", "why": "0 means success, 127 means command not found.", "example": "nosuchcmd; echo $?"},
+    {"cmd": "type", "what": "Does the command exist, and where?", "where": "The first check after an error.", "why": "It weeds out typos.", "example": "type nosuchcmd"}
+   ],
+   "tip": "On a real system Ubuntu sometimes suggests 'Command 'x' not found, did you mean...'; read the suggestion carefully."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Open the manual page of the `ls` command with `man ls`.", "hint": "The sim page is short; look at NAME, SYNOPSIS and DESCRIPTION."},
+  "t02": {"text": "Show the short usage summary with `ls --help`.", "hint": "Double dash: --help."},
+  "t03": {"text": "Type `type cd`. Does the output say 'builtin'? What does that mean?", "hint": "Builtin: inside Bash, not a separate program."},
+  "t04": {"text": "Find the path of the `ls` command with `which ls`.", "hint": "The output starts with /usr/bin/."},
+  "t05": {"text": "Open `man cat` and read the SYNOPSIS line: which part is optional?", "hint": "Anything inside square brackets is optional."},
+  "t06": {"text": "Type `help` and see the list of known commands.", "hint": "Type it without arguments."},
+  "t07": {"text": "Find all `.txt` files under the current directory with `find . -name \"*.txt\"`.", "hint": "Put the pattern in quotes."},
+  "t08": {"text": "List the commands you have typed so far with `history`.", "hint": "A numbered list appears."},
+  "t09": {"text": "Show only the first three lines of the page with `man ls | head -n 3`.", "hint": "Pipe: |."},
+  "t10": {"text": "Predict: what number does `nosuchcmd; echo $?` print? Then run it to verify.", "hint": "No such command → exit code 127."},
+  "t11": {"text": "Predict: how many directories does `find ~ -type d | wc -l` count under home (including home)? Run it and verify.", "hint": "Desktop, Documents, Downloads and home itself."},
+  "t12": {"text": "Debug: `man mkdirr` gives an error ('No manual entry'). Open the manual of the correct command with `man mkdir`.", "hint": "Typo: an extra r."},
+  "t13": {"text": "Mini: find where the `todo.txt` file is with `find` and save the path to the file `~/path.txt`.", "hint": "`find ~ -name todo.txt > ~/path.txt`; then check with `cat ~/path.txt`."},
+  "t14": {"text": "Challenge: In a single command, count the `.txt` files under home and write the number to `~/count.txt`.", "hint": "`find`, pipe, `wc -l` and redirection. The result is the file count; .txt files you created yourself are counted too."},
+  "t15": {"text": "TICKET #4410 — Support: 'Where is ls installed, and what kind of command is cd?' Save the path to `~/ls_path.txt` and the type of `cd` to `~/cd_type.txt`.", "hint": "`which ls > ...` and `type cd > ...`."},
+  "t16": {"text": "TICKET #4411 — The teacher wants to see what you tried: first run `which ls`, then save the history to `~/hist.txt`.", "hint": "`history > ~/hist.txt`."}
+ },
+ "vm": {
+  "intro": "Run the following commands on your VM (Ubuntu, Rocky, Alma or WSL). There is no destructive command; still, remember to leave the pager (man) with `q`.",
+  "tasks": {
+   "v01": {
+    "title": "Open a manual page",
+    "text": "Open `man ls`, search for `long` with `/`, leave with `q`. Then paste the first lines.",
+    "blocks": [{"cmd": "man ls | head -n 5", "expected": "LS(1)    User Commands\n\nNAME\n       ls - list directory contents"}],
+    "differs": ["If your language is Turkish/German the headings may be translated.", "If you get 'No manual entry', the manual package is missing: `sudo apt install man-db` or `sudo dnf install man-db`."]
+   },
+   "v02": {
+    "title": "--help summary",
+    "text": "Paste the first lines of the `ls --help` output.",
+    "blocks": [{"cmd": "ls --help | head -n 5", "expected": "Usage: ls [OPTION]... [FILE]...\nList information about the FILEs (the current directory by default)."}],
+    "differs": ["On macOS or BusyBox the `--help` format may differ; run it on a Linux VM."]
+   },
+   "v03": {
+    "title": "Command types",
+    "text": "Paste the type and path of the `cd`, `ls` and `which ls` commands.",
+    "blocks": [{"cmd": "type cd\ntype ls\nwhich ls", "expected": "cd is a shell builtin\nls is aliased to `ls --color=auto'\n/usr/bin/ls"}],
+    "differs": ["`ls` may be an alias (for colour on Ubuntu/Rocky); this is normal.", "On some distributions you get `/bin/ls` (`/bin` is linked to `/usr/bin`)."]
+   },
+   "v04": {
+    "title": "Search with find",
+    "text": "Find the `.txt` files in your home. Since the output is personal, just say 'Done'.",
+    "blocks": [{"cmd": "find ~ -maxdepth 2 -name \"*.txt\" 2>/dev/null"}],
+    "differs": ["If there is no output, you have no .txt files in your home: first create one with `touch ~/notes.txt`."]
+   },
+   "v05": {
+    "title": "whatis and apropos",
+    "text": "Search for the one-line description of `ls` and for commands containing 'copy'.",
+    "blocks": [{"cmd": "whatis ls\napropos copy | head -n 5", "expected": "ls (1) - list directory contents\ncp (1) - copy files and directories"}],
+    "differs": ["If you see 'nothing appropriate', there is no index: run `sudo mandb` and try again.", "On Ubuntu/Rocky the `apropos` output may have a different number of lines."]
+   },
+   "v06": {
+    "title": "command not found",
+    "text": "Run a command that doesn't exist and paste the exit code.",
+    "blocks": [{"cmd": "nosuchcmd; echo $?", "expected": "bash: nosuchcmd: command not found\n127"}],
+    "differs": ["Ubuntu may suggest 'Command 'nosuchcmd' not found, did you mean...'; the last line should still be 127.", "If you use Zsh the message is 'zsh: command not found: nosuchcmd'."]
+   },
+   "v07": {
+    "title": "Look at the history",
+    "text": "List your last five commands.",
+    "blocks": [{"cmd": "history | tail -n 5", "expected": "  498  which ls\n  499  nosuchcmd\n  500  history | tail -n 5"}],
+    "differs": ["The numbers will be different; this is normal.", "In a freshly opened terminal the list may be short."]
+   },
+   "v08": {
+    "title": "Manual sections",
+    "text": "Open the section 5 page describing the format of the `/etc/passwd` file and paste the first lines.",
+    "blocks": [{"cmd": "man 5 passwd | head -n 5", "expected": "PASSWD(5)   File Formats Manual\n\nNAME\n       passwd - password file"}],
+    "differs": ["`man passwd` (section 1) is a different page: the password-changing command.", "If the page is missing, the `man-db` or `man-pages` package is absent."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Which keys are used to search for text in a man page and to quit the page?", "options": ["`f` and `x`", "`/` and `q`", "`s` and `e`", "`?` and `Esc`"], "explain": "`/word` searches, `n` goes to the next match, `q` quits."},
+  "q2": {"q": "In the pattern `ls [OPTION]... [FILE]...`, what do `[ ]` and `...` mean?", "options": ["Mandatory and forbidden", "The part in square brackets is hidden", "Optional and can be written more than once", "Just a comment line"], "explain": "Square brackets mean optional, the three dots show that the previous part can be repeated."},
+  "q3": {"q": "What is the number in the output of `nosuchcmd; echo $?`?", "options": ["127", "0", "1", "255"], "explain": "In the 'command not found' case Bash returns 127 as the exit code."},
+  "q4": {"q": "With which command do you see that `cd` is not an external program?", "options": ["`find cd`", "`ls cd`", "`man -f cd`", "`type cd`"], "explain": "The output of `type cd` is `cd is a shell builtin`; that is, it is inside Bash."}
+ },
+ "summary": [
+  "`man command` is the detailed manual, `command --help` a short summary, `help` is for shell built-ins.",
+  "In man: `/` searches, `n` next, `q` quits; sections: 1 commands, 5 file formats, 8 administration.",
+  "SYNOPSIS: `[ ]` optional, `...` repetition, `|` or.",
+  "`which` shows the path, `type` shows the type; `find . -name \"*.txt\"` searches for files.",
+  "`history` lists the past; `command not found` has exit code 127."
+ ],
+ "glossary": [
+  {"term": "man page", "meaning": "The manual page of a command that ships with the system."},
+  {"term": "SYNOPSIS", "meaning": "The man section showing the command's usage pattern."},
+  {"term": "builtin", "meaning": "A command embedded in Bash that has no separate program."},
+  {"term": "PATH", "meaning": "The list of directories where commands are searched."},
+  {"term": "exit code", "meaning": "The number a command leaves when it finishes; 0 is success, 127 is command not found."},
+  {"term": "pager", "meaning": "A program that shows long text page by page (less)."}
+ ]
+}

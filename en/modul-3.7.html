@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3.7 Comparison: diff, cmp, comm, patch — Linux Foundations Academy</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","en")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="3.7">
+<header class="top"><a class="brand" href="index.html">Linux Foundations Academy</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (optional)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-3.7.html" hreflang="tr" lang="tr" data-switch="tr">TR</a><a href="../de/modul-3.7.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-3.7.html" hreflang="en" lang="en" data-switch="en" aria-current="true">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Theme" aria-label="Theme">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Overall progress"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#diff">diff: line-by-line differences</a></li><li><a href="#dirs">Comparing directories</a></li><li><a href="#bytes">cmp and checksums</a></li><li><a href="#lists">Comparing lists: comm, uniq</a></li><li><a href="#patch">Create and apply patches: patch</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>Contents</summary><ol><li><a href="#diff">diff: line-by-line differences</a></li><li><a href="#dirs">Comparing directories</a></li><li><a href="#bytes">cmp and checksums</a></li><li><a href="#lists">Comparing lists: comm, uniq</a></li><li><a href="#patch">Create and apply patches: patch</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> Level 3</p>
+<h1><span class="module-id">3.7</span> Comparison: diff, cmp, comm, patch</h1>
+<p class="lead">Compare two files, two directories and two lists, read the difference, create and apply patches, and use exit codes in scripts.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>What will you learn in this module?</h2><ul><li>You read <code>diff</code> output (normal and <code>-u</code> unified), including <code>@@</code> hunks and <code>+</code>/<code>-</code> lines.</li><li>You compare directories and files quickly with <code>diff -r</code>, <code>diff -q</code>, <code>cmp</code> and <code>sha256sum -c</code>.</li><li>You find differences between sorted lists with <code>comm</code>, and common or unique lines with <code>sort | uniq -d/-u</code>.</li><li>You create patches with <code>diff -u</code>, apply them with <code>patch</code>, undo them with <code>-R</code>, and check exit codes (0/1/2).</li></ul></section>
+<section id="diff"><h2>diff: line-by-line differences</h2>
+<p><code>diff old new</code> compares two text files line by line and prints the changes needed to turn the old file into the new one. In normal output you see a command line such as <code>2c2</code> (line 2 changed); <code>&lt;</code> marks lines from the first file, <code>&gt;</code> lines from the second.</p>
+<p>In practice the <strong>unified</strong> format (<code>-u</code>) is the standard: <code>---</code> is the first file, <code>+++</code> the second; the hunk <code>@@ -1,3 +1,4 @@</code> means three lines starting at line 1 in the first file and four lines starting at line 1 in the second. Lines starting with <code>-</code> exist only in the old file, lines with <code>+</code> only in the new one; lines starting with a space are context. Git and patch tools use this format.</p>
+<p><strong>Exit code:</strong> <code>0</code> files identical, <code>1</code> differences found, <code>2</code> trouble (file missing, unreadable). So <code>diff</code> reports &#x27;failure&#x27; when it finds differences; that is not an error. In the simulator <code>diff</code>, <code>cmp</code>, <code>comm</code> and <code>patch</code> do not run; try them on your own VM. Here the simulator only checks that you typed the command, plus the prepared files.</p>
+<article class="cmd"><h3><code>diff</code></h3><dl><dt>What is it for?</dt><dd>Shows the difference between two files in normal format (with <code>&lt;</code> and <code>&gt;</code> lines).</dd><dt>Where is it used?</dt><dd>When comparing two versions of a configuration file.</dd><dt>Why does it matter?</dt><dd>You see what changed without reading the whole file.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff v1.txt v2.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>diff -u</code></h3><dl><dt>What is it for?</dt><dd>Unified format: <code>---</code>/<code>+++</code> header, <code>@@</code> hunks and <code>+</code>/<code>-</code> lines.</dd><dt>Where is it used?</dt><dd>When sharing changes, in code review, when creating patches.</dd><dt>Why does it matter?</dt><dd>Context lines make clear where the change is.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -u v1.txt v2.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>diff -q</code></h3><dl><dt>What is it for?</dt><dd>Prints only &#x27;Files ... differ&#x27;, or nothing.</dd><dt>Where is it used?</dt><dd>When only &#x27;same or not&#x27; matters; in scripts.</dd><dt>Why does it matter?</dt><dd>No long output, the exit code is still 0/1.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-q</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -q v1.txt v2.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>diff -y</code></h3><dl><dt>What is it for?</dt><dd>Shows two columns side by side; differences marked with <code>|</code>, <code>&lt;</code>, <code>&gt;</code>.</dd><dt>Where is it used?</dt><dd>When comparing short files by eye.</dd><dt>Why does it matter?</dt><dd>You see both versions next to each other.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-y</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -y v1.txt v2.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>diff -w</code></h3><dl><dt>What is it for?</dt><dd>Ignores whitespace differences (indentation, trailing spaces).</dd><dt>Where is it used?</dt><dd>For files that were only reformatted.</dd><dt>Why does it matter?</dt><dd>Noise disappears, real content differences remain.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-w</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -w v1.txt v2.txt">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Which file is &#x27;old&#x27; and which is &#x27;new&#x27;? Order matters: <code>diff old new</code>. Swap them and <code>+</code> and <code>-</code> swap too.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Files created on Windows carry <code>\r</code> (CRLF) at each line end, so every line looks different. Clean up with <code>tr -d &#x27;\r&#x27; &lt; win.txt &gt; fixed.txt</code> or use <code>diff --strip-trailing-cr</code>.</p></aside>
+</section>
+<section id="dirs"><h2>Comparing directories</h2>
+<p><code>diff -r dir_a dir_b</code> compares two directory trees recursively. For files that exist in only one directory it prints <code>Only in dir_a: extra.txt</code>; for files with different content it prints the diff. With <code>-q</code> (or <code>-rq</code>) you see only which files differ; ideal for checking a backup with many files.</p>
+<p>You can also compare the output of two commands: <code>diff &lt;(sort a.txt) &lt;(sort b.txt)</code> (process substitution, a <strong>bash</strong> feature) hands the outputs over like temporary files. It does not work in plain <code>sh</code>.</p>
+<article class="cmd"><h3><code>diff -r</code></h3><dl><dt>What is it for?</dt><dd>Compares two directories including subdirectories.</dd><dt>Where is it used?</dt><dd>When comparing two project versions or a backup.</dd><dt>Why does it matter?</dt><dd>Missing, extra and changed files in one go.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-r</span> dir_a dir_b</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -r dir_a dir_b">Copy</button></div></div></article>
+<article class="cmd"><h3><code>diff -rq</code></h3><dl><dt>What is it for?</dt><dd>Lists only files that differ or exist on one side only.</dd><dt>Where is it used?</dt><dd>For backup verification, in large trees.</dd><dt>Why does it matter?</dt><dd>A short overview; look at single files in detail afterwards.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-rq</span> dir_a dir_b</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -rq dir_a dir_b">Copy</button></div></div></article>
+<article class="cmd"><h3><code>diff &lt;( )</code></h3><dl><dt>What is it for?</dt><dd>Compares the output of two commands like files (bash).</dd><dt>Where is it used?</dt><dd>For sorted lists or comparing two environments.</dd><dt>Why does it matter?</dt><dd>No intermediate files needed.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="to">&lt;</span><span class="tk">(sort</span> list_a.txt) <span class="to">&lt;</span><span class="tk">(sort</span> list_b.txt)</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff &lt;(sort list_a.txt) &lt;(sort list_b.txt)">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Direction does not matter, but for readability always write the &#x27;reference&#x27; directory first.</p></aside>
+</section>
+<section id="bytes"><h2>cmp and checksums</h2>
+<p><code>cmp</code> compares files <strong>byte by byte</strong> and reports the byte and line number of the first difference. For binary files <code>diff</code> only says &#x27;Binary files differ&#x27;; <code>cmp</code> shows the exact position. <code>cmp -s</code> prints nothing, only the exit code (0 same, 1 different, 2 trouble). In scripts: <code>if cmp -s a b; then echo same; fi</code>.</p>
+<p>If the files are on different machines you cannot compare them directly; compute a <strong>checksum</strong>. <code>sha256sum notes.txt</code> produces a hash; identical content gives an identical hash. <code>sha256sum -c sums.txt</code> recomputes stored hashes and prints <code>OK</code> or <code>FAILED</code>. This is how you verify a download is intact. <code>md5sum</code> is outdated; use <code>sha256sum</code> for security.</p>
+<article class="cmd"><h3><code>cmp</code></h3><dl><dt>What is it for?</dt><dd>Compares two files byte by byte and reports the position of the first difference.</dd><dt>Where is it used?</dt><dd>For binary files and to verify copies.</dd><dt>Why does it matter?</dt><dd>Gives a definite answer even for non-text files.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cmp</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cmp v1.txt v2.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>cmp -s</code></h3><dl><dt>What is it for?</dt><dd>Silent comparison; the result is only in the exit code.</dd><dt>Where is it used?</dt><dd>In scripts as an <code>if</code> condition.</dd><dt>Why does it matter?</dt><dd>Decides &#x27;same?&#x27; without output.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cmp</span> <span class="tf">-s</span> v1.txt v1.bak; echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cmp -s v1.txt v1.bak; echo $?">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sha256sum</code></h3><dl><dt>What is it for?</dt><dd>Computes the SHA-256 hash of a file.</dd><dt>Where is it used?</dt><dd>For verifying downloads and backups.</dd><dt>Why does it matter?</dt><dd>You compare contents without having the files side by side.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> v1.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum v1.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sha256sum -c</code></h3><dl><dt>What is it for?</dt><dd>Checks a hash list; prints <code>OK</code> or <code>FAILED</code> per file.</dd><dt>Where is it used?</dt><dd>For ISO images or backups.</dd><dt>Why does it matter?</dt><dd>Shows automatically whether anything is corrupted or changed.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> <span class="tf">-c</span> sums.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum -c sums.txt">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>See the exit code with <code>echo $?</code> right after the command; if another command runs in between, the value is gone.</p></aside>
+</section>
+<section id="lists"><h2>Comparing lists: comm, uniq</h2>
+<p><code>comm a b</code> shows two <strong>sorted</strong> files in three columns: column 1 only in a, column 2 only in b, column 3 in both. <code>-1</code>, <code>-2</code>, <code>-3</code> hide that column: <code>comm -12</code> = common lines, <code>comm -23</code> = only in a, <code>comm -13</code> = only in b.</p>
+<p><strong>Pitfall:</strong> if the input is not sorted, <code>comm</code> gives wrong results and warns &#x27;file 2 is not in sorted order&#x27;. Sort first: <code>sort list_b.txt &gt; sorted_b.txt</code>.</p>
+<p>Without <code>comm</code>, <code>sort a b | uniq -d</code> gives lines present in both lists (duplicated ones) and <code>sort a b | uniq -u</code> gives lines that appear only once. Each list should be free of duplicates itself, otherwise the counting breaks. Both commands also work in the simulator.</p>
+<article class="cmd"><h3><code>comm</code></h3><dl><dt>What is it for?</dt><dd>Compares two sorted files in three columns.</dd><dt>Where is it used?</dt><dd>When comparing user, package or IP lists.</dd><dt>Why does it matter?</dt><dd>Separates common and unique lines in one command.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm list_a.txt sorted_b.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>comm -12</code></h3><dl><dt>What is it for?</dt><dd>Shows only lines present in both files.</dd><dt>Where is it used?</dt><dd>When you need the intersection.</dd><dt>Why does it matter?</dt><dd>Hides columns 1 and 2, the common one remains.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> -12 list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm -12 list_a.txt sorted_b.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>comm -23</code></h3><dl><dt>What is it for?</dt><dd>Shows only lines present in the first file.</dd><dt>Where is it used?</dt><dd>For the question &#x27;I have it, you don&#x27;t&#x27;.</dd><dt>Why does it matter?</dt><dd>Finds missing or surplus entries.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> -23 list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm -23 list_a.txt sorted_b.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sort | uniq -d</code></h3><dl><dt>What is it for?</dt><dd>From merged sorted lines, prints the duplicated (common) ones.</dd><dt>Where is it used?</dt><dd>Without <code>comm</code>, or for a quick intersection.</dd><dt>Why does it matter?</dt><dd>Works everywhere with standard tools.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-d</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sort list_a.txt list_b.txt | uniq -d" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -d">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sort | uniq -u</code></h3><dl><dt>What is it for?</dt><dd>Prints only lines that occur exactly once (symmetric difference).</dd><dt>Where is it used?</dt><dd>When looking for lines that are in only one of the lists.</dd><dt>Why does it matter?</dt><dd>Eliminates the common lines.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-u</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sort list_a.txt list_b.txt | uniq -u" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -u">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Rule of thumb: always <code>sort</code> before <code>comm</code>; and use the same locale (<code>LC_ALL=C</code>) afterwards, otherwise the sort order may not match.</p></aside>
+</section>
+<section id="patch"><h2>Create and apply patches: patch</h2>
+<p><code>diff -u old new &gt; change.patch</code> writes the difference to a file. Someone else applies it with <code>patch</code> to their old copy: <code>patch work.txt &lt; change.patch</code>. For directory trees you create <code>diff -ruN old/ new/ &gt; all.patch</code>; when applying, <code>-p1</code> strips the first path component (<code>old/</code>), <code>-p0</code> uses paths unchanged.</p>
+<p>Before applying, try <code>patch --dry-run &lt; change.patch</code>: it changes nothing and tells you whether the hunks fit. On failures a <code>.rej</code> file is created. <code>patch -R &lt; change.patch</code> undoes the patch.</p>
+<p>A patch relies on context lines; if the file was changed elsewhere in the meantime, applying can fail or shift (<code>fuzz</code>).</p>
+<article class="cmd"><h3><code>diff -u &gt; file.patch</code></h3><dl><dt>What is it for?</dt><dd>Writes the difference in unified format to a patch file.</dd><dt>Where is it used?</dt><dd>To hand a change to someone else.</dd><dt>Why does it matter?</dt><dd>Only the changed lines are transported, not the whole file.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -u v1.txt v2.txt &gt; change.patch">Copy</button></div></div></article>
+<article class="cmd"><h3><code>patch</code></h3><dl><dt>What is it for?</dt><dd>Applies the changes in a patch file to a file.</dd><dt>Where is it used?</dt><dd>When working a received patch into your copy.</dd><dt>Why does it matter?</dt><dd>Applies only the difference instead of replacing the whole file.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">patch</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="patch work.txt &lt; change.patch">Copy</button></div></div></article>
+<article class="cmd"><h3><code>patch --dry-run</code></h3><dl><dt>What is it for?</dt><dd>Tests the patch without actually applying it.</dd><dt>Where is it used?</dt><dd>Before patching important files.</dd><dt>Why does it matter?</dt><dd>You spot mismatches without changing anything.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">patch</span> <span class="tf">--dry-run</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="patch --dry-run work.txt &lt; change.patch">Copy</button></div></div></article>
+<article class="cmd"><h3><code>patch -R</code></h3><dl><dt>What is it for?</dt><dd>Reverses the patch (undoes it).</dd><dt>Where is it used?</dt><dd>When an applied patch causes problems.</dd><dt>Why does it matter?</dt><dd>Restores the state before the patch.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">patch</span> <span class="tf">-R</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="patch -R work.txt &lt; change.patch">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>If the patch is for a directory tree, run it from the project root and try <code>--dry-run</code> first.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p><code>patch</code> modifies files in place. For important files make a backup first with <code>cp work.txt work.txt.orig</code>, and on your VM take a snapshot first.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p>Do not apply patches to the root directory (<code>/</code>) or system configuration; work only in your practice folder. A wrong <code>-p</code> value changes the wrong files.</p></aside>
+</section>
+<section id="vm"><h2>Do it on your own VM <span class="gcount" data-g="vm"></span></h2><p>The real practice happens on real Linux: run the commands in your own virtual machine (VirtualBox, UTM or WSL) and compare the output.</p><p>Run the following commands on your own VM in the <code>~/lab</code> folder. They only create files in this practice folder and do not touch system settings.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>diff: normal and unified</h3><span class="status" aria-hidden="true"></span></header><p>Create two small files and see the difference in both formats. Paste the unified output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/lab</span> <span class="to">&amp;&amp;</span> <span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;port=80\nhost=linux-lab\nmode=prod\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">v1.txt</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">v2.txt</span></span>
+<span class="ln"><span class="tk">diff</span> v1.txt v2.txt</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/lab &amp;&amp; cd ~/lab
+printf &#x27;port=80\nhost=linux-lab\nmode=prod\n&#x27; &gt; v1.txt
+printf &#x27;port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n&#x27; &gt; v2.txt
+diff v1.txt v2.txt
+diff -u v1.txt v2.txt">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">1c1
+&lt; port=80
+---
+&gt; port=8080
+3a4
+&gt; debug=on
+--- v1.txt	2026-11-12 10:00:00
++++ v2.txt	2026-11-12 10:00:01
+@@ -1,3 +1,4 @@
+-port=80
++port=8080
+ host=linux-lab
+ mode=prod
++debug=on</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>Date and time will differ; what matters are the <code>@@</code>, <code>-</code> and <code>+</code> lines.</li><li>If there is no output, the files are identical; re-check the <code>printf</code> lines.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Exit codes</h3><span class="status" aria-hidden="true"></span></header><p>See <code>diff -q</code>, <code>cmp -s</code> and the exit codes. Paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-q</span> v1.txt v2.txt; echo <span class="ts">&quot;exit=$?&quot;</span></span>
+<span class="ln"><span class="tk">cp</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">cmp</span> <span class="tf">-s</span> v1.txt same.txt; echo <span class="ts">&quot;exit=$?&quot;</span></span>
+<span class="ln"><span class="tk">diff</span> v1.txt missing.txt; echo <span class="ts">&quot;exit=$?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+diff -q v1.txt v2.txt; echo &quot;exit=$?&quot;
+cp v1.txt same.txt
+cmp -s v1.txt same.txt; echo &quot;exit=$?&quot;
+diff v1.txt missing.txt; echo &quot;exit=$?&quot;">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">Files v1.txt and v2.txt differ
+exit=1
+exit=0
+diff: missing.txt: No such file or directory
+exit=2</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If your system language differs, the message may be translated; the <code>exit=</code> values must match.</li><li>If you see <code>exit=0</code> on the first line, <code>v2.txt</code> was not created; run v01 again.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>comm and uniq</h3><span class="status" aria-hidden="true"></span></header><p>Compare two name lists. First see the warning for unsorted <code>comm</code>, then the right way.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;alice\nbob\ncarol\ndave\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">list_a.txt</span></span>
+<span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;erin\nbob\ncarol\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">list_b.txt</span></span>
+<span class="ln"><span class="tk">comm</span> -12 list_a.txt list_b.txt</span>
+<span class="ln"><span class="tk">sort</span> list_b.txt <span class="to">&gt;</span> <span class="tk">sorted_b.txt</span></span>
+<span class="ln"><span class="tk">comm</span> -12 list_a.txt sorted_b.txt</span>
+<span class="ln"><span class="tk">comm</span> -23 list_a.txt sorted_b.txt</span>
+<span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-d</span></span>
+<span class="ln"><span class="tk">diff</span> <span class="to">&lt;</span><span class="tk">(sort</span> list_a.txt) <span class="to">&lt;</span><span class="tk">(sort</span> list_b.txt)</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+printf &#x27;alice\nbob\ncarol\ndave\n&#x27; &gt; list_a.txt
+printf &#x27;erin\nbob\ncarol\n&#x27; &gt; list_b.txt
+comm -12 list_a.txt list_b.txt
+sort list_b.txt &gt; sorted_b.txt
+comm -12 list_a.txt sorted_b.txt
+comm -23 list_a.txt sorted_b.txt
+sort list_a.txt list_b.txt | uniq -d
+diff &lt;(sort list_a.txt) &lt;(sort list_b.txt)">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">comm: file 2 is not in sorted order
+bob
+carol
+alice
+dave
+bob
+carol
+1d0
+&lt; alice
+...</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>With unsorted input the <code>comm</code> warning may not appear or the output may be incomplete; the result is undefined, so always <code>sort</code> first.</li><li>If <code>diff &lt;(...)</code> gives a <code>syntax error</code>, your shell is not bash; type <code>bash</code> and try again.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>Create, test, apply and undo a patch</h3><span class="status" aria-hidden="true"></span></header><p>Turn a copy of <code>v1.txt</code> into <code>v2.txt</code> with a patch and undo it. Paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">cp</span> v1.txt work.txt</span>
+<span class="ln"><span class="tk">patch</span> <span class="tf">--dry-run</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">patch</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">cat</span> work.txt</span>
+<span class="ln"><span class="tk">patch</span> <span class="tf">-R</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">cat</span> work.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+diff -u v1.txt v2.txt &gt; change.patch
+cp v1.txt work.txt
+patch --dry-run work.txt &lt; change.patch
+patch work.txt &lt; change.patch
+cat work.txt
+patch -R work.txt &lt; change.patch
+cat work.txt">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">checking file work.txt
+patching file work.txt
+port=8080
+host=linux-lab
+mode=prod
+debug=on
+patching file work.txt
+port=80
+host=linux-lab
+mode=prod</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If you see <code>patch: command not found</code>: on Ubuntu <code>sudo apt install patch</code>, on Rocky/Alma <code>sudo dnf install patch</code>.</li><li>If <code>--dry-run</code> is not supported (very old version), skip that line.</li><li>If you see <code>Hunk #1 FAILED</code>, <code>work.txt</code> is not identical to <code>v1.txt</code>; start over with <code>cp v1.txt work.txt</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Checksums</h3><span class="status" aria-hidden="true"></span></header><p>Compute hashes, then modify a file and catch the corruption with <code>sha256sum -c</code>. Paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab</span></span>
+<span class="ln"><span class="tk">sha256sum</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">sha256sum</span> v1.txt <span class="to">&gt;</span> <span class="tk">sums.txt</span></span>
+<span class="ln"><span class="tk">sha256sum</span> <span class="tf">-c</span> sums.txt</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;x&#x27;</span> <span class="to">&gt;&gt;</span> <span class="tk">v1.txt</span></span>
+<span class="ln"><span class="tk">sha256sum</span> <span class="tf">-c</span> sums.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab
+sha256sum v1.txt same.txt
+sha256sum v1.txt &gt; sums.txt
+sha256sum -c sums.txt
+echo &#x27;x&#x27; &gt;&gt; v1.txt
+sha256sum -c sums.txt">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">&lt;64 hex characters&gt;  v1.txt
+&lt;64 hex characters&gt;  same.txt
+v1.txt: OK
+v1.txt: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>The first two hashes must be identical (<code>v1.txt</code> and <code>same.txt</code> have the same content).</li><li>On a non-English system the warning text may be translated; <code>OK</code> and <code>FAILED</code> stay the same.</li><li>If <code>same.txt</code> is missing, run the step from v02.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Quick exercises (simulator)</h2><p>Optional: warm up before the VM, or practise without one, in the in-browser virtual terminal. Tasks are verified automatically.</p><p>Tasks get harder from warm-up to ticket. Badges show the difficulty.</p><p><button type="button" class="btn" data-openterm>&gt;_ Open terminal (optional)</button></p>
+<h3 class="kind k-warmup">Warm-up <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Compare <code>v1.txt</code> and <code>v2.txt</code> with <code>diff v1.txt v2.txt</code>.</p><details><summary>Hint</summary><p>The simulator has no diff; typing the command is enough. You will see the real output on your VM.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff v1.txt v2.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Compare the same files in unified format: <code>diff -u v1.txt v2.txt</code>.</p><details><summary>Hint</summary><p><code>-u</code> means unified; the output contains <code>@@</code> hunks.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -u v1.txt v2.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Compare byte by byte with <code>cmp v1.txt v2.txt</code>.</p><details><summary>Hint</summary><p>cmp reports the byte and line number of the first difference.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cmp</span> v1.txt v2.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cmp v1.txt v2.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Guided lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d1">Easy</span></p><p>Copy <code>v1.txt</code> with <code>cp v1.txt v1.bak</code> and verify they are identical with <code>diff -q v1.txt v1.bak</code>.</p><details><summary>Hint</summary><p>If identical, <code>diff -q</code> prints nothing and the exit code is 0.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v1.txt v1.bak</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-q</span> v1.txt v1.bak</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v1.txt v1.bak
+diff -q v1.txt v1.bak">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Compare the directories <code>dir_a</code> and <code>dir_b</code> with <code>diff -rq dir_a dir_b</code>.</p><details><summary>Hint</summary><p><code>-r</code> recursive, <code>-q</code> short summary. <code>-r dir_a dir_b</code> is accepted too.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">diff</span> <span class="tf">-rq</span> dir_a dir_b</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="diff -rq dir_a dir_b">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p><code>list_b.txt</code> is not sorted. For <code>comm</code>, create a sorted copy with <code>sort list_b.txt &gt; sorted_b.txt</code>.</p><details><summary>Hint</summary><p>The redirect <code>&gt;</code> writes the sorted output into a new file.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_b.txt <span class="to">&gt;</span> <span class="tk">sorted_b.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_b.txt &gt; sorted_b.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Use <code>comm -12 list_a.txt sorted_b.txt</code> to show the lines present in both lists.</p><details><summary>Hint</summary><p><code>-12</code> hides columns 1 and 2; the common column remains.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">comm</span> -12 list_a.txt sorted_b.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="comm -12 list_a.txt sorted_b.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t14" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Copy with <code>cp v1.txt same.txt</code>, run <code>cmp -s v1.txt same.txt</code> and type <code>echo $?</code> right after.</p><details><summary>Hint</summary><p>In one line this also works: <code>cmp -s v1.txt same.txt ; echo $?</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">cmp</span> <span class="tf">-s</span> v1.txt same.txt</span>
+<span class="ln"><span class="tk">echo</span> <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v1.txt same.txt
+cmp -s v1.txt same.txt
+echo $?">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Predict <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t08" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict, then run: <code>sort list_a.txt list_b.txt | uniq -d</code>. Which names appear?</p><details><summary>Hint</summary><p><code>uniq -d</code> prints only lines that occur more than once.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-d</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -d">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict, then run: <code>sort list_a.txt list_b.txt | uniq -u</code>. Which names appear?</p><details><summary>Hint</summary><p><code>-u</code> prints only lines that occur once: names that are in only one of the two lists.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-u</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt | uniq -u">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: what does <code>grep -q debug v1.txt ; echo $?</code> print? Run it to check.</p><details><summary>Hint</summary><p><code>grep -q</code> returns 0 if found, 1 if not; <code>v1.txt</code> contains no debug.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> <span class="tf">-q</span> debug v1.txt <span class="to">;</span> <span class="tk">echo</span> <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep -q debug v1.txt ; echo $?">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t15" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d3">Hard</span></p><p>Predict, then run: <code>cut -d= -f1 v1.txt</code>. Which keys are listed?</p><details><summary>Hint</summary><p><code>-d=</code> is the delimiter, <code>-f1</code> the first field: everything before the <code>=</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cut</span> <span class="tf">-d=</span> <span class="tf">-f1</span> v1.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cut -d= -f1 v1.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Debug <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t11" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: <code>win.txt</code> looks different on every line because it has Windows line endings (<code>\r</code>). Create a clean copy with <code>tr -d &#x27;\r&#x27; &lt; win.txt &gt; fixed.txt</code>.</p><details><summary>Hint</summary><p><code>tr -d</code> deletes the given character; redirect input with <code>&lt;</code>, output with <code>&gt;</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">tr</span> <span class="tf">-d</span> <span class="ts">&#x27;\r&#x27;</span> <span class="to">&lt;</span> <span class="tk">win.txt</span> <span class="to">&gt;</span> <span class="tk">fixed.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="tr -d &#x27;\r&#x27; &lt; win.txt &gt; fixed.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini project <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t12" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d2">Medium</span></p><p>Mini project: copy with <code>cp v1.txt work.txt</code>, create a patch with <code>diff -u v1.txt v2.txt &gt; change.patch</code>, then apply it with <code>patch work.txt &lt; change.patch</code>.</p><details><summary>Hint</summary><p>Three commands in order; diff and patch do not run in the simulator, try them on your VM.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v1.txt work.txt</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">change.patch</span></span>
+<span class="ln"><span class="tk">patch</span> work.txt <span class="to">&lt;</span> <span class="tk">change.patch</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v1.txt work.txt
+diff -u v1.txt v2.txt &gt; change.patch
+patch work.txt &lt; change.patch">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Challenge <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: write only the names that are in <code>list_a.txt</code> (not in <code>list_b.txt</code>) to the file <code>only_a.txt</code>. Without <code>comm</code>; hint: pass <code>list_b.txt</code> twice.</p><details><summary>Hint</summary><p><code>sort list_a.txt list_b.txt list_b.txt | uniq -u &gt; only_a.txt</code>: names from b occur at least twice, names only in a occur once.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sort</span> list_a.txt list_b.txt list_b.txt <span class="to">|</span> <span class="tk">uniq</span> <span class="tf">-u</span> <span class="to">&gt;</span> <span class="tk">only_a.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sort list_a.txt list_b.txt list_b.txt | uniq -u &gt; only_a.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t16" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>TICKET #3701 — Change review: back up <code>v2.txt</code> as <code>v2.bak</code>, save the difference to <code>v1.txt</code> with <code>diff -u v1.txt v2.txt &gt; review.patch</code>, and write <code>review done</code> into <code>report.txt</code>.</p><details><summary>Hint</summary><p>Three steps: <code>cp</code>, <code>diff -u ... &gt; review.patch</code>, <code>echo review done &gt; report.txt</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cp</span> v2.txt v2.bak</span>
+<span class="ln"><span class="tk">diff</span> <span class="tf">-u</span> v1.txt v2.txt <span class="to">&gt;</span> <span class="tk">review.patch</span></span>
+<span class="ln"><span class="tk">echo</span> review done <span class="to">&gt;</span> <span class="tk">report.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cp v2.txt v2.bak
+diff -u v1.txt v2.txt &gt; review.patch
+echo review done &gt; report.txt">Copy</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Reset lab</button></p></section>
+<section id="quiz"><h2>Self-test</h2>
+<div class="q card" data-q="q1"><p><strong>With which exit code does <code>diff a b</code> end when the files differ?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">0</button><button type="button" class="opt" data-i="1">1</button><button type="button" class="opt" data-i="2">2</button><button type="button" class="opt" data-i="3">127</button></div><p class="explain" hidden>0 identical, 1 differences, 2 trouble. A difference is not an error, but it is not zero either.</p></div>
+<div class="q card" data-q="q2"><p><strong>What does <code>comm</code> need from its input files to work correctly?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">That they are sorted</button><button type="button" class="opt" data-i="1">Root privileges</button><button type="button" class="opt" data-i="2">The same size</button><button type="button" class="opt" data-i="3">That they are binary</button></div><p class="explain" hidden>comm expects sorted input; otherwise the result is wrong. Apply <code>sort</code> first.</p></div>
+<div class="q card" data-q="q3"><p><strong>What does a line starting with <code>+</code> mean in unified diff output?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">The line existed only in the old file</button><button type="button" class="opt" data-i="1">The line is a comment</button><button type="button" class="opt" data-i="2">The line is only in the new file (added)</button><button type="button" class="opt" data-i="3">The line was moved elsewhere</button></div><p class="explain" hidden><code>-</code> was removed from the old file, <code>+</code> added to the new one; lines starting with a space are context.</p></div>
+<div class="q card" data-q="q4"><p><strong>Which command undoes an applied patch?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">diff -R change.patch</button><button type="button" class="opt" data-i="1">patch -u change.patch</button><button type="button" class="opt" data-i="2">cmp -r change.patch</button><button type="button" class="opt" data-i="3">patch -R &lt; change.patch</button></div><p class="explain" hidden><code>patch -R</code> reverses the patch; the patch file is read from standard input.</p></div>
+</section>
+<section id="summary" class="card"><h2>Summary</h2><ul><li><code>diff -u old new</code> shows the change; exit code 0 same, 1 different, 2 trouble.</li><li><code>diff -rq</code> checks directories, <code>cmp</code> compares bytes, <code>sha256sum -c</code> verifies content integrity.</li><li><code>comm</code> works only on sorted input; alternatives: <code>sort | uniq -d</code> (common) and <code>uniq -u</code> (unique).</li><li>Create a patch with <code>diff -u &gt; change.patch</code>, test with <code>patch --dry-run</code>, apply with <code>patch</code>, undo with <code>patch -R</code>.</li><li>Pitfalls: unsorted <code>comm</code>, CRLF line endings, <code>diff</code> on binary files.</li></ul></section>
+<section id="glossary"><h2>Key terms</h2><dl class="gl"><dt>hunk</dt><dd>A change block in unified diff that starts with <code>@@</code> and includes context lines.</dd><dt>unified diff</dt><dd>The <code>diff -u</code> format: <code>---</code>/<code>+++</code> header, <code>@@</code> hunks, <code>+</code>/<code>-</code> lines.</dd><dt>patch</dt><dd>A file holding diff output; the <code>patch</code> command applies it to files.</dd><dt>exit code</dt><dd>A command&#x27;s final status, read with <code>$?</code>. For diff: 0 same, 1 different, 2 trouble.</dd><dt>checksum</dt><dd>A hash value computed from content; if the content changes, the value changes.</dd><dt>CRLF</dt><dd>Windows line ending (<code>\r\n</code>); Linux uses only <code>\n</code>.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-3.6.html">← Previous</a><a class="btn primary" href="modul-3.8.html">Next →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (optional)</strong><button type="button" class="ibtn" id="termclose" aria-label="Close terminal">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "en", "module": "3.7", "setup": {"dirs": ["/home/student/lab", "/home/student/lab/dir_a", "/home/student/lab/dir_b"], "files": {"/home/student/lab/v1.txt": "port=80\nhost=linux-lab\nmode=prod\n", "/home/student/lab/v2.txt": "port=8080\nhost=linux-lab\nmode=prod\ndebug=on\n", "/home/student/lab/list_a.txt": "alice\nbob\ncarol\ndave\n", "/home/student/lab/list_b.txt": "erin\nbob\ncarol\n", "/home/student/lab/win.txt": "port=80\r\nhost=linux-lab\r\nmode=prod\r\n", "/home/student/lab/dir_a/app.conf": "level=1\n", "/home/student/lab/dir_a/readme.txt": "hello\n", "/home/student/lab/dir_b/app.conf": "level=2\n", "/home/student/lab/dir_b/extra.txt": "extra\n"}, "cwd": "/home/student/lab"}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^diff v1\\.txt v2\\.txt$"}}, {"id": "t02", "kind": "warmup", "check": {"cmd": "^diff\\s+(-\\S+\\s+)*-u\\s+v1\\.txt v2\\.txt$"}}, {"id": "t03", "kind": "warmup", "check": {"cmd": "^cmp\\s+v1\\.txt v2\\.txt$"}}, {"id": "t04", "kind": "guided", "check": [{"exists": "/home/student/lab/v1.bak", "type": "f"}, {"cmd": "^diff\\s+-q\\s+v1\\.txt v1\\.bak$"}]}, {"id": "t05", "kind": "guided", "check": {"cmd": "^diff\\s+-\\w*r\\w*\\s+dir_a/? dir_b/?$"}}, {"id": "t06", "kind": "guided", "check": {"equals": ["/home/student/lab/sorted_b.txt", "bob\ncarol\nerin\n"]}}, {"id": "t07", "kind": "guided", "check": {"cmd": "^comm\\s+(-12|-21|-1\\s+-2|-2\\s+-1)\\s+list_a\\.txt sorted_b\\.txt$"}}, {"id": "t08", "kind": "predict", "check": {"out": "bob\\s+carol", "of": "uniq -d"}}, {"id": "t09", "kind": "predict", "check": {"out": "alice\\s+dave\\s+erin", "of": "uniq -u"}}, {"id": "t10", "kind": "predict", "check": {"out": "1", "of": "grep -q debug v1\\.txt.*echo \\$\\?"}}, {"id": "t11", "kind": "debug", "check": [{"contains": ["/home/student/lab/fixed.txt", "^port=80\\nhost=linux-lab\\nmode=prod\\n$"]}, {"contains": ["/home/student/lab/fixed.txt", "^[^\\r]+$"]}]}, {"id": "t12", "kind": "mini", "check": [{"exists": "/home/student/lab/work.txt", "type": "f"}, {"seq": ["^cp v1\\.txt work\\.txt$", "^diff\\s+-u\\s+v1\\.txt v2\\.txt\\s*>\\s*change\\.patch$", "^patch\\s+(--dry-run\\s+)?work\\.txt\\s*<\\s*change\\.patch$"]}]}, {"id": "t13", "kind": "challenge", "check": {"equals": ["/home/student/lab/only_a.txt", "alice\ndave\n"]}}, {"id": "t14", "kind": "guided", "check": [{"exists": "/home/student/lab/same.txt", "type": "f"}, {"seq": ["^cp v1\\.txt same\\.txt$", "^cmp\\s+-s\\s+v1\\.txt same\\.txt", "echo \\$\\?$"]}]}, {"id": "t15", "kind": "predict", "check": {"out": "port\\s+host\\s+mode", "of": "^cut"}}, {"id": "t16", "kind": "ticket", "check": [{"exists": "/home/student/lab/v2.bak", "type": "f"}, {"cmd": "^diff\\s+-\\w*u\\w*\\s+v1\\.txt v2\\.txt\\s*>\\s*review\\.patch$"}, {"equals": ["/home/student/lab/report.txt", "review done\n"]}]}], "vm": [{"id": "v01", "expect": "@@"}, {"id": "v02", "expect": "exit=1"}, {"id": "v03", "expect": "bob"}, {"id": "v04", "expect": "patching file|Hunk|hunk"}, {"id": "v05", "expect": "OK"}], "quiz": {"q1": 1, "q2": 0, "q3": 2, "q4": 3}, "ui": {"correct": "Correct!", "wrong": "Not quite, try again.", "taskDone": "Task complete", "moduleDone": "Module complete! 🎉", "tasksDone": "done", "welcome": "Virtual Linux terminal — commands only affect this page's virtual file system. Type 'help' to list commands, Tab to complete, ↑/↓ for history.", "sandboxNote": "Safe sandbox: your real system is never touched.", "resetConfirm": "This module's virtual file system and command history will be reset. Your progress (completed tasks) is kept. Continue?", "openTerminal": "Open terminal (optional)", "closeTerminal": "Close terminal", "continue": "Continue", "startPath": "Start learning", "noResult": "No matching module or command.", "soon": "Coming soon", "overall": "Overall progress", "copied": "Copied ✓", "pasteOk": "Your output matches the expected pattern ✓", "pasteBad": "No match yet. See the tips under \"My output looks different\" and paste the complete output.", "iDidIt": "Done", "undo": "Undo", "groupDone": "done", "vmDone": "VM tasks"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

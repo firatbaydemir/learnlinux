@@ -1,0 +1,462 @@
+{
+ "title": "Ağ Temelleri — ip, ss, DNS, Portlar",
+ "lead": "Ağdaki kimliğini oku: adres, geçit, port ve isim. Bu modüldeki komutlar neredeyse tamamen okuma komutudur.",
+ "objectives": [
+  "`ip a` ve `ip r` ile IP adresini, prefix'i ve varsayılan geçidi (gateway) okursun.",
+  "`ss -tulpn` ile hangi servisin hangi portta, hangi arayüzde dinlediğini görürsün.",
+  "İsim çözümleme zincirini bilirsin: `/etc/hosts` → `/etc/resolv.conf` → DNS sunucusu.",
+  "Güvenlik duvarını (firewalld / ufw) önce okur, sonra kilitlenmeden değiştirirsin.",
+  "\"İnternet yok\" sorununu katman katman (adres → geçit → IP → isim) teşhis edersin."
+ ],
+ "sections": [
+  {
+   "id": "addr",
+   "title": "Adres ve yönlendirme: ip a, ip r",
+   "body": [
+    "Her ağ arayüzünün (`eth0`, `ens3`, `enp0s3`, `lo`) bir **IP adresi** ve bir **prefix**'i vardır. `192.168.1.42/24` demek: ilk 24 bit ağı, kalan kısım cihazı belirtir (`/24` = `255.255.255.0`). `lo` loopback arayüzüdür (`127.0.0.1`), makinenin kendisidir ve dışarı çıkmaz.",
+    "Hedef yerel ağda değilse paket **varsayılan geçide** gider. `ip r` çıktısındaki `default via 192.168.1.1` satırı bunu söyler. Eski `ifconfig` ve `route` komutları yerine modern `ip` kullan; `ip` hem Rocky/Alma hem Ubuntu/Debian'da vardır.",
+    "Arayüz adları dağıtıma ve VM'e göre değişir; çıktın `eth0` yerine `ens3` veya `enp0s3` gösterebilir."
+   ],
+   "commands": [
+    {
+     "cmd": "ip a",
+     "what": "Tüm arayüzleri, IP adreslerini ve durumlarını (UP/DOWN) listeler.",
+     "where": "Makinenin adresini öğrenmek veya arayüzün ayakta olduğunu doğrulamak için.",
+     "why": "Ağ sorununda ilk bakılacak yer; adres yoksa üst katmanların hiçbiri çalışmaz.",
+     "example": "ip a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip -br a",
+     "what": "Aynı bilgiyi tek satırlık kısa tabloda verir.",
+     "where": "Hızlıca \"hangi arayüz hangi adreste\" bakarken.",
+     "why": "Uzun çıktıyı okumaktan kurtarır, ekrana sığar.",
+     "example": "ip -br a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip r",
+     "what": "Yönlendirme tablosunu gösterir; `default via` satırı geçittir.",
+     "where": "Dış ağa neden çıkamadığını araştırırken.",
+     "why": "Varsayılan rota yoksa yerel ağın dışına hiçbir paket gidemez.",
+     "example": "ip r",
+     "nosim": true
+    },
+    {
+     "cmd": "grep default",
+     "what": "Satırları metne göre süzer; burada kayıtlı rota çıktısından geçidi bulur.",
+     "where": "Uzun çıktıdan tek satırı almak istediğinde.",
+     "why": "Aynı süzme `ss` çıktısında da çalışır; simülatörde örnek dosyalarla alıştırma yaparsın.",
+     "example": "grep default ~/net/routes.txt"
+    }
+   ],
+   "tip": "Aynı satırı alt komutlarla kesebilirsin: `grep default ~/net/routes.txt | cut -d' ' -f3` geçidin adresini verir.",
+   "warn": "Bir arayüzün adresini `ip addr add/del` ile elle değiştirmek bağlantını (SSH dahil) anında koparabilir. Bu modülde yalnızca okuyoruz."
+  },
+  {
+   "id": "ports",
+   "title": "Portlar ve dinleyen servisler: ss",
+   "body": [
+    "IP adresi makineyi, **port** ise makinedeki servisi seçer: `22` SSH, `80` HTTP, `443` HTTPS, `53` DNS. Bir servis çalışıyorsa belirli bir adreste ve portta **dinler** (LISTEN).",
+    "`ss -tulpn` harfleri: `t` TCP, `u` UDP, `l` yalnızca dinleyenler, `p` süreç adı, `n` isim çözme (sayısal çıktı). Süreç adını görmek için `sudo` gerekir.",
+    "**Yerel adrese dikkat:** `0.0.0.0:22` her arayüzden erişilebilir demektir. `127.0.0.1:5432` yalnızca makinenin kendisinden erişilebilir. Bir veritabanı `0.0.0.0` üzerinde dinliyorsa dışarıya açık olabilir; bu bir güvenlik bulgusudur.",
+    "Eski `netstat -tulpn` komutunun yerini `ss` aldı; seçenekleri neredeyse aynıdır."
+   ],
+   "commands": [
+    {
+     "cmd": "ss -tulpn",
+     "what": "Dinleyen TCP/UDP soketlerini, portlarını ve süreçlerini listeler.",
+     "where": "\"Servis gerçekten dinliyor mu, hangi adreste?\" sorusunu yanıtlarken.",
+     "why": "Bir servis çalışıyor görünse de yanlış adreste dinliyorsa bağlantı kurulamaz.",
+     "example": "sudo ss -tulpn",
+     "nosim": true
+    },
+    {
+     "cmd": "ss -tln",
+     "what": "Yalnızca TCP dinleyenleri, süreç bilgisi olmadan (sudo gerekmez) gösterir.",
+     "where": "Hızlı kontrol veya betiklerde.",
+     "why": "Kısa ve yetkisiz çalışır; bir portun açık olup olmadığını görmeye yeter.",
+     "example": "ss -tln | grep 8080",
+     "nosim": true
+    },
+    {
+     "cmd": "curl -I",
+     "what": "Bir web sunucusunun yalnızca yanıt başlıklarını getirir.",
+     "where": "Servisin gerçekten HTTP yanıtı verip vermediğini sınarken.",
+     "why": "Port açık olsa da uygulama yanıt vermeyebilir; `200` veya `301` gibi kod bunu gösterir.",
+     "example": "curl -I http://127.0.0.1:8080",
+     "nosim": true
+    }
+   ],
+   "tip": "`ss` çıktısını süz: `ss -tln | grep LISTEN | wc -l` kaç TCP portunun dinlediğini sayar.",
+   "warn": "Sahibi olmadığın sunuculara port taraması yapma. Bu hem etik değildir hem de fark edilir; kendi VM'inle `127.0.0.1` üzerinde çalış."
+  },
+  {
+   "id": "dns",
+   "title": "İsim çözümleme: hosts, resolv.conf, DNS",
+   "body": [
+    "Bir isim (`example.com`) IP'ye şu sırayla çevrilir: önce `/etc/hosts` dosyasına bakılır, sonra `/etc/resolv.conf` içinde yazan **DNS sunucusuna** sorulur (sıra `/etc/nsswitch.conf` içinde `hosts:` satırıyla belirlenir).",
+    "`/etc/hosts` yerel, elle yazılmış eşlemelerdir: `192.168.1.50 intranet.lab`. Test için çok işe yarar ama yalnızca o makineyi etkiler.",
+    "`/etc/resolv.conf` genellikle NetworkManager veya systemd-resolved tarafından otomatik üretilir; elle yaptığın değişiklik yeniden başlatmada silinebilir. Ubuntu'da içinde sık sık `127.0.0.53` görürsün; gerçek sunucuyu `resolvectl status` gösterir.",
+    "**Önemli ayrım:** `ping 1.1.1.1` çalışıp `ping example.com` çalışmıyorsa ağın sağlam, sorun DNS'tedir."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/hosts",
+     "what": "Yerel isim-adres eşlemelerini gösterir.",
+     "where": "Bir ismin beklenmedik bir adrese gitmesinin sebebini ararken.",
+     "why": "`/etc/hosts` DNS'ten önce okunur; yanlış satır tüm çözümlemeyi geçersiz kılar.",
+     "example": "cat /etc/hosts"
+    },
+    {
+     "cmd": "cat /etc/resolv.conf",
+     "what": "Kullanılan DNS sunucularını (`nameserver`) ve arama alanını (`search`) gösterir.",
+     "where": "İsimler çözülmediğinde ilk bakılacak dosya.",
+     "why": "Yanlış veya erişilemeyen bir `nameserver` satırı tüm isim çözümlemeyi bozar.",
+     "example": "cat /etc/resolv.conf"
+    },
+    {
+     "cmd": "getent hosts",
+     "what": "Sistemin gerçek çözümleme sırasıyla (hosts + DNS) bir ismi çözer.",
+     "where": "Uygulamaların göreceği sonucu test ederken.",
+     "why": "`/etc/hosts` dosyasını da hesaba katar; yalnızca DNS'e bakan araçlardan daha doğrudur.",
+     "example": "getent hosts localhost",
+     "nosim": true
+    },
+    {
+     "cmd": "resolvectl status",
+     "what": "systemd-resolved kullanan sistemlerde arayüz başına DNS sunucularını gösterir.",
+     "where": "Ubuntu ve yeni Rocky/Alma sürümlerinde `resolv.conf` yeterince bilgi vermediğinde.",
+     "why": "`127.0.0.53` arkasındaki gerçek DNS sunucusunu ortaya çıkarır.",
+     "example": "resolvectl status",
+     "nosim": true
+    }
+   ],
+   "tip": "Değiştirmeden önce yedek al: `sudo cp /etc/hosts /etc/hosts.bak`.",
+   "warn": "Hatalı bir `nameserver` satırı bütün isim çözümlemeyi bozar. Üretim makinesinde `/etc/resolv.conf` yerine NetworkManager (`nmcli`) veya netplan üzerinden ayarla."
+  },
+  {
+   "id": "firewall",
+   "title": "Güvenlik duvarı: firewalld ve ufw",
+   "body": [
+    "Servis dinlese bile **güvenlik duvarı** portu engelliyor olabilir. Rocky/Alma/RHEL'de `firewalld` (`firewall-cmd`), Ubuntu/Debian'da `ufw` kullanılır.",
+    "firewalld'de değişiklikler varsayılan olarak **runtime**'dır: hemen geçerli olur ama reload veya yeniden başlatmada kaybolur. Kalıcı yapmak için `--permanent` ekleyip `--reload` çalıştırırsın. ufw kuralları ise otomatik kalıcıdır.",
+    "Önce **oku**: `firewall-cmd --list-all` veya `ufw status verbose`. Sonra değiştir.",
+    "SELinux (Rocky) ve AppArmor (Ubuntu) ayrı bir katmandır; portu açman her zaman servisin o portu kullanabileceği anlamına gelmez, ama bu modülün konusu değil."
+   ],
+   "commands": [
+    {
+     "cmd": "firewall-cmd --list-all",
+     "what": "Aktif bölgedeki izinli servisleri ve portları gösterir.",
+     "where": "Rocky/Alma/RHEL'de bir portun neden dışarıdan erişilemediğini ararken.",
+     "why": "Hangi servis veya port izinli, tek bakışta görürsün; salt okunur ve güvenlidir.",
+     "example": "sudo firewall-cmd --list-all",
+     "nosim": true
+    },
+    {
+     "cmd": "firewall-cmd --add-port",
+     "what": "Bir portu açar; `--permanent` olmadan yalnızca runtime'da geçerlidir.",
+     "where": "Bir servisi dışarıya açman gerektiğinde.",
+     "why": "Önce runtime dene, çalışıyorsa kalıcı yap; yanlışlık varsa reload ile geri döner.",
+     "example": "sudo firewall-cmd --add-port=8080/tcp --timeout=300",
+     "nosim": true
+    },
+    {
+     "cmd": "ufw status verbose",
+     "what": "Ubuntu/Debian'da güvenlik duvarının durumunu ve kurallarını gösterir.",
+     "where": "Ubuntu sunucuda kuralları denetlerken.",
+     "why": "`inactive` ise güvenlik duvarı kapalıdır; `active` ise varsayılan politika görünür.",
+     "example": "sudo ufw status verbose",
+     "nosim": true
+    }
+   ],
+   "tip": "Rocky'de `--timeout=300` ile açılan kural 5 dakika sonra kendiliğinden kalkar; yanlış yaparsan kendi kendine düzelir.",
+   "warn": "Güvenlik duvarını SSH üzerinden değiştirirken ikinci bir SSH oturumu açık tut ve önce `--timeout` kullan. `ufw enable` yapmadan önce `sudo ufw allow 22/tcp` ile SSH'ı izinli kıl.",
+   "danger": "SSH portunu kapatan veya varsayılan politikayı `deny` yapan bir kuralı uzaktan uygularsan kendini dışarıda bırakırsın. Önce VM snapshot'ı al (modül 0.2) ve konsol erişimini hazır tut."
+  },
+  {
+   "id": "diagnose",
+   "title": "Teşhis merdiveni: aşağıdan yukarı",
+   "body": [
+    "\"İnternet yok\" sorununu **katman katman** çöz; ilk başarısız adım sorunun yeridir: (1) arayüz UP ve adres var mı? (2) geçide ping gidiyor mu? (3) dış IP'ye (`1.1.1.1`) ping gidiyor mu? (4) isim çözülüyor mu? (5) servis dinliyor ve güvenlik duvarı izin veriyor mu?",
+    "`ping` ICMP kullanır; bazı ağlar ICMP'yi engeller, bu yüzden ping başarısızlığı her zaman kopukluk demek değildir. Bu yüzden `curl -I` ile gerçek servisi de dene.",
+    "Sürekli `ping` atmak hedefi gereksiz yorar; `-c 3` ile sayıyı sınırla."
+   ],
+   "commands": [
+    {
+     "cmd": "ping -c 3",
+     "what": "Hedefe 3 ICMP paketi gönderir ve yanıt süresini ölçer.",
+     "where": "Geçidin, dış IP'nin ve ismin ayrı ayrı erişilebilir olduğunu denerken.",
+     "why": "Hangi katmanın koptuğunu tek tek gösterir.",
+     "example": "ping -c 3 1.1.1.1",
+     "nosim": true
+    },
+    {
+     "cmd": "cut -d",
+     "what": "Satırı ayırıcıya göre alanlara böler ve istediğin alanı alır.",
+     "where": "Çıktıdan adres, port veya prefix gibi tek bir değeri almak için.",
+     "why": "Elle kopyalamadan değeri dosyaya veya sonraki komuta aktarırsın.",
+     "example": "echo 192.168.1.42/24 | cut -d/ -f2"
+    },
+    {
+     "cmd": "sort -n | uniq",
+     "what": "Satırları sayısal sıralar ve tekrarları kaldırır.",
+     "where": "Dinleyen portların temiz bir listesini çıkarırken.",
+     "why": "Rapor ve karşılaştırma için sade, tekrarsız liste verir.",
+     "example": "sort -n ~/net/ports.txt | uniq"
+    }
+   ],
+   "tip": "Sonuçlarını bir rapora yaz: `hostname > ~/net/report.txt`, sonra `>>` ile ekle. Destek biletine yapıştırmak kolaylaşır."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Örnek rota dosyasını oku: `cat ~/net/routes.txt`. Hangi satır geçidi söylüyor?",
+   "hint": "`default via ...` satırı."
+  },
+  "t02": {
+   "text": "`~/net/ss.txt` dosyasında yalnızca dinleyen (LISTEN) satırları göster.",
+   "hint": "`grep LISTEN ~/net/ss.txt`"
+  },
+  "t03": {
+   "text": "Yerel isim eşlemelerini `cat /etc/hosts` ile oku.",
+   "hint": "`localhost` satırını bulmalısın."
+  },
+  "t04": {
+   "text": "`grep default ~/net/routes.txt` ile varsayılan rotayı bul. Geçidin adresi nedir?",
+   "hint": "`via` kelimesinden sonraki adres."
+  },
+  "t05": {
+   "text": "Geçidin adresini (yalnızca adres) `~/net/gateway.txt` dosyasına yaz.",
+   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; 3. alan geçittir."
+  },
+  "t06": {
+   "text": "Dinleyen (LISTEN) satırların sayısını `~/net/listen_count.txt` dosyasına yaz.",
+   "hint": "`grep LISTEN ... | wc -l > file`."
+  },
+  "t07": {
+   "text": "Dışarıya açık dinleyenleri (LISTEN olup `127.0.0.1` olmayanlar) `~/net/exposed.txt` dosyasına yaz.",
+   "hint": "İki `grep`'i boruyla bağla; ikincisinde `-v 127.0.0.1` kullan."
+  },
+  "t08": {
+   "text": "Tahmin et: 8080 portunda hangi süreç dinliyor? Sonra `grep 8080 ~/net/ss.txt` ile doğrula.",
+   "hint": "Satırın sonundaki `users:((...))` kısmına bak."
+  },
+  "t09": {
+   "text": "Tahmin et: `eth0` hangi adresi ve prefix'i taşıyor? `grep 192 ~/net/ipa.txt` ile doğrula.",
+   "hint": "`inet` satırı `adres/prefix` biçimindedir."
+  },
+  "t10": {
+   "text": "Tahmin et: `echo 192.168.1.42/24 | cut -d/ -f2` ne yazdırır? Çalıştırıp kontrol et.",
+   "hint": "`/` karakterinden sonraki alan, yani prefix uzunluğu."
+  },
+  "t11": {
+   "text": "Hata ayıklama: `~/net/resolv.conf` içindeki `nameserver` geçersiz. Dosyayı `nameserver 192.168.1.1` ve `nameserver 1.1.1.1` iki satırı olacak biçimde yeniden yaz.",
+   "hint": "`printf 'line1\\nline2\\n' > file` ile iki satır yazabilirsin; önce `cat` ile hatayı gör."
+  },
+  "t12": {
+   "text": "Hata ayıklama: `~/net/check_ports.sh` betiği çalışmıyor. Sebebini bul, düzelt ve betiği çalıştır.",
+   "hint": "`ls -l` ile izinlere bak; `chmod 755` sonra `~/net/check_ports.sh`."
+  },
+  "t13": {
+   "text": "Mini rapor: `~/net/report.txt` dosyasına sırayla host adını, geçidin adresini ve dinleyen servis sayısını (3 satır) yaz.",
+   "hint": "İlk komutta `>`, sonrakilerde `>>` kullan; host adı için `hostname`."
+  },
+  "t14": {
+   "text": "Zor: `ss.txt` içindeki LISTEN satırlarından yalnızca port numaralarını, sayısal sıralı ve tekrarsız olarak `~/net/ports.txt` dosyasına yaz (her satırda bir port).",
+   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file`"
+  },
+  "t15": {
+   "text": "Zor: 8080/tcp portunu kalıcı açmak için firewalld planını `~/net/fw_plan.txt` dosyasına iki satır olarak yaz: önce `--permanent --add-port=8080/tcp` içeren komut, sonra `firewall-cmd --reload`. (Planı yazarsın, çalıştırmazsın.)",
+   "hint": "`echo 'komut' > file`, ikinci satır için `>>`. Tırnak kullan."
+  },
+  "t16": {
+   "text": "Ticket: Kullanıcılar `intranet.lab` adına ulaşamıyor. İç sunucunun adresi `192.168.1.50`. `~/net/hosts` dosyasına bu eşlemeyi ekle (mevcut satırları silme).",
+   "hint": "`echo '192.168.1.50 intranet.lab' >> ~/net/hosts`"
+  },
+  "t17": {
+   "text": "Ticket: Güvenlik denetimi, PostgreSQL'in (port 5432) yalnızca yerel adreste dinlediğinin kanıtını istiyor. İlgili `ss.txt` satırını `~/net/audit.txt` dosyasına kaydet.",
+   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; satırda `127.0.0.1:5432` olmalı."
+  }
+ },
+ "vm": {
+  "intro": "Bu adımlar kendi VM'inde çalışır ve yalnızca okur. Çıktılar sana özgüdür; IP'ler ve arayüz adları farklı olabilir. Eksik komut olursa Rocky'de `sudo dnf install iproute bind-utils`, Ubuntu'da `sudo apt install iproute2 dnsutils` kur.",
+  "tasks": {
+   "v01": {
+    "title": "Adres ve geçit",
+    "text": "Arayüzlerini ve rotanı oku, çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ip -br a\nip r",
+      "expected": "lo      UNKNOWN  127.0.0.1/8\nens3    UP       192.168.1.42/24\ndefault via 192.168.1.1 dev ens3 proto dhcp metric 100\n192.168.1.0/24 dev ens3 proto kernel scope link src 192.168.1.42"
+     }
+    ],
+    "differs": [
+     "Arayüz adı `eth0`, `ens3` veya `enp0s3` olabilir; önemli olan adresin ve `default via` satırının olması.",
+     "`default` satırı yoksa makinenin geçidi yoktur; VM'in ağ ayarını (NAT/Bridge) kontrol et."
+    ]
+   },
+   "v02": {
+    "title": "Dinleyen servisler",
+    "text": "Hangi servislerin dinlediğini listele ve SSH'ı bul.",
+    "blocks": [
+     {
+      "cmd": "sudo ss -tulpn\nss -tln",
+      "expected": "Netid State  Local Address:Port Process\ntcp   LISTEN 0.0.0.0:22         users:((\"sshd\",pid=812,fd=3))\n..."
+     }
+    ],
+    "differs": [
+     "`sudo` olmadan süreç adı (`Process` sütunu) boş kalır.",
+     "`ss` yoksa `iproute`/`iproute2` paketini kur; `LISTEN` satırı yoksa servis çalışmıyordur."
+    ]
+   },
+   "v03": {
+    "title": "İsim çözümleme zinciri",
+    "text": "hosts ve resolv.conf içeriğini oku, sonra bir ismi sistemin yöntemiyle çöz.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/hosts\ncat /etc/resolv.conf\nresolvectl status | head -n 15\ngetent hosts localhost",
+      "expected": "127.0.0.1 localhost\nnameserver 127.0.0.53\n...\n::1             localhost"
+     }
+    ],
+    "differs": [
+     "`resolvectl` yoksa (eski veya minimal sistem) o satırı atla; `resolv.conf` yeterlidir.",
+     "Ubuntu'da `nameserver 127.0.0.53` görmen normaldir; gerçek sunucu `resolvectl status` içinde yazar."
+    ]
+   },
+   "v04": {
+    "title": "Teşhis merdiveni",
+    "text": "Geçide, dış IP'ye ve bir isme sırayla 2'şer ping at. `192.168.1.1` yerine kendi geçidini yaz.",
+    "blocks": [
+     {
+      "cmd": "ping -c 2 192.168.1.1\nping -c 2 1.1.1.1\nping -c 2 example.com",
+      "expected": "2 packets transmitted, 2 received, 0% packet loss"
+     }
+    ],
+    "differs": [
+     "IP'ye ping gidip isme gitmiyorsa sorun DNS'tedir (`/etc/resolv.conf`).",
+     "Hiçbiri gitmiyorsa önce `ip a` ve `ip r` ile adres/geçit kontrol et; bazı ağlar ICMP'yi engeller, `curl -I https://example.com` ile de dene."
+    ]
+   },
+   "v05": {
+    "title": "Kendi dinleyen servisini kur ve gör",
+    "text": "Yalnızca `127.0.0.1` üzerinde geçici bir web sunucusu başlat, `ss` ile gör, `curl` ile sına, sonra kapat.",
+    "blocks": [
+     {
+      "cmd": "python3 -m http.server 8080 --bind 127.0.0.1 &\nsleep 1\nss -tln | grep 8080\ncurl -I http://127.0.0.1:8080\nkill %1",
+      "expected": "LISTEN 0 5 127.0.0.1:8080 0.0.0.0:*\nHTTP/1.0 200 OK"
+     }
+    ],
+    "differs": [
+     "`python3` yoksa kurulum gerekir; atlayıp `ss -tln` çıktını yapıştırabilirsin.",
+     "Port meşgulse `8081` kullan. İş bitince `jobs` ile arka planda iş kalmadığını doğrula."
+    ]
+   },
+   "v06": {
+    "title": "Güvenlik duvarını oku (değiştirme)",
+    "text": "Kendi dağıtımının güvenlik duvarı durumunu oku. Şimdilik hiçbir kural ekleme. Kural değiştirmeden önce VM snapshot'ı al (modül 0.2) ve ikinci bir SSH oturumu açık tut.",
+    "blocks": [
+     {
+      "cmd": "# Rocky / Alma / RHEL\nsudo firewall-cmd --state\nsudo firewall-cmd --list-all\n# Ubuntu / Debian\nsudo ufw status verbose",
+      "expected": "running\npublic (active)\n  services: cockpit dhcpv6-client ssh\n# veya: Status: inactive"
+     }
+    ],
+    "differs": [
+     "Dağıtımına ait olmayan komut `command not found` verir; bu normaldir, diğerini çalıştır.",
+     "`not running` veya `inactive` güvenlik duvarının kapalı olduğunu gösterir; bu laboratuvarda değiştirmene gerek yok."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Varsayılan geçidi (default gateway) hangi komut gösterir?",
+   "options": [
+    "`ip a`",
+    "`ip r`",
+    "`ss -tulpn`",
+    "`cat /etc/hosts`"
+   ],
+   "explain": "`ip r` yönlendirme tablosunu gösterir; `default via ...` satırı geçittir. `ip a` adresleri, `ss` dinleyen portları, `/etc/hosts` isim eşlemelerini gösterir."
+  },
+  "q2": {
+   "q": "`ss -tulpn` çıktısında bir veritabanı `127.0.0.1:5432` üzerinde dinliyor. Ona kimler bağlanabilir?",
+   "options": [
+    "Ağdaki herkes",
+    "Yalnızca güvenlik duvarı kuralı olanlar",
+    "Yalnızca makinenin kendisi",
+    "Hiç kimse"
+   ],
+   "explain": "`127.0.0.1` loopback adresidir; servis yalnızca yerelden erişilebilir. Dışarıya açık olan `0.0.0.0` veya dış arayüz adresidir."
+  },
+  "q3": {
+   "q": "Bir isim çözülürken genellikle hangi sıra izlenir?",
+   "options": [
+    "Önce `/etc/hosts`, sonra `resolv.conf` içindeki DNS sunucusu",
+    "Önce DNS sunucusu, sonra `/etc/hosts`",
+    "Yalnızca DNS sunucusu",
+    "Önce geçit, sonra `/etc/hosts`"
+   ],
+   "explain": "`nsswitch.conf` içindeki `hosts:` satırı sırayı belirler; varsayılan olarak önce dosya (`/etc/hosts`), sonra DNS gelir."
+  },
+  "q4": {
+   "q": "`firewall-cmd --add-port=8080/tcp` komutunu `--permanent` olmadan çalıştırırsan ne olur?",
+   "options": [
+    "Kural sonsuza kadar kalır",
+    "Kural yalnızca yeniden başlatmadan sonra geçerli olur",
+    "Komut reddedilir",
+    "Kural hemen geçerli olur ama reload veya yeniden başlatmada kaybolur"
+   ],
+   "explain": "Varsayılan runtime yapılandırmasıdır: hemen etkilidir, kalıcı değildir. Kalıcı yapmak için `--permanent` ve `--reload` gerekir."
+  }
+ },
+ "summary": [
+  "`ip a` adresleri, `ip r` rotayı ve varsayılan geçidi gösterir.",
+  "`ss -tulpn` dinleyen servisleri gösterir; `127.0.0.1` yalnızca yerel, `0.0.0.0` her arayüzdür.",
+  "İsim çözümleme: `/etc/hosts` → `/etc/resolv.conf` → DNS sunucusu.",
+  "Güvenlik duvarını önce oku; firewalld'de runtime ile kalıcıyı ayır, SSH'ta `--timeout` ve ikinci oturum kullan.",
+  "Teşhis: adres → geçit → dış IP → isim → servis ve güvenlik duvarı."
+ ],
+ "glossary": [
+  {
+   "term": "IP adresi",
+   "meaning": "Bir arayüzün ağdaki adresi, örneğin 192.168.1.42."
+  },
+  {
+   "term": "prefix / subnet maskesi",
+   "meaning": "Adresin ağ ve cihaz kısmını ayırır; /24 = 255.255.255.0."
+  },
+  {
+   "term": "gateway (geçit)",
+   "meaning": "Yerel ağ dışındaki hedefler için paketlerin gönderildiği router adresi."
+  },
+  {
+   "term": "loopback",
+   "meaning": "Makinenin kendisi: `lo` arayüzü, 127.0.0.1."
+  },
+  {
+   "term": "port",
+   "meaning": "Bir makinedeki servisi seçen numara; 22 SSH, 80 HTTP, 443 HTTPS."
+  },
+  {
+   "term": "LISTEN",
+   "meaning": "Bir servisin belirli bir adreste ve portta bağlantı beklemesi."
+  },
+  {
+   "term": "DNS",
+   "meaning": "İsimleri IP adreslerine çeviren sistem."
+  },
+  {
+   "term": "nameserver",
+   "meaning": "`/etc/resolv.conf` içinde tanımlanan DNS sunucusu."
+  },
+  {
+   "term": "runtime / permanent",
+   "meaning": "firewalld'de geçici (reload'a kadar) ve kalıcı yapılandırma."
+  },
+  {
+   "term": "ICMP / ping",
+   "meaning": "Erişilebilirliği ve gecikmeyi ölçen basit ağ protokolü."
+  }
+ ]
+}

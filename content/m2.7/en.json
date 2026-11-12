@@ -1,0 +1,407 @@
+{
+ "title": "Editors",
+ "lead": "Edit text files in the terminal: nano for a quick start, vi/vim when it has to be everywhere and fast.",
+ "objectives": [
+  "You open, edit, save and close files with nano.",
+  "You know vim's modes and can always get out of vim (:q!, :wq).",
+  "You use basic vim commands: insert, delete a line, undo, search.",
+  "You edit config files safely: backup first, sudo only when needed."
+ ],
+ "sections": [
+  {
+   "id": "nano",
+   "title": "nano: the easy editor",
+   "body": [
+    "`nano` is beginner friendly: you start typing right away and the shortcuts are listed at the bottom of the screen. `^` means the **Ctrl** key, so `^X` is Ctrl+X.",
+    "If the file does not exist, `nano file` opens an empty buffer and creates the file when you save. On Ubuntu nano is usually preinstalled; on Rocky/Alma install it with `sudo dnf install nano` if needed."
+   ],
+   "commands": [
+    {
+     "cmd": "nano file",
+     "what": "Opens a file in the nano editor (creates it on save if missing).",
+     "where": "For quick edits of text and config files.",
+     "why": "Simple, with visible help at the bottom.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+O",
+     "what": "Writes out (saves) the file; confirm the name with ENTER.",
+     "where": "Inside nano, whenever you want to save.",
+     "why": "Saves your work without leaving the editor.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+X",
+     "what": "Exits nano; asks to save if there are unsaved changes (Y/N).",
+     "where": "Inside nano, when you are done.",
+     "why": "The way out: Y saves, N discards.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+K / Ctrl+U",
+     "what": "Cuts the current line / pastes it back.",
+     "where": "To delete, move or duplicate lines.",
+     "why": "Fast line editing without a mouse.",
+     "example": "nano todo.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "More nano keys: `Ctrl+W` search, `Ctrl+G` help, `Alt+U` undo, `Ctrl+_` go to line number."
+  },
+  {
+   "id": "vim",
+   "title": "vi / vim: modes",
+   "body": [
+    "`vi` is installed on practically every Linux system, `vim` is its improved version (on some minimal systems `vi` is simply vim). Learn the basics once and you can fix a server in any situation.",
+    "The key idea: vim has **modes**. In **Normal mode** (default at start) keys are commands — typing `dd` deletes a line instead of writing text. With `i` you enter **Insert mode** and type normally; `Esc` takes you back. With `:` you enter **command-line mode** for `:w`, `:q`, `:wq`, `:q!`.",
+    "Beginner mistake number one: typing text while in Normal mode. If strange things happen, press `Esc` once or twice, then continue."
+   ],
+   "commands": [
+    {
+     "cmd": "vim file",
+     "what": "Opens a file in vim (starts in Normal mode).",
+     "where": "For config files, scripts and on servers without nano.",
+     "why": "Available everywhere and very fast once learned.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "i / Esc",
+     "what": "`i` enters Insert mode, `Esc` returns to Normal mode.",
+     "where": "Whenever you switch between typing and commanding.",
+     "why": "Without `i` you cannot type text; without `Esc` you cannot give commands.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": ":wq",
+     "what": "Writes the file and quits (also `ZZ` or `:x`).",
+     "where": "From Normal mode after typing `:`.",
+     "why": "Saves and leaves in one step.",
+     "example": "vim todo.txt",
+     "nosim": true
+    }
+   ],
+   "danger": "Stuck in vim? Press `Esc`, then type `:q!` and ENTER to quit WITHOUT saving, or `:wq` to save and quit. Ctrl+C or Ctrl+X do not exit vim."
+  },
+  {
+   "id": "vimcmds",
+   "title": "Essential vim commands",
+   "body": [
+    "These Normal-mode commands cover most daily work. Arrow keys work, but `h j k l` (left, down, up, right) keep your hands on the home row.",
+    "Many commands take a number: `3dd` deletes three lines, `5j` moves five lines down. `gg` jumps to the top, `G` to the end, `:42` to line 42. Use `:set number` to show line numbers."
+   ],
+   "commands": [
+    {
+     "cmd": "dd",
+     "what": "Deletes (cuts) the current line; `p` pastes it below.",
+     "where": "In Normal mode.",
+     "why": "Remove, move or duplicate lines (`yy` copies).",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "u",
+     "what": "Undoes the last change; `Ctrl+R` redoes it.",
+     "where": "In Normal mode.",
+     "why": "Fixes accidental edits.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "/text",
+     "what": "Searches forward for `text`; `n` jumps to the next match.",
+     "where": "In Normal mode.",
+     "why": "Find settings in long config files.",
+     "example": "vim server.log",
+     "nosim": true
+    },
+    {
+     "cmd": ":q!",
+     "what": "Quits and discards all unsaved changes.",
+     "where": "From Normal mode when you made a mess or just looked.",
+     "why": "The emergency exit; plain `:q` refuses if there are changes.",
+     "example": "vim todo.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Run `vimtutor` once (about 30 minutes) — the best interactive vim course, installed with vim."
+  },
+  {
+   "id": "safe",
+   "title": "Editing safely",
+   "body": [
+    "System config files live in `/etc` and belong to root. As a normal user you can read them but not save changes: use `sudo nano /etc/file` only when you must. **Make a backup first** so you can restore after a typo.",
+    "Non-interactive alternatives need no editor: `echo \"text\" >> file` appends a line, `echo \"text\" > file` **overwrites** the whole file. With `cp file file.bak` you create a backup in one second.",
+    "If vim crashed or the terminal closed, a leftover swap file (`.file.swp`) may remain and vim warns on the next start. If nobody else is editing the file, you can delete the swap file."
+   ],
+   "commands": [
+    {
+     "cmd": "cp file file.bak",
+     "what": "Creates a backup copy before editing.",
+     "where": "Before every change to an important file.",
+     "why": "You can restore the old state with `cp file.bak file`.",
+     "example": "cp app.conf app.conf.bak"
+    },
+    {
+     "cmd": "sudoedit",
+     "what": "Edits a root-owned file with your own editor via a temporary copy.",
+     "where": "For files in `/etc`.",
+     "why": "Safer than running the whole editor as root.",
+     "example": "sudoedit /etc/hosts",
+     "nosim": true
+    },
+    {
+     "cmd": "export EDITOR",
+     "what": "Sets the default editor used by tools such as `sudoedit` and `crontab -e`.",
+     "where": "In your shell or in `~/.bashrc`.",
+     "why": "Tools then open nano instead of an editor you do not know.",
+     "example": "export EDITOR=nano",
+     "nosim": true
+    },
+    {
+     "cmd": "cat file",
+     "what": "Shows the file content without opening an editor.",
+     "where": "To verify the result of an edit.",
+     "why": "Quick check that the file contains what you expect.",
+     "example": "cat todo.txt"
+    }
+   ],
+   "warn": "Before editing a file under `/etc`, make a backup (`sudo cp file file.bak`). A broken `/etc/fstab` or `/etc/ssh/sshd_config` can make the machine unbootable or unreachable.",
+   "tip": "`>` overwrites, `>>` appends. One missing `>` can empty a file — check with `cat` afterwards."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Create a file without an editor: `echo \"hello editor\" > hello.txt`.",
+   "hint": "`>` creates or overwrites the file."
+  },
+  "t02": {
+   "text": "Show the content of the file with `cat hello.txt`.",
+   "hint": "You should see hello editor."
+  },
+  "t03": {
+   "text": "Back up `todo.txt` before editing it: `cp todo.txt todo.txt.bak`.",
+   "hint": "Source first, then the backup name."
+  },
+  "t04": {
+   "text": "Append a line to `todo.txt` without an editor: `echo \"buy bread\" >> todo.txt`.",
+   "hint": "Use two `>` characters to append."
+  },
+  "t05": {
+   "text": "Show `todo.txt` with line numbers using `cat -n todo.txt`.",
+   "hint": "In vim you would see them with `:set number`."
+  },
+  "t06": {
+   "text": "Find the line with `report` and show its number: `grep -n report todo.txt`.",
+   "hint": "`-n` prints the line number in front."
+  },
+  "t07": {
+   "text": "Predict: how many lines does `todo.txt` have now? Check with `wc -l todo.txt`.",
+   "hint": "It had 3 lines and you appended one."
+  },
+  "t08": {
+   "text": "Predict: what happens when a normal user runs `echo test > /etc/motd`? Try it.",
+   "hint": "Expect Permission denied; editing system files needs sudo (and a backup)."
+  },
+  "t09": {
+   "text": "Debug: a bad edit broke `app.conf` (it says `mode=debug`). Restore the old version from `app.conf.bak`.",
+   "hint": "Copy the backup over the file with `cp`."
+  },
+  "t10": {
+   "text": "Debug: vim keeps warning about a leftover swap file `.todo.txt.swp` in your home folder. Nobody is editing the file; delete the swap file.",
+   "hint": "Hidden file: `rm .todo.txt.swp`; list it with `ls -a`."
+  },
+  "t11": {
+   "text": "Mini project: create the folder `scripts`, write `scripts/hello.sh` containing the lines `#!/bin/bash` and `echo hello` (use `printf` with `\\n`), then make it mode 755.",
+   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, then `chmod 755 scripts/hello.sh`."
+  },
+  "t12": {
+   "text": "Challenge: first back up `notes.txt` as `notes.txt.bak`, then append the line `meeting at 10` to `notes.txt`.",
+   "hint": "Order matters: `cp` before the edit, then `echo ... >>`."
+  },
+  "t13": {
+   "text": "Challenge: from `server.log` save only the lines containing `ERROR` into `errors.txt`.",
+   "hint": "`grep` pattern file, with the output redirected using `>`."
+  },
+  "t14": {
+   "text": "TICKET #2705 — New hires need a welcome note. Create `~/welcome.txt` containing `Welcome to linux-lab`, put a copy into `~/Documents/welcome.txt`, and make the copy read-only for everyone (mode 444).",
+   "hint": "`echo`, `cp`, `chmod 444`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "You are in vim and want to leave WITHOUT saving. What do you type?",
+   "options": [
+    "Ctrl+X",
+    "Esc, then :q!",
+    "Ctrl+C",
+    "Esc, then :wq"
+   ],
+   "explain": "`:q!` quits and discards changes; `:wq` would save them. Ctrl+X is nano's exit key, not vim's."
+  },
+  "q2": {
+   "q": "In vim you type `dd` right after starting and a line disappears. Why?",
+   "options": [
+    "vim is broken",
+    "You were in Insert mode",
+    "dd is a typo in the file",
+    "You were in Normal mode where dd deletes a line"
+   ],
+   "explain": "vim starts in Normal mode where keys are commands. `dd` deletes the current line; `u` undoes it."
+  },
+  "q3": {
+   "q": "What does `Ctrl+X` do in nano?",
+   "options": [
+    "Exits nano and asks to save changes",
+    "Cuts a line",
+    "Opens help",
+    "Searches text"
+   ],
+   "explain": "Ctrl+X exits; with unsaved changes nano asks Y/N. Ctrl+K cuts, Ctrl+G is help, Ctrl+W searches."
+  },
+  "q4": {
+   "q": "What should you do before editing `/etc/ssh/sshd_config`?",
+   "options": [
+    "Delete the file and create a new one",
+    "Run the editor as a normal user",
+    "Make a backup copy of it",
+    "Nothing, the file can be regenerated"
+   ],
+   "explain": "A backup (`sudo cp file file.bak`) lets you restore quickly after an error."
+  }
+ },
+ "summary": [
+  "`nano file` to edit, `Ctrl+O` saves, `Ctrl+X` exits.",
+  "vim has modes: Normal (commands), Insert (`i`, text), command line (`:`). `Esc` returns to Normal.",
+  "Exit vim: `:wq` (save) or `:q!` (discard). Basics: `dd`, `u`, `/text`, `gg`/`G`.",
+  "Back up system files before editing; use `sudo` only when needed. `>` overwrites, `>>` appends."
+ ],
+ "glossary": [
+  {
+   "term": "Normal mode",
+   "meaning": "vim's default mode in which keys are commands."
+  },
+  {
+   "term": "Insert mode",
+   "meaning": "vim mode for typing text, entered with i, left with Esc."
+  },
+  {
+   "term": "swap file",
+   "meaning": "A hidden .file.swp that vim creates while editing; it remains after a crash."
+  },
+  {
+   "term": "buffer",
+   "meaning": "The in-memory copy of the file you edit until you save."
+  },
+  {
+   "term": "EDITOR",
+   "meaning": "Environment variable naming the default editor for other tools."
+  }
+ ],
+ "vm": {
+  "intro": "On your VM you now use the real editors. Do all steps in your home directory with test files; take a snapshot before touching files in /etc.",
+  "tasks": {
+   "v01": {
+    "title": "First file with nano",
+    "text": "Open nano, type the text, save with Ctrl+O and ENTER, exit with Ctrl+X. Then show the file.",
+    "blocks": [
+     {
+      "cmd": "nano nano_test.txt\n# type: hello nano   -> Ctrl+O, ENTER, Ctrl+X\ncat nano_test.txt",
+      "expected": "hello nano"
+     }
+    ],
+    "differs": [
+     "`command not found`: install nano with `sudo apt install nano` (Ubuntu) or `sudo dnf install nano` (Rocky/Alma).",
+     "If nano asks 'Save modified buffer?' on exit, press `Y` and ENTER."
+    ]
+   },
+   "v02": {
+    "title": "Cut and paste lines in nano",
+    "text": "In nano write `line one` and `line two`, save and exit. Reopen, cut the first line with Ctrl+K, paste it twice with Ctrl+U, save. Paste the result.",
+    "blocks": [
+     {
+      "cmd": "nano lines.txt\n# type two lines, save, exit\nnano lines.txt\n# Ctrl+K once, Ctrl+U twice, Ctrl+O, ENTER, Ctrl+X\ncat -n lines.txt",
+      "expected": "     1\tline two\n     2\tline one\n     3\tline one"
+     }
+    ],
+    "differs": [
+     "If the order differs, it depends on where the cursor was when pasting; `line one` and `line two` must both appear.",
+     "No numbering shown? You forgot `-n` in `cat -n`."
+    ]
+   },
+   "v03": {
+    "title": "First file with vim",
+    "text": "Open vim, press `i`, type the text, then Esc and `:wq` ENTER. Show the file.",
+    "blocks": [
+     {
+      "cmd": "vim vim_test.txt\n# i  -> type: hello vim  -> Esc  -> :wq  -> ENTER\ncat vim_test.txt",
+      "expected": "hello vim"
+     }
+    ],
+    "differs": [
+     "Typed text is missing or odd? You did not press `i` first. Press Esc, `:q!`, and start again.",
+     "`vim: command not found`: use `vi vim_test.txt` or install vim (`sudo apt install vim` / `sudo dnf install vim-enhanced`)."
+    ]
+   },
+   "v04": {
+    "title": "Quit without saving",
+    "text": "Write `keep` into a file, then open it in vim, add a line `lose` and leave with `:q!`. The file must still contain only `keep`.",
+    "blocks": [
+     {
+      "cmd": "echo keep > discard.txt\nvim discard.txt\n# i -> type: lose -> Esc -> :q! -> ENTER\ncat discard.txt",
+      "expected": "keep"
+     }
+    ],
+    "differs": [
+     "If `lose` is in the file, you used `:wq` instead of `:q!`.",
+     "If vim refuses to quit with `:q`, that is the protection for unsaved changes: use `:q!`."
+    ]
+   },
+   "v05": {
+    "title": "Delete a line and undo",
+    "text": "Create a 20-line file, delete line 5 with `5G` then `dd`, press `u` to undo, then `dd` again and save. Count the lines.",
+    "blocks": [
+     {
+      "cmd": "seq 1 20 > numbers.txt\nvim numbers.txt\n# 5G -> dd -> u -> dd -> :wq\nwc -l numbers.txt",
+      "expected": "19 numbers.txt"
+     }
+    ],
+    "differs": [
+     "Result 20: the final `dd` or the save did not happen; result 18: you deleted twice without `u`.",
+     "`seq` is missing? Use `for i in $(seq 1 20); do echo $i; done > numbers.txt` or install coreutils."
+    ]
+   },
+   "v06": {
+    "title": "Set the default editor",
+    "text": "Set nano as default editor for this session and check the variable.",
+    "blocks": [
+     {
+      "cmd": "export EDITOR=nano\necho $EDITOR",
+      "expected": "nano"
+     }
+    ],
+    "differs": [
+     "To make it permanent add `export EDITOR=nano` to `~/.bashrc`; it takes effect in a new shell."
+    ]
+   },
+   "v07": {
+    "title": "Backup before editing /etc",
+    "text": "Back up `/etc/hosts` with sudo, check the backup, and open the original with sudoedit or `sudo nano`. Look, change nothing, exit without saving.",
+    "blocks": [
+     {
+      "cmd": "sudo cp /etc/hosts /etc/hosts.bak\nls -l /etc/hosts.bak\nsudoedit /etc/hosts\n# look around, then Ctrl+X (nano) or :q! (vim)",
+      "expected": "-rw-r--r--. 1 root root 158 ... /etc/hosts.bak"
+     }
+    ],
+    "differs": [
+     "`sudoedit` complains about the editor? Run `export EDITOR=nano` first, or use `sudo nano /etc/hosts`.",
+     "If `sudo` asks for a password, enter your own (nothing is displayed while typing)."
+    ]
+   }
+  }
+ }
+}

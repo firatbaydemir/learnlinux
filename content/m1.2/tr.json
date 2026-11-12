@@ -1,0 +1,235 @@
+{
+  "title": "Kimlik ve Sistem — whoami, id, uname",
+  "lead": "Bir sisteme dokunmadan önce iki soruyu yanıtla: Ben kimim? Hangi makinedeyim? Bu modül salt okunur, güvenli komutlarla bunu öğretir.",
+  "objectives": [
+    "`whoami`, `id` ve `groups` ile kullanıcı kimliğini, UID/GID değerlerini ve grup üyeliklerini okursun.",
+    "`hostname` ve `uname` ile makine adını, kernel sürümünü ve mimariyi bulursun.",
+    "`/etc/os-release` ile dağıtımı ve sürümünü öğrenirsin.",
+    "`date` ve `uptime` ile saati ve sistemin ne kadardır açık olduğunu görürsün.",
+    "`df -h` ve `free -h` ile disk ve bellek durumunu okursun.",
+    "`env` ve `$USER` ile ortam değişkenlerini kullanırsın."
+  ],
+  "sections": [
+    {
+      "id": "identity",
+      "title": "Ben kimim? whoami, id, groups",
+      "body": [
+        "Bir komutu çalıştırmadan önce hangi hesapla çalıştığını bilmelisin: normal kullanıcı mı, yönetici mi? Yanlış hesapla yapılan bir işlem ya hata verir ya da gereğinden fazla yetkiyle zarar verir.",
+        "`whoami` yalnızca kullanıcı adını yazar. `id` daha fazlasını söyler: sayısal kullanıcı numarası **UID**, ana grup numarası **GID** ve üye olduğun tüm gruplar. Linux izinleri adlara değil bu numaralara bakar. UID 0 her zaman **root**'tur (yönetici); normal kullanıcılar genelde 1000'den başlar.",
+        "`groups` aynı grupları yalnızca adlarıyla listeler. Bu kursta `student` kullanıcısı `student`, `wheel` ve `devs` gruplarındadır. `wheel` RHEL ailesinde `sudo` kullanma yetkisi veren yönetici grubudur (Ubuntu'da bu grubun adı `sudo`'dur)."
+      ],
+      "commands": [
+        {"cmd": "whoami", "what": "Geçerli kullanıcı adını yazar.", "where": "Giriş yaptıktan sonra, `sudo` kullandıktan sonra veya bir betik içinde.", "why": "Yanlış kullanıcıyla işlem yapmayı önler.", "example": "whoami"},
+        {"cmd": "id", "what": "UID, GID ve tüm grupları gösterir.", "where": "`Permission denied` hatalarını araştırırken.", "why": "İzinler numaralara ve grup üyeliğine göre denetlenir.", "example": "id"},
+        {"cmd": "groups", "what": "Üye olduğun grupların adlarını listeler.", "where": "Bir dosyaya grup üzerinden erişip erişemediğini görmek için.", "why": "`id` çıktısından daha kısa ve okunaklıdır.", "example": "groups"},
+        {"cmd": "id -u", "what": "Yalnızca UID numarasını yazar.", "where": "Betiklerde root olup olmadığını denetlemek için (0 = root).", "why": "Tek bir sayı, betikte karşılaştırması kolaydır.", "example": "id -u", "nosim": true}
+      ],
+      "tip": "`whoami` bir kişi adı, `id` ise sistemin gerçekte baktığı numaraları verir. Şüphede kaldığında `id` çalıştır."
+    },
+    {
+      "id": "host",
+      "title": "Hangi makinedeyim? hostname ve uname",
+      "body": [
+        "Birden çok sunucu ya da VM'in olduğunda hepsinin komut satırı birbirine benzer. `hostname` makinenin ağdaki adını söyler; yıkıcı bir komuttan önce doğru makinede olduğunu doğrulamanın en ucuz yoludur.",
+        "`uname` çekirdek (kernel) hakkında bilgi verir. `uname -r` kernel sürümünü, `uname -m` mimariyi (`x86_64` = 64 bit Intel/AMD, `aarch64` = ARM), `uname -a` hepsini tek satırda yazar. Destek bileti açarken ve yazılım indirirken bu değerler istenir."
+      ],
+      "commands": [
+        {"cmd": "hostname", "what": "Makinenin adını yazar.", "where": "Sunucuları birbirinden ayırırken, ticket yazarken.", "why": "Yanlış makinede işlem yapmayı önler.", "example": "hostname"},
+        {"cmd": "uname -r", "what": "Çalışan kernel sürümünü yazar.", "where": "Hata raporu veya sürücü uyumluluğu kontrolünde.", "why": "Kernel sürümü hangi özelliklerin olduğunu belirler.", "example": "uname -r"},
+        {"cmd": "uname -m", "what": "Makine mimarisini yazar.", "where": "Paket veya ISO indirmeden önce.", "why": "Paketler mimariye özeldir.", "example": "uname -m"},
+        {"cmd": "uname -a", "what": "Tüm sistem bilgisini tek satırda yazar.", "where": "Destek talebine yapıştırmak için.", "why": "Ad, kernel ve mimari tek seferde görünür.", "example": "uname -a"},
+        {"cmd": "hostname -I", "what": "Makinenin IP adres(ler)ini yazar.", "where": "VM'ine SSH ile bağlanmak istediğinde.", "why": "Adresi öğrenmenin en kısa yolu.", "example": "hostname -I", "nosim": true}
+      ],
+      "tip": "Prompt'taki `student@linux-lab` kısmı kullanıcı@makine'dir; `whoami` ve `hostname` aynı bilgiyi verir."
+    },
+    {
+      "id": "distro",
+      "title": "Hangi dağıtım? /etc/os-release",
+      "body": [
+        "Kernel aynı olsa da dağıtımlar farklıdır. Dağıtım adı ve sürümü `/etc/os-release` dosyasında düz metin olarak durur; Ubuntu, Rocky, Alma ve diğerlerinde aynı biçimdedir. `cat` ile okursun, dosyayı değiştirmezsin.",
+        "`NAME` ve `VERSION` anlaşılır adı, `PRETTY_NAME` tek satırlık özeti, `ID_LIKE` ise ailesini söyler (`debian` ya da `rhel fedora`). Aile, paket yöneticisini seçmeni sağlar: `apt` mı `dnf` mi."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/os-release", "what": "Dağıtım bilgilerinin tamamını gösterir.", "where": "Yeni bir sistemde ilk iş olarak.", "why": "Hangi komutların ve paketlerin geçerli olduğunu belirler.", "example": "cat /etc/os-release"},
+        {"cmd": "grep PRETTY_NAME /etc/os-release", "what": "Yalnızca dağıtımın okunaklı adını gösterir.", "where": "Ticket'a tek satır yazmak için.", "why": "Uzun dosyadan ihtiyacın olan satırı süzer.", "example": "grep PRETTY_NAME /etc/os-release"},
+        {"cmd": "grep ID_LIKE /etc/os-release", "what": "Dağıtımın ait olduğu aileyi gösterir.", "where": "`apt` mı `dnf` mi kullanacağından emin olmadığında.", "why": "Aile, paket yöneticisini belirler.", "example": "grep ID_LIKE /etc/os-release"}
+      ],
+      "tip": "WSL'de de aynı dosya vardır; Windows'taki değil, içindeki Linux dağıtımını gösterir."
+    },
+    {
+      "id": "time",
+      "title": "Saat ve çalışma süresi: date, uptime",
+      "body": [
+        "`date` sistem saatini ve saat dilimini yazar. Günlük (log) kayıtlarını yorumlarken ve yedek dosyalarına tarih verirken gerekir. Çıktının biçimini `+` ile başlayan bir kalıpla değiştirebilirsin: `date +%F` → `2026-11-12`.",
+        "`uptime` üç şeyi tek satırda verir: saat, sistemin ne kadardır açık olduğu ve son 1, 5, 15 dakikadaki **load average** (yük ortalaması). Yük, çekirdek sayısının çok üstündeyse sistem yavaşlıyordur. Beklenmedik yeniden başlatmayı da buradan anlarsın."
+      ],
+      "commands": [
+        {"cmd": "date", "what": "Geçerli tarih ve saati yazar.", "where": "Log kayıtlarını saatle karşılaştırırken.", "why": "Yanlış saat, sertifika ve log sorunlarının sık nedenidir.", "example": "date"},
+        {"cmd": "date +%F", "what": "Tarihi YYYY-AA-GG biçiminde yazar.", "where": "Dosya adlarına tarih eklerken (`backup-2026-11-12`).", "why": "Alfabetik sıralanabilen, tutarlı bir biçimdir.", "example": "date +%F", "nosim": true},
+        {"cmd": "uptime", "what": "Çalışma süresini ve yük ortalamasını gösterir.", "where": "Sistem yavaşladığında ilk bakılan yer.", "why": "Yük ve son yeniden başlatma bilgisini hızlıca verir.", "example": "uptime"},
+        {"cmd": "uptime -p", "what": "Çalışma süresini okunaklı biçimde yazar (`up 2 days, 3 hours`).", "where": "Çıktıyı kısaca raporlamak için.", "why": "Yük bilgisi olmadan yalnızca süreyi verir.", "example": "uptime -p", "nosim": true}
+      ],
+      "tip": "Load average'ı çekirdek sayısıyla karşılaştır: 4 çekirdekte 4.0 tam doluluk demektir."
+    },
+    {
+      "id": "resources",
+      "title": "Disk ve bellek: df -h, free -h",
+      "body": [
+        "`df` (disk free) bağlı dosya sistemlerinin doluluğunu gösterir. `-h` (human-readable) bayt yerine `G`, `M` gibi okunaklı birimler kullanır. `Use%` sütunu %90'ı aşıyorsa dikkat et: dolu bir disk servislerin çökmesine neden olur.",
+        "`free` belleği (RAM) ve swap'i gösterir. Önemli sütun `available`'dır: yeni programlara verilebilecek bellek. `free` sütununun küçük olması normaldir, çünkü Linux boş belleği önbellek (`buff/cache`) olarak kullanır.",
+        "İkisi de yalnızca okur; hiçbir şeyi değiştirmez."
+      ],
+      "commands": [
+        {"cmd": "df -h", "what": "Tüm dosya sistemlerinin boyutunu ve doluluğunu gösterir.", "where": "`No space left on device` hatasında.", "why": "Hangi bölümün dolduğunu bulursun.", "example": "df -h"},
+        {"cmd": "df -h /", "what": "Yalnızca kök dosya sistemini gösterir.", "where": "Tek bir bölümün durumuna bakarken.", "why": "Çıktıyı kısa tutar.", "example": "df -h /"},
+        {"cmd": "free -h", "what": "Bellek ve swap kullanımını okunaklı birimlerle gösterir.", "where": "Sistem yavaşladığında.", "why": "`available` sütunu gerçek boş belleği gösterir.", "example": "free -h"}
+      ],
+      "warn": "`df` dosya sistemlerini, `du` ise klasörleri ölçer; ikisini karıştırma. Disk doluluğunu `df -h` ile bulur, nedenini sonraki modüllerde öğreneceğin araçlarla ararsın.",
+      "tip": "`free` çıktısında `free` değeri küçük diye endişelenme; `available` sütununa bak."
+    },
+    {
+      "id": "env",
+      "title": "Ortam değişkenleri: env ve $USER",
+      "body": [
+        "Kabuk, bilgileri **ortam değişkenlerinde** saklar. `$USER` kullanıcı adını, `$HOME` ev dizinini, `$SHELL` kabuğunu, `$HOSTNAME` makine adını tutar. Başına `$` koyarak değerini kullanırsın: `echo $USER`.",
+        "`env` tüm değişkenleri `ADI=değer` biçiminde listeler. Uzun çıktıdan tek bir tanesini süzmek için `|` (boru) ile `grep` kullanırsın: `env | grep USER`.",
+        "Değişkenler betiklerde kullanışlıdır: `echo \"$USER@$(hostname)\"` hem kullanıcıyı hem makineyi birleştirir. `$(...)` içindeki komutun çıktısı oraya yerleşir."
+      ],
+      "commands": [
+        {"cmd": "env", "what": "Tüm ortam değişkenlerini listeler.", "where": "Bir ayarın nereden geldiğini araştırırken.", "why": "Hangi değerlerle çalıştığını görürsün.", "example": "env"},
+        {"cmd": "echo $USER", "what": "Kullanıcı adı değişkeninin değerini yazar.", "where": "Betiklerde ve dosya adlarında.", "why": "Kullanıcı adını elle yazmak zorunda kalmazsın.", "example": "echo $USER"},
+        {"cmd": "echo $HOME", "what": "Ev dizininin yolunu yazar.", "where": "Yolları taşınabilir yazmak için.", "why": "`/home/student` yerine her kullanıcıda doğru çalışır.", "example": "echo $HOME"},
+        {"cmd": "env | grep USER", "what": "Yalnızca adında USER geçen değişkenleri süzer.", "where": "Uzun listede tek bir değişkeni bulmak için.", "why": "Boru ve `grep` ile çıktıyı daraltırsın.", "example": "env | grep USER"},
+        {"cmd": "echo \"$USER@$(hostname)\"", "what": "Kullanıcı ve makine adını birleştirir.", "where": "Rapor satırı veya log mesajı üretirken.", "why": "Değişken ile komut çıktısını birleştirmeyi gösterir.", "example": "echo \"$USER@$(hostname)\""},
+        {"cmd": "printenv USER", "what": "Tek bir değişkenin değerini yazar.", "where": "Betikte yalnızca değer gerektiğinde.", "why": "`grep` gerekmez, çıktıda sadece değer vardır.", "example": "printenv USER", "nosim": true}
+      ],
+      "tip": "Değişken adları büyük/küçük harfe duyarlıdır: `$USER` çalışır, `$user` boş döner."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Hangi kullanıcıyla çalıştığını `whoami` ile öğren.", "hint": "Sadece `whoami` yaz ve Enter'a bas."},
+    "t02": {"text": "Makinenin adını `hostname` ile öğren.", "hint": "Prompt'taki `@` işaretinden sonraki kısımla aynı olmalı."},
+    "t03": {"text": "Kernel sürümünü `uname -r` ile yazdır.", "hint": "`-r` release (sürüm) demektir."},
+    "t04": {"text": "UID, GID ve tüm grupları görmek için `id` çalıştır.", "hint": "`uid=` değeri 1000 ise normal kullanıcısın, 0 ise root."},
+    "t05": {"text": "Üye olduğun grupları `groups` ile listele ve `id` çıktısıyla karşılaştır.", "hint": "`groups` yalnızca adları yazar, numaraları yazmaz."},
+    "t06": {"text": "Dağıtım bilgisini `cat /etc/os-release` ile oku.", "hint": "`PRETTY_NAME` satırı özetidir."},
+    "t07": {"text": "Sistemin ne kadardır açık olduğunu ve yük ortalamasını `uptime` ile gör.", "hint": "Sondaki üç sayı 1, 5 ve 15 dakikalık yüktür."},
+    "t08": {"text": "Disk doluluğunu okunaklı birimlerle görmek için `df -h` çalıştır.", "hint": "`Use%` sütununa bak."},
+    "t09": {"text": "Bellek durumunu `free -h` ile göster.", "hint": "Gerçek boş bellek `available` sütunundadır."},
+    "t10": {"text": "Ortam değişkenleri arasından yalnızca USER içerenleri süz: `env | grep USER`.", "hint": "`|` işareti `env` çıktısını `grep`'e aktarır."},
+    "t11": {"text": "Tahmin et: `student` kullanıcısı `devs` grubunda mı? Sonra `groups` ile doğrula.", "hint": "Önce tahminini söyle, sonra komutu çalıştır."},
+    "t12": {"text": "Tahmin et: `echo \"$USER@$(hostname)\"` ne yazar? Çalıştırarak doğrula.", "hint": "`$USER` ve `$(hostname)` komut çalışmadan önce kendi değerleriyle değişir."},
+    "t13": {"text": "`~/kernel.txt` dosyasında eski bir kernel sürümü yazıyor. Bu dosyayı gerçek kernel sürümüyle düzelt.", "hint": "`uname -r > ~/kernel.txt` eski içeriği ezer. Sonra `cat ~/kernel.txt` ile bak."},
+    "t14": {"text": "`~/me.txt` dosyası oluştur: sırayla `whoami`, `id` ve `hostname` çıktısı olsun (3 satır).", "hint": "İlkinde `>`, sonrakilerde `>>` kullan: `whoami > ~/me.txt`, `id >> ~/me.txt`."},
+    "t15": {"text": "Dağıtımın okunaklı adını `PRETTY_NAME=` öneki olmadan `~/distro.txt` dosyasına yaz.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` `=` işaretinden sonrasını alır."},
+    "t16": {"text": "Kernel sürümünün yalnızca ana numarasını (ilk sayı) `~/major.txt` dosyasına yaz.", "hint": "`uname -r` çıktısını `cut -d. -f1` ile nokta ile bölüp birinci alanı al."},
+    "t17": {"text": "Ticket: Destek ekibi sistem bilgisi istiyor. `~/sysinfo.txt` dosyasına sırayla makine adını, kernel sürümünü, kullanıcı adını ve `df -h` çıktısını yaz.", "hint": "`hostname > ~/sysinfo.txt` ile başla, sonra dört komutun çıktısını `>>` ile ekle."},
+    "t18": {"text": "Ticket: Yönetici, `student` hesabının `wheel` grubunda olup olmadığını soruyor. Kanıt olarak yalnızca `wheel` geçen çıktıyı `~/admin_check.txt` dosyasına kaydet.", "hint": "`id | grep wheel > ~/admin_check.txt`"}
+  },
+  "vm": {
+    "intro": "Bu bölümdeki komutların hepsi salt okunurdur; VM'inde güvenle çalıştırabilirsin. Çıktılar dağıtımına göre farklı olabilir; önemli olan yapıyı tanımandır.",
+    "tasks": {
+      "v01": {
+        "title": "Kimliğini öğren",
+        "text": "Kullanıcı adını, UID/GID değerlerini ve gruplarını göster; `id` çıktısını yapıştır.",
+        "blocks": [
+          {"cmd": "whoami\nid\ngroups", "expected": "student\nuid=1000(student) gid=1000(student) groups=1000(student),10(wheel)\nstudent wheel"}
+        ],
+        "differs": [
+          "Ubuntu'da yönetici grubu `wheel` değil `sudo` adındadır; `id` çıktısında `27(sudo)` görürsün.",
+          "Kullanıcı adın `student` olmayabilir; bu sorun değil, kendi adını gör."
+        ]
+      },
+      "v02": {
+        "title": "Makine ve kernel",
+        "text": "Makine adını ve tüm kernel bilgisini göster; `uname -a` çıktısını yapıştır.",
+        "blocks": [
+          {"cmd": "hostname\nuname -r\nuname -m\nuname -a", "expected": "linux-lab\n5.14.0-427.el9.x86_64\nx86_64\nLinux linux-lab 5.14.0-427.el9.x86_64 #1 SMP PREEMPT_DYNAMIC ... x86_64 GNU/Linux"}
+        ],
+        "differs": [
+          "Kernel sürümün farklı olabilir (Ubuntu 24.04'te `6.8...`); önemli olan çıktının `Linux` ile başlamasıdır.",
+          "Apple Silicon üstündeki VM'de mimari `aarch64` görünür."
+        ]
+      },
+      "v03": {
+        "title": "Dağıtımını tanı",
+        "text": "Dağıtım bilgisini oku ve çıktıyı yapıştır.",
+        "blocks": [
+          {"cmd": "cat /etc/os-release\ngrep ID_LIKE /etc/os-release", "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nPRETTY_NAME=\"Rocky Linux 9.4 (Blue Onyx)\"\nID_LIKE=\"rhel centos fedora\""}
+        ],
+        "differs": [
+          "Ubuntu'da `ID_LIKE=debian` görünür; Rocky/Alma'da `rhel` içerir.",
+          "Bazı dağıtımlarda `ID_LIKE` satırı hiç yoktur (örneğin Debian'ın kendisinde); `grep` o zaman boş döner."
+        ]
+      },
+      "v04": {
+        "title": "Saat ve çalışma süresi",
+        "text": "Tarihi ve sistemin ne kadardır açık olduğunu göster; `uptime` çıktısını yapıştır.",
+        "blocks": [
+          {"cmd": "date\ndate +%F\nuptime", "expected": "Thu Nov 12 10:28:55 CET 2026\n2026-11-12\n 10:28:55 up 2 days,  3:12,  1 user,  load average: 0.08, 0.03, 0.01"}
+        ],
+        "differs": [
+          "Yeni açılan VM'de çalışma süresi dakikalarla görünür (`up 12 min`).",
+          "Tarih biçimi ve saat dilimi sistem diline göre değişebilir."
+        ]
+      },
+      "v05": {
+        "title": "Disk ve bellek",
+        "text": "Disk ve bellek durumunu okunaklı birimlerle göster; ikisinin çıktısını birlikte yapıştır.",
+        "blocks": [
+          {"cmd": "df -h\nfree -h", "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/mapper/rhel-root  20G  4.1G  16G  21% /\n...\n               total        used        free  ...\nMem:           3.8Gi       612Mi       2.4Gi ..."}
+        ],
+        "differs": [
+          "WSL'de `df -h` çıktısında Windows sürücülerini (`C:\\`) de görürsün.",
+          "Bellek sütunları kullandığın VM'in ayarına göre farklı sayılar gösterir."
+        ]
+      },
+      "v06": {
+        "title": "Ortam değişkenleri",
+        "text": "Kullanıcı değişkenini yazdır ve `env` çıktısından süz.",
+        "blocks": [
+          {"cmd": "echo $USER\necho $HOME\nenv | grep USER\necho \"$USER@$(hostname)\"", "expected": "student\n/home/student\nUSER=student\nstudent@linux-lab"}
+        ],
+        "differs": [
+          "`env | grep USER` birden çok satır döndürebilir (örneğin `XDG_SESSION_...` ile eşleşenler); `USER=` satırını ara.",
+          "Bazı sistemlerde `$USER` boştur (örneğin kapsayıcı içinde); `whoami` yine çalışır."
+        ]
+      },
+      "v07": {
+        "title": "Yönetici kimliğini gör",
+        "text": "`sudo` ile `whoami` çalıştır: komut artık root olarak çalışır. Şifre isterse hesabının şifresini yaz (yazarken ekranda görünmez).",
+        "blocks": [
+          {"cmd": "whoami\nsudo whoami\nwhoami", "expected": "student\nroot\nstudent"}
+        ],
+        "differs": [
+          "`student is not in the sudoers file` hatası alırsan hesabın yönetici grubunda değildir; VM'ini kurduğun kullanıcıyla dene.",
+          "Çıktının ortasında `root` yazmalı; `sudo` yalnızca o tek komutu yükseltir, sonra yine normal kullanıcısın."
+        ]
+      }
+    }
+  },
+  "quiz": {
+    "q1": {"q": "`id` çıktısında `uid=0(...)` görüyorsun. Bu ne anlama gelir?", "options": ["Hesap devre dışıdır", "Kullanıcı root'tur (yönetici)", "Kullanıcı misafirdir", "Kullanıcı hiçbir gruba üye değildir"], "explain": "UID 0 her zaman root'a aittir. Normal kullanıcılar genelde 1000 ve üstü bir UID alır."},
+    "q2": {"q": "Çalışan kernel sürümünü hangi komut gösterir?", "options": ["`hostname`", "`whoami`", "`uname -r`", "`df -h`"], "explain": "`uname -r` kernel sürümünü yazar. `hostname` makine adını, `whoami` kullanıcıyı, `df -h` diski gösterir."},
+    "q3": {"q": "Disk doluluğunu okunaklı birimlerle (GB, MB) hangi komut gösterir?", "options": ["`df -h`", "`free -h`", "`uptime`", "`id`"], "explain": "`df -h` dosya sistemlerini gösterir. `free -h` belleği, `uptime` çalışma süresini gösterir."},
+    "q4": {"q": "Geçerli kullanıcının adını hangi ortam değişkeni tutar?", "options": ["`$HOST`", "`$NAME`", "`$WHO`", "`$USER`"], "explain": "`$USER` kullanıcı adını tutar; `$HOME` ev dizinini, `$SHELL` kabuğu tutar."}
+  },
+  "summary": [
+    "`whoami`, `id`, `groups`: kim olduğunu ve hangi izinlere sahip olduğunu gösterir; UID 0 = root.",
+    "`hostname` ve `uname -r/-m/-a`: makine adı, kernel sürümü ve mimari.",
+    "`/etc/os-release`: dağıtım adı, sürümü ve ailesi (`ID_LIKE`).",
+    "`date` ve `uptime`: saat ve sistemin çalışma süresiyle yük ortalaması.",
+    "`df -h` ve `free -h`: disk ve bellek durumu; bellekte `available` sütununa bak.",
+    "`env`, `$USER`, `$HOME`: ortam değişkenleri; değerini `$` ile kullanırsın.",
+    "Bir işleme başlamadan önce kim olduğunu ve hangi makinede olduğunu kontrol et."
+  ],
+  "glossary": [
+    {"term": "UID", "meaning": "Kullanıcı numarası; izin kontrolü adlara değil bu sayıya göre yapılır. 0 = root."},
+    {"term": "GID", "meaning": "Grup numarası; kullanıcının ana grubunu belirtir."},
+    {"term": "wheel", "meaning": "RHEL ailesinde `sudo` yetkisi veren yönetici grubu (Ubuntu'da `sudo`)."},
+    {"term": "kernel", "meaning": "Donanımı yöneten Linux çekirdeği; sürümü `uname -r` ile görülür."},
+    {"term": "hostname", "meaning": "Makinenin ağdaki adı."},
+    {"term": "load average", "meaning": "Son 1, 5 ve 15 dakikadaki ortalama sistem yükü; `uptime` gösterir."},
+    {"term": "ortam değişkeni", "meaning": "Kabuğun sakladığı `ADI=değer` çifti, örneğin `USER` ya da `HOME`."}
+  ]
+}

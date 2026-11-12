@@ -1,0 +1,113 @@
+{
+ "title": "Streams: stdin, stdout, stderr",
+ "lead": "Every Linux command has three standard channels: input, output and error. Understanding them is the foundation of redirection and pipes.",
+ "objectives": [
+  "You tell stdin (0), stdout (1) and stderr (2) apart.",
+  "You redirect output and errors to files with `>`, `>>` and `2>`.",
+  "You merge or discard streams with `2>&1` and `/dev/null`."
+ ],
+ "sections": [
+  {
+   "id": "streams",
+   "title": "The three standard channels",
+   "body": [
+    "A running program has three open channels: **stdin** (0) reads input, **stdout** (1) writes the normal result, **stderr** (2) writes error messages. By default input comes from the keyboard, output and errors go to the screen.",
+    "Because both land on the same screen they look mixed, yet they are separate channels. That separation lets you send errors to their own file."
+   ],
+   "commands": [
+    {"cmd": "echo", "what": "Writes text to stdout.", "where": "For tests and simple output.", "why": "The simplest stdout example.", "example": "echo hello"},
+    {"cmd": "cat", "what": "Writes a file to stdout.", "where": "To see file contents.", "why": "Reads a file and feeds the channel.", "example": "cat lab/names.txt"},
+    {"cmd": "ls", "what": "When asked to list a missing path, the error goes to stderr.", "where": "To see the error channel.", "why": "The message appears on screen but is not on stdout.", "example": "ls lab/missing.txt"}
+   ],
+   "tip": "Channel numbers: 0 = input, 1 = output, 2 = error. You use them in redirections."
+  },
+  {
+   "id": "redirect",
+   "title": "Redirecting to files",
+   "body": [
+    "`>` writes stdout to a file and **truncates** it. `>>` **appends**. `2>` redirects only stderr. `<` feeds a file as stdin.",
+    "If output and errors should go to the same file write `> file 2>&1`: stdout goes to the file first, then stderr is attached to wherever stdout goes. Order matters. `/dev/null` is a special file that discards everything written to it."
+   ],
+   "commands": [
+    {"cmd": ">", "what": "Writes stdout to a file; an existing file is emptied.", "where": "To save output.", "why": "You keep the result for later.", "example": "echo hello > out.txt"},
+    {"cmd": ">>", "what": "Appends stdout to the end of a file.", "where": "When keeping logs.", "why": "Preserves the old content.", "example": "echo world >> out.txt"},
+    {"cmd": "2>", "what": "Writes only error messages to a file.", "where": "To collect errors separately.", "why": "Output stays on screen, errors are saved.", "example": "ls lab/missing.txt 2> errors.txt"},
+    {"cmd": "<", "what": "Makes a file the command's input.", "where": "For commands that read input.", "why": "Reads from a file instead of the keyboard.", "example": "cat < lab/names.txt"},
+    {"cmd": "2>&1", "what": "Sends stderr to wherever stdout goes.", "where": "To collect everything in one file.", "why": "Output and errors are saved together.", "example": "ls lab missing_dir > all.txt 2>&1"},
+    {"cmd": "2>/dev/null", "what": "Discards errors.", "where": "To silence harmless errors.", "why": "Keeps the screen clean.", "example": "ls lab missing_dir 2>/dev/null"}
+   ],
+   "tip": "Safe habit: decide first whether you need `>>` or `>`. A wrong `>` silently wipes an existing file.",
+   "warn": "`>` empties the target file before the command runs. `sort file > file` destroys the file's content."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Write text to the screen (stdout) with `echo hello`.", "hint": "The output appears directly on screen."},
+  "t02": {"text": "Print the file's content to stdout with `cat lab/names.txt`.", "hint": "You should see three names."},
+  "t03": {"text": "List the missing path `lab/missing.txt` with `ls` and read the error message.", "hint": "That message comes from stderr."},
+  "t04": {"text": "Write the text to the file `out.txt` with `echo hello > out.txt`.", "hint": "You see no output; check with `cat out.txt`."},
+  "t05": {"text": "Append a second line to the same file with `echo world >> out.txt`.", "hint": "`>>` appends, `>` overwrites."},
+  "t06": {"text": "Put the error into `errors.txt` with `ls lab/missing.txt 2> errors.txt`.", "hint": "The error no longer shows on screen."},
+  "t07": {"text": "Feed the file as stdin with `cat < lab/names.txt`.", "hint": "`<` reads input from a file."},
+  "t08": {"text": "Predict: when `ls lab/missing.txt > result.txt` runs, does the error appear on screen? Is `result.txt` filled? Run it to verify.", "hint": "`>` redirects stdout only; the error is on stderr."},
+  "t09": {"text": "Predict: what does `cat lab/names.txt | wc -l` print? Run it to verify.", "hint": "`wc -l` counts lines; how many lines does the file have?"},
+  "t10": {"text": "Debug: `ls lab missing_dir > all.txt` prints the error on screen and it does not reach `all.txt`. Make `all.txt` contain both the listing and the error.", "hint": "Add `2>&1` at the end of the command."},
+  "t11": {"text": "Mini project: build `build.log`. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. The file must have 3 lines.", "hint": "The first uses `>`, the others `>>` and `2>>`."},
+  "t12": {"text": "Challenge: discard the errors of `ls lab missing_dir` into `/dev/null` and save the normal output to `found.txt`.", "hint": "Two redirections: `2>/dev/null` and `> found.txt`."},
+  "t13": {"text": "Ticket: the auditor wants the number of users in `lab/names.txt` in `~/count.txt` (number only).", "hint": "`wc -l < file` prints the count without a file name; save with `>`."}
+ },
+ "vm": {
+  "intro": "These commands run in your VM's home directory and only write files you create yourself; still, do not reuse the name of an important file.",
+  "tasks": {
+   "v01": {
+    "title": "Separate output and errors",
+    "text": "List an existing file and a missing path; write output and errors to separate files, then show both.",
+    "blocks": [
+     {"cmd": "ls /etc/hostname /nonexistent > out.txt 2> err.txt\ncat out.txt err.txt", "expected": "/etc/hostname\nls: cannot access '/nonexistent': No such file or directory"}
+    ],
+    "differs": [
+     "The error text varies slightly by distribution and language; `nonexistent` must appear.",
+     "If `out.txt` is empty, `/etc/hostname` does not exist on your system; use `/etc/hosts`."
+    ]
+   },
+   "v02": {
+    "title": "Overwrite and append",
+    "text": "Create a file with `>`, append a line with `>>` and show the result.",
+    "blocks": [
+     {"cmd": "echo \"line one\" > ~/streams.txt\necho \"line two\" >> ~/streams.txt\ncat ~/streams.txt", "expected": "line one\nline two"}
+    ],
+    "differs": [
+     "If only `line two` appears you used `>` in both commands."
+    ]
+   },
+   "v03": {
+    "title": "Silence errors",
+    "text": "List a directory you cannot read as a normal user together with a file; discard the errors to `/dev/null`.",
+    "blocks": [
+     {"cmd": "ls /root /etc/hostname 2>/dev/null", "expected": "/etc/hostname"}
+    ],
+    "differs": [
+     "If `hostname` is missing your system has no such file; as long as no error message appears on screen it worked."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Which channel number is stderr?", "options": ["1", "2", "0", "3"], "explain": "0 = stdin, 1 = stdout, 2 = stderr."},
+  "q2": {"q": "What does `echo x > file` do when the file already exists?", "options": ["Appends to it", "Gives an error", "Empties it and overwrites it", "Asks for confirmation"], "explain": "`>` truncates the file; use `>>` to append."},
+  "q3": {"q": "Which command saves errors to a file and keeps normal output on screen?", "options": ["`ls x 2> err.txt`", "`ls x > err.txt`", "`ls x >> err.txt`", "`ls x | err.txt`"], "explain": "`2>` redirects only stderr."},
+  "q4": {"q": "What is `/dev/null` for?", "options": ["Stores logs", "It is the keyboard input", "A temp directory", "It discards everything written to it"], "explain": "`/dev/null` is a black hole: whatever you write there vanishes."}
+ },
+ "summary": [
+  "Three channels: stdin (0), stdout (1), stderr (2).",
+  "`>` overwrites, `>>` appends, `2>` redirects errors, `<` supplies input.",
+  "`2>&1` merges errors into output; order matters in `> file 2>&1`.",
+  "`/dev/null` discards data."
+ ],
+ "glossary": [
+  {"term": "stdin", "meaning": "Standard input, channel 0; keyboard by default."},
+  {"term": "stdout", "meaning": "Standard output, channel 1; screen by default."},
+  {"term": "stderr", "meaning": "Standard error, channel 2; error messages."},
+  {"term": "redirection", "meaning": "Connecting a channel to a file or another channel."},
+  {"term": "/dev/null", "meaning": "Special file that discards what is written."}
+ ]
+}

@@ -1,0 +1,434 @@
+{
+ "title": "Process Basics",
+ "lead": "Look at the running system with a microscope: what a process is, who started it and what state it is in.",
+ "objectives": [
+  "You explain what a process is, what PID and PPID mean and why PID 1 is special.",
+  "You list processes with ps aux, ps -ef and ps -o, and find them with pgrep.",
+  "You show parent/child relations with pstree and ps --forest and look into /proc/<pid>.",
+  "You recognise process states (R, S, D, T, Z) and know what a zombie is and what it is not."
+ ],
+ "sections": [
+  {
+   "id": "concept",
+   "title": "What is a process?",
+   "body": [
+    "A program on disk (for example `bash`) is just a file. When you start it, the kernel loads it into memory and it becomes a **process**. Hundreds of processes run at the same time.",
+    "Every process has a unique number, the **PID**. It also knows who started it: the **PPID** (parent PID). Processes give birth to each other: your shell starts `ps`, `ps` is the child of the shell. At the top is **PID 1**, the first process of the system, today usually `systemd`. All others descend from it.",
+    "The shell knows its own PID: `$$`. In the simulator it always prints 4242."
+   ],
+   "commands": [
+    {
+     "cmd": "echo $$",
+     "what": "Prints the PID of the current shell.",
+     "where": "In scripts and when you need your own PID, e.g. for /proc/$$.",
+     "why": "You can inspect your own process without searching for it.",
+     "example": "echo $$"
+    },
+    {
+     "cmd": "ps",
+     "what": "Lists only the processes of your current terminal.",
+     "where": "For a quick look: normally just `bash` and `ps` itself.",
+     "why": "The smallest snapshot; shows PID, terminal, CPU time and command.",
+     "example": "ps"
+    }
+   ],
+   "tip": "`ps` is a **snapshot**, not a live view. For a live view you use `top` (next modules)."
+  },
+  {
+   "id": "ps",
+   "title": "Reading with ps",
+   "body": [
+    "`ps` exists in two styles. `ps aux` is **BSD style** (no dash): all users, with %CPU and %MEM. `ps -ef` is **UNIX style** (with dash): all processes with a **PPID** column. `ps aux` has no PPID column; for relations use `ps -ef` or `-o`.",
+    "With `-o` you choose the columns yourself: `ps -o pid,ppid,stat,cmd`. This is the cleanest way for scripts and the best way to read exactly what you need.",
+    "On Rocky/Alma/Ubuntu `ps` is already installed (package `procps` / `procps-ng`)."
+   ],
+   "commands": [
+    {
+     "cmd": "ps aux",
+     "what": "All processes of all users, with user, %CPU, %MEM, state and command.",
+     "where": "When you ask who is using the system and how much.",
+     "why": "Most common overview; combine with `grep` or `sort`.",
+     "example": "ps aux | head -n 10",
+     "nosim": true
+    },
+    {
+     "cmd": "ps -ef",
+     "what": "All processes in UNIX format, including the PPID column.",
+     "where": "When you want to know who the parent is.",
+     "why": "Shows relations; PPID 1 means the process hangs directly under init/systemd.",
+     "example": "ps -ef | head -n 10",
+     "nosim": true
+    },
+    {
+     "cmd": "ps -o",
+     "what": "Shows exactly the columns you list.",
+     "where": "In scripts and for focused questions.",
+     "why": "Short, readable and stable output.",
+     "example": "ps -o pid,ppid,stat,comm"
+    },
+    {
+     "cmd": "ps -p",
+     "what": "Shows only the process with the given PID.",
+     "where": "When you know the PID and want to check it.",
+     "why": "No grep needed; combine with `-o`.",
+     "example": "ps -o pid,ppid,stat,cmd -p $$"
+    }
+   ],
+   "tip": "`ps aux | grep sshd` also finds the grep process itself. `pgrep` avoids that.",
+   "warn": "Never rely on column positions in `ps aux` for the COMMAND field: it contains spaces. Use `ps -o` in scripts."
+  },
+  {
+   "id": "tree",
+   "title": "Trees and searching: pstree and pgrep",
+   "body": [
+    "`pstree` draws the family tree: systemd at the root, then services, your SSH session, your shell and your commands. `ps -ef --forest` shows the same with a PPID column.",
+    "`pgrep` searches by name and prints only PIDs. It is made for scripts: `pgrep -x sshd` prints the PID if `sshd` runs and exits with 1 if not.",
+    "`pstree` comes from the package `psmisc`, which is not always installed. Rocky/Alma: `sudo dnf install psmisc`. Debian/Ubuntu: `sudo apt install psmisc`. `pgrep` belongs to procps and is always there."
+   ],
+   "commands": [
+    {
+     "cmd": "pstree -p",
+     "what": "Shows the process tree with PIDs.",
+     "where": "To understand who started whom.",
+     "why": "At a glance: everything hangs under PID 1 (systemd).",
+     "example": "pstree -p | head -n 15",
+     "nosim": true
+    },
+    {
+     "cmd": "ps -ef --forest",
+     "what": "The ps list in tree form with PPID.",
+     "where": "When psmisc is not installed.",
+     "why": "A tree plus all columns of `ps -ef`.",
+     "example": "ps -ef --forest | head -n 20",
+     "nosim": true
+    },
+    {
+     "cmd": "pgrep -l",
+     "what": "Finds processes by name and prints PID and name.",
+     "where": "In scripts, to check whether a service runs.",
+     "why": "Cleaner than `ps | grep`; `-x` matches the exact name.",
+     "example": "pgrep -l sshd",
+     "nosim": true
+    },
+    {
+     "cmd": "pgrep -a",
+     "what": "Prints PID and the complete command line.",
+     "where": "When several processes have the same name.",
+     "why": "You see the arguments and can pick the right PID.",
+     "example": "pgrep -a bash",
+     "nosim": true
+    }
+   ],
+   "tip": "Package install: Rocky `sudo dnf install psmisc`, Ubuntu `sudo apt install psmisc`."
+  },
+  {
+   "id": "proc",
+   "title": "Inside /proc/<pid>",
+   "body": [
+    "`/proc` is a **virtual filesystem**: it does not live on disk, the kernel generates it. Every process has a directory `/proc/<pid>/`. That is the source `ps` itself reads from.",
+    "Useful files: `status` (name, state, PID, PPID, UID), `exe` (link to the program), `cwd` (working directory), `fd/` (open files), `cmdline` (the command line). As a normal user you can read your own processes; for others some files are restricted.",
+    "`/proc/self` always means the process that reads it. So `cat /proc/self/status` shows the status of `cat`."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /proc/$$/status",
+     "what": "Shows name, state, PID, PPID and UID of your shell.",
+     "where": "For details that ps does not show.",
+     "why": "The raw source: State and PPid lines tell the story.",
+     "example": "head -n 9 /proc/$$/status",
+     "nosim": true
+    },
+    {
+     "cmd": "ls -l /proc/$$/exe",
+     "what": "A link to the executable of the process.",
+     "where": "When you ask which binary really runs.",
+     "why": "Uncovers renamed or deleted programs.",
+     "example": "ls -l /proc/$$/exe",
+     "nosim": true
+    },
+    {
+     "cmd": "ls /proc/$$/fd",
+     "what": "Lists the open file descriptors (0, 1, 2 ...).",
+     "where": "When debugging open files.",
+     "why": "0 = stdin, 1 = stdout, 2 = stderr; more means open files.",
+     "example": "ls -l /proc/$$/fd",
+     "nosim": true
+    }
+   ],
+   "tip": "`cat /proc/self/status` is a quick test that /proc works, also in WSL."
+  },
+  {
+   "id": "states",
+   "title": "States, zombies and signals",
+   "body": [
+    "The **STAT** column shows the state: `R` running, `S` sleeping (waiting, interruptible), `D` uninterruptible sleep (usually waiting for disk/network; cannot be killed), `T` stopped (Ctrl+Z), `Z` **zombie**. Extra letters: `s` session leader, `+` foreground, `<` high priority.",
+    "A **zombie** is a process that has already finished. Only its entry in the process table remains, because the parent has not yet read the exit status (`wait`). A zombie uses no CPU and almost no memory, and **you cannot kill it, not even with `kill -9`**, because it is already dead. The fix: the parent must collect it, or you stop/restart the parent; then init adopts and reaps the orphan.",
+    "Signals: `kill` sends a signal, default `SIGTERM` (15, polite request, the program can clean up). `SIGKILL` (9) cannot be caught; the kernel ends the process immediately without cleanup. **PID 1** is special: signals without a handler are ignored for it, even SIGKILL from user space. That protects the system from an accidental kill.",
+    "Load average (`uptime`) shows runnable processes over 1/5/15 minutes. Read it **relative to the number of cores** (`nproc`): load 4.0 is full on 4 cores and overload on 2."
+   ],
+   "commands": [
+    {
+     "cmd": "ps -eo pid,ppid,stat,cmd",
+     "what": "All processes with state and parent.",
+     "where": "When looking for zombies (STAT Z) or stuck processes (D).",
+     "why": "Pipe to `grep` or `sort` for a quick filter.",
+     "example": "ps -eo pid,ppid,stat,cmd | head -n 10"
+    },
+    {
+     "cmd": "uptime",
+     "what": "Shows uptime and the load average of 1, 5 and 15 minutes.",
+     "where": "As the first look at 'is the server slow?'.",
+     "why": "Compare the load with the number of cores.",
+     "example": "uptime"
+    },
+    {
+     "cmd": "nproc",
+     "what": "Prints the number of CPU cores.",
+     "where": "To read the load average correctly.",
+     "why": "Load 2.0 is fine on 8 cores and busy on 2.",
+     "example": "nproc",
+     "nosim": true
+    },
+    {
+     "cmd": "kill -15",
+     "what": "Sends SIGTERM (polite stop) to a PID.",
+     "where": "First choice to end a process.",
+     "why": "The program can save data and clean up.",
+     "example": "kill -15 4242",
+     "nosim": true
+    },
+    {
+     "cmd": "kill -9",
+     "what": "Sends SIGKILL; the process is ended immediately.",
+     "where": "Only if SIGTERM did not work.",
+     "why": "Last resort; no cleanup, data can be lost.",
+     "example": "kill -9 4242",
+     "nosim": true
+    }
+   ],
+   "tip": "Order for stopping: `kill -15`, wait a few seconds, check with `ps -p PID`, and only then `kill -9`.",
+   "warn": "Check the PID twice before you kill. `pkill name` and `killall name` kill **all** processes with that name, including ones you did not mean.",
+   "danger": "Do not kill processes you do not know, especially not as root: `kill -9` on `sshd`, `systemd-journald` or a database can lock you out or corrupt data. Practise only with your own `sleep` processes."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "List the processes of your terminal with `ps`. Which two do you see?",
+   "hint": "Just `ps`, no options. You see `bash` and `ps`."
+  },
+  "t02": {
+   "text": "Print the PID of your shell with `echo $$`.",
+   "hint": "Two dollar signs. In the simulator it is always 4242."
+  },
+  "t03": {
+   "text": "Run the all-process view in BSD style: `ps aux`.",
+   "hint": "No dash for `aux`. (`ps -ef` is accepted too.)"
+  },
+  "t04": {
+   "text": "Choose your columns with `ps -o pid,ppid,comm`.",
+   "hint": "Columns separated by commas, no spaces."
+  },
+  "t05": {
+   "text": "Read only the header line of the snapshot with `head -n 1 ~/lab/ps_snapshot.txt`. Which column is the CPU usage?",
+   "hint": "`ps_snapshot.txt` is a saved `ps aux` output in `~/lab`. The column is %CPU."
+  },
+  "t06": {
+   "text": "Show all processes of alice in the snapshot: `grep alice ~/lab/ps_snapshot.txt`. Which program is busy?",
+   "hint": "Look at the %CPU column; the process is `python3 worker.py`."
+  },
+  "t07": {
+   "text": "Count the processes of alice: `grep alice ~/lab/ps_snapshot.txt | wc -l`.",
+   "hint": "`wc -l` counts lines after the pipe."
+  },
+  "t08": {
+   "text": "Find the zombie in the snapshot with `grep defunct ~/lab/ps_snapshot.txt`. Which PID and which user?",
+   "hint": "Zombies show STAT `Z` and `<defunct>`. It is PID 1701 of bob."
+  },
+  "t09": {
+   "text": "`~/lab/proc_status.txt` is a copy of `/proc/1701/status`. Find the parent: `grep PPid ~/lab/proc_status.txt`.",
+   "hint": "PPid is the PID of the parent; you must deal with it, not with the zombie."
+  },
+  "t10": {
+   "text": "Predict first: how many lines does `ps | wc -l` print? Then run it to verify.",
+   "hint": "Header plus bash plus ps = 3."
+  },
+  "t11": {
+   "text": "Predict first: is the 1-minute load average low? Run `uptime` to verify. Remember: read load relative to `nproc`.",
+   "hint": "Look at the three numbers after 'load average:'."
+  },
+  "t12": {
+   "text": "Sort the snapshot by CPU, highest first, and show two lines: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 2`.",
+   "hint": "`-k3` = third column, `-n` numeric, `-r` reverse."
+  },
+  "t13": {
+   "text": "Mini project: write the PIDs of all root processes into `~/lab/root_pids.txt`. Filter with `grep ^root`, squeeze spaces with `tr -s ' '`, pick column 2 with `cut -d' ' -f2`, redirect with `>`.",
+   "hint": "One pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`."
+  },
+  "t14": {
+   "text": "Debug: `~/lab/fix.txt` says `kill -9 1701`. That is wrong, a zombie cannot be killed. Overwrite the file with the better command: signal the parent, e.g. `kill -s SIGCHLD 1500`.",
+   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. The parent PID is 1500 (see t09)."
+  },
+  "t15": {
+   "text": "Challenge: find the process with the highest CPU usage in the snapshot using `sort`. Write the **polite** stop command for it into `~/lab/decision.txt` (do not run it).",
+   "hint": "It is PID 1620. Polite means signal 15: `echo \"kill -15 1620\" > ~/lab/decision.txt`."
+  },
+  "t16": {
+   "text": "TICKET #5110 — The server is slow. Alice's job is suspected. Write the user, PID and command of the busiest process into `~/lab/report.txt`.",
+   "hint": "Use `sort` or `grep` on the snapshot; then `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`."
+  },
+  "t17": {
+   "text": "Save your shell PID to a file: `echo $$ > ~/lab/mypid.txt`.",
+   "hint": "`>` writes the output of `echo` into the file."
+  }
+ },
+ "vm": {
+  "intro": "Run these steps on your own VM (Ubuntu, Rocky, Alma or WSL). Steps 1 to 4 only read. Step 5 stops a process: take a **snapshot** first and only touch your own `sleep` process.",
+  "tasks": {
+   "v01": {
+    "title": "Your own process",
+    "text": "Print the PID of your shell, then show its PID, PPID and state with ps. Paste the output.",
+    "blocks": [
+     {
+      "cmd": "echo $$\nps -o pid,ppid,stat,cmd -p $$",
+      "expected": "2100\n    PID    PPID STAT CMD\n   2100    2050 Ss   -bash"
+     }
+    ],
+    "differs": [
+     "The numbers differ on your system; `PPID` must be in the header.",
+     "In a terminal started via SSH the parent is `sshd`, in a desktop terminal it is the terminal program."
+    ]
+   },
+   "v02": {
+    "title": "ps aux and ps -ef",
+    "text": "Compare both styles. Which one has a PPID column?",
+    "blocks": [
+     {
+      "cmd": "ps aux | head -n 5\nps -ef | head -n 5",
+      "expected": "USER  PID %CPU %MEM ... COMMAND\nroot    1  0.0  0.3 ... /usr/lib/systemd/systemd\nUID   PID  PPID  C STIME TTY TIME CMD\nroot    1     0  0 08:00 ?   00:00:02 /usr/lib/systemd/systemd"
+     }
+    ],
+    "differs": [
+     "On WSL1 or in a container PID 1 may be `init` or something else.",
+     "Only `ps -ef` has PPID; `ps aux` has %CPU and %MEM."
+    ]
+   },
+   "v03": {
+    "title": "Process tree",
+    "text": "Install `psmisc` if needed and look at the tree. Who is at the root? Paste the first lines.",
+    "blocks": [
+     {
+      "cmd": "# Rocky/Alma: sudo dnf install -y psmisc\n# Ubuntu/Debian: sudo apt install -y psmisc\npstree -p | head -n 8\nps -ef --forest | head -n 15",
+      "expected": "systemd(1)-+-sshd(412)---sshd(2050)---sshd(2090)---bash(2100)-+-pstree(2200)\n           |-crond(650)\n..."
+     }
+    ],
+    "differs": [
+     "`pstree: command not found` means psmisc is not installed; use the install line above.",
+     "On WSL you may see `init(1)` or `SessionLeader` instead of systemd."
+    ]
+   },
+   "v04": {
+    "title": "Look into /proc",
+    "text": "Read the status of your shell directly from /proc and show where the program lives.",
+    "blocks": [
+     {
+      "cmd": "head -n 9 /proc/$$/status\nls -l /proc/$$/exe\nls -l /proc/$$/fd",
+      "expected": "Name:\tbash\nUmask:\t0022\nState:\tS (sleeping)\n...\nPPid:\t2050\n...\nlrwxrwxrwx 1 student student 0 ... /proc/2100/exe -> /usr/bin/bash"
+     }
+    ],
+    "differs": [
+     "The `Name:`, `State:` and `PPid:` lines must exist; the order of other lines can differ.",
+     "`exe` may show `/bin/bash` on some systems (a link to /usr/bin)."
+    ]
+   },
+   "v05": {
+    "title": "Start and stop a process safely",
+    "text": "**Snapshot first.** Start your own `sleep` in the background, find it with pgrep, stop it politely with SIGTERM and check that it is gone. Never use `pkill` or `kill -9` on unknown processes.",
+    "blocks": [
+     {
+      "cmd": "sleep 600 &\npgrep -l sleep\nkill -15 $!\nsleep 1\npgrep -l sleep || echo gone",
+      "expected": "[1] 2300\n2300 sleep\n[1]+  Terminated   sleep 600\ngone"
+     }
+    ],
+    "differs": [
+     "`$!` is the PID of the last background process.",
+     "If `pgrep` still prints a line, another `sleep` is running; check with `pgrep -a sleep` before you kill anything."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Which PID has the first process of a Linux system (today usually systemd)?",
+   "options": [
+    "0",
+    "1",
+    "2",
+    "100"
+   ],
+   "explain": "PID 1 is started by the kernel; all other processes descend from it. It also ignores signals it has no handler for, even SIGKILL from user space."
+  },
+  "q2": {
+   "q": "What is true for a zombie process (STAT Z)?",
+   "options": [
+    "It uses a lot of CPU",
+    "It waits for disk I/O",
+    "It is finished; the parent has not collected the exit status, and `kill -9` does not help",
+    "It was stopped with Ctrl+Z"
+   ],
+   "explain": "A zombie is already dead; only its table entry remains. The parent must call wait, or you restart the parent."
+  },
+  "q3": {
+   "q": "What does `$$` mean in the shell?",
+   "options": [
+    "The PID of the current shell",
+    "The PID of the last background job",
+    "The exit code of the last command",
+    "The number of processes"
+   ],
+   "explain": "`$$` is the shell's own PID. The last background PID is `$!`, the exit code is `$?`."
+  },
+  "q4": {
+   "q": "Which command shows a PPID column by default?",
+   "options": [
+    "ps",
+    "ps aux",
+    "uptime",
+    "ps -ef"
+   ],
+   "explain": "`ps -ef` (UNIX style) shows PPID. `ps aux` (BSD style) does not; for it use `ps -o pid,ppid,...`."
+  }
+ },
+ "summary": [
+  "A process is a running program with a PID; its parent has the PPID; PID 1 (systemd) is the ancestor of all.",
+  "`ps aux` (BSD) shows CPU/MEM, `ps -ef` shows PPID, `ps -o` chooses columns, `pgrep` finds by name.",
+  "`pstree` (package psmisc) and `ps -ef --forest` show the tree; `/proc/<pid>` is where the kernel exposes the details.",
+  "A zombie (Z) is dead and cannot be killed; fix the parent. Use `kill -15` first, `kill -9` last, never on unknown processes.",
+  "Read the load average relative to `nproc`."
+ ],
+ "glossary": [
+  {
+   "term": "process",
+   "meaning": "A running instance of a program with its own PID and memory."
+  },
+  {
+   "term": "PID / PPID",
+   "meaning": "Process ID and the ID of its parent process."
+  },
+  {
+   "term": "zombie",
+   "meaning": "A finished process whose exit status has not yet been collected by its parent (STAT Z)."
+  },
+  {
+   "term": "signal",
+   "meaning": "A message to a process, e.g. SIGTERM (15) or SIGKILL (9)."
+  },
+  {
+   "term": "/proc",
+   "meaning": "Virtual filesystem through which the kernel exposes process and system information."
+  },
+  {
+   "term": "load average",
+   "meaning": "Average number of runnable processes over 1, 5 and 15 minutes; read it relative to the CPU cores."
+  }
+ ]
+}

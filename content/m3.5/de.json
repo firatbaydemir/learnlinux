@@ -1,0 +1,98 @@
+{
+  "title": "Text filtern: sort, uniq, cut und tr",
+  "lead": "Mache aus Rohtext einen brauchbaren Bericht: sortiere Zeilen, zähle Duplikate, wähle Felder aus und wandle Zeichen um.",
+  "objectives": [
+    "Text und Zahlen mit `sort` sortieren.",
+    "Aufeinanderfolgende Duplikate mit `uniq` zusammenfassen oder zählen.",
+    "Felder aus getrenntem Text mit `cut` auswählen.",
+    "Zeichen mit `tr` umwandeln und Werkzeuge in Pipelines kombinieren."
+  ],
+  "sections": [
+    {
+      "id": "sort",
+      "title": "Zeilen mit sort sortieren",
+      "body": [
+        "`sort DATEI` sortiert Zeilen alphabetisch beziehungsweise lexikalisch. `-r` kehrt die Reihenfolge um; `-n` sortiert Zahlenwerte statt Text. Bei einer normalen Textsortierung kann `100` vor `2` stehen.",
+        "`sort` gibt das Ergebnis aus und ändert die Quelldatei nicht. Leite die Ausgabe in eine andere Datei um, wenn du das sortierte Ergebnis behalten möchtest."
+      ],
+      "commands": [
+        {"cmd":"sort","what":"Sortiert Zeilen als Text.","where":"Wenn eine Liste alphabetisch geordnet werden soll.","why":"Ähnliche Zeilen werden zusammen gruppiert.","example":"sort data/fruits.txt"},
+        {"cmd":"sort -r","what":"Kehrt die Sortierreihenfolge um.","where":"Wenn spätere Werte zuerst erscheinen sollen.","why":"Erzeugt die umgekehrte Reihenfolge derselben Sortierung.","example":"sort -r data/fruits.txt"},
+        {"cmd":"sort -n","what":"Sortiert Zeilen nach ihrem Zahlenwert.","where":"Bei Dateien mit einer Zahl pro Zeile.","why":"Ordnet Werte wie `2` und `100` numerisch korrekt.","example":"sort -n data/numbers.txt"}
+      ],
+      "tip":"Standardmäßig vergleicht `sort` Text. Verwende `-n` für Zahlen und prüfe bei Bedarf die ersten Zeilen mit `head`."
+    },
+    {
+      "id": "uniq",
+      "title": "Duplikate mit uniq zusammenfassen",
+      "body": [
+        "`uniq` fasst nur unmittelbar aufeinanderfolgende identische Zeilen zusammen. Wenn Duplikate an verschiedenen Stellen stehen, sortiere zuerst, um sie nebeneinander zu bringen.",
+        "`uniq -c` stellt jeder eindeutigen Zeile ihre Anzahl voran. Das eignet sich für einfache Häufigkeitsberichte."
+      ],
+      "commands": [
+        {"cmd":"uniq","what":"Fasst aufeinanderfolgende identische Zeilen zu einer zusammen.","where":"Beim Entfernen von Duplikaten aus einer sortierten Liste.","why":"Von jedem Wert bleibt eine Kopie erhalten.","example":"sort data/fruits.txt | uniq"},
+        {"cmd":"uniq -c","what":"Fasst aufeinanderfolgende Duplikate zusammen und zählt sie.","where":"Wenn du die Häufigkeit jedes Wertes ermitteln möchtest.","why":"Zeigt Wert und Häufigkeit gemeinsam an.","example":"sort data/fruits.txt | uniq -c"}
+      ],
+      "warn":"`uniq` sucht nicht im ganzen Text nach Duplikaten, sondern erkennt nur nebeneinanderliegende Wiederholungen. Üblich ist `sort | uniq`."
+    },
+    {
+      "id": "cuttr",
+      "title": "Felder mit cut wählen und Zeichen mit tr umwandeln",
+      "body": [
+        "`cut -dTRENNZEICHEN -fFELD` wählt Felder aus getrennten Zeilen. CSV verwendet Kommas, `/etc/passwd` Doppelpunkte. Mehrere Felder lassen sich mit einer kommaseparierten Liste wie `-f1,3` auswählen.",
+        "`tr SET1 SET2` wandelt Zeichen aus der Standardeingabe um. So kannst du beispielsweise ASCII-Kleinbuchstaben in Großbuchstaben umwandeln. `cut`, `sort`, `uniq` und `tr` lassen sich über stdin/stdout mit Pipes kombinieren."
+      ],
+      "commands": [
+        {"cmd":"cut -d, -f1","what":"Wählt das erste Feld kommaseparierter Zeilen aus.","where":"Wenn du eine Spalte aus einer CSV-Datei extrahieren möchtest.","why":"Nicht benötigte Spalten werden entfernt.","example":"cut -d, -f1 data/employees.csv"},
+        {"cmd":"cut -d, -f1,3","what":"Wählt das erste und dritte Feld aus.","where":"Wenn mehrere Spalten benötigt werden.","why":"Behält nur die erforderlichen Daten.","example":"cut -d, -f1,3 data/employees.csv"},
+        {"cmd":"tr 'a-z' 'A-Z'","what":"Wandelt ASCII-Kleinbuchstaben in Großbuchstaben um.","where":"Wenn die Schreibweise von Text vereinheitlicht werden soll.","why":"Zeichen lassen sich in einer Pipeline umwandeln.","example":"echo hello | tr 'a-z' 'A-Z'"}
+      ],
+      "tip":"Bei Text mit wechselnden Mengen an Leerraum kann `awk` flexibler als `cut` sein; hier konzentrieren wir uns auf feste Trennzeichen."
+    },
+    {
+      "id": "pipeline",
+      "title": "Werkzeuge in einer Pipeline kombinieren",
+      "body": [
+        "Textfilter sind klein und spezialisiert. Wähle zum Beispiel ein Statusfeld aus einem Log, sortiere es und zähle es mit `uniq -c`. Prüfe das Ergebnis auf dem Bildschirm und speichere es anschließend mit `>` in einem Bericht.",
+        "Die Reihenfolge ist wichtig: `sort | uniq -c` zählt Duplikate; danach sortiert `sort -rn` nach der Anzahl, beginnend mit dem höchsten Wert."
+      ],
+      "commands": [
+        {"cmd":"sort | uniq -c | sort -rn","what":"Zählt Werte und sortiert sie nach Häufigkeit absteigend.","where":"Wenn häufige Werte in Logs oder Listen gesucht werden.","why":"Kombiniert kleine Werkzeuge zu einem Bericht.","example":"cut -d' ' -f2 data/access.log | sort | uniq -c | sort -rn"},
+        {"cmd":"cut -d, -f2","what":"Gibt das ausgewählte CSV-Feld an eine Pipe weiter.","where":"Wenn eine Spalte für weitere Filter vorbereitet wird.","why":"Jedes Werkzeug bleibt auf eine Aufgabe konzentriert.","example":"cut -d, -f2 data/employees.csv | sort | uniq"}
+      ],
+      "warn":"`>` überschreibt den vorhandenen Inhalt des Ziels. Schreibe nicht über die Quelldatei; verwende einen eigenen Berichtsnamen."
+    }
+  ],
+  "tasks": {
+    "t01":{"text":"Sortiere die Zeilen in `data/fruits.txt` alphabetisch.","hint":"Verwende `sort data/fruits.txt`."},
+    "t02":{"text":"Gib dieselbe Obstliste in umgekehrter Reihenfolge aus.","hint":"Verwende `sort -r data/fruits.txt`."},
+    "t03":{"text":"Sortiere die Zahlen in `data/numbers.txt` numerisch.","hint":"Verwende `sort -n data/numbers.txt`."},
+    "t04":{"text":"Entferne doppelte Obstzeilen; sortiere vorher.","hint":"Verwende `sort data/fruits.txt | uniq`."},
+    "t05":{"text":"Zähle, wie oft jede Obstsorte vorkommt.","hint":"Verwende `sort data/fruits.txt | uniq -c`."},
+    "t06":{"text":"Extrahiere nur die Mitarbeiternamen, also die erste CSV-Spalte.","hint":"Das Trennzeichen ist ein Komma: `cut -d, -f1 data/employees.csv`."},
+    "t07":{"text":"Schätze die Häufigkeit jeder Abteilung in der Mitarbeiter-CSV. Die Überschrift im zweiten Feld bleibt enthalten.","hint":"Verwende `cut -d, -f2 data/employees.csv | sort | uniq -c`."},
+    "t08":{"text":"Schätze die erste Zeile einer Textsortierung der Zahlen und führe den Befehl aus.","hint":"Ein normales `sort` vergleicht Text; `10` kann zuerst stehen."},
+    "t09":{"text":"Fehlersuche: Schreibe die sortierten eindeutigen Zeilen aus `data/mixed.txt` in `unique.txt`.","hint":"Zuerst sortieren, dann `uniq` ausführen und die Ausgabe umleiten."},
+    "t10":{"text":"Mini-Aufgabe: Wandle `hello` mit `tr` in Großbuchstaben um.","hint":"Verwende `echo hello | tr 'a-z' 'A-Z'`."},
+    "t11":{"text":"Mini-Aufgabe: Schreibe die eindeutigen Abteilungsnamen aus der Mitarbeiter-CSV in `reports/departments.txt`.","hint":"Extrahiere das zweite CSV-Feld, sortiere es und leite die `uniq`-Ausgabe in den Bericht um."},
+    "t12":{"text":"Herausforderung: Sortiere Statuscodes im Zugriffslog nach Häufigkeit, höchste zuerst.","hint":"Extrahiere das zweite Feld mit `cut`, danach `sort | uniq -c | sort -rn`."},
+    "t13":{"text":"Ticket: Schreibe die Anzahlen der Zugriffslog-Statuscodes in `reports/status_count.txt`.","hint":"Extrahiere das zweite Feld, sortiere, verwende `uniq -c` und leite in den Bericht um."}
+  },
+  "vm": {
+    "intro":"Diese Filter lesen auf deiner VM nur Eingaben. Verwende für Ausgabedateien eigene Namen in deinem Home-Verzeichnis.",
+    "tasks": {
+      "v01":{"title":"Numerisch sortieren","text":"Sortiere die Benutzer-IDs aus `/etc/passwd` numerisch und füge die ersten Zeilen ein.","blocks":[{"cmd":"cut -d: -f3 /etc/passwd | sort -n | head -n 5","expected":"0\n1\n2"}],"differs":["Die IDs hängen von der Distribution ab; sie sollten numerisch aufsteigend sortiert sein."]},
+      "v02":{"title":"Ein CSV-Feld auswählen","text":"Extrahiere das Namensfeld aus der CSV-Datei in deinem Home-Verzeichnis. Falls sie fehlt, ersetze den Pfad durch eine eigene CSV-Datei.","blocks":[{"cmd":"cut -d, -f1 ~/Documents/list.csv","expected":"name\nalice\nbob"}],"differs":["Wenn deine CSV ein anderes Trennzeichen nutzt, ändere `-d`. Die erste Zeile kann eine Überschrift sein."]},
+      "v03":{"title":"Häufigkeiten zählen","text":"Zähle die Login-Shell-Felder in `/etc/passwd` und füge die Häufigkeitstabelle ein.","blocks":[{"cmd":"cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn","expected":"\\d+\\s+\\S+"}],"differs":["Die Zahlen hängen von der Distribution ab. Achte darauf, dass `sort` vor `uniq -c` steht."]},
+      "v04":{"title":"Einen kleinen Bericht erstellen","text":"Lege Beispiel-Statuscodes in deinem Home-Verzeichnis an, sortiere und zähle sie und zeige anschließend den Bericht.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && printf '200\\n404\\n200\\n500\\n200\\n' > status.txt && sort status.txt | uniq -c | sort -rn > status_report.txt && cat status_report.txt"}],"differs":["Ist `status_report.txt` leer, prüfe `status.txt` und die Reihenfolge der Umleitungen. Überschreibe nicht die Quelldatei."]}
+    }
+  },
+  "quiz": {
+    "q1":{"q":"Welche Option sortiert Zahlenzeilen nach ihrem Zahlenwert?","options":["`sort -r`","`sort -n`","`uniq -c`","`cut -n`"],"explain":"`sort -n` sortiert numerisch."},
+    "q2":{"q":"Warum wird `uniq` meist nach `sort` verwendet?","options":["`uniq` liest nur CSV","`sort` erstellt eine Sicherung","`uniq` wandelt den gesamten Text in Großbuchstaben um","`uniq` fasst nur aufeinanderfolgende Duplikate zusammen"],"explain":"Durch die Sortierung stehen gleiche Werte nebeneinander, sodass `uniq` sie zusammenfassen kann."},
+    "q3":{"q":"Was wählt `cut -d, -f2 file.csv` aus?","options":["Das zweite kommagetrennte Feld","Die zweite Zeile","Das zweite Zeichen","Die Dateigröße"],"explain":"`-d,` setzt das Komma als Trennzeichen und `-f2` wählt das zweite Feld."},
+    "q4":{"q":"Was macht `tr 'a-z' 'A-Z'`?","options":["Sortiert Zeilen rückwärts","Zählt Duplikate","Wandelt ASCII-Kleinbuchstaben in Großbuchstaben um","Extrahiert die zweite Spalte"],"explain":"`tr` wandelt Zeichensätze um; dieses Beispiel wandelt ASCII-Kleinbuchstaben in Großbuchstaben um."}
+  },
+  "summary":["`sort` sortiert Text; `sort -n` sortiert Zahlen und `sort -r` kehrt die Reihenfolge um.","`uniq` fasst nur aufeinanderfolgende Duplikate zusammen; meist muss vorher sortiert werden.","`uniq -c` gibt die Anzahl jeder eindeutigen Zeile aus.","`cut -dTRENNZEICHEN -fFELD` wählt Felder aus getrennten Zeilen.","`tr` wandelt Zeichen um; kombiniere Werkzeuge mit Pipes und schreibe Berichte in separate Dateien."],
+  "glossary":[{"term":"Filter","meaning":"Ein Befehl, der Eingaben liest und ausgewählte oder umgewandelte Ausgaben schreibt."},{"term":"Trennzeichen","meaning":"Ein Zeichen, das Felder in einer Zeile voneinander trennt."},{"term":"Feld","meaning":"Eine Spalte einer durch Trennzeichen aufgeteilten Zeile."},{"term":"Häufigkeitstabelle","meaning":"Eine Liste, die zeigt, wie oft jeder Wert vorkommt."}]
+}

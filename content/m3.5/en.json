@@ -1,0 +1,98 @@
+{
+  "title": "Text Filtering: sort, uniq, cut and tr",
+  "lead": "Turn raw text into a useful report by sorting lines, counting duplicates, selecting fields and transforming characters.",
+  "objectives": [
+    "Sort text and numbers with `sort`.",
+    "Collapse or count consecutive duplicates with `uniq`.",
+    "Select fields from delimited text with `cut`.",
+    "Transform characters with `tr` and combine tools in pipelines."
+  ],
+  "sections": [
+    {
+      "id": "sort",
+      "title": "Sort lines with sort",
+      "body": [
+        "`sort FILE` sorts lines alphabetically or lexically. `-r` reverses the order; `-n` sorts numeric values rather than text. For example, a plain text sort may place `100` before `2`.",
+        "`sort` prints its result and does not change the source file. Redirect the output to a different file if you want to keep the sorted result."
+      ],
+      "commands": [
+        {"cmd":"sort","what":"Sorts lines as text.","where":"When putting a list in alphabetical order.","why":"Groups similar lines together.","example":"sort data/fruits.txt"},
+        {"cmd":"sort -r","what":"Reverses the sort order.","where":"When you want later values first.","why":"Produces the reverse of the same ordering.","example":"sort -r data/fruits.txt"},
+        {"cmd":"sort -n","what":"Sorts lines by numeric value.","where":"For files with one number per line.","why":"Places values such as `2` and `100` in numeric order.","example":"sort -n data/numbers.txt"}
+      ],
+      "tip":"By default, `sort` compares text. Use `-n` for numbers, and check the first lines with `head` if needed."
+    },
+    {
+      "id": "uniq",
+      "title": "Collapse duplicates with uniq",
+      "body": [
+        "`uniq` collapses only identical adjacent lines. If duplicates occur in different parts of a file, sort them first to bring them together.",
+        "`uniq -c` prefixes each unique line with its count. This is useful for simple frequency reports."
+      ],
+      "commands": [
+        {"cmd":"uniq","what":"Collapses consecutive identical lines into one.","where":"When removing duplicates from a sorted list.","why":"Leaves one copy of each value.","example":"sort data/fruits.txt | uniq"},
+        {"cmd":"uniq -c","what":"Collapses consecutive duplicates and prints their counts.","where":"When calculating how often each value occurs.","why":"Shows each value and its frequency together.","example":"sort data/fruits.txt | uniq -c"}
+      ],
+      "warn":"`uniq` does not search for duplicates across the whole file; it catches only adjacent repeats. The common pattern is `sort | uniq`."
+    },
+    {
+      "id": "cuttr",
+      "title": "Select fields with cut and transform characters with tr",
+      "body": [
+        "`cut -dDELIMITER -fFIELD` selects fields from delimited lines. CSV uses commas, while `/etc/passwd` uses colons. Select multiple fields with a comma-separated list such as `-f1,3`.",
+        "`tr SET1 SET2` transforms characters from standard input. For example, you can convert ASCII lowercase letters to uppercase. `cut`, `sort`, `uniq` and `tr` use stdin and stdout, so they can be combined with pipes."
+      ],
+      "commands": [
+        {"cmd":"cut -d, -f1","what":"Selects the first field from comma-separated lines.","where":"When extracting a column from a CSV file.","why":"Removes columns you do not need.","example":"cut -d, -f1 data/employees.csv"},
+        {"cmd":"cut -d, -f1,3","what":"Selects the first and third fields.","where":"When you need more than one column.","why":"Keeps only the required data.","example":"cut -d, -f1,3 data/employees.csv"},
+        {"cmd":"tr 'a-z' 'A-Z'","what":"Converts ASCII lowercase letters to uppercase.","where":"When standardizing the letter case of text.","why":"Transforms characters within a pipeline.","example":"echo hello | tr 'a-z' 'A-Z'"}
+      ],
+      "tip":"For text separated by variable amounts of whitespace, `awk` may be more flexible than `cut`; here we focus on fixed delimiters."
+    },
+    {
+      "id": "pipeline",
+      "title": "Combine tools in a pipeline",
+      "body": [
+        "Text filters are small and focused. For example, select a status-code field from a log, sort it and count it with `uniq -c`. Check the result on screen, then save it to a report with `>`.",
+        "Order matters: `sort | uniq -c` counts duplicates, then `sort -rn` sorts by count from highest to lowest."
+      ],
+      "commands": [
+        {"cmd":"sort | uniq -c | sort -rn","what":"Counts values and sorts them from most to least frequent.","where":"When finding common values in logs or lists.","why":"Combines small tools into a report.","example":"cut -d' ' -f2 data/access.log | sort | uniq -c | sort -rn"},
+        {"cmd":"cut -d, -f2","what":"Passes the selected field from CSV into a pipe.","where":"When preparing one column for another filter.","why":"Keeps each tool focused on one task.","example":"cut -d, -f2 data/employees.csv | sort | uniq"}
+      ],
+      "warn":"`>` overwrites the existing contents of its target. Do not write over the source file; choose a separate report filename."
+    }
+  ],
+  "tasks": {
+    "t01":{"text":"Sort the lines in `data/fruits.txt` alphabetically.","hint":"Use `sort data/fruits.txt`."},
+    "t02":{"text":"Show the same fruit list in reverse order.","hint":"Use `sort -r data/fruits.txt`."},
+    "t03":{"text":"Sort the numbers in `data/numbers.txt` numerically.","hint":"Use `sort -n data/numbers.txt`."},
+    "t04":{"text":"Remove duplicate fruit lines; remember to sort first.","hint":"Use `sort data/fruits.txt | uniq`."},
+    "t05":{"text":"Count how many times each fruit occurs.","hint":"Use `sort data/fruits.txt | uniq -c`."},
+    "t06":{"text":"Extract only employee names, the first column of the CSV.","hint":"The delimiter is a comma: `cut -d, -f1 data/employees.csv`."},
+    "t07":{"text":"Predict the frequency of each department in the employee CSV. The header in the second field is included.","hint":"Use `cut -d, -f2 data/employees.csv | sort | uniq -c`."},
+    "t08":{"text":"Predict the first line from a text sort of the numbers, then run it.","hint":"Plain `sort` compares text; `10` may come first."},
+    "t09":{"text":"Debug: write the sorted unique lines from `data/mixed.txt` to `unique.txt`.","hint":"Sort first, then use `uniq` and redirect the result."},
+    "t10":{"text":"Mini task: convert `hello` to uppercase with `tr`.","hint":"Use `echo hello | tr 'a-z' 'A-Z'`."},
+    "t11":{"text":"Mini task: write the unique department names from the employee CSV to `reports/departments.txt`.","hint":"Extract the second CSV field, sort it, then redirect `uniq` output to the report."},
+    "t12":{"text":"Challenge: sort the access log's status codes by frequency, highest first.","hint":"Extract the second field with `cut`, then use `sort | uniq -c | sort -rn`."},
+    "t13":{"text":"Ticket: write counts of access-log status codes to `reports/status_count.txt`.","hint":"Extract the second field, sort, use `uniq -c`, then redirect to the report."}
+  },
+  "vm": {
+    "intro":"These filters only read input on your VM. Use separate filenames in your home directory for output reports.",
+    "tasks": {
+      "v01":{"title":"Numeric sort","text":"Sort the user IDs in `/etc/passwd` numerically and paste the first few lines.","blocks":[{"cmd":"cut -d: -f3 /etc/passwd | sort -n | head -n 5","expected":"0\n1\n2"}],"differs":["The IDs depend on the distribution; they should be in increasing numeric order."]},
+      "v02":{"title":"Select a CSV field","text":"Extract the name field from the report CSV in your home directory. If it is not present, replace the path with one of your CSV files.","blocks":[{"cmd":"cut -d, -f1 ~/Documents/list.csv","expected":"name\nalice\nbob"}],"differs":["If your CSV uses a different delimiter, change `-d`. The first line may be a header."]},
+      "v03":{"title":"Count frequencies","text":"Count login shell fields in `/etc/passwd` and paste the frequency table.","blocks":[{"cmd":"cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn","expected":"\\d+\\s+\\S+"}],"differs":["Counts vary by distribution. Make sure `sort` comes before `uniq -c`."]},
+      "v04":{"title":"Create a small report","text":"Prepare sample status codes in your home directory, sort and count them, then show the report.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && printf '200\\n404\\n200\\n500\\n200\\n' > status.txt && sort status.txt | uniq -c | sort -rn > status_report.txt && cat status_report.txt"}],"differs":["If `status_report.txt` is empty, check `status.txt` and the redirection order. Do not overwrite the source."]}
+    }
+  },
+  "quiz": {
+    "q1":{"q":"Which option sorts numeric lines by their numeric values?","options":["`sort -r`","`sort -n`","`uniq -c`","`cut -n`"],"explain":"`sort -n` sorts numerically."},
+    "q2":{"q":"Why is `uniq` usually used after `sort`?","options":["`uniq` reads only CSV","`sort` makes a backup","`uniq` converts all text to uppercase","`uniq` collapses only adjacent duplicates"],"explain":"Sorting brings identical values next to each other so `uniq` can collapse them."},
+    "q3":{"q":"What does `cut -d, -f2 file.csv` select?","options":["The second comma-delimited field","The second line","The second character","The file size"],"explain":"`-d,` sets the delimiter to a comma and `-f2` selects the second field."},
+    "q4":{"q":"What does `tr 'a-z' 'A-Z'` do?","options":["Sorts lines in reverse","Counts duplicates","Converts lowercase ASCII letters to uppercase","Extracts the second column"],"explain":"`tr` transforms character sets; this example converts ASCII lowercase letters to uppercase."}
+  },
+  "summary":["`sort` sorts text; use `sort -n` for numbers and `sort -r` for reverse order.","`uniq` collapses only adjacent duplicates, so sorting first is usually necessary.","`uniq -c` reports the count for each unique line.","`cut -dDELIMITER -fFIELD` selects fields from delimited lines.","`tr` transforms characters; combine small tools with pipes and write reports to separate files."],
+  "glossary":[{"term":"filter","meaning":"A command that reads input and writes selected or transformed output."},{"term":"delimiter","meaning":"A character that separates fields in a line."},{"term":"field","meaning":"One column of a line split by a delimiter."},{"term":"frequency table","meaning":"A list showing how often each value occurs."}]
+}

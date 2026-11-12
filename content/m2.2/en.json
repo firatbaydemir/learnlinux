@@ -1,0 +1,150 @@
+{
+ "title": "Paths and Types",
+ "lead": "Read absolute and relative paths correctly, recognise file types with ls -l and create symbolic links (shortcuts).",
+ "objectives": [
+  "You tell absolute (start with `/`) from relative paths and use the shortcuts `.`, `..` and `~`.",
+  "You read the file type from the first letter of `ls -l` (`-`, `d`, `l`, `c`, `b`).",
+  "You create a symbolic link with `ln -s` and see what it points to."
+ ],
+ "sections": [
+  {
+   "id": "paths",
+   "title": "Absolute and relative paths",
+   "body": [
+    "On Linux the only way to reach a file is to give a **path**. An **absolute path** starts at the root directory (`/`) and points to the same place from anywhere: `/etc/hostname`.",
+    "A **relative path** does not start with `/` and is worked out **from the current directory**. Inside `/etc`, `hostname` is enough; in your home directory the same name fails, because no such file is there.",
+    "Check where you are with `pwd` first. The meaning of a relative path always depends on the current directory."
+   ],
+   "commands": [
+    {"cmd": "pwd", "what": "Prints the absolute path of the current directory.", "where": "Before using relative paths.", "why": "So you do not work in the wrong directory.", "example": "pwd"},
+    {"cmd": "cd", "what": "Changes the working directory; takes absolute or relative paths.", "where": "When moving between directories.", "why": "Afterwards short relative paths are enough.", "example": "cd /etc"},
+    {"cmd": "cat", "what": "Prints the contents of a file.", "where": "When reading small text files.", "why": "To test that a path points to the right file.", "example": "cat /etc/hostname"}
+   ],
+   "tip": "When unsure, type the absolute path; it works from every directory."
+  },
+  {
+   "id": "shortcuts",
+   "title": "Special path shortcuts: . .. ~",
+   "body": [
+    "`.` is the current directory, `..` the parent directory, `~` your home directory (`/home/student`). You can combine them in paths: `../config.txt`, `~/Documents/report.txt`.",
+    "Files whose name starts with `.` are **hidden**; `ls` does not show them, `ls -a` does. Every directory also lists the entries `.` and `..`."
+   ],
+   "commands": [
+    {"cmd": "cd ..", "what": "Moves up to the parent directory.", "where": "When returning from a subdirectory.", "why": "Go up quickly without typing the full path.", "example": "cd .."},
+    {"cmd": "ls -a", "what": "Lists all files including hidden ones.", "where": "When looking for configuration files.", "why": "Hidden files do not appear otherwise.", "example": "ls -a ~"}
+   ]
+  },
+  {
+   "id": "types",
+   "title": "Reading file types",
+   "body": [
+    "On Linux everything is a file: text, folders, devices, shortcuts. In `ls -l` output the **first letter** of the line tells the type.",
+    "`-` regular file, `d` directory, `l` symbolic link, `c` character device (`/dev/null`), `b` block device (disk), `s` socket, `p` named pipe. The next nine characters are permissions (covered in later modules)."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Long listing: type, permissions, owner, size, date, name.", "where": "To find out what something is.", "why": "You know what it is before deleting or reading it.", "example": "ls -l /dev/null"},
+    {"cmd": "stat", "what": "Shows detailed information and the type of a file.", "where": "When you need the type or timestamps.", "why": "Gives the type as a word instead of a letter.", "example": "stat /etc/hostname"}
+   ],
+   "tip": "Files under `/dev` are hardware interfaces, not real data; do not read them randomly with `cat`."
+  },
+  {
+   "id": "links",
+   "title": "Symbolic links",
+   "body": [
+    "A **symbolic link** is a small shortcut file that points to another path. `ls -l` shows it with `l` and as `link -> target`. Reading the link means reading the target.",
+    "If the target is deleted or moved, the link stays behind **broken**. A relative target (`../docs/readme.txt`) is resolved **from the link's directory**, not from your current one."
+   ],
+   "commands": [
+    {"cmd": "ln -s", "what": "Creates a symbolic link: `ln -s TARGET LINK`.", "where": "To reach a long path under a short name.", "why": "You keep the file in one place without copying.", "example": "ln -s ~/Documents/report.txt ~/link.txt"},
+    {"cmd": "readlink", "what": "Prints the target of a link.", "where": "To see where a link leads.", "why": "Just the target instead of the whole `ls -l` line.", "example": "readlink ~/link.txt", "nosim": true}
+   ],
+   "warn": "Argument order for `ln -s`: TARGET first, then LINK. Swapped, you get a broken link. `ln -sf` overwrites an existing file; be careful.",
+   "danger": "If a link points to a directory, `rm -r link/` (with a trailing `/`) can delete the contents of the target directory. To remove the link type `rm link` and check with `ls -l` first."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Run `cat /etc/hostname` using the absolute path.", "hint": "Works from any directory."},
+  "t02": {"text": "Move to `/etc` with `cd /etc`.", "hint": "An absolute path starts with `/`."},
+  "t03": {"text": "While in `/etc`, type the relative path `cat hostname`.", "hint": "The file is in the current directory."},
+  "t04": {"text": "Go home with `cd ~` and run `cat hostname` again. What happens and why?", "hint": "There is no hostname file in home; expect an error."},
+  "t05": {"text": "From `/home/student` go up one directory with `cd ..`.", "hint": "Confirm with `pwd` that it shows `/home`."},
+  "t06": {"text": "Now type relatively: `cd student/Documents`.", "hint": "No `/` at the start."},
+  "t07": {"text": "Run `ls -l /etc/hostname`. What is the first character?", "hint": "`-` means regular file."},
+  "t08": {"text": "Run `ls -l /dev/null` and predict first: which letter comes first?", "hint": "`c` for character device."},
+  "t09": {"text": "Create the symbolic link `~/link.txt` with `ln -s ~/Documents/report.txt ~/link.txt`.", "hint": "TARGET first, then the LINK name."},
+  "t10": {"text": "Inspect the link with `ls -l ~/link.txt`. What is after the arrow (`->`)?", "hint": "The line starts with `l`."},
+  "t11": {"text": "What does `cat ~/link.txt` print? Predict first, then run it.", "hint": "The link reads its target."},
+  "t12": {"text": "Debug: inside `~/projects/app`, `config.txt` is not found; the file is one level up. Read it with `cat` using a relative path with `../`.", "hint": "First `cd ~/projects/app`, then `cat ../config.txt`."},
+  "t13": {"text": "Mini project: create `~/lab/docs` and `~/lab/bin`, write a file with `echo hello linux > ~/lab/docs/readme.txt`, and create `~/lab/bin/readme-link` as a symbolic link to it.", "hint": "`mkdir -p`, `echo ... >` and `ln -s TARGET LINK`."},
+  "t14": {"text": "Challenge: go into `~/lab/bin` and create the link `rel-link` with a **relative target** (`../docs/readme.txt`); then read it with `cat rel-link`.", "hint": "A relative target is resolved from the link's directory."},
+  "t15": {"text": "Ticket: the application looks for its configuration at `~/app/current/config.txt`, but the real file is in `~/releases/v2/config.txt`. Create `~/app/current` as a symbolic link to `~/releases/v2` and verify with `cat ~/app/current/config.txt`.", "hint": "`mkdir -p ~/app`, then `ln -s ~/releases/v2 ~/app/current`."},
+  "t16": {"text": "Run `ls -la ~` to see hidden files too.", "hint": "`-a` shows hidden files, `-l` the details."}
+ },
+ "vm": {
+  "intro": "On your VM, try absolute/relative paths, look at the file types in `/dev` and create a symbolic link. All commands are harmless.",
+  "tasks": {
+   "v01": {
+    "title": "Absolute and relative path",
+    "text": "Try the same file relatively, then from the wrong directory, and paste the output.",
+    "blocks": [
+     {"cmd": "pwd\ncd /etc\npwd\ncat hostname\ncd ~\ncat hostname", "expected": "/home/student\n/etc\nlinux-lab\ncat: hostname: No such file or directory"}
+    ],
+    "differs": [
+     "If your host is not called `linux-lab` that is fine; you see your own host name.",
+     "If `cat hostname` in home does not fail, you created a file named `hostname` there."
+    ]
+   },
+   "v02": {
+    "title": "Read file types",
+    "text": "Look at the type of a file, a directory and a device; watch the first letters.",
+    "blocks": [
+     {"cmd": "ls -ld /etc /etc/hostname /dev/null", "expected": "drwxr-xr-x. ... /etc\n-rw-r--r--. ... /etc/hostname\ncrw-rw-rw-. ... /dev/null"}
+    ],
+    "differs": [
+     "Some distributions have no `/etc/hostname`; try `/etc/os-release` instead.",
+     "A `.` or `+` after the permissions is the SELinux/ACL marker, not important."
+    ]
+   },
+   "v03": {
+    "title": "Create a symbolic link",
+    "text": "Create a file in home and a link to it, then read the link.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/practice\necho hello linux > ~/practice/notes.txt\nln -s ~/practice/notes.txt ~/practice/link.txt\nls -l ~/practice\ncat ~/practice/link.txt", "expected": "lrwxrwxrwx. 1 student student ... link.txt -> /home/student/practice/notes.txt\nhello linux"}
+    ],
+    "differs": [
+     "If `->` is missing or `link.txt` is red you may have swapped the arguments: TARGET first, then LINK.",
+     "On `File exists`, `~/practice/link.txt` is already there; remove it first with `rm ~/practice/link.txt`."
+    ]
+   },
+   "v04": {
+    "title": "Type name with stat",
+    "text": "Show the type as a word with `stat`, then delete the practice folder.",
+    "blocks": [
+     {"cmd": "stat -c '%F' /etc /etc/hostname /dev/null ~/practice/link.txt\n# cleanup: look first with ls -l ~/practice, then\nrm -r ~/practice", "expected": "directory\nregular file\ncharacter special file\nsymbolic link"}
+    ],
+    "differs": [
+     "On macOS or BSD tools `-c` does not exist; this belongs on a Linux VM.",
+     "If you see `rm: cannot remove ... Is a directory`, you forgot `-r`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Which is an absolute path?", "options": ["Documents/report.txt", "/home/student/Documents/report.txt", "../report.txt", "~report.txt"], "explain": "An absolute path starts with `/` at the root and points to the same file from anywhere."},
+  "q2": {"q": "A line in `ls -l` starts with `l`. What is it?", "options": ["Regular file", "Directory", "Device", "Symbolic link"], "explain": "`l` means symbolic link; `-` is a regular file, `d` a directory."},
+  "q3": {"q": "Where are you after `cd ..` from `/etc`?", "options": ["/", "/home", "/etc/..", "~"], "explain": "`..` is the parent directory; from `/etc` you go up to `/`."},
+  "q4": {"q": "What happens when the target of a symbolic link is deleted?", "options": ["The link is deleted too", "The link copies the target", "The link stays broken", "The target comes back"], "explain": "The link only stores a path; when the target disappears the link remains but is broken."}
+ },
+ "summary": [
+  "Absolute paths start with `/`; relative paths are resolved from the current directory.",
+  "`.` is current, `..` parent, `~` your home directory.",
+  "The first letter of `ls -l` gives the type: `-`, `d`, `l`, `c`, `b`.",
+  "`ln -s TARGET LINK` creates a symbolic link; if the target goes away the link breaks."
+ ],
+ "glossary": [
+  {"term": "absolute path", "meaning": "Full address starting at the root directory (`/`)."},
+  {"term": "relative path", "meaning": "Address worked out from the current directory."},
+  {"term": "symbolic link", "meaning": "Shortcut file that points to another path."},
+  {"term": "device file", "meaning": "Special file under `/dev` that represents hardware."}
+ ]
+}

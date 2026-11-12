@@ -1,0 +1,176 @@
+{
+ "title": "sed und awk",
+ "lead": "Mit sed Text zeilenweise ersetzen, löschen und auswählen; mit awk Zeilen in Felder (Spalten) zerlegen, rechnen und Logdateien auswerten.",
+ "objectives": [
+  "Du nutzt sed mit `s/old/new/`, dem Flag `g`, `-n` + `p`, Adressen/Bereichen und `d`.",
+  "Du weißt, dass `sed -i` die Datei dauerhaft ändert, und legst vorher ein Backup an (`-i.bak`).",
+  "Du wählst mit awk Felder (`$1`, `$NF`, `-F`), schreibst Bedingungen und berechnest mit `BEGIN`/`END` Summe und Durchschnitt.",
+  "Du zählst mit awk-Arrays Werte in Logdateien und kombinierst awk in Pipelines mit `cut`, `sort`, `uniq`."
+ ],
+ "sections": [
+  {
+   "id": "sed-sub",
+   "title": "sed: Ersetzen (s///)",
+   "body": [
+    "`sed` (Stream Editor) liest Text zeilenweise, wendet den Befehl an und schreibt das Ergebnis auf den Bildschirm. Er **ändert die Datei nicht**; nur mit `-i` tut er das (dritter Abschnitt).",
+    "Der häufigste Befehl ist `s/suche/ersatz/`. Standardmäßig wird pro Zeile nur der **erste** Treffer ersetzt; für alle hängst du `g` (global) an: `s/cat/dog/g`.",
+    "Das Trennzeichen muss nicht `/` sein. Bei Pfaden wie `/usr/local` nimmst du `|`: `s|/usr/local|/opt|`. Ein `&` im Ersatz steht für den Treffer selbst; ein echtes `&` schreibst du als `\\&`."
+   ],
+   "commands": [
+    {"cmd": "sed 's/old/new/'", "what": "Ersetzt den ersten Treffer jeder Zeile.", "where": "Bei einer schnellen Textkorrektur.", "why": "Du siehst das Ergebnis, ohne die Datei anzufassen.", "example": "sed 's/cat/hamster/' pets.txt"},
+    {"cmd": "sed 's/old/new/g'", "what": "Ersetzt alle Treffer in der Zeile.", "where": "Wenn ein Wort überall ersetzt werden soll.", "why": "Ohne `g` bleibt der zweite Treffer einer Zeile stehen.", "example": "sed 's/cat/dog/g' pets.txt"},
+    {"cmd": "sed 's|a|b|'", "what": "Nutzt `|` als Trennzeichen; gut lesbar bei Pfaden mit `/`.", "where": "Beim Ersetzen von Pfaden und URLs.", "why": "Du brauchst keine `\\/`-Escapes.", "example": "sed 's|/usr/local|/opt|' paths.txt"},
+    {"cmd": "sed -e ... -e ...", "what": "Wendet mehrere sed-Befehle nacheinander an.", "where": "Wenn mehrere Änderungen in einem Durchlauf nötig sind.", "why": "Die Datei wird nur einmal gelesen.", "example": "sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv"}
+   ],
+   "tip": "Mit `-E` (erweiterte Regex) funktionieren `+`, `?`, `|` und `( )` ohne Escape: `sed -E 's/[0-9]+/N/g' access.log`.",
+   "warn": "Das Suchmuster ist ein **regulärer Ausdruck**: `.` steht für jedes Zeichen. Suchst du einen Punkt, schreibe `\\.`, sonst ersetzt `s/1.2/X/` auch `102`."
+  },
+  {
+   "id": "sed-lines",
+   "title": "sed: Zeilen auswählen und löschen",
+   "body": [
+    "sed gibt standardmäßig jede Zeile aus. `-n` schaltet das ab; mit `p` (print) gibst du dann gezielt Zeilen aus. Zeilen wählst du per **Adresse**: Nummer (`2p`), Bereich (`1,3p`), letzte Zeile (`$p`) oder Regex (`/404/p`).",
+    "`d` (delete) wirft die Zeile aus der Ausgabe. `/^#/d` entfernt Kommentarzeilen, `/^$/d` Leerzeilen, `1d` die Kopfzeile. All das betrifft nur die **Ausgabe**; die Datei bleibt gleich. Zum Speichern leitest du um: `sed '/^#/d' server.conf > clean.conf`."
+   ],
+   "commands": [
+    {"cmd": "sed -n 'Np'", "what": "Gibt nur Zeile N aus.", "where": "Wenn du eine bestimmte Zeile einer großen Datei sehen willst.", "why": "Kürzer als `head | tail`.", "example": "sed -n '2p' pets.txt"},
+    {"cmd": "sed -n 'A,Bp'", "what": "Gibt die Zeilen von A bis B aus; `$` ist die letzte Zeile.", "where": "Um einen Abschnitt einer Datei anzusehen.", "why": "Der Bereich kommt mit einem Befehl.", "example": "sed -n '2,4p' employees.csv"},
+    {"cmd": "sed '/regex/d'", "what": "Löscht passende Zeilen aus der Ausgabe.", "where": "Beim Entfernen von Kommentar- oder Leerzeilen.", "why": "Liefert die saubere Fassung einer Konfigurationsdatei.", "example": "sed '/^#/d' server.conf"},
+    {"cmd": "sed '1d'", "what": "Überspringt die erste Zeile (z. B. CSV-Kopf).", "where": "Vor dem Verarbeiten von Daten mit Kopfzeile.", "why": "Folgende Tools halten die Kopfzeile nicht für Daten.", "example": "sed '1d' employees.csv"}
+   ],
+   "tip": "`-n` und `p` gehören immer zusammen. Allein gibt `sed '2p'` Zeile 2 **doppelt** aus (einmal automatisch, einmal durch `p`)."
+  },
+  {
+   "id": "sed-inplace",
+   "title": "sed -i: Datei direkt ändern",
+   "body": [
+    "`sed -i` schreibt das Ergebnis nicht auf den Bildschirm, sondern **in die Datei selbst**. Es gibt kein Undo und keinen Papierkorb: Eine falsche Regex zerstört die Datei dauerhaft.",
+    "Regel: erst ohne `-i` laufen lassen und die Ausgabe prüfen, dann mit Backup. `sed -i.bak '...' file` sichert das Original als `file.bak` und funktioniert in GNU- (Linux) und BSD-sed (macOS).",
+    "**GNU/BSD-Unterschied:** Unter Linux genügt `sed -i 's/a/b/' f`. Unter macOS verlangt `-i` zwingend eine Endung; ohne Backup schreibst du `sed -i '' 's/a/b/' f`. Verhält sich derselbe Befehl auf zwei Systemen anders, liegt es daran."
+   ],
+   "commands": [
+    {"cmd": "sed -i.bak", "what": "Ändert die Datei direkt und sichert das Original als `.bak`.", "where": "Bei Änderungen an Konfigurationsdateien.", "why": "Bei einem Fehler kehrst du über das Backup zurück.", "example": "sed -i.bak 's/8080/9090/' server.conf"},
+    {"cmd": "cp file file.bak", "what": "Legt ein Backup von Hand an.", "where": "Bevor du mehrere Dateien änderst.", "why": "Lässt dir nach `-i` einen Rückweg.", "example": "cp app.conf app.conf.bak", "nosim": false},
+    {"cmd": "diff old new", "what": "Zeigt den Unterschied zwischen zwei Dateien.", "where": "Beim Überprüfen der Änderung.", "why": "Du siehst, ob nur die gewünschte Zeile geändert wurde.", "example": "diff server.conf.bak server.conf", "nosim": true}
+   ],
+   "warn": "`sed -i` ist nicht rückgängig zu machen. Auf Produktivsystemen zuerst ein **Backup** anlegen. Bei mehreren Dateien (`sed -i ... *.conf`) erst an einer Datei ohne `-i` testen.",
+   "danger": "Mit falschem Muster leert `sed -i 's/.*//' file` den gesamten Inhalt. Mache vor destruktiven Tests auf deiner VM einen **Snapshot**."
+  },
+  {
+   "id": "awk-basics",
+   "title": "awk: Felder und Bedingungen",
+   "body": [
+    "`awk` zerlegt jede Zeile an Leerzeichen in **Felder**: `$1` ist das erste, `$2` das zweite, `$NF` das letzte Feld, `$0` die ganze Zeile. Das Trennzeichen änderst du mit `-F`: für CSV `-F,`.",
+    "Ein Programm hat die Form `Muster { Aktion }`. Ohne Muster gilt es für jede Zeile; mit Muster nur für passende: `$3 > 5000` oder `/404/`. Fehlt die Aktion, wird die Zeile ausgegeben. `NR` ist die Zeilennummer, `NF` die Feldanzahl; `NR>1` überspringt die Kopfzeile.",
+    "`BEGIN { }` läuft einmal vor der ersten Zeile, `END { }` einmal nach der letzten. Ideal für Summe und Durchschnitt: `{ s += $3 } END { print s }`. Für formatierte Ausgabe nimm `printf`; das Zeilenende schreibst du selbst (`\\n`)."
+   ],
+   "commands": [
+    {"cmd": "awk '{print $1}'", "what": "Gibt das erste Feld jeder Zeile aus.", "where": "Um eine Spalte aus Logs oder Befehlsausgaben zu holen.", "why": "`cut` stolpert über wechselnde Leerzeichen, awk nicht.", "example": "awk '{print $1}' access.log"},
+    {"cmd": "awk -F, '...'", "what": "Setzt das Feldtrennzeichen auf `,`.", "where": "Bei CSV- und `:`-getrennten Dateien.", "why": "Nur so landen die Werte in den richtigen Feldern.", "example": "awk -F, 'NR>1 {print $1, $3}' employees.csv"},
+    {"cmd": "awk 'condition'", "what": "Gibt nur Zeilen aus, die die Bedingung erfüllen.", "where": "Beim Filtern von Werten über einer Schwelle oder von Fehlercodes.", "why": "Ermöglicht numerische Vergleiche, die `grep` nicht kann.", "example": "awk -F, 'NR>1 && $3 > 5000 {print $1}' employees.csv"},
+    {"cmd": "awk '... END {...}'", "what": "Gibt nach der letzten Zeile das Ergebnis aus.", "where": "Bei Summe, Durchschnitt, Zähler.", "why": "Eine Auswertung in einem Durchlauf.", "example": "awk -F, 'NR>1 {s+=$3} END {print s}' employees.csv"}
+   ],
+   "tip": "Schreibe das awk-Programm immer in **einfache Anführungszeichen**; sonst deutet die Shell `$1` selbst aus und awk bekommt ein leeres Programm."
+  },
+  {
+   "id": "awk-arrays",
+   "title": "awk: Zählen und Log-Analyse",
+   "body": [
+    "awk-Arrays sind **assoziativ** (Schlüssel → Wert) und brauchen keine Deklaration. `c[$2]++` erhöht den Zähler je Statuscode um eins; im `END`-Block gibst du mit `for (k in c)` alle aus. Die Reihenfolge ist undefiniert, also hänge `sort` an.",
+    "Das Muster lässt sich mit Pipes kombinieren: `ps aux | awk 'NR>1 {print $1}' | sort | uniq -c` zeigt, wie viele Prozesse jeder Benutzer hat. Auch `cut -d' ' -f2 access.log | sort | uniq -c` funktioniert; bei unregelmäßigen Leerzeichen ist awk aber sicherer."
+   ],
+   "commands": [
+    {"cmd": "awk '{c[$2]++} END {for (k in c) print k, c[k]}'", "what": "Zählt, wie oft jeder Wert im zweiten Feld vorkommt.", "where": "Beim Zählen nach HTTP-Statuscode oder IP.", "why": "Fasst ein Log mit einem Befehl zusammen.", "example": "awk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort"},
+    {"cmd": "awk '{print $NF}'", "what": "Gibt das letzte Feld jeder Zeile aus.", "where": "Bei Zeilen mit wechselnder Feldanzahl.", "why": "Du musst die Nummer der letzten Spalte nicht kennen.", "example": "awk '{print $NF}' access.log"},
+    {"cmd": "awk 'BEGIN {...}'", "what": "Läuft einmal, bevor die Datei gelesen wird.", "where": "Für Kopfzeilen oder Startwerte.", "why": "Fügt dem Bericht eine Überschrift hinzu.", "example": "awk 'BEGIN {print \"ip status\"} {print $1, $2}' access.log"},
+    {"cmd": "awk '{printf ...}'", "what": "Formatierte Ausgabe im C-Stil.", "where": "Bei ausgerichteten oder Dezimalzahlen.", "why": "`print` überlässt Format und Zeilenende nicht dir.", "example": "awk -F, 'NR>1 {printf \"%s earns %d\\n\", $1, $3}' employees.csv"}
+   ],
+   "tip": "Durchschnitt: `END {print s/(NR-1)}` (mit Kopfzeile) oder ein eigener Zähler (`n++`). Bei leerer Datei Division durch null beachten."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Gib mit sed nur Zeile 2 von `pets.txt` aus: `sed -n '2p' pets.txt`.", "hint": "`-n` schaltet die automatische Ausgabe ab, `2p` druckt nur Zeile 2. Der Simulator führt sed nicht aus ('not supported'); dein Befehl wird trotzdem erfasst."},
+  "t02": {"text": "Gib mit awk nur die erste Spalte (die IP-Adressen) von `access.log` aus.", "hint": "`awk '{print $1}' access.log` — das Programm gehört in einfache Anführungszeichen."},
+  "t03": {"text": "Vorhersage: Welche Namen gibt `cut -d, -f1 employees.csv` aus (entspricht `awk -F, '{print $1}'`)? Erst überlegen, dann ausführen.", "hint": "Die erste Spalte ist die Kopfzeile `name` und vier Namen (anna, ben, cara, dan)."},
+  "t04": {"text": "Du änderst den Port in `server.conf`. Sichere zuerst mit `cp server.conf server.conf.bak`, dann `sed -i 's/8080/9090/' server.conf`.", "hint": "Reihenfolge zählt: erst Backup, dann `-i`. Alternativ legt `sed -i.bak` das Backup selbst an; hier muss aber die Datei `server.conf.bak` existieren."},
+  "t05": {"text": "Gib `server.conf` ohne Kommentarzeilen (beginnend mit `#`) aus: `sed '/^#/d' server.conf`.", "hint": "`^#` bedeutet # am Zeilenanfang, `d` entfernt die Zeile. Die Datei bleibt unverändert."},
+  "t06": {"text": "Fehlerhafter Befehl: `sed 's/usr/local/bin/opt/bin/' paths.txt` schlägt fehl, weil das `/` im Pfad mit dem Trennzeichen kollidiert. Korrigiere: ersetze `/usr/local` durch `/opt` (Trennzeichen `|`).", "hint": "`sed 's|/usr/local|/opt|' paths.txt`. Das erste Zeichen nach `s` ist das Trennzeichen; üblich sind `|`, `#` und `,`."},
+  "t07": {"text": "Vorhersage: Wie oft kommt die Abteilung `it` in der Ausgabe von `cut -d, -f2 employees.csv | sort | uniq -c` vor? Danach ausführen.", "hint": "`uniq -c` setzt jeder verschiedenen Zeile die Anzahl voran. Die Kopfzeile `dept` zählt als eigene Zeile."},
+  "t08": {"text": "Mini-Projekt: Lege den Ordner `reports` an, kopiere `employees.csv` hinein und berechne in der Kopie das Durchschnittsgehalt mit awk (Kopfzeile überspringen): `awk -F, 'NR>1 {s+=$3; n++} END {print s/n}' reports/employees.csv`.", "hint": "Schritte: `mkdir reports`, `cp employees.csv reports/`, dann awk. `NR>1` überspringt die Kopfzeile, `n` zählt die Zeilen."},
+  "t09": {"text": "Mini-Projekt: Lege den Ordner `backup` an, kopiere `app.conf` nach `backup/app.conf` und ersetze dann in `app.conf` mit `sed -i` `mode=dev` durch `mode=prod`.", "hint": "`mkdir backup`, `cp app.conf backup/app.conf`, `sed -i 's/mode=dev/mode=prod/' app.conf`. Das Backup VOR `-i` anlegen."},
+  "t10": {"text": "Vorhersage: Welches Tier gibt `sed -n '3p' pets.txt` aus? Prüfe mit dem gleichwertigen `head -n 3 pets.txt | tail -n 1`.", "hint": "Zeilen: cat, dog, bird, cat, fish. `head -n 3` nimmt die ersten drei, `tail -n 1` die letzte davon."},
+  "t11": {"text": "Challenge: Wähle mit awk aus `access.log` nur die Zeilen mit Statuscode 404 (Bedingung: zweites Feld ist 404).", "hint": "`awk '$2 == 404' access.log` — das Muster allein genügt; ohne Aktion wird die Zeile ausgegeben."},
+  "t12": {"text": "Challenge: Mache in `employees.csv` mit einem sed-Aufruf zwei Ersetzungen (mit zwei `-e`): `it` zu `IT`, `hr` zu `HR`. Nur ausgeben, Datei nicht ändern.", "hint": "`sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv`."},
+  "t13": {"text": "Debuggen: Ein falsches `sed -i` hat `db.conf` zerstört (nur `host=` ist übrig). Das Backup `db.conf.bak` liegt noch da. Stelle die Datei aus dem Backup wieder her.", "hint": "`cp db.conf.bak db.conf`. Prüfe mit `cat db.conf`: `host=localhost` und `port=5432`."},
+  "t14": {"text": "Ticket #3601 — 'Für den Live-Server brauchen wir eine saubere Konfiguration: Erstelle eine Kopie ohne Kommentarzeilen als `server.live`; das Original soll als `server.conf.orig` aufbewahrt werden.' (Im Simulator gibt es kein sed: erzeuge die Ausgabe ohne Kommentare mit `grep -v`; auf einem echten System macht `sed '/^#/d'` dasselbe.)", "hint": "`cp server.conf server.conf.orig` und `grep -v '^#' server.conf > server.live`."},
+  "t15": {"text": "Ticket #3602 — 'Schreibe die Verteilung der Statuscodes aus access.log in die Datei `status_report.txt`.' (Pro Code eine Anzahl, z. B. `3 200`.)", "hint": "Zweite Spalte holen, sortieren, zählen: `cut -d' ' -f2 access.log | sort | uniq -c > status_report.txt`. Ein awk-Array täte dasselbe."},
+  "t16": {"text": "Ticket #3603 — 'Berechne die Gehaltssumme der IT-Abteilung.' Schreibe es mit awk: Trennzeichen `,`, Zeilen mit `it` im zweiten Feld, drittes Feld aufsummieren, mit `END` ausgeben.", "hint": "`awk -F, '$2==\"it\" {s+=$3} END {print s}' employees.csv` (Ergebnis 11300)."}
+ },
+ "vm": {
+  "intro": "Führe diese Befehle auf deiner eigenen Ubuntu/Rocky/Alma-VM aus. Alles bleibt in `~/lab` und in deinen eigenen Testdateien. sed und awk sind auf diesen Distributionen vorinstalliert (GNU-Versionen).",
+  "tasks": {
+   "v01": {
+    "title": "Testdateien anlegen",
+    "text": "Lege in `~/lab` die folgenden vier Testdateien mit `printf` an und füge die Zeilenzahlen ein.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/lab && cd ~/lab\nprintf 'cat\\ndog\\nbird\\ncat\\nfish\\n' > pets.txt\nprintf 'name,dept,salary\\nanna,it,5200\\nben,hr,4100\\ncara,it,6100\\ndan,ops,3900\\n' > employees.csv\nprintf '# server config\\nport=8080\\n# debug off\\ndebug=false\\nhost=localhost\\n' > server.conf\nprintf '10.0.0.1 200\\n10.0.0.2 404\\n10.0.0.1 200\\n10.0.0.3 500\\n10.0.0.2 200\\n' > access.log\nwc -l pets.txt employees.csv server.conf access.log", "expected": "  5 pets.txt\n  5 employees.csv\n  5 server.conf\n  5 access.log\n 20 total"}
+    ],
+    "differs": ["Ist die Zeilenzahl nicht 5, fehlt bei einem `printf` etwas oder ist zu viel; prüfe die Datei mit `cat` und führe den Befehl erneut aus.", "Siehst du ein echtes `n` statt `\\n`, prüfe die einfachen Anführungszeichen."]
+   },
+   "v02": {
+    "title": "sed: ersetzen, wählen, löschen",
+    "text": "Führe drei sed-Befehle aus. Die Dateien bleiben unverändert, nur die Ausgabe ändert sich. Füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nsed 's/cat/hamster/' pets.txt\nsed -n '2,3p' pets.txt\nsed '1d' employees.csv", "expected": "hamster\ndog\nbird\nhamster\nfish\ndog\nbird\nanna,it,5200\nben,hr,4100\ncara,it,6100\ndan,ops,3900"}
+    ],
+    "differs": ["Zeigt `cat pets.txt` weiterhin `cat`, ist das richtig: ohne `-i` ändert sich die Datei nicht.", "Keine Ausgabe? Vielleicht ist `cd ~/lab` fehlgeschlagen; wiederhole v01."]
+   },
+   "v03": {
+    "title": "sed -i mit Backup",
+    "text": "Ändere den Port in `server.conf` mit Backup und zeige den Unterschied. Füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "cd ~/lab\n# GNU sed (Ubuntu/Rocky/Alma); -i.bak legt ein Backup an\nsed -i.bak 's/8080/9090/' server.conf\ngrep port server.conf\ndiff server.conf.bak server.conf", "expected": "port=9090\n2c2\n< port=8080\n---\n> port=9090"}
+    ],
+    "differs": ["Auf macOS/BSD funktioniert `-i.bak` ebenfalls; ohne Endung brauchst du `sed -i '' ...`.", "Ist die `diff`-Ausgabe leer, wurde nichts geändert; prüfe die Schreibweise `8080`.", "Zurückholen: `cp server.conf.bak server.conf`."]
+   },
+   "v04": {
+    "title": "awk: Spalte, Bedingung, Summe",
+    "text": "Führe drei awk-Befehle auf `employees.csv` aus: zwei Spalten, Gehälter über 5000, Summe und Durchschnitt.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nawk -F, 'NR>1 {print $1, $3}' employees.csv\nawk -F, 'NR>1 && $3 > 5000 {print $1}' employees.csv\nawk -F, 'NR>1 {s+=$3} END {printf \"total=%d avg=%.1f\\n\", s, s/(NR-1)}' employees.csv", "expected": "anna 5200\nben 4100\ncara 6100\ndan 3900\nanna\ncara\ntotal=19300 avg=4825.0"}
+    ],
+    "differs": ["Das Dezimaltrennzeichen kann je nach Locale `4825,0` sein.", "Bei `total=0` fehlt `-F,` oder die Shell hat `$3` ausgewertet; setze das Programm in einfache Anführungszeichen."]
+   },
+   "v05": {
+    "title": "Log-Analyse: Zählen",
+    "text": "Zähle die Statuscodes in `access.log` mit einem awk-Array, finde die 404-Zeile mit sed und füge die Ausgabe ein. Optional: laufende Prozesse pro Benutzer zählen.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nawk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort\nsed -n '/404/p' access.log\nps aux | awk 'NR>1 {print $1}' | sort | uniq -c | sort -rn | head -3", "expected": "200 3\n404 1\n500 1\n10.0.0.2 404\n    120 root\n     35 student\n      4 www-data"}
+    ],
+    "differs": ["Zahlen und Benutzer des letzten Befehls hängen von deinem System ab; wichtig ist das Format `Anzahl Benutzer` pro Zeile.", "Die Reihenfolge bei `for (k in c)` ist undefiniert; deshalb das `sort`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Was macht `sed 's/a/b/' file` ohne das Flag `g`?", "options": ["Ersetzt alle a in der Datei durch b", "Ersetzt in jeder Zeile nur das erste a durch b", "Ändert nur die erste Zeile", "Ändert die Datei direkt"], "explain": "Ohne `g` wird pro Zeile nur der erste Treffer ersetzt; die Datei ändert sich ohne `-i` gar nicht."},
+  "q2": {"q": "Was ist der sicherste Weg, eine Konfigurationsdatei direkt zu ändern?", "options": ["`sed -n 's/a/b/p' file`", "`sed -e 's/a/b/' file`", "`sed -i 's/a/b/' file` (ohne Backup)", "`sed -i.bak 's/a/b/' file`"], "explain": "`-i.bak` sichert das Original als `file.bak`; `-i` allein ist nicht umkehrbar."},
+  "q3": {"q": "Was gibt `awk -F, '{print $NF}' employees.csv` aus?", "options": ["Das erste Feld jeder Zeile", "Die Feldanzahl der Zeile", "Das letzte Feld jeder Zeile", "Die ganze Zeile"], "explain": "`NF` ist die Feldanzahl, `$NF` der Wert des letzten Feldes."},
+  "q4": {"q": "Wozu dient `NR>1` in `awk -F, 'NR>1 {s+=$3} END {print s}'`?", "options": ["Überspringt die erste Zeile (Kopfzeile)", "Verarbeitet nur die erste Zeile", "Setzt die Feldanzahl auf 1", "Sortiert die Datei"], "explain": "`NR` ist die Zeilennummer; `NR>1` führt die Aktion für alle Zeilen außer der Kopfzeile aus."}
+ },
+ "summary": [
+  "`sed 's/old/new/g'` ersetzt; `-n` + `p` wählt aus, `d` löscht. Ohne `-i` ändert sich die Datei nie.",
+  "`sed -i` ist dauerhaft: nutze `-i.bak` für ein Backup. Auf macOS brauchst du `-i ''`.",
+  "awk zerlegt Zeilen in Felder: `$1`, `$NF`, `-F,`; gerechnet wird mit `NR`, `NF`, `BEGIN`, `END`.",
+  "Mit dem assoziativen Array `c[$2]++` zählst du Werte in Logs; sortiere die Ausgabe mit `sort`.",
+  "Setze Programme immer in einfache Anführungszeichen und prüfe das Ergebnis erst auf dem Bildschirm."
+ ],
+ "glossary": [
+  {"term": "sed", "meaning": "Stream-Editor, der Text zeilenweise verarbeitet."},
+  {"term": "awk", "meaning": "Textverarbeitungssprache, die Zeilen in Felder zerlegt und Bedingungen, Berechnungen und Berichte erlaubt."},
+  {"term": "Feld (field)", "meaning": "Teil einer Zeile, den awk am Trennzeichen abtrennt: `$1`, `$2`, … `$NF`."},
+  {"term": "Adresse (address)", "meaning": "Nummer, Bereich oder Regex, die festlegt, auf welche Zeilen ein sed-Befehl wirkt."},
+  {"term": "In-place-Bearbeitung", "meaning": "Mit `sed -i` wird das Ergebnis in die Datei selbst statt auf den Bildschirm geschrieben."},
+  {"term": "Assoziatives Array", "meaning": "awk-Array mit Schlüssel-Wert-Paaren; typisch für Zähler."},
+  {"term": "Regex", "meaning": "Regulärer Ausdruck, der ein Textmuster beschreibt; sed und awk nutzen ihn zum Suchen."}
+ ]
+}

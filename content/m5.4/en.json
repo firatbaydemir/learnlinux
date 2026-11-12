@@ -1,0 +1,83 @@
+{
+  "title": "Job Control",
+  "lead": "Manage shell jobs in the foreground or background, cancel with Ctrl+C, pause with Ctrl+Z, and use nohup when appropriate.",
+  "objectives": [
+    "You distinguish foreground, background, and stopped shell jobs.",
+    "You manage the current terminal's jobs with `jobs`, `bg`, and `fg`.",
+    "You understand what `nohup` does and what it does not replace."
+  ],
+  "sections": [
+    {
+      "id": "signals",
+      "title": "Foreground, Ctrl+C, and Ctrl+Z",
+      "body": [
+        "A foreground command occupies the terminal. `Ctrl+C` usually sends SIGINT to cancel it; `Ctrl+Z` sends SIGTSTP and **pauses** the job. A stopped job is not finished and may still hold resources.",
+        "Adding `&` to the end of a command starts it in the background. That does not make it independent of the terminal; closing the session can still affect it."
+      ],
+      "commands": [
+        {"cmd": "sleep 300", "what": "Waits for five minutes in the foreground and keeps the terminal busy.", "where": "To safely try how a foreground job behaves.", "why": "It demonstrates the difference between Ctrl+C and Ctrl+Z.", "example": "sleep 300", "nosim": true},
+        {"cmd": "sleep 300 &", "what": "Starts the sleep command in the background.", "where": "When you want to keep entering commands in the terminal.", "why": "The shell prints a job number and PID.", "example": "sleep 300 &", "nosim": true}
+      ],
+      "tip": "Do not forget a stopped job: find it with `jobs -l` and resume or stop it according to its purpose."
+    },
+    {
+      "id": "jobs",
+      "title": "jobs, bg, and fg",
+      "body": [
+        "`jobs -l` lists jobs only in the current shell session. `bg %1` resumes a job in the background; `fg %1` brings it to the foreground. `%1` is the shell job number from `jobs`, not a PID.",
+        "A background job may continue writing to the terminal. The shell reports when it finishes. Do not guess the job number; check `jobs` first."
+      ],
+      "commands": [
+        {"cmd": "jobs -l", "what": "Lists the current shell's jobs with their states and PIDs.", "where": "When looking for stopped or background jobs.", "why": "You can see the job number and state before choosing the correct job.", "example": "jobs -l", "nosim": true},
+        {"cmd": "bg %1 / fg %1", "what": "Resumes a selected job in the background or brings it to the foreground.", "where": "When resuming a job or reclaiming terminal control.", "why": "It changes how the same job interacts with the terminal.", "example": "bg %1", "nosim": true}
+      ],
+      "tip": "`jobs` gives the job number; `ps` or `jobs -l` shows the PID. They are not interchangeable."
+    },
+    {
+      "id": "nohup",
+      "title": "Session independence: nohup",
+      "body": [
+        "`nohup` starts a command so that it ignores SIGHUP, which can help it continue after a session closes. A common pattern redirects output to a file and starts the command with `&`.",
+        "`nohup` is not a job monitor or service manager. Use `systemd` for long-running production services; use `tmux` or `screen` for interactive work across disconnected SSH sessions. Stop test jobs and inspect their output."
+      ],
+      "commands": [
+        {"cmd": "nohup command > job.log 2>&1 &", "what": "Protects the command from SIGHUP, redirects output to a file, and starts it in the background.", "where": "When a short, non-interactive job needs to outlive a session.", "why": "Terminal output is retained and the shell is freed.", "example": "nohup ./backup.sh > backup.log 2>&1 &", "nosim": true},
+        {"cmd": "tail -n 20 job.log", "what": "Shows the job's most recent output lines.", "where": "When checking progress or error messages.", "why": "You can inspect the log without bringing the job to the foreground.", "example": "tail -n 20 backup.log"}
+      ],
+      "warn": "Test only in your own VM with a short job. `nohup` does not stop the job automatically; track its PID and log file."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Find the state of the `sleep` job in the snapshot.", "hint": "`grep sleep ~/lab/jobs_snapshot.txt` should show `Stopped`."},
+    "t02": {"text": "Show the current state of the `backup.sh` job.", "hint": "The line from `grep backup ~/lab/jobs_snapshot.txt` contains `Running`."},
+    "t03": {"text": "Predict how many jobs are stopped in the snapshot, then verify with `grep -c`.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` counts them."},
+    "t04": {"text": "Save resuming job 1 with `bg %1` and then checking with `jobs -l` to `~/lab/job_plan.txt`.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt`"},
+    "t05": {"text": "Add bringing the job to the foreground and cleaning it up when finished to the plan.", "hint": "Add `fg %1` and `kill %1` to the file."},
+    "t06": {"text": "Write a nohup example to `~/lab/persistent_job.txt` that redirects output to `backup.log`.", "hint": "`nohup ./backup.sh > backup.log 2>&1 &`"},
+    "t07": {"text": "Add a `jobs -l` check and a nohup note to ticket #5401 to assess whether the job is tied to the terminal session.", "hint": "Save the short note in `~/lab/ticket_5401.txt`."}
+  },
+  "vm": {
+    "intro": "Run the examples in your own test VM. A shell job belongs to that shell session; stop test jobs you no longer need.",
+    "tasks": {
+      "v01": {"title": "Stop a job", "text": "Start `sleep` in the foreground. Press `Ctrl+Z` while it runs, then check the shell job with the command below.", "blocks": [{"cmd": "sleep 300\n# After pressing Ctrl+Z:\njobs -l", "expected": "[1]+ Stopped sleep 300"}], "differs": ["The job number may not be 1; use your own `jobs -l` output.", "Make sure your terminal emulator sends Ctrl+Z to the shell."]},
+      "v02": {"title": "Background and clean up", "text": "First verify the job number with `jobs -l`. Replace `%1` in the example with the correct number, resume it in the background, and then clean it up.", "blocks": [{"cmd": "bg %1\njobs -l\nkill %1", "expected": "The job appears as Running."}], "differs": ["Replace `%1` if your job number is different.", "`kill %1` signals this shell job; use it only for the test `sleep` job."]},
+      "v03": {"title": "A short nohup job", "text": "Redirect the output of a short command with `nohup`, wait for it to finish, and read the file.", "blocks": [{"cmd": "nohup sh -c 'sleep 2; echo done' > ~/job-output.txt 2>&1 &\nsleep 3\ncat ~/job-output.txt", "expected": "done"}], "differs": ["If the command is still running, wait a few seconds and run `cat ~/job-output.txt` again.", "If you get a path or permission error, make sure the destination is inside your home directory."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "What does `Ctrl+Z` do to a running job?", "options": ["Permanently deletes it", "Pauses it", "Starts it as root", "Closes the terminal"], "explain": "Ctrl+Z usually sends SIGTSTP; the job pauses but is not complete."},
+    "q2": {"q": "What does `%1` mean in `bg %1`?", "options": ["The shell job number", "PID 1", "One second", "The nice value"], "explain": "The percent-prefixed number is the shell job number shown by `jobs`."},
+    "q3": {"q": "What does `nohup` provide?", "options": ["Turns the job into a systemd service", "Schedules the job automatically", "Limits memory use", "Helps protect against SIGHUP"], "explain": "nohup starts a command to ignore SIGHUP; it is not a service manager by itself."},
+    "q4": {"q": "What is the difference between a job number and a PID?", "options": ["There is no difference", "Only root has job numbers", "The job number belongs to the shell; the PID belongs to the process", "A PID exists only for background jobs"], "explain": "A shell job number belongs to the current session; a PID identifies the system process."}
+  },
+  "summary": [
+    "`Ctrl+C` usually cancels a job; `Ctrl+Z` pauses it.",
+    "`jobs`, `bg`, and `fg` manage the current shell's jobs; `%N` is a shell job number.",
+    "`nohup` protects against SIGHUP but does not replace a service manager; redirect output and monitor the job."
+  ],
+  "glossary": [
+    {"term": "foreground", "meaning": "An interactive job that owns terminal control."},
+    {"term": "background job", "meaning": "A job running in the shell without terminal control."},
+    {"term": "SIGHUP", "meaning": "A signal processes may receive when a session or terminal connection closes."}
+  ]
+}

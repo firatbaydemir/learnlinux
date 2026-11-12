@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4.4 Permission Basics — Linux Foundations Academy</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","en")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="4.4">
+<header class="top"><a class="brand" href="index.html">Linux Foundations Academy</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (optional)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-4.4.html" hreflang="tr" lang="tr" data-switch="tr">TR</a><a href="../de/modul-4.4.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-4.4.html" hreflang="en" lang="en" data-switch="en" aria-current="true">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Theme" aria-label="Theme">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Overall progress"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#read">Reading ls -l output</a></li><li><a href="#meaning">r, w, x: on files and on directories</a></li><li><a href="#chmod">chmod: changing permissions</a></li><li><a href="#owner">chown and chgrp: owner and group</a></li><li><a href="#umask">umask: default permissions</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>Contents</summary><ol><li><a href="#read">Reading ls -l output</a></li><li><a href="#meaning">r, w, x: on files and on directories</a></li><li><a href="#chmod">chmod: changing permissions</a></li><li><a href="#owner">chown and chgrp: owner and group</a></li><li><a href="#umask">umask: default permissions</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> Level 4</p>
+<h1><span class="module-id">4.4</span> Permission Basics</h1>
+<p class="lead">Read <code>ls -l</code> output and manage file and directory permissions correctly with <code>chmod</code>, <code>chown</code> and <code>umask</code>.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>What will you learn in this module?</h2><ul><li>You read the type character, the three permission triplets, owner and group in <code>ls -l</code>.</li><li>You explain that r, w, x mean different things for files and for directories.</li><li>You know that deleting a file depends on the w+x permission of the <strong>parent directory</strong>, not of the file.</li><li>You set permissions with <code>chmod</code> (octal and symbolic) and change ownership with <code>chown</code>/<code>chgrp</code>.</li><li>You show by calculation that <code>umask</code> is a bit mask, not a subtraction.</li></ul></section>
+<section id="read"><h2>Reading ls -l output</h2>
+<p><code>ls -l</code> prints one line per file: <code>-rw-r----- 1 student devs 120 Nov 12 10:00 report.txt</code>. The first character is the <strong>type</strong>: <code>-</code> file, <code>d</code> directory, <code>l</code> symbolic link. The next nine characters are three triplets: <strong>owner (u)</strong>, <strong>group (g)</strong>, <strong>others (o)</strong>. Each triplet is <code>rwx</code> for read, write, execute; a missing permission shows as <code>-</code>.</p>
+<p>The two names after the number are owner and group (<code>student devs</code>); the <code>1</code> before them is the hard link count. The system checks in order: if you are the owner, only the owner triplet applies; otherwise, if you are in the group, the group triplet applies; otherwise the others triplet. <strong>root</strong> and processes with relevant capabilities can bypass many discretionary access-control (DAC) checks; other controls such as SELinux or a read-only mount may still deny access.</p>
+<p><code>id</code> shows your groups. A new group membership only reaches your process after a fresh login (or with <code>newgrp</code>).</p>
+<article class="cmd"><h3><code>ls -l</code></h3><dl><dt>What is it for?</dt><dd>Lists files with type, permissions, owner, group, size and date.</dd><dt>Where is it used?</dt><dd>First stop for any permission problem.</dd><dt>Why does it matter?</dt><dd>Shows at a glance who may do what.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -l" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -l">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ls -ld</code></h3><dl><dt>What is it for?</dt><dd>Shows the permissions of the directory itself (not its contents).</dd><dt>Where is it used?</dt><dd>When checking directory permissions.</dd><dt>Why does it matter?</dt><dd><code>ls -l shared</code> lists the contents; for the directory itself you need <code>-d</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> shared</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -ld shared" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -ld shared">Copy</button></div></div></article>
+<article class="cmd"><h3><code>stat</code></h3><dl><dt>What is it for?</dt><dd>Shows file details; permissions in octal and symbolic form.</dd><dt>Where is it used?</dt><dd>When you want to verify the octal value.</dd><dt>Why does it matter?</dt><dd>No need to convert between <code>ls -l</code> and octal in your head.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">stat</span> secret.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="stat secret.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="stat secret.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>id</code></h3><dl><dt>What is it for?</dt><dd>Shows user and group IDs.</dd><dt>Where is it used?</dt><dd>For the question &#x27;why can&#x27;t I access this?&#x27;.</dd><dt>Why does it matter?</dt><dd>Determines which triplet applies to you.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">id</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="id" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="id">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Split the permission string into groups of three: <code>rw- r-- ---</code> means owner reads and writes, group reads, others nothing.</p></aside>
+</section>
+<section id="meaning"><h2>r, w, x: on files and on directories</h2>
+<p><strong>On files:</strong> <code>r</code> reads the content, <code>w</code> changes the content, <code>x</code> runs the file as a program. New files are <strong>never created executable</strong>; for <code>./script.sh</code> you first need <code>chmod +x</code>.</p>
+<p><strong>On directories:</strong> <code>r</code> lists the names, <code>x</code> allows entering and reaching entries by name (<code>cd</code>, <code>cat vault/data.txt</code>), <code>w</code> allows creating, deleting and renaming entries. <code>w</code> alone is useless; <strong>w needs x too</strong>. To reach a path you need <strong>x on every directory</strong> along it.</p>
+<p><strong>Key rule:</strong> to delete or move a file, the file&#x27;s own permissions do not matter; you need <strong>w+x on the parent directory</strong>. File permissions only control reading and writing the content. So a <code>644</code> file inside a <code>555</code> directory cannot be deleted, and neither can a <code>777</code> file there.</p>
+<article class="cmd"><h3><code>cat</code></h3><dl><dt>What is it for?</dt><dd>Reads file content; needs r on the file and x on the directories in the path.</dd><dt>Where is it used?</dt><dd>When testing read permission.</dd><dt>Why does it matter?</dt><dd>Unauthorized reads stop with <code>Permission denied</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> secret.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cat secret.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="cat secret.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>rm</code></h3><dl><dt>What is it for?</dt><dd>Deletes a file; success depends on w+x of the parent directory.</dd><dt>Where is it used?</dt><dd>When understanding delete failures.</dd><dt>Why does it matter?</dt><dd>The directory permission decides, not the file permission.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="rm locked/old.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="rm locked/old.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>cd</code></h3><dl><dt>What is it for?</dt><dd>Enters a directory; needs x on the directory.</dd><dt>Where is it used?</dt><dd>For access problems.</dd><dt>Why does it matter?</dt><dd>Without x you cannot get in.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> vault</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cd vault" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="cd vault">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>When you say &#x27;I can&#x27;t delete it&#x27;, don&#x27;t look at the file; look at the <strong>directory</strong> with <code>ls -ld .</code>.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p><code>chmod -R 777</code> is not a fix. It gives everyone write and execute rights, hides the real cause and opens a security hole. First find the real reason with <code>ls -l</code> and <code>id</code>.</p></aside>
+</section>
+<section id="chmod"><h2>chmod: changing permissions</h2>
+<p>In octal notation you add <strong>r=4, w=2, x=1</strong>: <code>7</code>=rwx, <code>6</code>=rw-, <code>5</code>=r-x, <code>4</code>=r--, <code>0</code>=---. The three digits are for owner, group, others. Common values: <code>644</code> (regular file), <code>755</code> (program and directory), <code>600</code> (private file), <code>700</code> (private directory), <code>664</code> and <code>775</code> (group work).</p>
+<p>In symbolic notation you write who (<code>u</code>, <code>g</code>, <code>o</code>, <code>a</code>), operation (<code>+</code>, <code>-</code>, <code>=</code>) and permission (<code>r</code>, <code>w</code>, <code>x</code>): <code>chmod g+w,o-rx shared</code>. <strong>Capital <code>X</code></strong> sets x only on directories and on files that are already executable; <code>chmod -R u=rwX,go=rX data</code> makes directories 755 and previously non-executable files 644, while preserving x on files that were already executable.</p>
+<p>Only the <strong>owner</strong> (or root) may change permissions; on someone else&#x27;s file you get <code>Operation not permitted</code>.</p>
+<article class="cmd"><h3><code>chmod 640</code></h3><dl><dt>What is it for?</dt><dd>Sets octal permissions: owner rw-, group r--, others ---.</dd><dt>Where is it used?</dt><dd>When you define permissions in one step.</dd><dt>Why does it matter?</dt><dd>The result is explicit and repeatable.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 640 notes.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod 640 notes.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod 640 notes.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>chmod +x</code></h3><dl><dt>What is it for?</dt><dd>Adds the execute permission.</dd><dt>Where is it used?</dt><dd>When making a script executable.</dd><dt>Why does it matter?</dt><dd>Changes only x, leaves other bits (subject to umask).</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x script.sh</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod +x script.sh" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod +x script.sh">Copy</button></div></div></article>
+<article class="cmd"><h3><code>chmod g+w,o-rx</code></h3><dl><dt>What is it for?</dt><dd>Symbolic: group gains write, others lose read and execute.</dd><dt>Where is it used?</dt><dd>For small corrections.</dd><dt>Why does it matter?</dt><dd>Changes only the bits you name.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> g+w,o-rx shared</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod g+w,o-rx shared" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod g+w,o-rx shared">Copy</button></div></div></article>
+<article class="cmd"><h3><code>chmod -R u=rwX,go=rX</code></h3><dl><dt>What is it for?</dt><dd>Fixes a tree recursively: files 644, directories 755.</dd><dt>Where is it used?</dt><dd>For bulk corrections.</dd><dt>Why does it matter?</dt><dd>Thanks to <code>X</code>, files don&#x27;t get needless x.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> <span class="tf">-R</span> u=rwX,go=rX data</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod -R u=rwX,go=rX data" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod -R u=rwX,go=rX data">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Look at the target with <code>ls -l</code> first; with <code>-R</code>, double-check the end of the path.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p>Running <code>chmod -R</code> with a wrong value on <code>/</code> or <code>~</code> breaks the system or your home (e.g. SSH key permissions, sudo). In the VM take a <strong>snapshot</strong> first and work only inside the practice folder.</p></aside>
+</section>
+<section id="owner"><h2>chown and chgrp: owner and group</h2>
+<p>Every file has an owner and a group. <strong>Only root may change the owner</strong> (<code>sudo chown</code>). A regular user may only set a file&#x27;s group to a group they belong to; in the simulator we use <code>sudo chgrp</code> for that.</p>
+<p><code>chown alice:devs report.txt</code> sets owner and group together. A typical team setup: group <code>devs</code>, mode <code>660</code> on files or <code>770</code> on directories; only <code>devs</code> members get access. Finer rules (per-user permissions) use ACLs (<code>getfacl</code>/<code>setfacl</code>); those come in later modules.</p>
+<article class="cmd"><h3><code>sudo chown</code></h3><dl><dt>What is it for?</dt><dd>Changes the owner (and optionally the group).</dd><dt>Where is it used?</dt><dd>When handing a file over to another user.</dd><dt>Why does it matter?</dt><dd>Only root can do this.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chown alice:devs report.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sudo chown alice:devs report.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="sudo chown alice:devs report.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>sudo chgrp</code></h3><dl><dt>What is it for?</dt><dd>Changes only the group.</dd><dt>Where is it used?</dt><dd>When assigning a group to a shared directory.</dd><dt>Why does it matter?</dt><dd>Keeps the owner and controls group access.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chgrp devs team.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="sudo chgrp devs team.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="sudo chgrp devs team.txt">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Be careful with <code>chown -R</code> on real systems too; verify the path with <code>ls -ld</code> first.</p></aside>
+</section>
+<section id="umask"><h2>umask: default permissions</h2>
+<p>New files <strong>start</strong> from <code>666</code>, new directories from <code>777</code>; <code>umask</code> removes bits using a <strong>mask</strong>: <strong>new mode = base &amp; ~umask</strong>. This is not subtraction. Examples (file, base 666): umask <code>022</code> → <code>644</code>; <code>027</code> → <code>640</code>; <code>077</code> → <code>600</code>; <code>002</code> → <code>664</code>.</p>
+<p>The difference shows when the umask has bits the base lacks: for <code>025</code>, <code>666 &amp; ~025 = 642</code>, while subtraction would give <code>641</code> (wrong). For <code>001</code> the result is <code>666</code>, subtraction would give <code>665</code>. Because x is not in the base, files are never created executable.</p>
+<p><code>umask</code> is <strong>per process</strong>: it applies only in that shell and the programs started from it. To make it permanent, put it in <code>~/.bashrc</code> (user) or <code>/etc/profile</code> (system).</p>
+<article class="cmd"><h3><code>umask</code></h3><dl><dt>What is it for?</dt><dd>Shows the current mask in octal (e.g. <code>0022</code>).</dd><dt>Where is it used?</dt><dd>To understand permissions of new files.</dd><dt>Why does it matter?</dt><dd>Explains why files are created as 644.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">umask</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="umask" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="umask">Copy</button></div></div></article>
+<article class="cmd"><h3><code>umask -S</code></h3><dl><dt>What is it for?</dt><dd>Shows the mask symbolically: <code>u=rwx,g=rx,o=rx</code>.</dd><dt>Where is it used?</dt><dd>When you want to see the allowed bits directly.</dd><dt>Why does it matter?</dt><dd>Shows what is granted instead of what is removed.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> <span class="tf">-S</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask -S">Copy</button></div></div></article>
+<article class="cmd"><h3><code>umask 027</code></h3><dl><dt>What is it for?</dt><dd>Sets the mask for this shell: new files 640, directories 750.</dd><dt>Where is it used?</dt><dd>When working closed to outsiders.</dd><dt>Why does it matter?</dt><dd>Affects every new file that follows.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 027</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="umask 027" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="umask 027">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>In shared project folders use <code>umask 002</code>: new files <code>664</code>, directories <code>775</code>.</p></aside>
+</section>
+<section id="vm"><h2>Do it on your own VM <span class="gcount" data-g="vm"></span></h2><p>The real practice happens on real Linux: run the commands in your own virtual machine (VirtualBox, UTM or WSL) and compare the output.</p><p>Work in your own VM inside the <code>~/permlab</code> practice folder. Paste the commands in order and paste the output on this page. Take a snapshot before destructive steps.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>Read permissions</h3><span class="status" aria-hidden="true"></span></header><p>Read the permission strings of system files and check your identity.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/etc/passwd</span> <span class="tp">/etc/shadow</span> <span class="tp">/usr/bin/passwd</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">/tmp</span> <span class="tp">/home</span></span>
+<span class="ln"><span class="tk">id</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l /etc/passwd /etc/shadow /usr/bin/passwd
+ls -ld /tmp /home
+id">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">-rw-r--r-- 1 root root  2345 Nov 12 10:00 /etc/passwd
+-rw-r----- 1 root shadow 1234 Nov 12 10:00 /etc/shadow
+-rwsr-xr-x 1 root root 59976 Nov 12 10:00 /usr/bin/passwd
+drwxrwxrwt 15 root root 4096 Nov 12 10:00 /tmp</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>On Rocky/Alma <code>/etc/shadow</code> may show <code>----------</code>; that is normal (root bypasses the check).</li><li><code>s</code> (setuid) and <code>t</code> (sticky) are special bits; for now just treat them as &#x27;x-like&#x27;.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Practice with chmod</h3><span class="status" aria-hidden="true"></span></header><p>Create the practice folder and a file, set the mode to <code>640</code> and show the result.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">touch</span> notes.txt</span>
+<span class="ln"><span class="tk">chmod</span> 640 notes.txt</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> notes.txt</span>
+<span class="ln"><span class="tk">stat</span> <span class="tf">-c</span> <span class="ts">&#x27;%a %A %U:%G&#x27;</span> notes.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/permlab
+cd ~/permlab
+touch notes.txt
+chmod 640 notes.txt
+ls -l notes.txt
+stat -c &#x27;%a %A %U:%G&#x27; notes.txt">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">-rw-r----- 1 student student 0 Nov 12 10:00 notes.txt
+640 -rw-r----- student:student</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>stat -c</code> exists only in GNU stat; it does not work on macOS/BSD, you can ignore it.</li><li>If your user is not <code>student</code>, you will see your own name; that is fine.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Deleting depends on directory permission</h3><span class="status" aria-hidden="true"></span></header><p>Set the directory to <code>555</code>, try to delete the file inside, then restore the directory permission.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">mkdir</span> locked</span>
+<span class="ln"><span class="tk">touch</span> <span class="tp">locked/old.txt</span></span>
+<span class="ln"><span class="tk">chmod</span> 555 locked</span>
+<span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> locked</span>
+<span class="ln"><span class="tk">chmod</span> 755 locked</span>
+<span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+<span class="ln"><span class="tk">ls</span> locked</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/permlab
+mkdir locked
+touch locked/old.txt
+chmod 555 locked
+rm locked/old.txt
+ls -ld locked
+chmod 755 locked
+rm locked/old.txt
+ls locked">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">rm: cannot remove &#x27;locked/old.txt&#x27;: Permission denied
+dr-xr-xr-x 2 student student 4096 Nov 12 10:00 locked</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>As root the delete succeeds because root bypasses permissions; test as a normal user.</li><li>The message may be translated (<code>Zugriff verweigert</code>, <code>Erişim engellendi</code>).</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>Effect of umask</h3><span class="status" aria-hidden="true"></span></header><p>Set the mask to <code>027</code> and look at the permissions of a new file and a new directory. Note: this change affects only this terminal session.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">umask</span></span>
+<span class="ln"><span class="tk">umask</span> 027</span>
+<span class="ln"><span class="tk">touch</span> f027.txt</span>
+<span class="ln"><span class="tk">mkdir</span> d027</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> f027.txt d027</span>
+<span class="ln"><span class="tk">umask</span> 022</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/permlab
+umask
+umask 027
+touch f027.txt
+mkdir d027
+ls -ld f027.txt d027
+umask 022">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">0022
+-rw-r----- 1 student student 0 Nov 12 10:00 f027.txt
+drwxr-x--- 2 student student 4096 Nov 12 10:00 d027</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>Your starting umask may be <code>0002</code> (Ubuntu with a per-user group); that is normal.</li><li>In a new terminal the old value returns: umask is per process.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>chown and cleanup</h3><span class="status" aria-hidden="true"></span></header><p>Make root the owner of the file, then delete the directory: since you may write to the parent directory, the root-owned file is deleted too.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">touch</span> owned.txt</span>
+<span class="ln"><span class="tk">sudo</span> chown root:root owned.txt</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> owned.txt</span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">rm</span> <span class="tf">-r</span> <span class="tp">~/permlab</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tp">~/permlab</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/permlab
+touch owned.txt
+sudo chown root:root owned.txt
+ls -l owned.txt
+cd ~
+rm -r ~/permlab
+ls ~/permlab">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">-rw-r--r-- 1 root root 0 Nov 12 10:00 owned.txt
+ls: cannot access &#x27;/home/student/permlab&#x27;: No such file or directory</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If <code>sudo</code> asks for a password, enter your own.</li><li>If <code>rm: remove write-protected regular file?</code> appears, type <code>y</code>: deleting the root-owned file depends on the directory permission, not the file permission.</li><li>Type the <code>rm -r</code> path carefully; never try it on <code>/</code> or <code>~</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Quick exercises (simulator)</h2><p>Optional: warm up before the VM, or practise without one, in the in-browser virtual terminal. Tasks are verified automatically.</p><p>Tasks get harder from warm-up to ticket. Badges show the difficulty.</p><p><button type="button" class="btn" data-openterm>&gt;_ Open terminal (optional)</button></p>
+<h3 class="kind k-warmup">Warm-up <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>List the permissions of the files in the <code>lab</code> folder with <code>ls -l</code>.</p><details><summary>Hint</summary><p>Read the first 10 characters of each line: type + three triplets.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Make <code>script.sh</code> executable with <code>chmod +x script.sh</code>.</p><details><summary>Hint</summary><p>Then check the x bits with <code>ls -l script.sh</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x script.sh</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod +x script.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Show the current mask with <code>umask</code>.</p><details><summary>Hint</summary><p>The default output is <code>0022</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Guided lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Run <code>chmod 640 notes.txt</code> so the owner has rw-, group r--, others ---.</p><details><summary>Hint</summary><p>6=rw-, 4=r--, 0=---.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 640 notes.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 640 notes.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Set the <code>shared</code> directory to <code>770</code> symbolically: add write for the group, remove read and execute from others (<code>chmod g+w,o-rx shared</code>).</p><details><summary>Hint</summary><p>Separate the two operations with a comma, no space.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> g+w,o-rx shared</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod g+w,o-rx shared">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Make <code>alice</code> the owner of <code>team.txt</code> with <code>sudo chown alice team.txt</code>.</p><details><summary>Hint</summary><p>Only root can change the owner, so <code>sudo</code> is needed.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chown alice team.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo chown alice team.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Set the group of <code>team.txt</code> to <code>devs</code> with <code>sudo chgrp devs team.txt</code>.</p><details><summary>Hint</summary><p><code>ls -l team.txt</code> should show <code>alice devs</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> chgrp devs team.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo chgrp devs team.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t08" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Set <code>umask 027</code>, then create a file with <code>touch new.txt</code>. What permissions does it get?</p><details><summary>Hint</summary><p>666 &amp; ~027 = 640.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 027</span>
+<span class="ln"><span class="tk">touch</span> new.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 027
+touch new.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Predict <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t09" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: <code>locked</code> is <code>555</code>, and <code>old.txt</code> inside is <code>644</code>. Does <code>rm locked/old.txt</code> work? Run it to check.</p><details><summary>Hint</summary><p>Deleting needs w on the directory; look with <code>ls -ld locked</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="rm locked/old.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d3">Hard</span></p><p>Predict: what mode does <code>predict.txt</code> get after <code>umask 025</code> and <code>touch predict.txt</code>? Calculate first (666 &amp; ~025), then run it and verify with <code>ls -l predict.txt</code>.</p><details><summary>Hint</summary><p>Subtraction gives 641; the correct mask calculation gives 642.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 025</span>
+<span class="ln"><span class="tk">touch</span> predict.txt</span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> predict.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 025
+touch predict.txt
+ls -l predict.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t11" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: does <code>./deploy.sh</code> run? Run it to check.</p><details><summary>Hint</summary><p>The file is 644 with no x bit: expect <code>Permission denied</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">./deploy.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="./deploy.sh">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Debug <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: <code>locked/old.txt</code> cannot be deleted. Fix the problem and delete the file.</p><details><summary>Hint</summary><p>Look at the directory, not the file: <code>chmod u+w locked</code>, then <code>rm</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> u+w locked</span>
+<span class="ln"><span class="tk">rm</span> <span class="tp">locked/old.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod u+w locked
+rm locked/old.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t13" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: <code>cat vault/data.txt</code> fails. Fix it and read the file.</p><details><summary>Hint</summary><p><code>vault</code> is <code>600</code>: no x, you cannot get in. <code>chmod u+x vault</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> u+x vault</span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">vault/data.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod u+x vault
+cat vault/data.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini project <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t14" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d2">Medium</span></p><p>Mini project: create a <code>team</code> directory with <code>plan.txt</code> inside; directory <code>770</code>, file <code>660</code>; set the directory&#x27;s group to <code>devs</code> with <code>sudo chgrp devs team</code>.</p><details><summary>Hint</summary><p>Order: <code>mkdir</code>, <code>touch</code>, two <code>chmod</code>, one <code>chgrp</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> team</span>
+<span class="ln"><span class="tk">touch</span> <span class="tp">team/plan.txt</span></span>
+<span class="ln"><span class="tk">chmod</span> 770 team</span>
+<span class="ln"><span class="tk">chmod</span> 660 <span class="tp">team/plan.txt</span></span>
+<span class="ln"><span class="tk">sudo</span> chgrp devs team</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir team
+touch team/plan.txt
+chmod 770 team
+chmod 660 team/plan.txt
+sudo chgrp devs team">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Challenge <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: everything in the <code>data</code> tree is <code>777</code>. Make directories <code>755</code> and files <code>644</code> (<code>data/a.txt</code>, <code>data/sub/b.txt</code>).</p><details><summary>Hint</summary><p>Use capital <code>X</code>: <code>chmod -R u=rwX,go=rX data</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> <span class="tf">-R</span> u=rwX,go=rX data</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod -R u=rwX,go=rX data">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t16" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>TICKET #4401 — Alice will edit <code>report.txt</code>, group <code>devs</code> may write too, nobody else gets access. Set owner <code>alice</code>, group <code>devs</code>, mode <code>660</code>.</p><details><summary>Hint</summary><p>First <code>chmod 660</code>, then <code>sudo chown alice:devs</code>; after the owner changes you can no longer run chmod.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> 660 report.txt</span>
+<span class="ln"><span class="tk">sudo</span> chown alice:devs report.txt</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod 660 report.txt
+sudo chown alice:devs report.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t17" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>TICKET #4402 — The team creates new files in <code>shared</code> and the group cannot write them. Set <code>umask 002</code> and create a <code>664</code> file with <code>touch shared/log.txt</code>.</p><details><summary>Hint</summary><p>666 &amp; ~002 = 664.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">umask</span> 002</span>
+<span class="ln"><span class="tk">touch</span> <span class="tp">shared/log.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="umask 002
+touch shared/log.txt">Copy</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Reset lab</button></p></section>
+<section id="quiz"><h2>Self-test</h2>
+<div class="q card" data-q="q1"><p><strong>Which permission is needed to delete <code>notes.txt</code>?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">w on the file</button><button type="button" class="opt" data-i="1">w and x on the parent directory</button><button type="button" class="opt" data-i="2">r on the file</button><button type="button" class="opt" data-i="3">Only being the file owner</button></div><p class="explain" hidden>Deleting removes the directory entry, so you need w+x on the parent directory. The file&#x27;s own permission does not decide.</p></div>
+<div class="q card" data-q="q2"><p><strong>With <code>umask 027</code>, what mode does a new file get?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">750</button><button type="button" class="opt" data-i="1">600</button><button type="button" class="opt" data-i="2">640</button><button type="button" class="opt" data-i="3">027</button></div><p class="explain" hidden>666 &amp; ~027 = 640. For a directory, 777 &amp; ~027 = 750.</p></div>
+<div class="q card" data-q="q3"><p><strong>What does <code>x</code> on a directory allow?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Entering it and reaching entries by name</button><button type="button" class="opt" data-i="1">Executing the files inside</button><button type="button" class="opt" data-i="2">Deleting the directory</button><button type="button" class="opt" data-i="3">Listing the names inside</button></div><p class="explain" hidden>x on a directory is the traverse permission (<code>cd</code>, passing through a path). Listing needs r.</p></div>
+<div class="q card" data-q="q4"><p><strong>Why is <code>chmod -R 777</code> the wrong fix for &#x27;Permission denied&#x27;?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">The command does not work</button><button type="button" class="opt" data-i="1">Only root may use it</button><button type="button" class="opt" data-i="2">It changes the owner</button><button type="button" class="opt" data-i="3">It gives everyone full access and hides the real cause</button></div><p class="explain" hidden>777 grants everyone read, write and execute and weakens security. First find the cause with <code>ls -l</code> and <code>id</code>, then grant only the minimum needed.</p></div>
+</section>
+<section id="summary" class="card"><h2>Summary</h2><ul><li><code>ls -l</code>: type character + owner/group/others triplets; r=4, w=2, x=1.</li><li>On directories: r=list, w=create/delete/rename (with x), x=enter/access; deleting a file depends on w+x of its parent directory.</li><li><code>chmod</code> works in octal (<code>640</code>) or symbolic (<code>g+w</code>, <code>u=rwX</code>); only root can <code>chown</code>.</li><li>umask is a mask, not a subtraction: new mode = base &amp; ~umask (file 666, directory 777).</li><li><code>chmod -R 777</code> is not a fix; apply the principle of least privilege.</li></ul></section>
+<section id="glossary"><h2>Key terms</h2><dl class="gl"><dt>permission triplet</dt><dd>A separate rwx set for owner, group and others.</dd><dt>octal mode</dt><dd>Permissions written as the sum r=4, w=2, x=1, e.g. 644.</dd><dt>umask</dt><dd>Bit mask that defines which permission bits are removed from new files and directories.</dd><dt>owner</dt><dd>The user the file belongs to; may change permissions.</dd><dt>group</dt><dd>A set of users sharing permissions, e.g. devs.</dd><dt>traverse permission</dt><dd>The x bit on a directory; allows passing through the path and access by name.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-4.3.html">← Previous</a><a class="btn primary" href="modul-4.5.html">Next →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (optional)</strong><button type="button" class="ibtn" id="termclose" aria-label="Close terminal">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "en", "module": "4.4", "setup": {"dirs": ["/home/student/lab", "/home/student/lab/shared", "/home/student/lab/locked", "/home/student/lab/vault", "/home/student/lab/data", "/home/student/lab/data/sub"], "files": {"/home/student/lab/secret.txt": "top secret\n", "/home/student/lab/script.sh": "echo hello\n", "/home/student/lab/deploy.sh": "echo deploy\n", "/home/student/lab/report.txt": "quarterly report\n", "/home/student/lab/notes.txt": "my notes\n", "/home/student/lab/team.txt": "team list\n", "/home/student/lab/locked/old.txt": "old data\n", "/home/student/lab/vault/data.txt": "vault data\n", "/home/student/lab/data/a.txt": "file a\n", "/home/student/lab/data/sub/b.txt": "file b\n"}, "modes": [["/home/student/lab/secret.txt", "600"], ["/home/student/lab/locked", "555"], ["/home/student/lab/vault", "600"], ["/home/student/lab/data/a.txt", "777"], ["/home/student/lab/data/sub/b.txt", "777"], ["/home/student/lab/data/sub", "777"], ["/home/student/lab/data", "777"]], "cwd": "/home/student/lab"}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^ls -\\w*l", "ok": true}}, {"id": "t02", "kind": "warmup", "check": {"mode": ["~/lab/script.sh", "755"]}}, {"id": "t03", "kind": "warmup", "check": {"cmd": "^umask$", "ok": true}}, {"id": "t04", "kind": "guided", "check": {"mode": ["~/lab/notes.txt", "640"]}}, {"id": "t05", "kind": "guided", "check": {"mode": ["~/lab/shared", "770"]}}, {"id": "t06", "kind": "guided", "check": {"owner": ["~/lab/team.txt", "alice"]}}, {"id": "t07", "kind": "guided", "check": {"owner": ["~/lab/team.txt", "alice", "devs"]}}, {"id": "t08", "kind": "guided", "check": [{"cmd": "^umask 0?27$", "ok": true}, {"mode": ["~/lab/new.txt", "640"]}]}, {"id": "t09", "kind": "predict", "check": {"cmd": "^rm locked/old\\.txt$", "ok": false}}, {"id": "t10", "kind": "predict", "check": [{"cmd": "^umask 0?25$", "ok": true}, {"mode": ["~/lab/predict.txt", "642"]}]}, {"id": "t11", "kind": "predict", "check": {"cmd": "^\\./deploy\\.sh$", "ok": false}}, {"id": "t12", "kind": "debug", "check": {"absent": "~/lab/locked/old.txt"}}, {"id": "t13", "kind": "debug", "check": {"cmd": "^cat (\\./)?vault/data\\.txt$", "ok": true}}, {"id": "t14", "kind": "mini", "check": [{"mode": ["~/lab/team", "770"]}, {"mode": ["~/lab/team/plan.txt", "660"]}, {"owner": ["~/lab/team", "student", "devs"]}]}, {"id": "t15", "kind": "challenge", "check": [{"mode": ["~/lab/data", "755"]}, {"mode": ["~/lab/data/sub", "755"]}, {"mode": ["~/lab/data/a.txt", "644"]}, {"mode": ["~/lab/data/sub/b.txt", "644"]}]}, {"id": "t16", "kind": "ticket", "check": [{"owner": ["~/lab/report.txt", "alice", "devs"]}, {"mode": ["~/lab/report.txt", "660"]}]}, {"id": "t17", "kind": "ticket", "check": [{"cmd": "^umask 0?02$", "ok": true}, {"mode": ["~/lab/shared/log.txt", "664"]}]}], "vm": [{"id": "v01", "expect": "[-d][rwx-]{9}"}, {"id": "v02", "expect": "-rw-r-----"}, {"id": "v03", "expect": "Permission denied|Erişim engellendi|Zugriff verweigert|Keine Berechtigung"}, {"id": "v04", "expect": "(?=[\\s\\S]*-rw-r-----)(?=[\\s\\S]*drwxr-x---)"}, {"id": "v05", "expect": "root\\s+root"}], "quiz": {"q1": 1, "q2": 2, "q3": 0, "q4": 3}, "ui": {"correct": "Correct!", "wrong": "Not quite, try again.", "taskDone": "Task complete", "moduleDone": "Module complete! 🎉", "tasksDone": "done", "welcome": "Virtual Linux terminal — commands only affect this page's virtual file system. Type 'help' to list commands, Tab to complete, ↑/↓ for history.", "sandboxNote": "Safe sandbox: your real system is never touched.", "resetConfirm": "This module's virtual file system and command history will be reset. Your progress (completed tasks) is kept. Continue?", "openTerminal": "Open terminal (optional)", "closeTerminal": "Close terminal", "continue": "Continue", "startPath": "Start learning", "noResult": "No matching module or command.", "soon": "Coming soon", "overall": "Overall progress", "copied": "Copied ✓", "pasteOk": "Your output matches the expected pattern ✓", "pasteBad": "No match yet. See the tips under \"My output looks different\" and paste the complete output.", "iDidIt": "Done", "undo": "Undo", "groupDone": "done", "vmDone": "VM tasks"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

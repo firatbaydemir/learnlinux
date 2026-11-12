@@ -1,0 +1,125 @@
+{
+ "title": "Disk- und Netzwerkstatus",
+ "lead": "Wenn ein Server langsam wird, prüfst du zuerst zwei Dinge: Speicherplatz und Netzwerk. Mit df, du, free, uptime, ip, ping und ss machst du einen schnellen Gesundheitscheck.",
+ "objectives": [
+  "Du findest mit `df -h` die volle Partition und mit `du` den Ordner, der den Platz belegt.",
+  "Du liest Speicher und Last mit `free -h` und `uptime`.",
+  "Du grenzt ein Netzwerkproblem Schicht für Schicht mit `ip`, `ping` und `ss` ein.",
+  "Du speicherst Statusausgaben in Dateien und erstellst einen Bericht für ein Support-Ticket."
+ ],
+ "sections": [
+  {
+   "id": "disk",
+   "title": "Plattenbelegung: df und du",
+   "body": [
+    "Ist eine Platte zu 100 % voll, schlagen Schreibzugriffe mit `No space left on device` fehl; Dienste und Logs bleiben stehen. Frage deshalb zuerst, **welche Partition** voll ist: `df -h`. Spalten: `Size` gesamt, `Used` belegt, `Avail` frei, `Use%` Füllstand, `Mounted on` Einhängepunkt.",
+    "Kennst du die Partition, suchst du mit `du`, **welcher Ordner** den Platz belegt. `du -sh folder` liefert die Summe; `du -h --max-depth=1 folder | sort -h` listet Unterordner von klein nach groß. Manchmal ist Platz frei, aber Dateien lassen sich nicht anlegen: die Inodes sind aufgebraucht, prüfe mit `df -i`."
+   ],
+   "commands": [
+    {"cmd": "df -h", "what": "Zeigt Größe und Belegung der Partitionen in lesbaren Einheiten.", "where": "Erster Befehl bei Langsamkeit oder 'Disk full'-Fehlern.", "why": "Zeigt auf einen Blick, welcher Einhängepunkt betroffen ist.", "example": "df -h"},
+    {"cmd": "du -sh", "what": "Zeigt die Gesamtgröße eines Ordners.", "where": "Nachdem df die volle Partition gezeigt hat.", "why": "Grenzt den verursachenden Ordner ein.", "example": "du -sh /var/log", "nosim": true},
+    {"cmd": "du --max-depth=1", "what": "Listet Ordnergrößen eine Ebene tiefer; mit sort -h sortieren.", "where": "Bei der Suche nach dem größten Ordner.", "why": "Du gehst gezielt vor, ohne den ganzen Baum zu durchlaufen.", "example": "du -h --max-depth=1 /var | sort -h", "nosim": true},
+    {"cmd": "df -i", "what": "Zeigt die Belegung der Inodes (Dateianzahl).", "where": "Platz ist frei, aber Dateien lassen sich nicht anlegen.", "why": "Millionen winziger Dateien können Inodes erschöpfen.", "example": "df -i", "nosim": true}
+   ],
+   "tip": "`df` findet die Partition, `du` den Ordner. Erst df, dann du.",
+   "warn": "Prüfe mit `ls -l`, was eine Datei ist, bevor du sie löschst. Bei einer Logdatei eines laufenden Dienstes ist Leeren (`: > file`) oft besser als Löschen; im Zweifel frage deinen Administrator."
+  },
+  {
+   "id": "mem",
+   "title": "Speicher und Last: free und uptime",
+   "body": [
+    "`free -h` zeigt RAM und Swap. Achte auf die Spalte `available`: Speicher, der neuen Programmen wirklich zur Verfügung steht. Auch wenn `free` klein aussieht, wird der Cache (`buff/cache`) bei Bedarf freigegeben. Keine Panik.",
+    "`uptime` zeigt die Laufzeit und die **Load Average** (1, 5, 15 Minuten). Liegt die Last dauerhaft über der Anzahl deiner CPU-Kerne, staut sich Arbeit."
+   ],
+   "commands": [
+    {"cmd": "free -h", "what": "Zeigt RAM- und Swap-Nutzung in lesbaren Einheiten.", "where": "Bei Verdacht auf Speichermangel.", "why": "available nennt den wirklich freien Speicher.", "example": "free -h"},
+    {"cmd": "uptime", "what": "Zeigt Laufzeit, Benutzeranzahl und Load Average.", "where": "Schnellcheck bei einem langsamen Server.", "why": "Die Load Average zeigt einen Trend, keine Momentaufnahme.", "example": "uptime"}
+   ],
+   "tip": "Für einen Bericht nutze `df -h > report.txt`, zum Anhängen `>>`."
+  },
+  {
+   "id": "net",
+   "title": "Netzwerk: ip, ping und ss",
+   "body": [
+    "Grenze ein Netzwerkproblem von unten nach oben ein: 1) Ist die Schnittstelle aktiv und hat sie eine IP? `ip -br a`. 2) Gibt es eine Standardroute (Gateway)? `ip route`. 3) Ist das Gateway erreichbar? `ping -c 3 <gateway>`. 4) Eine Internet-IP? `ping -c 3 1.1.1.1`. 5) Namensauflösung? `ping -c 3 example.com`.",
+    "Geht ping zur IP, aber nicht zum Namen, liegt es an **DNS** (`/etc/resolv.conf`). Geht gar nichts, prüfe Kabel, VM-Netzwerkeinstellung oder Gateway. `ss -tuln` zeigt, auf welchen Ports die Maschine lauscht (z. B. 22 für SSH)."
+   ],
+   "commands": [
+    {"cmd": "ip -br a", "what": "Listet Schnittstellen, Status und IP-Adressen kurz auf.", "where": "Erster Schritt bei Netzwerkproblemen.", "why": "Ohne IP lohnt sich ein Blick auf höhere Schichten nicht.", "example": "ip -br a", "nosim": true},
+    {"cmd": "ip route", "what": "Zeigt die Routingtabelle und das Standard-Gateway.", "where": "Wenn du nach außen nicht ankommst.", "why": "Ohne default-via-Zeile kann Verkehr nicht hinaus.", "example": "ip route", "nosim": true},
+    {"cmd": "ping -c 3", "what": "Sendet 3 Testpakete an ein Ziel; meldet Verlust und Latenz.", "where": "Beim Testen von Verbindung und DNS.", "why": "Ohne -c läuft ping endlos.", "example": "ping -c 3 1.1.1.1", "nosim": true},
+    {"cmd": "ss -tuln", "what": "Listet lauschende TCP/UDP-Ports numerisch.", "where": "Um zu sehen, ob ein Dienst auf seinem Port lauscht.", "why": "Prüft die Serverseite bei 'Ich komme nicht drauf'.", "example": "ss -tuln", "nosim": true}
+   ],
+   "danger": "Auf einem Remote-Server trennen Befehle wie `ip link set eth0 down` deine SSH-Verbindung, und du sperrst dich aus. Stelle sicher, dass du Konsolenzugang hast, bevor du Netzwerkeinstellungen änderst."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Sieh dir die Belegung der Partitionen mit `df -h` an.", "hint": "-h gibt lesbare Einheiten (G, M)."},
+  "t02": {"text": "Zeige den Speicherstatus mit `free -h`.", "hint": "Achte auf die Spalte available."},
+  "t03": {"text": "Zeige die Load Average mit `uptime`.", "hint": "Drei Zahlen: 1, 5, 15 Minuten."},
+  "t04": {"text": "Lies den Beispielbericht `~/reports/df_sample.txt` mit `cat` und finde die Spalte Use%.", "hint": "`cat ~/reports/df_sample.txt`"},
+  "t05": {"text": "Speichere die Ausgabe von `df -h` mit `>` in `~/disk_report.txt`.", "hint": "`df -h > ~/disk_report.txt`. Ein einzelnes `>` überschreibt die Datei."},
+  "t06": {"text": "Hänge die Ausgabe von `free -h` an dieselbe Datei an (`>>`).", "hint": "`>>` hängt an, `>` überschreibt; falls überschrieben, wiederhole t05."},
+  "t07": {"text": "Hänge auch die Ausgabe von `uptime` an `~/disk_report.txt` an.", "hint": "Wieder `>>` verwenden."},
+  "t08": {"text": "Vorhersage: Welcher Einhängepunkt gehört zur Zeile mit 95% in `~/reports/df_sample.txt`? Prüfe dann mit `grep 95% ~/reports/df_sample.txt`.", "hint": "Die Spalte Mounted on am Zeilenende."},
+  "t09": {"text": "Vorhersage: Was sagt `~/reports/ping_sample.txt` über das Netzwerk? Sieh die Verlustrate mit `grep loss ~/reports/ping_sample.txt`.", "hint": "100% packet loss heißt, das Ziel wurde nie erreicht."},
+  "t10": {"text": "Vorhersage: Welche IP hat die Schnittstelle eth0 in `~/reports/ip_sample.txt`? Prüfe mit `grep eth0 ~/reports/ip_sample.txt`.", "hint": "Das /24 ist die Netzmaske, nicht Teil der IP."},
+  "t11": {"text": "Die Platte füllt sich. Sieh mit `ls -l ~/logs` nach; das alte Debug-Log `old_debug.log` ist unnötig, lösche es, aber fasse `app.log` nicht an.", "hint": "`rm ~/logs/old_debug.log`. Prüfe den genauen Namen vor dem Löschen mit ls."},
+  "t12": {"text": "Mini-Projekt: Erstelle den Bericht `~/health.txt`. Er soll der Reihe nach die Überschrift `== disk ==`, die Ausgabe von `df -h`, die Überschrift `== memory ==` und die Ausgabe von `free -h` enthalten.", "hint": "Erste Zeile `echo \"== disk ==\" > ~/health.txt`, der Rest mit `>>`."},
+  "t13": {"text": "Challenge: Schreibe aus `~/reports/df_sample.txt` nur die 95%-Zeile nach `~/alert.txt` und die Anzahl solcher Zeilen nach `~/alert_count.txt`.", "hint": "`grep` filtert die Zeile, `grep -c` zählt; beides mit `>` umleiten."},
+  "t14": {"text": "Ticket: \"Die Anwendung meldet 'No space left on device'.\" Finde den vollen Einhängepunkt in `~/reports/df_sample.txt` und schreibe seinen Namen in `~/full_mount.txt`. Lösche außerdem die unnötige `~/logs/core.dump`.", "hint": "Die volle ist die 95%-Zeile. Der Einhängepunkt ist `/var`: `echo /var > ~/full_mount.txt`."}
+ },
+ "vm": {
+  "intro": "Die Befehle hier lesen nur Informationen und sind auf deiner VM sicher. Füge die Ausgabe ein, wir prüfen sie automatisch.",
+  "tasks": {
+   "v01": {
+    "title": "Plattenbelegung",
+    "text": "Führe `df -h` aus und füge die Ausgabe ein. Notiere den Füllstand der Root-Partition (`/`).",
+    "blocks": [{"cmd": "df -h\ndf -i /", "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        19G  4.1G   14G  23% /"}],
+    "differs": ["Die Partition kann `/dev/vda1`, `/dev/mapper/...` oder `/dev/nvme0n1p2` heißen; wichtig ist die Spalte Use%.", "Viele `tmpfs`/`loop`-Zeilen sind normal (Ubuntu snap); konzentriere dich auf die `/`-Zeile."]
+   },
+   "v02": {
+    "title": "Platzsuche",
+    "text": "Sortiere die Größen deines Home-Verzeichnisses und der Ordner unter /var. Füge die größten 5 Zeilen ein.",
+    "blocks": [{"cmd": "du -sh ~\nsudo du -xh /var --max-depth=1 2>/dev/null | sort -h | tail -5", "expected": "120M\t/var/cache\n1.1G\t/var/lib\n1.4G\t/var"}],
+    "differs": ["Fehlt `sort -h` (sehr altes System), nutze `sort -n` und `du -k`.", "Fragt sudo nach einem Passwort, gib das Passwort deines VM-Benutzers ein; es wird beim Tippen nicht angezeigt."]
+   },
+   "v03": {
+    "title": "IP und Routing",
+    "text": "Zeige deine Schnittstellen und das Standard-Gateway; füge die Ausgabe ein.",
+    "blocks": [{"cmd": "ip -br a\nip route", "expected": "lo      UNKNOWN  127.0.0.1/8\nenp0s3  UP       10.0.2.15/24\ndefault via 10.0.2.2 dev enp0s3"}],
+    "differs": ["Der Schnittstellenname kann `eth0`, `enp0s3` oder `ens160` sein.", "Bei VirtualBox-NAT ist die IP meist 10.0.2.15; bei Bridged kommt sie aus dem Bereich deines Routers.", "Gibt es gar keine IP, prüfe, ob die Netzwerkkarte der VM verbunden und auf NAT/Bridged gestellt ist."]
+   },
+   "v04": {
+    "title": "Verbindungs- und DNS-Test",
+    "text": "Pinge erst eine IP, dann einen Namen. Füge beide Ausgaben ein.",
+    "blocks": [{"cmd": "ping -c 3 1.1.1.1\nping -c 3 example.com", "expected": "3 packets transmitted, 3 received, 0% packet loss"}],
+    "differs": ["Geht die IP, aber der Name nicht, ist es ein DNS-Problem; sieh in `cat /etc/resolv.conf`.", "Manche Netze blockieren ICMP; schlägt ping fehl, das Web funktioniert aber, liegt das Problem an ping selbst."]
+   },
+   "v05": {
+    "title": "Lauschende Ports",
+    "text": "Liste die Ports auf, auf denen deine Maschine lauscht, und füge die Ausgabe ein.",
+    "blocks": [{"cmd": "ss -tuln", "expected": "tcp   LISTEN  0  128  0.0.0.0:22  0.0.0.0:*"}],
+    "differs": ["Ist SSH nicht installiert, erscheint 22 nicht; für dieses Modul ist das in Ordnung.", "Fehlt `ss`, versuche auf alten Systemen `netstat -tuln`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Mit welchem Befehl siehst du, welche Partition voll ist?", "options": ["du -sh", "df -h", "free -h", "uptime"], "explain": "`df` zeigt die Partitionsbelegung, `du` Ordnergrößen."},
+  "q2": {"q": "`/var` ist zu 95 % voll. Wie findest du den größten Unterordner?", "options": ["ping -c 3 /var", "df -i", "du -h --max-depth=1 /var | sort -h", "ip route"], "explain": "du liefert Unterordnergrößen, sort -h ordnet sie von klein nach groß."},
+  "q3": {"q": "`ping 1.1.1.1` funktioniert, `ping example.com` nicht. Wahrscheinlichstes Problem?", "options": ["DNS (Namensauflösung)", "Kabel abgezogen", "Platte voll", "Zu wenig RAM"], "explain": "Die IP ist erreichbar, Namen werden nicht aufgelöst: prüfe die DNS-Einstellung."},
+  "q4": {"q": "Welcher Befehl zeigt, auf welchen Ports die Maschine lauscht?", "options": ["ip -br a", "ping -c 3", "df -h", "ss -tuln"], "explain": "`ss -tuln` listet lauschende TCP/UDP-Ports numerisch auf."}
+ },
+ "summary": [
+  "`df -h` beantwortet, welche Partition, `du -sh` / `du --max-depth=1`, welcher Ordner voll ist.",
+  "Bei `free -h` zählt `available`, bei `uptime` die Load Average.",
+  "Grenze Netzwerkprobleme von unten nach oben ein: `ip -br a`, `ip route`, ping IP, ping Name.",
+  "Mach Ausgaben mit `>` und `>>` zum Bericht; prüfe vor dem Löschen mit `ls -l`."
+ ],
+ "glossary": [
+  {"term": "Inode", "meaning": "Eintrag mit Informationen über eine Datei; ihre Anzahl ist begrenzt."},
+  {"term": "Load Average", "meaning": "Durchschnittliche Zahl lauffähiger Prozesse über 1, 5 und 15 Minuten."},
+  {"term": "Gateway", "meaning": "Ausgang aus dem lokalen Netz nach außen (meist der Router)."},
+  {"term": "DNS", "meaning": "System, das Namen in IP-Adressen übersetzt."}
+ ]
+}

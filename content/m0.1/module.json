@@ -1,0 +1,45 @@
+{
+ "id": "0.1",
+ "level": 0,
+ "setup": {
+  "files": {
+   "/home/student/distro.txt": "ID=windows\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^uname -r$", "ok": true}, "solution": ["uname -r"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^cat /etc/os-release$", "ok": true}, "solution": ["cat /etc/os-release"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^uname -a$", "ok": true}, "solution": ["uname -a"]},
+  {"id": "t04", "kind": "guided", "diff": 2, "check": {"cmd": "^ls /$", "ok": true}, "solution": ["ls /"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^ls (-\\w+ )?/etc$", "ok": true}, "solution": ["ls /etc"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cmd": "^cat /etc/shells$", "ok": true}, "solution": ["cat /etc/shells"]},
+  {"id": "t07", "kind": "predict", "diff": 2, "check": {"out": "x86_64", "of": "^uname -m$"}, "solution": ["uname -m"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "linux-lab", "of": "^cat /etc/hostname$"}, "solution": ["cat /etc/hostname"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "/bin/bash", "of": "^echo \\$SHELL$"}, "solution": ["echo $SHELL"]},
+  {"id": "t10", "kind": "debug", "diff": 2, "check": {"contains": ["~/distro.txt", "^ID=linux"]}, "solution": ["echo ID=linux > ~/distro.txt"]},
+  {"id": "t11", "kind": "mini", "diff": 2, "check": [
+    {"exists": "~/about_linux", "type": "d"},
+    {"contains": ["~/about_linux/kernel.txt", "\\d+\\.\\d+"]},
+    {"contains": ["~/about_linux/distro.txt", "NAME="]}
+   ], "solution": ["mkdir ~/about_linux", "uname -r > ~/about_linux/kernel.txt", "cat /etc/os-release > ~/about_linux/distro.txt"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [
+    {"linesMin": ["~/system_report.txt", 3]},
+    {"contains": ["~/system_report.txt", "linux-lab"]},
+    {"contains": ["~/system_report.txt", "student"]},
+    {"contains": ["~/system_report.txt", "5\\.14"]}
+   ], "solution": ["hostname > ~/system_report.txt", "uname -r >> ~/system_report.txt", "whoami >> ~/system_report.txt"]},
+  {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/ticket_answer.txt", "ID_LIKE"]}, "solution": ["grep ID_LIKE /etc/os-release > ~/ticket_answer.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "(?=[\\s\\S]*\\d+\\.\\d+)(?=[\\s\\S]*(NAME|ID)=)"},
+  {"id": "v02", "expect": "(?=[\\s\\S]*\\betc\\b)(?=[\\s\\S]*\\busr\\b)"},
+  {"id": "v03", "expect": "systemd|init"},
+  {"id": "v04", "expect": null}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 3},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 2}
+ ]
+}

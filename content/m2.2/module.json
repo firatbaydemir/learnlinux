@@ -1,0 +1,42 @@
+{
+ "id": "2.2",
+ "level": 2,
+ "setup": {
+  "dirs": ["/home/student/projects/app"],
+  "files": {
+   "/home/student/Documents/report.txt": "quarterly report\n",
+   "/home/student/projects/config.txt": "port=8080\n",
+   "/home/student/releases/v2/config.txt": "version=2\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^cat /etc/hostname$", "ok": true}, "solution": ["cat /etc/hostname"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cwd": "/etc"}, "solution": ["cd /etc"]},
+  {"id": "t03", "kind": "guided", "diff": 1, "check": {"cmd": "^cat hostname$", "ok": true}, "solution": ["cat hostname"]},
+  {"id": "t04", "kind": "predict", "diff": 1, "check": {"cmd": "^cat hostname$", "ok": false}, "solution": ["cd ~", "cat hostname"]},
+  {"id": "t05", "kind": "guided", "diff": 1, "check": {"cwd": "/home"}, "solution": ["cd .."]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cwd": "~/Documents"}, "solution": ["cd student/Documents"]},
+  {"id": "t07", "kind": "guided", "diff": 1, "check": [{"cmd": "^ls -l /etc/hostname$", "ok": true}, {"out": "-rw"}], "solution": ["ls -l /etc/hostname"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": [{"cmd": "^ls -l /dev/null$", "ok": true}, {"out": "crw"}], "solution": ["ls -l /dev/null"]},
+  {"id": "t09", "kind": "guided", "diff": 2, "check": {"exists": "~/link.txt", "type": "l", "link": true}, "solution": ["cd ~", "ln -s ~/Documents/report.txt ~/link.txt"]},
+  {"id": "t10", "kind": "guided", "diff": 2, "check": [{"cmd": "^ls -l(a)? ~/link\\.txt$", "ok": true}, {"out": "->"}], "solution": ["ls -l ~/link.txt"]},
+  {"id": "t11", "kind": "predict", "diff": 2, "check": [{"cmd": "^cat ~/link\\.txt$", "ok": true}, {"out": "quarterly report"}], "solution": ["cat ~/link.txt"]},
+  {"id": "t12", "kind": "debug", "diff": 2, "check": {"cmd": "^cat (\\.\\./config\\.txt|~/projects/config\\.txt|/home/student/projects/config\\.txt)$", "ok": true}, "solution": ["cd ~/projects/app", "cat ../config.txt"]},
+  {"id": "t13", "kind": "mini", "diff": 2, "check": [{"exists": "~/lab/docs", "type": "d"}, {"exists": "~/lab/bin", "type": "d"}, {"contains": ["~/lab/docs/readme.txt", "hello linux"]}, {"exists": "~/lab/bin/readme-link", "type": "l", "link": true}], "solution": ["mkdir -p ~/lab/docs ~/lab/bin", "echo hello linux > ~/lab/docs/readme.txt", "ln -s ~/lab/docs/readme.txt ~/lab/bin/readme-link"]},
+  {"id": "t14", "kind": "challenge", "diff": 3, "check": [{"exists": "~/lab/bin/rel-link", "type": "l", "link": true}, {"cmd": "^cat rel-link$", "ok": true}, {"out": "hello linux", "of": "cat rel-link"}], "solution": ["cd ~/lab/bin", "ln -s ../docs/readme.txt rel-link", "cat rel-link"]},
+  {"id": "t15", "kind": "ticket", "diff": 3, "check": [{"exists": "~/app/current", "type": "l", "link": true}, {"cmd": "^cat ~/app/current/config\\.txt$", "ok": true}, {"out": "version=2", "of": "cat ~/app/current/config.txt"}], "solution": ["mkdir -p ~/app", "ln -s ~/releases/v2 ~/app/current", "cat ~/app/current/config.txt"]},
+  {"id": "t16", "kind": "warmup", "diff": 1, "check": {"cmd": "^ls -(la|al|a)\\s+~$", "ok": true}, "solution": ["ls -la ~"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "/etc"},
+  {"id": "v02", "expect": "crw"},
+  {"id": "v03", "expect": "->"},
+  {"id": "v04", "expect": "regular|directory|symbolic|character|block"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 3},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 2}
+ ]
+}

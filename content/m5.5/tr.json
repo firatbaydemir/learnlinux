@@ -1,0 +1,84 @@
+{
+  "title": "Paket Yönetimi",
+  "lead": "Dağıtımına uygun paket yöneticisiyle yazılım ara, kur, güncelle ve kaldır; paket depoları ile kurulu paket veritabanını ayırt et.",
+  "objectives": [
+    "Debian ailesinde apt/dpkg, RHEL ailesinde dnf/rpm kullanıldığını bilirsin.",
+    "Paket arama, bilgi alma, kurulum, güncelleme ve kaldırma adımlarını uygularsın.",
+    "Kurulum öncesi değişiklikleri inceler ve kritik paketleri korursun."
+  ],
+  "sections": [
+    {
+      "id": "families",
+      "title": "Dağıtımlar ve paket araçları",
+      "body": [
+        "Paket yöneticileri yazılımı imzalı depolardan indirir, bağımlılıkları çözer ve kurulu paket veritabanını günceller. Ubuntu ve Debian'da üst düzey araç `apt`, düşük düzey sorgu aracı `dpkg`; Rocky, Alma ve Fedora'da `dnf` ve `rpm` kullanılır.",
+        "Aynı yazılımın paket adı dağıtımlar arasında değişebilir: RHEL ailesinde Apache HTTP Server genellikle `httpd`, Debian ailesinde `apache2` adıyla bulunur. Önce hangi dağıtımda olduğunu ve doğru paket adını öğren."
+      ],
+      "commands": [
+        {"cmd": "cat /etc/os-release", "what": "Dağıtım adını, sürümünü ve kimliğini gösterir.", "where": "Paket komutu veya servis adı seçmeden önce.", "why": "Sistemin Debian mı RHEL ailesi mi olduğunu doğrular.", "example": "cat /etc/os-release"},
+        {"cmd": "apt search / dnf search", "what": "Yapılandırılmış depolarda ada veya açıklamaya göre paket arar.", "where": "Paket adından emin olmadığında.", "why": "Yanlış paketi kurma ihtimalini azaltır.", "example": "dnf search nginx", "nosim": true}
+      ],
+      "tip": "`apt` ve `dnf` komutlarını sistem ailesine göre seç; aynı komutun iki ailede de bulunduğunu varsayma."
+    },
+    {
+      "id": "install",
+      "title": "Arama, kurulum ve güncelleme",
+      "body": [
+        "Kurulumdan önce paketin açıklamasını ve hangi depodan geldiğini incele. `apt update` Debian ailesinde paket listelerini yeniler; paketleri tek başına yükseltmez. `dnf check-update` güncelleme olup olmadığını denetler.",
+        "Paket kurma ve sistem güncelleme yönetici izni ister. Onay ekranında kurulacak, kaldırılacak ve güncellenecek paketleri oku; beklenmeyen kritik değişiklik varsa işlemi iptal et."
+      ],
+      "commands": [
+        {"cmd": "sudo apt install package / sudo dnf install package", "what": "Depodan paketi ve gerekli bağımlılıklarını kurar.", "where": "Paket adını ve kaynağını doğruladıktan sonra.", "why": "Dosyaları elle indirip yerleştirmek yerine paket veritabanını tutarlı günceller.", "example": "sudo dnf install cowsay", "nosim": true},
+        {"cmd": "sudo apt update / sudo dnf check-update", "what": "Depo paket bilgilerini yeniler veya güncelleme olup olmadığını denetler.", "where": "Debian tabanlı sistemde kurulumdan önce veya güncelleme kontrolünde.", "why": "Paket yöneticisinin güncel depo bilgisini kullanmasını sağlar.", "example": "sudo apt update", "nosim": true}
+      ],
+      "tip": "`apt update` paket listelerini yeniler; kurulu paketleri yükseltmek için ayrıca `apt upgrade` gerekir."
+    },
+    {
+      "id": "remove",
+      "title": "Kaldırma ve paket doğrulama",
+      "body": [
+        "`apt remove` ve `dnf remove` paketi kaldırırken bağımlılıkları da etkileyebilir. `apt purge` ayrıca paket yapılandırmasını kaldırır; `autoremove` artık gerekmeyen bağımlılıkları bulur. Önerilen kaldırma listesini dikkatle incele.",
+        "`dpkg -l` veya `rpm -qa` kurulu paketleri listeler. Bu düşük düzey araçlar paketleri kurmak için değil, sorgulamak için uygundur; kurulum ve kaldırmada `apt` veya `dnf` kullan."
+      ],
+      "commands": [
+        {"cmd": "sudo apt remove / sudo dnf remove", "what": "Paket yöneticisi üzerinden paketi kaldırır.", "where": "Deneme paketi artık gerekmediğinde.", "why": "Paket veritabanını ve bağımlılıkları kontrollü biçimde günceller.", "example": "sudo apt remove cowsay", "nosim": true},
+        {"cmd": "dpkg -l / rpm -qa", "what": "Kurulu paketlerin listesini sorgular.", "where": "Paketin kurulu olup olmadığını doğrularken.", "why": "Sistemdeki kurulum durumunu paket veritabanından gösterir.", "example": "rpm -qa | grep cowsay", "nosim": true}
+      ],
+      "warn": "Paket eklemek veya kaldırmak sistemi değiştirir. Yalnızca kendi VM'inde dene; `kernel`, `systemd`, SSH ve ağ paketlerini kaldırma. Onay listesini oku."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Paket notlarında RHEL ailesi için kullanılan üst düzey paket yöneticisini bul.", "hint": "`grep RHEL ~/lab/package_notes.txt` satırında `dnf` geçer."},
+    "t02": {"text": "Ubuntu/Debian ailesi için kullanılan üst düzey paket yöneticisini bul.", "hint": "`grep Ubuntu ~/lab/package_notes.txt` satırında `apt` geçer."},
+    "t03": {"text": "Tahmin et: kaç satırda `package` kelimesi geçiyor? `grep -c` ile doğrula.", "hint": "`grep -c package ~/lab/package_notes.txt`"},
+    "t04": {"text": "Ubuntu/Debian için paket kurulumundan önce depo listesini yenileme adımını `~/lab/install_plan.txt` dosyasına yaz.", "hint": "`sudo apt update` ifadesini kaydet."},
+    "t05": {"text": "Planına hem RHEL ailesi hem Debian ailesi için `cowsay` kurulum komutunu ekle.", "hint": "Sırasıyla `sudo dnf install cowsay` ve `sudo apt install cowsay`."},
+    "t06": {"text": "Test paketini kaldırırken `autoremove` önerilerini inceleme uyarısı içeren bir temizlik planı yaz.", "hint": "Notu `~/lab/cleanup_plan.txt` içine kaydet."},
+    "t07": {"text": "Ticket #5501 için dağıtımı kontrol etmeyi ve web paketi adının aileye göre `httpd` veya `apache2` olduğunu bildiren not oluştur.", "hint": "Notu `~/lab/ticket_5501.txt` dosyasına yaz."}
+  },
+  "vm": {
+    "intro": "Paket kurma ve kaldırma sistemde değişiklik yapar. Yalnızca kendi test VM'inde çalış; üretim sisteminde paket işlemi yapma ve onay ekranlarını mutlaka oku.",
+    "tasks": {
+      "v01": {"title": "Dağıtımı tanı", "text": "Dağıtım kimliğini ve sistemde bulunan paket aracını kontrol et.", "blocks": [{"cmd": "cat /etc/os-release\ncommand -v apt\ndnf --version", "expected": "ID= satırı dağıtımı gösterir; kullandığın ailede apt veya dnf bulunur."}], "differs": ["Her iki paket aracının da bulunması gerekmez; dağıtımına uygun olanı kullan.", "ID veya ID_LIKE alanı dağıtım ailesini belirlemeye yardımcı olur."]},
+      "v02": {"title": "Paketi kurmadan araştır", "text": "Önce `cowsay` paketinin bilgisini görüntüle. Yalnızca dağıtımına uygun komutu çalıştır.", "blocks": [{"cmd": "apt-cache policy cowsay", "expected": "Candidate veya paket sürümü"}, {"cmd": "dnf info cowsay", "expected": "Available Packages veya paket bilgisi"}], "differs": ["Debian/Ubuntu'da apt-cache; Rocky/Alma/Fedora'da dnf kullan.", "Paket bulunamazsa depo listesi güncel olmayabilir veya etkin depo paketi içermeyebilir."]},
+      "v03": {"title": "Test paketini kur", "text": "Yalnızca kendi test VM'inde, dağıtımına uygun komutla küçük `cowsay` paketini kur. Onay ekranındaki değişiklikleri incele.", "blocks": [{"cmd": "sudo apt install cowsay", "expected": "Setting up cowsay veya kurulum tamamlandı"}, {"cmd": "sudo dnf install cowsay", "expected": "Complete! veya Installed: cowsay"}], "differs": ["Yalnızca bir blok çalıştır: Debian/Ubuntu için apt, RHEL ailesi için dnf.", "Paket bulunmuyorsa işlemi zorlamadan önce doğru depo ve paket adını araştır."]},
+      "v04": {"title": "Test paketini kaldır", "text": "Kurulumdan sonra aynı paket yöneticisiyle `cowsay` paketini kaldır ve sonucu doğrula. Önerilen kaldırılacak paketleri onaylamadan önce incele.", "blocks": [{"cmd": "sudo apt remove cowsay", "expected": "Removing cowsay veya cowsay kaldırıldı"}, {"cmd": "sudo dnf remove cowsay", "expected": "Removing: cowsay veya Complete!"}], "differs": ["Yalnızca paketi kurduğun dağıtım ailesinin komutunu çalıştır.", "Beklenmeyen önemli paketler listelenirse onaylama; `n` ile iptal et."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "Ubuntu ve Debian'da yaygın üst düzey paket aracı hangisidir?", "options": ["apt", "dnf", "rpm", "systemctl"], "explain": "`apt` Debian ailesinde depoları ve paket kurulumunu yönetir."},
+    "q2": {"q": "RHEL ailesinde Apache HTTP Server paketi genellikle hangi adla geçer?", "options": ["apache2", "nginx", "httpd", "openssh"], "explain": "RHEL ailesinde paket adı genellikle httpd; Debian ailesinde apache2'dir."},
+    "q3": {"q": "`apt update` ne yapar?", "options": ["Çekirdeği yükseltir", "Paket depo listelerini yeniler", "Tüm paketleri kaldırır", "Sistemi yeniden başlatır"], "explain": "apt update yerel depo indekslerini yeniler; kurulu paketleri yükseltmek için apt upgrade gerekir."},
+    "q4": {"q": "Kurulum onay ekranında ne yapmalısın?", "options": ["Her zaman onaylamalısın", "Kritik paketleri yok saymalısın", "Çıktıyı görmeden Enter'a basmalısın", "Eklenip kaldırılacak paketleri incelemelisin"], "explain": "Bağımlılık çözümü başka paketleri de değiştirebilir; işlemden önce listeyi gözden geçir."}
+  },
+  "summary": [
+    "Ubuntu/Debian: apt/dpkg; Rocky/Alma/Fedora: dnf/rpm. Önce dağıtımını ve paket adını doğrula.",
+    "`apt update` depo listelerini yeniler; kurulum ve yükseltme ayrı işlemlerdir.",
+    "Paket kaldırma ve `autoremove` öncesinde önerilen değişiklikleri incele; kritik sistem paketlerini koru."
+  ],
+  "glossary": [
+    {"term": "repository", "meaning": "Dağıtımın paketleri ve paket bilgilerini yayımladığı yazılım deposu."},
+    {"term": "dependency", "meaning": "Bir paketin çalışması veya kurulması için gereken başka paket."},
+    {"term": "package manager", "meaning": "Paketleri ve bağımlılıkları kuran, güncelleyen, kaldıran araç."}
+  ]
+}

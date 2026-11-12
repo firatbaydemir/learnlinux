@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6.5 Bash Script 1 — Variables, Arguments, Conditions — Linux Foundations Academy</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","en")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="6.5">
+<header class="top"><a class="brand" href="index.html">Linux Foundations Academy</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (optional)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-6.5.html" hreflang="tr" lang="tr" data-switch="tr">TR</a><a href="../de/modul-6.5.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-6.5.html" hreflang="en" lang="en" data-switch="en" aria-current="true">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Theme" aria-label="Theme">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Overall progress"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#first">The first script: shebang and execute permission</a></li><li><a href="#vars">Variables, quoting and arithmetic</a></li><li><a href="#args">Arguments and exit codes</a></li><li><a href="#cond">Conditions: if, elif, else</a></li><li><a href="#strict">Safe scripts: set -euo pipefail and debugging</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>Contents</summary><ol><li><a href="#first">The first script: shebang and execute permission</a></li><li><a href="#vars">Variables, quoting and arithmetic</a></li><li><a href="#args">Arguments and exit codes</a></li><li><a href="#cond">Conditions: if, elif, else</a></li><li><a href="#strict">Safe scripts: set -euo pipefail and debugging</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> Level 6</p>
+<h1><span class="module-id">6.5</span> Bash Script 1 — Variables, Arguments, Conditions</h1>
+<p class="lead">Write your first Bash script, make it executable, and work with variables, arguments, exit codes and conditions.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>What will you learn in this module?</h2><ul><li>You write a script with a shebang, make it executable with chmod +x and start it with ./script.sh.</li><li>You assign variables and know the difference between single and double quotes, read, $(command) and $(( )).</li><li>You read arguments with $1, $# and &quot;$@&quot; and check exit codes with $? and exit.</li><li>You make decisions with if/elif/else, [[ ]] and test, and you use set -euo pipefail as a safety net.</li></ul></section>
+<section id="first"><h2>The first script: shebang and execute permission</h2>
+<p>A script is a text file with commands. The first line, the <strong>shebang</strong> <code>#!/bin/bash</code>, tells the system which interpreter runs the file. Without the <strong>execute bit</strong> the file cannot be started directly: <code>./hello.sh</code> then gives *Permission denied*.</p>
+<p><code>./</code> means &#x27;the file in this folder&#x27;. Linux does not search the current folder for commands, so <code>hello.sh</code> alone gives *command not found*. In this module you create scripts with <code>printf</code> (or a heredoc on your VM) so you can see exactly what is in the file.</p>
+<article class="cmd"><h3><code>#!/bin/bash</code></h3><dl><dt>What is it for?</dt><dd>The shebang: first line of the file, names the interpreter.</dd><dt>Where is it used?</dt><dd>At the top of every Bash script.</dd><dt>Why does it matter?</dt><dd>The script runs with Bash and not with another shell such as sh.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh">Copy</button></div></div></article>
+<article class="cmd"><h3><code>chmod +x</code></h3><dl><dt>What is it for?</dt><dd>Sets the execute bit on a file.</dd><dt>Where is it used?</dt><dd>Once after you create a script.</dd><dt>Why does it matter?</dt><dd>Without it <code>./script.sh</code> fails with Permission denied.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="chmod +x ~/bin/hello.sh" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="chmod +x ~/bin/hello.sh">Copy</button></div></div></article>
+<article class="cmd"><h3><code>./script.sh</code></h3><dl><dt>What is it for?</dt><dd>Runs an executable script by path.</dd><dt>Where is it used?</dt><dd>When you start your own scripts.</dd><dt>Why does it matter?</dt><dd>The path (<code>./</code> or full path) tells the shell where the file is.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="~/bin/hello.sh" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="~/bin/hello.sh">Copy</button></div></div></article>
+<article class="cmd"><h3><code>bash script.sh</code></h3><dl><dt>What is it for?</dt><dd>Runs a script with Bash directly, no execute bit needed.</dd><dt>Where is it used?</dt><dd>For quick tests and on volumes mounted noexec.</dd><dt>Why does it matter?</dt><dd>Handy for debugging; the shebang is ignored.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">bash</span> <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="bash ~/bin/hello.sh">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Put your own scripts in <code>~/bin</code>. On Ubuntu and Rocky this folder is added to <code>PATH</code> at login once it exists, so you can start them by name.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Never run a script you downloaded or do not understand. Read it first with <code>cat script.sh</code>. Be especially careful with <code>curl ... | bash</code> and with <code>sudo</code> on a first attempt.</p></aside>
+</section>
+<section id="vars"><h2>Variables, quoting and arithmetic</h2>
+<p>A variable is set with <code>NAME=value</code> — <strong>no spaces around <code>=</code></strong>. You read it with <code>$NAME</code>. <code>NAME = value</code> does not work: Bash thinks <code>NAME</code> is a command.</p>
+<p><strong>Double quotes</strong> <code>&quot;...&quot;</code> expand variables, <strong>single quotes</strong> <code>&#x27;...&#x27;</code> do not: <code>echo &#x27;$HOME&#x27;</code> prints the text <code>$HOME</code>. Always quote variables (<code>&quot;$NAME&quot;</code>) so file names with spaces stay one word.</p>
+<p><code>$(command)</code> inserts the output of a command, <code>$(( ))</code> calculates integers, <code>read</code> asks the user for input (VM only).</p>
+<article class="cmd"><h3><code>NAME=value</code></h3><dl><dt>What is it for?</dt><dd>Sets a variable (no spaces around the equals sign).</dd><dt>Where is it used?</dt><dd>At the top of a script for settings and paths.</dd><dt>Why does it matter?</dt><dd>You change a value in one place instead of ten.</dd></dl><div class="code"><pre><code><span class="ln">NAME=student; <span class="tk">echo</span> <span class="ts">&quot;Hello $NAME&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="NAME=student; echo &quot;Hello $NAME&quot;" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="NAME=student; echo &quot;Hello $NAME&quot;">Copy</button></div></div></article>
+<article class="cmd"><h3><code>&quot;$VAR&quot; and &#x27;$VAR&#x27;</code></h3><dl><dt>What is it for?</dt><dd>Double quotes expand the variable, single quotes keep the text.</dd><dt>Where is it used?</dt><dd>In every command that uses variables.</dd><dt>Why does it matter?</dt><dd>Quoting protects against spaces and glob characters in values.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;$HOME&#x27;</span> <span class="ts">&quot;$HOME&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="echo &#x27;$HOME&#x27; &quot;$HOME&quot;" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="echo &#x27;$HOME&#x27; &quot;$HOME&quot;">Copy</button></div></div></article>
+<article class="cmd"><h3><code>read -r -p</code></h3><dl><dt>What is it for?</dt><dd>Reads a line of input into a variable.</dd><dt>Where is it used?</dt><dd>In interactive scripts that ask questions.</dd><dt>Why does it matter?</dt><dd><code>-r</code> keeps backslashes, <code>-p</code> shows a prompt.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">read</span> <span class="tf">-r</span> <span class="tf">-p</span> <span class="ts">&quot;Name: &quot;</span> NAME</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="read -r -p &quot;Name: &quot; NAME">Copy</button></div></div></article>
+<article class="cmd"><h3><code>$(command)</code></h3><dl><dt>What is it for?</dt><dd>Replaces itself with the output of the command.</dd><dt>Where is it used?</dt><dd>To store output in a variable or use it in text.</dd><dt>Why does it matter?</dt><dd>Lets scripts react to system state.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Host: $(hostname)&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="echo &quot;Host: $(hostname)&quot;" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="echo &quot;Host: $(hostname)&quot;">Copy</button></div></div></article>
+<article class="cmd"><h3><code>$(( ))</code></h3><dl><dt>What is it for?</dt><dd>Integer arithmetic.</dd><dt>Where is it used?</dt><dd>Counters, sizes, simple calculations.</dd><dt>Why does it matter?</dt><dd>Bash has no decimals; for those use <code>bc</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="tp">$((6</span> * 7))</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo $((6 * 7))">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>A default value is written <code>${NAME:-default}</code>: it is used when <code>NAME</code> is empty or unset.</p></aside>
+</section>
+<section id="args"><h2>Arguments and exit codes</h2>
+<p>A script receives arguments: <code>$0</code> is the script name, <code>$1</code>, <code>$2</code>, ... are the arguments, <code>$#</code> is their number and <code>&quot;$@&quot;</code> is the list of all of them, each kept as one word. Quote <code>&quot;$@&quot;</code>, otherwise <code>my file</code> becomes two words.</p>
+<p>Every command ends with an <strong>exit code</strong>: <code>0</code> means success, anything else means failure. <code>$?</code> holds the code of the last command. In a script you end with <code>exit 0</code> or <code>exit 1</code>. The simulator cannot run arguments in scripts reliably, so the real runs are in the VM section.</p>
+<article class="cmd"><h3><code>$0 $1 $2</code></h3><dl><dt>What is it for?</dt><dd>Script name and the first arguments.</dd><dt>Where is it used?</dt><dd>When the script needs input from the caller.</dd><dt>Why does it matter?</dt><dd>One script works for many files or names.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">./args.sh</span> alice bob</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="./args.sh alice bob">Copy</button></div></div></article>
+<article class="cmd"><h3><code>$# and &quot;$@&quot;</code></h3><dl><dt>What is it for?</dt><dd>Number of arguments and the list of all arguments.</dd><dt>Where is it used?</dt><dd>To check the count or loop over arguments.</dd><dt>Why does it matter?</dt><dd><code>&quot;$@&quot;</code> keeps every argument intact, even with spaces.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">./args.sh</span> <span class="ts">&quot;my file&quot;</span> bob</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="./args.sh &quot;my file&quot; bob">Copy</button></div></div></article>
+<article class="cmd"><h3><code>${1:-guest}</code></h3><dl><dt>What is it for?</dt><dd>First argument, or <code>guest</code> if none was given.</dd><dt>Where is it used?</dt><dd>For optional arguments.</dd><dt>Why does it matter?</dt><dd>The script does not break when the argument is missing.</dd></dl><div class="code"><pre><code><span class="ln">NAME=&quot;${1:-guest}&quot;</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="NAME=&quot;${1:-guest}&quot;">Copy</button></div></div></article>
+<article class="cmd"><h3><code>$? and exit</code></h3><dl><dt>What is it for?</dt><dd><code>$?</code> is the last exit code, <code>exit N</code> ends a script with code N.</dd><dt>Where is it used?</dt><dd>After commands you want to check, and at the end of scripts.</dd><dt>Why does it matter?</dt><dd>Other scripts, cron and CI decide based on this code.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">false;</span> echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="false; echo $?" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="false; echo $?">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p><code>grep</code> returns 1 when nothing matches. That is not an error in the program, just a &#x27;no&#x27; answer: <code>grep carol ~/users.txt; echo $?</code> prints <code>1</code>.</p></aside>
+</section>
+<section id="cond"><h2>Conditions: if, elif, else</h2>
+<p><code>if</code> runs a command and looks at its exit code. The command is usually <code>[ ... ]</code> (the same as <code>test</code>) or Bash&#x27;s <code>[[ ... ]]</code>. Spaces inside the brackets are required: <code>[ -f &quot;$1&quot; ]</code>.</p>
+<p>Useful tests: <code>-f</code> regular file, <code>-d</code> directory, <code>-x</code> executable, <code>-z</code> string is empty, <code>-n</code> string is not empty. For numbers use <code>-eq -ne -lt -le -gt -ge</code>, for text <code>==</code> and <code>!=</code>. <code>[[ ]]</code> is safer than <code>[ ]</code> (no word splitting) but exists only in Bash, not in plain <code>sh</code>.</p>
+<p>Short forms: <code>cmd1 &amp;&amp; cmd2</code> runs the second only on success, <code>cmd1 || cmd2</code> only on failure.</p>
+<article class="cmd"><h3><code>if / elif / else / fi</code></h3><dl><dt>What is it for?</dt><dd>Runs different commands depending on a test.</dd><dt>Where is it used?</dt><dd>Whenever a script must decide.</dd><dt>Why does it matter?</dt><dd>Scripts react to input and state instead of running blindly.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">if</span> [ <span class="tf">-f</span> <span class="ts">&quot;$1&quot;</span> ]; then echo exists; else echo missing; fi</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="if [ -f &quot;$1&quot; ]; then echo exists; else echo missing; fi">Copy</button></div></div></article>
+<article class="cmd"><h3><code>[ ] / test</code></h3><dl><dt>What is it for?</dt><dd>Tests files, strings and numbers; the result is the exit code.</dd><dt>Where is it used?</dt><dd>In the condition of <code>if</code>, or alone with <code>&amp;&amp;</code> / <code>||</code>.</dd><dt>Why does it matter?</dt><dd>The portable form that works in every shell.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">~/notes.txt</span> <span class="to">&amp;&amp;</span> <span class="tk">echo</span> yes</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="test -f ~/notes.txt &amp;&amp; echo yes" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="test -f ~/notes.txt &amp;&amp; echo yes">Copy</button></div></div></article>
+<article class="cmd"><h3><code>[[ ]]</code></h3><dl><dt>What is it for?</dt><dd>Bash conditions with patterns and <code>&amp;&amp;</code> / <code>||</code> inside.</dd><dt>Where is it used?</dt><dd>In scripts with <code>#!/bin/bash</code>.</dd><dt>Why does it matter?</dt><dd>Fewer quoting traps than <code>[ ]</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">[[</span> <span class="tp">$score</span> <span class="tf">-ge</span> 50 <span class="to">&amp;&amp;</span> <span class="tk">-n</span> <span class="tp">$name</span> ]] <span class="to">&amp;&amp;</span> <span class="tk">echo</span> ok</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="[[ $score -ge 50 &amp;&amp; -n $name ]] &amp;&amp; echo ok">Copy</button></div></div></article>
+<article class="cmd"><h3><code>&amp;&amp; and ||</code></h3><dl><dt>What is it for?</dt><dd>Chains commands by success or failure.</dd><dt>Where is it used?</dt><dd>For short checks on one line.</dd><dt>Why does it matter?</dt><dd>Quick alternative to a full <code>if</code>.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-d</span> <span class="tp">~/Documents</span> <span class="to">&amp;&amp;</span> <span class="tk">echo</span> dir <span class="to">||</span> <span class="tk">echo</span> nodir</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="test -d ~/Documents &amp;&amp; echo dir || echo nodir" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="test -d ~/Documents &amp;&amp; echo dir || echo nodir">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Check first, act second: <code>[ -f &quot;$1&quot; ] || { echo &quot;no such file&quot;; exit 1; }</code> stops early with a clear message.</p></aside>
+</section>
+<section id="strict"><h2>Safe scripts: set -euo pipefail and debugging</h2>
+<p>By default Bash <strong>continues after errors</strong>. The line <code>set -euo pipefail</code> at the top changes that: <code>-e</code> stops at the first failing command, <code>-u</code> treats an unset variable as an error, <code>-o pipefail</code> makes a pipe fail if any part fails.</p>
+<p>To debug use <code>bash -n script.sh</code> (syntax check only) and <code>bash -x script.sh</code> (prints every command with a <code>+</code> before running it). <code>shellcheck</code> finds typical mistakes before you run the script. Install it with <code>sudo apt install shellcheck</code> on Debian/Ubuntu or <code>sudo dnf install epel-release &amp;&amp; sudo dnf install ShellCheck</code> on RHEL/Rocky.</p>
+<p>On hardened systems a script can fail although <code>chmod +x</code> was done: the folder may be mounted <code>noexec</code>, or SELinux (RHEL/Rocky) / AppArmor (Ubuntu) may block it when a service starts it. Then use <code>bash script.sh</code> for a test and look at the audit/journal logs.</p>
+<article class="cmd"><h3><code>set -euo pipefail</code></h3><dl><dt>What is it for?</dt><dd>Strict mode: stop on errors, unset variables and failed pipes.</dd><dt>Where is it used?</dt><dd>Second line of almost every script.</dd><dt>Why does it matter?</dt><dd>Errors are not silently ignored, so the script does less damage.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">set</span> <span class="tf">-euo</span> pipefail</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="set -euo pipefail">Copy</button></div></div></article>
+<article class="cmd"><h3><code>bash -n / bash -x</code></h3><dl><dt>What is it for?</dt><dd><code>-n</code> checks syntax, <code>-x</code> traces each command.</dd><dt>Where is it used?</dt><dd>When a script misbehaves.</dd><dt>Why does it matter?</dt><dd>You see exactly which line and which values are used.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">bash</span> <span class="tf">-x</span> <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="bash -x ~/bin/hello.sh">Copy</button></div></div></article>
+<article class="cmd"><h3><code>shellcheck</code></h3><dl><dt>What is it for?</dt><dd>Static analysis of shell scripts.</dd><dt>Where is it used?</dt><dd>Before you share or schedule a script.</dd><dt>Why does it matter?</dt><dd>Finds quoting bugs and typos early.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">shellcheck</span> <span class="tp">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="shellcheck ~/bin/vars.sh">Copy</button></div></div></article>
+<article class="cmd"><h3><code>${VAR:?message}</code></h3><dl><dt>What is it for?</dt><dd>Aborts with a message if the variable is empty or unset.</dd><dt>Where is it used?</dt><dd>Before destructive commands that use a variable.</dd><dt>Why does it matter?</dt><dd>Prevents <code>rm</code> from running on the wrong path.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">rm</span> <span class="tf">-r</span> <span class="ts">&quot;${TARGET:?TARGET is not set}/cache&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="rm -r &quot;${TARGET:?TARGET is not set}/cache&quot;">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Print first, delete later: replace <code>rm</code> with <code>echo rm</code> in a test run and check the paths with your eyes.</p></aside>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Only <code>-e</code> is no guarantee: it is ignored inside conditions (<code>if</code>, <code>&amp;&amp;</code>, <code>||</code>). Test every script with harmless sample data first.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p>An empty variable is dangerous: <code>rm -rf &quot;$DIR&quot;/*</code> becomes <code>rm -rf /*</code> when <code>DIR</code> is empty. Use <code>set -u</code> and <code>${DIR:?}</code>, test in a VM and take a <strong>snapshot</strong> first (module 0.2).</p></aside>
+</section>
+<section id="vm"><h2>Do it on your own VM <span class="gcount" data-g="vm"></span></h2><p>The real practice happens on real Linux: run the commands in your own virtual machine (VirtualBox, UTM or WSL) and compare the output.</p><p>On your VM (Ubuntu or Rocky) you run the scripts for real. Use only your own <code>~/bin</code> folder and harmless test data. For destructive experiments take a snapshot first (module 0.2).</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>First script and execute bit</h3><span class="status" aria-hidden="true"></span></header><p>Create the script with a heredoc, try to run it before and after <code>chmod +x</code>, and paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/bin</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/hello.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Hello, Linux!&quot;</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/hello.sh</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">~/bin/hello.sh</span></span>
+<span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/bin
+cat &gt; ~/bin/hello.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+echo &quot;Hello, Linux!&quot;
+EOF
+~/bin/hello.sh
+chmod +x ~/bin/hello.sh
+ls -l ~/bin/hello.sh
+~/bin/hello.sh">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">bash: /home/student/bin/hello.sh: Permission denied
+-rwxr-xr-x. 1 student student 38 Nov 12 10:00 /home/student/bin/hello.sh
+Hello, Linux!</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>On Ubuntu <code>ls -l</code> has no dot after the permissions; on Rocky there is one (SELinux context).</li><li>If the first run already works, your umask or file system gives the execute bit; that is fine.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Variables, quoting, read and arithmetic</h3><span class="status" aria-hidden="true"></span></header><p>Write a script that shows the quoting difference, reads a number and doubles it. Feed the number through a pipe.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/vars.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln">NAME=&quot;student&quot;</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;single: $NAME&#x27;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;double: $NAME&quot;</span></span>
+<span class="ln"><span class="tk">read</span> <span class="tf">-r</span> <span class="tf">-p</span> <span class="ts">&quot;Number: &quot;</span> N</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Double: $((N * 2))&quot;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Year: $(date +%Y)&quot;</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/vars.sh</span></span>
+<span class="ln"><span class="tk">echo</span> 21 <span class="to">|</span> <span class="tk">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/vars.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+NAME=&quot;student&quot;
+echo &#x27;single: $NAME&#x27;
+echo &quot;double: $NAME&quot;
+read -r -p &quot;Number: &quot; N
+echo &quot;Double: $((N * 2))&quot;
+echo &quot;Year: $(date +%Y)&quot;
+EOF
+chmod +x ~/bin/vars.sh
+echo 21 | ~/bin/vars.sh">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">single: $NAME
+double: student
+Double: 42
+Year: 2026</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>The prompt <code>Number:</code> is not shown because input comes from a pipe; that is normal.</li><li>If you see <code>unbound variable</code> or <code>syntax error</code>, check that there are no spaces around <code>=</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Arguments with spaces</h3><span class="status" aria-hidden="true"></span></header><p>Write a script that prints the argument count and every argument, then call it with a file name that contains a space.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/args.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Script: $0&quot;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;Count: $#&quot;</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;First: $1&quot;</span></span>
+<span class="ln"><span class="tk">for</span> item in <span class="ts">&quot;$@&quot;</span><span class="to">;</span> <span class="tk">do</span></span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;Arg: $item&quot;</span></span>
+<span class="ln"><span class="tk">done</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/args.sh</span></span>
+<span class="ln"><span class="tk">~/bin/args.sh</span> <span class="ts">&quot;my file&quot;</span> bob</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/args.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+echo &quot;Script: $0&quot;
+echo &quot;Count: $#&quot;
+echo &quot;First: $1&quot;
+for item in &quot;$@&quot;; do
+  echo &quot;Arg: $item&quot;
+done
+EOF
+chmod +x ~/bin/args.sh
+~/bin/args.sh &quot;my file&quot; bob">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">Script: /home/student/bin/args.sh
+Count: 2
+First: my file
+Arg: my file
+Arg: bob</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If <code>Count</code> is 3, you called it without quotes around <code>my file</code>.</li><li>Replace <code>&quot;$@&quot;</code> with <code>$@</code> and run again: <code>my</code> and <code>file</code> become separate arguments.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>if / elif / else and exit codes</h3><span class="status" aria-hidden="true"></span></header><p>Build a small grading script with <code>[[ ]]</code>, run it with three inputs and look at exit codes of <code>test</code>.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/grade.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln">score=&quot;${1:-0}&quot;</span>
+<span class="ln"><span class="tk">if</span> [[ <span class="tp">$score</span> <span class="tf">-ge</span> 90 ]]; then</span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;top&quot;</span></span>
+<span class="ln"><span class="tk">elif</span> [[ <span class="tp">$score</span> <span class="tf">-ge</span> 50 ]]; then</span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;pass&quot;</span></span>
+<span class="ln"><span class="tk">else</span></span>
+<span class="ln">  <span class="tk">echo</span> <span class="ts">&quot;fail&quot;</span></span>
+<span class="ln"><span class="tk">fi</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/grade.sh</span></span>
+<span class="ln"><span class="tk">~/bin/grade.sh</span> 95</span>
+<span class="ln"><span class="tk">~/bin/grade.sh</span> 60</span>
+<span class="ln"><span class="tk">~/bin/grade.sh</span></span>
+<span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">/etc/passwd;</span> echo <span class="ts">&quot;rc=$?&quot;</span></span>
+<span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">/nonexistent;</span> echo <span class="ts">&quot;rc=$?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/grade.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+score=&quot;${1:-0}&quot;
+if [[ $score -ge 90 ]]; then
+  echo &quot;top&quot;
+elif [[ $score -ge 50 ]]; then
+  echo &quot;pass&quot;
+else
+  echo &quot;fail&quot;
+fi
+EOF
+chmod +x ~/bin/grade.sh
+~/bin/grade.sh 95
+~/bin/grade.sh 60
+~/bin/grade.sh
+test -f /etc/passwd; echo &quot;rc=$?&quot;
+test -f /nonexistent; echo &quot;rc=$?&quot;">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">top
+pass
+fail
+rc=0
+rc=1</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If you get <code>[[: not found</code>, you started the script with <code>sh script.sh</code>; use <code>bash</code> or run it directly.</li><li>If every input prints <code>fail</code>, check the spaces inside <code>[[ ... ]]</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Strict mode in action</h3><span class="status" aria-hidden="true"></span></header><p>Compare what <code>set -euo pipefail</code> does with a failing command and with an unset variable.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="to">&gt;</span> <span class="tk">~/bin/strict.sh</span> <span class="to">&lt;&lt;</span><span class="ts">&#x27;EOF&#x27;</span></span>
+<span class="ln"><span class="tc">#!/bin/bash</span></span>
+<span class="ln"><span class="tk">set</span> <span class="tf">-euo</span> pipefail</span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;before&quot;</span></span>
+<span class="ln"><span class="tk">false</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="ts">&quot;after&quot;</span></span>
+<span class="ln"><span class="tk">EOF</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/strict.sh</span></span>
+<span class="ln"><span class="tk">~/bin/strict.sh;</span> echo <span class="ts">&quot;exit=$?&quot;</span></span>
+<span class="ln"><span class="tk">bash</span> <span class="tf">-c</span> <span class="ts">&#x27;set -u; echo &quot;$UNDEFINED_VAR&quot;&#x27;</span><span class="to">;</span> <span class="tk">echo</span> <span class="ts">&quot;exit=$?&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat &gt; ~/bin/strict.sh &lt;&lt;&#x27;EOF&#x27;
+#!/bin/bash
+set -euo pipefail
+echo &quot;before&quot;
+false
+echo &quot;after&quot;
+EOF
+chmod +x ~/bin/strict.sh
+~/bin/strict.sh; echo &quot;exit=$?&quot;
+bash -c &#x27;set -u; echo &quot;$UNDEFINED_VAR&quot;&#x27;; echo &quot;exit=$?&quot;">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">before
+exit=1
+bash: line 1: UNDEFINED_VAR: unbound variable
+exit=1</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>after</code> must not appear. If it does, check the <code>set</code> line.</li><li>The exact wording of the <code>unbound variable</code> message depends on the Bash version.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v06" data-expect="1"><header><h3>Debugging: bash -n, bash -x, shellcheck</h3><span class="status" aria-hidden="true"></span></header><p>Check the syntax, trace a script and install ShellCheck (choose your distribution). If the install is not possible, skip the third block and paste the first two outputs.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">bash</span> <span class="tf">-n</span> <span class="tp">~/bin/hello.sh;</span> echo <span class="ts">&quot;syntax=$?&quot;</span></span>
+<span class="ln"><span class="tk">bash</span> <span class="tf">-x</span> <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="bash -n ~/bin/hello.sh; echo &quot;syntax=$?&quot;
+bash -x ~/bin/hello.sh">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">syntax=0
++ echo &#x27;Hello, Linux!&#x27;
+Hello, Linux!</pre>
+<div class="code"><pre><code><span class="ln"><span class="tc"># Ubuntu / Debian</span></span>
+<span class="ln"><span class="tk">sudo</span> apt install <span class="tf">-y</span> shellcheck</span>
+<span class="ln"><span class="tc"># Rocky / RHEL</span></span>
+<span class="ln"><span class="tk">sudo</span> dnf install <span class="tf">-y</span> epel-release <span class="to">&amp;&amp;</span> <span class="tk">sudo</span> dnf install <span class="tf">-y</span> ShellCheck</span>
+<span class="ln"><span class="tk">shellcheck</span> <span class="tp">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="# Ubuntu / Debian
+sudo apt install -y shellcheck
+# Rocky / RHEL
+sudo dnf install -y epel-release &amp;&amp; sudo dnf install -y ShellCheck
+shellcheck ~/bin/vars.sh">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">(no output means no findings)</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li><code>syntax=0</code> means the syntax is fine; any other number means a syntax error and Bash prints the line.</li><li>If ShellCheck prints hints like SC2086, they usually point to missing quotes around a variable.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Quick exercises (simulator)</h2><p>Optional: warm up before the VM, or practise without one, in the in-browser virtual terminal. Tasks are verified automatically.</p><p>Tasks get harder from warm-up to ticket. Badges show the difficulty.</p><p><button type="button" class="btn" data-openterm>&gt;_ Open terminal (optional)</button></p>
+<h3 class="kind k-warmup">Warm-up <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Create the folder for your scripts in your home directory: <code>mkdir ~/bin</code>.</p><details><summary>Hint</summary><p><code>~</code> is your home directory.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tp">~/bin</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir ~/bin">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Write your first script with <code>printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh</code>.</p><details><summary>Hint</summary><p><code>\n</code> is a line break; the file gets two lines. Check with <code>cat ~/bin/hello.sh</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho &quot;Hello, Linux!&quot;\n&#x27; &gt; ~/bin/hello.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t03" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Make the script executable with <code>chmod +x ~/bin/hello.sh</code>.</p><details><summary>Hint</summary><p>Look at <code>ls -l ~/bin/hello.sh</code>: the permissions now contain <code>x</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod +x ~/bin/hello.sh">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Guided lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d1">Easy</span></p><p>Run the script by its path: <code>~/bin/hello.sh</code>.</p><details><summary>Hint</summary><p>Or <code>cd ~/bin</code> first and then <code>./hello.sh</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">~/bin/hello.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="~/bin/hello.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Write <code>~/bin/vars.sh</code> with the lines <code>#!/bin/bash</code>, <code>NAME=student</code> and <code>echo &quot;Hello $NAME&quot;</code> (use <code>printf</code>), make it executable and run it.</p><details><summary>Hint</summary><p>Three commands: <code>printf ... &gt; ~/bin/vars.sh</code>, <code>chmod +x</code>, then run it. Output: <code>Hello student</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nNAME=student\necho &quot;Hello $NAME&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/vars.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/vars.sh</span></span>
+<span class="ln"><span class="tk">~/bin/vars.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nNAME=student\necho &quot;Hello $NAME&quot;\n&#x27; &gt; ~/bin/vars.sh
+chmod +x ~/bin/vars.sh
+~/bin/vars.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t08" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Write <code>~/bin/check.sh</code> (shebang, then <code>if [ -f &quot;$1&quot; ]; then</code>, <code>echo &quot;exists&quot;</code>, <code>else</code>, <code>echo &quot;missing&quot;</code>, <code>fi</code>) and make it executable. The simulator cannot run <code>if</code>; you will run it in the VM.</p><details><summary>Hint</summary><p>Use one <code>printf</code> with <code>\n</code> between the lines, then <code>chmod +x</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nif [ -f &quot;$1&quot; ]; then\n  echo &quot;exists&quot;\nelse\n  echo &quot;missing&quot;\nfi\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/check.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/check.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nif [ -f &quot;$1&quot; ]; then\n  echo &quot;exists&quot;\nelse\n  echo &quot;missing&quot;\nfi\n&#x27; &gt; ~/bin/check.sh
+chmod +x ~/bin/check.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Use <code>test</code> or <code>[ ]</code> twice: check that <code>~/notes.txt</code> is a file (<code>-f</code>) and that <code>~/Documents</code> is a directory (<code>-d</code>). Add <code>&amp;&amp; echo ok</code> to see the result.</p><details><summary>Hint</summary><p><code>test -f ~/notes.txt &amp;&amp; echo file</code> and <code>[ -d ~/Documents ] &amp;&amp; echo dir</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-f</span> <span class="tp">~/notes.txt</span> <span class="to">&amp;&amp;</span> <span class="tk">echo</span> file</span>
+<span class="ln"><span class="tk">[</span> <span class="tf">-d</span> <span class="tp">~/Documents</span> ] <span class="to">&amp;&amp;</span> <span class="tk">echo</span> dir</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="test -f ~/notes.txt &amp;&amp; echo file
+[ -d ~/Documents ] &amp;&amp; echo dir">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Predict <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t06" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: what do <code>&#x27;$HOME&#x27;</code> and <code>&quot;$HOME&quot;</code> print? Then check with <code>echo &#x27;$HOME&#x27; &quot;$HOME&quot;</code>.</p><details><summary>Hint</summary><p>Single quotes keep the text, double quotes expand the variable.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="ts">&#x27;$HOME&#x27;</span> <span class="ts">&quot;$HOME&quot;</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo &#x27;$HOME&#x27; &quot;$HOME&quot;">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict the exit code of a search without a match. Run <code>grep carol ~/users.txt; echo $?</code>.</p><details><summary>Hint</summary><p>grep finds nothing in this file and answers with a non-zero code.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> carol <span class="tp">~/users.txt;</span> echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep carol ~/users.txt; echo $?">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Predict: is <code>~/notes.txt</code> executable? Run <code>test -x ~/notes.txt; echo $?</code> and read the code.</p><details><summary>Hint</summary><p>Exit code 0 means true, 1 means false.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">test</span> <span class="tf">-x</span> <span class="tp">~/notes.txt;</span> echo <span class="tp">$?</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="test -x ~/notes.txt; echo $?">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Debug <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t11" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: <code>~/scripts/broken.sh</code> has no shebang and no execute permission. Fix both (keep the two existing commands in it), then run it; it must create <code>~/backup.done</code>.</p><details><summary>Hint</summary><p>Rewrite the file with <code>printf</code> and add <code>#!/bin/bash</code> as the first line, then <code>chmod +x</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho Backup started\ntouch /home/student/backup.done\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/scripts/broken.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/scripts/broken.sh</span></span>
+<span class="ln"><span class="tk">~/scripts/broken.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho Backup started\ntouch /home/student/backup.done\n&#x27; &gt; ~/scripts/broken.sh
+chmod +x ~/scripts/broken.sh
+~/scripts/broken.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d3">Hard</span></p><p>Debug: <code>~/scripts/greet.sh</code> should print <code>Hello alice</code> but prints the text <code>Hello $NAME</code>. Find the two mistakes (space around <code>=</code>, single quotes), fix them and run the script.</p><details><summary>Hint</summary><p><code>NAME=alice</code> without spaces, and <code>echo &quot;Hello $NAME&quot;</code> with double quotes.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nNAME=alice\necho &quot;Hello $NAME&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/scripts/greet.sh</span></span>
+<span class="ln"><span class="tk">~/scripts/greet.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nNAME=alice\necho &quot;Hello $NAME&quot;\n&#x27; &gt; ~/scripts/greet.sh
+~/scripts/greet.sh">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini project <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d2">Medium</span></p><p>Mini project: write <code>~/bin/args.sh</code> with a shebang and three <code>echo</code> lines that use <code>$1</code>, <code>$#</code> and <code>&quot;$@&quot;</code>. Make it executable.</p><details><summary>Hint</summary><p>Example line: <code>echo &quot;Count: $#&quot;</code>. Use one <code>printf</code> and <code>\n</code> between the lines.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\necho &quot;First: $1&quot;\necho &quot;Count: $#&quot;\necho &quot;All:&quot; &quot;$@&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/args.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/args.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\necho &quot;First: $1&quot;\necho &quot;Count: $#&quot;\necho &quot;All:&quot; &quot;$@&quot;\n&#x27; &gt; ~/bin/args.sh
+chmod +x ~/bin/args.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t14" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d3">Hard</span></p><p>Mini project: write <code>~/bin/backup.sh</code>: shebang, <code>set -euo pipefail</code>, <code>SRC=&quot;$HOME/Documents&quot;</code>, <code>DEST=&quot;$HOME/backup&quot;</code>, <code>mkdir -p &quot;$DEST&quot;</code> and <code>cp &quot;$SRC/report.txt&quot; &quot;$DEST/&quot;</code>. Make it executable.</p><details><summary>Hint</summary><p>Quote every variable. The simulator cannot run <code>set</code>, so only create the file.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nset -euo pipefail\nSRC=&quot;$HOME/Documents&quot;\nDEST=&quot;$HOME/backup&quot;\nmkdir -p &quot;$DEST&quot;\ncp &quot;$SRC/report.txt&quot; &quot;$DEST/&quot;\necho &quot;Backup done: $DEST&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/backup.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/backup.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nset -euo pipefail\nSRC=&quot;$HOME/Documents&quot;\nDEST=&quot;$HOME/backup&quot;\nmkdir -p &quot;$DEST&quot;\ncp &quot;$SRC/report.txt&quot; &quot;$DEST/&quot;\necho &quot;Backup done: $DEST&quot;\n&#x27; &gt; ~/bin/backup.sh
+chmod +x ~/bin/backup.sh">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Challenge <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: create <code>~/bin/need_arg.sh</code>. Without an argument it prints <code>Usage: need_arg.sh NAME</code> and ends with <code>exit 1</code>; otherwise it prints <code>Hello, $1</code> and ends with <code>exit 0</code>. Make it executable.</p><details><summary>Hint</summary><p>Test with <code>-z &quot;$1&quot;</code>; use <code>if ... then ... fi</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nif [ -z &quot;$1&quot; ]; then\n  echo &quot;Usage: need_arg.sh NAME&quot;\n  exit 1\nfi\necho &quot;Hello, $1&quot;\nexit 0\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/need_arg.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/need_arg.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nif [ -z &quot;$1&quot; ]; then\n  echo &quot;Usage: need_arg.sh NAME&quot;\n  exit 1\nfi\necho &quot;Hello, $1&quot;\nexit 0\n&#x27; &gt; ~/bin/need_arg.sh
+chmod +x ~/bin/need_arg.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t16" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: create <code>~/bin/probe.sh</code> whose only command is <code>test -f /home/student/missing.txt</code>. Make it executable, run it and write its exit code with <code>echo $? &gt; ~/code.txt</code> into <code>~/code.txt</code>.</p><details><summary>Hint</summary><p>A script returns the exit code of its last command. Run <code>echo $?</code> right after the script.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\ntest -f /home/student/missing.txt\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/probe.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/probe.sh</span></span>
+<span class="ln"><span class="tk">~/bin/probe.sh</span></span>
+<span class="ln"><span class="tk">echo</span> <span class="tp">$?</span> <span class="to">&gt;</span> <span class="tk">~/code.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\ntest -f /home/student/missing.txt\n&#x27; &gt; ~/bin/probe.sh
+chmod +x ~/bin/probe.sh
+~/bin/probe.sh
+echo $? &gt; ~/code.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t17" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>Ticket: The new-hire team wants <code>~/bin/welcome.sh</code>. With a name it prints <code>Welcome, NAME</code>; without an argument it must use <code>guest</code>. Use <code>${1:-guest}</code>, add a shebang and make it executable.</p><details><summary>Hint</summary><p><code>NAME=&quot;${1:-guest}&quot;</code> and then <code>echo &quot;Welcome, $NAME&quot;</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">printf</span> <span class="ts">&#x27;#!/bin/bash\nNAME=&quot;${1:-guest}&quot;\necho &quot;Welcome, $NAME&quot;\n&#x27;</span> <span class="to">&gt;</span> <span class="tk">~/bin/welcome.sh</span></span>
+<span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/bin/welcome.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="printf &#x27;#!/bin/bash\nNAME=&quot;${1:-guest}&quot;\necho &quot;Welcome, $NAME&quot;\n&#x27; &gt; ~/bin/welcome.sh
+chmod +x ~/bin/welcome.sh">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t18" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d2">Medium</span></p><p>Ticket: A colleague says <code>~/scripts/report.sh</code> fails with &#x27;Permission denied&#x27;. Fix it with the smallest change and run it; it must create <code>~/report.done</code>.</p><details><summary>Hint</summary><p>The file lacks the execute bit; you do not need to edit its contents.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">chmod</span> +x <span class="tp">~/scripts/report.sh</span></span>
+<span class="ln"><span class="tk">~/scripts/report.sh</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="chmod +x ~/scripts/report.sh
+~/scripts/report.sh">Copy</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Reset lab</button></p></section>
+<section id="quiz"><h2>Self-test</h2>
+<div class="q card" data-q="q1"><p><strong>What does <code>echo &#x27;$HOME&#x27;</code> print?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">/home/student</button><button type="button" class="opt" data-i="1">$HOME</button><button type="button" class="opt" data-i="2">An empty line</button><button type="button" class="opt" data-i="3">HOME</button></div><p class="explain" hidden>Single quotes prevent expansion; the text <code>$HOME</code> is printed. Only double quotes expand variables.</p></div>
+<div class="q card" data-q="q2"><p><strong>What does <code>$#</code> contain inside a script?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">The number of arguments</button><button type="button" class="opt" data-i="1">The name of the script</button><button type="button" class="opt" data-i="2">The exit code of the last command</button><button type="button" class="opt" data-i="3">All arguments as one text</button></div><p class="explain" hidden><code>$#</code> is the argument count; <code>$0</code> is the script name, <code>$?</code> the last exit code and <code>&quot;$@&quot;</code> the list of arguments.</p></div>
+<div class="q card" data-q="q3"><p><strong>What does <code>set -euo pipefail</code> do?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Starts the script as root</button><button type="button" class="opt" data-i="1">Prints each command before it runs</button><button type="button" class="opt" data-i="2">Ignores all errors</button><button type="button" class="opt" data-i="3">Stops on errors, unset variables and failed parts of a pipe</button></div><p class="explain" hidden><code>-e</code> stops on errors, <code>-u</code> on unset variables and <code>pipefail</code> on failing pipe parts. Printing commands is <code>-x</code>.</p></div>
+<div class="q card" data-q="q4"><p><strong>You start <code>./run.sh</code> and the file has no execute bit. What happens?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">command not found</button><button type="button" class="opt" data-i="1">A syntax error</button><button type="button" class="opt" data-i="2">Permission denied</button><button type="button" class="opt" data-i="3">The script runs normally</button></div><p class="explain" hidden>Without the x bit the kernel refuses to start the file: Permission denied. Fix it with <code>chmod +x run.sh</code>.</p></div>
+</section>
+<section id="summary" class="card"><h2>Summary</h2><ul><li>A script starts with the shebang <code>#!/bin/bash</code>, needs <code>chmod +x</code> and is started with <code>./script.sh</code>.</li><li>Variables: <code>NAME=value</code> without spaces; <code>&quot;$NAME&quot;</code> expands, <code>&#x27;$NAME&#x27;</code> does not. Always quote.</li><li><code>$1</code>, <code>$#</code> and <code>&quot;$@&quot;</code> read arguments; <code>${1:-default}</code> sets a default.</li><li><code>$?</code> is the last exit code (0 = success); <code>exit N</code> ends a script with a code.</li><li><code>if</code> with <code>[ ]</code>, <code>[[ ]]</code> or <code>test</code> decides; <code>-f -d -z -eq</code> are the most common tests.</li><li><code>set -euo pipefail</code> plus <code>bash -x</code> and <code>shellcheck</code> make scripts safer and easier to debug.</li></ul></section>
+<section id="glossary"><h2>Key terms</h2><dl class="gl"><dt>shebang</dt><dd>The first line <code>#!/bin/bash</code>; names the interpreter of the script.</dd><dt>execute bit</dt><dd>The x permission that allows a file to be started as a program.</dd><dt>variable</dt><dd>A named value, set with <code>NAME=value</code> and read with <code>$NAME</code>.</dd><dt>quoting</dt><dd>Single quotes keep text literally, double quotes expand variables.</dd><dt>positional argument</dt><dd>A value passed to the script: <code>$1</code>, <code>$2</code>, ...</dd><dt>exit code</dt><dd>A number returned by a command; 0 is success, everything else is failure.</dd><dt>test / [ ]</dt><dd>A command that evaluates a condition and answers with an exit code.</dd><dt>strict mode</dt><dd><code>set -euo pipefail</code>: stop on errors, unset variables and failed pipes.</dd><dt>heredoc</dt><dd><code>&lt;&lt;&#x27;EOF&#x27;</code> passes several lines of text to a command, often to create a file.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-6.4.html">← Previous</a><a class="btn primary" href="modul-6.6.html">Next →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (optional)</strong><button type="button" class="ibtn" id="termclose" aria-label="Close terminal">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "en", "module": "6.5", "setup": {"dirs": ["/home/student/scripts"], "files": {"/home/student/users.txt": "alice\nbob\n", "/home/student/scripts/broken.sh": "echo Backup started\ntouch /home/student/backup.done\n", "/home/student/scripts/greet.sh": "#!/bin/bash\nNAME = alice\necho 'Hello $NAME'\n", "/home/student/scripts/report.sh": "#!/bin/bash\necho Report done\ntouch /home/student/report.done\n"}, "modes": [["/home/student/scripts/broken.sh", "644"], ["/home/student/scripts/greet.sh", "755"], ["/home/student/scripts/report.sh", "644"]]}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"exists": "~/bin", "type": "d"}}, {"id": "t02", "kind": "warmup", "check": [{"contains": ["~/bin/hello.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/hello.sh", "echo \"Hello, Linux!\""]}]}, {"id": "t03", "kind": "warmup", "check": {"mode": ["~/bin/hello.sh", "755"]}}, {"id": "t04", "kind": "guided", "check": {"cmd": "^(\\./|~/bin/|/home/student/bin/)hello\\.sh$", "ok": true, "out": "Hello, Linux!"}}, {"id": "t05", "kind": "guided", "check": [{"contains": ["~/bin/vars.sh", "NAME=student"]}, {"contains": ["~/bin/vars.sh", "echo \"Hello \\$NAME\""]}, {"out": "Hello student", "of": "vars\\.sh$"}]}, {"id": "t06", "kind": "predict", "check": {"out": "\\$HOME /home/student", "of": "^echo"}}, {"id": "t07", "kind": "predict", "check": {"out": "1", "of": "carol.*echo \\$\\?"}}, {"id": "t08", "kind": "guided", "check": [{"contains": ["~/bin/check.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/check.sh", "if \\[+ -f"]}, {"contains": ["~/bin/check.sh", "\\nelse\\n"]}, {"contains": ["~/bin/check.sh", "\\nfi\\n"]}, {"mode": ["~/bin/check.sh", "755"]}]}, {"id": "t09", "kind": "guided", "check": [{"cmd": "^(test|\\[) -f \\S*notes\\.txt", "ok": true}, {"cmd": "^(test|\\[) -d \\S*Documents", "ok": true}]}, {"id": "t10", "kind": "predict", "check": {"out": "1", "of": "-x.*echo \\$\\?"}}, {"id": "t11", "kind": "debug", "check": [{"contains": ["~/scripts/broken.sh", "^#!/bin/bash\\n"]}, {"mode": ["~/scripts/broken.sh", "755"]}, {"exists": "~/backup.done", "type": "f"}]}, {"id": "t12", "kind": "debug", "check": [{"contains": ["~/scripts/greet.sh", "\\nNAME=alice\\n"]}, {"contains": ["~/scripts/greet.sh", "echo \"Hello \\$NAME\""]}, {"out": "Hello alice", "of": "greet\\.sh$"}]}, {"id": "t13", "kind": "mini", "check": [{"contains": ["~/bin/args.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/args.sh", "\\$1"]}, {"contains": ["~/bin/args.sh", "\\$#"]}, {"contains": ["~/bin/args.sh", "\"\\$@\""]}, {"mode": ["~/bin/args.sh", "755"]}]}, {"id": "t14", "kind": "mini", "check": [{"contains": ["~/bin/backup.sh", "^#!/bin/bash\\nset -euo pipefail\\n"]}, {"contains": ["~/bin/backup.sh", "\\nSRC="]}, {"contains": ["~/bin/backup.sh", "\\nDEST="]}, {"contains": ["~/bin/backup.sh", "mkdir -p \"\\$DEST\""]}, {"contains": ["~/bin/backup.sh", "\\ncp \"\\$SRC"]}, {"mode": ["~/bin/backup.sh", "755"]}]}, {"id": "t15", "kind": "challenge", "check": [{"contains": ["~/bin/need_arg.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/need_arg.sh", "-z \"?\\$1\"?"]}, {"contains": ["~/bin/need_arg.sh", "Usage: need_arg\\.sh NAME"]}, {"contains": ["~/bin/need_arg.sh", "exit 1"]}, {"contains": ["~/bin/need_arg.sh", "exit 0"]}, {"contains": ["~/bin/need_arg.sh", "Hello, \\$1"]}, {"mode": ["~/bin/need_arg.sh", "755"]}]}, {"id": "t16", "kind": "challenge", "check": [{"contains": ["~/bin/probe.sh", "test -f /home/student/missing\\.txt"]}, {"mode": ["~/bin/probe.sh", "755"]}, {"equals": ["~/code.txt", "1\n"]}]}, {"id": "t17", "kind": "ticket", "check": [{"contains": ["~/bin/welcome.sh", "^#!/bin/bash\\n"]}, {"contains": ["~/bin/welcome.sh", "\\$\\{1:-guest\\}"]}, {"contains": ["~/bin/welcome.sh", "Welcome, "]}, {"mode": ["~/bin/welcome.sh", "755"]}]}, {"id": "t18", "kind": "ticket", "check": [{"mode": ["~/scripts/report.sh", "755"]}, {"exists": "~/report.done", "type": "f"}]}], "vm": [{"id": "v01", "expect": "(?=[\\s\\S]*Hello)(?=[\\s\\S]*rwx)"}, {"id": "v02", "expect": "(?=[\\s\\S]*single: \\$NAME)(?=[\\s\\S]*double: student)(?=[\\s\\S]*Double: 42)"}, {"id": "v03", "expect": "(?=[\\s\\S]*Count: 2)(?=[\\s\\S]*Arg: my file)"}, {"id": "v04", "expect": "(?=[\\s\\S]*pass)(?=[\\s\\S]*fail)"}, {"id": "v05", "expect": "(?=[\\s\\S]*before)(?=[\\s\\S]*exit=1)"}, {"id": "v06", "expect": "(?=[\\s\\S]*syntax=0)(?=[\\s\\S]*\\+ )"}], "quiz": {"q1": 1, "q2": 0, "q3": 3, "q4": 2}, "ui": {"correct": "Correct!", "wrong": "Not quite, try again.", "taskDone": "Task complete", "moduleDone": "Module complete! 🎉", "tasksDone": "done", "welcome": "Virtual Linux terminal — commands only affect this page's virtual file system. Type 'help' to list commands, Tab to complete, ↑/↓ for history.", "sandboxNote": "Safe sandbox: your real system is never touched.", "resetConfirm": "This module's virtual file system and command history will be reset. Your progress (completed tasks) is kept. Continue?", "openTerminal": "Open terminal (optional)", "closeTerminal": "Close terminal", "continue": "Continue", "startPath": "Start learning", "noResult": "No matching module or command.", "soon": "Coming soon", "overall": "Overall progress", "copied": "Copied ✓", "pasteOk": "Your output matches the expected pattern ✓", "pasteBad": "No match yet. See the tips under \"My output looks different\" and paste the complete output.", "iDidIt": "Done", "undo": "Undo", "groupDone": "done", "vmDone": "VM tasks"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

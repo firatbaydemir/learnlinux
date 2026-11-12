@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0.2 Kendi Linux VM&#x27;ini kurmak — Temel Linux Akademisi</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","tr")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="0.2">
+<header class="top"><a class="brand" href="index.html">Temel Linux Akademisi</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (isteğe bağlı)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-0.2.html" hreflang="tr" lang="tr" data-switch="tr" aria-current="true">TR</a><a href="../de/modul-0.2.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-0.2.html" hreflang="en" lang="en" data-switch="en">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Tema" aria-label="Tema">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Genel ilerleme"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="İçindekiler"><strong>İçindekiler</strong><ol><li><a href="#why">Neden kendi VM&#x27;in?</a></li><li><a href="#iso">ISO&#x27;yu indir ve doğrula</a></li><li><a href="#create">VM oluştur ve kur</a></li><li><a href="#snapshot">Snapshot: geri al düğmen</a></li><li><a href="#network">Ağ temelleri</a></li><li><a href="#ssh">SSH ile bağlan</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>İçindekiler</summary><ol><li><a href="#why">Neden kendi VM&#x27;in?</a></li><li><a href="#iso">ISO&#x27;yu indir ve doğrula</a></li><li><a href="#create">VM oluştur ve kur</a></li><li><a href="#snapshot">Snapshot: geri al düğmen</a></li><li><a href="#network">Ağ temelleri</a></li><li><a href="#ssh">SSH ile bağlan</a></li><li><a href="#vm">Kendi VM&#x27;inde yap</a></li><li><a href="#lab">Alıştırmalar</a></li><li><a href="#quiz">Öz test</a></li><li><a href="#summary">Özet</a></li><li><a href="#glossary">Terimler</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Ana sayfa</a> <span aria-hidden="true">/</span> Seviye 0</p>
+<h1><span class="module-id">0.2</span> Kendi Linux VM&#x27;ini kurmak</h1>
+<p class="lead">VirtualBox, UTM veya WSL içine Rocky/Alma Linux ya da Ubuntu kur, indirmeyi doğrula, snapshot al ve SSH ile bağlan.</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>Bu modülde neler öğreneceksin?</h2><ul><li>Bilgisayarına uygun aracı seçersin (VirtualBox, UTM veya WSL).</li><li>Kurmadan önce ISO&#x27;yu SHA-256 sağlama toplamıyla doğrularsın.</li><li>VM oluşturur, snapshot alır ve SSH ile bağlanırsın.</li></ul></section>
+<section id="why"><h2>Neden kendi VM&#x27;in?</h2>
+<p>Gerçek beceri <strong>gerçek Linux</strong>&#x27;ta kazanılır. Sanal makine (VM), bilgisayarının içindeki tam bir bilgisayardır: bozabilir, yeniden kurabilirsin; gerçek sistemine hiçbir şey olmaz.</p>
+<p>Donanımına uygun aracı seç: <strong>VirtualBox</strong> (Windows, Intel Mac, Linux), <strong>UTM</strong> (Apple Silicon Mac, ARM64 ISO gerekir) veya <strong>WSL 2</strong> (Windows 10/11, en hızlı başlangıç, yalnızca Ubuntu). Dağıtım olarak şirketlerde kullanılan RHEL ailesinden <strong>Rocky Linux 9 / AlmaLinux 9</strong> ve isteğe bağlı <strong>Ubuntu 24.04 LTS</strong> öneriyoruz.</p>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Her VM için 2 CPU çekirdeği, 4 GB RAM ve 25 GB disk planla.</p></aside>
+</section>
+<section id="iso"><h2>ISO&#x27;yu indir ve doğrula</h2>
+<p>ISO&#x27;yu yalnızca dağıtımın resmi sitesinden indir (rockylinux.org, almalinux.org, ubuntu.com). ISO&#x27;nun yanında bir <strong>sağlama toplamı</strong> (SHA-256) yayımlanır. Kendi dosyanın toplamını hesapla ve karşılaştır: tek karakter farklıysa dosya bozuk veya değiştirilmiştir, yeniden indir.</p>
+<article class="cmd"><h3><code>sha256sum (Linux/macOS: shasum -a 256)</code></h3><dl><dt>Ne işe yarar?</dt><dd>Dosyanın SHA-256 sağlama toplamını hesaplar.</dd><dt>Nerede kullanılır?</dt><dd>İndirme sonrası ana bilgisayarında.</dd><dt>Neden önemli?</dt><dd>ISO&#x27;nun eksiksiz ve değiştirilmemiş olduğunu kanıtlar.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> Rocky-9-latest-x86_64-minimal.iso</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum Rocky-9-latest-x86_64-minimal.iso">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>Get-FileHash (Windows PowerShell)</code></h3><dl><dt>Ne işe yarar?</dt><dd>Windows&#x27;ta aynı sağlama toplamı.</dd><dt>Nerede kullanılır?</dt><dd>Windows ana bilgisayarda PowerShell.</dd><dt>Neden önemli?</dt><dd>Windows&#x27;ta sha256sum yoktur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">Get-FileHash</span> .\Rocky-9-latest-x86_64-minimal.iso <span class="tf">-Algorithm</span> SHA256</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="Get-FileHash .\Rocky-9-latest-x86_64-minimal.iso -Algorithm SHA256">Kopyala</button></div></div></article>
+<aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>Sağlama toplamı uyuşmayan ISO ile, kurucu açılsa bile asla kurulum yapma.</p></aside>
+</section>
+<section id="create"><h2>VM oluştur ve kur</h2>
+<p>VirtualBox/UTM&#x27;de yeni VM oluştur, ISO&#x27;yu bağla; 2 CPU, 4 GB RAM ve 25 GB disk ver. Başlat ve kurucuyu izle: dili seç, diski seç (otomatik bölümleme yeterli), root parolası belirle, <strong>normal bir kullanıcı oluştur ve &quot;yönetici&quot; kutusunu işaretle</strong> (kullanıcıyı <code>wheel</code>/<code>sudo</code> grubuna ekler).</p>
+<p>Önce <strong>Minimal</strong> kurulumu seç; araçları sonra kendin eklersin. Yeniden başlatmadan sonra ISO&#x27;yu çıkar ve normal kullanıcınla giriş yap. <code>cat /etc/os-release</code> ile hangi sistemi kurduğunu gör.</p>
+<p><strong>WSL</strong>&#x27;de bu tek komuttur (yönetici PowerShell): <code>wsl --install -d Ubuntu-24.04</code>. Yeniden başlat ve istenince kullanıcı adını oluştur.</p>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Boşluksuz, kısa ve küçük harfli bir kullanıcı adı seç; çok yazacaksın.</p></aside>
+</section>
+<section id="snapshot"><h2>Snapshot: geri al düğmen</h2>
+<p><strong>Snapshot</strong>, VM&#x27;in tüm durumunu kaydeder. İlk başarılı açılıştan hemen sonra ve her riskli denemeden önce <code>clean-install</code> adlı bir tane al. Bir şeyi bozarsan snapshot&#x27;ı saniyeler içinde geri yüklersin.</p>
+<p>VirtualBox&#x27;ta: Makine ▸ Anlık görüntü al; UTM&#x27;de VM&#x27;i klonla veya QEMU snapshot seçeneğini kullan. WSL için yedek dışa aktar: <code>wsl --export Ubuntu-24.04 yedek.tar</code>.</p>
+<aside class="callout danger" role="note"><strong>⛔ Tehlike</strong><p>Snapshot gerçek dosyalarının yedeği değildir; ana bilgisayar diski bozulursa snapshot&#x27;lar da gider.</p></aside>
+</section>
+<section id="network"><h2>Ağ temelleri</h2>
+<p><strong>NAT</strong> (varsayılan) VM&#x27;in internete çıkmasını sağlar ama ağından gizler; erişmek için port yönlendirme kullan. <strong>Bridged</strong> VM&#x27;i kendi IP adresiyle yerel ağına koyar. <strong>Host-only</strong> yalnızca VM ile bilgisayarını bağlar.</p>
+<p>Öğrenmek için port yönlendirmeli NAT (ana makine 2222 → konuk 22) veya bridged ikisi de uygundur. VM içinde adresini <code>ip -brief a</code> ile gör.</p>
+<article class="cmd"><h3><code>ip -brief a</code></h3><dl><dt>Ne işe yarar?</dt><dd>Arayüzleri durum ve IP adresiyle gösterir.</dd><dt>Nerede kullanılır?</dt><dd>VM içinde.</dd><dt>Neden önemli?</dt><dd>SSH ile bağlanmak için IP adresi gerekir.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ip</span> <span class="tf">-brief</span> a</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ip -brief a">Kopyala</button></div></div></article>
+</section>
+<section id="ssh"><h2>SSH ile bağlan</h2>
+<p>VM penceresi kullanışsızdır. Bunun yerine ana makinenin terminalinden <strong>SSH</strong> ile bağlan: kopyala/yapıştır çalışır ve gerçekte sunucular böyle yönetilir. Önce VM&#x27;de SSH servisinin çalıştığından emin ol (Rocky/Alma&#x27;da <code>sudo systemctl enable --now sshd</code>, Ubuntu&#x27;da <code>ssh</code>).</p>
+<p>Sonra ana makineden: <code>ssh kullanici@IP</code> (bridged) veya <code>ssh -p 2222 kullanici@127.0.0.1</code> (port yönlendirmeli NAT). Sunucu anahtarını <code>yes</code> ile kabul et.</p>
+<article class="cmd"><h3><code>ssh user@host</code></h3><dl><dt>Ne işe yarar?</dt><dd>Güvenli uzak kabuk açar.</dd><dt>Nerede kullanılır?</dt><dd>Ana makineden VM&#x27;e veya herhangi bir sunucuya.</dd><dt>Neden önemli?</dt><dd>Linux yönetiminin standart yoludur.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ssh</span> student@192.168.1.50</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh student@192.168.1.50">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ssh-keygen -t ed25519</code></h3><dl><dt>Ne işe yarar?</dt><dd>Parolasız giriş için anahtar çifti üretir.</dd><dt>Nerede kullanılır?</dt><dd>Ana makinede bir kez.</dd><dt>Neden önemli?</dt><dd>Parolalardan daha güvenli ve rahattır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ssh-keygen</span> <span class="tf">-t</span> ed25519</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh-keygen -t ed25519">Kopyala</button></div></div></article>
+<article class="cmd"><h3><code>ssh-copy-id user@host</code></h3><dl><dt>Ne işe yarar?</dt><dd>Açık anahtarını VM&#x27;e kurar.</dd><dt>Nerede kullanılır?</dt><dd>ssh-keygen sonrası.</dd><dt>Neden önemli?</dt><dd>Sonraki girişlerde parola gerekmez.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ssh-copy-id</span> student@192.168.1.50</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh-copy-id student@192.168.1.50">Kopyala</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>SSH çalışınca bir snapshot al — dönmek için en iyi durumdur.</p></aside>
+</section>
+<section id="vm"><h2>Kendi VM&#x27;inde yap <span class="gcount" data-g="vm"></span></h2><p>Asıl uygulama gerçek Linux&#x27;ta yapılır: kendi sanal makinende (VirtualBox, UTM veya WSL) komutları çalıştır, çıktıyı karşılaştır.</p><p>Bu modülün ana yolu budur: adımları kendi bilgisayarında uygula. &quot;Yaptım&quot; de veya çıktı yapıştırıp kontrol ettir.</p>
+<article class="vmt card" data-vm="v01" data-expect="0"><header><h3>ISO&#x27;yu indir</h3><span class="status" aria-hidden="true"></span></header><p>Rocky Linux 9 veya AlmaLinux 9 (minimal ISO; Apple Silicon için ARM64) ya da Ubuntu 24.04 indir ve yayımlanan SHA-256 değerini not al.</p>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Apple Silicon için aarch64/arm64 ISO gerekir; x86_64 UTM&#x27;de doğal olarak açılmaz.</li></ul></details>
+<p><button type="button" class="btn primary done">Yaptım</button> <button type="button" class="btn undo" hidden>Geri al</button></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Sağlama toplamını doğrula</h3><span class="status" aria-hidden="true"></span></header><p>ISO&#x27;nun SHA-256 değerini hesapla ve çıktıyı yapıştır. Yayımlanan değerle elle karşılaştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sha256sum</span> Rocky-9-latest-x86_64-minimal.iso</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sha256sum Rocky-9-latest-x86_64-minimal.iso">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">3f2b...c9a1  Rocky-9-latest-x86_64-minimal.iso</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">shasum</span> <span class="tf">-a</span> 256 Rocky-9-latest-aarch64-minimal.iso</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="shasum -a 256 Rocky-9-latest-aarch64-minimal.iso">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">(macOS) 64 onaltılı karakter ve dosya adı</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>64 onaltılı karakter beklenir; daha kısa çıktı komutun başarısız olduğu anlamına gelir.</li><li>Windows: <code>Get-FileHash dosya.iso -Algorithm SHA256</code> tablo yazdırır; Hash sütununu yapıştır.</li><li>Yayımlanan değerden farklı mı? Dosyayı sil ve yeniden indir.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="0"><header><h3>VM&#x27;i oluştur ve kur</h3><span class="status" aria-hidden="true"></span></header><p>VM&#x27;i oluştur (2 CPU, 4 GB RAM, 25 GB disk), sistemi kur, yönetici kullanıcı oluştur ve giriş ekranına kadar başlat.</p>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Açılış döngüsü veya &quot;no bootable medium&quot;: ISO&#x27;nun bağlı olduğunu ve önyükleme sırasının optik sürücüyle başladığını kontrol et.</li><li>Windows&#x27;ta VirtualBox: BIOS&#x27;ta sanallaştırmayı (VT-x/AMD-V) aç ve Hyper-V çakışmalarını kapat.</li></ul></details>
+<p><button type="button" class="btn primary done">Yaptım</button> <button type="button" class="btn undo" hidden>Geri al</button></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>İlk giriş</h3><span class="status" aria-hidden="true"></span></header><p>Kullanıcınla giriş yap ve hangi sistemi kurduğunu göster. Çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/os-release">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">NAME=&quot;Rocky Linux&quot;
+VERSION=&quot;9.4 (Blue Onyx)&quot;</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Ubuntu&#x27;da <code>NAME=&quot;Ubuntu&quot;</code> görünür; bu ders için ikisi de uygundur.</li><li>WSL&#x27;de de dosya vardır; metin aynıdır.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v05" data-expect="0"><header><h3>Snapshot al</h3><span class="status" aria-hidden="true"></span></header><p><code>sudo poweroff</code> ile düzgün kapat, <code>clean-install</code> adlı snapshot al, sonra VM&#x27;i yeniden başlat.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> poweroff</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo poweroff">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">(VM penceresi kapanır)</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Snapshot gri mi? Önce VM&#x27;i kapat (VirtualBox&#x27;ta düğme makine araçlarındadır).</li></ul></details>
+<p><button type="button" class="btn primary done">Yaptım</button> <button type="button" class="btn undo" hidden>Geri al</button></p>
+</article>
+<article class="vmt card" data-vm="v06" data-expect="1"><header><h3>IP adresini bul</h3><span class="status" aria-hidden="true"></span></header><p>Arayüzlerini göster ve çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ip</span> <span class="tf">-brief</span> a</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ip -brief a">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">lo     UNKNOWN  127.0.0.1/8
+enp0s3 UP       10.0.2.15/24</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>10.0.2.15</code> NAT demektir; ana makineden erişmek için port yönlendirme kuralını kullan.</li><li>enp0s3&#x27;te IPv4 yok mu? <code>nmcli device</code> çalıştır ve arayüzü bağla veya VM ağ adaptörünün açık olduğunu kontrol et.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v07" data-expect="1"><header><h3>SSH ile bağlan</h3><span class="status" aria-hidden="true"></span></header><p>Ana makine terminalinden VM&#x27;e bağlan ve aşağıdaki komutu çalıştır. Çıktıyı yapıştır.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ssh</span> student@192.168.1.50</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ssh student@192.168.1.50">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">(VM üzerinde bir prompt alırsın)</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">echo</span> <span class="tp">$SSH_CONNECTION</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="echo $SSH_CONNECTION">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">192.168.1.10 51234 192.168.1.50 22</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>Connection refused</code>: sshd çalışmıyor (<code>sudo systemctl enable --now sshd</code>).</li><li><code>Connection timed out</code>: yanlış IP veya (NAT&#x27;ta) port yönlendirme kuralı yok.</li><li><code>Permission denied</code>: yanlış kullanıcı adı veya parola.</li></ul></details>
+<label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v08" data-expect="0"><header><h3>Sistemi güncelle</h3><span class="status" aria-hidden="true"></span></header><p>Sistemi güncelle, yeniden başlat ve güncelleme hatasız bittiyse &quot;Yaptım&quot; de.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> dnf <span class="tf">-y</span> update   <span class="tc"># Rocky/Alma</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo dnf -y update">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">Complete!</pre>
+<div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> apt update <span class="to">&amp;&amp;</span> <span class="tk">sudo</span> apt <span class="tf">-y</span> upgrade   <span class="tc"># Ubuntu</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo apt update &amp;&amp; sudo apt -y upgrade">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">(E: hatası yok)</pre>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>Could not resolve host</code>: VM&#x27;in interneti yok; ağ adaptörünü kontrol et.</li></ul></details>
+<p><button type="button" class="btn primary done">Yaptım</button> <button type="button" class="btn undo" hidden>Geri al</button></p>
+</article>
+</section>
+<section id="lab"><h2>Hızlı alıştırmalar (simülatör)</h2><p>İsteğe bağlı: VM&#x27;e geçmeden önce ısınmak veya VM&#x27;in yokken denemek için tarayıcıdaki sanal terminali kullan. Görevler otomatik doğrulanır.</p><p>Görevler ısınmadan ticket&#x27;a doğru zorlaşır. Rozetler zorluğu gösterir.</p><p><button type="button" class="btn" data-openterm>&gt;_ Terminali aç (isteğe bağlı)</button></p>
+<h3 class="kind k-warmup">Isınma <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Isınma: simülatörde <code>cat /etc/os-release</code> ile kurulu bir sistemin kendini nasıl tanıttığını oku.</p><details><summary>İpucu</summary><p>Dosya adında tire var.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/os-release">Kopyala</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Isınma</span><span class="badge d1">Kolay</span></p><p>Isınma: <code>id</code> çalıştır; kullanıcını, uid&#x27;ni ve gruplarını gör (<code>wheel</code> yönetici demektir).</p><details><summary>İpucu</summary><p>Sadece <code>id</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">id</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="id">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Adım adım lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t03" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Adım adım lab</span><span class="badge d2">Orta</span></p><p>Adım adım: <code>hostname</code>, sonra <code>uname -r</code> çalıştır — her kurulumdan sonra not edilecek ilk bilgiler.</p><details><summary>İpucu</summary><p>İki ayrı komut.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">hostname</span></span>
+<span class="ln"><span class="tk">uname</span> <span class="tf">-r</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="hostname
+uname -r">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Tahmin et <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Tahmin et</span><span class="badge d2">Orta</span></p><p>Tahmin et: <code>sudo whoami</code> ne yazdırır? Düşün, sonra çalıştır.</p><details><summary>İpucu</summary><p>sudo komutu root olarak çalıştırır.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">sudo</span> whoami</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="sudo whoami">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Hata ayıkla <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t05" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Hata ayıkla</span><span class="badge d2">Orta</span></p><p>Hata ayıkla: <code>cat /etc/os_release</code> başarısız olur. Çalıştır, hatayı oku, sonra doğru komutu çalıştır.</p><details><summary>İpucu</summary><p>Alt çizgi ile tire farkı; <code>ls /etc</code> yardımcı olur.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os_release</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">/etc/os-release</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/os_release
+cat /etc/os-release">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini proje <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t06" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini proje</span><span class="badge d2">Orta</span></p><p>Mini proje: dağıtım adı satırını <code>grep PRETTY_NAME /etc/os-release &gt; ~/vm-summary.txt</code> ile <code>~/vm-summary.txt</code> dosyasına kaydet.</p><details><summary>İpucu</summary><p><code>&gt;</code> çıktıyı dosyaya yazar.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">grep</span> PRETTY_NAME <span class="tp">/etc/os-release</span> <span class="to">&gt;</span> <span class="tk">~/vm-summary.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="grep PRETTY_NAME /etc/os-release &gt; ~/vm-summary.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Meydan okuma <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t07" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Meydan okuma</span><span class="badge d3">Zor</span></p><p>Meydan okuma: tek <code>mkdir -p</code> komutuyla <code>~/vm-lab/snapshots</code> ve <code>~/vm-lab/notes</code> klasörlerini oluştur.</p><details><summary>İpucu</summary><p>Brace açılımı: <code>~/vm-lab/{snapshots,notes}</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/vm-lab/{snapshots,notes}</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/vm-lab/{snapshots,notes}">Kopyala</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t08" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Zor</span></p><p>TICKET #3001 — Laboratuvar VM raporu istiyor: makine adı, çekirdek sürümü ve kullanıcı adını (bu sırayla) <code>~/vm-report.txt</code> dosyasına satır satır yaz.</p><details><summary>İpucu</summary><p>İlk komutta <code>&gt;</code>, sonraki ikisinde <code>&gt;&gt;</code>.</p></details><details><summary>Çözüm</summary><div class="code"><pre><code><span class="ln"><span class="tk">hostname</span> <span class="to">&gt;</span> <span class="tk">~/vm-report.txt</span></span>
+<span class="ln"><span class="tk">uname</span> <span class="tf">-r</span> <span class="to">&gt;&gt;</span> <span class="tk">~/vm-report.txt</span></span>
+<span class="ln"><span class="tk">whoami</span> <span class="to">&gt;&gt;</span> <span class="tk">~/vm-report.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="hostname &gt; ~/vm-report.txt
+uname -r &gt;&gt; ~/vm-report.txt
+whoami &gt;&gt; ~/vm-report.txt">Kopyala</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Laboratuvarı sıfırla</button></p></section>
+<section id="quiz"><h2>Öz test</h2>
+<div class="q card" data-q="q1"><p><strong>Eşleşen bir SHA-256 sağlama toplamı ne anlatır?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">ISO en yeni sürümdür</button><button type="button" class="opt" data-i="1">Dosya eksiksiz ve değiştirilmemiştir</button><button type="button" class="opt" data-i="2">ISO ücretsizdir</button><button type="button" class="opt" data-i="3">VM daha hızlı açılır</button></div><p class="explain" hidden>Sağlama toplamı bir parmak izidir; aynı izler dosyanın yayımlananla aynı olduğunu gösterir.</p></div>
+<div class="q card" data-q="q2"><p><strong>Hangi ağ modu VM&#x27;i yerel ağdan gizler ama internete çıkarır?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Bridged</button><button type="button" class="opt" data-i="1">Host-only</button><button type="button" class="opt" data-i="2">NAT</button><button type="button" class="opt" data-i="3">Hiçbiri</button></div><p class="explain" hidden>NAT ana bilgisayar bağlantısını paylaşır; VM&#x27;e erişmek için port yönlendirme kullan.</p></div>
+<div class="q card" data-q="q3"><p><strong>Snapshot ne zaman alınmalı?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Riskli bir denemeden önce</button><button type="button" class="opt" data-i="1">Asla; disk israfı</button><button type="button" class="opt" data-i="2">Yalnızca VM silindikten sonra</button><button type="button" class="opt" data-i="3">Yalnızca WSL&#x27;de</button></div><p class="explain" hidden>Snapshot hızlı bir geri dönüş noktasıdır; pişman olabileceğin değişikliklerden önce al.</p></div>
+<div class="q card" data-q="q4"><p><strong>Apple Silicon Mac&#x27;te olağan tercih hangisidir?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">x86 ISO ile VirtualBox</button><button type="button" class="opt" data-i="1">WSL 2</button><button type="button" class="opt" data-i="2">Windows Hyper-V</button><button type="button" class="opt" data-i="3">ARM64 ISO ile UTM</button></div><p class="explain" hidden>Apple Silicon ARM&#x27;dır; UTM ARM64 konukları doğal çalıştırır.</p></div>
+</section>
+<section id="summary" class="card"><h2>Özet</h2><ul><li>VM, tamamen kontrol edebildiğin güvenli ve harcanabilir bir Linux&#x27;tur.</li><li>Kurmadan önce ISO sağlama toplamını her zaman doğrula.</li><li>Temiz kurulumdan sonra ve deneylerden önce snapshot al.</li><li>Ana bilgisayar terminalinden SSH ile çalışmak profesyonel yoldur.</li></ul></section>
+<section id="glossary"><h2>Terimler</h2><dl class="gl"><dt>VM</dt><dd>Sanal makine: yazılımla taklit edilen tam bir bilgisayar.</dd><dt>ISO</dt><dd>Kurulum ortamının disk kalıbı dosyası.</dd><dt>sağlama toplamı (checksum)</dt><dd>Dosyanın bozulup bozulmadığını anlamak için parmak izi.</dd><dt>snapshot</dt><dd>VM&#x27;in geri dönülebilir kayıtlı durumu.</dd><dt>SSH</dt><dd>Secure Shell: şifreli uzak terminal protokolü.</dd><dt>NAT</dt><dd>Ağ adresi çevirisi: VM ana bilgisayarın bağlantısını paylaşır.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-0.1.html">← Önceki</a><a class="btn primary" href="modul-0.3.html">Sonraki →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (isteğe bağlı)</strong><button type="button" class="ibtn" id="termclose" aria-label="Terminali kapat">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "tr", "module": "0.2", "setup": {}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^cat /etc/os-release$", "ok": true}}, {"id": "t02", "kind": "warmup", "check": {"cmd": "^id$", "ok": true}}, {"id": "t03", "kind": "guided", "check": {"seq": ["^hostname$", "^uname -r$"], "ok": true}}, {"id": "t04", "kind": "predict", "check": {"out": "root", "of": "^sudo whoami$"}}, {"id": "t05", "kind": "debug", "check": [{"cmd": "^cat /etc/os_release$", "ok": false}, {"cmd": "^cat /etc/os-release$", "ok": true}]}, {"id": "t06", "kind": "mini", "check": [{"exists": "~/vm-summary.txt", "type": "f"}, {"contains": ["~/vm-summary.txt", "PRETTY_NAME"]}]}, {"id": "t07", "kind": "challenge", "check": [{"exists": "~/vm-lab/snapshots", "type": "d"}, {"exists": "~/vm-lab/notes", "type": "d"}]}, {"id": "t08", "kind": "ticket", "check": [{"linesMin": ["~/vm-report.txt", 3]}, {"contains": ["~/vm-report.txt", "linux-lab"]}, {"contains": ["~/vm-report.txt", "student"]}]}], "vm": [{"id": "v01", "expect": null}, {"id": "v02", "expect": "[0-9a-f]{64}"}, {"id": "v03", "expect": null}, {"id": "v04", "expect": "(Rocky|Alma|Ubuntu|Red Hat|Fedora|Debian|CentOS)"}, {"id": "v05", "expect": null}, {"id": "v06", "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+"}, {"id": "v07", "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+ \\d+ \\d+\\.\\d+\\.\\d+\\.\\d+ 22"}, {"id": "v08", "expect": null}], "quiz": {"q1": 1, "q2": 2, "q3": 0, "q4": 3}, "ui": {"correct": "Doğru!", "wrong": "Yanlış, tekrar dene.", "taskDone": "Görev tamamlandı", "moduleDone": "Modül tamamlandı! 🎉", "tasksDone": "tamamlandı", "welcome": "Sanal Linux terminali — komutlar yalnızca bu sayfadaki sanal dosya sisteminde çalışır. 'help' yazarak komutları gör, Tab ile tamamla, ↑/↓ ile geçmişte gez.", "sandboxNote": "Güvenli kum havuzu: gerçek sistemine dokunulmaz.", "resetConfirm": "Bu modülün sanal dosya sistemi ve komut geçmişi sıfırlanacak. İlerlemen (tamamlanan görevler) korunur. Devam?", "openTerminal": "Terminali aç (isteğe bağlı)", "closeTerminal": "Terminali kapat", "continue": "Devam et", "startPath": "Öğrenmeye başla", "noResult": "Eşleşen modül veya komut yok.", "soon": "Yakında", "overall": "Genel ilerleme", "copied": "Kopyalandı ✓", "pasteOk": "Çıktın beklenen kalıpla eşleşti ✓", "pasteBad": "Henüz eşleşmedi. \"Çıktım farklı çıktı\" ipuçlarına bak ve çıktının tamamını yapıştır.", "iDidIt": "Yaptım", "undo": "Geri al", "groupDone": "tamam", "vmDone": "VM görevleri"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

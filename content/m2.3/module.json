@@ -1,0 +1,302 @@
+{
+ "id": "2.3",
+ "level": 2,
+ "setup": {
+  "dirs": [
+   "/home/student/old_project"
+  ],
+  "files": {
+   "/home/student/old_project/old.txt": "old data\n"
+  }
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "check": {
+    "exists": "~/practice",
+    "type": "d"
+   },
+   "solution": [
+    "mkdir practice"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t02",
+   "check": {
+    "cwd": "~/practice"
+   },
+   "solution": [
+    "cd practice"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t03",
+   "check": {
+    "exists": "~/practice/file1.txt",
+    "type": "f"
+   },
+   "solution": [
+    "touch file1.txt"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t04",
+   "check": {
+    "exists": "~/practice/folder1",
+    "type": "d"
+   },
+   "solution": [
+    "mkdir folder1"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t05",
+   "check": {
+    "exists": "~/practice/project/src/code",
+    "type": "d"
+   },
+   "solution": [
+    "mkdir -p project/src/code"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t06",
+   "check": {
+    "cmd": "^ls\\s+-R",
+    "ok": true
+   },
+   "solution": [
+    "ls -R project"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t07",
+   "check": [
+    {
+     "exists": "~/practice/a.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/practice/b.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/practice/c.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "touch {a,b,c}.txt"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t08",
+   "check": [
+    {
+     "seq": [
+      "^touch delete_me\\.txt$",
+      "^rm delete_me\\.txt$"
+     ],
+     "ok": true
+    },
+    {
+     "absent": "~/practice/delete_me.txt"
+    }
+   ],
+   "solution": [
+    "touch delete_me.txt",
+    "rm delete_me.txt"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t09",
+   "check": {
+    "cmd": "^rmdir project$",
+    "ok": false
+   },
+   "solution": [
+    "rmdir project"
+   ],
+   "kind": "predict",
+   "diff": 2
+  },
+  {
+   "id": "t10",
+   "check": [
+    {
+     "cmd": "^rm\\s+-r\\w*\\s+project$",
+     "ok": true
+    },
+    {
+     "absent": "~/practice/project"
+    }
+   ],
+   "solution": [
+    "rm -r project"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t11",
+   "check": {
+    "cmd": "^rm folder1$",
+    "ok": false
+   },
+   "solution": [
+    "rm folder1"
+   ],
+   "kind": "predict",
+   "diff": 2
+  },
+  {
+   "id": "t12",
+   "check": [
+    {
+     "seq": [
+      "^mkdir -p \\S*final_project$",
+      "^touch report\\.txt$",
+      "^ls -R final_project$",
+      "^rm -r final_project$"
+     ],
+     "ok": true
+    },
+    {
+     "absent": "~/practice/final_project"
+    }
+   ],
+   "solution": [
+    "mkdir -p ~/practice/final_project",
+    "cd ~/practice/final_project",
+    "touch report.txt",
+    "cd ..",
+    "ls -R final_project",
+    "rm -r final_project"
+   ],
+   "kind": "challenge",
+   "diff": 3
+  },
+  {
+   "id": "t13",
+   "check": {
+    "cmd": "^mkdir /etc/\\w+$",
+    "ok": false
+   },
+   "solution": [
+    "mkdir /etc/practice"
+   ],
+   "kind": "predict",
+   "diff": 2
+  },
+  {
+   "id": "t14",
+   "kind": "debug",
+   "check": {
+    "absent": "/home/student/old_project"
+   },
+   "solution": [
+    "rmdir ~/old_project",
+    "rm -r ~/old_project"
+   ],
+   "diff": 2
+  },
+  {
+   "id": "t15",
+   "kind": "mini",
+   "check": [
+    {
+     "exists": "~/web/css",
+     "type": "d"
+    },
+    {
+     "exists": "~/web/js",
+     "type": "d"
+    },
+    {
+     "exists": "~/web/img",
+     "type": "d"
+    },
+    {
+     "exists": "~/web/index.html",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "mkdir -p ~/web/{css,js,img}",
+    "touch ~/web/index.html"
+   ],
+   "diff": 2
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "check": [
+    {
+     "exists": "~/archive/2026/q1/jan.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/archive/2026/q1/feb.txt",
+     "type": "f"
+    },
+    {
+     "exists": "~/archive/2026/q1/mar.txt",
+     "type": "f"
+    }
+   ],
+   "solution": [
+    "mkdir -p ~/archive/2026/q1",
+    "touch ~/archive/2026/q1/{jan,feb,mar}.txt"
+   ],
+   "diff": 3
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 2
+  },
+  {
+   "id": "q2",
+   "answer": 1
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "(?=[\\s\\S]*src)(?=[\\s\\S]*test)"
+  },
+  {
+   "id": "v02",
+   "expect": "Permission denied|Erişim engellendi|Zugriff verweigert"
+  },
+  {
+   "id": "v03",
+   "expect": null
+  }
+ ]
+}

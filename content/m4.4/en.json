@@ -1,0 +1,390 @@
+{
+ "title": "Permission Basics",
+ "lead": "Read `ls -l` output and manage file and directory permissions correctly with `chmod`, `chown` and `umask`.",
+ "objectives": [
+  "You read the type character, the three permission triplets, owner and group in `ls -l`.",
+  "You explain that r, w, x mean different things for files and for directories.",
+  "You know that deleting a file depends on the w+x permission of the **parent directory**, not of the file.",
+  "You set permissions with `chmod` (octal and symbolic) and change ownership with `chown`/`chgrp`.",
+  "You show by calculation that `umask` is a bit mask, not a subtraction."
+ ],
+ "sections": [
+  {
+   "id": "read",
+   "title": "Reading ls -l output",
+   "body": [
+    "`ls -l` prints one line per file: `-rw-r----- 1 student devs 120 Nov 12 10:00 report.txt`. The first character is the **type**: `-` file, `d` directory, `l` symbolic link. The next nine characters are three triplets: **owner (u)**, **group (g)**, **others (o)**. Each triplet is `rwx` for read, write, execute; a missing permission shows as `-`.",
+    "The two names after the number are owner and group (`student devs`); the `1` before them is the hard link count. The system checks in order: if you are the owner, only the owner triplet applies; otherwise, if you are in the group, the group triplet applies; otherwise the others triplet. **root** and processes with relevant capabilities can bypass many discretionary access-control (DAC) checks; other controls such as SELinux or a read-only mount may still deny access.",
+    "`id` shows your groups. A new group membership only reaches your process after a fresh login (or with `newgrp`)."
+   ],
+   "commands": [
+    {
+     "cmd": "ls -l",
+     "what": "Lists files with type, permissions, owner, group, size and date.",
+     "where": "First stop for any permission problem.",
+     "why": "Shows at a glance who may do what.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "ls -ld",
+     "what": "Shows the permissions of the directory itself (not its contents).",
+     "where": "When checking directory permissions.",
+     "why": "`ls -l shared` lists the contents; for the directory itself you need `-d`.",
+     "example": "ls -ld shared"
+    },
+    {
+     "cmd": "stat",
+     "what": "Shows file details; permissions in octal and symbolic form.",
+     "where": "When you want to verify the octal value.",
+     "why": "No need to convert between `ls -l` and octal in your head.",
+     "example": "stat secret.txt"
+    },
+    {
+     "cmd": "id",
+     "what": "Shows user and group IDs.",
+     "where": "For the question 'why can't I access this?'.",
+     "why": "Determines which triplet applies to you.",
+     "example": "id"
+    }
+   ],
+   "tip": "Split the permission string into groups of three: `rw- r-- ---` means owner reads and writes, group reads, others nothing."
+  },
+  {
+   "id": "meaning",
+   "title": "r, w, x: on files and on directories",
+   "body": [
+    "**On files:** `r` reads the content, `w` changes the content, `x` runs the file as a program. New files are **never created executable**; for `./script.sh` you first need `chmod +x`.",
+    "**On directories:** `r` lists the names, `x` allows entering and reaching entries by name (`cd`, `cat vault/data.txt`), `w` allows creating, deleting and renaming entries. `w` alone is useless; **w needs x too**. To reach a path you need **x on every directory** along it.",
+    "**Key rule:** to delete or move a file, the file's own permissions do not matter; you need **w+x on the parent directory**. File permissions only control reading and writing the content. So a `644` file inside a `555` directory cannot be deleted, and neither can a `777` file there."
+   ],
+   "commands": [
+    {
+     "cmd": "cat",
+     "what": "Reads file content; needs r on the file and x on the directories in the path.",
+     "where": "When testing read permission.",
+     "why": "Unauthorized reads stop with `Permission denied`.",
+     "example": "cat secret.txt"
+    },
+    {
+     "cmd": "rm",
+     "what": "Deletes a file; success depends on w+x of the parent directory.",
+     "where": "When understanding delete failures.",
+     "why": "The directory permission decides, not the file permission.",
+     "example": "rm locked/old.txt"
+    },
+    {
+     "cmd": "cd",
+     "what": "Enters a directory; needs x on the directory.",
+     "where": "For access problems.",
+     "why": "Without x you cannot get in.",
+     "example": "cd vault"
+    }
+   ],
+   "tip": "When you say 'I can't delete it', don't look at the file; look at the **directory** with `ls -ld .`.",
+   "warn": "`chmod -R 777` is not a fix. It gives everyone write and execute rights, hides the real cause and opens a security hole. First find the real reason with `ls -l` and `id`."
+  },
+  {
+   "id": "chmod",
+   "title": "chmod: changing permissions",
+   "body": [
+    "In octal notation you add **r=4, w=2, x=1**: `7`=rwx, `6`=rw-, `5`=r-x, `4`=r--, `0`=---. The three digits are for owner, group, others. Common values: `644` (regular file), `755` (program and directory), `600` (private file), `700` (private directory), `664` and `775` (group work).",
+    "In symbolic notation you write who (`u`, `g`, `o`, `a`), operation (`+`, `-`, `=`) and permission (`r`, `w`, `x`): `chmod g+w,o-rx shared`. **Capital `X`** sets x only on directories and on files that are already executable; `chmod -R u=rwX,go=rX data` makes directories 755 and previously non-executable files 644, while preserving x on files that were already executable.",
+    "Only the **owner** (or root) may change permissions; on someone else's file you get `Operation not permitted`."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod 640",
+     "what": "Sets octal permissions: owner rw-, group r--, others ---.",
+     "where": "When you define permissions in one step.",
+     "why": "The result is explicit and repeatable.",
+     "example": "chmod 640 notes.txt"
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Adds the execute permission.",
+     "where": "When making a script executable.",
+     "why": "Changes only x, leaves other bits (subject to umask).",
+     "example": "chmod +x script.sh"
+    },
+    {
+     "cmd": "chmod g+w,o-rx",
+     "what": "Symbolic: group gains write, others lose read and execute.",
+     "where": "For small corrections.",
+     "why": "Changes only the bits you name.",
+     "example": "chmod g+w,o-rx shared"
+    },
+    {
+     "cmd": "chmod -R u=rwX,go=rX",
+     "what": "Fixes a tree recursively: files 644, directories 755.",
+     "where": "For bulk corrections.",
+     "why": "Thanks to `X`, files don't get needless x.",
+     "example": "chmod -R u=rwX,go=rX data"
+    }
+   ],
+   "tip": "Look at the target with `ls -l` first; with `-R`, double-check the end of the path.",
+   "danger": "Running `chmod -R` with a wrong value on `/` or `~` breaks the system or your home (e.g. SSH key permissions, sudo). In the VM take a **snapshot** first and work only inside the practice folder."
+  },
+  {
+   "id": "owner",
+   "title": "chown and chgrp: owner and group",
+   "body": [
+    "Every file has an owner and a group. **Only root may change the owner** (`sudo chown`). A regular user may only set a file's group to a group they belong to; in the simulator we use `sudo chgrp` for that.",
+    "`chown alice:devs report.txt` sets owner and group together. A typical team setup: group `devs`, mode `660` on files or `770` on directories; only `devs` members get access. Finer rules (per-user permissions) use ACLs (`getfacl`/`setfacl`); those come in later modules."
+   ],
+   "commands": [
+    {
+     "cmd": "sudo chown",
+     "what": "Changes the owner (and optionally the group).",
+     "where": "When handing a file over to another user.",
+     "why": "Only root can do this.",
+     "example": "sudo chown alice:devs report.txt"
+    },
+    {
+     "cmd": "sudo chgrp",
+     "what": "Changes only the group.",
+     "where": "When assigning a group to a shared directory.",
+     "why": "Keeps the owner and controls group access.",
+     "example": "sudo chgrp devs team.txt"
+    }
+   ],
+   "tip": "Be careful with `chown -R` on real systems too; verify the path with `ls -ld` first."
+  },
+  {
+   "id": "umask",
+   "title": "umask: default permissions",
+   "body": [
+    "New files **start** from `666`, new directories from `777`; `umask` removes bits using a **mask**: **new mode = base & ~umask**. This is not subtraction. Examples (file, base 666): umask `022` → `644`; `027` → `640`; `077` → `600`; `002` → `664`.",
+    "The difference shows when the umask has bits the base lacks: for `025`, `666 & ~025 = 642`, while subtraction would give `641` (wrong). For `001` the result is `666`, subtraction would give `665`. Because x is not in the base, files are never created executable.",
+    "`umask` is **per process**: it applies only in that shell and the programs started from it. To make it permanent, put it in `~/.bashrc` (user) or `/etc/profile` (system)."
+   ],
+   "commands": [
+    {
+     "cmd": "umask",
+     "what": "Shows the current mask in octal (e.g. `0022`).",
+     "where": "To understand permissions of new files.",
+     "why": "Explains why files are created as 644.",
+     "example": "umask"
+    },
+    {
+     "cmd": "umask -S",
+     "what": "Shows the mask symbolically: `u=rwx,g=rx,o=rx`.",
+     "where": "When you want to see the allowed bits directly.",
+     "why": "Shows what is granted instead of what is removed.",
+     "example": "umask -S",
+     "nosim": true
+    },
+    {
+     "cmd": "umask 027",
+     "what": "Sets the mask for this shell: new files 640, directories 750.",
+     "where": "When working closed to outsiders.",
+     "why": "Affects every new file that follows.",
+     "example": "umask 027"
+    }
+   ],
+   "tip": "In shared project folders use `umask 002`: new files `664`, directories `775`."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "List the permissions of the files in the `lab` folder with `ls -l`.",
+   "hint": "Read the first 10 characters of each line: type + three triplets."
+  },
+  "t02": {
+   "text": "Make `script.sh` executable with `chmod +x script.sh`.",
+   "hint": "Then check the x bits with `ls -l script.sh`."
+  },
+  "t03": {
+   "text": "Show the current mask with `umask`.",
+   "hint": "The default output is `0022`."
+  },
+  "t04": {
+   "text": "Run `chmod 640 notes.txt` so the owner has rw-, group r--, others ---.",
+   "hint": "6=rw-, 4=r--, 0=---."
+  },
+  "t05": {
+   "text": "Set the `shared` directory to `770` symbolically: add write for the group, remove read and execute from others (`chmod g+w,o-rx shared`).",
+   "hint": "Separate the two operations with a comma, no space."
+  },
+  "t06": {
+   "text": "Make `alice` the owner of `team.txt` with `sudo chown alice team.txt`.",
+   "hint": "Only root can change the owner, so `sudo` is needed."
+  },
+  "t07": {
+   "text": "Set the group of `team.txt` to `devs` with `sudo chgrp devs team.txt`.",
+   "hint": "`ls -l team.txt` should show `alice devs`."
+  },
+  "t08": {
+   "text": "Set `umask 027`, then create a file with `touch new.txt`. What permissions does it get?",
+   "hint": "666 & ~027 = 640."
+  },
+  "t09": {
+   "text": "Predict: `locked` is `555`, and `old.txt` inside is `644`. Does `rm locked/old.txt` work? Run it to check.",
+   "hint": "Deleting needs w on the directory; look with `ls -ld locked`."
+  },
+  "t10": {
+   "text": "Predict: what mode does `predict.txt` get after `umask 025` and `touch predict.txt`? Calculate first (666 & ~025), then run it and verify with `ls -l predict.txt`.",
+   "hint": "Subtraction gives 641; the correct mask calculation gives 642."
+  },
+  "t11": {
+   "text": "Predict: does `./deploy.sh` run? Run it to check.",
+   "hint": "The file is 644 with no x bit: expect `Permission denied`."
+  },
+  "t12": {
+   "text": "Debug: `locked/old.txt` cannot be deleted. Fix the problem and delete the file.",
+   "hint": "Look at the directory, not the file: `chmod u+w locked`, then `rm`."
+  },
+  "t13": {
+   "text": "Debug: `cat vault/data.txt` fails. Fix it and read the file.",
+   "hint": "`vault` is `600`: no x, you cannot get in. `chmod u+x vault`."
+  },
+  "t14": {
+   "text": "Mini project: create a `team` directory with `plan.txt` inside; directory `770`, file `660`; set the directory's group to `devs` with `sudo chgrp devs team`.",
+   "hint": "Order: `mkdir`, `touch`, two `chmod`, one `chgrp`."
+  },
+  "t15": {
+   "text": "Challenge: everything in the `data` tree is `777`. Make directories `755` and files `644` (`data/a.txt`, `data/sub/b.txt`).",
+   "hint": "Use capital `X`: `chmod -R u=rwX,go=rX data`."
+  },
+  "t16": {
+   "text": "TICKET #4401 — Alice will edit `report.txt`, group `devs` may write too, nobody else gets access. Set owner `alice`, group `devs`, mode `660`.",
+   "hint": "First `chmod 660`, then `sudo chown alice:devs`; after the owner changes you can no longer run chmod."
+  },
+  "t17": {
+   "text": "TICKET #4402 — The team creates new files in `shared` and the group cannot write them. Set `umask 002` and create a `664` file with `touch shared/log.txt`.",
+   "hint": "666 & ~002 = 664."
+  }
+ },
+ "vm": {
+  "intro": "Work in your own VM inside the `~/permlab` practice folder. Paste the commands in order and paste the output on this page. Take a snapshot before destructive steps.",
+  "tasks": {
+   "v01": {
+    "title": "Read permissions",
+    "text": "Read the permission strings of system files and check your identity.",
+    "blocks": [
+     {
+      "cmd": "ls -l /etc/passwd /etc/shadow /usr/bin/passwd\nls -ld /tmp /home\nid",
+      "expected": "-rw-r--r-- 1 root root  2345 Nov 12 10:00 /etc/passwd\n-rw-r----- 1 root shadow 1234 Nov 12 10:00 /etc/shadow\n-rwsr-xr-x 1 root root 59976 Nov 12 10:00 /usr/bin/passwd\ndrwxrwxrwt 15 root root 4096 Nov 12 10:00 /tmp"
+     }
+    ],
+    "differs": [
+     "On Rocky/Alma `/etc/shadow` may show `----------`; that is normal (root bypasses the check).",
+     "`s` (setuid) and `t` (sticky) are special bits; for now just treat them as 'x-like'."
+    ]
+   },
+   "v02": {
+    "title": "Practice with chmod",
+    "text": "Create the practice folder and a file, set the mode to `640` and show the result.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/permlab\ncd ~/permlab\ntouch notes.txt\nchmod 640 notes.txt\nls -l notes.txt\nstat -c '%a %A %U:%G' notes.txt",
+      "expected": "-rw-r----- 1 student student 0 Nov 12 10:00 notes.txt\n640 -rw-r----- student:student"
+     }
+    ],
+    "differs": [
+     "`stat -c` exists only in GNU stat; it does not work on macOS/BSD, you can ignore it.",
+     "If your user is not `student`, you will see your own name; that is fine."
+    ]
+   },
+   "v03": {
+    "title": "Deleting depends on directory permission",
+    "text": "Set the directory to `555`, try to delete the file inside, then restore the directory permission.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\nmkdir locked\ntouch locked/old.txt\nchmod 555 locked\nrm locked/old.txt\nls -ld locked\nchmod 755 locked\nrm locked/old.txt\nls locked",
+      "expected": "rm: cannot remove 'locked/old.txt': Permission denied\ndr-xr-xr-x 2 student student 4096 Nov 12 10:00 locked"
+     }
+    ],
+    "differs": [
+     "As root the delete succeeds because root bypasses permissions; test as a normal user.",
+     "The message may be translated (`Zugriff verweigert`, `Erişim engellendi`)."
+    ]
+   },
+   "v04": {
+    "title": "Effect of umask",
+    "text": "Set the mask to `027` and look at the permissions of a new file and a new directory. Note: this change affects only this terminal session.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\numask\numask 027\ntouch f027.txt\nmkdir d027\nls -ld f027.txt d027\numask 022",
+      "expected": "0022\n-rw-r----- 1 student student 0 Nov 12 10:00 f027.txt\ndrwxr-x--- 2 student student 4096 Nov 12 10:00 d027"
+     }
+    ],
+    "differs": [
+     "Your starting umask may be `0002` (Ubuntu with a per-user group); that is normal.",
+     "In a new terminal the old value returns: umask is per process."
+    ]
+   },
+   "v05": {
+    "title": "chown and cleanup",
+    "text": "Make root the owner of the file, then delete the directory: since you may write to the parent directory, the root-owned file is deleted too.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\ntouch owned.txt\nsudo chown root:root owned.txt\nls -l owned.txt\ncd ~\nrm -r ~/permlab\nls ~/permlab",
+      "expected": "-rw-r--r-- 1 root root 0 Nov 12 10:00 owned.txt\nls: cannot access '/home/student/permlab': No such file or directory"
+     }
+    ],
+    "differs": [
+     "If `sudo` asks for a password, enter your own.",
+     "If `rm: remove write-protected regular file?` appears, type `y`: deleting the root-owned file depends on the directory permission, not the file permission.",
+     "Type the `rm -r` path carefully; never try it on `/` or `~`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Which permission is needed to delete `notes.txt`?",
+   "options": [
+    "w on the file",
+    "w and x on the parent directory",
+    "r on the file",
+    "Only being the file owner"
+   ],
+   "explain": "Deleting removes the directory entry, so you need w+x on the parent directory. The file's own permission does not decide."
+  },
+  "q2": {
+   "q": "With `umask 027`, what mode does a new file get?",
+   "options": [
+    "750",
+    "600",
+    "640",
+    "027"
+   ],
+   "explain": "666 & ~027 = 640. For a directory, 777 & ~027 = 750."
+  },
+  "q3": {
+   "q": "What does `x` on a directory allow?",
+   "options": [
+    "Entering it and reaching entries by name",
+    "Executing the files inside",
+    "Deleting the directory",
+    "Listing the names inside"
+   ],
+   "explain": "x on a directory is the traverse permission (`cd`, passing through a path). Listing needs r."
+  },
+  "q4": {
+   "q": "Why is `chmod -R 777` the wrong fix for 'Permission denied'?",
+   "options": [
+    "The command does not work",
+    "Only root may use it",
+    "It changes the owner",
+    "It gives everyone full access and hides the real cause"
+   ],
+   "explain": "777 grants everyone read, write and execute and weakens security. First find the cause with `ls -l` and `id`, then grant only the minimum needed."
+  }
+ },
+ "summary": [
+  "`ls -l`: type character + owner/group/others triplets; r=4, w=2, x=1.",
+  "On directories: r=list, w=create/delete/rename (with x), x=enter/access; deleting a file depends on w+x of its parent directory.",
+  "`chmod` works in octal (`640`) or symbolic (`g+w`, `u=rwX`); only root can `chown`.",
+  "umask is a mask, not a subtraction: new mode = base & ~umask (file 666, directory 777).",
+  "`chmod -R 777` is not a fix; apply the principle of least privilege."
+ ],
+ "glossary": [
+  {"term": "permission triplet", "meaning": "A separate rwx set for owner, group and others."},
+  {"term": "octal mode", "meaning": "Permissions written as the sum r=4, w=2, x=1, e.g. 644."},
+  {"term": "umask", "meaning": "Bit mask that defines which permission bits are removed from new files and directories."},
+  {"term": "owner", "meaning": "The user the file belongs to; may change permissions."},
+  {"term": "group", "meaning": "A set of users sharing permissions, e.g. devs."},
+  {"term": "traverse permission", "meaning": "The x bit on a directory; allows passing through the path and access by name."}
+ ]
+}

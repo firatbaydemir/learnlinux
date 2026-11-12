@@ -1,0 +1,150 @@
+{
+ "title": "Yollar ve Türler",
+ "lead": "Mutlak ve göreli yolları doğru oku, ls -l ile dosya türünü tanı ve sembolik link (kısayol) oluştur.",
+ "objectives": [
+  "Mutlak (`/` ile başlar) ve göreli yolu ayırt eder, `.`, `..` ve `~` kısayollarını kullanırsın.",
+  "`ls -l` çıktısının ilk harfinden dosya türünü (`-`, `d`, `l`, `c`, `b`) okursun.",
+  "`ln -s` ile sembolik link kurar ve linkin neye işaret ettiğini görürsün."
+ ],
+ "sections": [
+  {
+   "id": "paths",
+   "title": "Mutlak ve göreli yollar",
+   "body": [
+    "Linux'ta bir dosyaya ulaşmanın tek yolu **yol** (path) vermektir. **Mutlak yol** kök dizinden (`/`) başlar ve nerede olursan ol aynı yeri gösterir: `/etc/hostname`.",
+    "**Göreli yol** `/` ile başlamaz ve **bulunduğun dizinden** hesaplanır. `/etc` içindeyken `hostname` yeterlidir; home dizinindeyken aynı ad hata verir, çünkü orada böyle bir dosya yoktur.",
+    "Önce `pwd` ile nerede olduğuna bak. Göreli yolun anlamı her zaman bulunduğun dizine bağlıdır."
+   ],
+   "commands": [
+    {"cmd": "pwd", "what": "Bulunduğun dizinin mutlak yolunu yazar.", "where": "Göreli yol kullanmadan önce.", "why": "Yanlış dizinde işlem yapmamak için.", "example": "pwd"},
+    {"cmd": "cd", "what": "Çalışma dizinini değiştirir; mutlak veya göreli yol alır.", "where": "Dizinler arasında gezerken.", "why": "Sonraki komutlarda kısa göreli yollar kullanabilmek için.", "example": "cd /etc"},
+    {"cmd": "cat", "what": "Dosyanın içeriğini yazar.", "where": "Küçük metin dosyalarını okurken.", "why": "Yolun doğru dosyayı gösterdiğini denemek için.", "example": "cat /etc/hostname"}
+   ],
+   "tip": "Emin değilsen mutlak yol yaz; her dizinden çalışır."
+  },
+  {
+   "id": "shortcuts",
+   "title": "Özel yol kısayolları: . .. ~",
+   "body": [
+    "`.` bulunduğun dizindir, `..` bir üst dizindir, `~` home dizinindir (`/home/student`). Bunları yollarda birleştirebilirsin: `../config.txt`, `~/Documents/report.txt`.",
+    "Adı `.` ile başlayan dosyalar **gizlidir**; `ls` onları göstermez, `ls -a` gösterir. Her dizinde `.` ve `..` girdileri de listelenir."
+   ],
+   "commands": [
+    {"cmd": "cd ..", "what": "Bir üst dizine çıkar.", "where": "Alt dizinden geri dönerken.", "why": "Tam yolu yazmadan hızlıca yukarı gitmek için.", "example": "cd .."},
+    {"cmd": "ls -a", "what": "Gizli dosyalar dahil hepsini listeler.", "where": "Yapılandırma dosyalarını ararken.", "why": "Gizli dosyalar normal listede görünmez.", "example": "ls -a ~"}
+   ]
+  },
+  {
+   "id": "types",
+   "title": "Dosya türlerini okumak",
+   "body": [
+    "Linux'ta her şey bir dosyadır: metin, klasör, aygıt, kısayol. `ls -l` çıktısında satırın **ilk harfi** türü söyler.",
+    "`-` normal dosya, `d` dizin, `l` sembolik link, `c` karakter aygıtı (`/dev/null`), `b` blok aygıtı (disk), `s` soket, `p` named pipe. Sonraki dokuz karakter izinlerdir (sonraki modüllerde)."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Uzun listeleme: tür, izin, sahip, boyut, tarih, ad.", "where": "Bir şeyin türünü anlamak için.", "why": "Silmeden veya okumadan önce ne olduğunu bilmek için.", "example": "ls -l /dev/null"},
+    {"cmd": "stat", "what": "Bir dosyanın ayrıntılı bilgisini ve türünü gösterir.", "where": "Tür veya zaman damgası gerektiğinde.", "why": "Tür adını harf yerine kelime olarak verir.", "example": "stat /etc/hostname"}
+   ],
+   "tip": "`/dev` altındaki dosyalar gerçek veri değil donanım arayüzüdür; `cat` ile rastgele okuma."
+  },
+  {
+   "id": "links",
+   "title": "Sembolik linkler",
+   "body": [
+    "**Sembolik link** başka bir yolu gösteren küçük bir kısayol dosyasıdır. `ls -l` onu `l` ile ve `link -> hedef` biçiminde gösterir. Linki okumak hedefi okumak demektir.",
+    "Hedef silinir veya taşınırsa link **kırık** kalır. Göreli hedefli link (`../docs/readme.txt`) **linkin bulunduğu dizinden** hesaplanır, bulunduğun dizinden değil."
+   ],
+   "commands": [
+    {"cmd": "ln -s", "what": "Sembolik link oluşturur: `ln -s HEDEF LINK`.", "where": "Kısa bir yoldan uzun bir yola erişmek için.", "why": "Dosyayı kopyalamadan tek yerde tutarsın.", "example": "ln -s ~/Documents/report.txt ~/link.txt"},
+    {"cmd": "readlink", "what": "Linkin gösterdiği hedefi yazar.", "where": "Linkin nereye gittiğini görmek için.", "why": "`ls -l` yerine yalnızca hedefi almak için.", "example": "readlink ~/link.txt", "nosim": true}
+   ],
+   "warn": "`ln -s` argüman sırası: önce HEDEF, sonra LINK. Ters yazarsan kırık link oluşur. `ln -sf` var olan bir dosyanın üzerine yazar; dikkat et.",
+   "danger": "Link bir dizini gösterirken `rm -r link/` (sonunda `/`) hedef dizinin içeriğini silebilir. Linki silmek için `rm link` yaz ve önce `ls -l` ile kontrol et."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Mutlak yolla `cat /etc/hostname` çalıştır.", "hint": "Hangi dizindeysen çalışır."},
+  "t02": {"text": "`cd /etc` ile `/etc` dizinine geç.", "hint": "Mutlak yol `/` ile başlar."},
+  "t03": {"text": "`/etc` içindeyken göreli yolla `cat hostname` yaz.", "hint": "Dosya bulunduğun dizinde."},
+  "t04": {"text": "`cd ~` ile eve dön ve `cat hostname` komutunu tekrar çalıştır. Ne olur, neden?", "hint": "Home içinde hostname dosyası yok; hata beklenir."},
+  "t05": {"text": "`/home/student` içindeyken `cd ..` ile bir üst dizine çık.", "hint": "`pwd` ile `/home` yazdığını doğrula."},
+  "t06": {"text": "Şimdi göreli yolla `cd student/Documents` yaz.", "hint": "Başında `/` yok."},
+  "t07": {"text": "`ls -l /etc/hostname` çalıştır. İlk karakter ne?", "hint": "`-` normal dosya demektir."},
+  "t08": {"text": "`ls -l /dev/null` çalıştır ve tahmin et: ilk harf ne olacak?", "hint": "Karakter aygıtı için `c`."},
+  "t09": {"text": "`ln -s ~/Documents/report.txt ~/link.txt` ile `~/link.txt` sembolik linkini oluştur.", "hint": "Önce HEDEF, sonra LINK adı."},
+  "t10": {"text": "`ls -l ~/link.txt` ile linki incele. Okun (`->`) ucunda ne var?", "hint": "Satır `l` ile başlar."},
+  "t11": {"text": "`cat ~/link.txt` çıktısı ne olur? Tahmin et, sonra çalıştır.", "hint": "Link hedefi okur."},
+  "t12": {"text": "Debug: `~/projects/app` içindeyken `config.txt` bulunamıyor; dosya bir üst dizinde. Göreli yol `../` kullanarak `cat` ile oku.", "hint": "Önce `cd ~/projects/app`, sonra `cat ../config.txt`."},
+  "t13": {"text": "Mini proje: `~/lab/docs` ve `~/lab/bin` dizinlerini kur, `echo hello linux > ~/lab/docs/readme.txt` ile dosya yaz, `~/lab/bin/readme-link` adında ona sembolik link ver.", "hint": "`mkdir -p`, `echo ... >` ve `ln -s HEDEF LINK`."},
+  "t14": {"text": "Zor görev: `~/lab/bin` içine geç ve **göreli hedefle** (`../docs/readme.txt`) `rel-link` linkini oluştur; sonra `cat rel-link` ile oku.", "hint": "Göreli hedef linkin bulunduğu dizinden hesaplanır."},
+  "t15": {"text": "Ticket: Uygulama yapılandırmayı `~/app/current/config.txt` yolunda arıyor, gerçek dosya `~/releases/v2/config.txt` içinde. `~/app/current` sembolik linkini `~/releases/v2` dizinine kur ve `cat ~/app/current/config.txt` ile doğrula.", "hint": "`mkdir -p ~/app`, sonra `ln -s ~/releases/v2 ~/app/current`."},
+  "t16": {"text": "Gizli dosyaları da görmek için `ls -la ~` çalıştır.", "hint": "`-a` gizli dosyaları, `-l` ayrıntıyı getirir."}
+ },
+ "vm": {
+  "intro": "Kendi VM'inde mutlak/göreli yolları dene, `/dev` dosya türlerine bak ve bir sembolik link kur. Hepsi zararsız komutlardır.",
+  "tasks": {
+   "v01": {
+    "title": "Mutlak ve göreli yol",
+    "text": "Aynı dosyayı önce göreli, sonra yanlış dizinden dene ve çıktıyı yapıştır.",
+    "blocks": [
+     {"cmd": "pwd\ncd /etc\npwd\ncat hostname\ncd ~\ncat hostname", "expected": "/home/student\n/etc\nlinux-lab\ncat: hostname: No such file or directory"}
+    ],
+    "differs": [
+     "Host adın `linux-lab` değilse sorun yok; kendi host adın görünür.",
+     "Eve dönünce `cat hostname` hata vermiyorsa home içinde `hostname` adlı bir dosya oluşturmuşsundur."
+    ]
+   },
+   "v02": {
+    "title": "Dosya türlerini oku",
+    "text": "Bir dosya, bir dizin ve bir aygıtın türünü gör; ilk harflere bak.",
+    "blocks": [
+     {"cmd": "ls -ld /etc /etc/hostname /dev/null", "expected": "drwxr-xr-x. ... /etc\n-rw-r--r--. ... /etc/hostname\ncrw-rw-rw-. ... /dev/null"}
+    ],
+    "differs": [
+     "Bazı dağıtımlarda `/etc/hostname` yoktur; yerine `/etc/os-release` dene.",
+     "İzin sonundaki `.` veya `+` SELinux/ACL işaretidir, önemli değil."
+    ]
+   },
+   "v03": {
+    "title": "Sembolik link kur",
+    "text": "Home içinde bir dosya ve ona link oluştur, linki oku.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/practice\necho hello linux > ~/practice/notes.txt\nln -s ~/practice/notes.txt ~/practice/link.txt\nls -l ~/practice\ncat ~/practice/link.txt", "expected": "lrwxrwxrwx. 1 student student ... link.txt -> /home/student/practice/notes.txt\nhello linux"}
+    ],
+    "differs": [
+     "`link.txt` kırmızı veya `->` yoksa argüman sırasını ters yazmış olabilirsin: önce HEDEF, sonra LINK.",
+     "`File exists` hatasında `~/practice/link.txt` zaten var; önce `rm ~/practice/link.txt` ile sil."
+    ]
+   },
+   "v04": {
+    "title": "stat ile tür adı",
+    "text": "`stat` ile türü kelime olarak gör, sonra alıştırma klasörünü sil.",
+    "blocks": [
+     {"cmd": "stat -c '%F' /etc /etc/hostname /dev/null ~/practice/link.txt\n# temizlik: önce ls -l ~/practice ile bak, sonra\nrm -r ~/practice", "expected": "directory\nregular file\ncharacter special file\nsymbolic link"}
+    ],
+    "differs": [
+     "macOS veya BSD benzeri araçta `-c` yoktur; bu bir Linux VM'inde çalışır.",
+     "`rm: cannot remove ... Is a directory` görürsen `-r` unutulmuş."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Hangisi mutlak yoldur?", "options": ["Documents/report.txt", "/home/student/Documents/report.txt", "../report.txt", "~report.txt"], "explain": "Mutlak yol kök dizinden `/` ile başlar ve her dizinden aynı dosyayı gösterir."},
+  "q2": {"q": "`ls -l` çıktısında satır `l` ile başlıyorsa bu nedir?", "options": ["Normal dosya", "Dizin", "Aygıt", "Sembolik link"], "explain": "`l` symbolic link demektir; `-` normal dosya, `d` dizindir."},
+  "q3": {"q": "`/etc` içindeyken `cd ..` sonrası neredesin?", "options": ["/", "/home", "/etc/..", "~"], "explain": "`..` bir üst dizindir; `/etc` içinden `/` dizinine çıkarsın."},
+  "q4": {"q": "Sembolik linkin hedefi silinirse ne olur?", "options": ["Link de silinir", "Link hedefi kopyalar", "Link kırık kalır", "Hedef geri gelir"], "explain": "Link yalnızca bir yol tutar; hedef kaybolunca link var ama kırıktır."}
+ },
+ "summary": [
+  "Mutlak yol `/` ile başlar, göreli yol bulunduğun dizinden hesaplanır.",
+  "`.` mevcut, `..` üst dizin, `~` home dizinidir.",
+  "`ls -l` çıktısının ilk harfi türü verir: `-`, `d`, `l`, `c`, `b`.",
+  "`ln -s HEDEF LINK` sembolik link kurar; hedef kaybolursa link kırılır."
+ ],
+ "glossary": [
+  {"term": "mutlak yol", "meaning": "Kök dizinden (`/`) başlayan tam adres."},
+  {"term": "göreli yol", "meaning": "Bulunduğun dizinden hesaplanan adres."},
+  {"term": "sembolik link", "meaning": "Başka bir yolu gösteren kısayol dosyası."},
+  {"term": "aygıt dosyası", "meaning": "`/dev` altında donanımı temsil eden özel dosya."}
+ ]
+}

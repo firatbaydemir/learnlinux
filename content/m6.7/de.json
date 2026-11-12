@@ -1,0 +1,196 @@
+{
+ "title": "systemd-Timer — Die moderne Alternative zu Cron",
+ "lead": "Plane die Arbeit; das System führt sie für dich aus. Du schreibst einen Service und einen Timer, prüfst den Zeitausdruck, beobachtest den Lauf mit journalctl und vergleichst alles mit cron.",
+ "objectives": [
+  "Du schreibst eine `.service`-Datei (`Type=oneshot`, `ExecStart`) und eine `.timer`-Datei (`OnCalendar`, `Persistent=true`).",
+  "Du prüfst einen Zeitausdruck mit `systemd-analyze calendar`, bevor er je läuft.",
+  "Du installierst und überwachst einen Timer mit `daemon-reload`, `enable --now`, `list-timers` und `journalctl -u`.",
+  "Du liest eine cron-Zeile (`30 2 * * *`) und schreibst den gleichwertigen Timer.",
+  "Du kennst Benutzer-Timer (`systemctl --user`) und weißt, wie du dich zwischen cron und Timer entscheidest."
+ ],
+ "sections": [
+  {
+   "id": "why",
+   "title": "Warum Timer? Vergleich mit cron",
+   "body": [
+    "Ein Skript von Hand zu starten ist einfach; echte Automatisierung heißt, es **zur richtigen Zeit** laufen zu lassen. Der klassische Weg ist **cron**: fünf Zeitfelder und ein Befehl in einer Zeile. Der moderne Weg ist ein **systemd-Timer**: zwei Dateien, eine sagt, **was** läuft (`backup.service`), die andere, **wann** es läuft (`backup.timer`).",
+    "Eine cron-Zeile: `30 2 * * * /home/student/bin/backup.sh` = jeden Tag um 02:30. Felder: Minute, Stunde, Tag des Monats, Monat, Wochentag. Vorteile des Timers: Ausgaben landen im **Journal** (`journalctl -u`), `Persistent=true` holt einen verpassten Lauf beim Boot nach, `RandomizedDelaySec` verteilt die Last, und `systemctl list-timers` zeigt den nächsten Lauf.",
+    "In diesem Modul schreibst du die Dateien im Simulator und prüfst ihren Inhalt; `systemctl` und `journalctl` funktionieren nur auf einer echten VM. Der Vorteil von cron ist die Einfachheit: eine Zeile, überall vorhanden."
+   ],
+   "commands": [
+    {"cmd": "crontab -e", "what": "Öffnet deine eigene cron-Tabelle im Editor.", "where": "Für einfache, einzeilige Zeitaufgaben.", "why": "Der Vergleichspunkt: Du erkennst die alte Aufgabe, bevor du sie in einen Timer überführst.", "example": "crontab -e", "nosim": true},
+    {"cmd": "crontab -l", "what": "Listet die aktuellen cron-Zeilen auf.", "where": "Bei der Bestandsaufnahme der zu migrierenden Aufgaben.", "why": "Du siehst, welche Aufgaben du in Timer umwandelst.", "example": "crontab -l", "nosim": true},
+    {"cmd": "printf (cron line)", "what": "Schreibt eine cron-Zeile in eine Datei: `Minute Stunde Tag Monat Wochentag Befehl`.", "where": "Um die cron-Syntax zu üben und in einer Datei zu behalten.", "why": "Du gewöhnst dich an die richtige Reihenfolge der Felder.", "example": "printf '30 2 * * * /home/student/bin/backup.sh\\n' > backup.cron"},
+    {"cmd": "systemctl list-timers", "what": "Listet aktive Timer mit nächster und letzter Laufzeit auf.", "where": "Wenn du prüfst, ob ein Timer wirklich eingeplant ist.", "why": "Du erkennst einen still untätigen Timer sofort.", "example": "systemctl list-timers --all", "nosim": true}
+   ],
+   "tip": "Für eine einfache einmalige Benutzeraufgabe reicht cron. Wähle einen Timer, wenn du Logs, Abhängigkeiten, Nachholen und Überwachung willst."
+  },
+  {
+   "id": "service",
+   "title": "Die Service-Unit: Was läuft?",
+   "body": [
+    "Die Service-Datei definiert den Befehl. Für geplante Aufgaben nimmst du **`Type=oneshot`**: Der Befehl läuft und endet. `ExecStart` verlangt einen **absoluten Pfad**; schreibe `/usr/local/bin/backup.sh`, nicht `backup.sh`.",
+    "System-Units kommen nach `/etc/systemd/system/` (root nötig). Im Simulator kannst du dort nicht schreiben; nutze stattdessen den Ordner `~/units/`, der Inhalt zum Kopieren ist identisch. Mache das Skript zuerst ausführbar: `chmod +x`.",
+    "Hinweis: Eine `.service` braucht keinen `[Install]`-Abschnitt; die Planung gehört zum Timer. Zum Testen von Hand genügt `sudo systemctl start backup.service`."
+   ],
+   "commands": [
+    {"cmd": "printf > backup.service", "what": "Schreibt die Service-Unit Zeile für Zeile.", "where": "Im Sim in `~/units/`, auf der VM unter `/etc/systemd/system/`.", "why": "Du erzeugst die Datei reproduzierbar, ohne einen Editor zu öffnen.", "example": "printf '[Unit]\\nDescription=Nightly backup\\n\\n[Service]\\nType=oneshot\\nExecStart=/home/student/bin/backup.sh\\n' > backup.service"},
+    {"cmd": "cat", "what": "Zeigt den Inhalt der geschriebenen Datei.", "where": "Nach jedem Schreiben.", "why": "Du siehst Tippfehler (`Type=oneshot`, Pfad), bevor du startest.", "example": "cat backup.service"},
+    {"cmd": "chmod +x", "what": "Gibt dem Skript das Ausführungsrecht.", "where": "Für jedes Skript, das `ExecStart` aufruft.", "why": "Ohne Recht scheitert der Dienst mit `203/EXEC`.", "example": "chmod +x backup.sh"},
+    {"cmd": "systemd-analyze verify", "what": "Prüft Syntax und Pfade der Unit-Datei.", "where": "Vor `daemon-reload`.", "why": "Fängt einen falschen Pfad oder Tippfehler, ohne etwas auszuführen.", "example": "systemd-analyze verify /etc/systemd/system/backup.service", "nosim": true}
+   ],
+   "tip": "Starte die Unit einmal von Hand mit `sudo systemctl start backup.service`; wenn es klappt, ist das Einplanen sicher.",
+   "warn": "Unter RHEL/Rocky (SELinux) kann ein Dienst ein Skript unter `/home` oft nicht ausführen (`203/EXEC`, `Permission denied`). Lege das Skript nach `/usr/local/bin`; unter Debian/Ubuntu (AppArmor) ist das seltener, derselbe Pfad wird aber empfohlen."
+  },
+  {
+   "id": "timer",
+   "title": "Die Timer-Unit: Wann läuft es?",
+   "body": [
+    "Eine Timer-Datei enthält die Zeit in `[Timer]` und die Zeile `WantedBy=timers.target` in `[Install]`. Der Name passt zum Service: `backup.timer` → `backup.service`.",
+    "**`OnCalendar=`** ist Kalenderzeit: `*-*-* 02:30:00` jeden Tag um 02:30, `Mon *-*-* 08:00:00` jeden Montag um 08:00; `hourly`, `daily`, `weekly` sind Kurzformen. **`OnBootSec=`** wartet nach dem Boot, **`OnUnitActiveSec=`** nach dem letzten Lauf.",
+    "**`Persistent=true`**: Ein Lauf, der verpasst wurde, weil die Maschine aus war, wird beim nächsten Boot sofort nachgeholt. **`RandomizedDelaySec=`** verzögert den Start zufällig, damit viele Maschinen nicht gleichzeitig auf eine gemeinsame Ressource zugreifen."
+   ],
+   "commands": [
+    {"cmd": "OnCalendar=", "what": "Definiert kalenderbasierte Zeit.", "where": "Für Aufgaben zu festen Zeiten wie nachts oder wöchentlich.", "why": "Es ist das lesbare Gegenstück zu den fünf cron-Feldern.", "example": "printf '[Timer]\\nOnCalendar=*-*-* 02:30:00\\n' | cat"},
+    {"cmd": "OnBootSec= / OnUnitActiveSec=", "what": "Wartet eine relative Zeit nach dem Boot oder dem letzten Lauf.", "where": "Für Aufgaben wie \"10 Min. nach dem Boot, dann jede Stunde\".", "why": "Löst intervallbasierte Aufgaben ohne Kalender.", "example": "printf '[Timer]\\nOnBootSec=10min\\nOnUnitActiveSec=1h\\n' | cat"},
+    {"cmd": "Persistent=true", "what": "Holt einen verpassten Lauf beim nächsten Boot nach.", "where": "Auf Laptops, VMs oder nachts ausgeschalteten Maschinen.", "why": "Bietet anacron-ähnliche Sicherheit, die cron fehlt.", "example": "printf '[Timer]\\nOnCalendar=daily\\nPersistent=true\\n' | cat"},
+    {"cmd": "RandomizedDelaySec=", "what": "Fügt dem Start eine zufällige Verzögerung hinzu.", "where": "Auf vielen Servern, die zur selben Zeit laufen.", "why": "Verhindert plötzliche Lastspitzen auf gemeinsamem Repository oder Netz.", "example": "printf '[Timer]\\nOnCalendar=daily\\nRandomizedDelaySec=5min\\n' | cat"},
+    {"cmd": "systemd-analyze calendar", "what": "Deutet einen Zeitausdruck und zeigt den nächsten Ablauf.", "where": "Vor und nach dem Schreiben eines Timers.", "why": "Ein falscher Ausdruck läuft still nie; hier siehst du es sofort.", "example": "systemd-analyze calendar \"Mon *-*-* 08:00:00\"", "nosim": true}
+   ],
+   "tip": "Listen wie `Mon,Fri *-*-* 08:00` und `*-*-* *:00/15:00` (alle 15 Min.) funktionieren; teste alle zuerst mit `systemd-analyze calendar`."
+  },
+  {
+   "id": "manage",
+   "title": "Installieren, starten, überwachen",
+   "body": [
+    "Die Reihenfolge ist fest: Dateien schreiben → `systemd-analyze verify` und `calendar` → `sudo systemctl daemon-reload` → Service von Hand `start`en und `journalctl` prüfen → den **Timer** mit `enable --now` aktivieren → mit `list-timers` prüfen.",
+    "`enable --now` gilt für den **Timer** (`backup.timer`), nicht für den Service. Vergisst du `daemon-reload` nach einer neuen oder geänderten Datei, nutzt systemd weiter den alten Stand.",
+    "Lies die Ausgabe mit `journalctl -u backup.service`; `-f` folgt live, `--since today` filtert den Tag. Ein fehlgeschlagener Lauf zeigt eine Zeile `Failed with result`."
+   ],
+   "commands": [
+    {"cmd": "sudo systemctl daemon-reload", "what": "Lässt systemd die Unit-Dateien neu einlesen.", "where": "Nach jeder neuen oder geänderten .service und .timer.", "why": "Ohne sieht systemd eine alte oder gar keine Datei.", "example": "sudo systemctl daemon-reload", "nosim": true},
+    {"cmd": "sudo systemctl start backup.service", "what": "Führt den Service einmal sofort aus.", "where": "Um die Aufgabe selbst vor dem Aktivieren des Timers zu testen.", "why": "Du findest Fehler, ohne auf den Timer zu warten.", "example": "sudo systemctl start backup.service", "nosim": true},
+    {"cmd": "sudo systemctl enable --now backup.timer", "what": "Aktiviert den Timer beim Boot und startet ihn sofort.", "where": "Für jeden dauerhaften Timer.", "why": "Er läuft auch nach einem Neustart.", "example": "sudo systemctl enable --now backup.timer", "nosim": true},
+    {"cmd": "systemctl list-timers", "what": "Zeigt die nächsten und letzten Läufe.", "where": "Nach der Installation und bei der Fehlersuche.", "why": "Die Spalte NEXT beweist, dass der Timer wirklich eingeplant ist.", "example": "systemctl list-timers backup.timer", "nosim": true},
+    {"cmd": "journalctl -u", "what": "Zeigt die Logeinträge einer Unit.", "where": "Beim Lesen erfolgreicher und fehlgeschlagener Läufe.", "why": "Ein durchsuchbarer Eintrag statt des cron-Postfachs.", "example": "journalctl -u backup.service --since today", "nosim": true}
+   ],
+   "warn": "Ein Dienst mit root-Rechten kann mit einem Skript, das Dateien löscht oder verschiebt, großen Schaden anrichten. Teste das Skript zuerst per `echo` im Probelauf, prüfe den Pfad, plane es erst dann ein. Ein falsches `OnCalendar` gibt keinen Fehler; es läuft einfach nie.",
+   "danger": "Stoppe oder deaktiviere über SSH niemals `sshd` oder Netzwerkdienste mit `systemctl`; du sperrst dich aus. Experimentiere nur mit eigenen Units und mache vor wichtigen Änderungen einen VM-Snapshot (Modul 0.2)."
+  },
+  {
+   "id": "user",
+   "title": "Benutzer-Timer und die Umstiegsentscheidung",
+   "body": [
+    "Du kannst auch ohne root planen: **Benutzer-Units** liegen in `~/.config/systemd/user/` und werden mit `systemctl --user` verwaltet (kein `sudo`). Sie enden beim Abmelden; damit sie weiterlaufen, nutze `loginctl enable-linger student`.",
+    "Entscheidung: einzeilige Aufgabe, Ausgabe egal → **cron**. Brauchst du Logs, Abhängigkeiten (lauf, wenn das Netz da ist), Nachholen (`Persistent`), Zufallsverzögerung oder Ressourcenlimits → **Timer**. Beide können nebeneinander laufen; beim Umstieg kommentierst du die alte cron-Zeile aus, prüfst den neuen Timer und löschst dann.",
+    "Unter Debian/Ubuntu bringen Pakete oft Timer statt cron mit (`apt-daily.timer`); unter RHEL/Rocky etwa `dnf-makecache.timer`. `systemctl list-timers --all` ist voll fertiger Beispiele."
+   ],
+   "commands": [
+    {"cmd": "mkdir -p ~/.config/systemd/user", "what": "Erstellt den Ordner für Benutzer-Units.", "where": "Vor deinem ersten Benutzer-Timer.", "why": "systemd sucht Benutzer-Units hier.", "example": "mkdir -p ~/.config/systemd/user"},
+    {"cmd": "systemctl --user daemon-reload", "what": "Lässt systemd die Benutzer-Units neu einlesen.", "where": "Nach dem Schreiben der Benutzerdateien.", "why": "Du folgst demselben Ablauf ohne `sudo`.", "example": "systemctl --user daemon-reload", "nosim": true},
+    {"cmd": "systemctl --user enable --now notes.timer", "what": "Aktiviert und startet einen Benutzer-Timer.", "where": "Für persönliche Aufgaben in deinem Home.", "why": "Kein root nötig, das Risiko ist klein.", "example": "systemctl --user enable --now notes.timer", "nosim": true},
+    {"cmd": "loginctl enable-linger", "what": "Hält Benutzer-Units auch im abgemeldeten Zustand am Laufen.", "where": "Auf einem Server, wo ein Benutzer-Timer im Hintergrund weiterlaufen muss.", "why": "Sonst stoppt der Timer beim Abmelden.", "example": "sudo loginctl enable-linger student", "nosim": true}
+   ],
+   "tip": "Ein Benutzer-Timer ist der sicherste Ort zum Experimentieren: Bei einem Fehler ist nur dein eigenes Konto betroffen, nicht das System."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Erstelle die Ordner `~/bin` und `~/units` mit einem Befehl: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` akzeptiert mehrere Pfade."},
+  "t02": {"text": "Lies die cron-Beispieldatei: `cat ~/sample/crontab.txt`. Sie hat drei Aufgabenzeilen.", "hint": "Die Zeilen lauten: Minute Stunde Tag Monat Wochentag Befehl."},
+  "t03": {"text": "Schreibe `~/bin/backup.sh` mit `printf`: erste Zeile `#!/bin/bash`, zweite Zeile `echo backup done`.", "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"},
+  "t04": {"text": "Mache `~/bin/backup.sh` ausführbar (Modus 755).", "hint": "`chmod 755 ~/bin/backup.sh` oder `chmod +x`."},
+  "t05": {"text": "Schreibe `~/units/backup.service`: In `[Service]` stehen `Type=oneshot` und `ExecStart=/home/student/bin/backup.sh`.", "hint": "Trenne die Zeilen mit `\\n` in einem `printf` und beende mit `> ~/units/backup.service`."},
+  "t06": {"text": "Schreibe `~/units/backup.timer`: unter `[Timer]` `OnCalendar=*-*-* 02:30:00` und `Persistent=true`, unter `[Install]` `WantedBy=timers.target`.", "hint": "Nutze im Sim einfache Anführungszeichen, damit die Shell `*` nicht expandiert."},
+  "t07": {"text": "Sage voraus: Wie viele Zeilen in `~/sample/list-timers.txt` enthalten `timer`? Prüfe dann mit `grep -c timer ~/sample/list-timers.txt`.", "hint": "Die Kopfzeile enthält kein kleingeschriebenes `timer`; es gibt zwei Timer-Zeilen."},
+  "t08": {"text": "Sage voraus: Welche Zeit zeigt die Zeile `Next elapse` in `~/sample/analyze.txt`? Sieh nach mit `grep 'Next elapse' ~/sample/analyze.txt`.", "hint": "Der Ausdruck war Montag 08:00; finde den nächsten Montag."},
+  "t09": {"text": "Fehlersuche: `~/broken/broken.timer` funktioniert nicht. Es hat einen Tippfehler `OnCalender` und der Abschnitt `[Install]` fehlt. Schreibe die Datei neu mit `OnCalendar=daily`, `Persistent=true` und `WantedBy=timers.target`.", "hint": "Beginne mit `cat ~/broken/broken.timer`. Schreibweise: Calen**d**ar."},
+  "t10": {"text": "Fehlersuche: `ExecStart=report.sh` in `~/broken/report.service` ist ein relativer Pfad; systemd lehnt ihn ab. Schreibe die Datei so neu, dass sie `ExecStart=/home/student/bin/report.sh` enthält (`Type=oneshot` bleibt).", "hint": "Sieh dir die Zeilen mit `cat` an, dann `printf ... > ~/broken/report.service`."},
+  "t11": {"text": "Mini-Projekt (Benutzer-Timer): Erstelle den Ordner `~/.config/systemd/user`. `notes.service` muss `ExecStart=/usr/bin/touch /home/student/notes.txt` enthalten; `notes.timer` muss `OnCalendar=hourly` und `WantedBy=timers.target` enthalten.", "hint": "Drei Befehle: `mkdir -p`, ein `printf` für den Service, eines für den Timer."},
+  "t12": {"text": "Mini-Projekt (cron-Vergleich): Schreibe zwei cron-Zeilen in `~/units/backup.cron`: `30 2 * * * /home/student/bin/backup.sh` und `0 8 * * 1 /home/student/bin/report.sh`.", "hint": "Nimm `>` für die erste Zeile und `>>` für die zweite."},
+  "t13": {"text": "Challenge: Schreibe für eine `cleanup`-Aufgabe `~/units/cleanup.service` (`ExecStart=/home/student/bin/cleanup.sh`, `Type=oneshot`) und `~/units/cleanup.timer`. Timer: 10 Minuten nach dem Boot (`OnBootSec=10min`), dann jede Stunde (`OnUnitActiveSec=1h`), zufällige Verzögerung bis 5 Minuten (`RandomizedDelaySec=5min`), `WantedBy=timers.target`.", "hint": "Es ist ein Intervall-Timer, kein Kalender-Timer: nimm kein `OnCalendar`."},
+  "t14": {"text": "Ticket: \"Das nächtliche Backup schlägt seit einigen Tagen still fehl.\" Schreibe nur die `Failed`-Zeilen aus `~/sample/journal.txt` nach `~/units/failed.txt`.", "hint": "`grep Failed ... > ...`"},
+  "t15": {"text": "Ticket: \"Der Wochenbericht muss jeden Montag um 08:00 laufen und auch nach dem Boot nachlaufen, wenn die Maschine aus war.\" Schreibe `~/units/report.timer` (`OnCalendar`, die Einstellung zum Nachholen, `WantedBy=timers.target`).", "hint": "Montag 08:00 = `Mon *-*-* 08:00:00`; Nachholen = `Persistent=true`."},
+  "t16": {"text": "Zähle mit `wc -l ~/sample/journal.txt`, wie viele Zeilen das Journal-Beispiel hat.", "hint": "Schau auf die Zahl am Anfang der Ausgabe."}
+ },
+ "vm": {
+  "intro": "Gehe auf deiner VM (Ubuntu oder Rocky/Alma) der Reihe nach vor. Mache zuerst einen **Snapshot** (Modul 0.2). Du schreibst Units nach `/etc/systemd/system/`; fasse nur deine eigenen `backup.*`-Dateien an. Geht etwas schief, stoppe mit `sudo systemctl disable --now backup.timer`.",
+  "tasks": {
+   "v01": {
+    "title": "Skript und Service schreiben",
+    "text": "Lege zuerst das Skript nach `/usr/local/bin`, schreibe dann die Service-Datei und zeige ihren Inhalt. Lass das Skript wegen SELinux in `/usr/local/bin`.",
+    "blocks": [
+     {"cmd": "sudo tee /usr/local/bin/backup.sh > /dev/null <<'EOF'\n#!/bin/bash\necho \"backup done\"\nEOF\nsudo chmod 755 /usr/local/bin/backup.sh", "expected": "(keine Ausgabe)"},
+     {"cmd": "sudo tee /etc/systemd/system/backup.service > /dev/null <<'EOF'\n[Unit]\nDescription=Nightly backup\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/backup.sh\nEOF\ncat /etc/systemd/system/backup.service", "expected": "[Unit]\nDescription=Nightly backup\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/backup.sh"}
+    ],
+    "differs": ["Bei `Permission denied` fehlt `sudo`; `sudo` muss vor `tee` stehen.", "Die `EOF`-Zeile des Heredocs (`<<'EOF'`) muss allein am Zeilenanfang stehen."]
+   },
+   "v02": {
+    "title": "Timer schreiben",
+    "text": "Schreibe einen Timer, der jede Nacht um 02:30 läuft und verpasste Läufe nachholt, und füge seinen Inhalt ein.",
+    "blocks": [
+     {"cmd": "sudo tee /etc/systemd/system/backup.timer > /dev/null <<'EOF'\n[Unit]\nDescription=Run backup nightly\n\n[Timer]\nOnCalendar=*-*-* 02:30:00\nPersistent=true\nRandomizedDelaySec=5min\n\n[Install]\nWantedBy=timers.target\nEOF\ncat /etc/systemd/system/backup.timer", "expected": "[Timer]\nOnCalendar=*-*-* 02:30:00\nPersistent=true\n..."}
+    ],
+    "differs": ["Die Datei muss `backup.timer` heißen: gleicher Name wie der Service, andere Endung.", "Das gequotete Heredoc (`'EOF'`) verhindert die Expansion von `*`."]
+   },
+   "v03": {
+    "title": "Prüfen",
+    "text": "Prüfe Zeitausdruck und Unit-Dateien, ohne etwas auszuführen; füge die Ausgabe ein.",
+    "blocks": [
+     {"cmd": "systemd-analyze calendar \"*-*-* 02:30:00\"\nsystemd-analyze verify /etc/systemd/system/backup.service /etc/systemd/system/backup.timer", "expected": "Normalized form: *-*-* 02:30:00\n    Next elapse: Fri 2026-11-13 02:30:00 CET\n(verify: meist keine Ausgabe = kein Problem)"}
+    ],
+    "differs": ["Gibt `verify` nichts aus, gibt es kein Problem.", "In älteren Versionen kann der Text `Next elapse` leicht abweichen; die Zeile `Normalized form` erscheint trotzdem."]
+   },
+   "v04": {
+    "title": "Installieren und einplanen",
+    "text": "Führe `daemon-reload` aus, aktiviere den Timer und sieh ihn mit `list-timers` eingeplant. `backup.timer` muss in der Ausgabe stehen.",
+    "blocks": [
+     {"cmd": "sudo systemctl daemon-reload\nsudo systemctl enable --now backup.timer\nsystemctl list-timers backup.timer", "expected": "NEXT                        LEFT     LAST PASSED UNIT         ACTIVATES\nFri 2026-11-13 02:30:00 CET 16h left n/a  n/a    backup.timer backup.service"}
+    ],
+    "differs": ["Bei `Unit backup.timer not found` fehlt `daemon-reload` oder Dateiname/Pfad ist falsch.", "Wegen `RandomizedDelaySec` kann NEXT einige Minuten nach 02:30 liegen."]
+   },
+   "v05": {
+    "title": "Von Hand starten, Journal lesen",
+    "text": "Starte den Service einmal von Hand und finde die Zeile `backup done` in seinem Journal.",
+    "blocks": [
+     {"cmd": "sudo systemctl start backup.service\njournalctl -u backup.service --no-pager -n 10", "expected": "systemd[1]: Starting backup.service - Nightly backup...\nbackup.sh[1234]: backup done\nsystemd[1]: backup.service: Succeeded."}
+    ],
+    "differs": ["Unter Rocky/RHEL kann die letzte Zeile `Deactivated successfully.` lauten; das ist in Ordnung.", "Siehst du `Failed with result 'exit-code'`, stimmen Skriptpfad oder Rechte nicht (`chmod 755`, `ls -Z` für SELinux)."]
+   },
+   "v06": {
+    "title": "Benutzer-Timer und Aufräumen",
+    "text": "Richte einen Benutzer-Timer ohne `sudo` ein und sieh ihn in der Liste; stoppe dann ihn und den System-Timer. Wenn keine Fehler auftreten, drücke \"Erledigt\".",
+    "blocks": [
+     {"cmd": "mkdir -p ~/.config/systemd/user\nprintf '[Service]\\nType=oneshot\\nExecStart=/usr/bin/touch %h/notes.txt\\n' > ~/.config/systemd/user/notes.service\nprintf '[Timer]\\nOnCalendar=hourly\\n\\n[Install]\\nWantedBy=timers.target\\n' > ~/.config/systemd/user/notes.timer\nsystemctl --user daemon-reload\nsystemctl --user enable --now notes.timer\nsystemctl --user list-timers", "expected": "NEXT ... UNIT        ACTIVATES\n... notes.timer notes.service"},
+     {"cmd": "systemctl --user disable --now notes.timer\nsudo systemctl disable --now backup.timer", "expected": "Removed ...notes.timer symlink"}
+    ],
+    "differs": ["Bei `Failed to connect to bus` führe es in deiner normalen Anmeldesitzung aus, nicht per `sudo su`; `--user` braucht eine Nicht-root-Sitzung.", "`%h` bedeutet in einer Unit das Home-Verzeichnis; das `printf` steht in einfachen Anführungszeichen, damit die Shell es nicht expandiert."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Welche Datei legt fest, **wann** eine Aufgabe läuft?", "options": ["`backup.service`", "`backup.timer`", "`multi-user.target`", "`/etc/fstab`"], "explain": "Der Timer legt das 'Wann' fest, der Service das 'Was'; ihre Namen passen zusammen."},
+  "q2": {"q": "Was bewirkt `Persistent=true`?", "options": ["Verzögert die Aufgabe zufällig", "Löscht den Timer beim Neustart", "Holt einen Lauf nach, der verpasst wurde, weil die Maschine aus war", "Führt die Aufgabe als Benutzer statt als root aus"], "explain": "Persistent speichert die letzte Laufzeit auf der Platte; ein verpasster Lauf wird beim Boot nachgeholt."},
+  "q3": {"q": "Du hast eine neue `.timer`-Datei geschrieben. Was musst du vor `enable --now` tun?", "options": ["`sudo systemctl daemon-reload`", "`reboot`", "`crontab -e`", "Nichts, systemd erkennt sie automatisch"], "explain": "systemd cacht Unit-Dateien; nach einer Änderung ist `daemon-reload` nötig."},
+  "q4": {"q": "Wo liest du Ausgabe und Fehlerzeilen eines Dienstes?", "options": ["In `/var/spool/cron/`", "Mit `crontab -l`", "`systemctl status` allein reicht immer", "`journalctl -u backup.service`"], "explain": "systemd schreibt die Ausgabe ins Journal; `-u` filtert nach Unit."}
+ },
+ "summary": [
+  "Ein Timer sind zwei Dateien: `.service` definiert, was läuft, `.timer`, wann.",
+  "`Type=oneshot` und ein absoluter `ExecStart`-Pfad sind der Standard für geplante Aufgaben.",
+  "`OnCalendar` ist Kalenderzeit, `OnBootSec`/`OnUnitActiveSec` ein Intervall; `Persistent=true` holt Verpasstes nach.",
+  "Reihenfolge: Datei → `systemd-analyze calendar/verify` → `daemon-reload` → manuelles `start` → `enable --now` → `list-timers`.",
+  "Ausgabe liest du mit `journalctl -u`; die cron-Zeile `30 2 * * *` = jeden Tag um 02:30.",
+  "Benutzer-Timer laufen ohne root über `~/.config/systemd/user` und `systemctl --user`."
+ ],
+ "glossary": [
+  {"term": "timer unit", "meaning": "Eine `.timer`-Unit, die einen Service zu einer bestimmten Zeit startet."},
+  {"term": "service unit", "meaning": "Eine `.service`-Unit, die den auszuführenden Befehl definiert."},
+  {"term": "oneshot", "meaning": "`Type=oneshot`: Der Befehl läuft und endet; geeignet für geplante Aufgaben."},
+  {"term": "OnCalendar", "meaning": "Kalenderbasierter Zeitausdruck, z. B. `*-*-* 02:30:00`."},
+  {"term": "Persistent", "meaning": "`Persistent=true`: holt einen verpassten Lauf beim nächsten Boot nach."},
+  {"term": "RandomizedDelaySec", "meaning": "Fügt eine zufällige Startverzögerung hinzu, um Lastspitzen zu vermeiden."},
+  {"term": "daemon-reload", "meaning": "Lässt systemd seine Unit-Dateien neu einlesen."},
+  {"term": "journal", "meaning": "Der Log-Speicher von systemd, gelesen mit `journalctl`."},
+  {"term": "cron", "meaning": "Der klassische Planer; `crontab`-Zeilen nutzen fünf Zeitfelder."},
+  {"term": "linger", "meaning": "`loginctl enable-linger`: hält Benutzer-Units auch abgemeldet am Laufen."}
+ ]
+}

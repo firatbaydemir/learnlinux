@@ -1,0 +1,43 @@
+{
+  "id": "3.4",
+  "level": 3,
+  "setup": {
+    "dirs": ["/home/student/lab/logs", "/home/student/lab/project/config", "/home/student/lab/project/src"],
+    "files": {
+      "/home/student/lab/logs/app.log": "INFO service started\nERROR disk full\nINFO request received\nWARN response slow\nERROR timeout\nERROR disk full\n",
+      "/home/student/lab/logs/access.log": "10.0.0.1 200 /index\n10.0.0.2 404 /missing\n10.0.0.3 200 /docs\n10.0.0.2 200 /login\n",
+      "/home/student/lab/project/config/app.conf": "port=8080\nmode=production\n",
+      "/home/student/lab/project/src/main.txt": "TODO: validate input\nReady for review\n",
+      "/home/student/lab/project/src/notes.txt": "Remember to document the API\n",
+      "/home/student/lab/readme.txt": "Search practice files\n"
+    },
+    "cwd": "/home/student/lab"
+  },
+  "tasks": [
+    {"id":"t01","kind":"warmup","diff":1,"check":{"cmd":"^grep ERROR logs/app\\.log$","out":"ERROR disk full"},"solution":["grep ERROR logs/app.log"]},
+    {"id":"t02","kind":"warmup","diff":1,"check":{"cmd":"^grep -i warn logs/app\\.log$","out":"WARN response slow"},"solution":["grep -i warn logs/app.log"]},
+    {"id":"t03","kind":"guided","diff":1,"check":{"cmd":"^grep -n 404 logs/access\\.log$","out":"2:10\\.0\\.0\\.2 404"},"solution":["grep -n 404 logs/access.log"]},
+    {"id":"t04","kind":"guided","diff":2,"check":{"cmd":"^find project -name .*\\.conf.*$","out":"project/config/app\\.conf"},"solution":["find project -name \"*.conf\""]},
+    {"id":"t05","kind":"guided","diff":2,"check":{"cmd":"^find project -type f -name .*\\.txt.*$","out":"project/src/main\\.txt"},"solution":["find project -type f -name \"*.txt\""]},
+    {"id":"t06","kind":"predict","diff":2,"check":{"cmd":"^grep -c ERROR logs/app\\.log$","out":"3"},"solution":["grep -c ERROR logs/app.log"]},
+    {"id":"t07","kind":"predict","diff":2,"check":{"cmd":"^cat logs/access\\.log \\| grep 200$","out":"10\\.0\\.0\\.1 200"},"solution":["cat logs/access.log | grep 200"]},
+    {"id":"t08","kind":"debug","diff":2,"check":{"contains":["~/lab/errors.txt","ERROR timeout"]},"solution":["grep ERROR logs/app.log > errors.txt"]},
+    {"id":"t09","kind":"debug","diff":2,"check":{"cmd":"^grep -v INFO logs/app\\.log$","out":"WARN response slow"},"solution":["grep -v INFO logs/app.log"]},
+    {"id":"t10","kind":"mini","diff":2,"check":{"cmd":"^grep -r TODO project$","out":"main\\.txt:TODO"},"solution":["grep -r TODO project"]},
+    {"id":"t11","kind":"mini","diff":2,"check":{"cmd":"^find logs -type f -name .*\\.log.*$","out":"logs/app\\.log"},"solution":["find logs -type f -name \"*.log\""]},
+    {"id":"t12","kind":"challenge","diff":3,"check":{"cmd":"^grep -rin todo project$","out":"main\\.txt:1:TODO"},"solution":["grep -rin todo project"]},
+    {"id":"t13","kind":"ticket","diff":3,"check":{"contains":["~/lab/text_files.txt","readme\\.txt"]},"solution":["find . -type f -name \"*.txt\" > text_files.txt"]}
+  ],
+  "vm": [
+    {"id":"v01","expect":"ERROR disk full"},
+    {"id":"v02","expect":"\\d+:.*404"},
+    {"id":"v03","expect":"app\\.conf"},
+    {"id":"v04","expect":null}
+  ],
+  "quiz": [
+    {"id":"q1","answer":2},
+    {"id":"q2","answer":0},
+    {"id":"q3","answer":3},
+    {"id":"q4","answer":1}
+  ]
+}

@@ -1,0 +1,380 @@
+{
+ "title": "Linux Dizin Ağacı",
+ "lead": "Linux'ta her şeyin bir yeri vardır: ayarlar, loglar, kullanıcı dosyaları ve programlar için sabit dizinler. Hangi dosyayı nerede arayacağını öğren.",
+ "objectives": [
+  "Linux'ta C: veya D: sürücüsü olmadığını, her şeyin tek bir kök dizin `/` altında dallandığını açıklarsın.",
+  "`/etc`, `/home`, `/root`, `/var/log`, `/usr`, `/bin`, `/dev`, `/tmp`, `/proc`, `/opt` dizinlerinin görevini ayırt edersin.",
+  "`ls`, `cd` ve `cat` ile sistemi güvenle gezip bir sunucunun \"kimlik kartını\" çıkarırsın."
+ ],
+ "sections": [
+  {
+   "id": "root",
+   "title": "Ağacın kökü: /",
+   "body": [
+    "Windows'ta `C:` ve `D:` gibi sürücüler vardır. Linux'ta ise tek bir ağaç vardır ve kökü `/` (root directory, kök dizin) işaretidir. Yeni bir disk ya da USB bile bu ağacın bir dalına **bağlanır** (mount).",
+    "Dizinlerin yeri **FHS** (Filesystem Hierarchy Standard) adlı standartla belirlenir. Bu yüzden Ubuntu'da da Rocky'de de ayar dosyasını aynı yerde bulursun. Kök dizini görmek için `ls /` yeterlidir; hiçbir şeyi değiştirmiyorsun.",
+    "Kısa harita: `/etc` ayarlar, `/home` kullanıcılar, `/var` değişen veriler (loglar), `/usr` programlar, `/tmp` geçici dosyalar, `/proc` ve `/sys` kernel'in sanal dosyaları, `/dev` cihazlar."
+   ],
+   "commands": [
+    {
+     "cmd": "ls /",
+     "what": "Kök dizinin içindeki klasörleri listeler.",
+     "where": "Bir sisteme ilk girdiğinde genel yapıyı görmek için.",
+     "why": "Ağacın ana dallarını tanırsın.",
+     "example": "ls /"
+    },
+    {
+     "cmd": "cd /",
+     "what": "Kök dizine gider.",
+     "where": "Mutlak yol yazarken başlangıç noktası olarak.",
+     "why": "Yolu `/` ile başlayan komutlar bulunduğun yerden bağımsız çalışır.",
+     "example": "cd /"
+    },
+    {
+     "cmd": "pwd",
+     "what": "Bulunduğun dizinin tam yolunu yazar.",
+     "where": "Gezindikten sonra nerede olduğundan emin olmak için.",
+     "why": "Yanlış dizinde işlem yapmanı önler.",
+     "example": "pwd"
+    }
+   ],
+   "tip": "`/` ile başlayan yol **mutlak** yoldur (`/etc/hostname`); `/` ile başlamayan yol bulunduğun dizinden başlar."
+  },
+  {
+   "id": "config",
+   "title": "Ayarlar ve kullanıcılar: /etc, /home, /root",
+   "body": [
+    "`/etc` sistemin ve kurulu programların **ayar dosyalarını** taşır: `/etc/passwd` (kullanıcılar), `/etc/hostname` (makine adı), `/etc/fstab` (diskler), `/etc/os-release` (dağıtım bilgisi). Bunlar düz metin dosyalarıdır; `cat` ile okunur.",
+    "Normal kullanıcıların kişisel dosyaları `/home/<kullanıcı>` altındadır, örneğin `/home/student`. Yönetici `root`'un ev dizini ise `/root`'tur ve yalnızca root girebilir; normal kullanıcı orada `Permission denied` alır.",
+    "`/etc/shadow` parola özetlerini tutar ve yalnızca root okuyabilir. Normal kullanıcıyla `cat /etc/shadow` yazmak hata verir; bu bir arıza değil, korumadır."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/os-release",
+     "what": "Dağıtımın adını ve sürümünü gösterir.",
+     "where": "Hangi Linux'ta olduğunu öğrenmek için; her dağıtımda aynı yoldadır.",
+     "why": "Dağıtıma göre doğru komutu seçersin.",
+     "example": "cat /etc/os-release"
+    },
+    {
+     "cmd": "cat /etc/hostname",
+     "what": "Makinenin adını gösterir.",
+     "where": "Birden fazla sunucuyla çalışırken doğru makinede olduğunu doğrulamak için.",
+     "why": "Yanlış sunucuda işlem yapma riskini azaltır.",
+     "example": "cat /etc/hostname"
+    },
+    {
+     "cmd": "ls /home",
+     "what": "Sistemdeki normal kullanıcıların ev dizinlerini listeler.",
+     "where": "Hangi kullanıcıların var olduğuna hızlıca bakmak için.",
+     "why": "Kullanıcı dosyalarının nerede durduğunu görürsün.",
+     "example": "ls /home"
+    }
+   ],
+   "tip": "Ayar dosyasını değiştirmeden önce her zaman bir yedek al; bu modülde yalnızca okuyoruz."
+  },
+  {
+   "id": "variable",
+   "title": "Loglar ve sanal dosyalar: /var, /proc, /sys",
+   "body": [
+    "`/var` sistem çalıştıkça **değişen** verileri tutar. En önemlisi `/var/log` dizinidir: sistem ve servis kayıtları burada durur. RHEL, Rocky ve Alma'da genel kayıt `/var/log/messages`, Ubuntu'da `/var/log/syslog` dosyasıdır. Logları `/etc` altında arama; ayarlar `/etc`'de, loglar `/var/log`'dadır.",
+    "`/proc` ve `/sys` diskte gerçek dosya değildir. Kernel bunları RAM'de o an üretir. `ls /proc` çıktısındaki sayılar çalışan process'lerin numaralarıdır (PID). `cat /proc/cpuinfo` işlemci bilgisini, `cat /proc/meminfo` bellek bilgisini canlı gösterir.",
+    "Bu dosyaları yalnızca **okumak** için kullan. İçlerinde gezinmek ya da yazmak güvenli bir alışkanlık değildir."
+   ],
+   "commands": [
+    {
+     "cmd": "ls /var/log",
+     "what": "Log dosyalarını listeler.",
+     "where": "Bir hata araştırırken ilk bakılacak yer.",
+     "why": "Sorunun izini loglarda sürersin.",
+     "example": "ls /var/log"
+    },
+    {
+     "cmd": "cat /proc/cpuinfo",
+     "what": "Kernel'den işlemci bilgisini okur.",
+     "where": "Donanım ve kaynak kontrolünde.",
+     "why": "Sanal bir dosya olduğu için bilgi her zaman günceldir.",
+     "example": "cat /proc/cpuinfo"
+    },
+    {
+     "cmd": "find",
+     "what": "Bir dizin altında ada göre dosya arar.",
+     "where": "Dosyanın hangi dizinde olduğunu bilmediğinde.",
+     "why": "Tahmin etmek yerine ağacı tarayıp kesin yolu bulursun.",
+     "example": "find /etc -name sshd_config"
+    }
+   ],
+   "tip": "Dosya adı `messages` mı `syslog` mu? Dağıtıma göre değişir; önce `ls /var/log` ile bak.",
+   "danger": "`/proc` ve `/sys` içindeki dosyalara yazmak veya `/proc/kcore` gibi dosyaları `cat` ile açmak sistemi kararsızlaştırabilir. Yalnızca `cpuinfo`, `meminfo`, `version` gibi bilinen dosyaları oku."
+  },
+  {
+   "id": "programs",
+   "title": "Programlar ve cihazlar: /usr, /bin, /dev, /tmp, /opt",
+   "body": [
+    "`/usr` kurulu programların büyük kütüphanesidir. Komutların çoğu `/usr/bin` altındadır. Modern dağıtımlarda `/bin` ayrı bir dizin değil, `/usr/bin`'e giden bir **sembolik bağdır** (symlink): `ls -ld /bin` çıktısında `bin -> usr/bin` görürsün.",
+    "`/dev` cihaz dosyalarını taşır: `/dev/sda` bir disk, `/dev/null` her yazıyı yutan \"kara delik\"tir. `ls -l` çıktısında bunların satırı `c` (karakter) veya `b` (blok) harfiyle başlar.",
+    "`/tmp` geçici dosyalar içindir ve yeniden başlatmada genellikle temizlenir. `/opt` üçüncü parti yazılımlar, `/srv` sunucunun yayınladığı veriler içindir. Bir uygulamayı bulamazsan sırayla `/opt`, `/usr/local` ve `/etc` altına bak."
+   ],
+   "commands": [
+    {
+     "cmd": "ls -ld /bin",
+     "what": "`/bin` girdisinin kendisini ayrıntılı gösterir; sembolik bağ hedefi `->` ile görünür.",
+     "where": "Bir yolun gerçekten dizin mi yoksa bağ mı olduğunu anlamak için.",
+     "why": "Dizin yapısının neden dağıtımdan dağıtıma farklı görünebildiğini açıklar.",
+     "example": "ls -ld /bin"
+    },
+    {
+     "cmd": "ls -l /dev/null",
+     "what": "Bir cihaz dosyasının türünü ve izinlerini gösterir.",
+     "where": "Donanımın dosya olarak nasıl göründüğünü incelerken.",
+     "why": "Linux'ta her şeyin dosya olduğunu görürsün.",
+     "example": "ls -l /dev/null"
+    },
+    {
+     "cmd": "ls /opt",
+     "what": "Üçüncü parti yazılımların kurulduğu dizini listeler.",
+     "where": "Elle kurulmuş bir uygulamayı ararken.",
+     "why": "Paket yöneticisi dışındaki yazılımlar genellikle burada durur.",
+     "example": "ls /opt"
+    }
+   ],
+   "tip": "Bir komutun nerede durduğunu öğrenmek için `which ls` yazabilirsin.",
+   "warn": "`/tmp` herkese açıktır. Parola gibi gizli bilgileri orada saklama ve `/tmp` altında bile `rm -r` kullanmadan önce yolu iki kez oku."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Kök dizine git: `cd /`.",
+   "hint": "Yalnızca bir eğik çizgi yaz."
+  },
+  "t02": {
+   "text": "Ayar dosyalarının dizinini listele: `ls /etc`.",
+   "hint": "Listede `passwd` ve `hostname` gibi dosyalar görünür."
+  },
+  "t03": {
+   "text": "Dağıtım bilgisini oku: `cat /etc/os-release`.",
+   "hint": "`VERSION_ID` satırı sürümü verir."
+  },
+  "t04": {
+   "text": "Log dizinini listele: `ls /var/log`.",
+   "hint": "Bu sanal makinede `messages` adlı bir dosya var."
+  },
+  "t05": {
+   "text": "Normal kullanıcıların ev dizinlerini listele: `ls /home`.",
+   "hint": "`student` ve `alice` görünmeli."
+  },
+  "t06": {
+   "text": "Makine adını oku: `cat /etc/hostname`.",
+   "hint": "Çıktı `linux-lab` olmalı."
+  },
+  "t07": {
+   "text": "Sanal dosyadan işlemci bilgisini oku: `cat /proc/cpuinfo`.",
+   "hint": "Bu dosya diskte yer kaplamaz; kernel üretir."
+  },
+  "t08": {
+   "text": "Tahmin et: `/bin` bir dizin mi, bağ mı? Çalıştırarak doğrula: `ls -ld /bin`.",
+   "hint": "Çıktıda `->` işaretini ara; ok bir sembolik bağı gösterir."
+  },
+  "t09": {
+   "text": "Tahmin et: normal kullanıcı parola özetlerini okuyabilir mi? Dene: `cat /etc/shadow`.",
+   "hint": "`Permission denied` beklenir; bu koruma bilinçlidir."
+  },
+  "t10": {
+   "text": "Tahmin et: `ls /root` normal kullanıcıya ne söyler? Dene.",
+   "hint": "`/root` yalnızca root'un ev dizinidir."
+  },
+  "t11": {
+   "text": "Hata ayıklama: bir kullanıcı logları görmek için `cd /etc/log` yazdı ve `No such file or directory` aldı. Doğru dizine git.",
+   "hint": "Loglar `/etc` altında değil, `/var` altındadır."
+  },
+  "t12": {
+   "text": "Mini proje: `~/mini-root` altında küçük bir FHS ağacı kur. Tek `mkdir -p` ile `etc`, `var/log` ve `tmp` dizinlerini, `touch` ile `etc/app.conf` dosyasını oluştur; `echo started > ~/mini-root/var/log/app.log` ile log satırı yaz.",
+   "hint": "Küme: `~/mini-root/{etc,var/log,tmp}`; log dosyasına yönlendirme `>` ile yazılır."
+  },
+  "t13": {
+   "text": "Meydan okuma: `~/idcard.txt` dosyasına sunucunun kimlik kartını yaz: makine adı (`/etc/hostname`), kullanıcılar (`ls /home`) ve dağıtım adı (`PRETTY_NAME` satırı). İlkinde `>`, diğerlerinde `>>` kullan.",
+   "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` dağıtım satırını ekler."
+  },
+  "t14": {
+   "text": "Meydan okuma: `sshd_config` dosyasının yolunu bilmiyorsun. `/etc` altında adıyla ara: `find /etc -name sshd_config`.",
+   "hint": "`-name` dosya adını bekler; yol `/etc/ssh/` altında çıkar."
+  },
+  "t15": {
+   "text": "TICKET #2410 — \"Mağaza uygulaması (`shopapp`) hata veriyor, kurulum yerini ve loglarını bulamıyoruz.\" Üçüncü parti yazılım `/opt` altında. Log dosyasındaki `ERROR` satırını bulup `~/ticket-2410.txt` dosyasına kaydet.",
+   "hint": "Önce `ls /opt`, sonra `ls /opt/shopapp/logs`; ardından `grep ERROR ... > ~/ticket-2410.txt`."
+  }
+ },
+ "vm": {
+  "intro": "Bu bölümde yalnızca okuma yapıyorsun; hiçbir komut sistem dosyasını değiştirmez. Çıktılar dağıtıma göre biraz farklı olabilir (Ubuntu / Rocky / Alma / WSL); bu normaldir.",
+  "tasks": {
+   "v01": {
+    "title": "Kök dizini gez",
+    "text": "Kök dizinin içeriğini listele ve çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ls /",
+      "expected": "bin  boot  dev  etc  home  lib  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"
+     }
+    ],
+    "differs": [
+     "Dizin sayısı ve sırası dağıtıma göre değişir; `etc`, `var` ve `usr` bulunmalı.",
+     "Çıktı tek sütunsa terminali genişlet; içerik aynıdır."
+    ]
+   },
+   "v02": {
+    "title": "Hangi dağıtımdayım?",
+    "text": "Dağıtım bilgisini oku ve çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\n..."
+     }
+    ],
+    "differs": [
+     "Ubuntu'da `NAME=\"Ubuntu\"` ve `ID=ubuntu` görürsün; satırlar farklı ama `NAME=` ve `ID=` vardır.",
+     "Dosya yoksa çok eski bir sistemdesin; `cat /etc/issue` dene."
+    ]
+   },
+   "v03": {
+    "title": "/bin gerçekten bir bağ mı?",
+    "text": "`/` dizinini ayrıntılı listele ve `bin` satırına bak.",
+    "blocks": [
+     {
+      "cmd": "ls -l / | grep ' bin'",
+      "expected": "lrwxrwxrwx. 1 root root 7 ... bin -> usr/bin"
+     }
+    ],
+    "differs": [
+     "Satır boşsa `ls -ld /bin` dene; çok eski dağıtımlarda `/bin` gerçek bir dizin olabilir.",
+     "Satır `l` ile başlıyorsa bu bir sembolik bağdır."
+    ]
+   },
+   "v04": {
+    "title": "Sanal dosya: /proc",
+    "text": "Kernel'in işlemci bilgisinden ilk satırları oku.",
+    "blocks": [
+     {
+      "cmd": "head -n 5 /proc/cpuinfo\nls /proc | head -n 10",
+      "expected": "processor\t: 0\nvendor_id\t: GenuineIntel\n...\n1\n10\n..."
+     }
+    ],
+    "differs": [
+     "ARM işlemcide (Apple Silicon üzerinde UTM) alanlar farklıdır; `processor` satırı yine görünür.",
+     "WSL'de `/proc` içeriği biraz daha kısıtlı olabilir."
+    ]
+   },
+   "v05": {
+    "title": "Log dizinine bak",
+    "text": "Log dosyalarını listele ve çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ls /var/log",
+      "expected": "anaconda  audit  dnf.log  messages  secure  wtmp ..."
+     }
+    ],
+    "differs": [
+     "Ubuntu'da `syslog` ve `auth.log` görürsün, Rocky'de `messages` ve `secure`.",
+     "Bazı dosyaları okumak için `sudo` gerekir; listelemek için gerekmez."
+    ]
+   },
+   "v06": {
+    "title": "Geçici dizinde bir dosya",
+    "text": "`/tmp` altında bir deneme dosyası oluştur, gör ve hemen sil. Tek bir dosya silindiği için güvenlidir.",
+    "blocks": [
+     {
+      "cmd": "echo test > /tmp/lab-test.txt\nls -l /tmp/lab-test.txt\nrm /tmp/lab-test.txt",
+      "expected": "-rw-r--r--. 1 student student 5 ... /tmp/lab-test.txt"
+     }
+    ],
+    "differs": [
+     "Dosya adında yazım hatası varsa `rm` \"No such file\" der; ad `lab-test.txt` olmalı.",
+     "`rm` komutunda `-r` veya joker (`*`) kullanma."
+    ]
+   },
+   "v07": {
+    "title": "Cihaz dosyası",
+    "text": "`/dev/null` dosyasını ayrıntılı listele. Yaptıysan çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "ls -l /dev/null",
+      "expected": "crw-rw-rw-. 1 root root 1, 3 ... /dev/null"
+     }
+    ],
+    "differs": [
+     "Satır `c` ile başlıyorsa karakter cihazıdır; diğer izin harfleri farklıysa sorun yok.",
+     "Dosya yoksa bir konteynerde olabilirsin; normal bir VM'de her zaman bulunur."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Sistem loglarını hangi dizinde ararsın?",
+   "options": [
+    "/etc",
+    "/home",
+    "/var/log",
+    "/proc"
+   ],
+   "explain": "Loglar sürekli büyüyen veridir ve `/var/log` altında durur. `/etc` ayar dosyaları içindir."
+  },
+  "q2": {
+   "q": "`/proc` neden \"sanal\" bir dizindir?",
+   "options": [
+    "Yalnızca root görebildiği için",
+    "Diskte gerçek dosya değildir; kernel bilgiyi RAM'de o an üretir",
+    "İçindeki dosyalar şifreli olduğu için",
+    "İnternetten indirildiği için"
+   ],
+   "explain": "`/proc` ve `/sys` kernel'in sunduğu canlı bir arayüzdür ve diskte yer kaplamaz."
+  },
+  "q3": {
+   "q": "Sistem ve programların ayar dosyaları hangi dizinde bulunur?",
+   "options": [
+    "/etc",
+    "/tmp",
+    "/dev",
+    "/opt"
+   ],
+   "explain": "`/etc` ayar dosyalarının standart yeridir (`passwd`, `hostname`, `fstab`...)."
+  },
+  "q4": {
+   "q": "`student` kullanıcısının kişisel dosyaları nerededir; `root`'unki nerededir?",
+   "options": [
+    "`/root` ve `/home`",
+    "`/etc/student` ve `/etc/root`",
+    "İkisi de `/home` altında",
+    "`/home/student` ve `/root`"
+   ],
+   "explain": "Normal kullanıcılar `/home/<ad>` altındadır; root'un ev dizini ayrı olarak `/root`'tur."
+  }
+ },
+ "summary": [
+  "Linux'ta tek bir ağaç vardır; kök `/` olup her şey onun altında dallanır.",
+  "`/etc` ayarlar, `/var/log` loglar, `/home` ve `/root` ev dizinleri, `/usr` programlar.",
+  "`/proc` ve `/sys` kernel'in sanal dosyalarıdır; `/dev` cihazlar, `/tmp` geçici dosyalar, `/opt` üçüncü parti yazılımlar içindir.",
+  "Bir şey ararken önce dizinin görevini düşün, sonra `ls`, `cat` ve `find` ile doğrula."
+ ],
+ "glossary": [
+  {
+   "term": "FHS",
+   "meaning": "Filesystem Hierarchy Standard: hangi dizinin ne için kullanıldığını belirleyen standart."
+  },
+  {
+   "term": "kök dizin",
+   "meaning": "Ağacın en üstü olan `/`; tüm yollar buradan dallanır."
+  },
+  {
+   "term": "mutlak yol",
+   "meaning": "`/` ile başlayan, bulunduğun yerden bağımsız tam yol."
+  },
+  {
+   "term": "sembolik bağ",
+   "meaning": "Başka bir yolu gösteren özel dosya; `ls -l`'de `->` ile görünür."
+  },
+  {
+   "term": "PID",
+   "meaning": "Çalışan her process'in sayısal kimliği; `/proc` altında dizin adı olarak görünür."
+  }
+ ]
+}

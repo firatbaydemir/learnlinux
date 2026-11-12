@@ -1,0 +1,176 @@
+{
+ "title": "sed and awk",
+ "lead": "Use sed to replace, delete and select text line by line; use awk to split lines into fields (columns), calculate and summarize log files.",
+ "objectives": [
+  "You use sed with `s/old/new/`, the `g` flag, `-n` + `p`, addresses/ranges and `d`.",
+  "You know that `sed -i` changes a file permanently and make a backup first (`-i.bak`).",
+  "You select fields with awk (`$1`, `$NF`, `-F`), write conditions and compute sums and averages with `BEGIN`/`END`.",
+  "You count values in log files with awk arrays and combine awk in pipelines with `cut`, `sort`, `uniq`."
+ ],
+ "sections": [
+  {
+   "id": "sed-sub",
+   "title": "sed: substitution (s///)",
+   "body": [
+    "`sed` (stream editor) reads text line by line, applies a command and prints the result. It **does not change the file**; only `-i` does that (third section).",
+    "The most common command is `s/search/replace/`. By default only the **first** match on each line is replaced; add `g` (global) for all of them: `s/cat/dog/g`.",
+    "The delimiter does not have to be `/`. For paths like `/usr/local` use `|`: `s|/usr/local|/opt|`. A `&` in the replacement stands for the match itself; write `\\&` for a literal `&`."
+   ],
+   "commands": [
+    {"cmd": "sed 's/old/new/'", "what": "Replaces the first match on each line.", "where": "For a quick text fix.", "why": "You see the result without touching the file.", "example": "sed 's/cat/hamster/' pets.txt"},
+    {"cmd": "sed 's/old/new/g'", "what": "Replaces all matches on the line.", "where": "When a word must change everywhere.", "why": "Without `g` the second match on a line stays.", "example": "sed 's/cat/dog/g' pets.txt"},
+    {"cmd": "sed 's|a|b|'", "what": "Uses `|` as delimiter; readable for paths containing `/`.", "where": "When replacing paths and URLs.", "why": "No `\\/` escapes needed.", "example": "sed 's|/usr/local|/opt|' paths.txt"},
+    {"cmd": "sed -e ... -e ...", "what": "Applies several sed commands in order.", "where": "When one pass needs several changes.", "why": "The file is read only once.", "example": "sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv"}
+   ],
+   "tip": "With `-E` (extended regex) `+`, `?`, `|` and `( )` work without escapes: `sed -E 's/[0-9]+/N/g' access.log`.",
+   "warn": "The pattern is a **regular expression**: `.` means any character. To match a dot write `\\.`, otherwise `s/1.2/X/` also replaces `102`."
+  },
+  {
+   "id": "sed-lines",
+   "title": "sed: selecting and deleting lines",
+   "body": [
+    "By default sed prints every line. `-n` turns that off; then `p` (print) prints only the lines you want. You pick lines with an **address**: a number (`2p`), a range (`1,3p`), the last line (`$p`) or a regex (`/404/p`).",
+    "`d` (delete) drops the line from the output. `/^#/d` removes comment lines, `/^$/d` blank lines, `1d` the header line. All of this affects only the **output**; the file stays the same. To save the result, redirect: `sed '/^#/d' server.conf > clean.conf`."
+   ],
+   "commands": [
+    {"cmd": "sed -n 'Np'", "what": "Prints only line N.", "where": "To view a specific line of a big file.", "why": "Shorter than `head | tail`.", "example": "sed -n '2p' pets.txt"},
+    {"cmd": "sed -n 'A,Bp'", "what": "Prints lines A through B; `$` is the last line.", "where": "To look at one section of a file.", "why": "You get the range with one command.", "example": "sed -n '2,4p' employees.csv"},
+    {"cmd": "sed '/regex/d'", "what": "Deletes matching lines from the output.", "where": "When stripping comment or blank lines.", "why": "Produces the clean version of a config file.", "example": "sed '/^#/d' server.conf"},
+    {"cmd": "sed '1d'", "what": "Skips the first line (e.g. a CSV header).", "where": "Before processing data that has a header.", "why": "Later tools do not mistake the header for data.", "example": "sed '1d' employees.csv"}
+   ],
+   "tip": "`-n` and `p` always go together. Alone, `sed '2p'` prints line 2 **twice** (once automatically, once by `p`)."
+  },
+  {
+   "id": "sed-inplace",
+   "title": "sed -i: editing a file in place",
+   "body": [
+    "`sed -i` writes the result not to the screen but **into the file itself**. There is no undo and no trash can: a wrong regex damages the file permanently.",
+    "Rule: run without `-i` first and check the output, then run with a backup. `sed -i.bak '...' file` keeps the original as `file.bak` and works in both GNU (Linux) and BSD (macOS) sed.",
+    "**GNU/BSD difference:** on Linux `sed -i 's/a/b/' f` is enough. On macOS `-i` requires a suffix; for no backup write `sed -i '' 's/a/b/' f`. If the same command behaves differently on two systems, this is why."
+   ],
+   "commands": [
+    {"cmd": "sed -i.bak", "what": "Edits the file in place and saves the original as `.bak`.", "where": "When changing configuration files.", "why": "If something goes wrong you restore from the backup.", "example": "sed -i.bak 's/8080/9090/' server.conf"},
+    {"cmd": "cp file file.bak", "what": "Makes a manual backup.", "where": "Before changing several files.", "why": "Leaves you a way back after `-i`.", "example": "cp app.conf app.conf.bak", "nosim": false},
+    {"cmd": "diff old new", "what": "Shows the difference between two files.", "where": "When verifying the change.", "why": "You see whether only the intended line changed.", "example": "diff server.conf.bak server.conf", "nosim": true}
+   ],
+   "warn": "`sed -i` cannot be undone. On production systems take a **backup** first. For several files (`sed -i ... *.conf`) test on one file without `-i` first.",
+   "danger": "With a wrong pattern, `sed -i 's/.*//' file` empties the whole file. Take a **snapshot** of your VM before destructive experiments."
+  },
+  {
+   "id": "awk-basics",
+   "title": "awk: fields and conditions",
+   "body": [
+    "`awk` splits each line into **fields** at whitespace: `$1` is the first, `$2` the second, `$NF` the last field, `$0` the whole line. Change the separator with `-F`: for CSV use `-F,`.",
+    "A program has the form `pattern { action }`. Without a pattern it applies to every line; with one, only to matching lines: `$3 > 5000` or `/404/`. Without an action the line is printed. `NR` is the line number, `NF` the field count; `NR>1` skips the header.",
+    "`BEGIN { }` runs once before the first line, `END { }` once after the last. Ideal for sums and averages: `{ s += $3 } END { print s }`. Use `printf` for formatted output; you write the line ending yourself (`\\n`)."
+   ],
+   "commands": [
+    {"cmd": "awk '{print $1}'", "what": "Prints the first field of each line.", "where": "To take a column from logs or command output.", "why": "`cut` trips over varying spaces, awk does not.", "example": "awk '{print $1}' access.log"},
+    {"cmd": "awk -F, '...'", "what": "Sets the field separator to `,`.", "where": "For CSV and `:`-separated files.", "why": "The only way to get the values into the right fields.", "example": "awk -F, 'NR>1 {print $1, $3}' employees.csv"},
+    {"cmd": "awk 'condition'", "what": "Prints only lines that satisfy the condition.", "where": "When selecting values over a threshold or error codes.", "why": "Allows numeric comparisons `grep` cannot do.", "example": "awk -F, 'NR>1 && $3 > 5000 {print $1}' employees.csv"},
+    {"cmd": "awk '... END {...}'", "what": "Prints the result after the last line.", "where": "For sums, averages, counters.", "why": "One pass gives you the summary.", "example": "awk -F, 'NR>1 {s+=$3} END {print s}' employees.csv"}
+   ],
+   "tip": "Always put the awk program in **single quotes**; otherwise the shell expands `$1` itself and awk gets an empty program."
+  },
+  {
+   "id": "awk-arrays",
+   "title": "awk: counting and log analysis",
+   "body": [
+    "awk arrays are **associative** (key → value) and need no declaration. `c[$2]++` increments the counter for each status code; in the `END` block `for (k in c)` prints them all. The order is undefined, so append `sort`.",
+    "The pattern combines with pipes: `ps aux | awk 'NR>1 {print $1}' | sort | uniq -c` shows how many processes each user has. `cut -d' ' -f2 access.log | sort | uniq -c` works too, but with irregular spacing awk is safer."
+   ],
+   "commands": [
+    {"cmd": "awk '{c[$2]++} END {for (k in c) print k, c[k]}'", "what": "Counts how often each value in field two occurs.", "where": "When counting per HTTP status code or IP.", "why": "Summarizes a log with one command.", "example": "awk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort"},
+    {"cmd": "awk '{print $NF}'", "what": "Prints the last field of each line.", "where": "For lines with a varying number of fields.", "why": "You do not need to know the last column's number.", "example": "awk '{print $NF}' access.log"},
+    {"cmd": "awk 'BEGIN {...}'", "what": "Runs once before the file is read.", "where": "For headings or initial values.", "why": "Adds a title to the report output.", "example": "awk 'BEGIN {print \"ip status\"} {print $1, $2}' access.log"},
+    {"cmd": "awk '{printf ...}'", "what": "C-style formatted output.", "where": "For aligned or decimal numbers.", "why": "`print` does not give you control of format and line ending.", "example": "awk -F, 'NR>1 {printf \"%s earns %d\\n\", $1, $3}' employees.csv"}
+   ],
+   "tip": "Average: `END {print s/(NR-1)}` (with a header) or a separate counter (`n++`). Watch out for division by zero on an empty file."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Print only line 2 of `pets.txt` with sed: `sed -n '2p' pets.txt`.", "hint": "`-n` turns off automatic printing, `2p` prints only line 2. The simulator does not run sed ('not supported'); your command is still recorded."},
+  "t02": {"text": "Print only the first column (the IP addresses) of `access.log` with awk.", "hint": "`awk '{print $1}' access.log` — the program belongs in single quotes."},
+  "t03": {"text": "Predict: which names does `cut -d, -f1 employees.csv` print (same as `awk -F, '{print $1}'`)? Think first, then run it.", "hint": "The first column is the `name` header and four names (anna, ben, cara, dan)."},
+  "t04": {"text": "You are changing the port in `server.conf`. First back it up with `cp server.conf server.conf.bak`, then run `sed -i 's/8080/9090/' server.conf`.", "hint": "Order matters: backup first, then `-i`. Alternatively `sed -i.bak` makes the backup itself; but here the file `server.conf.bak` must exist."},
+  "t05": {"text": "Print `server.conf` without comment lines (those starting with `#`): `sed '/^#/d' server.conf`.", "hint": "`^#` means # at line start, `d` removes the line. The file stays unchanged."},
+  "t06": {"text": "Broken command: `sed 's/usr/local/bin/opt/bin/' paths.txt` fails because the `/` in the path collides with the delimiter. Fix it: replace `/usr/local` with `/opt` (use `|` as delimiter).", "hint": "`sed 's|/usr/local|/opt|' paths.txt`. The first character after `s` is the delimiter; `|`, `#` and `,` are common."},
+  "t07": {"text": "Predict: how often does the department `it` appear in the output of `cut -d, -f2 employees.csv | sort | uniq -c`? Then run the command.", "hint": "`uniq -c` prefixes each distinct line with its count. The `dept` header is a line too."},
+  "t08": {"text": "Mini project: create the folder `reports`, copy `employees.csv` into it and compute the average salary in the copy with awk (skip the header): `awk -F, 'NR>1 {s+=$3; n++} END {print s/n}' reports/employees.csv`.", "hint": "Steps: `mkdir reports`, `cp employees.csv reports/`, then awk. `NR>1` skips the header, `n` counts the rows."},
+  "t09": {"text": "Mini project: create the folder `backup`, copy `app.conf` to `backup/app.conf`, then change `mode=dev` to `mode=prod` in `app.conf` with `sed -i`.", "hint": "`mkdir backup`, `cp app.conf backup/app.conf`, `sed -i 's/mode=dev/mode=prod/' app.conf`. Make the backup BEFORE `-i`."},
+  "t10": {"text": "Predict: which animal does `sed -n '3p' pets.txt` print? Verify with the equivalent `head -n 3 pets.txt | tail -n 1`.", "hint": "Lines: cat, dog, bird, cat, fish. `head -n 3` takes the first three, `tail -n 1` the last of them."},
+  "t11": {"text": "Challenge: with awk select only the lines of `access.log` whose status code is 404 (condition: second field is 404).", "hint": "`awk '$2 == 404' access.log` — the pattern alone is enough; without an action the line is printed."},
+  "t12": {"text": "Challenge: in one sed call make two replacements in `employees.csv` (with two `-e`): `it` to `IT`, `hr` to `HR`. Just print, do not change the file.", "hint": "`sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv`."},
+  "t13": {"text": "Debug: a wrong `sed -i` broke `db.conf` (only `host=` is left). The backup `db.conf.bak` is still there. Restore the file from the backup.", "hint": "`cp db.conf.bak db.conf`. Check with `cat db.conf`: it should show `host=localhost` and `port=5432`."},
+  "t14": {"text": "Ticket #3601 — 'The live server needs a clean configuration: prepare a copy without comment lines as `server.live`, and keep the original as `server.conf.orig`.' (The simulator has no sed: produce the output without comments using `grep -v`; on a real system `sed '/^#/d'` does the same.)", "hint": "`cp server.conf server.conf.orig` and `grep -v '^#' server.conf > server.live`."},
+  "t15": {"text": "Ticket #3602 — 'Write the distribution of status codes in access.log to the file `status_report.txt`.' (One count per code, e.g. `3 200`.)", "hint": "Take the second column, sort, count: `cut -d' ' -f2 access.log | sort | uniq -c > status_report.txt`. An awk array would do the same."},
+  "t16": {"text": "Ticket #3603 — 'Calculate the total salary of the IT department.' Write it with awk: separator `,`, rows whose second field is `it`, sum the third field, print with `END`.", "hint": "`awk -F, '$2==\"it\" {s+=$3} END {print s}' employees.csv` (result 11300)."}
+ },
+ "vm": {
+  "intro": "Run these commands on your own Ubuntu/Rocky/Alma VM. Everything stays in `~/lab` and your own test files. sed and awk come preinstalled on these distributions (GNU versions).",
+  "tasks": {
+   "v01": {
+    "title": "Create the test files",
+    "text": "Create the following four test files in `~/lab` with `printf` and paste the line counts.",
+    "blocks": [
+     {"cmd": "mkdir -p ~/lab && cd ~/lab\nprintf 'cat\\ndog\\nbird\\ncat\\nfish\\n' > pets.txt\nprintf 'name,dept,salary\\nanna,it,5200\\nben,hr,4100\\ncara,it,6100\\ndan,ops,3900\\n' > employees.csv\nprintf '# server config\\nport=8080\\n# debug off\\ndebug=false\\nhost=localhost\\n' > server.conf\nprintf '10.0.0.1 200\\n10.0.0.2 404\\n10.0.0.1 200\\n10.0.0.3 500\\n10.0.0.2 200\\n' > access.log\nwc -l pets.txt employees.csv server.conf access.log", "expected": "  5 pets.txt\n  5 employees.csv\n  5 server.conf\n  5 access.log\n 20 total"}
+    ],
+    "differs": ["If a count is not 5, a `printf` line is missing or has too much; check the file with `cat` and run the command again.", "If you see a literal `n` instead of a newline, check the single quotes."]
+   },
+   "v02": {
+    "title": "sed: replace, select, delete",
+    "text": "Run three sed commands. The files stay unchanged, only the output differs. Paste the output.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nsed 's/cat/hamster/' pets.txt\nsed -n '2,3p' pets.txt\nsed '1d' employees.csv", "expected": "hamster\ndog\nbird\nhamster\nfish\ndog\nbird\nanna,it,5200\nben,hr,4100\ncara,it,6100\ndan,ops,3900"}
+    ],
+    "differs": ["If `cat pets.txt` still shows `cat` that is correct: without `-i` the file does not change.", "No output at all? `cd ~/lab` may have failed; repeat v01."]
+   },
+   "v03": {
+    "title": "sed -i with a backup",
+    "text": "Change the port in `server.conf` with a backup and show the difference. Paste the output.",
+    "blocks": [
+     {"cmd": "cd ~/lab\n# GNU sed (Ubuntu/Rocky/Alma); -i.bak makes a backup\nsed -i.bak 's/8080/9090/' server.conf\ngrep port server.conf\ndiff server.conf.bak server.conf", "expected": "port=9090\n2c2\n< port=8080\n---\n> port=9090"}
+    ],
+    "differs": ["On macOS/BSD `-i.bak` works too; without a suffix you need `sed -i '' ...`.", "If the `diff` output is empty nothing changed; check the spelling of `8080`.", "To undo: `cp server.conf.bak server.conf`."]
+   },
+   "v04": {
+    "title": "awk: column, condition, sum",
+    "text": "Run three awk commands on `employees.csv`: two columns, salaries over 5000, total and average.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nawk -F, 'NR>1 {print $1, $3}' employees.csv\nawk -F, 'NR>1 && $3 > 5000 {print $1}' employees.csv\nawk -F, 'NR>1 {s+=$3} END {printf \"total=%d avg=%.1f\\n\", s, s/(NR-1)}' employees.csv", "expected": "anna 5200\nben 4100\ncara 6100\ndan 3900\nanna\ncara\ntotal=19300 avg=4825.0"}
+    ],
+    "differs": ["Depending on the locale the decimal separator may be `4825,0`.", "If you see `total=0`, `-F,` is missing or the shell expanded `$3`; put the program in single quotes."]
+   },
+   "v05": {
+    "title": "Log analysis: counting",
+    "text": "Count the status codes in `access.log` with an awk array, find the 404 line with sed and paste the output. Optionally count running processes per user.",
+    "blocks": [
+     {"cmd": "cd ~/lab\nawk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort\nsed -n '/404/p' access.log\nps aux | awk 'NR>1 {print $1}' | sort | uniq -c | sort -rn | head -3", "expected": "200 3\n404 1\n500 1\n10.0.0.2 404\n    120 root\n     35 student\n      4 www-data"}
+    ],
+    "differs": ["The numbers and users of the last command depend on your system; what matters is the `count user` format on each line.", "The order of `for (k in c)` is undefined, which is why we added `sort`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What does `sed 's/a/b/' file` do without the `g` flag?", "options": ["Replaces every a in the file with b", "Replaces only the first a on each line with b", "Changes only the first line", "Edits the file in place"], "explain": "Without `g` only the first match per line is replaced; and without `-i` the file is not changed at all."},
+  "q2": {"q": "What is the safest way to edit a configuration file in place?", "options": ["`sed -n 's/a/b/p' file`", "`sed -e 's/a/b/' file`", "`sed -i 's/a/b/' file` (no backup)", "`sed -i.bak 's/a/b/' file`"], "explain": "`-i.bak` keeps the original as `file.bak`; `-i` alone cannot be undone."},
+  "q3": {"q": "What does `awk -F, '{print $NF}' employees.csv` print?", "options": ["The first field of each line", "The number of fields on the line", "The last field of each line", "The whole line"], "explain": "`NF` is the field count, `$NF` is the value of the last field."},
+  "q4": {"q": "What is `NR>1` for in `awk -F, 'NR>1 {s+=$3} END {print s}'`?", "options": ["Skips the first line (the header)", "Processes only the first line", "Sets the field count to 1", "Sorts the file"], "explain": "`NR` is the line number; `NR>1` runs the action on every line except the header."}
+ },
+ "summary": [
+  "`sed 's/old/new/g'` substitutes; `-n` + `p` selects, `d` deletes. Without `-i` the file never changes.",
+  "`sed -i` is permanent: use `-i.bak` for a backup. On macOS you need `-i ''`.",
+  "awk splits lines into fields: `$1`, `$NF`, `-F,`; calculate with `NR`, `NF`, `BEGIN`, `END`.",
+  "With the associative array `c[$2]++` you count values in logs; sort the output with `sort`.",
+  "Always put programs in single quotes and check the result on screen first."
+ ],
+ "glossary": [
+  {"term": "sed", "meaning": "Stream editor that processes text line by line."},
+  {"term": "awk", "meaning": "Text-processing language that splits lines into fields and supports conditions, calculations and reports."},
+  {"term": "field", "meaning": "A part of a line that awk splits off at the separator: `$1`, `$2`, … `$NF`."},
+  {"term": "address", "meaning": "A number, range or regex that selects which lines a sed command applies to."},
+  {"term": "in-place editing", "meaning": "With `sed -i` the result is written into the file itself instead of the screen."},
+  {"term": "associative array", "meaning": "An awk array holding key-value pairs; typical for counters."},
+  {"term": "regex", "meaning": "A regular expression describing a text pattern; sed and awk use it for matching."}
+ ]
+}

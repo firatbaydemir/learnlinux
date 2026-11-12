@@ -1,0 +1,32 @@
+{
+  "id": "5.4",
+  "level": 5,
+  "setup": {
+    "dirs": ["/home/student/lab"],
+    "files": {
+      "/home/student/lab/jobs_snapshot.txt": "JOB STATE COMMAND\n[1] Stopped sleep 300\n[2] Running ./backup.sh\n[3] Done ./report.sh\n"
+    },
+    "modes": [],
+    "cwd": "/home/student"
+  },
+  "tasks": [
+    {"id": "t01", "kind": "warmup", "diff": 1, "check": {"out": "Stopped", "of": "^grep sleep \\S*jobs_snapshot\\.txt$"}, "solution": ["grep sleep ~/lab/jobs_snapshot.txt"]},
+    {"id": "t02", "kind": "guided", "diff": 1, "check": {"out": "Running", "of": "^grep backup \\S*jobs_snapshot\\.txt$"}, "solution": ["grep backup ~/lab/jobs_snapshot.txt"]},
+    {"id": "t03", "kind": "predict", "diff": 2, "check": {"out": "1", "of": "^grep -c Stopped \\S*jobs_snapshot\\.txt$"}, "solution": ["grep -c Stopped ~/lab/jobs_snapshot.txt"]},
+    {"id": "t04", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/job_plan.txt", "bg %1"]}, "solution": ["echo 'bg %1; jobs -l' > ~/lab/job_plan.txt"]},
+    {"id": "t05", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/job_plan.txt", "fg %1"]}, {"contains": ["~/lab/job_plan.txt", "kill %1"]}], "solution": ["echo 'fg %1; return with Ctrl+Z; kill %1 when finished' >> ~/lab/job_plan.txt"]},
+    {"id": "t06", "kind": "challenge", "diff": 3, "check": {"contains": ["~/lab/persistent_job.txt", "nohup"]}, "solution": ["echo 'nohup ./backup.sh > backup.log 2>&1 &' > ~/lab/persistent_job.txt"]},
+    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5401.txt", "jobs -l"]}, {"contains": ["~/lab/ticket_5401.txt", "nohup"]}], "solution": ["echo 'Check jobs -l; use nohup only if the job must outlive the session' > ~/lab/ticket_5401.txt"]}
+  ],
+  "vm": [
+    {"id": "v01", "expect": "Stopped|sleep"},
+    {"id": "v02", "expect": "Running|sleep"},
+    {"id": "v03", "expect": "job-output|done"}
+  ],
+  "quiz": [
+    {"id": "q1", "answer": 1},
+    {"id": "q2", "answer": 0},
+    {"id": "q3", "answer": 3},
+    {"id": "q4", "answer": 2}
+  ]
+}

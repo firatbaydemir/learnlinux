@@ -1,0 +1,149 @@
+{
+ "title": "Kullanıcı bilgisi: kim, nerede, ne zaman?",
+ "lead": "whoami, id, who, w, last, lastb ve getent ile sistemde kimlerin olduğunu, kimin giriş yaptığını ve hesapların nerede saklandığını öğren.",
+ "objectives": [
+  "`whoami`, `id` ve `groups` ile kendi kimliğini (UID, GID, gruplar) okursun.",
+  "`/etc/passwd`, `/etc/group` ve `/etc/shadow` dosyalarının ne tuttuğunu ve alanlarını bilirsin.",
+  "`who` ve `w` ile şu an kimin bağlı olduğunu, `last` ile başarılı, `lastb` ile başarısız girişleri görürsün.",
+  "`getent` ile hesapları dosya ya da merkezi dizin (LDAP/SSSD) fark etmeden sorgularsın."
+ ],
+ "sections": [
+  {
+   "id": "me",
+   "title": "Ben kimim? whoami, id, groups",
+   "body": [
+    "Linux çok kullanıcılı bir sistemdir. Her işlem bir kullanıcı adına çalışır ve izinler buna göre belirlenir. Bir komutun neden çalışmadığını anlamak için önce **kim olduğunu** ve hangi gruplarda olduğunu bilmelisin.",
+    "`id` çıktısı `uid=1000(student) gid=1000(student) groups=...` biçimindedir. UID kullanıcının sayısal kimliğidir; çekirdek isimle değil **sayıyla** çalışır. `root` her zaman UID 0'dır. Genelde 1000 ve üstü UID'ler insan kullanıcılara, altındakiler sistem hesaplarına aittir."
+   ],
+   "commands": [
+    {"cmd": "whoami", "what": "Geçerli kullanıcı adını yazar.", "where": "sudo veya su sonrası kim olduğunu doğrularken.", "why": "Yanlış kullanıcıyla işlem yapmayı önler.", "example": "whoami"},
+    {"cmd": "id", "what": "UID, birincil GID ve tüm grupları gösterir.", "where": "İzin sorunlarında ve yeni hesap kontrolünde.", "why": "Bir kullanıcının hangi gruplar sayesinde erişebildiğini görürsün.", "example": "id alice"},
+    {"cmd": "groups", "what": "Ait olduğun grupların adlarını listeler.", "where": "Kısa grup kontrolü için.", "why": "id'den daha okunaklı özet verir.", "example": "groups"}
+   ],
+   "tip": "`id kullanici` ile başkasının kimliğine de bakabilirsin; hesap yoksa `no such user` hatası alırsın. Bu, hesabın var olup olmadığını denemenin en hızlı yoludur."
+  },
+  {
+   "id": "files",
+   "title": "Hesap dosyaları: passwd, group, shadow",
+   "body": [
+    "Yerel hesaplar üç düz metin dosyasında durur. **/etc/passwd** herkesin okuyabildiği bir listedir; her satır 7 alanı iki nokta ile ayırır: `isim:x:UID:GID:açıklama:home:kabuk`. `x` işareti parolanın burada olmadığını söyler.",
+    "Parola özetleri (hash) **/etc/shadow** içindedir ve yalnızca root okuyabilir. **/etc/group** grup adı, GID ve üyeleri tutar. `/sbin/nologin` kabuğu, hesabın etkileşimli giriş yapamayacağı (servis hesabı) anlamına gelir.",
+    "`getent` ise aynı bilgiyi sistemin tüm kaynaklarından (dosya, LDAP, SSSD) sorgular. Kurumsal ortamda kullanıcılar `/etc/passwd` içinde olmayabilir; bu yüzden betiklerde `cat /etc/passwd` yerine `getent passwd` tercih edilir."
+   ],
+   "commands": [
+    {"cmd": "cat /etc/passwd", "what": "Yerel hesap listesini gösterir.", "where": "Hesap, home dizini ve kabuk bilgisi lazım olduğunda.", "why": "Hesapların nasıl tanımlandığını görürsün.", "example": "cat /etc/passwd"},
+    {"cmd": "cut -d: -f1", "what": "İki nokta ile ayrılmış alanlardan 1. alanı (kullanıcı adı) alır.", "where": "Yalnızca isimleri listelemek için.", "why": "Büyük dosyalardan istenen sütunu çıkarır.", "example": "cut -d: -f1 /etc/passwd"},
+    {"cmd": "grep", "what": "Dosyada belirli kullanıcıyı içeren satırı bulur.", "where": "Tek hesabın kaydına bakarken.", "why": "Tüm listeyi okumadan hızlı sonuç verir.", "example": "grep student /etc/passwd"},
+    {"cmd": "getent passwd", "what": "Hesabı tüm kaynaklarda (dosya, LDAP, SSSD) arar.", "where": "Kurumsal sunucularda ve betiklerde.", "why": "Merkezi dizindeki kullanıcıları da görürsün.", "example": "getent passwd student", "nosim": true},
+    {"cmd": "getent group", "what": "Grubu ve üyelerini sorgular.", "where": "Kimin hangi grupta olduğunu kontrol ederken.", "why": "Yetki sorunlarını çözmeye yarar.", "example": "getent group devs", "nosim": true}
+   ],
+   "tip": "`cut -d: -f1,7 /etc/passwd` ile kullanıcı adı ve kabuğu yan yana görürsün; `nologin` olanlar servis hesaplarıdır.",
+   "warn": "`/etc/passwd` ve `/etc/shadow` dosyalarını bir metin editörüyle elle düzenleme. Tek yanlış karakter herkesin girişini bozabilir. Hesapları `useradd`, `usermod` gibi araçlarla yönet (modül 4.2)."
+  },
+  {
+   "id": "online",
+   "title": "Şu an kim bağlı? who ve w",
+   "body": [
+    "Bakım yapmadan, yeniden başlatmadan veya bir servisi durdurmadan önce sunucuda başka birinin çalışıp çalışmadığına bak. `who` bağlı kullanıcıları, terminalini (`tty1`, `pts/0`) ve giriş zamanını gösterir; uzaktan bağlananlar için IP parantez içinde görünür.",
+    "`w` daha ayrıntılıdır: ilk satırda çalışma süresi ve **load average** (yük ortalaması), ardından her oturum için boşta kalma süresi (IDLE) ve o an çalıştırdığı komut (WHAT) yer alır."
+   ],
+   "commands": [
+    {"cmd": "who", "what": "Şu an oturum açmış kullanıcıları, terminalleri ve zamanı gösterir.", "where": "Bakımdan önce.", "why": "Başkasının çalışmasını yanlışlıkla kesmezsin.", "example": "who", "nosim": true},
+    {"cmd": "w", "what": "Oturumlar, boşta süresi, çalışan komut ve yük ortalamasını gösterir.", "where": "Sunucu yavaşladığında veya şüpheli oturum ararken.", "why": "Kim ne yapıyor sorusunu tek komutta yanıtlar.", "example": "w", "nosim": true}
+   ],
+   "tip": "Kendi VM'inde tek oturum açıksa listede sadece sen olursun. Bir ikinci terminal sekmesi açıp `who` komutunu tekrar çalıştır; sayı artacaktır."
+  },
+  {
+   "id": "history",
+   "title": "Geçmiş girişler: last ve lastb",
+   "body": [
+    "`last`, `/var/log/wtmp` dosyasını okur ve **başarılı** girişleri, çıkışları ve yeniden başlatmaları (`reboot`) listeler. Sık yapılan bir hata: `last` ile başarısız denemeleri aramaktır. Başarısız girişler `last` içinde görünmez.",
+    "Başarısız giriş denemeleri `/var/log/btmp` dosyasındadır ve `lastb` ile okunur; yalnızca root okuyabilir. Brute-force (kaba kuvvet) saldırısı şüphesinde önce `sudo lastb | head` çalıştır. Bazı dağıtımlarda btmp dosyası yoksa komut hata verir; bu, hiç başarısız deneme kaydı olmadığı anlamına gelebilir."
+   ],
+   "commands": [
+    {"cmd": "last", "what": "Başarılı giriş/çıkışları ve reboot kayıtlarını listeler.", "where": "Gece kimin girdiğini araştırırken.", "why": "Hesap kötüye kullanımını tespit edersin.", "example": "last -n 10", "nosim": true},
+    {"cmd": "lastb", "what": "Başarısız giriş denemelerini listeler (root gerekir).", "where": "Güvenlik denetiminde.", "why": "Saldırı denemelerini gösterir.", "example": "sudo lastb -n 10", "nosim": true}
+   ],
+   "tip": "`last -n 5 student` yalnızca `student` hesabının son 5 girişini gösterir.",
+   "warn": "Giriş kayıtları hassas veridir (kullanıcı adları, IP adresleri). Çıktıyı herkese açık forumlarda paylaşmadan önce IP ve isimleri sil."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Hangi kullanıcıyla çalıştığını `whoami` ile öğren.", "hint": "Çıktı `student` olmalı."},
+  "t02": {"text": "`id` ile UID, GID ve grup listeni göster.", "hint": "Gruplar `groups=` bölümündedir."},
+  "t03": {"text": "`groups` komutuyla ait olduğun grupları yaz.", "hint": "`wheel` grubu sudo yetkisi demektir."},
+  "t04": {"text": "`id alice` ile başka bir kullanıcının kimliğine bak.", "hint": "Argüman olarak kullanıcı adı verilir."},
+  "t05": {"text": "`cat /etc/passwd` ile hesap dosyasını oku.", "hint": "Dosya herkes tarafından okunabilir."},
+  "t06": {"text": "`grep student /etc/passwd` ile yalnızca `student` hesabının satırını bul.", "hint": "Satırın 6. alanı home dizinidir."},
+  "t07": {"text": "`cut -d: -f1 /etc/passwd` ile yalnızca kullanıcı adlarını listele.", "hint": "-d ayırıcıyı, -f alan numarasını belirler."},
+  "t08": {"text": "`wc -l /etc/passwd` ile sistemde kaç hesap olduğunu say.", "hint": "-l satır sayar; her satır bir hesaptır."},
+  "t09": {"text": "Tahmin: `/etc/group` dosyasında kaç satır (grup) var? Önce tahmin et, sonra `wc -l /etc/group` ile doğrula.", "hint": "root, wheel, student, alice, devs gruplarını say."},
+  "t10": {"text": "Tahmin: normal kullanıcıyla `cat /etc/shadow` ne yapar? Önce düşün, sonra çalıştır.", "hint": "Parola özetleri yalnızca root'a açıktır: Permission denied|Erişim engellendi|Zugriff verweigert."},
+  "t11": {"text": "Tahmin: sistemde olmayan `bob` için `id bob` ne döner? Çalıştır ve hata mesajını oku.", "hint": "`no such user` hatası beklenir; çıkış kodu 0 değildir."},
+  "t12": {"text": "Hata ayıklama: Bir bilet, `alice` hesabının giriş yapamadığını söylüyor. `~/Documents/accounts.txt` dosyasında alice'in satırını bul ve kabuğunu (7. alan) `~/alice_shell.txt` dosyasına yaz.", "hint": "`grep alice FILE | cut -d: -f7 > TARGET`. `nologin` kabuğu etkileşimli girişi engeller."},
+  "t13": {"text": "Mini proje: `/etc/passwd` içinde kabuğu `/bin/bash` ile biten hesapların adlarını `~/shell_users.txt` dosyasına yaz.", "hint": "`grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt`; `$` satır sonunu temsil eder."},
+  "t14": {"text": "Meydan okuma: `~/me.txt` dosyasına önce kullanıcı adını (`whoami`), ardından `id` çıktısını ekle. Dosyada `student`, `uid=1000` ve `wheel` görünmeli.", "hint": "İlk komutta `>`, ikincisinde `>>` kullan."},
+  "t15": {"text": "Meydan okuma: `/etc/passwd` içinde kaç hesabın kabuğu `nologin`? Sayıyı `~/nologin_count.txt` dosyasına yaz.", "hint": "`grep -c` eşleşen satırları sayar; çıktıyı `>` ile dosyaya yönlendir."},
+  "t16": {"text": "TICKET #4107: Denetçi `alice` hesabının UID'sini ve gruplarını istiyor. Bilgiyi `~/alice_info.txt` dosyasına kaydet.", "hint": "`id alice > ~/alice_info.txt`; çıktıda `uid=1001` ve `devs` olmalı."}
+ },
+ "vm": {
+  "intro": "Bu komutlar yalnızca okur; VM'inde güvenle çalıştırabilirsin. `lastb` için `sudo` gerekir. Çıktıları paylaşmadan önce IP ve kullanıcı adlarını sil.",
+  "tasks": {
+   "v01": {
+    "title": "Kim bağlı?",
+    "text": "`who` ve `w` çıktılarını yapıştır.",
+    "blocks": [{"cmd": "who\nw", "expected": "student  pts/0   2026-11-12 09:00 (192.168.1.10)\n 09:20:01 up 1 day,  2:30,  1 user,  load average: 0.00, 0.01, 0.05\nUSER     TTY      FROM      LOGIN@   IDLE   WHAT\n..."}],
+    "differs": ["Hiç satır yoksa grafik oturumunda sahte terminalden çalışıyor olabilirsin; gerçek bir terminalde dene.", "WSL'de `who` boş dönebilir; `w` çıktısındaki load average satırı yeterlidir."]
+   },
+   "v02": {
+    "title": "Başarılı girişler",
+    "text": "Son girişleri listele ve çıktıyı yapıştır.",
+    "blocks": [{"cmd": "last -n 5", "expected": "student  pts/0  192.168.1.10  Wed Nov 12 09:00   still logged in\nreboot   system boot  5.14.0  Wed Nov 12 08:55 still running\n\nwtmp begins Mon Nov 10 08:00:00 2026"}],
+    "differs": ["`command not found` görürsen: `sudo apt install util-linux` (Ubuntu) veya `sudo dnf install util-linux` (Rocky/Alma).", "Konteyner veya WSL'de wtmp boş olabilir; son satırda `wtmp begins` yeterlidir."]
+   },
+   "v03": {
+    "title": "Başarısız girişler",
+    "text": "`lastb` çıktısına bak. Liste boş olabilir; bu normaldir. Sonra \"Yaptım\" de.",
+    "blocks": [{"cmd": "sudo lastb -n 5", "expected": "(boş ise) btmp begins Wed Nov 12 08:55:00 2026"}],
+    "differs": ["`No such file or directory` (btmp yok): hiç başarısız giriş kaydı yok demektir.", "Parola yanlış girerek (ikinci terminalde `su - alice` gibi) bir kayıt üretip tekrar bakabilirsin."]
+   },
+   "v04": {
+    "title": "getent ile hesap sorgula",
+    "text": "`student` hesabının kaydını al; sayılar ve home dizini görünmeli.",
+    "blocks": [{"cmd": "getent passwd student", "expected": "student:x:1000:1000:Student:/home/student:/bin/bash"}],
+    "differs": ["Kullanıcı adın `student` değilse kendi adını kullan: `getent passwd $(whoami)`.", "Çıktı boşsa o hesap yoktur; `whoami` ile adını doğrula."]
+   },
+   "v05": {
+    "title": "Kimliğin",
+    "text": "`id` çıktını yapıştır.",
+    "blocks": [{"cmd": "id", "expected": "uid=1000(student) gid=1000(student) groups=1000(student),10(wheel)"}],
+    "differs": ["Ubuntu'da sudo grubu `sudo` adındadır; Rocky/Alma'da `wheel`.", "UID 0 ise root olarak çalışıyorsun; normal kullanıcıya geç."]
+   },
+   "v06": {
+    "title": "Hesap listesi ve kabuklar",
+    "text": "Kullanıcı adı ve kabuğu yan yana listele (ilk 8 satır).",
+    "blocks": [{"cmd": "getent passwd | cut -d: -f1,7 | head -n 8", "expected": "root:/bin/bash\nbin:/sbin/nologin\ndaemon:/sbin/nologin\n..."}],
+    "differs": ["Ubuntu'da kabuk yolu `/usr/sbin/nologin` olabilir.", "`cut` hata verirse ayırıcıyı `-d:` biçiminde (boşluksuz) yazdığından emin ol."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Başarısız giriş denemelerini hangi komut gösterir?", "options": ["last", "lastb", "who", "w"], "explain": "`last` yalnızca başarılı girişleri gösterir; başarısız denemeler `/var/log/btmp` içindedir ve `lastb` ile okunur."},
+  "q2": {"q": "`/etc/passwd` satırındaki 7. alan neyi gösterir?", "options": ["Home dizinini", "Giriş kabuğunu", "Parola özetini", "UID değerini"], "explain": "Alanlar: isim, x, UID, GID, açıklama, home, kabuk. 7. alan kabuktur (ör. /bin/bash veya /sbin/nologin)."},
+  "q3": {"q": "Parola özetleri hangi dosyada saklanır?", "options": ["/etc/passwd", "/etc/shadow", "/etc/group", "/var/log/wtmp"], "explain": "Özetler yalnızca root'un okuyabildiği /etc/shadow içindedir; passwd'deki x bunu belirtir."},
+  "q4": {"q": "Betiklerde neden `getent passwd` tercih edilir?", "options": ["Yerel dosyanın yanında LDAP/SSSD kullanıcılarını da bulur", "Her zaman daha hızlıdır", "Parolaları gösterir", "Hiçbir izin gerektirmez ve parola gösterir"], "explain": "getent, NSS üzerinden tüm kaynakları sorgular; merkezi dizindeki kullanıcıları da döndürür."}
+ },
+ "summary": [
+  "`whoami`, `id` ve `groups` kim olduğunu ve hangi gruplarda olduğunu gösterir.",
+  "`/etc/passwd` 7 alanlıdır (isim, x, UID, GID, açıklama, home, kabuk); parola özetleri `/etc/shadow` içindedir.",
+  "`who` ve `w` şu anki oturumları, `last` başarılı, `lastb` başarısız geçmiş girişleri gösterir.",
+  "`getent` yerel dosya ve merkezi dizin ayrımı yapmadan hesapları sorgular."
+ ],
+ "glossary": [
+  {"term": "UID / GID", "meaning": "Kullanıcı ve grubun sayısal kimliği; root'un UID'si 0'dır."},
+  {"term": "nologin", "meaning": "Etkileşimli girişi engelleyen kabuk; servis hesaplarında kullanılır."},
+  {"term": "wtmp / btmp", "meaning": "Başarılı ve başarısız giriş kayıt dosyaları (`last` / `lastb`)."},
+  {"term": "load average", "meaning": "Son 1, 5 ve 15 dakikadaki ortalama sistem yükü."},
+  {"term": "NSS / getent", "meaning": "Hesap bilgisini dosya veya dizin servislerinden çözen katman ve sorgu komutu."}
+ ]
+}

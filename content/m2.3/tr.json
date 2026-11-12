@@ -1,0 +1,262 @@
+{
+ "title": "Dosya ve klasör oluşturma, silme",
+ "lead": "mkdir, touch, rmdir ve rm ile güvenli bir deneme alanında dosya yapısı kur ve temizle.",
+ "objectives": [
+  "mkdir ve mkdir -p ile klasör ve iç içe yapı oluşturursun.",
+  "touch ile boş dosya oluşturur, süsleme (brace) ile birden çoğunu tek komutta açarsın.",
+  "rmdir ve rm -r arasındaki farkı bilir, silmeden önce kontrol edersin."
+ ],
+ "sections": [
+  {
+   "id": "create",
+   "title": "Oluşturma: mkdir ve touch",
+   "body": [
+    "Önce güvenli bir **deneme alanı** aç: ev dizininde `practice` klasörü. Hatalar sadece orayı etkiler. Normal kullanıcı olarak `/etc` gibi sistem dizinlerine yazamazsın; bu bir koruma mekanizmasıdır.",
+    "`mkdir` klasör, `touch` boş dosya oluşturur. Süslü parantez (brace) açılımı birden çok adı üretir: `touch {a,b,c}.txt` komutu `a.txt b.txt c.txt` dosyalarını yaratır."
+   ],
+   "commands": [
+    {
+     "cmd": "mkdir",
+     "what": "Yeni klasör oluşturur.",
+     "where": "Proje, yedek veya deneme alanı açarken.",
+     "why": "Dosyaları düzenli tutar.",
+     "example": "mkdir practice"
+    },
+    {
+     "cmd": "mkdir -p",
+     "what": "Ara klasörler yoksa onları da oluşturur; klasör varsa hata vermez.",
+     "where": "İç içe yapı kurarken.",
+     "why": "Tek komutla tüm ağacı kurarsın.",
+     "example": "mkdir -p project/src/code"
+    },
+    {
+     "cmd": "touch",
+     "what": "Boş dosya oluşturur veya var olanın zaman damgasını günceller.",
+     "where": "Hızlı boş dosya gerektiğinde.",
+     "why": "Betik ve test dosyaları için başlangıç noktasıdır.",
+     "example": "touch file1.txt"
+    },
+    {
+     "cmd": "ls -R",
+     "what": "Alt klasörlerle birlikte ağacı listeler.",
+     "where": "Yapıyı doğrularken.",
+     "why": "Silmeden veya taşımadan önce neyin etkileneceğini görürsün.",
+     "example": "ls -R project"
+    }
+   ],
+   "tip": "İşlemden sonra her zaman ls ile sonucu doğrula."
+  },
+  {
+   "id": "delete",
+   "title": "Silme: rm ve rmdir",
+   "body": [
+    "Linux'ta **çöp kutusu yoktur**: `rm` ile silinen dosya geri gelmez. Bu yüzden silmeden önce `ls` ile ne sileceğini kontrol et.",
+    "`rmdir` yalnızca **boş** klasörü siler; doluysa hata verir ve seni korur. İçindekilerle birlikte silmek için `rm -r` gerekir. Klasöre `-r` olmadan `rm` uygularsan 'Is a directory' hatası alırsın. Bu simülatörde `rm -rf /` gibi tehlikeli komutlar reddedilir."
+   ],
+   "commands": [
+    {
+     "cmd": "rm",
+     "what": "Dosya siler (geri dönüşü yok).",
+     "where": "Gereksiz dosyaları temizlerken.",
+     "why": "Disk ve düzen için; ama dikkatli kullan.",
+     "example": "rm delete_me.txt"
+    },
+    {
+     "cmd": "rmdir",
+     "what": "Yalnızca boş klasörü siler.",
+     "where": "Boş klasörleri temizlerken.",
+     "why": "Yanlışlıkla dolu klasörü silmeni engeller.",
+     "example": "rmdir project"
+    },
+    {
+     "cmd": "rm -r",
+     "what": "Klasörü içindekilerle birlikte siler.",
+     "where": "Dolu klasörü kaldırırken.",
+     "why": "Tek komutla ağacı temizler; kontrolden sonra kullan.",
+     "example": "rm -r project"
+    }
+   ],
+   "tip": "Alışkanlık edin: önce `ls -R klasör`, sonra `rm -r klasör`.",
+   "warn": "`rm -r` ile hangi klasörü sildiğini ENTER'a basmadan önce bir kez daha oku. Yanlış dizinde çalıştırmak tüm projeni yok eder.",
+   "danger": "Gerçek sistemde `rm -rf /` veya `rm -rf ~` yazma. Geri dönüşü olmayan bir yok olmaya yol açar; bu kitapta yalnızca simülatörde reddedilir."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Ev dizininde `mkdir practice` ile bir deneme klasörü aç.",
+   "hint": "Önce `cd ~` ile ev dizinindeyken olduğundan emin ol."
+  },
+  "t02": {
+   "text": "`cd practice` ile klasörün içine gir.",
+   "hint": "Prompt'taki dizin adı değişmeli."
+  },
+  "t03": {
+   "text": "`touch file1.txt` ile boş bir dosya oluştur.",
+   "hint": "ls -l ile kontrol edebilirsin."
+  },
+  "t04": {
+   "text": "`mkdir folder1` ile bir alt klasör oluştur.",
+   "hint": "ls -l çıktısında satır d ile başlar."
+  },
+  "t05": {
+   "text": "`mkdir -p project/src/code` ile iç içe yapıyı tek komutla kur.",
+   "hint": "-p ara klasörleri de oluşturur."
+  },
+  "t06": {
+   "text": "`ls -R project` ile yapıyı alt klasörleriyle birlikte listele.",
+   "hint": "-R büyük harf."
+  },
+  "t07": {
+   "text": "`touch {a,b,c}.txt` ile üç dosyayı tek komutta oluştur.",
+   "hint": "Süslü parantez içinde virgülle ayır, boşluk bırakma."
+  },
+  "t08": {
+   "text": "`delete_me.txt` dosyasını `touch` ile oluştur, sonra `rm` ile sil.",
+   "hint": "İki ayrı komut; sonunda ls ile yok olduğunu gör."
+  },
+  "t09": {
+   "text": "Dolu klasörü `rmdir project` ile silmeyi dene. Hata verdi mi? Neden?",
+   "hint": "rmdir yalnızca boş klasörü siler."
+  },
+  "t10": {
+   "text": "`rm -r project` ile klasörü içindekilerle birlikte sil.",
+   "hint": "Önce ls -R proje ile içine bak."
+  },
+  "t11": {
+   "text": "Klasöre `-r` olmadan `rm folder1` uygula ve hata mesajını oku.",
+   "hint": "Is a directory hatası beklenir."
+  },
+  "t12": {
+   "text": "Meydan okuma: `mkdir -p ~/practice/final_project`, içine `touch report.txt`, bir üst dizinde `ls -R final_project`, sonra `rm -r final_project`.",
+   "hint": "Dosyayı oluşturmak için önce `cd ~/practice/final_project`, sonra `cd ..` ile çık."
+  },
+  "t13": {
+   "text": "Normal kullanıcıyla sistem dizininde klasör açmayı dene: `mkdir /etc/practice`. Ne oldu?",
+   "hint": "Permission denied beklenir; sistem dizinleri korumalıdır."
+  },
+  "t14": {
+   "text": "Hata ayıkla: `~/old_project` klasörü silinemiyor (`rmdir` hata veriyor). Klasörü içindekilerle birlikte kaldır.",
+   "hint": "İçinde dosya var; `rmdir` yetmez, `rm -r` gerekir."
+  },
+  "t15": {
+   "text": "Mini proje: `~/web` altında `css`, `js`, `img` klasörlerini tek `mkdir -p` komutuyla, `index.html` dosyasını `touch` ile oluştur.",
+   "hint": "Brace: `~/web/{css,js,img}`."
+  },
+  "t16": {
+   "text": "TICKET #2310 — Muhasebe `~/archive/2026/q1` klasöründe `jan.txt`, `feb.txt`, `mar.txt` dosyalarını bekliyor. Yapıyı oluştur.",
+   "hint": "`mkdir -p` ile klasörler, `touch` ile brace kullanarak dosyalar."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`rm` ile silinen bir dosya için ne söylenebilir?",
+   "options": [
+    "Çöp kutusuna gider",
+    "30 gün saklanır",
+    "Geri dönüşü yoktur",
+    "Sadece gizlenir"
+   ],
+   "explain": "Linux komut satırında çöp kutusu yoktur; silme kalıcıdır."
+  },
+  "q2": {
+   "q": "`mkdir -p a/b/c` komutundaki `-p` ne yapar?",
+   "options": [
+    "Parola sorar",
+    "Eksik ara klasörleri de oluşturur",
+    "Klasörü gizler",
+    "Klasörü salt okunur yapar"
+   ],
+   "explain": "-p (parents) tüm yolu tek seferde kurar ve var olan klasör için hata vermez."
+  },
+  "q3": {
+   "q": "Dolu bir klasöre `rmdir` uygulanırsa ne olur?",
+   "options": [
+    "Hata verir, klasör silinmez",
+    "Klasör içindekilerle silinir",
+    "Klasör boşaltılır",
+    "Klasör taşınır"
+   ],
+   "explain": "rmdir yalnızca boş klasörü siler. Dolu klasör için `rm -r` kullanılır."
+  },
+  "q4": {
+   "q": "Boş bir dosya oluşturmanın en yaygın komutu hangisidir?",
+   "options": [
+    "mkdir",
+    "rm",
+    "ls",
+    "touch"
+   ],
+   "explain": "`touch dosya` boş dosya oluşturur veya zaman damgasını günceller."
+  }
+ },
+ "summary": [
+  "`mkdir` klasör, `mkdir -p` iç içe klasör, `touch` boş dosya oluşturur.",
+  "`touch {a,b,c}.txt` ile brace açılımı birden çok dosya üretir.",
+  "`rmdir` yalnızca boş klasörü, `rm -r` dolu klasörü siler; çöp kutusu yoktur.",
+  "Her işlemden önce ve sonra `ls` ile kontrol et."
+ ],
+ "glossary": [
+  {
+   "term": "dizin / klasör",
+   "meaning": "Dosyaları içeren yapı; aynı kavramdır."
+  },
+  {
+   "term": "özyinelemeli (recursive)",
+   "meaning": "Alt klasörleri de kapsayan işlem; -r veya -R."
+  },
+  {
+   "term": "brace açılımı",
+   "meaning": "{a,b,c} gibi kalıpların kabuk tarafından birden çok kelimeye açılması."
+  },
+  {
+   "term": "zaman damgası",
+   "meaning": "Dosyanın son değişiklik zamanı."
+  }
+ ],
+ "vm": {
+  "intro": "Kendi VM'inde önce güvenli bir deneme klasörü aç; asla gerçek verinin olduğu yerde `rm -r` deneme.",
+  "tasks": {
+   "v01": {
+    "title": "Proje ağacı kur",
+    "text": "Deneme klasöründe iç içe yapı kur ve `ls -R` çıktısını yapıştır.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/practice/project/{src,test}\ntouch ~/practice/project/src/main.c\nls -R ~/practice",
+      "expected": "/home/student/practice:\nproject\n\n/home/student/practice/project:\nsrc  test\n..."
+     }
+    ],
+    "differs": [
+     "`ls -R` sıralaması farklı olabilir; `src` ve `test` görünmesi yeterli.",
+     "Boş klasörler `ls -R` çıktısında boş satırla ayrılır."
+    ]
+   },
+   "v02": {
+    "title": "Korumayı gör",
+    "text": "Normal kullanıcıyla sistem dizininde klasör açmayı dene ve hata mesajını yapıştır.",
+    "blocks": [
+     {
+      "cmd": "mkdir /etc/practice",
+      "expected": "mkdir: cannot create directory ‘/etc/practice’: Permission denied"
+     }
+    ],
+    "differs": [
+     "Sistemin Türkçe/Almanca ise mesaj çevrilmiş olabilir.",
+     "Hata yerine klasör oluştuysa root olarak çalışıyorsun; normal kullanıcıyla dene ve klasörü `sudo rmdir /etc/practice` ile sil."
+    ]
+   },
+   "v03": {
+    "title": "Temizlik",
+    "text": "Önce içine bak, sonra deneme klasörünü sil. Hata yoksa \"Yaptım\" de.",
+    "blocks": [
+     {
+      "cmd": "ls -R ~/practice\nrm -r ~/practice\nls ~/practice",
+      "expected": "ls: cannot access '/home/student/practice': No such file or directory"
+     }
+    ],
+    "differs": [
+     "`rm: cannot remove ... Is a directory` görürsen `-r` unutulmuş."
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "id": "2.8",
+ "level": 2,
+ "setup": {
+  "dirs": ["/home/student/reports", "/home/student/logs"],
+  "files": {
+   "/home/student/reports/df_sample.txt": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        50G   30G   20G  60% /\n/dev/sdb1       100G   95G    5G  95% /var\ntmpfs           1.9G     0  1.9G   0% /dev/shm\n",
+   "/home/student/reports/ping_sample.txt": "PING 1.1.1.1 (1.1.1.1) 56(84) bytes of data.\n\n--- 1.1.1.1 ping statistics ---\n4 packets transmitted, 0 received, 100% packet loss, time 3070ms\n",
+   "/home/student/reports/ip_sample.txt": "lo      UNKNOWN  127.0.0.1/8\neth0    UP       192.168.1.50/24\n",
+   "/home/student/logs/app.log": "INFO start\nERROR write failed\nINFO retry\n",
+   "/home/student/logs/old_debug.log": "debug line 1\ndebug line 2\n",
+   "/home/student/logs/core.dump": "binary-placeholder\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^df -h$", "ok": true}, "solution": ["df -h"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^free -h$", "ok": true}, "solution": ["free -h"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^uptime$", "ok": true}, "solution": ["uptime"]},
+  {"id": "t04", "kind": "guided", "diff": 2, "check": {"out": "Use%", "of": "^cat "}, "solution": ["cat ~/reports/df_sample.txt"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"contains": ["~/disk_report.txt", "Mounted on"]}, "solution": ["df -h > ~/disk_report.txt"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"contains": ["~/disk_report.txt", "Swap"]}, "solution": ["free -h >> ~/disk_report.txt"]},
+  {"id": "t07", "kind": "guided", "diff": 2, "check": {"contains": ["~/disk_report.txt", "load average"]}, "solution": ["uptime >> ~/disk_report.txt"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "/var", "of": "^grep .*95%"}, "solution": ["grep 95% ~/reports/df_sample.txt"]},
+  {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "100% packet loss", "of": "^(cat|grep|tail) "}, "solution": ["grep loss ~/reports/ping_sample.txt"]},
+  {"id": "t10", "kind": "predict", "diff": 2, "check": {"out": "192\\.168\\.1\\.50", "of": "^grep "}, "solution": ["grep eth0 ~/reports/ip_sample.txt"]},
+  {"id": "t11", "kind": "debug", "diff": 2, "check": [{"absent": "~/logs/old_debug.log"}, {"exists": "~/logs/app.log", "type": "f"}], "solution": ["rm ~/logs/old_debug.log"]},
+  {"id": "t12", "kind": "mini", "diff": 2, "check": {"contains": ["~/health.txt", "(?=[\\s\\S]*== disk ==)(?=[\\s\\S]*Mounted on)(?=[\\s\\S]*== memory ==)(?=[\\s\\S]*Swap)"]}, "solution": ["echo \"== disk ==\" > ~/health.txt", "df -h >> ~/health.txt", "echo \"== memory ==\" >> ~/health.txt", "free -h >> ~/health.txt"]},
+  {"id": "t13", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/alert.txt", "/var"]}, {"contains": ["~/alert_count.txt", "1"]}], "solution": ["grep 95% ~/reports/df_sample.txt > ~/alert.txt", "grep -c 95% ~/reports/df_sample.txt > ~/alert_count.txt"]},
+  {"id": "t14", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/full_mount.txt", "/var"]}, {"absent": "~/logs/core.dump"}], "solution": ["echo /var > ~/full_mount.txt", "rm ~/logs/core.dump"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "\\d+%"},
+  {"id": "v02", "expect": "\\d+(\\.\\d+)?[KMGT]"},
+  {"id": "v03", "expect": "\\d+\\.\\d+\\.\\d+\\.\\d+"},
+  {"id": "v04", "expect": "packets transmitted|Pakete|ttl=|time="},
+  {"id": "v05", "expect": "LISTEN|UNCONN"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

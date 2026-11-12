@@ -1,0 +1,552 @@
+{
+ "title": "Shell Araçları ve Ortam",
+ "lead": "Geçmiş, tamamlama, kısayollar, tırnaklar, değişkenler, PATH, joker karakterler ve komut yerine koyma ile kabuğu kendi lehine çalıştır.",
+ "objectives": [
+  "history, !! ve Ctrl+R ile eski komutları tekrar kullanırsın.",
+  "Tab tamamlama ve Ctrl+C/L/A/E kısayollarıyla hızlı çalışırsın.",
+  "Çift tırnak, tek tırnak ve ters bölü arasındaki farkı bilirsin.",
+  "Değişken tanımlar, export ile alt programlara aktarır, PATH'i okur ve genişletirsin.",
+  "Joker karakterler (*, ?, []), süslü parantez ve $() ile komutları kısaltırsın."
+ ],
+ "sections": [
+  {
+   "id": "history",
+   "title": "Komut geçmişi",
+   "body": [
+    "Kabuk yazdığın komutları hatırlar. `history` numaralı listeyi gösterir; `history 5` yalnızca son 5 komutu verir. Yukarı ok (↑) önceki komutu getirir.",
+    "`!!` bir önceki komutu tekrar çalıştırır. En sık kullanımı: `sudo !!` ile unuttuğun `sudo`'yu eklemek. `Ctrl+R` ise geçmişte **arama** yapar: birkaç harf yaz, eşleşen eski komut çıkar, Enter ile çalıştır."
+   ],
+   "commands": [
+    {
+     "cmd": "history",
+     "what": "Çalıştırdığın komutları numaralı listeler.",
+     "where": "Dün yazdığın uzun komutu hatırlamak istediğinde.",
+     "why": "Tekrar yazmadan zaman kazanır, ne yaptığını gösterir.",
+     "example": "history"
+    },
+    {
+     "cmd": "history 5",
+     "what": "Yalnızca son 5 komutu gösterir.",
+     "where": "Kısa bir özet yeterliyse.",
+     "why": "Uzun listede boğulmazsın.",
+     "example": "history 5"
+    },
+    {
+     "cmd": "!!",
+     "what": "Bir önceki komutu aynen tekrar çalıştırır.",
+     "where": "Yetki hatasından sonra `sudo !!` gibi.",
+     "why": "Aynı komutu yeniden yazmak gerekmez.",
+     "example": "echo hello",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+R",
+     "what": "Geçmişte geriye doğru arama yapar.",
+     "where": "Çok eski, uzun bir komutu bulurken.",
+     "why": "Ok tuşuyla yüzlerce satır gezmekten çok daha hızlıdır.",
+     "example": "history",
+     "nosim": true
+    }
+   ],
+   "tip": "Ctrl+R'ye bastıktan sonra tekrar Ctrl+R basarsan bir önceki eşleşmeye geçersin."
+  },
+  {
+   "id": "shortcuts",
+   "title": "Tab tamamlama ve kısayollar",
+   "body": [
+    "`Tab` tuşu komut, dosya ve klasör adlarını tamamlar. Tek eşleşme varsa tamamlar; birden çok varsa iki kez Tab ile seçenekleri listeler. Hem hızlandırır hem yazım hatasını önler.",
+    "Birkaç kısayol günlük işin yarısıdır: `Ctrl+C` çalışan komutu durdurur, `Ctrl+L` ekranı temizler (`clear` ile aynı), `Ctrl+A` satır başına, `Ctrl+E` satır sonuna gider. `alias` ile uzun komutlara kısa ad verebilirsin."
+   ],
+   "commands": [
+    {
+     "cmd": "Tab",
+     "what": "Yazdığın adı tamamlar veya seçenekleri listeler.",
+     "where": "Uzun dosya ve klasör adlarında.",
+     "why": "Hız ve doğruluk sağlar.",
+     "example": "ls Doc",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+C",
+     "what": "Çalışan komutu keser (SIGINT gönderir).",
+     "where": "Takılan veya bitmeyen bir komutta.",
+     "why": "Terminali kapatmadan komuttan çıkarsın.",
+     "example": "sleep 100",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+A / Ctrl+E",
+     "what": "İmleci satırın başına / sonuna taşır.",
+     "where": "Uzun komutu düzenlerken.",
+     "why": "Ok tuşuyla tek tek ilerlemekten hızlıdır.",
+     "example": "ls -l Documents",
+     "nosim": true
+    },
+    {
+     "cmd": "clear",
+     "what": "Ekranı temizler; Ctrl+L aynı işi yapar.",
+     "where": "Ekran kalabalıklaştığında.",
+     "why": "Çıktıyı okunur tutar.",
+     "example": "clear"
+    },
+    {
+     "cmd": "alias",
+     "what": "Komuta kısa takma ad verir.",
+     "where": "Sık yazdığın komutlar için.",
+     "why": "Yazma yükünü azaltır. Kalıcı olması için `~/.bashrc` içine yazılır.",
+     "example": "alias ll='ls -l'",
+     "nosim": true
+    }
+   ],
+   "tip": "Dosya adını asla elle uzun uzun yazma; ilk harfleri yaz ve Tab'a bas."
+  },
+  {
+   "id": "quoting",
+   "title": "Tırnaklar ve kaçış",
+   "body": [
+    "Kabuk komutu çalıştırmadan önce özel karakterleri yorumlar. Tırnaklar bunu kontrol eder. **Çift tırnak** içinde `$değişken` ve `$(komut)` açılır. **Tek tırnak** içinde her şey olduğu gibi kalır. **Ters bölü** (`\\`) tek bir karakterin özel anlamını kaldırır.",
+    "Boşluklu dosya adları da tırnak ister: `cat \"my notes.txt\"`. Tırnaksız yazarsan kabuk bunu iki ayrı argüman sayar."
+   ],
+   "commands": [
+    {
+     "cmd": "echo \"...\"",
+     "what": "Çift tırnak: değişkenler açılır, boşluklar korunur.",
+     "where": "Değişkenli mesajlarda.",
+     "why": "Hem esnek hem güvenlidir.",
+     "example": "echo \"Hello $USER\""
+    },
+    {
+     "cmd": "echo '...'",
+     "what": "Tek tırnak: hiçbir şey açılmaz, metin harfiyen yazılır.",
+     "where": "`$` içeren sabit metinde.",
+     "why": "Kabuğun araya girmesini engeller.",
+     "example": "echo 'Hello $USER'"
+    },
+    {
+     "cmd": "\\",
+     "what": "Sonraki karakterin özel anlamını kaldırır.",
+     "where": "Tek bir `$` veya boşluğu korumak için.",
+     "why": "Tırnak kullanmadan kısa çözüm.",
+     "example": "echo \\$HOME"
+    }
+   ],
+   "tip": "Şüphedeysen değişkenleri çift tırnağa al: `\"$FILE\"` boşluklu adlarda da çalışır."
+  },
+  {
+   "id": "variables",
+   "title": "Değişkenler ve export",
+   "body": [
+    "Değişken tanımlamak için `NAME=alice` yaz; **eşittir işaretinin iki yanında boşluk olmaz**. Değerini `$NAME` ile okursun. Böyle tanımlanan değişken yalnızca bu kabukta yaşar.",
+    "Başlattığın alt programların da görmesi için `export NAME=alice` kullan. `env` dışa aktarılmış tüm **ortam değişkenlerini** gösterir (`HOME`, `USER`, `PATH`, `SHELL`...). `export` ile yaptığın değişiklik terminal kapanınca kaybolur; kalıcı olması için `~/.bashrc` dosyasına yazılır."
+   ],
+   "commands": [
+    {
+     "cmd": "NAME=alice",
+     "what": "Kabuk değişkeni tanımlar (boşluksuz).",
+     "where": "Tekrar kullanacağın değerler için.",
+     "why": "Aynı değeri yeniden yazmazsın.",
+     "example": "NAME=alice"
+    },
+    {
+     "cmd": "echo $NAME",
+     "what": "Değişkenin değerini yazdırır.",
+     "where": "Değeri kontrol ederken.",
+     "why": "Kabuğun ne gördüğünü doğrularsın.",
+     "example": "echo $HOME"
+    },
+    {
+     "cmd": "export",
+     "what": "Değişkeni alt programlara aktarır.",
+     "where": "Programların okuduğu ayarlar için.",
+     "why": "export olmadan değişken yalnızca bu kabukta kalır.",
+     "example": "export GREETING=hello"
+    },
+    {
+     "cmd": "env",
+     "what": "Ortam değişkenlerini listeler.",
+     "where": "Ortamı incelerken, hata ayıklarken.",
+     "why": "Hangi ayarın aktif olduğunu görürsün.",
+     "example": "env | grep GREETING"
+    },
+    {
+     "cmd": "unset",
+     "what": "Değişkeni siler.",
+     "where": "Gereksiz değişkeni kaldırırken.",
+     "why": "Ortamı temiz tutar.",
+     "example": "unset GREETING",
+     "nosim": true
+    }
+   ],
+   "tip": "`NAME = alice` (boşluklu) yazma: kabuk `NAME` adında bir komut arar ve hata verir."
+  },
+  {
+   "id": "path",
+   "title": "PATH: komutlar nerede aranır",
+   "body": [
+    "Bir komut yazdığında kabuk onu `PATH` değişkenindeki klasörlerde sırayla arar. Klasörler `:` ile ayrılır. `which ls` bulunan yolu, `type ls` komutun türünü (program, yerleşik) gösterir.",
+    "Kendi araçlarının olduğu klasörü eklemek için `PATH`'in sonuna ekle. Eski değeri korumayı unutma: `export PATH=$PATH:~/bin`. Sadece `PATH=~/bin` yazarsan `ls` gibi komutlar da bulunamaz olur."
+   ],
+   "commands": [
+    {
+     "cmd": "echo $PATH",
+     "what": "Arama klasörlerini gösterir.",
+     "where": "'command not found' hatasında ilk bakılacak yer.",
+     "why": "Komutun neden bulunamadığını anlarsın.",
+     "example": "echo $PATH"
+    },
+    {
+     "cmd": "which",
+     "what": "Komutun tam yolunu gösterir.",
+     "where": "Hangi programın çalıştığını öğrenirken.",
+     "why": "Aynı adlı birden çok program karışmasın.",
+     "example": "which ls"
+    },
+    {
+     "cmd": "type",
+     "what": "Komutun program mı, yerleşik mi olduğunu söyler.",
+     "where": "`cd` gibi yerleşik komutlarda.",
+     "why": "Davranış farkını açıklar.",
+     "example": "type cd"
+    },
+    {
+     "cmd": "export PATH=$PATH:~/bin",
+     "what": "`~/bin`'i arama yoluna ekler.",
+     "where": "Kendi betiklerini ad ile çağırmak için.",
+     "why": "Her seferinde tam yol yazmazsın.",
+     "example": "export PATH=$PATH:~/bin"
+    }
+   ],
+   "warn": "`PATH=/new/dir` gibi eski değeri atan bir atama yapma; `ls` dahil hiçbir komut bulunamaz. Düzeltmek için terminali kapatıp aç.",
+   "tip": "Kalıcı yapmak için aynı `export` satırını `~/.bashrc` dosyasına ekle."
+  },
+  {
+   "id": "globbing",
+   "title": "Joker karakterler (globbing)",
+   "body": [
+    "Joker karakterleri **kabuk** açar, komut değil. `*` her şeyi (boş dahil), `?` tam bir karakteri, `[abc]` köşeli parantezdeki karakterlerden birini temsil eder. `ls *.txt` ifadesini kabuk önce dosya adlarına çevirir, sonra `ls`'e verir.",
+    "Hiçbir dosya eşleşmezse kabuk deseni olduğu gibi bırakır. Silme komutlarından önce deseni `echo` ile dene: `echo *.log`."
+   ],
+   "commands": [
+    {
+     "cmd": "*",
+     "what": "Herhangi bir uzunlukta karakter dizisi.",
+     "where": "Aynı türdeki dosyaları seçerken.",
+     "why": "Tek komutla çok dosya.",
+     "example": "echo lab/*.txt"
+    },
+    {
+     "cmd": "?",
+     "what": "Tam bir karakter.",
+     "where": "Sabit uzunlukta adlar için.",
+     "why": "`*`'dan daha dar eşleşir.",
+     "example": "echo lab/?.txt"
+    },
+    {
+     "cmd": "[ ]",
+     "what": "Köşeli parantezdeki karakterlerden biri.",
+     "where": "Belirli birkaç dosyayı seçerken.",
+     "why": "Tam kontrol sağlar.",
+     "example": "echo lab/[ab].txt"
+    }
+   ],
+   "warn": "`rm *` bulunduğun klasördeki tüm dosyaları siler. Önce `echo *` ile ne eşleştiğine bak, sonra `rm`'yi çalıştır.",
+   "tip": "Gizli dosyalar (`.` ile başlayanlar) `*` ile eşleşmez."
+  },
+  {
+   "id": "expansion",
+   "title": "Süslü parantez ve komut yerine koyma",
+   "body": [
+    "Süslü parantez (brace) açılımı metin üretir: `file{1,2,3}.txt` üç ada, `f{1..3}` ise `f1 f2 f3`'e dönüşür. Dosya olması gerekmez; bu yüzden toplu `touch` ve `mkdir` için idealdir.",
+    "`$(komut)` komutu çalıştırır ve **çıktısını** yerine koyar: `echo \"Today: $(date)\"`. Çıktıyı değişkene atamak için de kullanılır: `USERNAME=$(whoami)`."
+   ],
+   "commands": [
+    {
+     "cmd": "{a,b,c}",
+     "what": "Virgülle ayrılmış listeyi çoğaltır.",
+     "where": "Toplu dosya ve klasör oluştururken.",
+     "why": "Tek satırda üç dosya.",
+     "example": "touch ~/lab/file{1,2,3}.txt"
+    },
+    {
+     "cmd": "{1..3}",
+     "what": "Sayı veya harf aralığı üretir.",
+     "where": "Numaralı adlarda.",
+     "why": "Elle yazmaya gerek kalmaz.",
+     "example": "echo f{1..3}"
+    },
+    {
+     "cmd": "$(...)",
+     "what": "Komut çıktısını başka komutun içine koyar.",
+     "where": "Tarih, kullanıcı, host adı gibi dinamik değerlerde.",
+     "why": "Sabit yazmak yerine anlık değer kullanırsın.",
+     "example": "echo \"User: $(whoami)\""
+    }
+   ],
+   "tip": "Eski `` `komut` `` biçimi de çalışır ama iç içe kullanımda `$()` çok daha okunaklıdır."
+  },
+  {
+   "id": "output",
+   "title": "echo, printf ve çıkış kodu",
+   "body": [
+    "`echo` metni ve değişkenleri yazdırır. Biçimli çıktı için `printf` kullan: `%s` metin, `%d` sayı, `\\n` yeni satır yerine geçer. `printf` otomatik satır sonu eklemez.",
+    "Her komut bitince bir **çıkış kodu** bırakır: `0` başarı, diğerleri hata. Son komutunki `$?` ile okunur. Betiklerde başarıyı bununla kontrol edersin."
+   ],
+   "commands": [
+    {
+     "cmd": "echo",
+     "what": "Metin veya değişken değerini yazdırır.",
+     "where": "Mesaj vermek ve hızlı kontrol için.",
+     "why": "En basit çıktı aracıdır.",
+     "example": "echo \"Hello Linux\""
+    },
+    {
+     "cmd": "printf",
+     "what": "Biçimli çıktı üretir.",
+     "where": "Hizalı veya satır sonu kontrollü çıktıda.",
+     "why": "echo'dan daha öngörülebilirdir.",
+     "example": "printf \"Name: %s\\n\" alice"
+    },
+    {
+     "cmd": "echo $?",
+     "what": "Son komutun çıkış kodunu yazar.",
+     "where": "Komutun başarılı olup olmadığını anlarken.",
+     "why": "`0` başarıdır, `0` dışı hatadır.",
+     "example": "echo $?"
+    }
+   ]
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`echo \"Hello Linux\"` komutuyla ekrana mesaj yazdır.",
+   "hint": "Metni çift tırnak içine al."
+  },
+  "t02": {
+   "text": "Komut geçmişini göster.",
+   "hint": "`history` yaz."
+  },
+  "t03": {
+   "text": "Ev dizinini gösteren `HOME` değişkenini `echo` ile yazdır.",
+   "hint": "Değişkenin başına `$` koy: `echo $HOME`."
+  },
+  "t04": {
+   "text": "`GREETING=hello` değişkenini `export` ile dışa aktar, sonra `env` çıktısında `grep` ile bul.",
+   "hint": "`export GREETING=hello` ardından `env | grep GREETING`."
+  },
+  "t05": {
+   "text": "`lab` klasöründeki `.txt` dosyalarını joker karakterle listele: `echo lab/*.txt` komutunu çalıştır.",
+   "hint": "`*` tüm adlara uyar; `.txt` sonekini yazmayı unutma."
+  },
+  "t06": {
+   "text": "Süslü parantezle `lab` içinde `file1.txt`, `file2.txt` ve `file3.txt` dosyalarını tek komutta oluştur.",
+   "hint": "`touch ~/lab/file{1,2,3}.txt`."
+  },
+  "t07": {
+   "text": "`~/bin` klasörünü oluştur ve eski değeri koruyarak `PATH`'e ekle.",
+   "hint": "`mkdir ~/bin`, sonra `export PATH=$PATH:~/bin`."
+  },
+  "t08": {
+   "text": "Tahmin et: `echo '$HOME'` ne yazdırır? Tek tırnaklı hâlini çalıştırıp doğrula.",
+   "hint": "Tek tırnak içinde değişken açılmaz."
+  },
+  "t09": {
+   "text": "Tahmin et: `echo \"User: $(whoami)\"` ne yazdırır? Çalıştırıp doğrula.",
+   "hint": "`$()` içindeki komutun çıktısı yerine konur."
+  },
+  "t10": {
+   "text": "Tahmin et: `echo f{1..3}` ne yazdırır? Çalıştırıp doğrula.",
+   "hint": "Brace açılımı boşlukla ayrılmış üç kelime üretir."
+  },
+  "t11": {
+   "text": "Hata ayıklama: ev dizininde `my notes.txt` adlı bir dosya var; `cat my notes.txt` hata verir. Dosyanın içeriğini doğru yazımla göster.",
+   "hint": "Adı tırnağa al: `cat \"my notes.txt\"`."
+  },
+  "t12": {
+   "text": "Mini proje: `~/projects` klasörünü oluştur, içine `a.txt` ve `b.txt` dosyalarını tek komutla aç, sonra `owner.txt` dosyasına `$(whoami)` çıktısını yaz.",
+   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt`."
+  },
+  "t13": {
+   "text": "Zor görev: `~/info.txt` dosyasına tam olarak `host: linux-lab user: student` yaz. Değerleri `$(hostname)` ve `$(whoami)` ile üret.",
+   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt`."
+  },
+  "t14": {
+   "text": "Ticket: Ekip `~/tools` klasöründeki betikleri adıyla çağırmak istiyor. Klasörü bu oturumda `PATH`'e ekle ve ayarı kalıcı olması için `~/.bashrc` dosyasının sonuna yaz.",
+   "hint": "`export PATH=$PATH:~/tools`, sonra aynı satırı tek tırnakla `>>` ile `~/.bashrc`'ye ekle."
+  },
+  "t15": {
+   "text": "`printf` ile `Name: alice` satırını yazdır; `%s` ve `\\n` kullan.",
+   "hint": "`printf \"Name: %s\\n\" alice`."
+  },
+  "t16": {
+   "text": "Var olmayan bir dosyayı listele (`ls nofile`), ardından çıkış kodunu `echo $?` ile göster.",
+   "hint": "Hata sonrası `$?` sıfırdan farklı bir sayı verir."
+  }
+ },
+ "vm": {
+  "intro": "Aşağıdaki komutları kendi VM'inde (Ubuntu, Rocky, Alma veya WSL) çalıştır. Bu modüldeki komutlar zararsızdır; yine de `PATH` ayarını `export` ile yap, `PATH=` ile ezme.",
+  "tasks": {
+   "v01": {
+    "title": "Geçmişi incele",
+    "text": "Birkaç komut çalıştır, sonra geçmişin son satırlarını göster. Ardından `!!` ve `Ctrl+R` dene.",
+    "blocks": [
+     {
+      "cmd": "echo one\necho two\nhistory | tail -n 5",
+      "expected": "  101  echo one\n  102  echo two\n  103  history | tail -n 5"
+     },
+     {
+      "cmd": "# Ctrl+R'ye bas, 'echo' yaz, Enter'a bas; sonra:\n!!"
+     }
+    ],
+    "differs": [
+     "Numaralar senin geçmişine göre farklı olur; satırların sırası önemlidir.",
+     "`!!` çalışmazsa Bash'te olduğundan emin ol: `echo $SHELL`."
+    ]
+   },
+   "v02": {
+    "title": "Değişken ve export",
+    "text": "Bir değişken tanımla, `export` et ve alt kabuğun onu görüp görmediğini kontrol et.",
+    "blocks": [
+     {
+      "cmd": "MYVAR=hello\nbash -c 'echo \"child: [$MYVAR]\"'\nexport MYVAR\nbash -c 'echo \"child: [$MYVAR]\"'\nenv | grep MYVAR",
+      "expected": "child: []\nchild: [hello]\nMYVAR=hello"
+     }
+    ],
+    "differs": [
+     "İlk satır `child: []` değilse `MYVAR` daha önce export edilmiştir; terminali yeniden aç.",
+     "Çıktı yapıştırırken üç satırı da kopyala."
+    ]
+   },
+   "v03": {
+    "title": "Tırnak farkı",
+    "text": "Aynı metni çift ve tek tırnakla yazdır, farkı gör.",
+    "blocks": [
+     {
+      "cmd": "echo \"Hello $USER\"\necho 'Hello $USER'\necho Hello \\$USER",
+      "expected": "Hello student\nHello $USER\nHello $USER"
+     }
+    ],
+    "differs": [
+     "Kullanıcı adın `student` değilse kendi adın çıkar; bu normaldir.",
+     "`$USER` boşsa `echo $LOGNAME` dene."
+    ]
+   },
+   "v04": {
+    "title": "Joker ve brace",
+    "text": "Güvenli bir klasörde dosyaları brace ile oluştur ve joker karakterlerle eşleştir.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab\ntouch ~/lab/{a,b,c}.txt ~/lab/d.log\necho ~/lab/*.txt\necho ~/lab/?.log\necho ~/lab/[ab].txt",
+      "expected": "/home/student/lab/a.txt /home/student/lab/b.txt /home/student/lab/c.txt\n/home/student/lab/d.log\n/home/student/lab/a.txt /home/student/lab/b.txt"
+     }
+    ],
+    "differs": [
+     "Ev dizinin `/home/student` değilse yol farklı görünür; dosya adları aynı olmalı.",
+     "`WSL`'de `~` Windows tarafını değil Linux ev dizinini gösterir."
+    ]
+   },
+   "v05": {
+    "title": "Kendi aracını PATH'e ekle",
+    "text": "Küçük bir betik yaz, `PATH`'e ekle ve adıyla çağır.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/tools\nprintf '#!/bin/bash\\necho tool works\\n' > ~/tools/hello\nchmod +x ~/tools/hello\nexport PATH=$PATH:~/tools\nhello\nwhich hello",
+      "expected": "tool works\n/home/student/tools/hello"
+     }
+    ],
+    "differs": [
+     "`command not found` alırsan `echo $PATH` ile `tools` yolunun eklendiğini kontrol et.",
+     "`Permission denied` alırsan `chmod +x ~/tools/hello` komutunu tekrar çalıştır."
+    ]
+   },
+   "v06": {
+    "title": "Kısayolları dene",
+    "text": "Önce `sleep 100` yaz ve `Ctrl+C` ile kes. Sonra uzun bir komut yaz, `Ctrl+A` ve `Ctrl+E` ile satırda gez, `Ctrl+L` ile ekranı temizle. Tab ile `~/Doc` yazıp tamamla. Bittiyse \"Yaptım\" de.",
+    "blocks": [
+     {
+      "cmd": "sleep 100\n# Ctrl+C\nls ~/Doc\n# Tab"
+     }
+    ],
+    "differs": [
+     "Terminal emülatörün Ctrl+L'yi yakalıyorsa `clear` yaz.",
+     "Tab hiçbir şey yapmıyorsa iki kez bas; birden çok eşleşme listelenir."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`!!` ne yapar?",
+   "options": [
+    "Geçmişi siler",
+    "Geçmişi listeler",
+    "Önceki komutu tekrar çalıştırır",
+    "Kabuğu kapatır"
+   ],
+   "explain": "`!!` bir önceki komutla yer değiştirir; `sudo !!` çok kullanılır."
+  },
+  "q2": {
+   "q": "`echo '$HOME'` ne yazdırır?",
+   "options": [
+    "/home/student",
+    "$HOME",
+    "Boş satır",
+    "Hata verir"
+   ],
+   "explain": "Tek tırnak içinde değişken açılmaz; metin olduğu gibi yazılır."
+  },
+  "q3": {
+   "q": "Bir değişkeni alt programlara görünür yapan komut hangisi?",
+   "options": [
+    "export",
+    "unset",
+    "echo",
+    "history"
+   ],
+   "explain": "`export` değişkeni ortama aktarır; `env` ile görünür olur."
+  },
+  "q4": {
+   "q": "`echo f{1..3}` çıktısı nedir?",
+   "options": [
+    "f{1..3}",
+    "f",
+    "f1f2f3",
+    "f1 f2 f3"
+   ],
+   "explain": "Brace açılımı kabuk tarafından yapılır ve üç ayrı kelime üretir."
+  }
+ },
+ "summary": [
+  "`history`, `!!` ve `Ctrl+R` geçmişi yeniden kullanmanı sağlar.",
+  "`Tab` tamamlar; `Ctrl+C` keser, `Ctrl+L` temizler, `Ctrl+A/E` satırda gezdirir.",
+  "Çift tırnakta `$` açılır, tek tırnakta açılmaz, `\\` tek karakteri korur.",
+  "`NAME=value` boşluksuz yazılır; alt programlar için `export` gerekir.",
+  "`PATH` komutların aranacağı klasörlerdir; `export PATH=$PATH:...` ile genişletilir.",
+  "`*`, `?`, `[]` joker; `{a,b}` brace; `$()` komut çıktısını yerine koyar."
+ ],
+ "glossary": [
+  {
+   "term": "history",
+   "meaning": "Kabuğun hatırladığı komut listesi."
+  },
+  {
+   "term": "environment variable",
+   "meaning": "Kabuk ve alt programlar için ayar taşıyan değişken (HOME, PATH, USER)."
+  },
+  {
+   "term": "PATH",
+   "meaning": "Komutların aranacağı klasörlerin `:` ile ayrılmış listesi."
+  },
+  {
+   "term": "globbing",
+   "meaning": "`*`, `?`, `[]` desenlerinin dosya adlarına açılması."
+  },
+  {
+   "term": "command substitution",
+   "meaning": "`$(komut)` ifadesinin komutun çıktısıyla değiştirilmesi."
+  },
+  {
+   "term": "exit code",
+   "meaning": "Komutun bıraktığı sayı; `0` başarı, diğerleri hata."
+  }
+ ]
+}

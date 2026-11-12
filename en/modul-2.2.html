@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2.2 Paths and Types — Linux Foundations Academy</title>
+<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;localStorage.setItem("tla3:lang","en")}catch(e){}</script>
+<link rel="stylesheet" href="../shared/app.css">
+</head>
+<body class="page-module" data-module="2.2">
+<header class="top"><a class="brand" href="index.html">Linux Foundations Academy</a><div class="topr"><button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ Terminal (optional)</button><nav class="langsw" id="langsw" aria-label="Language"><a href="../tr/modul-2.2.html" hreflang="tr" lang="tr" data-switch="tr">TR</a><a href="../de/modul-2.2.html" hreflang="de" lang="de" data-switch="de">DE</a><a href="../en/modul-2.2.html" hreflang="en" lang="en" data-switch="en" aria-current="true">EN</a></nav><button type="button" class="ibtn" id="themebtn" title="Theme" aria-label="Theme">◐</button></div></header>
+<div class="topprog" role="progressbar" aria-label="Overall progress"><i id="modbar"></i></div>
+<div class="layout">
+<aside class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#paths">Absolute and relative paths</a></li><li><a href="#shortcuts">Special path shortcuts: . .. ~</a></li><li><a href="#types">Reading file types</a></li><li><a href="#links">Symbolic links</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></aside>
+<main class="content" id="main">
+<details class="tocm"><summary>Contents</summary><ol><li><a href="#paths">Absolute and relative paths</a></li><li><a href="#shortcuts">Special path shortcuts: . .. ~</a></li><li><a href="#types">Reading file types</a></li><li><a href="#links">Symbolic links</a></li><li><a href="#vm">Do it on your own VM</a></li><li><a href="#lab">Exercises</a></li><li><a href="#quiz">Self-test</a></li><li><a href="#summary">Summary</a></li><li><a href="#glossary">Key terms</a></li></ol></details>
+<div class="module-hero"><p class="crumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> Level 2</p>
+<h1><span class="module-id">2.2</span> Paths and Types</h1>
+<p class="lead">Read absolute and relative paths correctly, recognise file types with ls -l and create symbolic links (shortcuts).</p>
+<p class="muted" id="modtxt"></p></div>
+<section class="card" id="objectives"><h2>What will you learn in this module?</h2><ul><li>You tell absolute (start with <code>/</code>) from relative paths and use the shortcuts <code>.</code>, <code>..</code> and <code>~</code>.</li><li>You read the file type from the first letter of <code>ls -l</code> (<code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>).</li><li>You create a symbolic link with <code>ln -s</code> and see what it points to.</li></ul></section>
+<section id="paths"><h2>Absolute and relative paths</h2>
+<p>On Linux the only way to reach a file is to give a <strong>path</strong>. An <strong>absolute path</strong> starts at the root directory (<code>/</code>) and points to the same place from anywhere: <code>/etc/hostname</code>.</p>
+<p>A <strong>relative path</strong> does not start with <code>/</code> and is worked out <strong>from the current directory</strong>. Inside <code>/etc</code>, <code>hostname</code> is enough; in your home directory the same name fails, because no such file is there.</p>
+<p>Check where you are with <code>pwd</code> first. The meaning of a relative path always depends on the current directory.</p>
+<article class="cmd"><h3><code>pwd</code></h3><dl><dt>What is it for?</dt><dd>Prints the absolute path of the current directory.</dd><dt>Where is it used?</dt><dd>Before using relative paths.</dd><dt>Why does it matter?</dt><dd>So you do not work in the wrong directory.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">pwd</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="pwd" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="pwd">Copy</button></div></div></article>
+<article class="cmd"><h3><code>cd</code></h3><dl><dt>What is it for?</dt><dd>Changes the working directory; takes absolute or relative paths.</dd><dt>Where is it used?</dt><dd>When moving between directories.</dd><dt>Why does it matter?</dt><dd>Afterwards short relative paths are enough.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">/etc</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cd /etc" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="cd /etc">Copy</button></div></div></article>
+<article class="cmd"><h3><code>cat</code></h3><dl><dt>What is it for?</dt><dd>Prints the contents of a file.</dd><dt>Where is it used?</dt><dd>When reading small text files.</dd><dt>Why does it matter?</dt><dd>To test that a path points to the right file.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cat /etc/hostname" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="cat /etc/hostname">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>When unsure, type the absolute path; it works from every directory.</p></aside>
+</section>
+<section id="shortcuts"><h2>Special path shortcuts: . .. ~</h2>
+<p><code>.</code> is the current directory, <code>..</code> the parent directory, <code>~</code> your home directory (<code>/home/student</code>). You can combine them in paths: <code>../config.txt</code>, <code>~/Documents/report.txt</code>.</p>
+<p>Files whose name starts with <code>.</code> are <strong>hidden</strong>; <code>ls</code> does not show them, <code>ls -a</code> does. Every directory also lists the entries <code>.</code> and <code>..</code>.</p>
+<article class="cmd"><h3><code>cd ..</code></h3><dl><dt>What is it for?</dt><dd>Moves up to the parent directory.</dd><dt>Where is it used?</dt><dd>When returning from a subdirectory.</dd><dt>Why does it matter?</dt><dd>Go up quickly without typing the full path.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> ..</span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="cd .." title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="cd ..">Copy</button></div></div></article>
+<article class="cmd"><h3><code>ls -a</code></h3><dl><dt>What is it for?</dt><dd>Lists all files including hidden ones.</dd><dt>Where is it used?</dt><dd>When looking for configuration files.</dd><dt>Why does it matter?</dt><dd>Hidden files do not appear otherwise.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-a</span> <span class="tp">~</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -a ~" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -a ~">Copy</button></div></div></article>
+</section>
+<section id="types"><h2>Reading file types</h2>
+<p>On Linux everything is a file: text, folders, devices, shortcuts. In <code>ls -l</code> output the <strong>first letter</strong> of the line tells the type.</p>
+<p><code>-</code> regular file, <code>d</code> directory, <code>l</code> symbolic link, <code>c</code> character device (<code>/dev/null</code>), <code>b</code> block device (disk), <code>s</code> socket, <code>p</code> named pipe. The next nine characters are permissions (covered in later modules).</p>
+<article class="cmd"><h3><code>ls -l</code></h3><dl><dt>What is it for?</dt><dd>Long listing: type, permissions, owner, size, date, name.</dd><dt>Where is it used?</dt><dd>To find out what something is.</dd><dt>Why does it matter?</dt><dd>You know what it is before deleting or reading it.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/dev/null</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -l /dev/null" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -l /dev/null">Copy</button></div></div></article>
+<article class="cmd"><h3><code>stat</code></h3><dl><dt>What is it for?</dt><dd>Shows detailed information and the type of a file.</dd><dt>Where is it used?</dt><dd>When you need the type or timestamps.</dd><dt>Why does it matter?</dt><dd>Gives the type as a word instead of a letter.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">stat</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="stat /etc/hostname" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="stat /etc/hostname">Copy</button></div></div></article>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Files under <code>/dev</code> are hardware interfaces, not real data; do not read them randomly with <code>cat</code>.</p></aside>
+</section>
+<section id="links"><h2>Symbolic links</h2>
+<p>A <strong>symbolic link</strong> is a small shortcut file that points to another path. <code>ls -l</code> shows it with <code>l</code> and as <code>link -&gt; target</code>. Reading the link means reading the target.</p>
+<p>If the target is deleted or moved, the link stays behind <strong>broken</strong>. A relative target (<code>../docs/readme.txt</code>) is resolved <strong>from the link&#x27;s directory</strong>, not from your current one.</p>
+<article class="cmd"><h3><code>ln -s</code></h3><dl><dt>What is it for?</dt><dd>Creates a symbolic link: <code>ln -s TARGET LINK</code>.</dd><dt>Where is it used?</dt><dd>To reach a long path under a short name.</dd><dt>Why does it matter?</dt><dd>You keep the file in one place without copying.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/Documents/report.txt</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="try small" data-try="ln -s ~/Documents/report.txt ~/link.txt" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ln -s ~/Documents/report.txt ~/link.txt">Copy</button></div></div></article>
+<article class="cmd"><h3><code>readlink</code></h3><dl><dt>What is it for?</dt><dd>Prints the target of a link.</dd><dt>Where is it used?</dt><dd>To see where a link leads.</dd><dt>Why does it matter?</dt><dd>Just the target instead of the whole <code>ls -l</code> line.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">readlink</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="readlink ~/link.txt">Copy</button></div></div></article>
+<aside class="callout warn" role="note"><strong>⚠️ Warning</strong><p>Argument order for <code>ln -s</code>: TARGET first, then LINK. Swapped, you get a broken link. <code>ln -sf</code> overwrites an existing file; be careful.</p></aside>
+<aside class="callout danger" role="note"><strong>⛔ Danger</strong><p>If a link points to a directory, <code>rm -r link/</code> (with a trailing <code>/</code>) can delete the contents of the target directory. To remove the link type <code>rm link</code> and check with <code>ls -l</code> first.</p></aside>
+</section>
+<section id="vm"><h2>Do it on your own VM <span class="gcount" data-g="vm"></span></h2><p>The real practice happens on real Linux: run the commands in your own virtual machine (VirtualBox, UTM or WSL) and compare the output.</p><p>On your VM, try absolute/relative paths, look at the file types in <code>/dev</code> and create a symbolic link. All commands are harmless.</p>
+<article class="vmt card" data-vm="v01" data-expect="1"><header><h3>Absolute and relative path</h3><span class="status" aria-hidden="true"></span></header><p>Try the same file relatively, then from the wrong directory, and paste the output.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">pwd</span></span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">/etc</span></span>
+<span class="ln"><span class="tk">pwd</span></span>
+<span class="ln"><span class="tk">cat</span> hostname</span>
+<span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">cat</span> hostname</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="pwd
+cd /etc
+pwd
+cat hostname
+cd ~
+cat hostname">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">/home/student
+/etc
+linux-lab
+cat: hostname: No such file or directory</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If your host is not called <code>linux-lab</code> that is fine; you see your own host name.</li><li>If <code>cat hostname</code> in home does not fail, you created a file named <code>hostname</code> there.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Read file types</h3><span class="status" aria-hidden="true"></span></header><p>Look at the type of a file, a directory and a device; watch the first letters.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-ld</span> <span class="tp">/etc</span> <span class="tp">/etc/hostname</span> <span class="tp">/dev/null</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -ld /etc /etc/hostname /dev/null">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">drwxr-xr-x. ... /etc
+-rw-r--r--. ... /etc/hostname
+crw-rw-rw-. ... /dev/null</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>Some distributions have no <code>/etc/hostname</code>; try <code>/etc/os-release</code> instead.</li><li>A <code>.</code> or <code>+</code> after the permissions is the SELinux/ACL marker, not important.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Create a symbolic link</h3><span class="status" aria-hidden="true"></span></header><p>Create a file in home and a link to it, then read the link.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/practice</span></span>
+<span class="ln"><span class="tk">echo</span> hello linux <span class="to">&gt;</span> <span class="tk">~/practice/notes.txt</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/practice/notes.txt</span> <span class="tp">~/practice/link.txt</span></span>
+<span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">~/practice</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">~/practice/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/practice
+echo hello linux &gt; ~/practice/notes.txt
+ln -s ~/practice/notes.txt ~/practice/link.txt
+ls -l ~/practice
+cat ~/practice/link.txt">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">lrwxrwxrwx. 1 student student ... link.txt -&gt; /home/student/practice/notes.txt
+hello linux</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>If <code>-&gt;</code> is missing or <code>link.txt</code> is red you may have swapped the arguments: TARGET first, then LINK.</li><li>On <code>File exists</code>, <code>~/practice/link.txt</code> is already there; remove it first with <code>rm ~/practice/link.txt</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+<article class="vmt card" data-vm="v04" data-expect="1"><header><h3>Type name with stat</h3><span class="status" aria-hidden="true"></span></header><p>Show the type as a word with <code>stat</code>, then delete the practice folder.</p>
+<div class="code"><pre><code><span class="ln"><span class="tk">stat</span> <span class="tf">-c</span> <span class="ts">&#x27;%F&#x27;</span> <span class="tp">/etc</span> <span class="tp">/etc/hostname</span> <span class="tp">/dev/null</span> <span class="tp">~/practice/link.txt</span></span>
+<span class="ln"><span class="tc"># cleanup: look first with ls -l ~/practice, then</span></span>
+<span class="ln"><span class="tk">rm</span> <span class="tf">-r</span> <span class="tp">~/practice</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="stat -c &#x27;%F&#x27; /etc /etc/hostname /dev/null ~/practice/link.txt
+# cleanup: look first with ls -l ~/practice, then
+rm -r ~/practice">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">directory
+regular file
+character special file
+symbolic link</pre>
+<details class="differs"><summary>My output looks different</summary><ul><li>On macOS or BSD tools <code>-c</code> does not exist; this belongs on a Linux VM.</li><li>If you see <code>rm: cannot remove ... Is a directory</code>, you forgot <code>-r</code>.</li></ul></details>
+<label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
+</article>
+</section>
+<section id="lab"><h2>Quick exercises (simulator)</h2><p>Optional: warm up before the VM, or practise without one, in the in-browser virtual terminal. Tasks are verified automatically.</p><p>Tasks get harder from warm-up to ticket. Badges show the difficulty.</p><p><button type="button" class="btn" data-openterm>&gt;_ Open terminal (optional)</button></p>
+<h3 class="kind k-warmup">Warm-up <span class="gcount" data-g="warmup"></span></h3><ol class="tasks">
+<li class="task" data-task="t01" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Run <code>cat /etc/hostname</code> using the absolute path.</p><details><summary>Hint</summary><p>Works from any directory.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat /etc/hostname">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t02" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Move to <code>/etc</code> with <code>cd /etc</code>.</p><details><summary>Hint</summary><p>An absolute path starts with <code>/</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">/etc</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd /etc">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t16" data-kind="warmup"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-warmup">Warm-up</span><span class="badge d1">Easy</span></p><p>Run <code>ls -la ~</code> to see hidden files too.</p><details><summary>Hint</summary><p><code>-a</code> shows hidden files, <code>-l</code> the details.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-la</span> <span class="tp">~</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -la ~">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-guided">Guided lab <span class="gcount" data-g="guided"></span></h3><ol class="tasks">
+<li class="task" data-task="t03" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d1">Easy</span></p><p>While in <code>/etc</code>, type the relative path <code>cat hostname</code>.</p><details><summary>Hint</summary><p>The file is in the current directory.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> hostname</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat hostname">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t05" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d1">Easy</span></p><p>From <code>/home/student</code> go up one directory with <code>cd ..</code>.</p><details><summary>Hint</summary><p>Confirm with <code>pwd</code> that it shows <code>/home</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> ..</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ..">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t06" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Now type relatively: <code>cd student/Documents</code>.</p><details><summary>Hint</summary><p>No <code>/</code> at the start.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">student/Documents</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd student/Documents">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t07" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d1">Easy</span></p><p>Run <code>ls -l /etc/hostname</code>. What is the first character?</p><details><summary>Hint</summary><p><code>-</code> means regular file.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/etc/hostname</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l /etc/hostname">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t09" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Create the symbolic link <code>~/link.txt</code> with <code>ln -s ~/Documents/report.txt ~/link.txt</code>.</p><details><summary>Hint</summary><p>TARGET first, then the LINK name.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/Documents/report.txt</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~
+ln -s ~/Documents/report.txt ~/link.txt">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t10" data-kind="guided"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-guided">Guided lab</span><span class="badge d2">Medium</span></p><p>Inspect the link with <code>ls -l ~/link.txt</code>. What is after the arrow (<code>-&gt;</code>)?</p><details><summary>Hint</summary><p>The line starts with <code>l</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l ~/link.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-predict">Predict <span class="gcount" data-g="predict"></span></h3><ol class="tasks">
+<li class="task" data-task="t04" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d1">Easy</span></p><p>Go home with <code>cd ~</code> and run <code>cat hostname</code> again. What happens and why?</p><details><summary>Hint</summary><p>There is no hostname file in home; expect an error.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~</span></span>
+<span class="ln"><span class="tk">cat</span> hostname</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~
+cat hostname">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t08" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>Run <code>ls -l /dev/null</code> and predict first: which letter comes first?</p><details><summary>Hint</summary><p><code>c</code> for character device.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-l</span> <span class="tp">/dev/null</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="ls -l /dev/null">Copy</button></div></div></details></div></li>
+<li class="task" data-task="t11" data-kind="predict"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-predict">Predict</span><span class="badge d2">Medium</span></p><p>What does <code>cat ~/link.txt</code> print? Predict first, then run it.</p><details><summary>Hint</summary><p>The link reads its target.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cat</span> <span class="tp">~/link.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cat ~/link.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-debug">Debug <span class="gcount" data-g="debug"></span></h3><ol class="tasks">
+<li class="task" data-task="t12" data-kind="debug"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-debug">Debug</span><span class="badge d2">Medium</span></p><p>Debug: inside <code>~/projects/app</code>, <code>config.txt</code> is not found; the file is one level up. Read it with <code>cat</code> using a relative path with <code>../</code>.</p><details><summary>Hint</summary><p>First <code>cd ~/projects/app</code>, then <code>cat ../config.txt</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/projects/app</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">../config.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/projects/app
+cat ../config.txt">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-mini">Mini project <span class="gcount" data-g="mini"></span></h3><ol class="tasks">
+<li class="task" data-task="t13" data-kind="mini"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-mini">Mini project</span><span class="badge d2">Medium</span></p><p>Mini project: create <code>~/lab/docs</code> and <code>~/lab/bin</code>, write a file with <code>echo hello linux &gt; ~/lab/docs/readme.txt</code>, and create <code>~/lab/bin/readme-link</code> as a symbolic link to it.</p><details><summary>Hint</summary><p><code>mkdir -p</code>, <code>echo ... &gt;</code> and <code>ln -s TARGET LINK</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/lab/docs</span> <span class="tp">~/lab/bin</span></span>
+<span class="ln"><span class="tk">echo</span> hello linux <span class="to">&gt;</span> <span class="tk">~/lab/docs/readme.txt</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/lab/docs/readme.txt</span> <span class="tp">~/lab/bin/readme-link</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/lab/docs ~/lab/bin
+echo hello linux &gt; ~/lab/docs/readme.txt
+ln -s ~/lab/docs/readme.txt ~/lab/bin/readme-link">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-challenge">Challenge <span class="gcount" data-g="challenge"></span></h3><ol class="tasks">
+<li class="task" data-task="t14" data-kind="challenge"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-challenge">Challenge</span><span class="badge d3">Hard</span></p><p>Challenge: go into <code>~/lab/bin</code> and create the link <code>rel-link</code> with a <strong>relative target</strong> (<code>../docs/readme.txt</code>); then read it with <code>cat rel-link</code>.</p><details><summary>Hint</summary><p>A relative target is resolved from the link&#x27;s directory.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">cd</span> <span class="tp">~/lab/bin</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">../docs/readme.txt</span> rel-link</span>
+<span class="ln"><span class="tk">cat</span> rel-link</span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cd ~/lab/bin
+ln -s ../docs/readme.txt rel-link
+cat rel-link">Copy</button></div></div></details></div></li>
+</ol>
+<h3 class="kind k-ticket">Ticket <span class="gcount" data-g="ticket"></span></h3><ol class="tasks">
+<li class="task" data-task="t15" data-kind="ticket"><span class="tcheck" aria-hidden="true"></span><div><p class="badges"><span class="badge b-ticket">Ticket</span><span class="badge d3">Hard</span></p><p>Ticket: the application looks for its configuration at <code>~/app/current/config.txt</code>, but the real file is in <code>~/releases/v2/config.txt</code>. Create <code>~/app/current</code> as a symbolic link to <code>~/releases/v2</code> and verify with <code>cat ~/app/current/config.txt</code>.</p><details><summary>Hint</summary><p><code>mkdir -p ~/app</code>, then <code>ln -s ~/releases/v2 ~/app/current</code>.</p></details><details><summary>Solution</summary><div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tf">-p</span> <span class="tp">~/app</span></span>
+<span class="ln"><span class="tk">ln</span> <span class="tf">-s</span> <span class="tp">~/releases/v2</span> <span class="tp">~/app/current</span></span>
+<span class="ln"><span class="tk">cat</span> <span class="tp">~/app/current/config.txt</span></span>
+</code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir -p ~/app
+ln -s ~/releases/v2 ~/app/current
+cat ~/app/current/config.txt">Copy</button></div></div></details></div></li>
+</ol>
+<p><button type="button" class="btn" id="resetlab">Reset lab</button></p></section>
+<section id="quiz"><h2>Self-test</h2>
+<div class="q card" data-q="q1"><p><strong>Which is an absolute path?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Documents/report.txt</button><button type="button" class="opt" data-i="1">/home/student/Documents/report.txt</button><button type="button" class="opt" data-i="2">../report.txt</button><button type="button" class="opt" data-i="3">~report.txt</button></div><p class="explain" hidden>An absolute path starts with <code>/</code> at the root and points to the same file from anywhere.</p></div>
+<div class="q card" data-q="q2"><p><strong>A line in <code>ls -l</code> starts with <code>l</code>. What is it?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">Regular file</button><button type="button" class="opt" data-i="1">Directory</button><button type="button" class="opt" data-i="2">Device</button><button type="button" class="opt" data-i="3">Symbolic link</button></div><p class="explain" hidden><code>l</code> means symbolic link; <code>-</code> is a regular file, <code>d</code> a directory.</p></div>
+<div class="q card" data-q="q3"><p><strong>Where are you after <code>cd ..</code> from <code>/etc</code>?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">/</button><button type="button" class="opt" data-i="1">/home</button><button type="button" class="opt" data-i="2">/etc/..</button><button type="button" class="opt" data-i="3">~</button></div><p class="explain" hidden><code>..</code> is the parent directory; from <code>/etc</code> you go up to <code>/</code>.</p></div>
+<div class="q card" data-q="q4"><p><strong>What happens when the target of a symbolic link is deleted?</strong></p><div class="opts"><button type="button" class="opt" data-i="0">The link is deleted too</button><button type="button" class="opt" data-i="1">The link copies the target</button><button type="button" class="opt" data-i="2">The link stays broken</button><button type="button" class="opt" data-i="3">The target comes back</button></div><p class="explain" hidden>The link only stores a path; when the target disappears the link remains but is broken.</p></div>
+</section>
+<section id="summary" class="card"><h2>Summary</h2><ul><li>Absolute paths start with <code>/</code>; relative paths are resolved from the current directory.</li><li><code>.</code> is current, <code>..</code> parent, <code>~</code> your home directory.</li><li>The first letter of <code>ls -l</code> gives the type: <code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>.</li><li><code>ln -s TARGET LINK</code> creates a symbolic link; if the target goes away the link breaks.</li></ul></section>
+<section id="glossary"><h2>Key terms</h2><dl class="gl"><dt>absolute path</dt><dd>Full address starting at the root directory (<code>/</code>).</dd><dt>relative path</dt><dd>Address worked out from the current directory.</dd><dt>symbolic link</dt><dd>Shortcut file that points to another path.</dd><dt>device file</dt><dd>Special file under <code>/dev</code> that represents hardware.</dd></dl></section>
+<nav class="pn"><a class="btn" href="modul-2.1.html">← Previous</a><a class="btn primary" href="modul-2.3.html">Next →</a></nav>
+</main>
+<aside class="term" id="term" aria-label="Terminal" hidden><div class="termhead"><strong>Terminal (optional)</strong><button type="button" class="ibtn" id="termclose" aria-label="Close terminal">✕</button></div><div class="termout" id="termout" role="log"></div><div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal"></div></aside></div>
+<script type="application/json" id="tla-config">{"lang": "en", "module": "2.2", "setup": {"dirs": ["/home/student/projects/app"], "files": {"/home/student/Documents/report.txt": "quarterly report\n", "/home/student/projects/config.txt": "port=8080\n", "/home/student/releases/v2/config.txt": "version=2\n"}}, "tasks": [{"id": "t01", "kind": "warmup", "check": {"cmd": "^cat /etc/hostname$", "ok": true}}, {"id": "t02", "kind": "warmup", "check": {"cwd": "/etc"}}, {"id": "t03", "kind": "guided", "check": {"cmd": "^cat hostname$", "ok": true}}, {"id": "t04", "kind": "predict", "check": {"cmd": "^cat hostname$", "ok": false}}, {"id": "t05", "kind": "guided", "check": {"cwd": "/home"}}, {"id": "t06", "kind": "guided", "check": {"cwd": "~/Documents"}}, {"id": "t07", "kind": "guided", "check": [{"cmd": "^ls -l /etc/hostname$", "ok": true}, {"out": "-rw"}]}, {"id": "t08", "kind": "predict", "check": [{"cmd": "^ls -l /dev/null$", "ok": true}, {"out": "crw"}]}, {"id": "t09", "kind": "guided", "check": {"exists": "~/link.txt", "type": "l", "link": true}}, {"id": "t10", "kind": "guided", "check": [{"cmd": "^ls -l(a)? ~/link\\.txt$", "ok": true}, {"out": "->"}]}, {"id": "t11", "kind": "predict", "check": [{"cmd": "^cat ~/link\\.txt$", "ok": true}, {"out": "quarterly report"}]}, {"id": "t12", "kind": "debug", "check": {"cmd": "^cat (\\.\\./config\\.txt|~/projects/config\\.txt|/home/student/projects/config\\.txt)$", "ok": true}}, {"id": "t13", "kind": "mini", "check": [{"exists": "~/lab/docs", "type": "d"}, {"exists": "~/lab/bin", "type": "d"}, {"contains": ["~/lab/docs/readme.txt", "hello linux"]}, {"exists": "~/lab/bin/readme-link", "type": "l", "link": true}]}, {"id": "t14", "kind": "challenge", "check": [{"exists": "~/lab/bin/rel-link", "type": "l", "link": true}, {"cmd": "^cat rel-link$", "ok": true}, {"out": "hello linux", "of": "cat rel-link"}]}, {"id": "t15", "kind": "ticket", "check": [{"exists": "~/app/current", "type": "l", "link": true}, {"cmd": "^cat ~/app/current/config\\.txt$", "ok": true}, {"out": "version=2", "of": "cat ~/app/current/config.txt"}]}, {"id": "t16", "kind": "warmup", "check": {"cmd": "^ls -(la|al|a)\\s+~$", "ok": true}}], "vm": [{"id": "v01", "expect": "/etc"}, {"id": "v02", "expect": "crw"}, {"id": "v03", "expect": "->"}, {"id": "v04", "expect": "regular|directory|symbolic|character|block"}], "quiz": {"q1": 1, "q2": 3, "q3": 0, "q4": 2}, "ui": {"correct": "Correct!", "wrong": "Not quite, try again.", "taskDone": "Task complete", "moduleDone": "Module complete! 🎉", "tasksDone": "done", "welcome": "Virtual Linux terminal — commands only affect this page's virtual file system. Type 'help' to list commands, Tab to complete, ↑/↓ for history.", "sandboxNote": "Safe sandbox: your real system is never touched.", "resetConfirm": "This module's virtual file system and command history will be reset. Your progress (completed tasks) is kept. Continue?", "openTerminal": "Open terminal (optional)", "closeTerminal": "Close terminal", "continue": "Continue", "startPath": "Start learning", "noResult": "No matching module or command.", "soon": "Coming soon", "overall": "Overall progress", "copied": "Copied ✓", "pasteOk": "Your output matches the expected pattern ✓", "pasteBad": "No match yet. See the tips under \"My output looks different\" and paste the complete output.", "iDidIt": "Done", "undo": "Undo", "groupDone": "done", "vmDone": "VM tasks"}}</script>
+<script src="../shared/terminal.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/terminal-ui.js"></script>
+<script src="../shared/lab.js"></script>
+</body>
+</html>

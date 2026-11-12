@@ -1,0 +1,340 @@
+{
+ "id": "6.2",
+ "level": 6,
+ "setup": {
+  "dirs": [
+   "/home/student/lab"
+  ],
+  "files": {
+   "/home/student/lab/audit.log": "type=AVC msg=audit(1731400001.123:101): avc: denied { read } for pid=1201 comm=\"httpd\" name=\"index.html\" scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:user_home_t:s0 tclass=file permissive=0\ntype=AVC msg=audit(1731400002.123:102): avc: denied { getattr } for pid=1202 comm=\"httpd\" name=\"index.html\" scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:user_home_t:s0 tclass=file permissive=0\ntype=AVC msg=audit(1731400003.123:103): avc: denied { name_connect } for pid=1203 comm=\"httpd\" dest=8888 scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:object_r:unreserved_port_t:s0 tclass=tcp_socket permissive=0\ntype=AVC msg=audit(1731400004.123:104): avc: denied { read } for pid=1204 comm=\"sshd\" name=\"authorized_keys\" scontext=system_u:system_r:sshd_t:s0 tcontext=unconfined_u:object_r:ssh_home_t:s0 tclass=file permissive=0\ntype=AVC msg=audit(1731400005.123:105): avc: denied { write } for pid=1205 comm=\"php-fpm\" name=\"session.tmp\" scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:tmp_t:s0 tclass=file permissive=1\ntype=AVC msg=audit(1731400006.123:106): avc: denied { read } for pid=1206 comm=\"httpd\" name=\"upload.html\" scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:tmp_t:s0 tclass=file permissive=1\n",
+   "/home/student/lab/selinux_config": "# This file controls the state of SELinux.\nSELINUX=permissive\nSELINUXTYPE=targeted\n",
+   "/home/student/lab/broken_config": "SELINUX=disabled\nSELINUXTYPE=targeted\n",
+   "/home/student/lab/context.txt": "unconfined_u:object_r:user_home_t:s0\n",
+   "/home/student/lab/booleans.txt": "httpd_can_network_connect --> off\nhttpd_enable_homedirs --> off\nhttpd_can_sendmail --> on\nhttpd_read_user_content --> off\nftpd_anon_write --> off\nsamba_enable_home_dirs --> on\n",
+   "/home/student/lab/webfiles.txt": "unconfined_u:object_r:httpd_sys_content_t:s0 index.html\nunconfined_u:object_r:user_home_t:s0 about.html\nunconfined_u:object_r:httpd_sys_content_t:s0 style.css\nunconfined_u:object_r:tmp_t:s0 upload.html\n",
+   "/home/student/lab/aa_status.txt": "apparmor module is loaded.\n3 profiles are in enforce mode.\n   /usr/sbin/cupsd\n   /usr/bin/man\n   /usr/sbin/tcpdump\n1 profiles are in complain mode.\n   /usr/sbin/nginx\n",
+   "/home/student/lab/runbook.sh": "setenforce 0\nsetsebool httpd_can_network_connect on\n"
+  }
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^cat \\S*selinux_config$",
+    "ok": true
+   },
+   "solution": [
+    "cat ~/lab/selinux_config"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^grep -c denied \\S*audit\\.log$",
+    "ok": true
+   },
+   "solution": [
+    "grep -c denied ~/lab/audit.log"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^grep httpd \\S*booleans\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "grep httpd ~/lab/booleans.txt"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 1,
+   "check": {
+    "cwd": "~/lab"
+   },
+   "solution": [
+    "cd ~/lab"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "user_home_t"
+   },
+   "solution": [
+    "cut -d: -f3 context.txt"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "~/lab/httpd_denials.txt",
+      "comm=\"httpd\""
+     ]
+    },
+    {
+     "linesMin": [
+      "~/lab/httpd_denials.txt",
+      4
+     ]
+    }
+   ],
+   "solution": [
+    "grep 'comm=\"httpd\"' audit.log > httpd_denials.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 1,
+   "check": {
+    "out": "complain mode"
+   },
+   "solution": [
+    "grep complain aa_status.txt"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^grep -c permissive=1 \\S*audit\\.log$",
+     "ok": true
+    },
+    {
+     "out": "\\b2\\b"
+    }
+   ],
+   "solution": [
+    "grep -c permissive=1 audit.log"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": [
+    {
+     "cmd": "^grep -c ' off\\$' \\S*booleans\\.txt$",
+     "ok": true
+    },
+    {
+     "out": "\\b4\\b"
+    }
+   ],
+   "solution": [
+    "grep -c ' off$' booleans.txt"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "contains": [
+     "~/lab/broken_config",
+     "SELINUX=enforcing"
+    ]
+   },
+   "solution": [
+    "printf 'SELINUX=enforcing\\nSELINUXTYPE=targeted\\n' > ~/lab/broken_config"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "contains": [
+     "~/lab/runbook.sh",
+     "setsebool -P httpd_can_network_connect on"
+    ]
+   },
+   "solution": [
+    "echo 'setsebool -P httpd_can_network_connect on' > ~/lab/runbook.sh"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "~/lab/fix_web.sh",
+      "semanage fcontext -a -t httpd_sys_content_t"
+     ]
+    },
+    {
+     "contains": [
+      "~/lab/fix_web.sh",
+      "restorecon -Rv /srv/web"
+     ]
+    },
+    {
+     "mode": [
+      "~/lab/fix_web.sh",
+      "755"
+     ]
+    }
+   ],
+   "solution": [
+    "echo 'semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"' > ~/lab/fix_web.sh",
+    "echo 'restorecon -Rv /srv/web' >> ~/lab/fix_web.sh",
+    "chmod 755 ~/lab/fix_web.sh"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "~/lab/top_comm.txt",
+      "\\d+\\s+comm=\"httpd\""
+     ]
+    },
+    {
+     "contains": [
+      "~/lab/top_comm.txt",
+      "comm=\"sshd\""
+     ]
+    }
+   ],
+   "solution": [
+    "cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {
+    "equals": [
+     "~/lab/wrong_labels.txt",
+     "unconfined_u:object_r:user_home_t:s0 about.html\nunconfined_u:object_r:tmp_t:s0 upload.html\n"
+    ]
+   },
+   "solution": [
+    "grep -v httpd_sys_content_t webfiles.txt > wrong_labels.txt"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {
+    "equals": [
+     "~/lab/booleans_on.txt",
+     "httpd_can_sendmail --> on\nsamba_enable_home_dirs --> on\n"
+    ]
+   },
+   "solution": [
+    "grep ' on$' booleans.txt > booleans_on.txt"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "contains": [
+      "~/lab/ticket.txt",
+      "user_home_t"
+     ]
+    },
+    {
+     "contains": [
+      "~/lab/ticket.txt",
+      "httpd_sys_content_t"
+     ]
+    },
+    {
+     "contains": [
+      "~/lab/ticket.txt",
+      "restorecon"
+     ]
+    }
+   ],
+   "solution": [
+    "echo 'wrong type user_home_t, correct type httpd_sys_content_t, fix with restorecon' > ticket.txt"
+   ]
+  },
+  {
+   "id": "t17",
+   "kind": "ticket",
+   "diff": 3,
+   "check": {
+    "contains": [
+     "~/lab/fix_port.sh",
+     "semanage port -a -t http_port_t -p tcp 8888"
+    ]
+   },
+   "solution": [
+    "echo 'semanage port -a -t http_port_t -p tcp 8888' > fix_port.sh"
+   ]
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "enforcing|permissive|disabled"
+  },
+  {
+   "id": "v02",
+   "expect": "unconfined_u|system_u|:s0|\\w+_t"
+  },
+  {
+   "id": "v03",
+   "expect": null
+  },
+  {
+   "id": "v04",
+   "expect": "httpd_can_network_connect|-->|\\bon\\b|\\boff\\b"
+  },
+  {
+   "id": "v05",
+   "expect": "avc|denied|no matches|<no matches>"
+  },
+  {
+   "id": "v06",
+   "expect": "apparmor|profiles"
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 2
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ]
+}

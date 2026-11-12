@@ -1,0 +1,310 @@
+{
+ "id": "0.3",
+ "level": 0,
+ "setup": {},
+ "tasks": [
+  {
+   "id": "t01",
+   "check": {
+    "cmd": "^whoami$",
+    "ok": true
+   },
+   "solution": [
+    "whoami"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t02",
+   "check": {
+    "cmd": "^hostname$",
+    "ok": true
+   },
+   "solution": [
+    "hostname"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t03",
+   "check": {
+    "cmd": "^pwd$",
+    "ok": true
+   },
+   "solution": [
+    "pwd"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t04",
+   "check": {
+    "cmd": "^echo ",
+    "out": "Hello Linux"
+   },
+   "solution": [
+    "echo \"Hello Linux\""
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t05",
+   "check": {
+    "cmd": "^ls\\s+-\\w*l",
+    "ok": true
+   },
+   "solution": [
+    "ls -l"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t06",
+   "check": {
+    "cmd": "^man \\w+$",
+    "ok": true
+   },
+   "solution": [
+    "man ls"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t07",
+   "check": {
+    "cmd": "^\\w+ --help$",
+    "ok": true
+   },
+   "solution": [
+    "ls --help"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t08",
+   "check": {
+    "out": "command not found"
+   },
+   "solution": [
+    "lss"
+   ],
+   "kind": "debug",
+   "diff": 2
+  },
+  {
+   "id": "t09",
+   "check": {
+    "cmd": "^uname -r$",
+    "ok": true
+   },
+   "solution": [
+    "uname -r"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t10",
+   "check": {
+    "out": "student",
+    "of": "^echo \\$USER$"
+   },
+   "solution": [
+    "echo $USER"
+   ],
+   "kind": "predict",
+   "diff": 2
+  },
+  {
+   "id": "t11",
+   "check": {
+    "seq": [
+     "^pwd$",
+     "^ls$",
+     "^cd Documents$",
+     "^pwd$"
+    ],
+    "ok": true
+   },
+   "solution": [
+    "pwd",
+    "ls",
+    "cd Documents",
+    "pwd"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t12",
+   "check": {
+    "cmd": "^history$",
+    "ok": true
+   },
+   "solution": [
+    "history"
+   ],
+   "kind": "guided",
+   "diff": 2
+  },
+  {
+   "id": "t13",
+   "check": {
+    "cmd": "^clear$",
+    "ok": true
+   },
+   "solution": [
+    "clear"
+   ],
+   "kind": "warmup",
+   "diff": 1
+  },
+  {
+   "id": "t14",
+   "check": [
+    {
+     "exists": "first.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "first.txt",
+      "Hello"
+     ]
+    },
+    {
+     "cmd": "^cat first\\.txt$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "cd ~",
+    "echo Hello > first.txt",
+    "cat first.txt"
+   ],
+   "kind": "challenge",
+   "diff": 3
+  },
+  {
+   "id": "t15",
+   "kind": "predict",
+   "check": {
+    "seq": [
+     "^cd (~/)?Documents$",
+     "^cd \\.\\.$",
+     "^pwd$"
+    ],
+    "ok": true
+   },
+   "solution": [
+    "cd ~/Documents",
+    "cd ..",
+    "pwd"
+   ],
+   "diff": 2
+  },
+  {
+   "id": "t16",
+   "kind": "debug",
+   "check": {
+    "cmd": "^cat (~/|/home/student/)?notes\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "cd ~",
+    "ls",
+    "cat notes.txt"
+   ],
+   "diff": 2
+  },
+  {
+   "id": "t17",
+   "kind": "mini",
+   "check": [
+    {
+     "exists": "~/hello.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/hello.txt",
+      "student"
+     ]
+    },
+    {
+     "cmd": "^cat (~/)?hello\\.txt$",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "cd ~",
+    "whoami > hello.txt",
+    "cat hello.txt"
+   ],
+   "diff": 2
+  },
+  {
+   "id": "t18",
+   "kind": "ticket",
+   "check": [
+    {
+     "linesMin": [
+      "~/info.txt",
+      2
+     ]
+    },
+    {
+     "contains": [
+      "~/info.txt",
+      "linux-lab"
+     ]
+    }
+   ],
+   "solution": [
+    "cd ~",
+    "uname -r > info.txt",
+    "hostname >> info.txt"
+   ],
+   "diff": 3
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 2
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 2
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "(?=[\\s\\S]*\\d+\\.\\d+\\.\\d+)"
+  },
+  {
+   "id": "v02",
+   "expect": "(PRETTY_NAME|NAME)="
+  },
+  {
+   "id": "v03",
+   "expect": null
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+ "id": "4.3",
+ "level": 4,
+ "setup": {
+  "files": {
+   "/home/student/sudoers.bad": "student ALL=(ALL) NOPASSWD: ALL\n"
+  }
+ },
+ "tasks": [
+  {"id": "t01", "kind": "warmup", "diff": 1, "check": {"cmd": "^whoami$", "ok": true}, "solution": ["whoami"]},
+  {"id": "t02", "kind": "warmup", "diff": 1, "check": {"cmd": "^id$", "ok": true}, "solution": ["id"]},
+  {"id": "t03", "kind": "warmup", "diff": 1, "check": {"cmd": "^sudo whoami$", "ok": true}, "solution": ["sudo whoami"]},
+  {"id": "t04", "kind": "guided", "diff": 1, "check": {"cmd": "^sudo id$", "ok": true}, "solution": ["sudo id"]},
+  {"id": "t05", "kind": "guided", "diff": 2, "check": {"cmd": "^sudo ls -ld /root$", "ok": true}, "solution": ["sudo ls -ld /root"]},
+  {"id": "t06", "kind": "guided", "diff": 2, "check": {"cmd": "^sudo ls -l /etc/passwd$", "ok": true}, "solution": ["sudo ls -l /etc/passwd"]},
+  {"id": "t07", "kind": "predict", "diff": 1, "check": {"out": "^student\\s*$", "of": "^whoami$"}, "solution": ["whoami"]},
+  {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "^root\\s*$", "of": "^sudo whoami$"}, "solution": ["sudo whoami"]},
+  {"id": "t09", "kind": "debug", "diff": 2, "check": {"equals": ["~/sudoers.bad", "student ALL=(root) /usr/bin/systemctl restart nginx\n"]}, "solution": ["echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad"]},
+  {"id": "t10", "kind": "mini", "diff": 2, "check": [{"contains": ["~/admin_runbook.txt", "sudo -l"]}, {"contains": ["~/admin_runbook.txt", "sudo systemctl status nginx"]}, {"contains": ["~/admin_runbook.txt", "sudo -k"]}], "solution": ["echo 'sudo -l' > ~/admin_runbook.txt", "echo 'sudo systemctl status nginx' >> ~/admin_runbook.txt", "echo 'sudo -k' >> ~/admin_runbook.txt"]},
+  {"id": "t11", "kind": "challenge", "diff": 3, "check": {"equals": ["~/sudoers_rule.txt", "alice ALL=(root) /usr/bin/systemctl restart nginx\n"]}, "solution": ["echo 'alice ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers_rule.txt"]},
+  {"id": "t12", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/service_plan.txt", "sudo -l"]}, {"contains": ["~/service_plan.txt", "sudo systemctl restart nginx"]}], "solution": ["echo 'sudo -l' > ~/service_plan.txt", "echo 'sudo systemctl restart nginx' >> ~/service_plan.txt"]},
+  {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/ticket_4310.txt", "sudo visudo -f /etc/sudoers.d/alice"]}, "solution": ["echo 'sudo visudo -f /etc/sudoers.d/alice' > ~/ticket_4310.txt"]},
+  {"id": "t14", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/ticket_4311.txt", "alice ALL=\\(root\\) NOPASSWD: /usr/bin/systemctl restart nginx"]}, {"contains": ["~/ticket_4311.txt", "visudo"]}], "solution": ["echo 'sudo visudo -f /etc/sudoers.d/alice' > ~/ticket_4311.txt", "echo 'alice ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx' >> ~/ticket_4311.txt"]}
+ ],
+ "vm": [
+  {"id": "v01", "expect": "uid=\\d+\\(\\S+\\).*gid=\\d+"},
+  {"id": "v02", "expect": "^root\\s*$"},
+  {"id": "v03", "expect": "uid=0\\(root\\)"},
+  {"id": "v04", "expect": "User .* may run the following|Matching Defaults entries|Sudoers entry"},
+  {"id": "v05", "expect": "parsed OK|parsed in"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 2},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 3}
+ ]
+}

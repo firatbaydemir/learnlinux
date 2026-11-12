@@ -1,0 +1,407 @@
+{
+ "title": "Editoren",
+ "lead": "Textdateien im Terminal bearbeiten: nano für den schnellen Einstieg, vi/vim, wenn es überall und schnell gehen muss.",
+ "objectives": [
+  "Du öffnest, bearbeitest, speicherst und schließt Dateien mit nano.",
+  "Du kennst die Modi von vim und kommst immer wieder heraus (:q!, :wq).",
+  "Du nutzt grundlegende vim-Befehle: Einfügen, Zeile löschen, Rückgängig, Suchen.",
+  "Du bearbeitest Konfigurationsdateien sicher: erst Backup, sudo nur wenn nötig."
+ ],
+ "sections": [
+  {
+   "id": "nano",
+   "title": "nano: der einfache Editor",
+   "body": [
+    "`nano` ist einsteigerfreundlich: Du tippst sofort los, die Tastenkürzel stehen unten am Bildschirm. `^` steht für die Taste **Strg** (Ctrl); `^X` heißt also Strg+X.",
+    "Existiert die Datei nicht, öffnet `nano datei` einen leeren Puffer und legt die Datei beim Speichern an. Unter Ubuntu ist nano meist vorinstalliert; unter Rocky/Alma installierst du es bei Bedarf mit `sudo dnf install nano`."
+   ],
+   "commands": [
+    {
+     "cmd": "nano file",
+     "what": "Öffnet eine Datei im Editor nano (legt sie beim Speichern an, falls sie fehlt).",
+     "where": "Für schnelle Änderungen an Text- und Konfigurationsdateien.",
+     "why": "Einfach, die Hilfe steht unten im Bild.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+O",
+     "what": "Schreibt (speichert) die Datei; den Namen mit ENTER bestätigen.",
+     "where": "In nano, wann immer du speichern willst.",
+     "why": "Sichert deine Arbeit, ohne den Editor zu verlassen.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+X",
+     "what": "Beendet nano; fragt bei ungespeicherten Änderungen nach (Y/N).",
+     "where": "In nano, wenn du fertig bist.",
+     "why": "Der Ausgang: Y speichert, N verwirft.",
+     "example": "nano todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "Ctrl+K / Ctrl+U",
+     "what": "Schneidet die aktuelle Zeile aus / fügt sie wieder ein.",
+     "where": "Zum Löschen, Verschieben oder Duplizieren von Zeilen.",
+     "why": "Schnelles Zeilenbearbeiten ohne Maus.",
+     "example": "nano todo.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Weitere nano-Tasten: `Ctrl+W` Suchen, `Ctrl+G` Hilfe, `Alt+U` Rückgängig, `Ctrl+_` zu Zeilennummer springen."
+  },
+  {
+   "id": "vim",
+   "title": "vi / vim: Modi",
+   "body": [
+    "`vi` ist auf praktisch jedem Linux-System installiert, `vim` ist die verbesserte Version (auf manchen Minimalsystemen ist `vi` einfach vim). Lerne die Grundlagen einmal, und du kannst in jeder Lage einen Server retten.",
+    "Die Kernidee: vim hat **Modi**. Im **Normalmodus** (Standard beim Start) sind Tasten Befehle — `dd` schreibt keinen Text, sondern löscht eine Zeile. Mit `i` wechselst du in den **Einfügemodus** (Insert) und tippst normal; `Esc` bringt dich zurück. Mit `:` gelangst du in den **Kommandozeilenmodus** für `:w`, `:q`, `:wq`, `:q!`.",
+    "Anfängerfehler Nummer eins: im Normalmodus Text tippen. Passieren seltsame Dinge, drücke ein- bis zweimal `Esc` und mach weiter."
+   ],
+   "commands": [
+    {
+     "cmd": "vim file",
+     "what": "Öffnet eine Datei in vim (Start im Normalmodus).",
+     "where": "Für Konfigurationsdateien, Skripte und auf Servern ohne nano.",
+     "why": "Überall verfügbar und nach dem Lernen sehr schnell.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "i / Esc",
+     "what": "`i` wechselt in den Einfügemodus, `Esc` zurück in den Normalmodus.",
+     "where": "Beim Wechsel zwischen Tippen und Befehlen.",
+     "why": "Ohne `i` kannst du keinen Text tippen; ohne `Esc` keine Befehle geben.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": ":wq",
+     "what": "Schreibt die Datei und beendet vim (auch `ZZ` oder `:x`).",
+     "where": "Im Normalmodus nach Eingabe von `:`.",
+     "why": "Speichert und beendet in einem Schritt.",
+     "example": "vim todo.txt",
+     "nosim": true
+    }
+   ],
+   "danger": "In vim festgesteckt? Drücke `Esc`, tippe dann `:q!` und ENTER: beendet OHNE zu speichern; zum Speichern `:wq`. Strg+C oder Strg+X beenden vim nicht."
+  },
+  {
+   "id": "vimcmds",
+   "title": "Wichtige vim-Befehle",
+   "body": [
+    "Diese Normalmodus-Befehle decken den Alltag ab. Pfeiltasten funktionieren, aber `h j k l` (links, runter, hoch, rechts) lassen die Hände auf der Grundreihe.",
+    "Viele Befehle nehmen eine Zahl: `3dd` löscht drei Zeilen, `5j` geht fünf Zeilen nach unten. `gg` springt an den Anfang, `G` ans Ende, `:42` zu Zeile 42. `:set number` zeigt Zeilennummern."
+   ],
+   "commands": [
+    {
+     "cmd": "dd",
+     "what": "Löscht (schneidet) die aktuelle Zeile; `p` fügt sie darunter ein.",
+     "where": "Im Normalmodus.",
+     "why": "Zeilen entfernen, verschieben oder duplizieren (`yy` kopiert).",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "u",
+     "what": "Macht die letzte Änderung rückgängig; `Ctrl+R` stellt sie wieder her.",
+     "where": "Im Normalmodus.",
+     "why": "Korrigiert versehentliche Änderungen.",
+     "example": "vim todo.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "/text",
+     "what": "Sucht vorwärts nach `text`; `n` springt zum nächsten Treffer.",
+     "where": "Im Normalmodus.",
+     "why": "Findet Einstellungen in langen Konfigurationsdateien.",
+     "example": "vim server.log",
+     "nosim": true
+    },
+    {
+     "cmd": ":q!",
+     "what": "Beendet und verwirft alle ungespeicherten Änderungen.",
+     "where": "Vom Normalmodus, wenn du Unsinn gemacht oder nur geschaut hast.",
+     "why": "Der Notausgang; ein einfaches `:q` verweigert bei Änderungen.",
+     "example": "vim todo.txt",
+     "nosim": true
+    }
+   ],
+   "tip": "Starte einmal `vimtutor` (ca. 30 Minuten) — der beste interaktive vim-Kurs, kommt mit vim."
+  },
+  {
+   "id": "safe",
+   "title": "Sicher bearbeiten",
+   "body": [
+    "Systemkonfigurationen liegen in `/etc` und gehören root. Als normaler Benutzer kannst du sie lesen, aber nicht speichern: Nutze `sudo nano /etc/datei` nur, wenn es sein muss. **Mach zuerst ein Backup**, damit du nach einem Tippfehler wiederherstellen kannst.",
+    "Wege ohne Editor: `echo \"Text\" >> datei` hängt eine Zeile an, `echo \"Text\" > datei` **überschreibt** die ganze Datei. Mit `cp datei datei.bak` entsteht in einer Sekunde ein Backup.",
+    "Ist vim abgestürzt oder das Terminal geschlossen worden, bleibt evtl. eine Swap-Datei (`.datei.swp`) übrig und vim warnt beim nächsten Start. Bearbeitet niemand sonst die Datei, kannst du die Swap-Datei löschen."
+   ],
+   "commands": [
+    {
+     "cmd": "cp file file.bak",
+     "what": "Erstellt vor dem Bearbeiten eine Sicherungskopie.",
+     "where": "Vor jeder Änderung an einer wichtigen Datei.",
+     "why": "Den alten Stand holst du mit `cp file.bak file` zurück.",
+     "example": "cp app.conf app.conf.bak"
+    },
+    {
+     "cmd": "sudoedit",
+     "what": "Bearbeitet eine root-eigene Datei über eine temporäre Kopie mit deinem Editor.",
+     "where": "Für Dateien in `/etc`.",
+     "why": "Sicherer, als den ganzen Editor als root zu starten.",
+     "example": "sudoedit /etc/hosts",
+     "nosim": true
+    },
+    {
+     "cmd": "export EDITOR",
+     "what": "Legt den Standardeditor fest, den Werkzeuge wie `sudoedit` und `crontab -e` benutzen.",
+     "where": "In der Shell oder in `~/.bashrc`.",
+     "why": "Werkzeuge öffnen dann nano statt eines Editors, den du nicht kennst.",
+     "example": "export EDITOR=nano",
+     "nosim": true
+    },
+    {
+     "cmd": "cat file",
+     "what": "Zeigt den Dateiinhalt ohne Editor.",
+     "where": "Zum Überprüfen des Ergebnisses einer Änderung.",
+     "why": "Schnelle Kontrolle, ob die Datei enthält, was du erwartest.",
+     "example": "cat todo.txt"
+    }
+   ],
+   "warn": "Bevor du eine Datei unter `/etc` bearbeitest, mach ein Backup (`sudo cp datei datei.bak`). Eine kaputte `/etc/fstab` oder `/etc/ssh/sshd_config` kann die Maschine unbootbar oder unerreichbar machen.",
+   "tip": "`>` überschreibt, `>>` hängt an. Ein fehlendes `>` kann eine Datei leeren — prüfe danach mit `cat`."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Lege eine Datei ohne Editor an: `echo \"hello editor\" > hello.txt`.",
+   "hint": "`>` erstellt die Datei oder überschreibt sie."
+  },
+  "t02": {
+   "text": "Zeige den Inhalt der Datei mit `cat hello.txt`.",
+   "hint": "Du solltest hello editor sehen."
+  },
+  "t03": {
+   "text": "Sichere `todo.txt` vor dem Bearbeiten: `cp todo.txt todo.txt.bak`.",
+   "hint": "Erst die Quelle, dann der Backup-Name."
+  },
+  "t04": {
+   "text": "Hänge ohne Editor eine Zeile an `todo.txt` an: `echo \"buy bread\" >> todo.txt`.",
+   "hint": "Zum Anhängen zwei `>` verwenden."
+  },
+  "t05": {
+   "text": "Zeige `todo.txt` mit Zeilennummern: `cat -n todo.txt`.",
+   "hint": "In vim siehst du sie mit `:set number`."
+  },
+  "t06": {
+   "text": "Finde die Zeile mit `report` samt Nummer: `grep -n report todo.txt`.",
+   "hint": "`-n` setzt die Zeilennummer davor."
+  },
+  "t07": {
+   "text": "Vorhersage: Wie viele Zeilen hat `todo.txt` jetzt? Prüfe mit `wc -l todo.txt`.",
+   "hint": "Es waren 3 Zeilen, du hast eine angehängt."
+  },
+  "t08": {
+   "text": "Vorhersage: Was passiert, wenn ein normaler Benutzer `echo test > /etc/motd` ausführt? Probiere es.",
+   "hint": "Erwarte Permission denied; Systemdateien bearbeiten braucht sudo (und ein Backup)."
+  },
+  "t09": {
+   "text": "Debug: Eine falsche Änderung hat `app.conf` kaputt gemacht (dort steht `mode=debug`). Stelle die alte Version aus `app.conf.bak` wieder her.",
+   "hint": "Kopiere das Backup mit `cp` über die Datei."
+  },
+  "t10": {
+   "text": "Debug: vim warnt wegen einer übrig gebliebenen Swap-Datei `.todo.txt.swp` im Home-Verzeichnis. Niemand bearbeitet die Datei; lösche die Swap-Datei.",
+   "hint": "Versteckte Datei: `rm .todo.txt.swp`; mit `ls -a` sichtbar."
+  },
+  "t11": {
+   "text": "Mini-Projekt: Lege den Ordner `scripts` an, schreibe in `scripts/hello.sh` die Zeilen `#!/bin/bash` und `echo hello` (mit `printf` und `\\n`) und setze den Modus 755.",
+   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, dann `chmod 755 scripts/hello.sh`."
+  },
+  "t12": {
+   "text": "Challenge: Sichere zuerst `notes.txt` als `notes.txt.bak`, hänge dann die Zeile `meeting at 10` an `notes.txt` an.",
+   "hint": "Reihenfolge zählt: `cp` vor der Änderung, dann `echo ... >>`."
+  },
+  "t13": {
+   "text": "Challenge: Speichere aus `server.log` nur die Zeilen mit `ERROR` in `errors.txt`.",
+   "hint": "`grep` Muster Datei, Ausgabe mit `>` umleiten."
+  },
+  "t14": {
+   "text": "TICKET #2705 — Neue Mitarbeiter brauchen eine Willkommensnotiz. Erstelle `~/welcome.txt` mit dem Inhalt `Welcome to linux-lab`, lege eine Kopie als `~/Documents/welcome.txt` ab und mache die Kopie für alle schreibgeschützt (Modus 444).",
+   "hint": "`echo`, `cp`, `chmod 444`."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Du bist in vim und willst OHNE Speichern beenden. Was tippst du?",
+   "options": [
+    "Strg+X",
+    "Esc, dann :q!",
+    "Strg+C",
+    "Esc, dann :wq"
+   ],
+   "explain": "`:q!` beendet und verwirft Änderungen; `:wq` würde speichern. Strg+X ist die Ausstiegstaste von nano, nicht von vim."
+  },
+  "q2": {
+   "q": "Du tippst direkt nach dem Start von vim `dd` und eine Zeile verschwindet. Warum?",
+   "options": [
+    "vim ist kaputt",
+    "Du warst im Einfügemodus",
+    "dd ist ein Tippfehler in der Datei",
+    "Du warst im Normalmodus, dort löscht dd eine Zeile"
+   ],
+   "explain": "vim startet im Normalmodus, Tasten sind Befehle. `dd` löscht die aktuelle Zeile, `u` macht es rückgängig."
+  },
+  "q3": {
+   "q": "Was macht `Ctrl+X` in nano?",
+   "options": [
+    "Beendet nano und fragt nach dem Speichern",
+    "Schneidet eine Zeile aus",
+    "Öffnet die Hilfe",
+    "Sucht Text"
+   ],
+   "explain": "Strg+X beendet; bei ungespeicherten Änderungen fragt nano Y/N. Strg+K schneidet aus, Strg+G ist Hilfe, Strg+W sucht."
+  },
+  "q4": {
+   "q": "Was solltest du tun, bevor du `/etc/ssh/sshd_config` bearbeitest?",
+   "options": [
+    "Datei löschen und neu anlegen",
+    "Den Editor als normaler Benutzer starten",
+    "Eine Sicherungskopie anlegen",
+    "Nichts, die Datei lässt sich neu erzeugen"
+   ],
+   "explain": "Ein Backup (`sudo cp datei datei.bak`) ermöglicht schnelle Wiederherstellung nach einem Fehler."
+  }
+ },
+ "summary": [
+  "`nano file` zum Bearbeiten, `Ctrl+O` speichert, `Ctrl+X` beendet.",
+  "vim hat Modi: Normal (Befehle), Insert (`i`, Text), Kommandozeile (`:`). `Esc` führt zurück in den Normalmodus.",
+  "vim beenden: `:wq` (speichern) oder `:q!` (verwerfen). Grundlagen: `dd`, `u`, `/text`, `gg`/`G`.",
+  "Systemdateien vor dem Bearbeiten sichern; `sudo` nur wenn nötig. `>` überschreibt, `>>` hängt an."
+ ],
+ "glossary": [
+  {
+   "term": "Normalmodus",
+   "meaning": "Standardmodus von vim, in dem Tasten Befehle sind."
+  },
+  {
+   "term": "Einfügemodus",
+   "meaning": "Modus zum Tippen von Text; mit i betreten, mit Esc verlassen."
+  },
+  {
+   "term": "Swap-Datei",
+   "meaning": "Eine versteckte .datei.swp, die vim beim Bearbeiten anlegt; sie bleibt nach einem Absturz."
+  },
+  {
+   "term": "Puffer (Buffer)",
+   "meaning": "Die Kopie der Datei im Speicher, die du bis zum Speichern bearbeitest."
+  },
+  {
+   "term": "EDITOR",
+   "meaning": "Umgebungsvariable, die den Standardeditor für andere Werkzeuge benennt."
+  }
+ ],
+ "vm": {
+  "intro": "Auf deiner VM nutzt du jetzt die echten Editoren. Mach alle Schritte im Home-Verzeichnis mit Testdateien; erstelle einen Snapshot, bevor du Dateien in /etc anfasst.",
+  "tasks": {
+   "v01": {
+    "title": "Erste Datei mit nano",
+    "text": "Öffne nano, tippe den Text, speichere mit Strg+O und ENTER, beende mit Strg+X. Zeige dann die Datei.",
+    "blocks": [
+     {
+      "cmd": "nano nano_test.txt\n# tippe: hello nano   -> Ctrl+O, ENTER, Ctrl+X\ncat nano_test.txt",
+      "expected": "hello nano"
+     }
+    ],
+    "differs": [
+     "`command not found`: installiere nano mit `sudo apt install nano` (Ubuntu) oder `sudo dnf install nano` (Rocky/Alma).",
+     "Fragt nano beim Beenden 'Save modified buffer?', drücke `Y` und ENTER."
+    ]
+   },
+   "v02": {
+    "title": "Zeilen in nano ausschneiden und einfügen",
+    "text": "Schreibe in nano `line one` und `line two`, speichere und beende. Öffne erneut, schneide die erste Zeile mit Strg+K aus, füge sie mit Strg+U zweimal ein, speichere. Füge das Ergebnis ein.",
+    "blocks": [
+     {
+      "cmd": "nano lines.txt\n# zwei Zeilen tippen, speichern, beenden\nnano lines.txt\n# einmal Ctrl+K, zweimal Ctrl+U, Ctrl+O, ENTER, Ctrl+X\ncat -n lines.txt",
+      "expected": "     1\tline two\n     2\tline one\n     3\tline one"
+     }
+    ],
+    "differs": [
+     "Weicht die Reihenfolge ab, hängt es von der Cursorposition beim Einfügen ab; `line one` und `line two` müssen beide vorkommen.",
+     "Keine Nummerierung? Du hast `-n` bei `cat -n` vergessen."
+    ]
+   },
+   "v03": {
+    "title": "Erste Datei mit vim",
+    "text": "Öffne vim, drücke `i`, tippe den Text, dann Esc und `:wq` ENTER. Zeige die Datei.",
+    "blocks": [
+     {
+      "cmd": "vim vim_test.txt\n# i  -> tippe: hello vim  -> Esc  -> :wq  -> ENTER\ncat vim_test.txt",
+      "expected": "hello vim"
+     }
+    ],
+    "differs": [
+     "Text fehlt oder ist seltsam? Du hast vorher nicht `i` gedrückt. Esc, `:q!` und neu beginnen.",
+     "`vim: command not found`: nutze `vi vim_test.txt` oder installiere vim (`sudo apt install vim` / `sudo dnf install vim-enhanced`)."
+    ]
+   },
+   "v04": {
+    "title": "Ohne Speichern beenden",
+    "text": "Schreibe `keep` in eine Datei, öffne sie dann in vim, füge eine Zeile `lose` hinzu und beende mit `:q!`. Die Datei muss weiter nur `keep` enthalten.",
+    "blocks": [
+     {
+      "cmd": "echo keep > discard.txt\nvim discard.txt\n# i -> tippe: lose -> Esc -> :q! -> ENTER\ncat discard.txt",
+      "expected": "keep"
+     }
+    ],
+    "differs": [
+     "Steht `lose` in der Datei, hast du `:wq` statt `:q!` benutzt.",
+     "Verweigert vim das Beenden mit `:q`, ist das der Schutz vor ungespeicherten Änderungen: nutze `:q!`."
+    ]
+   },
+   "v05": {
+    "title": "Zeile löschen und rückgängig",
+    "text": "Erzeuge eine Datei mit 20 Zeilen, lösche Zeile 5 mit `5G` und `dd`, mache mit `u` rückgängig, dann nochmal `dd` und speichere. Zähle die Zeilen.",
+    "blocks": [
+     {
+      "cmd": "seq 1 20 > numbers.txt\nvim numbers.txt\n# 5G -> dd -> u -> dd -> :wq\nwc -l numbers.txt",
+      "expected": "19 numbers.txt"
+     }
+    ],
+    "differs": [
+     "Ergebnis 20: das letzte `dd` oder das Speichern fehlte; Ergebnis 18: du hast zweimal ohne `u` gelöscht.",
+     "Fehlt `seq`? Nutze `for i in $(seq 1 20); do echo $i; done > numbers.txt` oder installiere coreutils."
+    ]
+   },
+   "v06": {
+    "title": "Standardeditor festlegen",
+    "text": "Setze nano als Standardeditor für diese Sitzung und prüfe die Variable.",
+    "blocks": [
+     {
+      "cmd": "export EDITOR=nano\necho $EDITOR",
+      "expected": "nano"
+     }
+    ],
+    "differs": [
+     "Für dauerhaft füge `export EDITOR=nano` in `~/.bashrc` ein; es wirkt in einer neuen Shell."
+    ]
+   },
+   "v07": {
+    "title": "Backup vor Änderungen in /etc",
+    "text": "Sichere `/etc/hosts` mit sudo, prüfe das Backup und öffne das Original mit sudoedit oder `sudo nano`. Schau nur, ändere nichts, beende ohne Speichern.",
+    "blocks": [
+     {
+      "cmd": "sudo cp /etc/hosts /etc/hosts.bak\nls -l /etc/hosts.bak\nsudoedit /etc/hosts\n# umsehen, dann Ctrl+X (nano) oder :q! (vim)",
+      "expected": "-rw-r--r--. 1 root root 158 ... /etc/hosts.bak"
+     }
+    ],
+    "differs": [
+     "`sudoedit` meckert über den Editor? Führe zuerst `export EDITOR=nano` aus oder nutze `sudo nano /etc/hosts`.",
+     "Fragt `sudo` nach einem Passwort, gib dein eigenes ein (beim Tippen wird nichts angezeigt)."
+    ]
+   }
+  }
+ }
+}

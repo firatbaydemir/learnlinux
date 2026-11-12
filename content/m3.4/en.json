@@ -1,0 +1,87 @@
+{
+  "title": "Searching: grep and find",
+  "lead": "grep searches lines inside files, while find searches for files and directories in a directory tree. Combine them to inspect logs and project files quickly.",
+  "objectives": [
+    "Search file contents with `grep`.",
+    "Explain the effects of `-i`, `-n`, `-v` and `-c`.",
+    "Find files by name and type with `find`.",
+    "Use search results with pipes and redirection."
+  ],
+  "sections": [
+    {
+      "id": "grep",
+      "title": "Search file contents with grep",
+      "body": [
+        "`grep PATTERN FILE` prints matching lines. The pattern can be plain text or a regular expression. Use `-i` to ignore case, `-n` to show line numbers, `-v` to select non-matching lines and `-c` to count matching lines.",
+        "`grep` can also read text from a pipe when no filename is given. This lets you filter long output with `command | grep pattern`."
+      ],
+      "commands": [
+        {"cmd":"grep -n","what":"Shows line numbers alongside matching lines.","where":"When locating a match in a file.","why":"Makes it easier to find and inspect the result.","example":"grep -n ERROR logs/app.log"},
+        {"cmd":"grep -i","what":"Ignores upper- and lowercase differences.","where":"When log messages use different capitalization.","why":"`error`, `Error` and `ERROR` all match.","example":"grep -i error logs/app.log"},
+        {"cmd":"grep -v","what":"Shows lines that do not match the pattern.","where":"When excluding unwanted lines from results.","why":"Filters the inverse of a match.","example":"grep -v INFO logs/app.log"},
+        {"cmd":"grep -c","what":"Prints the number of matching lines.","where":"When counting events in a log.","why":"Gives a total without printing every line.","example":"grep -c ERROR logs/app.log"}
+      ],
+      "tip":"Pass the pattern and filename as separate arguments. Quote a search string that contains special characters."
+    },
+    {
+      "id": "find",
+      "title": "Search the file system with find",
+      "body": [
+        "`find START ...` searches downwards from the given directory. `-name` selects a name pattern, `-type f` selects regular files and `-type d` selects directories. Quote filename patterns so the shell does not expand `*` before find receives it.",
+        "`find` can search by more than name, and its output can be piped to another command. `locate` searches a prebuilt filename index; it is fast, but newly created files may not be indexed yet. Starting from a focused directory avoids scanning unrelated system paths."
+      ],
+      "commands": [
+        {"cmd":"find . -name","what":"Searches by name in a directory tree.","where":"When you know a filename or extension inside a project.","why":"It also searches subdirectories.","example":"find project -name \"*.conf\""},
+        {"cmd":"find . -type f","what":"Selects regular files only.","where":"When you need to distinguish files from directories.","why":"Limits results to one kind of filesystem object.","example":"find project -type f -name \"*.txt\""},
+        {"cmd":"find . -type d","what":"Selects directories only.","where":"When locating folders inside a project.","why":"Keeps directory names separate from filenames.","example":"find project -type d"},
+        {"cmd":"locate","what":"Searches an indexed database of filenames quickly.","where":"When looking for the path of a known file across the system.","why":"It is fast when the index is current; new files may not appear yet.","example":"locate sshd_config","nosim":true}
+      ],
+      "warn":"`find /` can scan the entire system and produce permission warnings. Start with a narrow path such as your project or home directory."
+    },
+    {
+      "id": "combine",
+      "title": "Combine searches and save results",
+      "body": [
+        "`grep` and `find` answer different questions: grep finds text inside files, while find locates files by name and path. Save results with `>` or pass them to another filter with `|`.",
+        "Inspect search results before changing important files. The commands in this module search and read; redirection creates a report only in your working directory."
+      ],
+      "commands": [
+        {"cmd":"grep -r","what":"Searches file contents recursively in a directory.","where":"When finding where a setting or word appears in a project.","why":"Avoids opening files one by one.","example":"grep -r TODO project"},
+        {"cmd":"find . -type f -name \"*.txt\" > list.txt","what":"Writes paths of matching text files to a list.","where":"When you want to inspect search results later.","why":"Keeps results in a reusable report.","example":"find project -type f -name \"*.txt\" > text_files.txt"}
+      ],
+      "tip":"Run a search and inspect its output first; then redirect it to a report if needed."
+    }
+  ],
+  "tasks": {
+    "t01":{"text":"Show the `ERROR` lines in `logs/app.log` with `grep`.","hint":"Pass the pattern and file: `grep ERROR logs/app.log`."},
+    "t02":{"text":"Search `logs/app.log` for `warn`, ignoring letter case.","hint":"Use `grep -i warn logs/app.log`."},
+    "t03":{"text":"Find the `404` line in the access log and include its line number.","hint":"Use `grep -n 404 logs/access.log`."},
+    "t04":{"text":"Find names ending in `.conf` in the `project` tree.","hint":"Use `find project -name \"*.conf\"`; quote the pattern."},
+    "t05":{"text":"Find only regular `.txt` files under `project`.","hint":"Use `find project -type f -name \"*.txt\"`."},
+    "t06":{"text":"Predict how many matching lines `grep -c ERROR logs/app.log` reports, then verify.","hint":"The command prints the count, not the matching lines."},
+    "t07":{"text":"Predict how to filter only `200` lines from the access log. Use a pipe.","hint":"Try `cat logs/access.log | grep 200`."},
+    "t08":{"text":"Debug: save the `ERROR` lines to `errors.txt` in your home directory.","hint":"Redirect stdout with `grep ERROR logs/app.log > errors.txt`."},
+    "t09":{"text":"Show log lines that do not contain `INFO`.","hint":"`-v` selects non-matching lines: `grep -v INFO logs/app.log`."},
+    "t10":{"text":"Mini task: search project files for lines containing `TODO`.","hint":"Search a directory recursively with `grep -r TODO project`."},
+    "t11":{"text":"Mini task: find regular files ending in `.log` under `logs`.","hint":"Use `find logs -type f -name \"*.log\"`."},
+    "t12":{"text":"Challenge: search `project` for `todo`, ignoring case and showing line numbers.","hint":"Combine options with `grep -rin todo project`."},
+    "t13":{"text":"Ticket: save all `.txt` file paths in the project to a `text_files.txt` report.","hint":"Use `find . -type f -name \"*.txt\" > text_files.txt`."}
+  },
+  "vm": {
+    "intro":"Read existing text and paths on your own VM. These commands do not change system files; use your home directory when creating a report.",
+    "tasks": {
+      "v01":{"title":"Search a log","text":"Search a system log for `error`, ignoring case, and paste one matching line.","blocks":[{"cmd":"grep -i error /var/log/messages | head -n 3","expected":"error"}],"differs":["If that log does not exist, choose a log on your distribution or create `~/lab/app.log` with sample lines."]},
+      "v02":{"title":"Show line numbers","text":"Find the `root` line in `/etc/passwd` and include its line number.","blocks":[{"cmd":"grep -n '^root:' /etc/passwd","expected":"1:root:"}],"differs":["The line number may vary by system; the output should contain `root` with a number before it."]},
+      "v03":{"title":"Search by filename","text":"Find the file named `hostname` under `/etc`.","blocks":[{"cmd":"find /etc -type f -name hostname","expected":"/etc/hostname"}],"differs":["The output should contain the full path. `find` takes the starting directory and name as separate arguments."]},
+      "v04":{"title":"Save results safely","text":"Create `lab` in your home directory, make a report listing `.txt` files there, and inspect the report.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["If the report is empty, check that `cd ~/lab` succeeded and the filenames are correct. Do not search the whole system."]}
+    }
+  },
+  "quiz": {
+    "q1":{"q":"What does `grep -i error file` do?","options":["Shows only the first line","Deletes the file","Shows matching lines regardless of letter case","Renames the file"],"explain":"`-i` makes the search case-insensitive."},
+    "q2":{"q":"What does `grep -n` add to its output?","options":["Line numbers","File sizes","Owner names","Modification times"],"explain":"`-n` shows the line number for each match."},
+    "q3":{"q":"What does `find project -type f -name '*.txt'` search for?","options":["Directories only","Logs across the whole system","Lines containing txt","Regular files ending in .txt under project"],"explain":"The starting path is `project`, the type is regular file, and the name pattern ends in `.txt`."},
+    "q4":{"q":"Which command searches file contents recursively for `TODO`?","options":["`find project -type d`","`grep -r TODO project`","`sort TODO project`","`cut TODO project`"],"explain":"`grep -r` searches file contents recursively in a directory tree."}
+  },
+  "summary":["`grep` searches file contents; `find` locates files and directories in a tree.","`grep -i` ignores case, `-n` shows line numbers, `-v` inverts matches and `-c` counts them.","`find -name` selects a name pattern; `-type f` selects regular files and `-type d` directories.","Quote filename patterns so the shell does not expand `*` before the search.","Start from a narrow directory instead of searching a large tree unnecessarily."],
+  "glossary":[{"term":"grep","meaning":"A search tool that finds matching lines in text files."},{"term":"find","meaning":"A filesystem search tool that starts at a directory and descends through its tree."},{"term":"regular expression","meaning":"A pattern syntax for matching text."},{"term":"recursive search","meaning":"A search that also visits subdirectories."}]
+}

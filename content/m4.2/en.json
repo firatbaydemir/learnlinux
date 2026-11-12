@@ -1,0 +1,147 @@
+{
+ "title": "User management: add, modify, lock, delete",
+ "lead": "Manage the lifecycle of an account safely with useradd, passwd, usermod, groupadd, chage and userdel.",
+ "objectives": [
+  "You create an account with a home directory and shell using `useradd -m -s` and set its password with `passwd`.",
+  "You add users to groups with `usermod -aG` and know what happens if the `-a` is forgotten.",
+  "You lock accounts with `usermod -L` and manage password policy with `chage`.",
+  "You know the difference between `userdel` and `userdel -r` and think about preserving data before deleting."
+ ],
+ "sections": [
+  {
+   "id": "create",
+   "title": "Creating accounts: useradd and passwd",
+   "body": [
+    "When a new employee arrives you create an account for them. These actions change system files (`/etc/passwd`, `/etc/shadow`, `/etc/group`), so they need **root privileges**, i.e. `sudo`.",
+    "`useradd` does **not create a home directory on every distribution by default**, so add `-m`. `-s /bin/bash` sets the login shell. The new home is filled with template files from `/etc/skel`. `passwd` sets the password; nothing is shown while you type, which is normal.",
+    "Debian/Ubuntu also have the interactive `adduser` wrapper; Rocky/Alma do not (use `useradd` there). In scripts prefer `useradd`, which works everywhere."
+   ],
+   "commands": [
+    {"cmd": "useradd", "what": "Creates a new user account.", "where": "When adding a new employee or service account.", "why": "Everyone gets separate files and permissions.", "example": "sudo useradd -m -s /bin/bash testuser", "nosim": true},
+    {"cmd": "passwd", "what": "Sets or changes the account's password.", "where": "After the account is created.", "why": "An account without a password cannot log in.", "example": "sudo passwd testuser", "nosim": true},
+    {"cmd": "chage", "what": "Manages password aging (`-d 0` forces a change at first login).", "where": "To force a new account to change its password at first login.", "why": "The temporary password set by the admin does not become permanent.", "example": "sudo chage -d 0 testuser", "nosim": true},
+    {"cmd": "getent passwd", "what": "Verifies that the account exists.", "where": "After every addition.", "why": "Catches typos immediately.", "example": "getent passwd testuser", "nosim": true}
+   ],
+   "tip": "Keep account names lowercase ASCII (`alice`, `testuser`). Spaces, accented characters and capitals cause trouble.",
+   "warn": "Adding users on a real VM changes the system. Take a snapshot of your VM first (module 0.2). Do not type passwords on the command line (`chpasswd` leaves them in history)."
+  },
+  {
+   "id": "modify",
+   "title": "Modifying: usermod, groupadd, groups",
+   "body": [
+    "`usermod` changes an existing account. Most used: `-aG group` (**append** to group), `-s` (shell), `-L` (lock), `-U` (unlock). Use `groupadd` to create a group; after a group change the user must **log in again**.",
+    "The classic mistake: `usermod -G devs alice` without `-a`. It wipes all of alice's supplementary groups and leaves only `devs`, including `wheel`. The user loses sudo rights. Always use `-aG`.",
+    "Sudo rights come from membership in `wheel` on Rocky/Alma and `sudo` on Ubuntu. Do not edit `/etc/sudoers` by hand; use `visudo`, which checks the syntax."
+   ],
+   "commands": [
+    {"cmd": "groupadd", "what": "Creates a new group.", "where": "When creating a shared group for a project team.", "why": "You grant access to the group, not to each person.", "example": "sudo groupadd labteam", "nosim": true},
+    {"cmd": "usermod -aG", "what": "Adds the user to a group while keeping existing groups.", "where": "When putting someone in a team or the sudo group.", "why": "Without `-a` the old groups are removed.", "example": "sudo usermod -aG labteam testuser", "nosim": true},
+    {"cmd": "usermod -L", "what": "Locks the account (password login is disabled); `-U` unlocks.", "where": "When an employee leaves or an account looks suspicious.", "why": "Cuts access at once while data stays intact.", "example": "sudo usermod -L testuser", "nosim": true},
+    {"cmd": "passwd -S", "what": "Shows account status (L/LK = locked).", "where": "To verify the lock.", "why": "Confirms the lock was really applied.", "example": "sudo passwd -S testuser", "nosim": true},
+    {"cmd": "id", "what": "Verifies the group change.", "where": "After each usermod.", "why": "Shows the membership was added and old ones were not removed.", "example": "id testuser"}
+   ],
+   "tip": "After a group change an open session keeps using the old groups; the user must log out and back in.",
+   "danger": "`usermod -G` (without `-a`) removes all of a user's supplementary groups. On an admin account this can remove sudo access and lock you out of the system. Always write `-aG` and check with `id`."
+  },
+  {
+   "id": "delete",
+   "title": "Deleting: userdel and the home directory",
+   "body": [
+    "`userdel NAME` removes the account from `/etc/passwd`, `/etc/shadow` and `/etc/group`, but **leaves the home directory and its files**. The directory then belongs to a UID with no owner. `userdel -r` also deletes the home directory and mail spool permanently.",
+    "The safe order in real life: (1) lock with `usermod -L`, (2) check running processes and cron jobs, (3) back up the home directory, (4) only then delete. You can find files of a deleted user with `find / -user UID`.",
+    "If the user has a session or running process, `userdel` errors out; end the session first."
+   ],
+   "commands": [
+    {"cmd": "userdel", "what": "Deletes the account, keeps the home directory.", "where": "After the employee left and data was backed up.", "why": "Closes the account without risk of data loss.", "example": "sudo userdel testuser", "nosim": true},
+    {"cmd": "userdel -r", "what": "Deletes account, home directory and mail spool permanently.", "where": "Only when the data is truly not needed.", "why": "Cleans up disk space and leftovers.", "example": "sudo userdel -r testuser", "nosim": true},
+    {"cmd": "ls -ld", "what": "Shows the home directory still exists.", "where": "After userdel.", "why": "You see that leftover directories remain ownerless.", "example": "ls -ld /home/testuser"}
+   ],
+   "warn": "`userdel -r` cannot be undone: photos, documents and keys are gone. Back up first, snapshot your VM, lock the account, and re-read the user name before pressing ENTER.",
+   "danger": "With `sudo rm -r /home/NAME`, a wrong path (a stray space or missing name) deletes other data. Run it only for the `testuser` you created and type the full path."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Try your sudo rights with `sudo whoami`. The output must be `root`.", "hint": "`student` is in the wheel group, so sudo works."},
+  "t02": {"text": "Show alice's account record with `grep alice /etc/passwd`.", "hint": "Field 6 is the home directory."},
+  "t03": {"text": "List which users have a home directory with `ls /home`.", "hint": "Each user has one folder."},
+  "t04": {"text": "Read the password hashes with `sudo cat /etc/shadow`. The file is root-only.", "hint": "Put `sudo` first; hashes start with `$6$...`."},
+  "t05": {"text": "See the permissions and owner of alice's home directory with `sudo ls -ld /home/alice`.", "hint": "`-d` lists the directory itself, not its content."},
+  "t06": {"text": "Read all groups with `cat /etc/group`.", "hint": "Line format: group:x:GID:members."},
+  "t07": {"text": "Find the members of the `devs` group with `grep devs /etc/group`.", "hint": "Members are in field 4, comma-separated."},
+  "t08": {"text": "List alice's home content (including hidden files) with `sudo ls -la /home/alice`.", "hint": "Reading another user's home needs root."},
+  "t09": {"text": "Predict: what does `cat /etc/shadow` do as a normal user? Run it and verify.", "hint": "Expect Permission denied|Erişim engellendi|Zugriff verweigert."},
+  "t10": {"text": "Predict: how do the permissions of alice's home directory look? Guess first, then verify with `sudo ls -ld /home/alice`.", "hint": "A private home: `drwx------` (700)."},
+  "t11": {"text": "Predict: what does `id carol` return for an account that does not exist yet? Run it.", "hint": "Expect a `no such user` error."},
+  "t12": {"text": "Debug: the `userdel -r alice` in `~/offboard.sh` deletes the home directory that must be kept for the audit. Rewrite the script so it contains `sudo userdel alice` without `-r`.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Use single quotes."},
+  "t13": {"text": "Mini project: write a three-line plan into `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` and `sudo usermod -aG devs carol`.", "hint": "Use `>` on the first line and `>>` on the rest."},
+  "t14": {"text": "Challenge: the script `~/onboard.sh` must create `dave` with `-m -s /bin/bash -G devs`, then force a password change at first login with `chage -d 0 dave`. Make the script `chmod 750`.", "hint": "Two `echo` commands and one `chmod`; use `sudo`."},
+  "t15": {"text": "TICKET #4210: `eve` has left the company. First lock the account, then delete it (keeping the home directory). Write the commands in order into `~/offboard_eve.txt`.", "hint": "`sudo usermod -L eve` and `sudo userdel eve`; do not use `-r`."},
+  "t16": {"text": "TICKET #4211: `frank` will become an administrator on the server (Rocky/Alma). Write the command into `~/frank.txt`.", "hint": "`sudo usermod -aG wheel frank`; do not forget `-a`."}
+ },
+ "vm": {
+  "intro": "This section changes the system. Take a snapshot of your VM first. Work only on `testuser` and `labteam` from this section; do not touch your own account.",
+  "tasks": {
+   "v01": {
+    "title": "Create an account",
+    "text": "Create the `testuser` account with a home directory and bash shell and paste its record.",
+    "blocks": [{"cmd": "sudo useradd -m -s /bin/bash testuser\ngetent passwd testuser", "expected": "testuser:x:1001:1001::/home/testuser:/bin/bash"}],
+    "differs": ["If you see `user already exists` the account was created earlier; `getent passwd testuser` is enough.", "On Ubuntu the UID may be a number other than 1001."]
+   },
+   "v02": {
+    "title": "Set a password",
+    "text": "Set a password for `testuser`. Nothing is shown while typing. Paste the success message.",
+    "blocks": [{"cmd": "sudo passwd testuser", "expected": "passwd: password updated successfully"}],
+    "differs": ["On Rocky/Alma the message is `passwd: all authentication tokens updated successfully.`", "A too short/simple password triggers a warning but is still accepted (as root)."]
+   },
+   "v03": {
+    "title": "Add to a group",
+    "text": "Create the `labteam` group, add `testuser` with **-aG** and paste the `id` output.",
+    "blocks": [{"cmd": "sudo groupadd labteam\nsudo usermod -aG labteam testuser\nid testuser", "expected": "uid=1001(testuser) gid=1001(testuser) groups=1001(testuser),1002(labteam)"}],
+    "differs": ["If the group exists you get `groupadd: group 'labteam' already exists`; continue.", "If `labteam` is missing next to the primary group, check the letters `-a` and `-G`."]
+   },
+   "v04": {
+    "title": "Lock the account",
+    "text": "Lock `testuser` and show its status.",
+    "blocks": [{"cmd": "sudo usermod -L testuser\nsudo passwd -S testuser", "expected": "testuser L 2026-11-12 0 99999 7 -1"}],
+    "differs": ["On Rocky/Alma the status is shown as `LK`.", "To unlock: `sudo usermod -U testuser`."]
+   },
+   "v05": {
+    "title": "Password policy",
+    "text": "Paste the `chage -l` output; force a password change at first login.",
+    "blocks": [{"cmd": "sudo chage -d 0 testuser\nsudo chage -l testuser", "expected": "Last password change                : password must be changed\nPassword expires                    : never\n..."}],
+    "differs": ["The output must contain the `Last password change` line; the value may be `password must be changed` or a date.", "If `chage: command not found`, the `shadow-utils` (Rocky) or `passwd` (Ubuntu) package is missing."]
+   },
+   "v06": {
+    "title": "userdel keeps the home",
+    "text": "Delete the account WITHOUT `-r`; then show that the account is gone but its home directory remains.",
+    "blocks": [{"cmd": "sudo userdel testuser\ngetent passwd testuser\nls -ld /home/testuser", "expected": "drwx------ 2 1001 1001 62 Nov 12 10:00 /home/testuser"}],
+    "differs": ["`getent` prints nothing; the account is deleted.", "The home directory's owner now shows as a number (1001) instead of a name; that means an ownerless directory.", "On `user is currently used by process`, end the user's session."]
+   },
+   "v07": {
+    "title": "Cleanup",
+    "text": "Clean up the now unneeded test directory and group. Type the full path in the commands. Press \"Done\" when finished.",
+    "blocks": [{"cmd": "sudo rm -r /home/testuser\nsudo groupdel labteam\nls /home", "expected": "student"}],
+    "differs": ["`groupdel: group 'labteam' does not exist` means it is already gone.", "If you notice you mistyped the path, do not press ENTER; be sure of the full path `/home/testuser`."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What does `sudo usermod -G devs alice` (without `-a`) do?", "options": ["Adds alice to devs and keeps the others", "Removes all of alice's supplementary groups and leaves only devs", "Deletes the alice account", "Locks alice"], "explain": "-G replaces the supplementary group list; without `-a` (append) old groups such as wheel are lost."},
+  "q2": {"q": "What happens after `userdel alice` (without `-r`)?", "options": ["The home directory is deleted too", "Nothing happens", "The account is deleted but the home directory stays", "The account is only locked"], "explain": "The records are removed; `/home/alice` and its files stay on disk. Deleting them needs `-r`."},
+  "q3": {"q": "How do you cut an account's access immediately without deleting it?", "options": ["usermod -L", "userdel -r", "passwd -d", "chmod 000 /home"], "explain": "`usermod -L` disables password login; the account and data stay and `-U` brings it back."},
+  "q4": {"q": "Membership in which group gives sudo rights on Rocky/Alma?", "options": ["wheel", "sudoers", "admin", "root"], "explain": "On the RHEL family the sudo group is `wheel`; on Debian/Ubuntu it is `sudo`."}
+ },
+ "summary": [
+  "`sudo useradd -m -s /bin/bash NAME` creates an account; `passwd` sets a password; `chage -d 0` forces a change at first login.",
+  "When adding to a group always use `usermod -aG`; forgetting `-a` removes the old groups.",
+  "`usermod -L` locks, `-U` unlocks; locking is the safe first step before deleting.",
+  "`userdel` keeps the home directory, `userdel -r` deletes it permanently; back up and snapshot first."
+ ],
+ "glossary": [
+  {"term": "wheel", "meaning": "The administrator group that grants sudo on the RHEL family (`sudo` on Debian)."},
+  {"term": "/etc/skel", "meaning": "Template files copied into a new home directory."},
+  {"term": "locked account", "meaning": "An account whose password login is disabled (`usermod -L`)."},
+  {"term": "ownerless directory", "meaning": "A directory that still belongs to the UID of a deleted user."},
+  {"term": "snapshot", "meaning": "A restorable point-in-time image of a VM."}
+ ]
+}

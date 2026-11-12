@@ -1,0 +1,306 @@
+{
+ "id": "5.1",
+ "level": 5,
+ "setup": {
+  "dirs": [
+   "/home/student/lab"
+  ],
+  "files": {
+   "/home/student/lab/ps_snapshot.txt": "USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\nroot         1  0.0  0.3 169000 11200 ?        Ss   08:00   0:02 /usr/lib/systemd/systemd\nroot       412  0.0  0.1  15000  5000 ?        Ss   08:00   0:00 /usr/sbin/sshd\nroot       650  0.0  0.1  11000  3200 ?        Ss   08:00   0:00 /usr/sbin/crond\nalice     1500  0.0  0.1  10200  4100 pts/1    Ss   09:05   0:00 bash\nalice     1620 45.3  2.0 250000 82000 pts/1    R    09:07   3:12 python3 worker.py\nbob       1701  0.0  0.0      0     0 ?        Z    09:10   0:00 [helper] <defunct>\nstudent   1203  0.0  0.1  10200  4000 pts/0    Ss   09:20   0:00 bash\nstudent   1342  0.0  0.0  12000  3000 pts/0    R+   09:21   0:00 ps aux\n",
+   "/home/student/lab/proc_status.txt": "Name:\thelper\nState:\tZ (zombie)\nPid:\t1701\nPPid:\t1500\nUid:\t1002\n",
+   "/home/student/lab/fix.txt": "kill -9 1701\n"
+  },
+  "modes": [],
+  "cwd": "/home/student"
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "out": "bash",
+    "of": "^ps$"
+   },
+   "solution": [
+    "ps"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "out": "4242",
+    "of": "^echo \\$\\$$"
+   },
+   "solution": [
+    "echo $$"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^ps (aux|-ef)$",
+    "ok": true
+   },
+   "solution": [
+    "ps aux"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^ps -o \\S*pid\\S*",
+    "ok": true
+   },
+   "solution": [
+    "ps -o pid,ppid,comm"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 1,
+   "check": {
+    "out": "%CPU",
+    "of": "^head .*ps_snapshot\\.txt"
+   },
+   "solution": [
+    "head -n 1 lab/ps_snapshot.txt"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "python3",
+    "of": "^grep alice \\S*ps_snapshot\\.txt$"
+   },
+   "solution": [
+    "grep alice lab/ps_snapshot.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "\\b2\\b",
+    "of": "^grep alice \\S*ps_snapshot\\.txt \\| wc -l$"
+   },
+   "solution": [
+    "grep alice lab/ps_snapshot.txt | wc -l"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "defunct",
+    "of": "^grep (defunct|Z|-w Z) ?\\S*ps_snapshot\\.txt$"
+   },
+   "solution": [
+    "grep defunct lab/ps_snapshot.txt"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "1500",
+    "of": "^grep PPid \\S*proc_status\\.txt$"
+   },
+   "solution": [
+    "grep PPid lab/proc_status.txt"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "3",
+    "of": "^ps \\| wc -l$"
+   },
+   "solution": [
+    "ps | wc -l"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "out": "load average: 0\\.08",
+    "of": "^uptime$"
+   },
+   "solution": [
+    "uptime"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "out": "python3",
+    "of": "^sort -k ?3 -nr \\S*ps_snapshot\\.txt \\| head -n ?2$"
+   },
+   "solution": [
+    "sort -k3 -nr lab/ps_snapshot.txt | head -n 2"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "contains": [
+      "/home/student/lab/root_pids.txt",
+      "412"
+     ]
+    },
+    {
+     "contains": [
+      "/home/student/lab/root_pids.txt",
+      "650"
+     ]
+    },
+    {
+     "linesMin": [
+      "/home/student/lab/root_pids.txt",
+      3
+     ]
+    }
+   ],
+   "solution": [
+    "grep ^root lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > lab/root_pids.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "contains": [
+     "/home/student/lab/fix.txt",
+     "kill (-s \\w+|-(?!9\\b|KILL)\\w+) 1500"
+    ]
+   },
+   "solution": [
+    "echo \"kill -s SIGCHLD 1500\" > lab/fix.txt"
+   ]
+  },
+  {
+   "id": "t15",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "cmd": "^sort .*ps_snapshot\\.txt",
+     "ok": true
+    },
+    {
+     "contains": [
+      "/home/student/lab/decision.txt",
+      "kill (-15|-TERM|-SIGTERM|-s (TERM|SIGTERM)) 1620"
+     ]
+    }
+   ],
+   "solution": [
+    "echo \"kill -15 1620\" > lab/decision.txt"
+   ]
+  },
+  {
+   "id": "t16",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "contains": [
+      "/home/student/lab/report.txt",
+      "alice"
+     ]
+    },
+    {
+     "contains": [
+      "/home/student/lab/report.txt",
+      "1620"
+     ]
+    },
+    {
+     "contains": [
+      "/home/student/lab/report.txt",
+      "python3"
+     ]
+    }
+   ],
+   "solution": [
+    "echo \"alice 1620 python3 worker.py\" > lab/report.txt"
+   ]
+  },
+  {
+   "id": "t17",
+   "kind": "guided",
+   "diff": 1,
+   "check": {
+    "contains": [
+     "/home/student/lab/mypid.txt",
+     "4242"
+    ]
+   },
+   "solution": [
+    "echo $$ > lab/mypid.txt"
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 2
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 3
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "\\bPPID\\b"
+  },
+  {
+   "id": "v02",
+   "expect": "(UID|USER)\\s+PID"
+  },
+  {
+   "id": "v03",
+   "expect": "systemd|init"
+  },
+  {
+   "id": "v04",
+   "expect": "State:|Name:"
+  },
+  {
+   "id": "v05",
+   "expect": "gone|Terminated|\\d+\\s+sleep"
+  }
+ ]
+}

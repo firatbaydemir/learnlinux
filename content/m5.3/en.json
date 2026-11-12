@@ -1,0 +1,85 @@
+{
+  "title": "Process Control",
+  "lead": "Stop processes safely with signals, target them by PID or name, and adjust CPU priority.",
+  "objectives": [
+    "You explain that `kill` sends signals and distinguish SIGTERM from SIGKILL.",
+    "You verify a PID and command line before targeting a process.",
+    "You understand `pkill`, `nice`, `renice`, and their permission limits."
+  ],
+  "sections": [
+    {
+      "id": "signals",
+      "title": "Signals: kill, SIGTERM, and SIGKILL",
+      "body": [
+        "`kill PID` sends **SIGTERM (15)** by default. It gives the process a chance to shut down cleanly and save data. If it does not respond, **SIGKILL (9)** is the last resort; a process cannot catch or ignore it.",
+        "`kill` sends a signal; it does not always mean “kill.” Verify the PID and command with `ps` or `pgrep` first. In particular, `kill -9` and targeting multiple processes can cause data loss."
+      ],
+      "commands": [
+        {"cmd": "kill -TERM PID", "what": "Sends SIGTERM to the specified PID.", "where": "When closing an application or stopping it cleanly.", "why": "It gives the process a chance to clean up and save data.", "example": "kill -TERM 2210", "nosim": true},
+        {"cmd": "kill -KILL PID", "what": "Immediately terminates the process through the kernel.", "where": "Only as a last resort when SIGTERM does not work.", "why": "The process cannot catch it; unsaved work may be lost.", "example": "kill -KILL 2210", "nosim": true}
+      ],
+      "tip": "Name the signal explicitly: `kill -TERM PID`. Then check with `ps -p PID` to see whether the process exited.",
+      "warn": "Do not signal a process on a production server or under a process manager without verifying its PID. Never target PID 1 or an unknown system process."
+    },
+    {
+      "id": "target",
+      "title": "Find and target processes by name",
+      "body": [
+        "`ps` gives you a process snapshot; `pgrep` searches for PIDs by name. `pkill` sends signals to matching processes. Check `pgrep -a` first because a name match may affect more processes than expected.",
+        "`pkill -TERM -x worker` targets only exact process-name matches. Use `-f` to match the full command line only when needed; it carries a higher risk of matching too broadly."
+      ],
+      "commands": [
+        {"cmd": "pgrep -a -x worker", "what": "Lists the PID and command for processes named exactly worker.", "where": "Before sending a signal to verify the target.", "why": "It reduces the chance of targeting the wrong PID or a similarly named process.", "example": "pgrep -a -x sleep", "nosim": true},
+        {"cmd": "pkill -TERM -x worker", "what": "Sends SIGTERM to processes named exactly worker.", "where": "When stopping a verified group of processes.", "why": "It requests a graceful shutdown without entering each PID.", "example": "pkill -TERM -x sleep", "nosim": true}
+      ],
+      "tip": "Run the same match with `pgrep -a` before using `pkill` so you can review every target.",
+      "danger": "`pkill -f` matches any part of a command line. Do not use it with a short or generic pattern."
+    },
+    {
+      "id": "priority",
+      "title": "CPU priority: nice and renice",
+      "body": [
+        "The nice range is **-20 to 19**: a higher value means a lower CPU priority. Regular users can lower the priority of their own processes; raising it usually requires administrator privileges.",
+        "`nice` starts a new command with a chosen value; `renice` changes the value of a running process. This affects CPU scheduling, but does not limit memory or CPU usage."
+      ],
+      "commands": [
+        {"cmd": "nice -n 10 command", "what": "Starts a new command with nice value 10.", "where": "For background work such as backups.", "why": "It lets interactive work get CPU time more easily.", "example": "nice -n 10 sleep 60", "nosim": true},
+        {"cmd": "renice 10 -p PID", "what": "Sets a running process's nice value to 10.", "where": "When lowering the priority of a running background task.", "why": "It changes CPU priority without restarting the process.", "example": "renice 10 -p 2210", "nosim": true}
+      ],
+      "tip": "Nice value and process state are different; inspect them separately with `ps -o pid,ni,stat,comm -p PID`."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Use `grep` to find user alice's processes in `~/lab/ps_snapshot.txt`.", "hint": "The file starts with a `USER` column; try `grep alice ~/lab/ps_snapshot.txt`."},
+    "t02": {"text": "Find the PID of the `python3` process in the snapshot.", "hint": "In the line from `grep python3 ~/lab/ps_snapshot.txt`, the second field is the PID."},
+    "t03": {"text": "Predict how many lines contain `python3`, then verify with `grep -c`.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` counts matching lines."},
+    "t04": {"text": "Save a graceful shutdown plan in `~/lab/term_plan.txt`: use `kill -TERM` for PID 2210.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt`"},
+    "t05": {"text": "Write an example in `~/lab/priority_plan.txt` that starts a backup with lower CPU priority.", "hint": "Use the form `nice -n 10 ./backup.sh`."},
+    "t06": {"text": "Add PID verification and a wait after SIGTERM; mention SIGKILL only as a last resort.", "hint": "Save your plan to `~/lab/escalation_plan.txt`."},
+    "t07": {"text": "For ticket #5301, write a short note that PID 2210 is `python3` and SIGTERM should be tried first.", "hint": "Write the note to `~/lab/ticket_5301.txt`."}
+  },
+  "vm": {
+    "intro": "Run these commands only in your own test VM. Do not signal an arbitrary PID; verify the process name and PID.",
+    "tasks": {
+      "v01": {"title": "Start a controlled process", "text": "Start a short-lived test process, note its PID, and verify it with `ps`. Stop it when done.", "blocks": [{"cmd": "sleep 300 &\necho $!\nps -o pid,ni,comm -p $!", "expected": "The PID and sleep command are visible."}], "differs": ["The shell may also print a job number; the PID is on the `echo $!` line.", "The PID will differ; do not expect a fixed number."]},
+      "v02": {"title": "Try SIGTERM first", "text": "Use the real PID of the test process you just started. Send SIGTERM, wait briefly, and verify that it exited.", "blocks": [{"cmd": "kill -TERM PID\nsleep 1\nps -p PID || echo 'process stopped'", "expected": "process stopped"}], "differs": ["Replace PID with the number from v01; do not run the literal word `PID`.", "If the process remains, verify the PID; do not signal another process."]},
+      "v03": {"title": "Inspect the nice value", "text": "Start a test process with lower priority, read its NI value in `ps`, and then stop your process.", "blocks": [{"cmd": "nice -n 10 sleep 60 &\nps -o pid,ni,comm -p $!\nkill -TERM $!", "expected": "The NI column shows 10 and the command column shows sleep."}], "differs": ["Column headings may be aligned differently by `ps`; the NI value should be 10.", "Stop only the PID started by your shell."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "Which signal does `kill PID` send by default?", "options": ["SIGKILL", "SIGTERM", "SIGSTOP", "SIGHUP"], "explain": "SIGTERM is the default signal; it asks the process to shut down cleanly."},
+    "q2": {"q": "When should SIGKILL be used?", "options": ["For every application shutdown", "Without checking the PID", "As a last resort when SIGTERM fails", "To change a nice value"], "explain": "SIGKILL cannot be caught and leaves no time for cleanup, so use it only as a last resort."},
+    "q3": {"q": "What happens when the nice value rises from 0 to 10?", "options": ["CPU priority decreases", "The process must stop", "The memory limit increases", "The process becomes root"], "explain": "A higher nice value means lower priority in CPU scheduling."},
+    "q4": {"q": "What should you do before targeting a process with `pkill`?", "options": ["Try PID 1", "Send SIGKILL", "Use a broad `pkill -f` pattern", "Verify matches with `pgrep -a`"], "explain": "Reviewing the matches confirms the target and reveals possible side effects."}
+  },
+  "summary": [
+    "`kill` sends SIGTERM by default; SIGKILL is a last resort.",
+    "Verify the PID and command with `ps` or `pgrep -a` before sending a signal.",
+    "`nice` sets priority at launch and `renice` changes it for a running process; higher nice means lower priority."
+  ],
+  "glossary": [
+    {"term": "signal", "meaning": "A control notification the kernel sends to a process."},
+    {"term": "PID", "meaning": "The unique process identifier of a running process."},
+    {"term": "nice", "meaning": "A value that affects a process's relative priority in CPU scheduling."}
+  ]
+}

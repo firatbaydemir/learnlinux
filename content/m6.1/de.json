@@ -1,0 +1,462 @@
+{
+ "title": "Netzwerk-Grundlagen — ip, ss, DNS, Ports",
+ "lead": "Lies deine Netzidentität: Adresse, Gateway, Port und Name. Fast alle Befehle in diesem Modul sind reine Lesebefehle.",
+ "objectives": [
+  "Du liest IP-Adresse, Präfix und Standardgateway mit `ip a` und `ip r`.",
+  "Du siehst mit `ss -tulpn`, welcher Dienst auf welchem Port und Interface lauscht.",
+  "Du kennst die Namensauflösungskette: `/etc/hosts` → `/etc/resolv.conf` → DNS-Server.",
+  "Du liest die Firewall (firewalld / ufw) zuerst und änderst sie, ohne dich auszusperren.",
+  "Du diagnostizierst \"kein Internet\" Schicht für Schicht (Adresse → Gateway → IP → Name)."
+ ],
+ "sections": [
+  {
+   "id": "addr",
+   "title": "Adresse und Routing: ip a, ip r",
+   "body": [
+    "Jedes Netzwerk-Interface (`eth0`, `ens3`, `enp0s3`, `lo`) hat eine **IP-Adresse** und ein **Präfix**. `192.168.1.42/24` heißt: Die ersten 24 Bit sind das Netz, der Rest bezeichnet das Gerät (`/24` = `255.255.255.0`). `lo` ist das Loopback-Interface (`127.0.0.1`): die Maschine selbst, es verlässt nie den Rechner.",
+    "Liegt das Ziel nicht im lokalen Netz, geht das Paket zum **Standardgateway**. Die Zeile `default via 192.168.1.1` in `ip r` verrät es. Nutze den modernen Befehl `ip` statt der alten `ifconfig` und `route`; er existiert auf Rocky/Alma und Ubuntu/Debian.",
+    "Interface-Namen hängen von Distribution und VM ab; deine Ausgabe zeigt evtl. `ens3` oder `enp0s3` statt `eth0`."
+   ],
+   "commands": [
+    {
+     "cmd": "ip a",
+     "what": "Listet alle Interfaces mit IP-Adressen und Status (UP/DOWN).",
+     "where": "Um die Adresse der Maschine zu erfahren oder zu prüfen, ob ein Interface aktiv ist.",
+     "why": "Erste Anlaufstelle bei Netzproblemen; ohne Adresse funktioniert nichts darüber.",
+     "example": "ip a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip -br a",
+     "what": "Zeigt dieselben Infos als kurze Tabelle, eine Zeile pro Interface.",
+     "where": "Für einen schnellen Blick, welches Interface welche Adresse hat.",
+     "why": "Du musst keine lange Ausgabe lesen; sie passt auf den Bildschirm.",
+     "example": "ip -br a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip r",
+     "what": "Zeigt die Routing-Tabelle; die Zeile `default via` ist das Gateway.",
+     "where": "Wenn du untersuchst, warum du externe Netze nicht erreichst.",
+     "why": "Ohne Standardroute verlässt kein Paket das lokale Netz.",
+     "example": "ip r",
+     "nosim": true
+    },
+    {
+     "cmd": "grep default",
+     "what": "Filtert Zeilen nach Text; hier findet es das Gateway in gespeicherter Routenausgabe.",
+     "where": "Wenn du aus langer Ausgabe eine einzelne Zeile brauchst.",
+     "why": "Derselbe Filter funktioniert bei `ss`-Ausgaben; im Simulator übst du mit Beispieldateien.",
+     "example": "grep default ~/net/routes.txt"
+    }
+   ],
+   "tip": "Kombiniere es mit Ausschneiden: `grep default ~/net/routes.txt | cut -d' ' -f3` liefert nur die Gateway-Adresse.",
+   "warn": "Eine Interface-Adresse von Hand mit `ip addr add/del` zu ändern, kann deine Verbindung (auch SSH) sofort trennen. In diesem Modul lesen wir nur."
+  },
+  {
+   "id": "ports",
+   "title": "Ports und lauschende Dienste: ss",
+   "body": [
+    "Die IP-Adresse wählt die Maschine, der **Port** den Dienst darauf: `22` SSH, `80` HTTP, `443` HTTPS, `53` DNS. Ein laufender Dienst **lauscht** (LISTEN) auf einer bestimmten Adresse und einem Port.",
+    "Buchstaben von `ss -tulpn`: `t` TCP, `u` UDP, `l` nur lauschende, `p` Prozessname, `n` numerische Ausgabe (keine Namensauflösung). Prozessnamen siehst du nur mit `sudo`.",
+    "**Achte auf die lokale Adresse:** `0.0.0.0:22` heißt auf jedem Interface erreichbar. `127.0.0.1:5432` ist nur von der Maschine selbst erreichbar. Lauscht eine Datenbank auf `0.0.0.0`, ist sie evtl. aus dem Netz erreichbar, das ist ein Sicherheitsbefund.",
+    "`ss` hat das alte `netstat -tulpn` ersetzt; die Optionen sind fast gleich."
+   ],
+   "commands": [
+    {
+     "cmd": "ss -tulpn",
+     "what": "Listet lauschende TCP/UDP-Sockets mit Ports und Prozessen.",
+     "where": "Um \"lauscht der Dienst wirklich, und auf welcher Adresse?\" zu beantworten.",
+     "why": "Ein Dienst kann laufen und trotzdem auf der falschen Adresse lauschen, dann scheitern Verbindungen.",
+     "example": "sudo ss -tulpn",
+     "nosim": true
+    },
+    {
+     "cmd": "ss -tln",
+     "what": "Zeigt nur TCP-Listener, ohne Prozessinfo (kein sudo nötig).",
+     "where": "Für schnelle Checks oder in Skripten.",
+     "why": "Kurz und ohne Rechte; reicht, um zu sehen, ob ein Port offen ist.",
+     "example": "ss -tln | grep 8080",
+     "nosim": true
+    },
+    {
+     "cmd": "curl -I",
+     "what": "Holt nur die Antwort-Header eines Webservers.",
+     "where": "Um zu testen, ob der Dienst wirklich per HTTP antwortet.",
+     "why": "Ein Port kann offen sein, ohne dass die Anwendung antwortet; ein Code wie `200` oder `301` zeigt es.",
+     "example": "curl -I http://127.0.0.1:8080",
+     "nosim": true
+    }
+   ],
+   "tip": "Filtere die `ss`-Ausgabe: `ss -tln | grep LISTEN | wc -l` zählt, wie viele TCP-Ports lauschen.",
+   "warn": "Scanne keine Server, die dir nicht gehören. Das ist unethisch und auffällig; arbeite auf `127.0.0.1` deiner eigenen VM."
+  },
+  {
+   "id": "dns",
+   "title": "Namensauflösung: hosts, resolv.conf, DNS",
+   "body": [
+    "Ein Name (`example.com`) wird in dieser Reihenfolge zur IP: Zuerst wird `/etc/hosts` geprüft, dann der **DNS-Server** aus `/etc/resolv.conf` gefragt (die Reihenfolge steht in der Zeile `hosts:` von `/etc/nsswitch.conf`).",
+    "`/etc/hosts` enthält lokale, handgeschriebene Zuordnungen: `192.168.1.50 intranet.lab`. Gut zum Testen, wirkt aber nur auf diese Maschine.",
+    "`/etc/resolv.conf` wird meist von NetworkManager oder systemd-resolved erzeugt; manuelle Änderungen können beim Neustart überschrieben werden. Unter Ubuntu steht dort oft `127.0.0.53`; den echten Server zeigt `resolvectl status`.",
+    "**Wichtige Unterscheidung:** Funktioniert `ping 1.1.1.1`, aber `ping example.com` nicht, ist dein Netz in Ordnung und das Problem ist DNS."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/hosts",
+     "what": "Zeigt lokale Name-zu-Adresse-Zuordnungen.",
+     "where": "Wenn ein Name zu einer unerwarteten Adresse führt.",
+     "why": "`/etc/hosts` wird vor DNS gelesen; eine falsche Zeile überstimmt die gesamte Auflösung.",
+     "example": "cat /etc/hosts"
+    },
+    {
+     "cmd": "cat /etc/resolv.conf",
+     "what": "Zeigt die verwendeten DNS-Server (`nameserver`) und die Suchdomain (`search`).",
+     "where": "Erste Datei, die du prüfst, wenn Namen nicht aufgelöst werden.",
+     "why": "Eine falsche oder unerreichbare `nameserver`-Zeile zerstört die gesamte Namensauflösung.",
+     "example": "cat /etc/resolv.conf"
+    },
+    {
+     "cmd": "getent hosts",
+     "what": "Löst einen Namen so auf, wie es das System wirklich tut (hosts + DNS).",
+     "where": "Um zu testen, was Anwendungen sehen werden.",
+     "why": "Berücksichtigt auch `/etc/hosts` und ist genauer als Tools, die nur DNS fragen.",
+     "example": "getent hosts localhost",
+     "nosim": true
+    },
+    {
+     "cmd": "resolvectl status",
+     "what": "Zeigt auf systemd-resolved-Systemen die DNS-Server pro Interface.",
+     "where": "Unter Ubuntu und neueren Rocky/Alma, wenn `resolv.conf` zu wenig verrät.",
+     "why": "Enthüllt den echten DNS-Server hinter `127.0.0.53`.",
+     "example": "resolvectl status",
+     "nosim": true
+    }
+   ],
+   "tip": "Vor Änderungen sichern: `sudo cp /etc/hosts /etc/hosts.bak`.",
+   "warn": "Eine falsche `nameserver`-Zeile zerstört die gesamte Namensauflösung. Auf Produktivsystemen konfigurierst du DNS über NetworkManager (`nmcli`) oder netplan statt `/etc/resolv.conf` zu bearbeiten."
+  },
+  {
+   "id": "firewall",
+   "title": "Firewall: firewalld und ufw",
+   "body": [
+    "Auch wenn ein Dienst lauscht, kann die **Firewall** den Port blockieren. Rocky/Alma/RHEL nutzen `firewalld` (`firewall-cmd`), Ubuntu/Debian `ufw`.",
+    "In firewalld sind Änderungen standardmäßig **runtime**: sofort wirksam, aber bei Reload oder Neustart weg. Dauerhaft wird es mit `--permanent` und anschließendem `--reload`. ufw-Regeln sind automatisch dauerhaft.",
+    "Zuerst **lesen**: `firewall-cmd --list-all` oder `ufw status verbose`. Dann ändern.",
+    "SELinux (Rocky) und AppArmor (Ubuntu) sind eine eigene Schicht; ein geöffneter Port heißt nicht immer, dass der Dienst ihn nutzen darf, das ist aber nicht Thema dieses Moduls."
+   ],
+   "commands": [
+    {
+     "cmd": "firewall-cmd --list-all",
+     "what": "Zeigt erlaubte Dienste und Ports der aktiven Zone.",
+     "where": "Auf Rocky/Alma/RHEL, wenn ein Port von außen nicht erreichbar ist.",
+     "why": "Du siehst auf einen Blick, welche Dienste oder Ports erlaubt sind; nur lesend und sicher.",
+     "example": "sudo firewall-cmd --list-all",
+     "nosim": true
+    },
+    {
+     "cmd": "firewall-cmd --add-port",
+     "what": "Öffnet einen Port; ohne `--permanent` gilt es nur zur Laufzeit.",
+     "where": "Wenn du einen Dienst nach außen freigeben musst.",
+     "why": "Erst zur Laufzeit testen, bei Erfolg dauerhaft machen; Fehler verschwinden mit einem Reload.",
+     "example": "sudo firewall-cmd --add-port=8080/tcp --timeout=300",
+     "nosim": true
+    },
+    {
+     "cmd": "ufw status verbose",
+     "what": "Zeigt Firewall-Status und Regeln unter Ubuntu/Debian.",
+     "where": "Beim Prüfen der Regeln auf einem Ubuntu-Server.",
+     "why": "`inactive` heißt Firewall aus; `active` zeigt die Standardrichtlinie.",
+     "example": "sudo ufw status verbose",
+     "nosim": true
+    }
+   ],
+   "tip": "Auf Rocky verschwindet eine mit `--timeout=300` angelegte Regel nach 5 Minuten von selbst; bei einem Fehler repariert sich das System also selbst.",
+   "warn": "Wenn du die Firewall über SSH änderst, halte eine zweite SSH-Sitzung offen und nutze zuerst `--timeout`. Vor `ufw enable` erlaubst du SSH mit `sudo ufw allow 22/tcp`.",
+   "danger": "Eine Regel aus der Ferne anzuwenden, die den SSH-Port schließt oder die Standardrichtlinie auf `deny` setzt, sperrt dich aus. Erstelle vorher einen VM-Snapshot (Modul 0.2) und halte Konsolenzugriff bereit."
+  },
+  {
+   "id": "diagnose",
+   "title": "Diagnoseleiter: von unten nach oben",
+   "body": [
+    "Löse \"kein Internet\" **Schicht für Schicht**; der erste fehlschlagende Schritt zeigt, wo das Problem liegt: (1) Ist das Interface UP und hat eine Adresse? (2) Geht ein Ping zum Gateway? (3) Geht ein Ping zu einer externen IP (`1.1.1.1`)? (4) Wird der Name aufgelöst? (5) Lauscht der Dienst und erlaubt die Firewall ihn?",
+    "`ping` nutzt ICMP; manche Netze blockieren ICMP, ein fehlgeschlagener Ping heißt also nicht immer keine Verbindung. Probiere auch den echten Dienst mit `curl -I`.",
+    "Dauerndes `ping` belastet das Ziel unnötig; begrenze die Anzahl mit `-c 3`."
+   ],
+   "commands": [
+    {
+     "cmd": "ping -c 3",
+     "what": "Sendet 3 ICMP-Pakete an das Ziel und misst die Antwortzeit.",
+     "where": "Um Gateway, externe IP und Name getrennt zu testen.",
+     "why": "Zeigt nacheinander, welche Schicht gestört ist.",
+     "example": "ping -c 3 1.1.1.1",
+     "nosim": true
+    },
+    {
+     "cmd": "cut -d",
+     "what": "Teilt eine Zeile an einem Trennzeichen in Felder und nimmt das gewünschte Feld.",
+     "where": "Um einen Wert wie Adresse, Port oder Präfix aus Ausgabe zu holen.",
+     "why": "Du gibst den Wert in eine Datei oder den nächsten Befehl, ohne von Hand zu kopieren.",
+     "example": "echo 192.168.1.42/24 | cut -d/ -f2"
+    },
+    {
+     "cmd": "sort -n | uniq",
+     "what": "Sortiert Zeilen numerisch und entfernt Duplikate.",
+     "where": "Wenn du eine saubere Liste lauschender Ports erstellst.",
+     "why": "Liefert eine übersichtliche, duplikatfreie Liste für Berichte und Vergleiche.",
+     "example": "sort -n ~/net/ports.txt | uniq"
+    }
+   ],
+   "tip": "Schreibe deine Ergebnisse in einen Bericht: `hostname > ~/net/report.txt`, dann mit `>>` anhängen. So lässt er sich leicht in ein Support-Ticket einfügen."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Lies die Beispiel-Routendatei: `cat ~/net/routes.txt`. Welche Zeile nennt das Gateway?",
+   "hint": "Die Zeile `default via ...`."
+  },
+  "t02": {
+   "text": "Zeige nur die lauschenden (LISTEN) Zeilen von `~/net/ss.txt`.",
+   "hint": "`grep LISTEN ~/net/ss.txt`"
+  },
+  "t03": {
+   "text": "Lies die lokalen Namenszuordnungen mit `cat /etc/hosts`.",
+   "hint": "Suche die Zeile mit `localhost`."
+  },
+  "t04": {
+   "text": "Finde die Standardroute mit `grep default ~/net/routes.txt`. Wie lautet die Gateway-Adresse?",
+   "hint": "Die Adresse nach dem Wort `via`."
+  },
+  "t05": {
+   "text": "Schreibe nur die Gateway-Adresse in `~/net/gateway.txt`.",
+   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; Feld 3 ist das Gateway."
+  },
+  "t06": {
+   "text": "Schreibe die Anzahl der lauschenden (LISTEN) Zeilen in `~/net/listen_count.txt`.",
+   "hint": "Eine Pipeline wie `grep LISTEN ... | wc -l > file`."
+  },
+  "t07": {
+   "text": "Schreibe die nach außen offenen Listener (LISTEN-Zeilen ohne `127.0.0.1`) in `~/net/exposed.txt`.",
+   "hint": "Verbinde zwei `grep` per Pipe; im zweiten nutzt du `-v 127.0.0.1`."
+  },
+  "t08": {
+   "text": "Rate: Welcher Prozess lauscht auf Port 8080? Prüfe dann mit `grep 8080 ~/net/ss.txt`.",
+   "hint": "Schau auf den Teil `users:((...))` am Zeilenende."
+  },
+  "t09": {
+   "text": "Rate: Welche Adresse und welches Präfix trägt `eth0`? Prüfe mit `grep 192 ~/net/ipa.txt`.",
+   "hint": "Die `inet`-Zeile hat die Form `address/prefix`."
+  },
+  "t10": {
+   "text": "Rate: Was gibt `echo 192.168.1.42/24 | cut -d/ -f2` aus? Führe es aus und prüfe.",
+   "hint": "Das Feld nach dem Zeichen `/`: die Präfixlänge."
+  },
+  "t11": {
+   "text": "Debug: Der `nameserver` in `~/net/resolv.conf` ist ungültig. Schreibe die Datei neu, sodass sie zwei Zeilen hat: `nameserver 192.168.1.1` und `nameserver 1.1.1.1`.",
+   "hint": "`printf 'line1\\nline2\\n' > file` schreibt zwei Zeilen; sieh dir den Fehler zuerst mit `cat` an."
+  },
+  "t12": {
+   "text": "Debug: Das Skript `~/net/check_ports.sh` läuft nicht. Finde die Ursache, behebe sie und führe das Skript aus.",
+   "hint": "Prüfe die Rechte mit `ls -l`; `chmod 755`, dann `~/net/check_ports.sh`."
+  },
+  "t13": {
+   "text": "Mini-Bericht: Schreibe Hostnamen, Gateway-Adresse und Anzahl lauschender Dienste (3 Zeilen, in dieser Reihenfolge) in `~/net/report.txt`.",
+   "hint": "Nutze `>` im ersten Befehl und `>>` in den folgenden; `hostname` liefert den Hostnamen."
+  },
+  "t14": {
+   "text": "Schwer: Schreibe aus den LISTEN-Zeilen von `ss.txt` nur die Portnummern, numerisch sortiert und ohne Duplikate, in `~/net/ports.txt` (ein Port pro Zeile).",
+   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file`"
+  },
+  "t15": {
+   "text": "Schwer: Schreibe den firewalld-Plan zum dauerhaften Öffnen von 8080/tcp als zwei Zeilen in `~/net/fw_plan.txt`: zuerst den Befehl mit `--permanent --add-port=8080/tcp`, dann `firewall-cmd --reload`. (Du schreibst den Plan, du führst ihn nicht aus.)",
+   "hint": "`echo 'command' > file`, für die zweite Zeile `>>`. Nutze Anführungszeichen."
+  },
+  "t16": {
+   "text": "Ticket: Nutzer erreichen den Namen `intranet.lab` nicht. Die Adresse des internen Servers ist `192.168.1.50`. Trage diese Zuordnung in `~/net/hosts` ein (vorhandene Zeilen nicht löschen).",
+   "hint": "`echo '192.168.1.50 intranet.lab' >> ~/net/hosts`"
+  },
+  "t17": {
+   "text": "Ticket: Ein Sicherheits-Audit verlangt den Nachweis, dass PostgreSQL (Port 5432) nur auf der lokalen Adresse lauscht. Speichere die passende Zeile aus `ss.txt` in `~/net/audit.txt`.",
+   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; die Zeile muss `127.0.0.1:5432` enthalten."
+  }
+ },
+ "vm": {
+  "intro": "Diese Schritte laufen auf deiner eigenen VM und lesen nur. Die Ausgaben sind individuell; IPs und Interface-Namen können abweichen. Fehlt ein Befehl, installiere `sudo dnf install iproute bind-utils` auf Rocky oder `sudo apt install iproute2 dnsutils` auf Ubuntu.",
+  "tasks": {
+   "v01": {
+    "title": "Adresse und Gateway",
+    "text": "Lies deine Interfaces und Route und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "ip -br a\nip r",
+      "expected": "lo      UNKNOWN  127.0.0.1/8\nens3    UP       192.168.1.42/24\ndefault via 192.168.1.1 dev ens3 proto dhcp metric 100\n192.168.1.0/24 dev ens3 proto kernel scope link src 192.168.1.42"
+     }
+    ],
+    "differs": [
+     "Das Interface kann `eth0`, `ens3` oder `enp0s3` heißen; wichtig sind die Adresse und die Zeile `default via`.",
+     "Fehlt die `default`-Zeile, hat die Maschine kein Gateway; prüfe den Netzwerkmodus der VM (NAT/Bridge)."
+    ]
+   },
+   "v02": {
+    "title": "Lauschende Dienste",
+    "text": "Liste auf, welche Dienste lauschen, und finde SSH.",
+    "blocks": [
+     {
+      "cmd": "sudo ss -tulpn\nss -tln",
+      "expected": "Netid State  Local Address:Port Process\ntcp   LISTEN 0.0.0.0:22         users:((\"sshd\",pid=812,fd=3))\n..."
+     }
+    ],
+    "differs": [
+     "Ohne `sudo` bleibt der Prozessname (Spalte `Process`) leer.",
+     "Fehlt `ss`, installiere `iproute`/`iproute2`; gibt es keine `LISTEN`-Zeile, läuft der Dienst nicht."
+    ]
+   },
+   "v03": {
+    "title": "Namensauflösungskette",
+    "text": "Lies hosts und resolv.conf und löse dann einen Namen so auf, wie es das System tut.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/hosts\ncat /etc/resolv.conf\nresolvectl status | head -n 15\ngetent hosts localhost",
+      "expected": "127.0.0.1 localhost\nnameserver 127.0.0.53\n...\n::1             localhost"
+     }
+    ],
+    "differs": [
+     "Fehlt `resolvectl` (altes oder minimales System), überspringe die Zeile; `resolv.conf` genügt.",
+     "`nameserver 127.0.0.53` unter Ubuntu ist normal; der echte Server steht in `resolvectl status`."
+    ]
+   },
+   "v04": {
+    "title": "Diagnoseleiter",
+    "text": "Pinge nacheinander Gateway, externe IP und einen Namen, je 2 Pakete. Ersetze `192.168.1.1` durch dein eigenes Gateway.",
+    "blocks": [
+     {
+      "cmd": "ping -c 2 192.168.1.1\nping -c 2 1.1.1.1\nping -c 2 example.com",
+      "expected": "2 packets transmitted, 2 received, 0% packet loss"
+     }
+    ],
+    "differs": [
+     "Antwortet die IP, aber der Name nicht, liegt das Problem bei DNS (`/etc/resolv.conf`).",
+     "Antwortet nichts, prüfe zuerst Adresse/Gateway mit `ip a` und `ip r`; manche Netze blockieren ICMP, probiere auch `curl -I https://example.com`."
+    ]
+   },
+   "v05": {
+    "title": "Eigenen Listener erzeugen und sehen",
+    "text": "Starte einen temporären Webserver nur auf `127.0.0.1`, sieh ihn mit `ss`, teste ihn mit `curl` und beende ihn.",
+    "blocks": [
+     {
+      "cmd": "python3 -m http.server 8080 --bind 127.0.0.1 &\nsleep 1\nss -tln | grep 8080\ncurl -I http://127.0.0.1:8080\nkill %1",
+      "expected": "LISTEN 0 5 127.0.0.1:8080 0.0.0.0:*\nHTTP/1.0 200 OK"
+     }
+    ],
+    "differs": [
+     "Fehlt `python3`, muss es installiert werden; du kannst stattdessen deine `ss -tln`-Ausgabe einfügen.",
+     "Ist der Port belegt, nimm `8081`. Prüfe danach mit `jobs`, dass kein Hintergrundjob übrig ist."
+    ]
+   },
+   "v06": {
+    "title": "Firewall lesen (nicht ändern)",
+    "text": "Lies den Firewall-Status deiner Distribution. Füge vorerst keine Regel hinzu. Vor Regeländerungen machst du einen VM-Snapshot (Modul 0.2) und hältst eine zweite SSH-Sitzung offen.",
+    "blocks": [
+     {
+      "cmd": "# Rocky / Alma / RHEL\nsudo firewall-cmd --state\nsudo firewall-cmd --list-all\n# Ubuntu / Debian\nsudo ufw status verbose",
+      "expected": "running\npublic (active)\n  services: cockpit dhcpv6-client ssh\n# oder: Status: inactive"
+     }
+    ],
+    "differs": [
+     "Der Befehl, der nicht zu deiner Distribution gehört, meldet `command not found`; das ist normal, führe den anderen aus.",
+     "`not running` oder `inactive` heißt, die Firewall ist aus; das musst du in diesem Lab nicht ändern."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Welcher Befehl zeigt das Standardgateway?",
+   "options": [
+    "`ip a`",
+    "`ip r`",
+    "`ss -tulpn`",
+    "`cat /etc/hosts`"
+   ],
+   "explain": "`ip r` zeigt die Routing-Tabelle; die Zeile `default via ...` ist das Gateway. `ip a` zeigt Adressen, `ss` lauschende Ports, `/etc/hosts` Namenszuordnungen."
+  },
+  "q2": {
+   "q": "In der Ausgabe von `ss -tulpn` lauscht eine Datenbank auf `127.0.0.1:5432`. Wer kann sich verbinden?",
+   "options": [
+    "Alle im Netz",
+    "Nur Rechner mit Firewall-Regel",
+    "Nur die Maschine selbst",
+    "Niemand"
+   ],
+   "explain": "`127.0.0.1` ist die Loopback-Adresse; der Dienst ist nur lokal erreichbar. Nach außen offen sind `0.0.0.0` oder die Adresse eines externen Interfaces."
+  },
+  "q3": {
+   "q": "In welcher Reihenfolge wird ein Name üblicherweise aufgelöst?",
+   "options": [
+    "Zuerst `/etc/hosts`, dann der DNS-Server aus `resolv.conf`",
+    "Zuerst der DNS-Server, dann `/etc/hosts`",
+    "Nur der DNS-Server",
+    "Zuerst das Gateway, dann `/etc/hosts`"
+   ],
+   "explain": "Die Zeile `hosts:` in `nsswitch.conf` legt die Reihenfolge fest; standardmäßig kommt zuerst die Datei (`/etc/hosts`), dann DNS."
+  },
+  "q4": {
+   "q": "Was passiert, wenn du `firewall-cmd --add-port=8080/tcp` ohne `--permanent` ausführst?",
+   "options": [
+    "Die Regel bleibt für immer",
+    "Die Regel gilt erst nach einem Neustart",
+    "Der Befehl wird abgelehnt",
+    "Die Regel gilt sofort, geht aber bei Reload oder Neustart verloren"
+   ],
+   "explain": "Standard ist die Runtime-Konfiguration: sofort wirksam, nicht dauerhaft. Für dauerhaft brauchst du `--permanent` und `--reload`."
+  }
+ },
+ "summary": [
+  "`ip a` zeigt Adressen, `ip r` die Routen und das Standardgateway.",
+  "`ss -tulpn` zeigt lauschende Dienste; `127.0.0.1` ist nur lokal, `0.0.0.0` jedes Interface.",
+  "Namensauflösung: `/etc/hosts` → `/etc/resolv.conf` → DNS-Server.",
+  "Lies die Firewall zuerst; trenne in firewalld Runtime von Permanent und nutze über SSH `--timeout` und eine zweite Sitzung.",
+  "Diagnose: Adresse → Gateway → externe IP → Name → Dienst und Firewall."
+ ],
+ "glossary": [
+  {
+   "term": "IP-Adresse",
+   "meaning": "Die Adresse eines Interfaces im Netz, z. B. 192.168.1.42."
+  },
+  {
+   "term": "Präfix / Subnetzmaske",
+   "meaning": "Trennt Netz- und Geräteteil einer Adresse; /24 = 255.255.255.0."
+  },
+  {
+   "term": "Gateway",
+   "meaning": "Die Router-Adresse, an die Pakete für Ziele außerhalb des lokalen Netzes gehen."
+  },
+  {
+   "term": "Loopback",
+   "meaning": "Die Maschine selbst: das Interface `lo`, 127.0.0.1."
+  },
+  {
+   "term": "Port",
+   "meaning": "Eine Nummer, die einen Dienst auf einer Maschine wählt; 22 SSH, 80 HTTP, 443 HTTPS."
+  },
+  {
+   "term": "LISTEN",
+   "meaning": "Ein Dienst wartet auf einer bestimmten Adresse und einem Port auf Verbindungen."
+  },
+  {
+   "term": "DNS",
+   "meaning": "Das System, das Namen in IP-Adressen übersetzt."
+  },
+  {
+   "term": "nameserver",
+   "meaning": "Ein in `/etc/resolv.conf` eingetragener DNS-Server."
+  },
+  {
+   "term": "runtime / permanent",
+   "meaning": "Temporäre (bis Reload) und dauerhafte Konfiguration in firewalld."
+  },
+  {
+   "term": "ICMP / ping",
+   "meaning": "Ein einfaches Netzprotokoll, das Erreichbarkeit und Latenz misst."
+  }
+ ]
+}

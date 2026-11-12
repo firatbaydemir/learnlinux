@@ -1,0 +1,487 @@
+{
+ "title": "Bash-Skript 1 — Variablen, Argumente, Bedingungen",
+ "lead": "Schreibe dein erstes Bash-Skript, mach es ausführbar und arbeite mit Variablen, Argumenten, Exit-Codes und Bedingungen.",
+ "objectives": [
+  "Du schreibst ein Skript mit Shebang, machst es mit chmod +x ausführbar und startest es mit ./script.sh.",
+  "Du weist Variablen zu und kennst den Unterschied zwischen einfachen und doppelten Anführungszeichen sowie read, $(Befehl) und $(( )).",
+  "Du liest Argumente mit $1, $# und \"$@\" und prüfst Exit-Codes mit $? und exit.",
+  "Du entscheidest mit if/elif/else, [[ ]] und test und nutzt set -euo pipefail als Sicherheitsnetz."
+ ],
+ "sections": [
+  {
+   "id": "first",
+   "title": "Das erste Skript: Shebang und Ausführungsrecht",
+   "body": [
+    "Ein Skript ist eine Textdatei mit Befehlen. Die erste Zeile, der **Shebang** `#!/bin/bash`, legt fest, welcher Interpreter die Datei ausführt. Ohne das **Ausführungsbit** (x) lässt sich die Datei nicht direkt starten: `./hello.sh` meldet dann *Permission denied*.",
+    "`./` bedeutet 'die Datei in diesem Ordner'. Linux sucht Befehle nicht im aktuellen Ordner; `hello.sh` allein ergibt deshalb *command not found*. In diesem Modul erzeugst du Skripte mit `printf` (auf deiner VM mit Heredoc), damit du genau siehst, was in der Datei steht."
+   ],
+   "commands": [
+    {
+     "cmd": "#!/bin/bash",
+     "what": "Der Shebang: erste Zeile der Datei, nennt den Interpreter.",
+     "where": "Ganz oben in jedem Bash-Skript.",
+     "why": "Das Skript läuft mit Bash und nicht mit einer anderen Shell wie sh.",
+     "example": "printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh"
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Setzt das Ausführungsbit einer Datei.",
+     "where": "Einmal nach dem Erstellen eines Skripts.",
+     "why": "Ohne es scheitert `./script.sh` mit Permission denied.",
+     "example": "chmod +x ~/bin/hello.sh"
+    },
+    {
+     "cmd": "./script.sh",
+     "what": "Startet ein ausführbares Skript über seinen Pfad.",
+     "where": "Wenn du eigene Skripte startest.",
+     "why": "Der Pfad (`./` oder vollständig) sagt der Shell, wo die Datei liegt.",
+     "example": "~/bin/hello.sh"
+    },
+    {
+     "cmd": "bash script.sh",
+     "what": "Startet ein Skript direkt mit Bash, ohne Ausführungsbit.",
+     "where": "Für schnelle Tests und auf noexec eingebundenen Laufwerken.",
+     "why": "Praktisch beim Debuggen; der Shebang wird ignoriert.",
+     "example": "bash ~/bin/hello.sh",
+     "nosim": true
+    }
+   ],
+   "tip": "Lege eigene Skripte in `~/bin` ab. Unter Ubuntu und Rocky wird dieser Ordner beim Login zu `PATH` hinzugefügt, wenn er existiert; dann startest du Skripte per Name.",
+   "warn": "Führe niemals ein Skript aus, das du heruntergeladen hast oder nicht verstehst. Lies es zuerst mit `cat script.sh`. Besonders vorsichtig bei `curl ... | bash` und bei `sudo` im ersten Versuch."
+  },
+  {
+   "id": "vars",
+   "title": "Variablen, Anführungszeichen und Arithmetik",
+   "body": [
+    "Eine Variable setzt du mit `NAME=value` — **keine Leerzeichen um `=`**. Gelesen wird sie mit `$NAME`. `NAME = value` funktioniert nicht: Bash hält `NAME` dann für einen Befehl.",
+    "**Doppelte Anführungszeichen** `\"...\"` expandieren Variablen, **einfache** `'...'` nicht: `echo '$HOME'` gibt den Text `$HOME` aus. Setze Variablen immer in Anführungszeichen (`\"$NAME\"`), damit Dateinamen mit Leerzeichen ein Wort bleiben.",
+    "`$(Befehl)` fügt die Ausgabe eines Befehls ein, `$(( ))` rechnet mit ganzen Zahlen, `read` fragt den Benutzer nach Eingaben (nur VM)."
+   ],
+   "commands": [
+    {
+     "cmd": "NAME=value",
+     "what": "Setzt eine Variable (keine Leerzeichen um das Gleichheitszeichen).",
+     "where": "Am Skriptanfang für Einstellungen und Pfade.",
+     "why": "Du änderst einen Wert an einer Stelle statt an zehn.",
+     "example": "NAME=student; echo \"Hello $NAME\""
+    },
+    {
+     "cmd": "\"$VAR\" und '$VAR'",
+     "what": "Doppelte Anführungszeichen expandieren die Variable, einfache behalten den Text.",
+     "where": "In jedem Befehl mit Variablen.",
+     "why": "Anführungszeichen schützen vor Leerzeichen und Platzhaltern im Wert.",
+     "example": "echo '$HOME' \"$HOME\""
+    },
+    {
+     "cmd": "read -r -p",
+     "what": "Liest eine Eingabezeile in eine Variable.",
+     "where": "In interaktiven Skripten, die Fragen stellen.",
+     "why": "`-r` behält Backslashes, `-p` zeigt eine Eingabeaufforderung.",
+     "example": "read -r -p \"Name: \" NAME",
+     "nosim": true
+    },
+    {
+     "cmd": "$(command)",
+     "what": "Ersetzt sich durch die Ausgabe des Befehls.",
+     "where": "Um Ausgaben in Variablen zu speichern oder in Text einzubauen.",
+     "why": "Skripte können auf den Systemzustand reagieren.",
+     "example": "echo \"Host: $(hostname)\""
+    },
+    {
+     "cmd": "$(( ))",
+     "what": "Ganzzahl-Arithmetik.",
+     "where": "Zähler, Größen, einfache Berechnungen.",
+     "why": "Bash kennt keine Dezimalzahlen; dafür nimmst du `bc`.",
+     "example": "echo $((6 * 7))",
+     "nosim": true
+    }
+   ],
+   "tip": "Einen Standardwert schreibst du `${NAME:-default}`: Er gilt, wenn `NAME` leer oder nicht gesetzt ist."
+  },
+  {
+   "id": "args",
+   "title": "Argumente und Exit-Codes",
+   "body": [
+    "Ein Skript erhält Argumente: `$0` ist der Skriptname, `$1`, `$2`, ... sind die Argumente, `$#` ist ihre Anzahl und `\"$@\"` die Liste aller, jedes bleibt ein Wort. Setze `\"$@\"` in Anführungszeichen, sonst werden aus `my file` zwei Wörter.",
+    "Jeder Befehl endet mit einem **Exit-Code**: `0` heißt Erfolg, jede andere Zahl Fehler. `$?` enthält den Code des letzten Befehls. Im Skript beendest du mit `exit 0` oder `exit 1`. Der Simulator kann Argumente in Skripten nicht zuverlässig ausführen; die echten Läufe stehen im VM-Teil."
+   ],
+   "commands": [
+    {
+     "cmd": "$0 $1 $2",
+     "what": "Skriptname und die ersten Argumente.",
+     "where": "Wenn das Skript Eingaben des Aufrufers braucht.",
+     "why": "Ein Skript funktioniert für viele Dateien oder Namen.",
+     "example": "./args.sh alice bob",
+     "nosim": true
+    },
+    {
+     "cmd": "$# und \"$@\"",
+     "what": "Anzahl der Argumente und Liste aller Argumente.",
+     "where": "Zum Prüfen der Anzahl oder für Schleifen über Argumente.",
+     "why": "`\"$@\"` behält jedes Argument heil, auch mit Leerzeichen.",
+     "example": "./args.sh \"my file\" bob",
+     "nosim": true
+    },
+    {
+     "cmd": "${1:-guest}",
+     "what": "Erstes Argument oder `guest`, wenn keins übergeben wurde.",
+     "where": "Für optionale Argumente.",
+     "why": "Das Skript bricht nicht, wenn das Argument fehlt.",
+     "example": "NAME=\"${1:-guest}\"",
+     "nosim": true
+    },
+    {
+     "cmd": "$? und exit",
+     "what": "`$?` ist der letzte Exit-Code, `exit N` beendet ein Skript mit Code N.",
+     "where": "Nach Befehlen, die du prüfen willst, und am Skriptende.",
+     "why": "Andere Skripte, cron und CI entscheiden anhand dieses Codes.",
+     "example": "false; echo $?"
+    }
+   ],
+   "tip": "`grep` gibt 1 zurück, wenn nichts passt. Das ist kein Programmfehler, nur ein 'Nein': `grep carol ~/users.txt; echo $?` gibt `1` aus."
+  },
+  {
+   "id": "cond",
+   "title": "Bedingungen: if, elif, else",
+   "body": [
+    "`if` führt einen Befehl aus und wertet seinen Exit-Code aus. Der Befehl ist meist `[ ... ]` (dasselbe wie `test`) oder Bashs `[[ ... ]]`. Die Leerzeichen in den Klammern sind Pflicht: `[ -f \"$1\" ]`.",
+    "Häufige Tests: `-f` normale Datei, `-d` Verzeichnis, `-x` ausführbar, `-z` Text ist leer, `-n` Text ist nicht leer. Für Zahlen `-eq -ne -lt -le -gt -ge`, für Text `==` und `!=`. `[[ ]]` ist sicherer als `[ ]` (keine Wortaufspaltung), gibt es aber nur in Bash, nicht in reinem `sh`.",
+    "Kurzformen: `cmd1 && cmd2` führt den zweiten nur bei Erfolg aus, `cmd1 || cmd2` nur bei Fehler."
+   ],
+   "commands": [
+    {
+     "cmd": "if / elif / else / fi",
+     "what": "Führt je nach Test unterschiedliche Befehle aus.",
+     "where": "Überall, wo ein Skript entscheiden muss.",
+     "why": "Skripte reagieren auf Eingabe und Zustand, statt blind zu laufen.",
+     "example": "if [ -f \"$1\" ]; then echo exists; else echo missing; fi",
+     "nosim": true
+    },
+    {
+     "cmd": "[ ] / test",
+     "what": "Testet Dateien, Texte und Zahlen; das Ergebnis ist der Exit-Code.",
+     "where": "In der Bedingung von `if` oder allein mit `&&` / `||`.",
+     "why": "Die portable Form, die in jeder Shell funktioniert.",
+     "example": "test -f ~/notes.txt && echo yes"
+    },
+    {
+     "cmd": "[[ ]]",
+     "what": "Bash-Bedingung mit Mustern und `&&` / `||` im Inneren.",
+     "where": "In Skripten mit `#!/bin/bash`.",
+     "why": "Weniger Fallstricke bei Anführungszeichen als `[ ]`.",
+     "example": "[[ $score -ge 50 && -n $name ]] && echo ok",
+     "nosim": true
+    },
+    {
+     "cmd": "&& und ||",
+     "what": "Verkettet Befehle nach Erfolg oder Fehler.",
+     "where": "Für kurze Prüfungen in einer Zeile.",
+     "why": "Schnelle Alternative zu einem vollständigen `if`.",
+     "example": "test -d ~/Documents && echo dir || echo nodir"
+    }
+   ],
+   "tip": "Erst prüfen, dann handeln: `[ -f \"$1\" ] || { echo \"no such file\"; exit 1; }` bricht früh mit klarer Meldung ab."
+  },
+  {
+   "id": "strict",
+   "title": "Sichere Skripte: set -euo pipefail und Debugging",
+   "body": [
+    "Bash **läuft standardmäßig nach Fehlern weiter**. Die Zeile `set -euo pipefail` ganz oben ändert das: `-e` stoppt beim ersten fehlgeschlagenen Befehl, `-u` behandelt nicht gesetzte Variablen als Fehler, `-o pipefail` lässt eine Pipe scheitern, wenn irgendein Teil scheitert.",
+    "Zum Debuggen nutzt du `bash -n script.sh` (nur Syntaxprüfung) und `bash -x script.sh` (gibt jeden Befehl mit vorangestelltem `+` aus, bevor er läuft). `shellcheck` findet typische Fehler, bevor du das Skript startest. Installation: `sudo apt install shellcheck` unter Debian/Ubuntu oder `sudo dnf install epel-release && sudo dnf install ShellCheck` unter RHEL/Rocky.",
+    "Auf gehärteten Systemen kann ein Skript trotz `chmod +x` scheitern: Der Ordner kann `noexec` eingebunden sein, oder SELinux (RHEL/Rocky) / AppArmor (Ubuntu) blockiert es, wenn ein Dienst es startet. Teste dann mit `bash script.sh` und sieh in die Audit-/Journal-Logs."
+   ],
+   "commands": [
+    {
+     "cmd": "set -euo pipefail",
+     "what": "Strenger Modus: Stopp bei Fehlern, nicht gesetzten Variablen und fehlgeschlagenen Pipes.",
+     "where": "Zweite Zeile fast jedes Skripts.",
+     "why": "Fehler werden nicht stillschweigend übergangen, das Skript richtet weniger Schaden an.",
+     "example": "set -euo pipefail",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -n / bash -x",
+     "what": "`-n` prüft die Syntax, `-x` verfolgt jeden Befehl.",
+     "where": "Wenn ein Skript sich falsch verhält.",
+     "why": "Du siehst genau, welche Zeile mit welchen Werten läuft.",
+     "example": "bash -x ~/bin/hello.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "shellcheck",
+     "what": "Statische Analyse für Shell-Skripte.",
+     "where": "Bevor du ein Skript weitergibst oder planst.",
+     "why": "Findet Quoting-Fehler und Tippfehler früh.",
+     "example": "shellcheck ~/bin/vars.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "${VAR:?message}",
+     "what": "Bricht mit Meldung ab, wenn die Variable leer oder nicht gesetzt ist.",
+     "where": "Vor zerstörerischen Befehlen, die eine Variable nutzen.",
+     "why": "Verhindert, dass `rm` auf dem falschen Pfad läuft.",
+     "example": "rm -r \"${TARGET:?TARGET is not set}/cache\"",
+     "nosim": true
+    }
+   ],
+   "tip": "Erst ausgeben, dann löschen: Schreibe im Testlauf `echo rm` statt `rm` und prüfe die Pfade mit eigenen Augen.",
+   "warn": "`-e` allein ist keine Garantie: In Bedingungen (`if`, `&&`, `||`) wird es ignoriert. Teste jedes Skript zuerst mit harmlosen Beispieldaten.",
+   "danger": "Eine leere Variable ist gefährlich: `rm -rf \"$DIR\"/*` wird zu `rm -rf /*`, wenn `DIR` leer ist. Nutze `set -u` und `${DIR:?}`, teste in einer VM und erstelle vorher einen **Snapshot** (Modul 0.2)."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Lege in deinem Home-Verzeichnis den Ordner für deine Skripte an: `mkdir ~/bin`.",
+   "hint": "`~` ist dein Home-Verzeichnis."
+  },
+  "t02": {
+   "text": "Schreibe dein erstes Skript mit `printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh`.",
+   "hint": "`\\n` ist ein Zeilenumbruch; die Datei hat zwei Zeilen. Prüfe mit `cat ~/bin/hello.sh`."
+  },
+  "t03": {
+   "text": "Mach das Skript mit `chmod +x ~/bin/hello.sh` ausführbar.",
+   "hint": "In `ls -l ~/bin/hello.sh` enthalten die Rechte jetzt `x`."
+  },
+  "t04": {
+   "text": "Starte das Skript über seinen Pfad: `~/bin/hello.sh`.",
+   "hint": "Oder erst `cd ~/bin`, dann `./hello.sh`."
+  },
+  "t05": {
+   "text": "Schreibe `~/bin/vars.sh` mit den Zeilen `#!/bin/bash`, `NAME=student` und `echo \"Hello $NAME\"` (mit `printf`), mach es ausführbar und starte es.",
+   "hint": "Drei Befehle: `printf ... > ~/bin/vars.sh`, `chmod +x`, dann starten. Ausgabe: `Hello student`."
+  },
+  "t06": {
+   "text": "Vorhersage: Was geben `'$HOME'` und `\"$HOME\"` aus? Prüfe es dann mit `echo '$HOME' \"$HOME\"`.",
+   "hint": "Einfache Anführungszeichen behalten den Text, doppelte expandieren die Variable."
+  },
+  "t07": {
+   "text": "Sage den Exit-Code einer Suche ohne Treffer voraus. Führe `grep carol ~/users.txt; echo $?` aus.",
+   "hint": "grep findet in dieser Datei nichts und antwortet mit einem Code ungleich null."
+  },
+  "t08": {
+   "text": "Schreibe `~/bin/check.sh` (Shebang, dann `if [ -f \"$1\" ]; then`, `echo \"exists\"`, `else`, `echo \"missing\"`, `fi`) und mach es ausführbar. Der Simulator kann `if` nicht ausführen; in der VM startest du es.",
+   "hint": "Ein `printf` mit `\\n` zwischen den Zeilen, dann `chmod +x`."
+  },
+  "t09": {
+   "text": "Nutze `test` oder `[ ]` zweimal: Prüfe, ob `~/notes.txt` eine Datei ist (`-f`) und `~/Documents` ein Verzeichnis (`-d`). Hänge `&& echo ok` an, um das Ergebnis zu sehen.",
+   "hint": "`test -f ~/notes.txt && echo file` und `[ -d ~/Documents ] && echo dir`."
+  },
+  "t10": {
+   "text": "Vorhersage: Ist `~/notes.txt` ausführbar? Führe `test -x ~/notes.txt; echo $?` aus und lies den Code.",
+   "hint": "Exit-Code 0 heißt wahr, 1 heißt falsch."
+  },
+  "t11": {
+   "text": "Debug: `~/scripts/broken.sh` hat weder Shebang noch Ausführungsrecht. Behebe beides (behalte die zwei vorhandenen Befehle) und starte es; es muss `~/backup.done` erzeugen.",
+   "hint": "Schreibe die Datei mit `printf` neu, erste Zeile `#!/bin/bash`, dann `chmod +x`."
+  },
+  "t12": {
+   "text": "Debug: `~/scripts/greet.sh` soll `Hello alice` ausgeben, gibt aber den Text `Hello $NAME` aus. Finde die zwei Fehler (Leerzeichen um `=`, einfache Anführungszeichen), behebe sie und starte das Skript.",
+   "hint": "`NAME=alice` ohne Leerzeichen und `echo \"Hello $NAME\"` mit doppelten Anführungszeichen."
+  },
+  "t13": {
+   "text": "Mini-Projekt: Schreibe `~/bin/args.sh` mit Shebang und drei `echo`-Zeilen, die `$1`, `$#` und `\"$@\"` nutzen. Mach es ausführbar.",
+   "hint": "Beispielzeile: `echo \"Count: $#\"`. Ein `printf`, `\\n` zwischen den Zeilen."
+  },
+  "t14": {
+   "text": "Mini-Projekt: Schreibe `~/bin/backup.sh`: Shebang, `set -euo pipefail`, `SRC=\"$HOME/Documents\"`, `DEST=\"$HOME/backup\"`, `mkdir -p \"$DEST\"` und `cp \"$SRC/report.txt\" \"$DEST/\"`. Mach es ausführbar.",
+   "hint": "Setze jede Variable in Anführungszeichen. Der Simulator kann `set` nicht ausführen; erstelle nur die Datei."
+  },
+  "t15": {
+   "text": "Challenge: Erstelle `~/bin/need_arg.sh`. Ohne Argument gibt es `Usage: need_arg.sh NAME` aus und endet mit `exit 1`; sonst gibt es `Hello, $1` aus und endet mit `exit 0`. Mach es ausführbar.",
+   "hint": "Teste mit `-z \"$1\"`; nutze `if ... then ... fi`."
+  },
+  "t16": {
+   "text": "Challenge: Erstelle `~/bin/probe.sh`, dessen einziger Befehl `test -f /home/student/missing.txt` ist. Mach es ausführbar, starte es und schreibe seinen Exit-Code mit `echo $? > ~/code.txt` in `~/code.txt`.",
+   "hint": "Ein Skript liefert den Exit-Code seines letzten Befehls. Führe `echo $?` direkt nach dem Skript aus."
+  },
+  "t17": {
+   "text": "Ticket: Das Onboarding-Team möchte `~/bin/welcome.sh`. Mit Namen gibt es `Welcome, NAME` aus; ohne Argument soll es `guest` verwenden. Nutze `${1:-guest}`, füge einen Shebang hinzu und mach es ausführbar.",
+   "hint": "`NAME=\"${1:-guest}\"` und danach `echo \"Welcome, $NAME\"`."
+  },
+  "t18": {
+   "text": "Ticket: Ein Kollege meldet, `~/scripts/report.sh` scheitert mit 'Permission denied'. Behebe es mit der kleinsten Änderung und starte es; es muss `~/report.done` erzeugen.",
+   "hint": "Der Datei fehlt das Ausführungsbit; ihren Inhalt musst du nicht ändern."
+  }
+ },
+ "vm": {
+  "intro": "Auf deiner VM (Ubuntu oder Rocky) führst du die Skripte wirklich aus. Nutze nur deinen eigenen Ordner `~/bin` und harmlose Testdaten. Vor zerstörerischen Experimenten erstellst du einen Snapshot (Modul 0.2).",
+  "tasks": {
+   "v01": {
+    "title": "Erstes Skript und Ausführungsbit",
+    "text": "Erstelle das Skript mit einem Heredoc, starte es vor und nach `chmod +x` und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/bin\ncat > ~/bin/hello.sh <<'EOF'\n#!/bin/bash\necho \"Hello, Linux!\"\nEOF\n~/bin/hello.sh\nchmod +x ~/bin/hello.sh\nls -l ~/bin/hello.sh\n~/bin/hello.sh",
+      "expected": "bash: /home/student/bin/hello.sh: Permission denied\n-rwxr-xr-x. 1 student student 38 Nov 12 10:00 /home/student/bin/hello.sh\nHello, Linux!"
+     }
+    ],
+    "differs": [
+     "Unter Ubuntu zeigt `ls -l` keinen Punkt hinter den Rechten; unter Rocky gibt es ihn (SELinux-Kontext).",
+     "Läuft schon der erste Start, setzt deine umask oder dein Dateisystem das Ausführungsbit; das ist in Ordnung."
+    ]
+   },
+   "v02": {
+    "title": "Variablen, Quoting, read und Arithmetik",
+    "text": "Schreibe ein Skript, das den Quoting-Unterschied zeigt, eine Zahl liest und verdoppelt. Gib die Zahl per Pipe ein.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/vars.sh <<'EOF'\n#!/bin/bash\nNAME=\"student\"\necho 'single: $NAME'\necho \"double: $NAME\"\nread -r -p \"Number: \" N\necho \"Double: $((N * 2))\"\necho \"Year: $(date +%Y)\"\nEOF\nchmod +x ~/bin/vars.sh\necho 21 | ~/bin/vars.sh",
+      "expected": "single: $NAME\ndouble: student\nDouble: 42\nYear: 2026"
+     }
+    ],
+    "differs": [
+     "Die Aufforderung `Number:` erscheint nicht, weil die Eingabe aus einer Pipe kommt; das ist normal.",
+     "Bei `unbound variable` oder `syntax error` prüfe, dass um `=` keine Leerzeichen stehen."
+    ]
+   },
+   "v03": {
+    "title": "Argumente mit Leerzeichen",
+    "text": "Schreibe ein Skript, das die Argumentzahl und jedes Argument ausgibt, und rufe es mit einem Dateinamen mit Leerzeichen auf.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/args.sh <<'EOF'\n#!/bin/bash\necho \"Script: $0\"\necho \"Count: $#\"\necho \"First: $1\"\nfor item in \"$@\"; do\n  echo \"Arg: $item\"\ndone\nEOF\nchmod +x ~/bin/args.sh\n~/bin/args.sh \"my file\" bob",
+      "expected": "Script: /home/student/bin/args.sh\nCount: 2\nFirst: my file\nArg: my file\nArg: bob"
+     }
+    ],
+    "differs": [
+     "Ist `Count` 3, hast du `my file` ohne Anführungszeichen übergeben.",
+     "Ersetze `\"$@\"` durch `$@` und starte erneut: `my` und `file` werden getrennte Argumente."
+    ]
+   },
+   "v04": {
+    "title": "if / elif / else und Exit-Codes",
+    "text": "Baue ein kleines Bewertungsskript mit `[[ ]]`, starte es mit drei Eingaben und sieh dir die Exit-Codes von `test` an.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/grade.sh <<'EOF'\n#!/bin/bash\nscore=\"${1:-0}\"\nif [[ $score -ge 90 ]]; then\n  echo \"top\"\nelif [[ $score -ge 50 ]]; then\n  echo \"pass\"\nelse\n  echo \"fail\"\nfi\nEOF\nchmod +x ~/bin/grade.sh\n~/bin/grade.sh 95\n~/bin/grade.sh 60\n~/bin/grade.sh\ntest -f /etc/passwd; echo \"rc=$?\"\ntest -f /nonexistent; echo \"rc=$?\"",
+      "expected": "top\npass\nfail\nrc=0\nrc=1"
+     }
+    ],
+    "differs": [
+     "Bei `[[: not found` hast du das Skript mit `sh script.sh` gestartet; nimm `bash` oder starte es direkt.",
+     "Gibt jede Eingabe `fail` aus, prüfe die Leerzeichen in `[[ ... ]]`."
+    ]
+   },
+   "v05": {
+    "title": "Strenger Modus in Aktion",
+    "text": "Vergleiche, was `set -euo pipefail` bei einem fehlschlagenden Befehl und bei einer nicht gesetzten Variable tut.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/strict.sh <<'EOF'\n#!/bin/bash\nset -euo pipefail\necho \"before\"\nfalse\necho \"after\"\nEOF\nchmod +x ~/bin/strict.sh\n~/bin/strict.sh; echo \"exit=$?\"\nbash -c 'set -u; echo \"$UNDEFINED_VAR\"'; echo \"exit=$?\"",
+      "expected": "before\nexit=1\nbash: line 1: UNDEFINED_VAR: unbound variable\nexit=1"
+     }
+    ],
+    "differs": [
+     "`after` darf nicht erscheinen. Tut es das, prüfe die `set`-Zeile.",
+     "Der genaue Wortlaut der Meldung `unbound variable` hängt von der Bash-Version ab."
+    ]
+   },
+   "v06": {
+    "title": "Debugging: bash -n, bash -x, shellcheck",
+    "text": "Prüfe die Syntax, verfolge ein Skript und installiere ShellCheck (wähle deine Distribution). Ist die Installation nicht möglich, überspringe den dritten Block und füge die ersten beiden Ausgaben ein.",
+    "blocks": [
+     {
+      "cmd": "bash -n ~/bin/hello.sh; echo \"syntax=$?\"\nbash -x ~/bin/hello.sh",
+      "expected": "syntax=0\n+ echo 'Hello, Linux!'\nHello, Linux!"
+     },
+     {
+      "cmd": "# Ubuntu / Debian\nsudo apt install -y shellcheck\n# Rocky / RHEL\nsudo dnf install -y epel-release && sudo dnf install -y ShellCheck\nshellcheck ~/bin/vars.sh",
+      "expected": "(keine Ausgabe bedeutet keine Funde)"
+     }
+    ],
+    "differs": [
+     "`syntax=0` heißt, die Syntax ist in Ordnung; jede andere Zahl ist ein Syntaxfehler und Bash nennt die Zeile.",
+     "Gibt ShellCheck Hinweise wie SC2086, deuten sie meist auf fehlende Anführungszeichen um eine Variable hin."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Was gibt `echo '$HOME'` aus?",
+   "options": [
+    "/home/student",
+    "$HOME",
+    "Eine leere Zeile",
+    "HOME"
+   ],
+   "explain": "Einfache Anführungszeichen verhindern die Expansion; der Text `$HOME` wird ausgegeben. Nur doppelte Anführungszeichen expandieren Variablen."
+  },
+  "q2": {
+   "q": "Was enthält `$#` in einem Skript?",
+   "options": [
+    "Die Anzahl der Argumente",
+    "Den Namen des Skripts",
+    "Den Exit-Code des letzten Befehls",
+    "Alle Argumente als ein Text"
+   ],
+   "explain": "`$#` ist die Argumentzahl; `$0` ist der Skriptname, `$?` der letzte Exit-Code und `\"$@\"` die Argumentliste."
+  },
+  "q3": {
+   "q": "Was bewirkt `set -euo pipefail`?",
+   "options": [
+    "Startet das Skript als root",
+    "Gibt jeden Befehl vor der Ausführung aus",
+    "Ignoriert alle Fehler",
+    "Stoppt bei Fehlern, nicht gesetzten Variablen und fehlgeschlagenen Pipe-Teilen"
+   ],
+   "explain": "`-e` stoppt bei Fehlern, `-u` bei nicht gesetzten Variablen und `pipefail` bei fehlgeschlagenen Pipe-Teilen. Befehle ausgeben ist `-x`."
+  },
+  "q4": {
+   "q": "Du startest `./run.sh`, aber die Datei hat kein Ausführungsbit. Was passiert?",
+   "options": [
+    "command not found",
+    "Ein Syntaxfehler",
+    "Permission denied",
+    "Das Skript läuft normal"
+   ],
+   "explain": "Ohne x-Bit startet der Kernel die Datei nicht: Permission denied. Mit `chmod +x run.sh` behebst du das."
+  }
+ },
+ "summary": [
+  "Ein Skript beginnt mit dem Shebang `#!/bin/bash`, braucht `chmod +x` und wird mit `./script.sh` gestartet.",
+  "Variablen: `NAME=value` ohne Leerzeichen; `\"$NAME\"` expandiert, `'$NAME'` nicht. Immer in Anführungszeichen setzen.",
+  "`$1`, `$#` und `\"$@\"` lesen Argumente; `${1:-default}` setzt einen Standardwert.",
+  "`$?` ist der letzte Exit-Code (0 = Erfolg); `exit N` beendet ein Skript mit einem Code.",
+  "`if` mit `[ ]`, `[[ ]]` oder `test` entscheidet; die häufigsten Tests sind `-f -d -z -eq`.",
+  "`set -euo pipefail`, `bash -x` und `shellcheck` machen Skripte sicherer und leichter zu debuggen."
+ ],
+ "glossary": [
+  {
+   "term": "Shebang",
+   "meaning": "Die erste Zeile `#!/bin/bash`; nennt den Interpreter des Skripts."
+  },
+  {
+   "term": "Ausführungsbit",
+   "meaning": "Das x-Recht, das erlaubt, eine Datei als Programm zu starten."
+  },
+  {
+   "term": "Variable",
+   "meaning": "Ein benannter Wert, gesetzt mit `NAME=value` und gelesen mit `$NAME`."
+  },
+  {
+   "term": "Quoting",
+   "meaning": "Einfache Anführungszeichen behalten Text wörtlich, doppelte expandieren Variablen."
+  },
+  {
+   "term": "Positionsargument",
+   "meaning": "Ein an das Skript übergebener Wert: `$1`, `$2`, ..."
+  },
+  {
+   "term": "Exit-Code",
+   "meaning": "Eine Zahl, die ein Befehl zurückgibt; 0 ist Erfolg, alles andere Fehler."
+  },
+  {
+   "term": "test / [ ]",
+   "meaning": "Ein Befehl, der eine Bedingung auswertet und mit einem Exit-Code antwortet."
+  },
+  {
+   "term": "Strenger Modus",
+   "meaning": "`set -euo pipefail`: Stopp bei Fehlern, nicht gesetzten Variablen und fehlgeschlagenen Pipes."
+  },
+  {
+   "term": "Heredoc",
+   "meaning": "`<<'EOF'` übergibt mehrere Textzeilen an einen Befehl, oft zum Erstellen einer Datei."
+  }
+ ]
+}

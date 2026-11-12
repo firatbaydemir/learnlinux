@@ -1,0 +1,146 @@
+{
+ "title": "Kimlik değiştirme: su, sudo ve sudoers",
+ "lead": "Root yetkisini ne zaman ve nasıl kullanacağını öğren; tek komutluk sudo'yu tercih et, kuralları visudo ile güvenle yönet.",
+ "objectives": [
+  "Root'un UID 0 olduğunu, `su -` ile `sudo` arasındaki farkı ve iki komutun hangi parolayı istediğini açıklarsın.",
+  "Tek bir yönetim komutunu `sudo` ile çalıştırır, yetkilerini `sudo -l` ile incelersin.",
+  "`sudo -i` ile tam root oturumunu açıp `exit` ile kapatır; gereksiz yere root kalmazsın.",
+  "`/etc/sudoers` dosyasının yetki politikası olduğunu ve yalnızca `visudo` ile düzenlenmesi gerektiğini bilirsin."
+ ],
+ "sections": [
+  {
+   "id": "identity",
+   "title": "Root kimdir? su ve sudo",
+   "body": [
+    "Linux'ta **root**, UID'si 0 olan süper kullanıcıdır. Sistem dosyalarını ve diğer hesapları yönetebilir; yanlış bir komut ciddi hasar verebilir. Günlük işler için normal hesabında kal, yönetici yetkisini yalnızca gereken iş için kullan.",
+    "`su - USER` hedef hesaba geçer ve hedef hesabın parolasını ister. `su -` root'a geçer; ancak Ubuntu gibi sistemlerde root hesabı parola ile girişe kapalı olabilir. `-` hedef kullanıcının login ortamını (ör. `HOME` ve profil) yükler.",
+    "`sudo COMMAND` ise izinli kullanıcıya kendi parolasını doğrulattıktan sonra yalnızca belirtilen komutu başka kullanıcı olarak çalıştırır (çoğunlukla root). `sudo` kuralı parola istemeyecek şekilde ayarlanmış da olabilir. Root oturumu açık tutmak yerine tek komut için sudo kullanmak daha güvenlidir."
+   ],
+   "commands": [
+    {"cmd": "whoami", "what": "Geçerli etkin kullanıcı adını gösterir.", "where": "Bir komutun hangi hesapla çalıştığını doğrularken.", "why": "Özellikle yetki değiştirdikten sonra yanlış hesapta işlem yapmayı önler.", "example": "whoami"},
+    {"cmd": "id", "what": "UID, birincil GID ve grup üyeliklerini gösterir.", "where": "Sudo yetkisinin hangi grup üzerinden geldiğini araştırırken.", "why": "Kullanıcı ve grup kimliklerini birlikte doğrular.", "example": "id"},
+    {"cmd": "su -", "what": "Root'un login oturumuna geçer; root parolası gerekir.", "where": "Yalnızca root hesabı etkin ve uzun bir yönetim oturumu gerçekten gerekiyorsa.", "why": "Login ortamını yükler; oturum boyunca tüm komutlar root olur.", "example": "su -", "nosim": true},
+    {"cmd": "sudo COMMAND", "what": "İzin verilen tek bir komutu başka kullanıcı olarak çalıştırır.", "where": "Normal hesabından belirli bir yönetim işlemi yaparken.", "why": "Yetkiyi ve etki alanını daha sınırlı tutar.", "example": "sudo whoami"},
+    {"cmd": "exit", "what": "Açık bir su veya sudo login oturumundan çıkar.", "where": "Yönetim işi bittiğinde.", "why": "Root kabuğunda gereğinden uzun kalmazsın.", "example": "exit"}
+   ],
+   "tip": "Parola sorulduğunda terminal karakter göstermez; bu beklenen davranıştır. Yalnızca kendi parolanı doğrulanmış sudo istemine gir."
+  },
+  {
+   "id": "sudo",
+   "title": "Tek komut ve yönetici oturumu",
+   "body": [
+    "`sudo whoami` çıktısı `root` olur; normal `whoami` ise kendi hesabını gösterir. Sudo, yalnızca komutu yetkiyle çalıştırır; komut bittikten sonra kabuğun normal kullanıcı olarak kalır.",
+    "`sudo -l` kendi hesabının hangi komutları çalıştırabileceğini listeler. `sudo -u USER COMMAND` ise izin verildiğinde tek komutu belirtilen kullanıcı olarak çalıştırır. Uygulama kuralları dağıtıma ve kurum politikasına göre değişir; `wheel` yaygın olarak Rocky/Alma'da, `sudo` ise Ubuntu/Debian'da kullanılır.",
+    "`sudo -i` root'un login kabuğunu açar; bu sırada `whoami` root, `HOME` ise `/root` olur. `sudo -s` daha çok mevcut ortamı koruyan bir root kabuğu açar. İkisi de yüksek riskli tam oturumdur: gerekiyorsa kısa tut ve `exit` ile çık. Sudo parola doğrulamasını bir süre önbellekte tutabilir; `sudo -k` bu önbelleği temizler."
+   ],
+   "commands": [
+    {"cmd": "sudo -l", "what": "Hesabın sudo ile kullanabileceği komut ve kuralları listeler.", "where": "Yetkini veya bir izin hatasını incelemeden önce.", "why": "Varsayılanların değil, makinenin gerçek politikasının ne olduğunu gösterir.", "example": "sudo -l"},
+    {"cmd": "sudo -u USER", "what": "Tek bir komutu belirtilen kullanıcı olarak çalıştırır.", "where": "Bir servisin veya görevin başka hesapla çalışmasını sınarken.", "why": "Root oturumu açmadan hedef hesabın yetkileriyle doğrulama yaparsın.", "example": "sudo -u nobody id", "nosim": true},
+    {"cmd": "sudo -i", "what": "Root'un login ortamında yönetici kabuğu açar.", "where": "Birden fazla yönetim komutu gerektiren kısa ve kontrollü oturumda.", "why": "Root'un HOME ve başlangıç ortamını yükler.", "example": "sudo -i", "nosim": true},
+    {"cmd": "sudo -k", "what": "Sudo parola doğrulamasının önbelleğini geçersiz kılar.", "where": "Paylaşılan terminalden ayrılırken veya doğrulamayı hemen yeniden istemek için.", "why": "Önceki doğrulamanın sonraki komutlar için kullanılmasını önler.", "example": "sudo -k", "nosim": true}
+   ],
+   "warn": "`sudo -i` içinde unutulan bir komut da root olarak çalışır. Kısa yönetim işlerinde `sudo COMMAND` kullan; root kabuğundan çıkınca `whoami` ile normal hesaba döndüğünü doğrula."
+  },
+  {
+   "id": "policy",
+   "title": "sudoers: yetki politikasını güvenle düzenle",
+   "body": [
+    "`/etc/sudoers` ve `/etc/sudoers.d/` dosyaları kimin hangi hedef kullanıcı olarak hangi komutları çalıştırabileceğini belirler. Bu dosyaları doğrudan `nano`, `vim` veya `echo` ile düzenleme: tek bir sözdizimi hatası tüm sudo erişimini bozabilir.",
+    "Politikayı denetlemek ve düzenlemek için `sudo visudo` kullan. Ek bir kural dosyası için `sudo visudo -f /etc/sudoers.d/NAME` açılır; `visudo` kaydetmeden önce sözdizimini kontrol eder. Bir kural örneği: `alice ALL=(root) /usr/bin/systemctl restart nginx` — yalnızca belirtilen komuta izin verir.",
+    "`NOPASSWD` parola istemini kaldırır; örneğin `alice ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx`. Bunu yalnızca gerçekten gerekiyorsa, tam komut yoluyla ve dar kapsamda kullan. `ALL` ile tüm komutlara sınırsız yetki vermek veya genel amaçlı bir kabuğu parolasız açmak güvenli bir kural değildir. Değişiklik sonrası `sudo -l` ile sonucu denetle."
+   ],
+   "commands": [
+    {"cmd": "sudo visudo", "what": "Sudo politikasını kilitleyerek ve sözdizimini doğrulayarak düzenler.", "where": "sudoers kuralı ekleme veya değiştirmede.", "why": "Hatalı dosyanın kaydedilip sudo erişiminin bozulma riskini azaltır.", "example": "sudo visudo", "nosim": true},
+    {"cmd": "sudo visudo -f", "what": "Belirtilen sudoers dosyasını güvenli şekilde düzenler.", "where": "Dağıtımın desteklediği sudoers.d kural dosyasını oluştururken.", "why": "Ana dosyaya dokunmadan kuralları ayrı tutar ve sözdizimini denetler.", "example": "sudo visudo -f /etc/sudoers.d/alice", "nosim": true},
+    {"cmd": "sudo visudo -c", "what": "Sudoers dosyalarının sözdizimini kontrol eder.", "where": "Bir politika değişikliğini doğruladıktan sonra.", "why": "Dosyanın okunup ayrıştırılabildiğini gösterir.", "example": "sudo visudo -c", "nosim": true},
+    {"cmd": "sudo -l", "what": "Etkin sudo kurallarını gösterir.", "where": "Bir kural değişikliğinin kullanıcıya uygulanıp uygulanmadığını kontrol ederken.", "why": "Yazılmış kuralı gerçek yetkiyle karşılaştırırsın.", "example": "sudo -l"}
+   ],
+   "danger": "`NOPASSWD: ALL` kullanıcıya parola sormadan tüm komutları çalıştırma yetkisi verir. Gereken tek komutu tam yolu ve gerekli argümanlarıyla sınırla; her kuralı `visudo` ile yazıp `sudo -l` ile doğrula."
+  },
+  {
+   "id": "workflow",
+   "title": "Güvenli yönetici iş akışı",
+   "body": [
+    "Önce normal hesabında hedefi ve etkisini doğrula; yetki gerekiyorsa yalnızca gerekli komutu sudo ile çalıştır. Hata alırsan körlemesine `sudo` eklemek yerine `id`, `sudo -l` ve dosyanın izinlerini incele.",
+    "Yönetim işi bittiğinde root oturumunu `exit` ile kapat. Komut geçmişine parola yazma, sudoers dosyasını doğrudan değiştirme ve anlamadığın komutu root olarak çalıştırma. Gerçek VM'de sistem politikasını değiştirmeden önce snapshot al."
+   ],
+   "commands": [
+    {"cmd": "sudo -l", "what": "İşlemden önce yetki kapsamını doğrular.", "where": "Bir yönetim komutuna başlamadan önce.", "why": "Yetkisiz veya gereğinden geniş kuralı fark ettirir.", "example": "sudo -l"},
+    {"cmd": "sudo whoami", "what": "Komutun root olarak çalıştığını güvenli biçimde doğrular.", "where": "Sudo davranışını öğrenirken.", "why": "Yetki geçişinin yalnızca komut için olduğunu gösterir.", "example": "sudo whoami"},
+    {"cmd": "sudo visudo -c", "what": "Sudoers yapılandırmasının sözdizimini denetler.", "where": "Politika değişikliğinden sonra.", "why": "Bozuk bir kuralı etkin kullanımdan önce yakalar.", "example": "sudo visudo -c", "nosim": true}
+   ],
+   "tip": "En az yetki ilkesini uygula: gereken kullanıcı, hedef hesap, komut ve argümanlardan fazlasına izin verme."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Geçerli hesabını `whoami` ile göster.", "hint": "Root değilsen kendi kullanıcı adın görünür."},
+  "t02": {"text": "UID ve grup üyeliklerini `id` ile incele.", "hint": "Çıktıda `uid=`, `gid=` ve `groups=` alanlarını bul."},
+  "t03": {"text": "`sudo whoami` çalıştır ve komutun root olarak çalıştığını doğrula.", "hint": "Sudo izinliyse çıktı `root` olur."},
+  "t04": {"text": "`sudo id` çalıştır; UID ve grupların normal hesaptan farklı olduğunu gözlemle.", "hint": "Etkili UID 0, root hesabıdır."},
+  "t05": {"text": "`sudo ls -ld /root` ile root'un ev dizininin sahibi ve izinlerini göster.", "hint": "`-d` dizinin kendisini listeler; sudo başka kullanıcının dizinini görmeyi sağlar."},
+  "t06": {"text": "`sudo ls -l /etc/sudoers` ile sudo politika dosyasının izinlerini oku; içeriğini değiştirme.", "hint": "Bu görev yalnızca dosya bilgilerini listeler."},
+  "t07": {"text": "Tahmin et: normal hesabında `whoami` çıktısı ne olur? Çalıştırıp doğrula.", "hint": "Sudo kullanmadığın için kendi kullanıcı adın görünür."},
+  "t08": {"text": "Tahmin et: `sudo whoami` çıktısı ne olur? Çalıştırıp doğrula.", "hint": "İzin verildiyse komut root olarak çalışır."},
+  "t09": {"text": "Hata ayıkla: `~/sudoers.bad` dosyasında herkese tüm komutlar için parolasız yetki veren tehlikeli kural var. Dosyayı şu dar kapsamlı örnekle değiştir: `student ALL=(root) /usr/bin/systemctl restart nginx`. Bu yalnızca taslaktır; gerçek sudoers dosyasına kopyalama.", "hint": "`echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad` kullan."},
+  "t10": {"text": "Mini proje: `~/admin_runbook.txt` dosyasına sırasıyla yetkileri listeleme, nginx durumunu kontrol etme ve parola önbelleğini temizleme komutlarını yaz: `sudo -l`, `sudo systemctl status nginx`, `sudo -k`.", "hint": "İlk satırda `>`, devamında `>>` kullan."},
+  "t11": {"text": "Meydan okuma: `~/sudoers_rule.txt` dosyasına yalnızca nginx servisini yeniden başlatmaya izin veren kuralı yaz: `alice ALL=(root) /usr/bin/systemctl restart nginx`.", "hint": "Kural dosyası taslağıdır; etkinleştirmek için `sudo visudo -f` gerekir."},
+  "t12": {"text": "Meydan okuma: `~/service_plan.txt` içine önce etkin yetkileri kontrol etme, sonra izinli servisi yeniden başlatma adımlarını sırayla yaz.", "hint": "Sırasıyla `sudo -l` ve `sudo systemctl restart nginx` yaz."},
+  "t13": {"text": "TICKET #4310: Alice için yeni kural dosyası açılacak. Gerçek dosyayı değiştirmeden, `~/ticket_4310.txt` içine güvenli düzenleme komutunu yaz.", "hint": "`sudo visudo -f /etc/sudoers.d/alice` kullan."},
+  "t14": {"text": "TICKET #4311: Alice yalnızca nginx'i yeniden başlatabilsin ve bu tek işlemde parola sorulmasın. `~/ticket_4311.txt` dosyasına önce visudo komutunu, sonra dar kapsamlı kuralı yaz. Bu taslağı gerçek sisteme uygulama.", "hint": "`NOPASSWD: ALL` değil, yalnızca `/usr/bin/systemctl restart nginx` için `NOPASSWD` kullan."}
+ },
+ "vm": {
+  "intro": "Bu bölüm gerçek sistemde yetki denetimini inceler; yapılandırmayı değiştirmez. Mümkünse VM snapshot'ı al. Parolanı yalnızca terminalin sudo istemine gir.",
+  "tasks": {
+   "v01": {
+    "title": "Normal kimliğini gör",
+    "text": "`id` ile normal hesabını ve grup üyeliklerini göster.",
+    "blocks": [{"cmd": "id", "expected": "uid=1000(student) gid=1000(student) groups=1000(student)"}],
+    "differs": ["Kullanıcı adı ve UID dağıtıma göre değişir; kendi değerlerin normaldir.", "Ubuntu'da sudo grubu, Rocky/Alma'da çoğunlukla wheel grubu kullanılır."]
+   },
+   "v02": {
+    "title": "Tek komutta sudo",
+    "text": "`sudo whoami` çalıştır ve etkin kullanıcının root olduğunu doğrula.",
+    "blocks": [{"cmd": "sudo whoami", "expected": "root"}],
+    "differs": ["Parola yazarken karakter görünmez; bu beklenir.", "`not in the sudoers file` hatasında hesabına izin verilmiyordur; yöneticiye danış."]
+   },
+   "v03": {
+    "title": "Etkin UID'yi doğrula",
+    "text": "`sudo id -u` ile ayrıcalıklı komutun UID 0 olarak çalıştığını doğrula.",
+    "blocks": [{"cmd": "sudo id -u", "expected": "0"}],
+    "differs": ["`id -u` etkin UID'yi sayı olarak verir; root'un UID'si 0'dır.", "Komut reddedilirse `sudo -l` ile izinleri kontrol et."]
+   },
+   "v04": {
+    "title": "Sudo yetkilerini oku",
+    "text": "`sudo -l` ile hesabının izinli komutlarını listele; hiçbir kuralı değiştirme.",
+    "blocks": [{"cmd": "sudo -l", "expected": "User student may run the following commands"}],
+    "differs": ["Kullanıcı adı ve kurallar dağıtıma göre farklıdır.", "Çıktıda `NOPASSWD` varsa yalnızca hangi komutla sınırlı olduğunu not et; kuralı değiştirme."]
+   },
+   "v05": {
+    "title": "Sudoers sözdizimini denetle",
+    "text": "`sudo visudo -c` ile mevcut sudo yapılandırmasının ayrıştırıldığını doğrula. Bu komut dosyayı değiştirmez.",
+    "blocks": [{"cmd": "sudo visudo -c", "expected": "/etc/sudoers: parsed OK"}],
+    "differs": ["Dağıtım ek dosyaları da denetleyebilir; her dosya için `parsed OK` benzeri bir satır beklenir.", "Hata çıkarsa dosyayı kendin doğrudan düzenleme; sistem yöneticisine bildir."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "`sudo COMMAND` ile `su -` arasındaki temel fark nedir?", "options": ["İkisi de her zaman root parolası ister", "`sudo` izinli tek komutu çalıştırır; `su -` hedef hesabın login oturumunu açar", "`su -` yalnızca dosya okur", "`sudo` kullanıcıyı kalıcı olarak root yapar"], "explain": "`sudo` bir komut için yetki verir; `su -` başka hesabın login kabuğuna geçer."},
+  "q2": {"q": "Sudo kural dosyasını değiştirmek için neden `visudo` kullanılır?", "options": ["Dosyayı şifreler", "Root hesabı oluşturur", "Sözdizimini denetleyip bozuk kuralın kaydedilme riskini azaltır", "Tüm kullanıcıları sudo grubuna ekler"], "explain": "`visudo` düzenleme sırasında kilit kullanır ve kaydetmeden önce sözdizimini kontrol eder."},
+  "q3": {"q": "En az yetki ilkesine uygun sudo kuralı hangisidir?", "options": ["Belirli kullanıcıya yalnızca gereken tam komutu vermek", "Herkese `NOPASSWD: ALL` vermek", "Root parolasını tüm ekibe göndermek", "Her komutu sürekli root kabuğunda çalıştırmak"], "explain": "Yetkiyi doğru kullanıcıya ve gereken tek komuta sınırla; geniş `ALL` kurallarından kaçın."},
+  "q4": {"q": "Ubuntu'da `su -` root parolasını kabul etmiyorsa en olası açıklama nedir?", "options": ["Linux'ta root hesabı yoktur", "sudo her zaman devre dışıdır", "Terminal root oturumlarını desteklemez", "Root hesabı parola ile girişe kapalı olabilir; izinli kullanıcı `sudo` kullanmalıdır"], "explain": "Ubuntu kurulumlarında root hesabı çoğu zaman kilitlidir; yönetim için sudo yetkili kullanıcı kullanılır."}
+ },
+ "summary": [
+  "Root UID 0'dır. `su -` hedef hesabın login oturumunu açar; `sudo COMMAND` izinli tek komutu yetkiyle çalıştırır.",
+  "`sudo -l` gerçek izinleri gösterir; `sudo -i` tam root login kabuğu açar ve iş bitince `exit` ile kapatılmalıdır.",
+  "Sudoers politikasını yalnızca `visudo` ile düzenle ve `visudo -c` ile sözdizimini doğrula.",
+  "`NOPASSWD` ve özellikle `ALL` kapsamını dar tut; yalnızca gerekli kullanıcıya, komuta ve argümanlara izin ver."
+ ],
+ "glossary": [
+  {"term": "root", "meaning": "UID 0 olan, sistem genelinde yönetim yetkisine sahip hesap."},
+  {"term": "sudo", "meaning": "Yetkili kullanıcının belirli komutu başka kullanıcı olarak çalıştırmasını sağlayan araç."},
+  {"term": "su", "meaning": "Geçerli oturumda başka bir kullanıcı hesabına geçiş aracı."},
+  {"term": "sudoers", "meaning": "Sudo yetkilerinin kullanıcı, hedef hesap ve komut kapsamını tanımlayan politika."},
+  {"term": "visudo", "meaning": "Sudoers dosyalarını kilitleyerek ve sözdizimini doğrulayarak düzenleyen araç."},
+  {"term": "NOPASSWD", "meaning": "Belirtilen sudo komutunda parola istemini kaldıran kural seçeneği."}
+ ]
+}

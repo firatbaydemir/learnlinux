@@ -1,0 +1,545 @@
+{
+ "title": "Servis ve Log",
+ "lead": "systemd ve systemctl ile servisleri yönet, basit bir unit dosyası yaz, sorunların nedenini journal ve /var/log içinde bul.",
+ "objectives": [
+  "systemctl ile servisleri kontrol eder, başlatır, durdurur, etkinleştirirsin ve start ile enable farkını bilirsin.",
+  "RHEL/Rocky ve Debian/Ubuntu servis adlarını bilirsin (sshd/ssh, httpd/apache2, firewalld/ufw).",
+  "Bir unit dosyasını ([Unit], [Service], [Install]) okur ve daemon-reload ile kendi unit'ini oluşturursun.",
+  "Logları journalctl ve /var/log içindeki klasik dosyalarla okur, logrotate ve kalıcı journal'ı bilirsin."
+ ],
+ "sections": [
+  {
+   "id": "systemctl",
+   "title": "systemd ve systemctl",
+   "body": [
+    "**systemd**, hemen hemen her modern dağıtımın ilk süreci (PID 1) olup **unit**'leri yönetir. En yaygın türler: `service` (sshd gibi bir daemon), `target` (unit grubu, eski run level gibi) ve `timer` (zamanlanmış iş, cron'un modern alternatifi).",
+    "`systemctl` kontrol aracıdır. **start** servisi **şimdi** çalıştırır, **enable** yalnızca **açılışta** başlamasını sağlar. İkisi bağımsızdır: servis çalışıyor ama disabled olabilir ya da enabled ama durmuş olabilir. `enable --now` ikisini birden yapar.",
+    "`reload` servisin yapılandırmayı yeniden okumasını sağlar (yeniden başlatmadan; her servis desteklemez), `restart` durdurup başlatır. `status`, `is-active` ve `is-enabled` yalnızca okur, her zaman güvenlidir.",
+    "Servisi değiştirmek root yetkisi ister, bu yüzden `sudo` kullan. Tüm systemctl komutları yalnızca gerçek VM'de çalışır; yerleşik terminal bunları çalıştıramaz, simülatörde komutu sadece yazarsın."
+   ],
+   "commands": [
+    {
+     "cmd": "systemctl status",
+     "what": "Bir unit'in durumunu, PID'ini, açılış ayarını ve son log satırlarını gösterir.",
+     "where": "Her servis sorununda ilk adım.",
+     "why": "Tek komut çalışıyor mu, enabled mı ve son mesajları ne, söyler.",
+     "example": "systemctl status sshd --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl start / stop",
+     "what": "Servisi şimdi başlatır veya durdurur; açılış ayarı değişmez.",
+     "where": "Servisi denerken veya bir portu boşaltırken.",
+     "why": "Yeniden başlatmadan anında etki eder.",
+     "example": "sudo systemctl start chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl restart / reload",
+     "what": "restart durdurup başlatır; reload yalnızca yapılandırmayı yeniden okur.",
+     "where": "Bir ayar dosyasını düzenledikten sonra.",
+     "why": "reload bağlantıları korur; restart yedek yoldur.",
+     "example": "sudo systemctl reload chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl enable / disable",
+     "what": "Açılışta başlamayı açar veya kapatır; çalışma durumu değişmez.",
+     "where": "Hep ayakta olması gereken servisler için.",
+     "why": "Yeniden başlatmadan sonra servis sen müdahale etmeden kalkar.",
+     "example": "sudo systemctl enable chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl enable --now",
+     "what": "Servisi açılış için etkinleştirir ve hemen başlatır.",
+     "where": "Yeni bir servis kurarken.",
+     "why": "İki adım tek komutta; en yaygın biçim.",
+     "example": "sudo systemctl enable --now chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl is-active / is-enabled",
+     "what": "Yalnızca active/inactive veya enabled/disabled yazar; çıkış kodu script'te kullanılabilir.",
+     "where": "Script'lerde ve hızlı kontrollerde.",
+     "why": "Kısa cevap, kolay test.",
+     "example": "systemctl is-active sshd && systemctl is-enabled sshd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl list-units --failed",
+     "what": "Failed durumundaki tüm unit'leri listeler.",
+     "where": "Açılıştan sonra veya sistemde bir terslik olduğunda.",
+     "why": "Neyin bozuk olduğuna hızlı genel bakış.",
+     "example": "systemctl list-units --failed --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl mask",
+     "what": "Unit'i /dev/null'a bağlar; bağımlılıklar dahil hiçbir şekilde başlatılamaz.",
+     "where": "Bir servis asla çalışmamalıysa.",
+     "why": "disable'dan daha güçlüdür; geri almak için `unmask`.",
+     "example": "sudo systemctl mask cups.service",
+     "nosim": true
+    }
+   ],
+   "tip": "`systemctl status` çıktısında `Loaded:` satırı enabled/disabled'ı, `Active:` satırı çalışma durumunu gösterir.",
+   "warn": "Tanımadığın bir servise asla stop, disable veya mask uygulama. Yanlış servisi durdurmak makineyi erişilemez yapabilir.",
+   "danger": "**Uzak bir VM'de sshd'yi veya ağ servisini asla durdurma, disable veya mask etme.** Kendi bağlantını kesersin ve geri bağlanamazsın. Bu modülde ssh/cron/chronyd durumunu yalnızca oku."
+  },
+  {
+   "id": "names",
+   "title": "Dağıtımlara göre servis adları",
+   "body": [
+    "Aynı yazılımın unit adı dağıtım ailesine göre değişir. RHEL/Rocky/Alma'da SSH servisi `sshd`, Debian/Ubuntu'da `ssh`'dır (çoğu zaman `sshd` takma adı da çalışır). Web sunucusu RHEL'de `httpd`, Debian/Ubuntu'da `apache2`'dir. Güvenlik duvarı RHEL'de `firewalld`, Ubuntu'da `ufw`'dur.",
+    "Cron servisi RHEL'de `crond`, Debian/Ubuntu'da `cron`'dur; zaman servisi `chronyd` (RHEL) veya `chrony`/`systemd-timesyncd`'dir (Ubuntu). Ad bulunamazsa `list-unit-files` ile ara. Hangi ailede olduğunu `/etc/os-release` söyler."
+   ],
+   "commands": [
+    {
+     "cmd": "cat /etc/os-release",
+     "what": "Dağıtım adını ve sürümünü gösterir.",
+     "where": "Bir servis veya log adı kullanmadan önce.",
+     "why": "ID ve ID_LIKE, RHEL ailesinde mi Debian ailesinde mi olduğunu söyler.",
+     "example": "cat /etc/os-release"
+    },
+    {
+     "cmd": "systemctl list-units --type=service",
+     "what": "Şu an yüklü servisleri durumlarıyla listeler.",
+     "where": "Makinede neyin çalıştığını öğrenmek istediğinde.",
+     "why": "Tahmin etmek yerine gerçek adları görürsün.",
+     "example": "systemctl list-units --type=service --state=running --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl list-unit-files",
+     "what": "Kurulu tüm unit dosyalarını açılış ayarıyla listeler.",
+     "where": "Ad bilinmiyorsa veya servis henüz yüklenmediyse.",
+     "why": "Durmuş ve disabled servisleri de bulur.",
+     "example": "systemctl list-unit-files --type=service --no-pager | grep -E 'ssh|cron|chrony'",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl list-timers",
+     "what": "Timer unit'lerini sonraki ve son çalışma zamanıyla listeler.",
+     "where": "systemd'in zamanlanmış işlerini ararken.",
+     "why": "Timer'lar birçok cron işinin yerini alır.",
+     "example": "systemctl list-timers --no-pager",
+     "nosim": true
+    }
+   ],
+   "tip": "Bir ailede yaygın olan ad diğerinde olmayabilir. Sekme tamamlama kullan: `systemctl status ssh<TAB>`."
+  },
+  {
+   "id": "unitfile",
+   "title": "Unit dosyaları ve kendi servisin",
+   "body": [
+    "Bir servis, üç bölümlü bir **unit dosyası** ile tanımlanır. `[Unit]` açıklama ve sıralamayı, `[Service]` ne çalıştırılacağını (`ExecStart=` **tam yolla**) ve nasıl çalıştırılacağını (`Restart=on-failure` çökünce yeniden başlatır), `[Install]` enable edilince nereye bağlanacağını (`WantedBy=multi-user.target`) içerir.",
+    "Paketler unit'lerini `/usr/lib/systemd/system` içine koyar (Debian'da ayrıca `/lib/systemd/system`). **Bunları düzenleme.** Kendi unit'lerin ve override'ların `/etc/systemd/system` içine gider; bu dizin önceliklidir.",
+    "Her yeni veya değişen unit dosyasından sonra `sudo systemctl daemon-reload` çalıştır, böylece systemd dosyaları yeniden okur. Yoksa uyarı alırsın veya eski sürüm çalışır. Minimal örnek:",
+    "`[Unit]` `Description=Linux Lab demo` — `[Service]` `ExecStart=/usr/bin/sleep 3600` `Restart=on-failure` — `[Install]` `WantedBy=multi-user.target`. VM alıştırmaları tam olarak bu unit'i `linux-lab-demo.service` adıyla kurar ve tekrar siler."
+   ],
+   "commands": [
+    {
+     "cmd": "systemctl cat",
+     "what": "Unit dosyasını drop-in override'larla birlikte yazdırır.",
+     "where": "Bir servisin gerçekte ne çalıştırdığını görmek istediğinde.",
+     "why": "ExecStart'ı ve dosya yolunu aramadan gösterir.",
+     "example": "systemctl cat sshd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemctl edit",
+     "what": "Orijinale dokunmadan /etc/systemd/system içinde drop-in override oluşturur.",
+     "where": "Paketten gelen bir servisi değiştirirken.",
+     "why": "Paket güncellemelerinde kaybolmaz; daemon-reload otomatik yapılır.",
+     "example": "sudo systemctl edit chronyd",
+     "nosim": true
+    },
+    {
+     "cmd": "systemd-analyze verify",
+     "what": "Unit dosyasında sözdizimi hatası arar.",
+     "where": "Yeni bir unit'i başlatmadan önce.",
+     "why": "Exec_Start gibi yazım hatalarını veya göreli yolu bulur.",
+     "example": "systemd-analyze verify /etc/systemd/system/linux-lab-demo.service",
+     "nosim": true
+    },
+    {
+     "cmd": "systemd-analyze blame",
+     "what": "Unit'leri açılışta harcadıkları süreye göre sıralar.",
+     "where": "Açılış yavaşsa.",
+     "why": "En yavaş unit'ler en üstte görünür.",
+     "example": "systemd-analyze blame --no-pager | head -n 10",
+     "nosim": true
+    }
+   ],
+   "tip": "Tipik unit hataları: `ExecStart=sleep 3600` (göreli yol; `/usr/bin/sleep` gerekir), anahtar adında yazım hatası, eksik `[Install]` (o zaman `enable` kurulum yapılandırması olmadığını söyler).",
+   "warn": "Unit dosyalarını /usr/lib/systemd/system içine kopyalama ve sistemin unit'lerini silme. Yalnızca /etc/systemd/system içindeki kendi `linux-lab-demo.service` dosyanla çalış."
+  },
+  {
+   "id": "journal",
+   "title": "journalctl ve çekirdek logu",
+   "body": [
+    "systemd tüm mesajları **journal** içinde toplar. `journalctl` onu okur. Filtreleri birleştir: unit için `-u`, geçerli açılış için `-b`, err ve daha kötü öncelik için `-p err`, zaman için `--since`, son 50 satır için `-n 50`, canlı izlemek için `-f` (Ctrl+C ile çık).",
+    "`journalctl -xe` sona ek açıklamalarla atlar; başarısız bir başlatmadan sonra systemctl'in önerdiği budur. Script'lerde ve çıktıyı yapıştırırken `--no-pager` kullan.",
+    "Varsayılan olarak journal yalnızca bellekte (`/run/log/journal`) tutulabilir ve yeniden başlatmada kaybolur. **Kalıcı journal** için `/var/log/journal` oluştur (veya `/etc/systemd/journald.conf` içinde `Storage=persistent` yap) ve journald'yi yeniden başlat. Ubuntu'da zaten kalıcıdır; birçok RHEL sisteminde değildir.",
+    "`journalctl --disk-usage` journal'ın ne kadar yer kapladığını gösterir. `dmesg` çekirdek halka tamponunu yazdırır (donanım, sürücüler, disk hataları); bazı sistemlerde `sudo` ister."
+   ],
+   "commands": [
+    {
+     "cmd": "journalctl -u",
+     "what": "Tek bir unit'in logunu gösterir.",
+     "where": "Servis başlamadığında veya yanlış davrandığında.",
+     "why": "Tüm sistem değil, yalnızca bu servisin mesajları.",
+     "example": "journalctl -u sshd --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -f",
+     "what": "Yeni log satırlarını canlı izler.",
+     "where": "Servisi yeniden başlatırken veya hatayı tekrarlarken.",
+     "why": "Tepkiyi anında görürsün; Ctrl+C ile çık.",
+     "example": "journalctl -u sshd -f",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -b",
+     "what": "Yalnızca geçerli açılışı gösterir (`-b -1` bir öncekini).",
+     "where": "Yeniden başlatma veya çökmeden sonra.",
+     "why": "Eski gürültüyü eler.",
+     "example": "journalctl -b --no-pager | tail -n 20",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -p err",
+     "what": "Önceliğe göre süzer: err ve daha kötüsü.",
+     "where": "Gerçek sorunların hızlı listesi için.",
+     "why": "Info ve debug mesajlarını gizler.",
+     "example": "journalctl -p err -b --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl --since",
+     "what": "Bir zamandan itibaren kayıtları gösterir (`--until` bitiş için).",
+     "where": "Olayın yaklaşık zamanını biliyorsan.",
+     "why": "Çıktıyı küçük tutar.",
+     "example": "journalctl --since \"1 hour ago\" --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -n 50 --no-pager",
+     "what": "Son 50 satırı sayfalayıcı olmadan yazdırır.",
+     "where": "Hızlı kontroller ve bilete yapıştırmak için.",
+     "why": "less içinde kaydırma yok, kopyalaması kolay.",
+     "example": "journalctl -n 50 --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl -xe",
+     "what": "Journal'ın sonunu açıklamalarla açar.",
+     "where": "Başarısız bir başlatmanın hemen ardından.",
+     "why": "systemd hata mesajında bunu kendisi önerir.",
+     "example": "journalctl -xe --no-pager",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl --disk-usage",
+     "what": "Journal'ın kullandığı disk alanını gösterir.",
+     "where": "/var dolduğunda.",
+     "why": "Yalnızca okur, güvenlidir.",
+     "example": "journalctl --disk-usage",
+     "nosim": true
+    },
+    {
+     "cmd": "journalctl --vacuum-time",
+     "what": "Verilen süreden eski journal kayıtlarını siler.",
+     "where": "Journal çok yer kaplıyorsa.",
+     "why": "Yer açar, ama eski loglar kalıcı olarak gider.",
+     "example": "sudo journalctl --vacuum-time=2weeks",
+     "nosim": true
+    },
+    {
+     "cmd": "dmesg",
+     "what": "Çekirdek mesajlarını yazdırır.",
+     "where": "Disk, USB, ağ kartı veya bellek sorunlarında.",
+     "why": "Çekirdek donanım sorunlarını önce burada bildirir.",
+     "example": "sudo dmesg | tail -n 20",
+     "nosim": true
+    }
+   ],
+   "tip": "Filtreleri birleştir: `journalctl -u sshd -p err --since \"1 hour ago\" --no-pager`.",
+   "warn": "`--vacuum-time` ve `--vacuum-size` logları kalıcı olarak siler. Hâlâ inceleme için logları gereken bir VM'de çalıştırma."
+  },
+  {
+   "id": "classic",
+   "title": "Klasik log dosyaları, rsyslog ve logrotate",
+   "body": [
+    "Journal'ın yanında `/var/log` içinde çoğunlukla **rsyslog**'un yazdığı metin logları vardır. Adlar değişir: RHEL/Rocky'de `/var/log/messages` (genel) ve `/var/log/secure` (giriş ve sudo); Debian/Ubuntu'da `/var/log/syslog` ve `/var/log/auth.log`. Bu dosyaları yalnızca root veya `adm` grubu okuyabilir, bu yüzden `sudo` kullan.",
+    "Tipik araçlar: `tail -f` dosyayı izler, `grep -i error` arar, `less` içinde gezinirsin (`/kelime` arar, `q` çıkar). Birleştir: `sudo grep -i error /var/log/messages | tail -n 20`.",
+    "**logrotate** logların sonsuza dek büyümesini önler: `/etc/logrotate.conf` ve `/etc/logrotate.d/` içindeki kurallara göre eski dosyaları yeniden adlandırır, sıkıştırır ve siler. Bir kuralda log yolu ve `weekly`, `rotate 4` (4 eski kopya tut), `compress`, `missingok`, `notifempty` gibi seçenekler vardır. Günlük olarak bir timer veya cron başlatır.",
+    "Simülatörde bir RHEL makinesinin dosyaları vardır; logları okumayı burada çalışabilirsin."
+   ],
+   "commands": [
+    {
+     "cmd": "ls /var/log",
+     "what": "Log dosyalarını ve klasörlerini listeler.",
+     "where": "Hangi logların olduğunu öğrenmek için.",
+     "why": "Dosya adları dağıtıma göre değişir.",
+     "example": "ls /var/log"
+    },
+    {
+     "cmd": "sudo cat /var/log/secure",
+     "what": "Yalnızca root'un okuyabildiği logu okur (Ubuntu: `/var/log/auth.log`).",
+     "where": "Girişleri ve sudo'yu incelerken.",
+     "why": "Kimin girdiğini ve kimin başarısız olduğunu gösterir.",
+     "example": "sudo cat /var/log/secure"
+    },
+    {
+     "cmd": "tail -f",
+     "what": "Dosyanın sonunu gösterir ve yeni satırları izler.",
+     "where": "Bir servis çalışırken veya test edilirken.",
+     "why": "Canlı görünüm; Ctrl+C ile çık.",
+     "example": "sudo tail -f /var/log/messages",
+     "nosim": true
+    },
+    {
+     "cmd": "grep -i",
+     "what": "Satırları büyük/küçük harf ayırmadan arar; `-c` sayar.",
+     "where": "Büyük bir logda hataları bulmak için.",
+     "why": "Binlerce satırı ilgili olanlara indirir.",
+     "example": "grep -i error /var/log/messages"
+    },
+    {
+     "cmd": "less",
+     "what": "Dosyayı sayfa sayfa gösterir; `/kelime` arar, `q` çıkar.",
+     "where": "Uzun loglar için.",
+     "why": "Terminali doldurmadan kaydırma.",
+     "example": "less /var/log/messages"
+    },
+    {
+     "cmd": "logrotate -d",
+     "what": "Debug modu: logrotate'in ne yapacağını yapmadan gösterir.",
+     "where": "/etc/logrotate.d içine yeni bir kural yazdıktan sonra.",
+     "why": "Kuralı güvenle test eder.",
+     "example": "sudo logrotate -d /etc/logrotate.conf",
+     "nosim": true
+    }
+   ],
+   "tip": "Hataları saymak için: `grep -ci error /var/log/messages`. Uzun bir aramanın yalnızca son satırlarını görmek için `| tail -n 5` ekle.",
+   "warn": "Bir servis yazarken log dosyasını `rm` veya `> file` ile asla silme ya da kesme; bunu logrotate'e bırak. Kanıtı silmek sonraki hata ayıklamayı da imkansız kılar."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Makinenin log dosyalarını `ls /var/log` ile listele.",
+   "hint": "`messages` ve `secure` dosyalarına bak."
+  },
+  "t02": {
+   "text": "Burada systemctl çalıştıramazsın; bir VM'de sshd durumunu göstermek için kullanacağın komutu bir dosyaya yaz: `echo \"systemctl status sshd\" > ~/answer_status.txt`.",
+   "hint": "Dosyada `systemctl status sshd` (veya `ssh`) aranır."
+  },
+  "t03": {
+   "text": "Genel logdaki hata satırlarını `grep -i error /var/log/messages` ile bul.",
+   "hint": "`-i` büyük/küçük harfi yok sayar, yani ERROR da bulunur."
+  },
+  "t04": {
+   "text": "`error` içeren satırları (harf duyarsız) `grep -ci error /var/log/messages` ile say.",
+   "hint": "`-c` satırlar yerine sayıyı yazdırır."
+  },
+  "t05": {
+   "text": "Yalnızca root'un okuyabildiği giriş logunu oku: `sudo cat /var/log/secure`.",
+   "hint": "sudo olmadan Permission denied alırsın; `student` wheel grubunda."
+  },
+  "t06": {
+   "text": "`~/lab/systemctl_status.txt` dosyası `systemctl status` çıktısının kaydıdır. `Loaded` satırını `grep Loaded ~/lab/systemctl_status.txt` ile göster. Servis enabled mı?",
+   "hint": "`Loaded:` satırında `enabled` veya `disabled` ara."
+  },
+  "t07": {
+   "text": "`~/lab/failed_units.txt` kaydedilmiş bir `systemctl list-units --failed` çıktısıdır. Yalnızca unit adlarını `~/lab/failed_names.txt` dosyasına yaz: `cut -d\" \" -f1 ~/lab/failed_units.txt | grep service > ~/lab/failed_names.txt`.",
+   "hint": "`cut -d\" \" -f1` ilk sütunu alır, `grep service` başlığı ve özet satırını eler."
+  },
+  "t08": {
+   "text": "sshd logunun son 50 satırını sayfalayıcısız gösteren journalctl komutunu `~/answer_journal.txt` dosyasına yaz, örneğin `echo 'journalctl -u sshd -n 50 --no-pager' > ~/answer_journal.txt`.",
+   "hint": "`-u` unit, `-n 50` son 50 satır, `--no-pager` less yok."
+  },
+  "t09": {
+   "text": "`~/lab/logrotate_demo.conf` bir logrotate kuralıdır. `rotate` satırını `grep rotate ~/lab/logrotate_demo.conf` ile göster. Kaç eski kopya tutuluyor?",
+   "hint": "`rotate 4` dört eski kopya demektir; `weekly` haftalık döndürme demektir."
+  },
+  "t10": {
+   "text": "Tahmin et: `/var/log/messages` dosyasının son iki satırı hangi mesajlar? Önce tahmin et, sonra `tail -n 2 /var/log/messages` ile kontrol et.",
+   "hint": "`tail -n 2` son iki satırı yazar; en yeni kayıt en altta olur."
+  },
+  "t11": {
+   "text": "Tahmin et: `~/lab/journal_sample.txt` içinde kaç satır `Failed` kelimesini içeriyor (büyük/küçük harf duyarlı, yani FAILURE sayılmaz)? Önce tahmin et, sonra `grep -c Failed ~/lab/journal_sample.txt` ile doğrula.",
+   "hint": "Gözle saymak istersen önce `cat ~/lab/journal_sample.txt` ile dosyayı oku."
+  },
+  "t12": {
+   "text": "Tahmin et: `/var/log/secure` dosyasının sahibi kim ve onu kimler okuyabilir? `ls -l /var/log/secure` ile kontrol et.",
+   "hint": "`-rw-------` modu yalnızca sahibin (root) okuyup yazabileceği anlamına gelir."
+  },
+  "t13": {
+   "text": "Debug: `~/lab/broken1.service` başlamaz, çünkü anahtar yanlış yazılmış ve komutta tam yol yok. Dosyayı (örneğin `printf` ve `>` ile) yeniden yaz; `ExecStart=/usr/bin/sleep 3600` içersin.",
+   "hint": "`cat ~/lab/broken1.service` hatayı gösterir; anahtar `ExecStart`, yol `/usr/bin/sleep` olmalı."
+  },
+  "t14": {
+   "text": "Debug: `~/lab/broken2.service` içinde `[Install]` bölümü olmadığı için `systemctl enable` şikayet eder. `printf` ve `>>` ile `[Install]` ve `WantedBy=multi-user.target` ekle.",
+   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`."
+  },
+  "t15": {
+   "text": "Mini proje: `~/lab/linux-lab-demo.service` dosyasını `[Unit]` (Description), `[Service]` (`ExecStart=/usr/bin/sleep 3600`) ve `[Install]` (`WantedBy=multi-user.target`) ile oluştur. Sonra üç VM adımını (`/etc/systemd/system/` içine kopyala, `daemon-reload`, `enable --now linux-lab-demo.service`) satır satır `~/lab/install_steps.txt` dosyasına yaz.",
+   "hint": "Satır sonları için `printf` ve `\\n` kullan. Adım dosyası yalnızca metindir; hiçbir şey kurulmaz."
+  },
+  "t16": {
+   "text": "Challenge: `~/lab/incident.txt` adlı bir olay raporu oluştur. Önce `/var/log/messages` içindeki tüm hata satırlarını (harf duyarsız) içine yaz, sonra `/var/log/secure` içeriğini ekle. Rapor en az 4 satır olmalı.",
+   "hint": "`grep -i error ... > file`, sonra `sudo cat ... >> file` (yönlendirmeyi kendi kabuğun yapar, bu yüzden home içindeki dosya sorun olmaz)."
+  },
+  "t17": {
+   "text": "TICKET #5610 — Bir müşteri, web sunucusunun yeniden başlatmadan sonra kalkmadığını bildiriyor. Bir RHEL VM'de çalıştıracağın üç komutu `~/ticket_5610.txt` dosyasına satır satır yaz: durumu göster (`systemctl status httpd`), logunu oku (`journalctl -u httpd -n 50 --no-pager`) ve etkinleştirip başlat (`sudo systemctl enable --now httpd`).",
+   "hint": "Satırlar arasında `\\n` olan tek bir `printf` kullan. Ubuntu'da ad `apache2` olurdu."
+  }
+ },
+ "vm": {
+  "intro": "Bu görevleri kendi VM'inde yaparsın. Çoğu yalnızca okur. 4. görev `sleep 3600` çalıştıran zararsız bir unit oluşturur. **Önce snapshot al** ve uzak bir VM'de sshd'yi veya ağ servisini asla durdurma ya da değiştirme. RHEL/Rocky'de `sshd`, `crond`, `chronyd`; Ubuntu'da `ssh`, `cron`, `chrony` kullan.",
+  "tasks": {
+   "v01": {
+    "title": "Servis durumunu oku",
+    "text": "ssh, cron ve zaman servisini hiçbir şeyi değiştirmeden kontrol et. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "# Rocky/RHEL\nsystemctl status sshd --no-pager\nsystemctl is-active crond chronyd\nsystemctl is-enabled sshd\n# Ubuntu\nsystemctl status ssh --no-pager\nsystemctl is-active cron\nsystemctl is-enabled ssh",
+      "expected": "● sshd.service - OpenSSH server daemon\n     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; ...)\n     Active: active (running) since ...\nactive\nactive\nenabled"
+     },
+     {
+      "cmd": "systemctl list-units --failed --no-pager",
+      "expected": "0 loaded units listed."
+     }
+    ],
+    "differs": [
+     "Ubuntu'da `Unit sshd.service could not be found`: `sshd` yerine `ssh` kullan.",
+     "`chronyd` bulunamazsa sistemin `systemd-timesyncd` kullanıyordur (Ubuntu); `systemctl status systemd-timesyncd` dene.",
+     "Listedeki failed unit'ler bu alıştırmanın hatası değildir; sadece not al."
+    ]
+   },
+   "v02": {
+    "title": "Journal'ı oku",
+    "text": "Journal'ı filtrelerle oku ve ne kadar yer kapladığına bak. Çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "journalctl -b -n 10 --no-pager\njournalctl -p err -b --no-pager | tail -n 5\njournalctl --since \"1 hour ago\" --no-pager | wc -l\njournalctl --disk-usage",
+      "expected": "... linux-lab systemd[1]: Started ...\n1234\nArchived and active journals take up 48.0M in the file system."
+     }
+    ],
+    "differs": [
+     "`Permission denied` veya `systemd-journal` grubu ile ilgili bir ipucu: komutları `sudo` ile çalıştır.",
+     "`-p err` için `-- No entries --` iyi haberdir: hata yoktu.",
+     "Journal yalnızca geçerli açılışı içeriyorsa henüz kalıcı değildir (bak `ls /var/log/journal`)."
+    ]
+   },
+   "v03": {
+    "title": "Klasik loglar ve dmesg",
+    "text": "Genel ve giriş logunun sonunu, sonra çekirdek logunu oku. Kendi ailenin dosya adlarını kullan.",
+    "blocks": [
+     {
+      "cmd": "# Rocky/RHEL\nsudo tail -n 5 /var/log/messages\nsudo tail -n 5 /var/log/secure\n# Ubuntu\nsudo tail -n 5 /var/log/syslog\nsudo tail -n 5 /var/log/auth.log\n# both\nsudo dmesg | tail -n 5\nls /etc/logrotate.d",
+      "expected": "Nov 12 10:01:02 linux-lab systemd[1]: ...\nNov 12 10:02:11 linux-lab sudo[2101]: student : TTY=pts/0 ; ...\n[ 12.345678] ..."
+     }
+    ],
+    "differs": [
+     "syslog/messages için `No such file or directory`: diğer ailenin dosya adı ya da rsyslog kurulu değil. Aynı veri journal'da vardır.",
+     "Ubuntu'da `dmesg` sudo olmadan engellenmiş olabilir; `sudo dmesg` kullan."
+    ]
+   },
+   "v04": {
+    "title": "Kendi servisini oluştur",
+    "text": "`linux-lab-demo.service` oluştur, yükle, başlat ve durumuna ile loguna bak. **Önce snapshot.** Unit yalnızca `sleep 3600` çalıştırır.",
+    "blocks": [
+     {
+      "cmd": "sudo tee /etc/systemd/system/linux-lab-demo.service > /dev/null <<'EOF'\n[Unit]\nDescription=Linux Lab demo\n\n[Service]\nExecStart=/usr/bin/sleep 3600\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\nEOF\nsudo systemctl daemon-reload\nsudo systemctl start linux-lab-demo.service\nsystemctl status linux-lab-demo.service --no-pager\nsystemctl is-enabled linux-lab-demo.service\njournalctl -u linux-lab-demo.service -n 5 --no-pager",
+      "expected": "● linux-lab-demo.service - Linux Lab demo\n     Loaded: loaded (/etc/systemd/system/linux-lab-demo.service; disabled; ...)\n     Active: active (running) since ...\ndisabled\n... systemd[1]: Started Linux Lab demo."
+     }
+    ],
+    "differs": [
+     "`Failed to start ... No such file or directory`: yolu `which sleep` ile kontrol et; bazı sistemlerde `/bin/sleep`'tir.",
+     "`is-enabled` `disabled` der, çünkü yalnızca start kullandın; start ile enable farkı budur.",
+     "Heredoc çalışmazsa dosyayı iki adımda kopyala: home içine yaz ve `sudo cp` ile /etc/systemd/system/ içine koy."
+    ]
+   },
+   "v05": {
+    "title": "Servisini tekrar kaldır",
+    "text": "Yalnızca `linux-lab-demo.service` dosyasını durdur ve sil, sonra systemd'in onu artık tanımadığını kontrol et. Başka hiçbir unit'e dokunma.",
+    "blocks": [
+     {
+      "cmd": "sudo systemctl stop linux-lab-demo.service\nsudo rm /etc/systemd/system/linux-lab-demo.service\nsudo systemctl daemon-reload\nsystemctl status linux-lab-demo.service --no-pager",
+      "expected": "Unit linux-lab-demo.service could not be found."
+     }
+    ],
+    "differs": [
+     "`enable` de yaptıysan, `rm` öncesinde `sudo systemctl disable linux-lab-demo.service` çalıştır.",
+     "`Unit ... not found` veya `inactive (dead)`, servisin gittiği veya çalışmadığı anlamına gelir.",
+     "`rm` içindeki dosya adını iki kez kontrol et: tam olarak demo dosyası olmalı."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`systemctl start` ile `systemctl enable` arasındaki fark nedir?",
+   "options": [
+    "Aynıdırlar",
+    "start şimdi çalıştırır, enable açılışta başlamasını sağlar",
+    "enable şimdi çalıştırır, start açılışta başlamasını sağlar",
+    "start paketi kurar, enable kaldırır"
+   ],
+   "explain": "start şimdi etki eder, enable yalnızca açılış ayarını değiştirir. `enable --now` ikisini yapar."
+  },
+  "q2": {
+   "q": "Web sunucusu servisi (RHEL, Ubuntu) için doğru çift hangisi?",
+   "options": [
+    "apache2, httpd",
+    "nginx, httpd",
+    "httpd, apache2",
+    "httpd, ssh"
+   ],
+   "explain": "RHEL/Rocky `httpd`, Debian/Ubuntu `apache2` kullanır. Aynısı sshd/ssh ve firewalld/ufw için de geçerlidir."
+  },
+  "q3": {
+   "q": "Hangi komut yalnızca geçerli açılışın hatalarını gösterir?",
+   "options": [
+    "journalctl -b -p err",
+    "journalctl -f",
+    "journalctl --vacuum-time=1d",
+    "systemctl status -b"
+   ],
+   "explain": "`-b` geçerli açılışla, `-p err` error ve daha kötü öncelikle sınırlar."
+  },
+  "q4": {
+   "q": "/etc/systemd/system/linux-lab-demo.service dosyasını oluşturdun. İlk olarak ne yaparsın?",
+   "options": [
+    "Makineyi yeniden başlatırım",
+    "Unit'i mask ederim",
+    "/usr/lib/systemd/system içindeki dosyaları silerim",
+    "systemctl daemon-reload çalıştırırım"
+   ],
+   "explain": "daemon-reload, systemd'in yeni veya değişen unit dosyasını okumasını sağlar."
+  }
+ },
+ "summary": [
+  "`start`/`stop` şimdi, `enable`/`disable` açılışta etki eder, `enable --now` ikisini yapar.",
+  "Adlar değişir: sshd/ssh, httpd/apache2, firewalld/ufw, crond/cron; `/etc/os-release` ile kontrol et.",
+  "Bir unit'te `[Unit]`, `[Service]` (tam yollu `ExecStart`, `Restart=`), `[Install]` vardır; kendi unit'lerin `/etc/systemd/system` içine gider ve ardından `daemon-reload` gelir.",
+  "`journalctl -u`, `-b`, `-p err`, `--since`, `-n 50 --no-pager`, `-f`, `-xe` nedeni bulur; `--disk-usage` boyutu gösterir.",
+  "Klasik loglar: RHEL `messages`/`secure`, Debian/Ubuntu `syslog`/`auth.log`; logrotate bunları `/etc/logrotate.d` kurallarıyla döndürür.",
+  "Uzak bir VM'de sshd'yi asla durdurma; hâlâ ihtiyacın olan logları asla silme ya da vacuum yapma."
+ ],
+ "glossary": [
+  {"term": "systemd", "meaning": "Servisleri başlatan ve denetleyen init sistemi (PID 1)."},
+  {"term": "unit", "meaning": "systemd'in yönettiği nesne: service, target, timer, mount ve daha fazlası."},
+  {"term": "target", "meaning": "Bir sistem durumunu tanımlayan unit grubu, örn. multi-user.target."},
+  {"term": "timer", "meaning": "Başka bir unit'i zamanlamayla başlatan unit; cron'a alternatif."},
+  {"term": "daemon-reload", "meaning": "Unit dosyaları değiştikten sonra systemd'in onları yeniden okumasını sağlar."},
+  {"term": "mask", "meaning": "Unit'i /dev/null'a bağlar, böylece başlatılamaz."},
+  {"term": "journal", "meaning": "systemd'in ikili log veritabanı; journalctl ile okunur."},
+  {"term": "rsyslog", "meaning": "Metin logları /var/log içine yazan klasik syslog daemon'u."},
+  {"term": "logrotate", "meaning": "Eski log dosyalarını kurallarla döndüren, sıkıştıran ve silen araç."}
+ ]
+}

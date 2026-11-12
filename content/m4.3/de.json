@@ -1,0 +1,146 @@
+{
+ "title": "Identität wechseln: su, sudo und sudoers",
+ "lead": "Lerne, wann und wie du root-Rechte nutzt: Bevorzuge sudo für einzelne Befehle und verwalte Regeln sicher mit visudo.",
+ "objectives": [
+  "Erkläre, dass root die UID 0 hat, den Unterschied zwischen `su -` und `sudo` sowie welches Passwort die Befehle verlangen.",
+  "Führe einen einzelnen Admin-Befehl mit `sudo` aus und prüfe deine Rechte mit `sudo -l`.",
+  "Öffne mit `sudo -i` eine vollständige root-Login-Shell, schließe sie mit `exit` und bleibe nicht unnötig root.",
+  "Weiß, dass `/etc/sudoers` die Rechte festlegt und ausschließlich mit `visudo` bearbeitet werden darf."
+ ],
+ "sections": [
+  {
+   "id": "identity",
+   "title": "Wer ist root? su und sudo",
+   "body": [
+    "Unter Linux ist **root** der Superuser mit UID 0. Root kann Systemdateien und andere Konten verwalten; ein falscher Befehl kann großen Schaden verursachen. Bleib für alltägliche Aufgaben in deinem normalen Konto und nutze Admin-Rechte nur, wenn sie nötig sind.",
+    "`su - USER` wechselt zum Zielkonto und fragt nach dessen Passwort. `su -` wechselt zu root, aber auf Systemen wie Ubuntu kann die Passwort-Anmeldung für root deaktiviert sein. `-` lädt die Login-Umgebung des Zielbenutzers (zum Beispiel `HOME` und Profil).",
+    "`sudo COMMAND` ermöglicht einem berechtigten Benutzer, sich mit dem eigenen Passwort zu authentifizieren und nur den angegebenen Befehl als einen anderen Benutzer, meist root, auszuführen. Eine sudo-Regel kann auch ohne Passwortabfrage eingerichtet sein. Einen einzelnen Befehl mit sudo auszuführen ist sicherer, als eine root-Sitzung offen zu halten."
+   ],
+   "commands": [
+    {"cmd": "whoami", "what": "Zeigt den aktuellen effektiven Benutzernamen.", "where": "Wenn du prüfen möchtest, unter welchem Konto ein Befehl läuft.", "why": "Verhindert Aktionen mit dem falschen Konto, besonders nach einem Rechtewechsel.", "example": "whoami"},
+    {"cmd": "id", "what": "Zeigt UID, primäre GID und Gruppenmitgliedschaften.", "where": "Wenn du prüfst, welche Gruppen sudo-Zugriff gewähren.", "why": "Prüft Benutzer- und Gruppenidentitäten gemeinsam.", "example": "id"},
+    {"cmd": "su -", "what": "Öffnet roots Login-Sitzung; dafür ist das root-Passwort nötig.", "where": "Nur wenn das root-Konto aktiviert ist und eine längere Admin-Sitzung wirklich nötig ist.", "why": "Lädt die Login-Umgebung; alle Befehle der Sitzung laufen als root.", "example": "su -", "nosim": true},
+    {"cmd": "sudo COMMAND", "what": "Führt einen erlaubten Befehl als ein anderes Konto aus.", "where": "Wenn von einem normalen Konto aus eine bestimmte administrative Aktion nötig ist.", "why": "Hält sowohl die Berechtigung als auch ihren Umfang begrenzt.", "example": "sudo whoami"},
+    {"cmd": "exit", "what": "Beendet eine geöffnete su- oder sudo-Login-Sitzung.", "where": "Wenn die administrative Arbeit abgeschlossen ist.", "why": "Verhindert, dass du länger als nötig in einer root-Shell bleibst.", "example": "exit"}
+   ],
+   "tip": "Bei der Passworteingabe im Terminal erscheinen keine Zeichen; das ist normal. Gib dein eigenes Passwort nur an einer vertrauenswürdigen sudo-Abfrage ein."
+  },
+  {
+   "id": "sudo",
+   "title": "Einzelner Befehl und Admin-Sitzungen",
+   "body": [
+    "`sudo whoami` gibt `root` aus; ein normales `whoami` zeigt dein eigenes Konto. Sudo erhöht nur die Berechtigung dieses Befehls. Danach bleibt deine Shell ein normaler Benutzer.",
+    "`sudo -l` listet die Befehle auf, die dein Konto ausführen darf. `sudo -u USER COMMAND` führt mit erlaubter Richtlinie einen einzelnen Befehl als angegebenen Benutzer aus. Die Regeln hängen von Distribution und Organisationsrichtlinie ab; `wheel` ist bei Rocky/Alma und `sudo` bei Ubuntu/Debian verbreitet.",
+    "`sudo -i` öffnet roots Login-Shell; `whoami` zeigt dann root und `HOME` ist `/root`. `sudo -s` öffnet eine root-Shell, die mehr von der aktuellen Umgebung übernimmt. Beide sind vollständige Sitzungen mit hohem Risiko: Halte sie kurz und beende sie mit `exit`. Sudo kann die Authentifizierung eine Weile zwischenspeichern; `sudo -k` verwirft diesen Cache."
+   ],
+   "commands": [
+    {"cmd": "sudo -l", "what": "Listet die Befehle und Regeln auf, die deinem Konto mit sudo zur Verfügung stehen.", "where": "Bevor du Berechtigungen oder einen Zugriffsfehler untersuchst.", "why": "Zeigt die tatsächliche Richtlinie des Systems statt bloßer Annahmen.", "example": "sudo -l"},
+    {"cmd": "sudo -u USER", "what": "Führt einen einzelnen Befehl als den angegebenen Benutzer aus.", "where": "Wenn du das Verhalten eines Dienstes oder Auftrags unter einem anderen Konto prüfen willst.", "why": "Testet die Rechte des Zielkontos ohne root-Sitzung.", "example": "sudo -u nobody id", "nosim": true},
+    {"cmd": "sudo -i", "what": "Öffnet eine Admin-Shell mit roots Login-Umgebung.", "where": "Für eine kurze, kontrollierte Sitzung mit mehreren Admin-Befehlen.", "why": "Lädt roots HOME und Startumgebung.", "example": "sudo -i", "nosim": true},
+    {"cmd": "sudo -k", "what": "Verwirft die zwischengespeicherte sudo-Authentifizierung.", "where": "Beim Verlassen eines gemeinsam genutzten Terminals oder wenn sofort erneut authentifiziert werden soll.", "why": "Verhindert die Wiederverwendung einer vorherigen Authentifizierung für folgende Befehle.", "example": "sudo -k", "nosim": true}
+   ],
+   "warn": "Ein vergessener Befehl in `sudo -i` läuft weiterhin als root. Nutze für kurze Aufgaben lieber `sudo COMMAND`; prüfe nach dem Verlassen einer root-Shell mit `whoami`, ob du zu deinem normalen Konto zurückgekehrt bist."
+  },
+  {
+   "id": "policy",
+   "title": "sudoers: Rechte sicher verwalten",
+   "body": [
+    "`/etc/sudoers` und Dateien unter `/etc/sudoers.d/` legen fest, wer welche Befehle als welches Zielkonto ausführen darf. Bearbeite diese Dateien niemals direkt mit `nano`, `vim` oder `echo`: Ein einzelner Syntaxfehler kann den gesamten sudo-Zugriff beschädigen.",
+    "Verwende `sudo visudo`, um die Richtlinie zu prüfen und zu bearbeiten. Für eine separate Regeldatei öffnest du `sudo visudo -f /etc/sudoers.d/NAME`; `visudo` prüft die Syntax vor dem Speichern. Beispiel: `alice ALL=(root) /usr/bin/systemctl restart nginx` erlaubt nur diesen Befehl.",
+    "`NOPASSWD` entfernt die Passwortabfrage, zum Beispiel `alice ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx`. Nutze es nur bei echtem Bedarf, mit vollständigem Befehlspfad und engem Umfang. Unbeschränkter Zugriff mit `ALL` oder eine passwortlose allgemeine Shell ist keine sichere Regel. Prüfe das Ergebnis mit `sudo -l`."
+   ],
+   "commands": [
+    {"cmd": "sudo visudo", "what": "Bearbeitet sudo-Richtlinien mit Sperre und Syntaxprüfung.", "where": "Beim Hinzufügen oder Ändern einer sudoers-Regel.", "why": "Verringert das Risiko, eine fehlerhafte Datei zu speichern und sudo-Zugriff zu verlieren.", "example": "sudo visudo", "nosim": true},
+    {"cmd": "sudo visudo -f", "what": "Bearbeitet die angegebene sudoers-Datei sicher.", "where": "Beim Erstellen einer separaten sudoers.d-Regel, sofern die Distribution dies unterstützt.", "why": "Hält Regeln getrennt von der Hauptdatei und prüft ihre Syntax.", "example": "sudo visudo -f /etc/sudoers.d/alice", "nosim": true},
+    {"cmd": "sudo visudo -c", "what": "Prüft die Syntax der sudoers-Dateien.", "where": "Nach der Prüfung einer Richtlinienänderung.", "why": "Bestätigt, dass die Datei gelesen und geparst werden kann.", "example": "sudo visudo -c", "nosim": true},
+    {"cmd": "sudo -l", "what": "Zeigt die aktiven sudo-Regeln.", "where": "Wenn du prüfen möchtest, ob eine Richtlinienänderung für einen Benutzer gilt.", "why": "Vergleicht die geschriebene Regel mit den wirksamen Rechten.", "example": "sudo -l"}
+   ],
+   "danger": "`NOPASSWD: ALL` erlaubt einem Benutzer, jeden Befehl ohne Passwort auszuführen. Begrenze die Regel auf den benötigten Benutzer, den exakten Befehlspfad und die nötigen Argumente; schreibe sie mit `visudo` und prüfe sie mit `sudo -l`."
+  },
+  {
+   "id": "workflow",
+   "title": "Sicherer Admin-Ablauf",
+   "body": [
+    "Prüfe zuerst Ziel und Auswirkungen mit deinem normalen Konto. Wenn erhöhte Rechte nötig sind, führe nur den erforderlichen Befehl mit sudo aus. Bei einem Fehler füge nicht blind `sudo` hinzu, sondern prüfe `id`, `sudo -l` und die Dateirechte.",
+    "Beende eine root-Sitzung nach der Arbeit mit `exit`. Schreibe niemals Passwörter in die Kommandozeilen-History, bearbeite sudoers nicht direkt und führe keinen unbekannten Befehl als root aus. Erstelle auf einer echten VM einen Snapshot, bevor du die Systemrichtlinie änderst."
+   ],
+   "commands": [
+    {"cmd": "sudo -l", "what": "Prüft vorab den Umfang deiner Berechtigungen.", "where": "Vor Beginn einer administrativen Aufgabe.", "why": "Hilft, fehlende oder zu weit gefasste Regeln zu erkennen.", "example": "sudo -l"},
+    {"cmd": "sudo whoami", "what": "Prüft sicher, ob ein Befehl als root läuft.", "where": "Wenn du das Verhalten von sudo kennenlernst.", "why": "Zeigt, dass der Rechtewechsel nur für den Befehl gilt.", "example": "sudo whoami"},
+    {"cmd": "sudo visudo -c", "what": "Prüft die Syntax der sudoers-Konfiguration.", "where": "Nach einer Richtlinienänderung.", "why": "Erkennt eine fehlerhafte Regel, bevor sie benötigt wird.", "example": "sudo visudo -c", "nosim": true}
+   ],
+   "tip": "Wende das Prinzip der geringsten Rechte an: Erlaube nur den nötigen Benutzer, das Zielkonto, den Befehl und seine Argumente."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Zeige dein aktuelles Konto mit `whoami`.", "hint": "Wenn du nicht root bist, erscheint dein eigener Benutzername."},
+  "t02": {"text": "Prüfe deine UID und Gruppenmitgliedschaften mit `id`.", "hint": "Suche die Felder `uid=`, `gid=` und `groups=`."},
+  "t03": {"text": "Führe `sudo whoami` aus und prüfe, ob der Befehl als root läuft.", "hint": "Wenn sudo es erlaubt, lautet die Ausgabe `root`."},
+  "t04": {"text": "Führe `sudo id` aus und beobachte den Unterschied zu UID und Gruppen deines normalen Kontos.", "hint": "Eine effektive UID von 0 kennzeichnet root."},
+  "t05": {"text": "Zeige Besitzer und Rechte von roots Home-Verzeichnis mit `sudo ls -ld /root`.", "hint": "`-d` listet das Verzeichnis selbst; sudo erlaubt den Blick in das Verzeichnis eines anderen Benutzers."},
+  "t06": {"text": "Lies mit `sudo ls -l /etc/sudoers` die Rechte der sudo-Richtliniendatei aus; ändere ihren Inhalt nicht.", "hint": "Diese Aufgabe listet nur Dateimetadaten."},
+  "t07": {"text": "Vorhersage: Was gibt `whoami` in deinem normalen Konto aus? Führe es zur Kontrolle aus.", "hint": "Ohne sudo erscheint dein eigener Benutzername."},
+  "t08": {"text": "Vorhersage: Was gibt `sudo whoami` aus? Führe es zur Kontrolle aus.", "hint": "Wenn der Befehl erlaubt ist, läuft er als root."},
+  "t09": {"text": "Fehlersuche: `~/sudoers.bad` enthält eine gefährliche Regel, die allen alle Befehle ohne Passwort erlaubt. Ersetze die Datei durch dieses eng begrenzte Beispiel: `student ALL=(root) /usr/bin/systemctl restart nginx`. Dies ist nur ein Entwurf; kopiere ihn nicht in die echte sudoers-Datei.", "hint": "Nutze `echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad`."},
+  "t10": {"text": "Mini-Projekt: Schreibe diese Befehle der Reihe nach in `~/admin_runbook.txt`: Rechte anzeigen, nginx-Status prüfen und Passwort-Cache leeren: `sudo -l`, `sudo systemctl status nginx`, `sudo -k`.", "hint": "Nutze `>` für die erste und `>>` für die weiteren Zeilen."},
+  "t11": {"text": "Herausforderung: Schreibe in `~/sudoers_rule.txt` eine Regel, die nur einen Neustart von nginx erlaubt: `alice ALL=(root) /usr/bin/systemctl restart nginx`.", "hint": "Dies ist ein Entwurf; zum Anwenden ist `sudo visudo -f` erforderlich."},
+  "t12": {"text": "Herausforderung: Schreibe in dieser Reihenfolge in `~/service_plan.txt`, wie du erst Rechte prüfst und dann den erlaubten Dienst neu startest.", "hint": "Schreibe zuerst `sudo -l`, dann `sudo systemctl restart nginx`."},
+  "t13": {"text": "TICKET #4310: Für Alice wird eine neue Regeldatei benötigt. Schreibe den sicheren Bearbeitungsbefehl in `~/ticket_4310.txt`, ohne eine echte Datei zu ändern.", "hint": "Nutze `sudo visudo -f /etc/sudoers.d/alice`."},
+  "t14": {"text": "TICKET #4311: Alice soll nginx nur für diesen einen Vorgang ohne Passwort neu starten dürfen. Schreibe den visudo-Befehl und danach die eng gefasste Regel in `~/ticket_4311.txt`. Wende diesen Entwurf nicht auf einem echten System an.", "hint": "Verwende `NOPASSWD` nur für `/usr/bin/systemctl restart nginx`, nicht `NOPASSWD: ALL`."}
+ },
+ "vm": {
+  "intro": "Dieser Abschnitt prüft die Rechte auf einem echten System, ändert aber keine Konfiguration. Erstelle nach Möglichkeit einen VM-Snapshot. Gib dein Passwort nur an der sudo-Abfrage im Terminal ein.",
+  "tasks": {
+   "v01": {
+    "title": "Normale Identität prüfen",
+    "text": "Zeige dein normales Konto und seine Gruppenmitgliedschaften mit `id`.",
+    "blocks": [{"cmd": "id", "expected": "uid=1000(student) gid=1000(student) groups=1000(student)"}],
+    "differs": ["Benutzername und UID hängen von der Distribution ab; deine eigenen Werte sind normal.", "Ubuntu verwendet häufig die Gruppe `sudo`, Rocky/Alma häufig `wheel`."]
+   },
+   "v02": {
+    "title": "Sudo für einen Befehl nutzen",
+    "text": "Führe `sudo whoami` aus und prüfe, ob der effektive Benutzer root ist.",
+    "blocks": [{"cmd": "sudo whoami", "expected": "root"}],
+    "differs": ["Beim Tippen des Passworts erscheinen keine Zeichen; das ist normal.", "Der Fehler `not in the sudoers file` bedeutet, dass deinem Konto keine Berechtigung erteilt wurde; frage einen Administrator."]
+   },
+   "v03": {
+    "title": "Effektive UID prüfen",
+    "text": "Führe `sudo id -u` aus und prüfe, ob der privilegierte Befehl mit UID 0 läuft.",
+    "blocks": [{"cmd": "sudo id -u", "expected": "0"}],
+    "differs": ["`id -u` gibt die effektive UID als Zahl aus; root hat UID 0.", "Wenn der Befehl abgelehnt wird, prüfe die Rechte mit `sudo -l`."]
+   },
+   "v04": {
+    "title": "Sudo-Berechtigungen lesen",
+    "text": "Liste mit `sudo -l` die für dein Konto erlaubten Befehle auf; ändere keine Regeln.",
+    "blocks": [{"cmd": "sudo -l", "expected": "User student may run the following commands"}],
+    "differs": ["Benutzername und Regeln unterscheiden sich je nach Distribution.", "Falls die Ausgabe `NOPASSWD` enthält, notiere den genauen Befehl; ändere die Regel nicht."]
+   },
+   "v05": {
+    "title": "sudoers-Syntax prüfen",
+    "text": "Führe `sudo visudo -c` aus, um zu prüfen, ob die aktuelle sudo-Konfiguration eingelesen wird. Der Befehl ändert keine Dateien.",
+    "blocks": [{"cmd": "sudo visudo -c", "expected": "/etc/sudoers: parsed OK"}],
+    "differs": ["Eine Distribution kann auch eingebundene Dateien prüfen; für jede Datei sollte eine Meldung wie `parsed OK` erscheinen.", "Melde einen Fehler dem Systemadministrator, statt die Datei direkt zu bearbeiten."]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "Was ist der Hauptunterschied zwischen `sudo COMMAND` und `su -`?", "options": ["Beide benötigen immer das root-Passwort", "`sudo` führt einen erlaubten Befehl aus; `su -` öffnet die Login-Sitzung des Zielkontos", "`su -` liest nur Dateien", "`sudo` macht den Benutzer dauerhaft zu root"], "explain": "`sudo` gewährt Rechte für einen Befehl; `su -` wechselt in die Login-Shell eines anderen Kontos."},
+  "q2": {"q": "Warum verwendet man `visudo`, um die sudo-Richtliniendatei zu bearbeiten?", "options": ["Es verschlüsselt die Datei", "Es erstellt das root-Konto", "Es prüft die Syntax und verringert das Risiko, eine fehlerhafte Regel zu speichern", "Es fügt alle Benutzer der sudo-Gruppe hinzu"], "explain": "`visudo` sperrt die Datei während der Bearbeitung und prüft vor dem Speichern die Syntax."},
+  "q3": {"q": "Welche sudo-Regel entspricht dem Prinzip der geringsten Rechte?", "options": ["Einem Benutzer nur den exakt benötigten Befehl erlauben", "Allen `NOPASSWD: ALL` geben", "Das root-Passwort mit dem Team teilen", "Jeden Befehl dauerhaft in einer root-Shell ausführen"], "explain": "Begrenze den Zugriff auf den richtigen Benutzer und den erforderlichen Befehl; vermeide weit gefasste `ALL`-Regeln."},
+  "q4": {"q": "Wenn `su -` das root-Passwort unter Ubuntu ablehnt, was ist eine wahrscheinliche Erklärung?", "options": ["Linux hat kein root-Konto", "sudo ist immer deaktiviert", "Das Terminal unterstützt keine root-Sitzungen", "Das root-Konto kann für die Passwort-Anmeldung gesperrt sein; ein berechtigter Benutzer sollte `sudo` nutzen"], "explain": "Bei Ubuntu-Installationen ist das root-Konto häufig gesperrt; ein berechtigter Benutzer nutzt sudo für die Administration."}
+ },
+ "summary": [
+  "root hat UID 0. `su -` öffnet die Login-Sitzung des Zielkontos; `sudo COMMAND` führt einen erlaubten Befehl mit erhöhten Rechten aus.",
+  "`sudo -l` zeigt die tatsächlichen Rechte; `sudo -i` öffnet eine vollständige root-Login-Shell und sollte danach mit `exit` beendet werden.",
+  "Bearbeite sudoers-Richtlinien nur mit `visudo` und prüfe die Syntax mit `visudo -c`.",
+  "Halte `NOPASSWD`- und besonders `ALL`-Regeln eng begrenzt; erlaube nur den benötigten Benutzer, Befehl und die nötigen Argumente."
+ ],
+ "glossary": [
+  {"term": "root", "meaning": "Das Konto mit UID 0 und systemweiten administrativen Rechten."},
+  {"term": "sudo", "meaning": "Ein Werkzeug, mit dem ein berechtigter Benutzer einen bestimmten Befehl als ein anderes Konto ausführt."},
+  {"term": "su", "meaning": "Ein Werkzeug zum Wechsel der aktuellen Sitzung zu einem anderen Benutzerkonto."},
+  {"term": "sudoers", "meaning": "Die Richtlinie, die sudo-Rechte nach Benutzer, Zielkonto und Befehl festlegt."},
+  {"term": "visudo", "meaning": "Ein Werkzeug, das sudoers-Dateien mit Sperre und Syntaxprüfung bearbeitet."},
+  {"term": "NOPASSWD", "meaning": "Eine sudo-Regeloption, die für festgelegte Befehle die Passwortabfrage entfernt."}
+ ]
+}

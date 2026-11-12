@@ -1,0 +1,487 @@
+{
+ "title": "Bash Script 1 — Variables, Arguments, Conditions",
+ "lead": "Write your first Bash script, make it executable, and work with variables, arguments, exit codes and conditions.",
+ "objectives": [
+  "You write a script with a shebang, make it executable with chmod +x and start it with ./script.sh.",
+  "You assign variables and know the difference between single and double quotes, read, $(command) and $(( )).",
+  "You read arguments with $1, $# and \"$@\" and check exit codes with $? and exit.",
+  "You make decisions with if/elif/else, [[ ]] and test, and you use set -euo pipefail as a safety net."
+ ],
+ "sections": [
+  {
+   "id": "first",
+   "title": "The first script: shebang and execute permission",
+   "body": [
+    "A script is a text file with commands. The first line, the **shebang** `#!/bin/bash`, tells the system which interpreter runs the file. Without the **execute bit** the file cannot be started directly: `./hello.sh` then gives *Permission denied*.",
+    "`./` means 'the file in this folder'. Linux does not search the current folder for commands, so `hello.sh` alone gives *command not found*. In this module you create scripts with `printf` (or a heredoc on your VM) so you can see exactly what is in the file."
+   ],
+   "commands": [
+    {
+     "cmd": "#!/bin/bash",
+     "what": "The shebang: first line of the file, names the interpreter.",
+     "where": "At the top of every Bash script.",
+     "why": "The script runs with Bash and not with another shell such as sh.",
+     "example": "printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh"
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Sets the execute bit on a file.",
+     "where": "Once after you create a script.",
+     "why": "Without it `./script.sh` fails with Permission denied.",
+     "example": "chmod +x ~/bin/hello.sh"
+    },
+    {
+     "cmd": "./script.sh",
+     "what": "Runs an executable script by path.",
+     "where": "When you start your own scripts.",
+     "why": "The path (`./` or full path) tells the shell where the file is.",
+     "example": "~/bin/hello.sh"
+    },
+    {
+     "cmd": "bash script.sh",
+     "what": "Runs a script with Bash directly, no execute bit needed.",
+     "where": "For quick tests and on volumes mounted noexec.",
+     "why": "Handy for debugging; the shebang is ignored.",
+     "example": "bash ~/bin/hello.sh",
+     "nosim": true
+    }
+   ],
+   "tip": "Put your own scripts in `~/bin`. On Ubuntu and Rocky this folder is added to `PATH` at login once it exists, so you can start them by name.",
+   "warn": "Never run a script you downloaded or do not understand. Read it first with `cat script.sh`. Be especially careful with `curl ... | bash` and with `sudo` on a first attempt."
+  },
+  {
+   "id": "vars",
+   "title": "Variables, quoting and arithmetic",
+   "body": [
+    "A variable is set with `NAME=value` — **no spaces around `=`**. You read it with `$NAME`. `NAME = value` does not work: Bash thinks `NAME` is a command.",
+    "**Double quotes** `\"...\"` expand variables, **single quotes** `'...'` do not: `echo '$HOME'` prints the text `$HOME`. Always quote variables (`\"$NAME\"`) so file names with spaces stay one word.",
+    "`$(command)` inserts the output of a command, `$(( ))` calculates integers, `read` asks the user for input (VM only)."
+   ],
+   "commands": [
+    {
+     "cmd": "NAME=value",
+     "what": "Sets a variable (no spaces around the equals sign).",
+     "where": "At the top of a script for settings and paths.",
+     "why": "You change a value in one place instead of ten.",
+     "example": "NAME=student; echo \"Hello $NAME\""
+    },
+    {
+     "cmd": "\"$VAR\" and '$VAR'",
+     "what": "Double quotes expand the variable, single quotes keep the text.",
+     "where": "In every command that uses variables.",
+     "why": "Quoting protects against spaces and glob characters in values.",
+     "example": "echo '$HOME' \"$HOME\""
+    },
+    {
+     "cmd": "read -r -p",
+     "what": "Reads a line of input into a variable.",
+     "where": "In interactive scripts that ask questions.",
+     "why": "`-r` keeps backslashes, `-p` shows a prompt.",
+     "example": "read -r -p \"Name: \" NAME",
+     "nosim": true
+    },
+    {
+     "cmd": "$(command)",
+     "what": "Replaces itself with the output of the command.",
+     "where": "To store output in a variable or use it in text.",
+     "why": "Lets scripts react to system state.",
+     "example": "echo \"Host: $(hostname)\""
+    },
+    {
+     "cmd": "$(( ))",
+     "what": "Integer arithmetic.",
+     "where": "Counters, sizes, simple calculations.",
+     "why": "Bash has no decimals; for those use `bc`.",
+     "example": "echo $((6 * 7))",
+     "nosim": true
+    }
+   ],
+   "tip": "A default value is written `${NAME:-default}`: it is used when `NAME` is empty or unset."
+  },
+  {
+   "id": "args",
+   "title": "Arguments and exit codes",
+   "body": [
+    "A script receives arguments: `$0` is the script name, `$1`, `$2`, ... are the arguments, `$#` is their number and `\"$@\"` is the list of all of them, each kept as one word. Quote `\"$@\"`, otherwise `my file` becomes two words.",
+    "Every command ends with an **exit code**: `0` means success, anything else means failure. `$?` holds the code of the last command. In a script you end with `exit 0` or `exit 1`. The simulator cannot run arguments in scripts reliably, so the real runs are in the VM section."
+   ],
+   "commands": [
+    {
+     "cmd": "$0 $1 $2",
+     "what": "Script name and the first arguments.",
+     "where": "When the script needs input from the caller.",
+     "why": "One script works for many files or names.",
+     "example": "./args.sh alice bob",
+     "nosim": true
+    },
+    {
+     "cmd": "$# and \"$@\"",
+     "what": "Number of arguments and the list of all arguments.",
+     "where": "To check the count or loop over arguments.",
+     "why": "`\"$@\"` keeps every argument intact, even with spaces.",
+     "example": "./args.sh \"my file\" bob",
+     "nosim": true
+    },
+    {
+     "cmd": "${1:-guest}",
+     "what": "First argument, or `guest` if none was given.",
+     "where": "For optional arguments.",
+     "why": "The script does not break when the argument is missing.",
+     "example": "NAME=\"${1:-guest}\"",
+     "nosim": true
+    },
+    {
+     "cmd": "$? and exit",
+     "what": "`$?` is the last exit code, `exit N` ends a script with code N.",
+     "where": "After commands you want to check, and at the end of scripts.",
+     "why": "Other scripts, cron and CI decide based on this code.",
+     "example": "false; echo $?"
+    }
+   ],
+   "tip": "`grep` returns 1 when nothing matches. That is not an error in the program, just a 'no' answer: `grep carol ~/users.txt; echo $?` prints `1`."
+  },
+  {
+   "id": "cond",
+   "title": "Conditions: if, elif, else",
+   "body": [
+    "`if` runs a command and looks at its exit code. The command is usually `[ ... ]` (the same as `test`) or Bash's `[[ ... ]]`. Spaces inside the brackets are required: `[ -f \"$1\" ]`.",
+    "Useful tests: `-f` regular file, `-d` directory, `-x` executable, `-z` string is empty, `-n` string is not empty. For numbers use `-eq -ne -lt -le -gt -ge`, for text `==` and `!=`. `[[ ]]` is safer than `[ ]` (no word splitting) but exists only in Bash, not in plain `sh`.",
+    "Short forms: `cmd1 && cmd2` runs the second only on success, `cmd1 || cmd2` only on failure."
+   ],
+   "commands": [
+    {
+     "cmd": "if / elif / else / fi",
+     "what": "Runs different commands depending on a test.",
+     "where": "Whenever a script must decide.",
+     "why": "Scripts react to input and state instead of running blindly.",
+     "example": "if [ -f \"$1\" ]; then echo exists; else echo missing; fi",
+     "nosim": true
+    },
+    {
+     "cmd": "[ ] / test",
+     "what": "Tests files, strings and numbers; the result is the exit code.",
+     "where": "In the condition of `if`, or alone with `&&` / `||`.",
+     "why": "The portable form that works in every shell.",
+     "example": "test -f ~/notes.txt && echo yes"
+    },
+    {
+     "cmd": "[[ ]]",
+     "what": "Bash conditions with patterns and `&&` / `||` inside.",
+     "where": "In scripts with `#!/bin/bash`.",
+     "why": "Fewer quoting traps than `[ ]`.",
+     "example": "[[ $score -ge 50 && -n $name ]] && echo ok",
+     "nosim": true
+    },
+    {
+     "cmd": "&& and ||",
+     "what": "Chains commands by success or failure.",
+     "where": "For short checks on one line.",
+     "why": "Quick alternative to a full `if`.",
+     "example": "test -d ~/Documents && echo dir || echo nodir"
+    }
+   ],
+   "tip": "Check first, act second: `[ -f \"$1\" ] || { echo \"no such file\"; exit 1; }` stops early with a clear message."
+  },
+  {
+   "id": "strict",
+   "title": "Safe scripts: set -euo pipefail and debugging",
+   "body": [
+    "By default Bash **continues after errors**. The line `set -euo pipefail` at the top changes that: `-e` stops at the first failing command, `-u` treats an unset variable as an error, `-o pipefail` makes a pipe fail if any part fails.",
+    "To debug use `bash -n script.sh` (syntax check only) and `bash -x script.sh` (prints every command with a `+` before running it). `shellcheck` finds typical mistakes before you run the script. Install it with `sudo apt install shellcheck` on Debian/Ubuntu or `sudo dnf install epel-release && sudo dnf install ShellCheck` on RHEL/Rocky.",
+    "On hardened systems a script can fail although `chmod +x` was done: the folder may be mounted `noexec`, or SELinux (RHEL/Rocky) / AppArmor (Ubuntu) may block it when a service starts it. Then use `bash script.sh` for a test and look at the audit/journal logs."
+   ],
+   "commands": [
+    {
+     "cmd": "set -euo pipefail",
+     "what": "Strict mode: stop on errors, unset variables and failed pipes.",
+     "where": "Second line of almost every script.",
+     "why": "Errors are not silently ignored, so the script does less damage.",
+     "example": "set -euo pipefail",
+     "nosim": true
+    },
+    {
+     "cmd": "bash -n / bash -x",
+     "what": "`-n` checks syntax, `-x` traces each command.",
+     "where": "When a script misbehaves.",
+     "why": "You see exactly which line and which values are used.",
+     "example": "bash -x ~/bin/hello.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "shellcheck",
+     "what": "Static analysis of shell scripts.",
+     "where": "Before you share or schedule a script.",
+     "why": "Finds quoting bugs and typos early.",
+     "example": "shellcheck ~/bin/vars.sh",
+     "nosim": true
+    },
+    {
+     "cmd": "${VAR:?message}",
+     "what": "Aborts with a message if the variable is empty or unset.",
+     "where": "Before destructive commands that use a variable.",
+     "why": "Prevents `rm` from running on the wrong path.",
+     "example": "rm -r \"${TARGET:?TARGET is not set}/cache\"",
+     "nosim": true
+    }
+   ],
+   "tip": "Print first, delete later: replace `rm` with `echo rm` in a test run and check the paths with your eyes.",
+   "warn": "Only `-e` is no guarantee: it is ignored inside conditions (`if`, `&&`, `||`). Test every script with harmless sample data first.",
+   "danger": "An empty variable is dangerous: `rm -rf \"$DIR\"/*` becomes `rm -rf /*` when `DIR` is empty. Use `set -u` and `${DIR:?}`, test in a VM and take a **snapshot** first (module 0.2)."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Create the folder for your scripts in your home directory: `mkdir ~/bin`.",
+   "hint": "`~` is your home directory."
+  },
+  "t02": {
+   "text": "Write your first script with `printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh`.",
+   "hint": "`\\n` is a line break; the file gets two lines. Check with `cat ~/bin/hello.sh`."
+  },
+  "t03": {
+   "text": "Make the script executable with `chmod +x ~/bin/hello.sh`.",
+   "hint": "Look at `ls -l ~/bin/hello.sh`: the permissions now contain `x`."
+  },
+  "t04": {
+   "text": "Run the script by its path: `~/bin/hello.sh`.",
+   "hint": "Or `cd ~/bin` first and then `./hello.sh`."
+  },
+  "t05": {
+   "text": "Write `~/bin/vars.sh` with the lines `#!/bin/bash`, `NAME=student` and `echo \"Hello $NAME\"` (use `printf`), make it executable and run it.",
+   "hint": "Three commands: `printf ... > ~/bin/vars.sh`, `chmod +x`, then run it. Output: `Hello student`."
+  },
+  "t06": {
+   "text": "Predict: what do `'$HOME'` and `\"$HOME\"` print? Then check with `echo '$HOME' \"$HOME\"`.",
+   "hint": "Single quotes keep the text, double quotes expand the variable."
+  },
+  "t07": {
+   "text": "Predict the exit code of a search without a match. Run `grep carol ~/users.txt; echo $?`.",
+   "hint": "grep finds nothing in this file and answers with a non-zero code."
+  },
+  "t08": {
+   "text": "Write `~/bin/check.sh` (shebang, then `if [ -f \"$1\" ]; then`, `echo \"exists\"`, `else`, `echo \"missing\"`, `fi`) and make it executable. The simulator cannot run `if`; you will run it in the VM.",
+   "hint": "Use one `printf` with `\\n` between the lines, then `chmod +x`."
+  },
+  "t09": {
+   "text": "Use `test` or `[ ]` twice: check that `~/notes.txt` is a file (`-f`) and that `~/Documents` is a directory (`-d`). Add `&& echo ok` to see the result.",
+   "hint": "`test -f ~/notes.txt && echo file` and `[ -d ~/Documents ] && echo dir`."
+  },
+  "t10": {
+   "text": "Predict: is `~/notes.txt` executable? Run `test -x ~/notes.txt; echo $?` and read the code.",
+   "hint": "Exit code 0 means true, 1 means false."
+  },
+  "t11": {
+   "text": "Debug: `~/scripts/broken.sh` has no shebang and no execute permission. Fix both (keep the two existing commands in it), then run it; it must create `~/backup.done`.",
+   "hint": "Rewrite the file with `printf` and add `#!/bin/bash` as the first line, then `chmod +x`."
+  },
+  "t12": {
+   "text": "Debug: `~/scripts/greet.sh` should print `Hello alice` but prints the text `Hello $NAME`. Find the two mistakes (space around `=`, single quotes), fix them and run the script.",
+   "hint": "`NAME=alice` without spaces, and `echo \"Hello $NAME\"` with double quotes."
+  },
+  "t13": {
+   "text": "Mini project: write `~/bin/args.sh` with a shebang and three `echo` lines that use `$1`, `$#` and `\"$@\"`. Make it executable.",
+   "hint": "Example line: `echo \"Count: $#\"`. Use one `printf` and `\\n` between the lines."
+  },
+  "t14": {
+   "text": "Mini project: write `~/bin/backup.sh`: shebang, `set -euo pipefail`, `SRC=\"$HOME/Documents\"`, `DEST=\"$HOME/backup\"`, `mkdir -p \"$DEST\"` and `cp \"$SRC/report.txt\" \"$DEST/\"`. Make it executable.",
+   "hint": "Quote every variable. The simulator cannot run `set`, so only create the file."
+  },
+  "t15": {
+   "text": "Challenge: create `~/bin/need_arg.sh`. Without an argument it prints `Usage: need_arg.sh NAME` and ends with `exit 1`; otherwise it prints `Hello, $1` and ends with `exit 0`. Make it executable.",
+   "hint": "Test with `-z \"$1\"`; use `if ... then ... fi`."
+  },
+  "t16": {
+   "text": "Challenge: create `~/bin/probe.sh` whose only command is `test -f /home/student/missing.txt`. Make it executable, run it and write its exit code with `echo $? > ~/code.txt` into `~/code.txt`.",
+   "hint": "A script returns the exit code of its last command. Run `echo $?` right after the script."
+  },
+  "t17": {
+   "text": "Ticket: The new-hire team wants `~/bin/welcome.sh`. With a name it prints `Welcome, NAME`; without an argument it must use `guest`. Use `${1:-guest}`, add a shebang and make it executable.",
+   "hint": "`NAME=\"${1:-guest}\"` and then `echo \"Welcome, $NAME\"`."
+  },
+  "t18": {
+   "text": "Ticket: A colleague says `~/scripts/report.sh` fails with 'Permission denied'. Fix it with the smallest change and run it; it must create `~/report.done`.",
+   "hint": "The file lacks the execute bit; you do not need to edit its contents."
+  }
+ },
+ "vm": {
+  "intro": "On your VM (Ubuntu or Rocky) you run the scripts for real. Use only your own `~/bin` folder and harmless test data. For destructive experiments take a snapshot first (module 0.2).",
+  "tasks": {
+   "v01": {
+    "title": "First script and execute bit",
+    "text": "Create the script with a heredoc, try to run it before and after `chmod +x`, and paste the output.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/bin\ncat > ~/bin/hello.sh <<'EOF'\n#!/bin/bash\necho \"Hello, Linux!\"\nEOF\n~/bin/hello.sh\nchmod +x ~/bin/hello.sh\nls -l ~/bin/hello.sh\n~/bin/hello.sh",
+      "expected": "bash: /home/student/bin/hello.sh: Permission denied\n-rwxr-xr-x. 1 student student 38 Nov 12 10:00 /home/student/bin/hello.sh\nHello, Linux!"
+     }
+    ],
+    "differs": [
+     "On Ubuntu `ls -l` has no dot after the permissions; on Rocky there is one (SELinux context).",
+     "If the first run already works, your umask or file system gives the execute bit; that is fine."
+    ]
+   },
+   "v02": {
+    "title": "Variables, quoting, read and arithmetic",
+    "text": "Write a script that shows the quoting difference, reads a number and doubles it. Feed the number through a pipe.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/vars.sh <<'EOF'\n#!/bin/bash\nNAME=\"student\"\necho 'single: $NAME'\necho \"double: $NAME\"\nread -r -p \"Number: \" N\necho \"Double: $((N * 2))\"\necho \"Year: $(date +%Y)\"\nEOF\nchmod +x ~/bin/vars.sh\necho 21 | ~/bin/vars.sh",
+      "expected": "single: $NAME\ndouble: student\nDouble: 42\nYear: 2026"
+     }
+    ],
+    "differs": [
+     "The prompt `Number:` is not shown because input comes from a pipe; that is normal.",
+     "If you see `unbound variable` or `syntax error`, check that there are no spaces around `=`."
+    ]
+   },
+   "v03": {
+    "title": "Arguments with spaces",
+    "text": "Write a script that prints the argument count and every argument, then call it with a file name that contains a space.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/args.sh <<'EOF'\n#!/bin/bash\necho \"Script: $0\"\necho \"Count: $#\"\necho \"First: $1\"\nfor item in \"$@\"; do\n  echo \"Arg: $item\"\ndone\nEOF\nchmod +x ~/bin/args.sh\n~/bin/args.sh \"my file\" bob",
+      "expected": "Script: /home/student/bin/args.sh\nCount: 2\nFirst: my file\nArg: my file\nArg: bob"
+     }
+    ],
+    "differs": [
+     "If `Count` is 3, you called it without quotes around `my file`.",
+     "Replace `\"$@\"` with `$@` and run again: `my` and `file` become separate arguments."
+    ]
+   },
+   "v04": {
+    "title": "if / elif / else and exit codes",
+    "text": "Build a small grading script with `[[ ]]`, run it with three inputs and look at exit codes of `test`.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/grade.sh <<'EOF'\n#!/bin/bash\nscore=\"${1:-0}\"\nif [[ $score -ge 90 ]]; then\n  echo \"top\"\nelif [[ $score -ge 50 ]]; then\n  echo \"pass\"\nelse\n  echo \"fail\"\nfi\nEOF\nchmod +x ~/bin/grade.sh\n~/bin/grade.sh 95\n~/bin/grade.sh 60\n~/bin/grade.sh\ntest -f /etc/passwd; echo \"rc=$?\"\ntest -f /nonexistent; echo \"rc=$?\"",
+      "expected": "top\npass\nfail\nrc=0\nrc=1"
+     }
+    ],
+    "differs": [
+     "If you get `[[: not found`, you started the script with `sh script.sh`; use `bash` or run it directly.",
+     "If every input prints `fail`, check the spaces inside `[[ ... ]]`."
+    ]
+   },
+   "v05": {
+    "title": "Strict mode in action",
+    "text": "Compare what `set -euo pipefail` does with a failing command and with an unset variable.",
+    "blocks": [
+     {
+      "cmd": "cat > ~/bin/strict.sh <<'EOF'\n#!/bin/bash\nset -euo pipefail\necho \"before\"\nfalse\necho \"after\"\nEOF\nchmod +x ~/bin/strict.sh\n~/bin/strict.sh; echo \"exit=$?\"\nbash -c 'set -u; echo \"$UNDEFINED_VAR\"'; echo \"exit=$?\"",
+      "expected": "before\nexit=1\nbash: line 1: UNDEFINED_VAR: unbound variable\nexit=1"
+     }
+    ],
+    "differs": [
+     "`after` must not appear. If it does, check the `set` line.",
+     "The exact wording of the `unbound variable` message depends on the Bash version."
+    ]
+   },
+   "v06": {
+    "title": "Debugging: bash -n, bash -x, shellcheck",
+    "text": "Check the syntax, trace a script and install ShellCheck (choose your distribution). If the install is not possible, skip the third block and paste the first two outputs.",
+    "blocks": [
+     {
+      "cmd": "bash -n ~/bin/hello.sh; echo \"syntax=$?\"\nbash -x ~/bin/hello.sh",
+      "expected": "syntax=0\n+ echo 'Hello, Linux!'\nHello, Linux!"
+     },
+     {
+      "cmd": "# Ubuntu / Debian\nsudo apt install -y shellcheck\n# Rocky / RHEL\nsudo dnf install -y epel-release && sudo dnf install -y ShellCheck\nshellcheck ~/bin/vars.sh",
+      "expected": "(no output means no findings)"
+     }
+    ],
+    "differs": [
+     "`syntax=0` means the syntax is fine; any other number means a syntax error and Bash prints the line.",
+     "If ShellCheck prints hints like SC2086, they usually point to missing quotes around a variable."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "What does `echo '$HOME'` print?",
+   "options": [
+    "/home/student",
+    "$HOME",
+    "An empty line",
+    "HOME"
+   ],
+   "explain": "Single quotes prevent expansion; the text `$HOME` is printed. Only double quotes expand variables."
+  },
+  "q2": {
+   "q": "What does `$#` contain inside a script?",
+   "options": [
+    "The number of arguments",
+    "The name of the script",
+    "The exit code of the last command",
+    "All arguments as one text"
+   ],
+   "explain": "`$#` is the argument count; `$0` is the script name, `$?` the last exit code and `\"$@\"` the list of arguments."
+  },
+  "q3": {
+   "q": "What does `set -euo pipefail` do?",
+   "options": [
+    "Starts the script as root",
+    "Prints each command before it runs",
+    "Ignores all errors",
+    "Stops on errors, unset variables and failed parts of a pipe"
+   ],
+   "explain": "`-e` stops on errors, `-u` on unset variables and `pipefail` on failing pipe parts. Printing commands is `-x`."
+  },
+  "q4": {
+   "q": "You start `./run.sh` and the file has no execute bit. What happens?",
+   "options": [
+    "command not found",
+    "A syntax error",
+    "Permission denied",
+    "The script runs normally"
+   ],
+   "explain": "Without the x bit the kernel refuses to start the file: Permission denied. Fix it with `chmod +x run.sh`."
+  }
+ },
+ "summary": [
+  "A script starts with the shebang `#!/bin/bash`, needs `chmod +x` and is started with `./script.sh`.",
+  "Variables: `NAME=value` without spaces; `\"$NAME\"` expands, `'$NAME'` does not. Always quote.",
+  "`$1`, `$#` and `\"$@\"` read arguments; `${1:-default}` sets a default.",
+  "`$?` is the last exit code (0 = success); `exit N` ends a script with a code.",
+  "`if` with `[ ]`, `[[ ]]` or `test` decides; `-f -d -z -eq` are the most common tests.",
+  "`set -euo pipefail` plus `bash -x` and `shellcheck` make scripts safer and easier to debug."
+ ],
+ "glossary": [
+  {
+   "term": "shebang",
+   "meaning": "The first line `#!/bin/bash`; names the interpreter of the script."
+  },
+  {
+   "term": "execute bit",
+   "meaning": "The x permission that allows a file to be started as a program."
+  },
+  {
+   "term": "variable",
+   "meaning": "A named value, set with `NAME=value` and read with `$NAME`."
+  },
+  {
+   "term": "quoting",
+   "meaning": "Single quotes keep text literally, double quotes expand variables."
+  },
+  {
+   "term": "positional argument",
+   "meaning": "A value passed to the script: `$1`, `$2`, ..."
+  },
+  {
+   "term": "exit code",
+   "meaning": "A number returned by a command; 0 is success, everything else is failure."
+  },
+  {
+   "term": "test / [ ]",
+   "meaning": "A command that evaluates a condition and answers with an exit code."
+  },
+  {
+   "term": "strict mode",
+   "meaning": "`set -euo pipefail`: stop on errors, unset variables and failed pipes."
+  },
+  {
+   "term": "heredoc",
+   "meaning": "`<<'EOF'` passes several lines of text to a command, often to create a file."
+  }
+ ]
+}

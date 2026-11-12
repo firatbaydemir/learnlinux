@@ -1,0 +1,282 @@
+{
+ "title": "The terminal and first steps",
+ "lead": "Learn to read the prompt, type your first commands and find help when you get stuck.",
+ "objectives": [
+  "You can read the user, machine and directory shown in the prompt.",
+  "You run safe first commands such as whoami, hostname, pwd and ls.",
+  "You find help yourself with man, --help and error messages."
+ ],
+ "sections": [
+  {
+   "id": "prompt",
+   "title": "Terminal and prompt",
+   "body": [
+    "The **terminal** is the window where you give the computer text commands. The program running inside it is the **shell**; the most common one is `bash`. The shell reads your line, runs it and prints the result.",
+    "The **prompt** at the start of each line tells you three things: who you are, which machine you are on and which directory you are in. Example: `student@linux-lab:~$` — user `student`, machine `linux-lab`, `~` means the home directory. A trailing `$` marks a normal user, `#` marks the administrator (root)."
+   ],
+   "tip": "Nothing runs until you press Enter. Use Backspace to fix typos."
+  },
+  {
+   "id": "first",
+   "title": "First commands: who am I, where am I?",
+   "body": [
+    "Before touching a system you must know who you are and where you are. The commands below only read information and change nothing. Click a box to paste the command into the terminal."
+   ],
+   "commands": [
+    {
+     "cmd": "whoami",
+     "what": "Prints the user you are working as.",
+     "where": "After login, and before and after using sudo.",
+     "why": "Prevents actions with the wrong user.",
+     "example": "whoami"
+    },
+    {
+     "cmd": "hostname",
+     "what": "Prints the machine's name.",
+     "where": "When you connect to several servers.",
+     "why": "Makes sure you are on the right machine.",
+     "example": "hostname"
+    },
+    {
+     "cmd": "pwd",
+     "what": "Prints the full path of the current directory.",
+     "where": "Whenever you feel lost.",
+     "why": "Knowing your location prevents mistakes in file operations.",
+     "example": "pwd"
+    },
+    {
+     "cmd": "ls",
+     "what": "Lists files and folders in the current directory. -l adds details.",
+     "where": "Everywhere — the most used command.",
+     "why": "Look around before you act.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "echo",
+     "what": "Prints the text you give it and expands variables like $USER.",
+     "where": "In scripts and for quick experiments.",
+     "why": "The simplest way to see a variable's value.",
+     "example": "echo $USER"
+    }
+   ]
+  },
+  {
+   "id": "help",
+   "title": "Getting help and reading errors",
+   "body": [
+    "Every Linux command has a manual: `man command` shows it in full, `command --help` shows a short summary. If you type an unknown command the shell says `command not found` — that is information, not a disaster: you probably made a typo.",
+    "The shell also saves time: **Tab** completes commands and file names, **↑ / ↓** recalls earlier commands, `history` lists them all with numbers, `clear` wipes the screen."
+   ],
+   "commands": [
+    {
+     "cmd": "man",
+     "what": "Shows a command's manual page.",
+     "where": "When you want to look up a command's options.",
+     "why": "You get the right information straight from your own system.",
+     "example": "man ls"
+    },
+    {
+     "cmd": "--help",
+     "what": "Prints a short usage summary.",
+     "where": "For a quick refresher.",
+     "why": "Shorter than man and often enough.",
+     "example": "ls --help"
+    },
+    {
+     "cmd": "history",
+     "what": "Lists earlier commands with numbers.",
+     "where": "To find an old command again.",
+     "why": "You don't have to retype everything.",
+     "example": "history"
+    }
+   ],
+   "tip": "Pressing Tab twice lists all possible completions. Try typing `whoa` and press Tab."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Type `whoami` and read which user you are working as.",
+   "hint": "Just type the command name and press Enter."
+  },
+  "t02": {
+   "text": "Use `hostname` to find the machine's name.",
+   "hint": "The output matches the word after the @ in the prompt."
+  },
+  "t03": {
+   "text": "Use `pwd` to print the full path of the current directory.",
+   "hint": "The path starts with / — an absolute path."
+  },
+  "t04": {
+   "text": "Print this text with `echo \"Hello Linux\"`.",
+   "hint": "Put the text inside double quotes."
+  },
+  "t05": {
+   "text": "List the directory in detail with `ls -l`. What does the `d` in the first column mean?",
+   "hint": "d means directory, - means a regular file."
+  },
+  "t06": {
+   "text": "Open the manual of `ls` with `man ls`.",
+   "hint": "The command name follows man."
+  },
+  "t07": {
+   "text": "Show the short help with `ls --help`.",
+   "hint": "Two dashes, no space: --help"
+  },
+  "t08": {
+   "text": "Deliberately type a command that does not exist (e.g. `lss`) and read the error.",
+   "hint": "The message is command not found — a sign of a typo."
+  },
+  "t09": {
+   "text": "Show the running kernel version with `uname -r`.",
+   "hint": "-r stands for release."
+  },
+  "t10": {
+   "text": "Type `echo $USER`. Is the output the same as `whoami`?",
+   "hint": "The dollar sign expands the variable to its value."
+  },
+  "t11": {
+   "text": "Run in order: `pwd`, `ls`, `cd Documents`, `pwd`. How did your location change?",
+   "hint": "Four separate lines, each with Enter."
+  },
+  "t12": {
+   "text": "List the commands you typed in this session with `history`.",
+   "hint": "A numbered list appears."
+  },
+  "t13": {
+   "text": "Clear the screen with `clear`.",
+   "hint": "Shortcut: Ctrl+L"
+  },
+  "t14": {
+   "text": "Challenge: in your home directory create a file with `echo Hello > first.txt`, then read it with `cat first.txt`.",
+   "hint": "The > writes output into a file. First return home with `cd ~`."
+  },
+  "t15": {
+   "text": "Predict: `cd ~/Documents`, then `cd ..`, then `pwd`. Predict which path you will see before running it, then check.",
+   "hint": "`..` means the parent directory."
+  },
+  "t16": {
+   "text": "Debug: a colleague typed `cat nots.txt` and got an error. Find the correct name with `ls` in your home directory and read the file with `cat`.",
+   "hint": "A misspelled file name gives 'No such file'; use the name from the `ls` output."
+  },
+  "t17": {
+   "text": "Mini project: write your user name into a file with `whoami > hello.txt`, then read it with `cat hello.txt`.",
+   "hint": "`>` redirects output into a file. `cd ~` first."
+  },
+  "t18": {
+   "text": "TICKET #1001 — Support needs system info: in your home directory write the kernel version (`uname -r`) and then the host name (`hostname`) into `info.txt`. The file must have 2 lines.",
+   "hint": "Use `>` for the first and `>>` (append) for the second; otherwise the first line is lost."
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Your prompt ends with `#`. What does that mean?",
+   "options": [
+    "The command was written as a comment",
+    "You are working as the administrator (root)",
+    "The file is hidden",
+    "The terminal is broken"
+   ],
+   "explain": "`$` means a normal user, `#` means root. A wrong command as root can do great damage — be careful."
+  },
+  "q2": {
+   "q": "How do you open a command's manual?",
+   "options": [
+    "help command",
+    "manual command",
+    "man command",
+    "read command"
+   ],
+   "explain": "`man command` opens the full manual; `command --help` gives a short summary."
+  },
+  "q3": {
+   "q": "What does `command not found` usually mean?",
+   "options": [
+    "The command name is misspelled or the command is not installed",
+    "The computer will shut down",
+    "The disk is full",
+    "There is no internet"
+   ],
+   "explain": "Check the spelling first; then check whether the command is installed."
+  },
+  "q4": {
+   "q": "Which key completes a partly typed command or file name?",
+   "options": [
+    "Esc",
+    "Ctrl+Z",
+    "Tab",
+    "Alt"
+   ],
+   "explain": "Tab completes; pressed twice it lists the options."
+  }
+ },
+ "summary": [
+  "The prompt shows user, machine and directory; `$` is normal, `#` is root.",
+  "`whoami`, `hostname`, `pwd`, `ls` are safe exploration commands.",
+  "For help use `man command` and `command --help`; error messages are clues.",
+  "Tab, ↑/↓ and `history` save time."
+ ],
+ "glossary": [
+  {
+   "term": "terminal",
+   "meaning": "The window where you type commands."
+  },
+  {
+   "term": "shell",
+   "meaning": "The program that runs your commands, e.g. bash."
+  },
+  {
+   "term": "prompt",
+   "meaning": "The user@machine:directory info at the start of each line."
+  },
+  {
+   "term": "home directory",
+   "meaning": "The user's own folder, written as ~."
+  }
+ ],
+ "vm": {
+  "intro": "Do the tasks below on your own Linux VM (Rocky/Alma or Ubuntu). If you do not have a VM yet, see module 0.2 first.",
+  "tasks": {
+   "v01": {
+    "title": "Find your kernel version",
+    "text": "Open a terminal in your VM and print the version of the running kernel. Paste the output below.",
+    "blocks": [
+     {
+      "cmd": "uname -r",
+      "expected": "5.14.0-427.13.1.el9_4.x86_64"
+     }
+    ],
+    "differs": [
+     "Your version number may differ; what matters is a dotted version such as `5.14.0`.",
+     "If you see `command not found`, check spelling (lower case, spaces)."
+    ]
+   },
+   "v02": {
+    "title": "Identify your distribution",
+    "text": "The file `/etc/os-release` tells you the distribution name and version.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\""
+     }
+    ],
+    "differs": [
+     "On Ubuntu you will see `NAME=\"Ubuntu\"`; that is normal.",
+     "On `No such file` make sure you are on a real distribution, not a bare container."
+    ]
+   },
+   "v03": {
+    "title": "Your first file",
+    "text": "Write and read a file in your home directory. The output must contain `Hello`; then press \"Done\".",
+    "blocks": [
+     {
+      "cmd": "cd ~ && echo Hello > first.txt && cat first.txt",
+      "expected": "Hello"
+     }
+    ],
+    "differs": [
+     "If nothing shows, check with `ls -l first.txt` that the file was created."
+    ]
+   }
+  }
+ }
+}

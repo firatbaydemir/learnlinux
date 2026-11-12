@@ -1,0 +1,370 @@
+{
+ "title": "Dateien lesen: cat, less, head, tail, wc",
+ "lead": "Für jede Datei gibt es das richtige Werkzeug: kleine Dateien mit cat, große mit less; head für den Anfang, tail für das Ende und Live-Logs, wc zum Zählen.",
+ "objectives": [
+  "Du wählst je nach Dateigröße das passende Werkzeug (cat, less, head, tail).",
+  "Du liest mit head und tail und der Option -n den Anfang und das Ende einer Datei.",
+  "Du zählst mit wc Zeilen, Wörter und Bytes und machst mit grep -c und | eine kleine Log-Analyse."
+ ],
+ "sections": [
+  {
+   "id": "choose",
+   "title": "Das richtige Werkzeug wählen",
+   "body": [
+    "Unter Linux sind Einstellungen, Logs und Notizen meist einfache Textdateien. Zum Lesen gibt es nicht den einen Befehl; du wählst nach **Größe und Ziel** der Datei.",
+    "Kleine Datei: `cat`. Große Datei: `less`. Anfang: `head`. Ende: `tail`. Live verfolgen: `tail -f`. Größe einschätzen: `wc`. Schau zuerst mit `wc -l` auf die Größe; das ist eine gute Gewohnheit."
+   ],
+   "tip": "Im Zweifel erst `wc -l notes.txt` für die Zeilenzahl, dann entscheiden."
+  },
+  {
+   "id": "cat_less",
+   "title": "Alles lesen: cat und less",
+   "body": [
+    "`cat` gibt die ganze Datei sofort aus; schnell und praktisch für kurze Dateien. `cat -n` nummeriert die Zeilen.",
+    "`less` öffnet die Datei seitenweise und blockiert das Terminal nicht. Darin: **Leertaste** eine Seite runter, **b** eine Seite hoch, `/wort` sucht, **q** beendet. Im Simulator verhält sich `less` wie `cat`; den echten Effekt probierst du in deiner VM."
+   ],
+   "commands": [
+    {
+     "cmd": "cat",
+     "what": "Gibt die ganze Datei aus.",
+     "where": "Bei kurzen Dateien (Notizen, /etc/hostname).",
+     "why": "Der schnellste Weg, aber nicht zu stoppen.",
+     "example": "cat notes.txt"
+    },
+    {
+     "cmd": "cat -n",
+     "what": "Gibt die Datei mit Zeilennummern aus.",
+     "where": "Wenn du über eine Zeile sprichst (Fehler in Zeile 7).",
+     "why": "Zeilennummern erleichtern Gespräch und Fehlersuche.",
+     "example": "cat -n notes.txt"
+    },
+    {
+     "cmd": "less",
+     "what": "Öffnet die Datei seitenweise; Leertaste, b, /Suche, q.",
+     "where": "Lange Texte und Logs.",
+     "why": "Füllt das Terminal nicht, und du kannst darin suchen.",
+     "example": "less /var/log/messages",
+     "nosim": true
+    }
+   ],
+   "warn": "Öffnest du eine riesige Datei mit `cat`, scrollt der Bildschirm minutenlang. Mit `Ctrl+C` brichst du ab; nimm beim nächsten Mal `less`.",
+   "danger": "Gib Programmdateien (Binärdateien) nie mit `cat` aus: das Terminal wird unlesbar. Hilft nur `reset`. Bist du bei Text unsicher, schau mit `less` hinein."
+  },
+  {
+   "id": "head_tail",
+   "title": "Anfang und Ende: head und tail",
+   "body": [
+    "`head` zeigt die ersten 10 Zeilen, `tail` die letzten 10. Mit `-n` änderst du die Zahl: `head -n 3 notes.txt`.",
+    "Neue Log-Einträge landen am Ende; für die neuesten Ereignisse nimmst du deshalb `tail`. `tail -f` **verfolgt** die Datei und zeigt neue Zeilen sofort; beenden mit `Ctrl+C`. Bei mehreren Dateien steht vor jeder ein Kopf `==> name <==`."
+   ],
+   "commands": [
+    {
+     "cmd": "head -n",
+     "what": "Zeigt die ersten n Zeilen.",
+     "where": "Für Kopfzeilen oder den Anfang einer Konfiguration.",
+     "why": "Schneller Blick in eine große Datei.",
+     "example": "head -n 3 logs/app.log"
+    },
+    {
+     "cmd": "tail -n",
+     "what": "Zeigt die letzten n Zeilen.",
+     "where": "Für die neuesten Log-Einträge.",
+     "why": "Fehler stehen meist am Ende.",
+     "example": "tail -n 4 logs/app.log"
+    },
+    {
+     "cmd": "tail -f",
+     "what": "Verfolgt die Datei und zeigt neue Zeilen live.",
+     "where": "Beim Beobachten des Logs eines laufenden Dienstes.",
+     "why": "Du fängst das Problem in dem Moment ab, in dem es auftritt.",
+     "example": "tail -f logs/app.log",
+     "nosim": true
+    }
+   ],
+   "tip": "`tail -f` endet nie von selbst; es wartet auch ohne neue Zeilen. Beenden mit `Ctrl+C`."
+  },
+  {
+   "id": "wc",
+   "title": "Zählen: wc",
+   "body": [
+    "`wc` (word count) liefert Zeilen, Wörter und Bytes. `-l` zählt nur Zeilen, `-w` nur Wörter, `-c` nur Bytes. Ohne Option erscheinen alle drei nebeneinander: `3 6 33 notes.txt`.",
+    "Vor dem Öffnen einer Datei verhindert `wc -l` mit der Größenangabe `cat`-Unfälle."
+   ],
+   "commands": [
+    {
+     "cmd": "wc -l",
+     "what": "Gibt die Zeilenzahl aus.",
+     "where": "Um die Länge eines Logs oder einer Liste zu erfahren.",
+     "why": "Schnelle Größenabschätzung.",
+     "example": "wc -l logs/app.log"
+    },
+    {
+     "cmd": "wc -w",
+     "what": "Gibt die Wortzahl aus.",
+     "where": "Bei Textlänge oder Ein-Wort-Dateien.",
+     "why": "Misst den Umfang des Inhalts.",
+     "example": "wc -w notes.txt"
+    },
+    {
+     "cmd": "wc",
+     "what": "Gibt Zeilen, Wörter und Bytes zusammen aus.",
+     "where": "Wenn du einen Überblick brauchst.",
+     "why": "Drei Maße mit einem Befehl.",
+     "example": "wc Documents/report.txt"
+    }
+   ]
+  },
+  {
+   "id": "combine",
+   "title": "Kombinieren: Pipe und Umleitung",
+   "body": [
+    "`|` (Pipe) macht die Ausgabe eines Befehls zur Eingabe des nächsten: `head -n 6 app.log | tail -n 3` liefert die Zeilen 4-6. `>` schreibt die Ausgabe in eine Datei statt auf den Bildschirm.",
+    "`grep ERROR app.log` zeigt nur Zeilen mit ERROR; `grep -c` zählt sie. Details folgen in späteren Modulen; hier kombinieren wir es mit den Lesewerkzeugen."
+   ],
+   "commands": [
+    {
+     "cmd": "head | tail",
+     "what": "Wählt die mittleren Zeilen einer Datei.",
+     "where": "Wenn du einen bestimmten Zeilenbereich brauchst.",
+     "why": "Durch Verketten beider Werkzeuge erhältst du einen Bereich.",
+     "example": "head -n 6 logs/app.log | tail -n 3"
+    },
+    {
+     "cmd": "grep -c",
+     "what": "Zählt die Zeilen, die das Muster enthalten.",
+     "where": "Bei der Frage, wie viele Fehler es gibt.",
+     "why": "Spart dir das Abzählen von Hand.",
+     "example": "grep -c ERROR logs/app.log"
+    },
+    {
+     "cmd": ">",
+     "what": "Schreibt die Ausgabe in eine Datei.",
+     "where": "Wenn du ein Ergebnis aufbewahrst oder einem Ticket anhängst.",
+     "why": "Die Ausgabe bleibt erhalten.",
+     "example": "grep ERROR logs/app.log > errors.txt"
+    }
+   ],
+   "warn": "`>` löscht den Inhalt einer bereits vorhandenen Zieldatei. Überlege zweimal, bevor du den Namen einer vorhandenen Datei angibst; zum Anhängen nimm `>>`.",
+   "danger": "Liest und schreibst du dieselbe Datei wie in `cat notes.txt > notes.txt`, wird sie leer und die Daten sind weg. Leite die Ausgabe immer in eine andere Datei."
+  },
+  {
+   "id": "paths",
+   "title": "Log-Pfade je nach Distribution",
+   "body": [
+    "Das Haupt-Systemlog liegt unter Debian/Ubuntu in `/var/log/syslog`, unter RHEL/Rocky/Alma in `/var/log/messages`. Fehlt die Datei, kommt `No such file or directory`; der Fehler liegt dann im Pfad, nicht im Befehl.",
+    "Viele Logs lassen sich nur mit `sudo` lesen (z. B. `sudo less /var/log/secure`). Schau zuerst mit `ls /var/log`."
+   ],
+   "tip": "Fehlt die Datei, finde den echten Namen mit `ls /var/log`. Zur Not zeigt `sudo journalctl -n 20` die letzten Einträge."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Lies eine kleine Datei mit `cat notes.txt`.",
+   "hint": "Die Datei ist kurz, also passt cat."
+  },
+  "t02": {
+   "text": "Wie viele Zeilen hat `logs/app.log`? Finde es mit `wc -l logs/app.log` heraus.",
+   "hint": "Die Option ist ein kleines L."
+  },
+  "t03": {
+   "text": "Zeige mit `head -n 3 logs/app.log` die ersten 3 Zeilen des Logs.",
+   "hint": "Nach -n folgt die Zeilenzahl."
+  },
+  "t04": {
+   "text": "Zeige mit `tail -n 4 logs/app.log` die letzten 4 Zeilen.",
+   "hint": "Die letzte Zeile sollte 'shutdown complete' sein."
+  },
+  "t05": {
+   "text": "Lies mit `cat -n notes.txt` die Datei mit Zeilennummern.",
+   "hint": "-n fügt Zeilennummern hinzu."
+  },
+  "t06": {
+   "text": "Ermittle mit `wc -w notes.txt` die Wortzahl.",
+   "hint": "Drei Zeilen mit je zwei Wörtern."
+  },
+  "t07": {
+   "text": "Sieh mit `wc Documents/report.txt` Zeilen, Wörter und Bytes zusammen.",
+   "hint": "Ohne Option erscheinen drei Zahlen."
+  },
+  "t08": {
+   "text": "Zeige den Anfang zweier Dateien mit einem Befehl: `head -n 2 Documents/list.csv Documents/report.txt`.",
+   "hint": "Jede Datei bekommt einen Kopf `==> name <==`."
+  },
+  "t09": {
+   "text": "Vorhersage: Was zeigt `wc -l notes.txt`? Führe es aus und prüfe.",
+   "hint": "Denk an die Zeilenzahl, die du mit `cat -n` gesehen hast."
+  },
+  "t10": {
+   "text": "Vorhersage: Was passiert bei `cat logs`? Führe es aus und lies den Fehler.",
+   "hint": "logs ist ein Verzeichnis, keine Datei; erwartet wird 'Is a directory'."
+  },
+  "t11": {
+   "text": "Vorhersage: Welche Zeile gibt `head -n 6 logs/app.log | tail -n 1` aus? Führe es aus und prüfe.",
+   "hint": "Die letzte der ersten 6 Zeilen, also Zeile 6."
+  },
+  "t12": {
+   "text": "Fehlersuche: Ein Kollege tippte `tail 5 logs/app.log` und bekam einen Fehler, weil `5` als Datei gilt. Zeige mit dem richtigen Befehl die letzten 5 Zeilen.",
+   "hint": "Für die Zeilenzahl braucht es `-n`."
+  },
+  "t13": {
+   "text": "Mini-Projekt: Schreibe mit `grep ERROR logs/app.log > errors.txt` alle Fehler in `errors.txt` und zähle sie dann mit `wc -l errors.txt`.",
+   "hint": "Es sollten drei ERROR-Zeilen sein."
+  },
+  "t14": {
+   "text": "Herausforderung: Schreibe nur die Zeilen 4, 5 und 6 von `logs/app.log` in die Datei `middle.txt`.",
+   "hint": "Erst die ersten 6 Zeilen nehmen, davon die letzten 3, das Ergebnis mit `>` umleiten."
+  },
+  "t15": {
+   "text": "Ticket: 'Wie viele Fehler gibt es auf dem Server, und welche sind die ersten beiden?' Speichere die ersten zwei ERROR-Zeilen in `first_errors.txt` und zeige die Gesamtzahl der ERROR-Zeilen mit `grep -c`.",
+   "hint": "`grep ERROR logs/app.log | head -n 2 > first_errors.txt`, dann `grep -c ERROR logs/app.log`."
+  }
+ },
+ "vm": {
+  "intro": "In deiner VM liest du nur; nichts wird gelöscht. Systemdateien zu lesen ist sicher, achte aber darauf, keine Dateien per Umleitung zu überschreiben.",
+  "tasks": {
+   "v01": {
+    "title": "Kleine Datei mit cat lesen",
+    "text": "Gib die Distributionsinformationen aus und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Ubuntu\"\nVERSION=\"24.04 LTS (Noble Numbat)\"\n..."
+     }
+    ],
+    "differs": [
+     "Unter Rocky/Alma siehst du `NAME=\"Rocky Linux\"`; die Felder können abweichen.",
+     "Bei `No such file` bist du evtl. in WSL oder einem Container; probiere `cat /etc/hostname`."
+    ]
+   },
+   "v02": {
+    "title": "Anfang und Ende lesen",
+    "text": "Zeige die ersten 5 und die letzten 3 Zeilen der Benutzerdatei.",
+    "blocks": [
+     {
+      "cmd": "head -n 5 /etc/passwd\ntail -n 3 /etc/passwd",
+      "expected": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n..."
+     }
+    ],
+    "differs": [
+     "Die zweite Zeile ist unter Ubuntu `daemon`, unter RHEL evtl. `bin`.",
+     "Die erste Zeile muss immer mit `root:x:0:0` beginnen."
+    ]
+   },
+   "v03": {
+    "title": "Zeilen zählen",
+    "text": "Ermittle die Zeilenzahl von `/etc/passwd` und die drei Maße von `/etc/hostname`.",
+    "blocks": [
+     {
+      "cmd": "wc -l /etc/passwd\nwc /etc/hostname",
+      "expected": "32 /etc/passwd\n 1  1 10 /etc/hostname"
+     }
+    ],
+    "differs": [
+     "Deine Zeilenzahl hängt von der Installation ab; wichtig sind die Zahl und der Dateiname.",
+     "Bei `wc /etc/hostname` ist die erste Zahl die Zeilen-, die zweite die Wort-, die dritte die Bytezahl."
+    ]
+   },
+   "v04": {
+    "title": "Mit less blättern",
+    "text": "Öffne das Hauptlog: unter Ubuntu `/var/log/syslog`, unter RHEL/Rocky/Alma `/var/log/messages`. Probiere Leertaste, b, /error und q. Danach klicke auf \"Erledigt\".",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu\nsudo less /var/log/syslog\n# Rocky / Alma\nsudo less /var/log/messages"
+     }
+    ],
+    "differs": [
+     "Fehlt die Datei, schau mit `ls /var/log` nach dem Namen; manche Systeme haben nur `sudo journalctl -n 50`.",
+     "Kommst du aus less nicht heraus, drücke `q`."
+    ]
+   },
+   "v05": {
+    "title": "Live verfolgen (tail -f)",
+    "text": "Öffne zwei Terminals. Im ersten verfolgst du die Datei, im zweiten hängst du eine Zeile an. Siehst du die neue Zeile, beende das erste mit `Ctrl+C` und füge die Ausgabe ein.",
+    "blocks": [
+     {
+      "cmd": "# Terminal 1\ntouch ~/live.log\ntail -f ~/live.log"
+     },
+     {
+      "cmd": "# Terminal 2\necho \"new entry\" >> ~/live.log",
+      "expected": "new entry"
+     }
+    ],
+    "differs": [
+     "Terminal 1 bleibt leer und wartet; das ist normal, bis eine Zeile angehängt wird.",
+     "Hast du nur ein Terminal, halte `tail -f` nicht mit `Ctrl+Z` an; öffne einen zweiten Tab oder ein Fenster."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Welches Werkzeug eignet sich, um ein 5-GB-Log sicher anzusehen?",
+   "options": [
+    "cat: gibt alles auf einmal aus",
+    "less: zeigt seitenweise an",
+    "mkdir: legt einen Ordner an",
+    "rm: löscht die Datei"
+   ],
+   "explain": "less zeigt nur, was auf den Bildschirm passt, und erlaubt Suche; cat lässt die ganze Datei über den Bildschirm laufen."
+  },
+  "q2": {
+   "q": "Was bewirkt `-f` bei `tail -f`?",
+   "options": [
+    "Löscht die Datei erzwungen",
+    "Blendet den Dateinamen aus",
+    "Liest schneller",
+    "Verfolgt die Datei und zeigt neue Zeilen live"
+   ],
+   "explain": "-f steht für 'follow'; beendet wird mit Ctrl+C."
+  },
+  "q3": {
+   "q": "Welcher Befehl liefert nur die Zeilenzahl einer Datei?",
+   "options": [
+    "wc -l notes.txt",
+    "wc -w notes.txt",
+    "head notes.txt",
+    "cat -n notes.txt"
+   ],
+   "explain": "wc -l zählt Zeilen; -w zählt Wörter."
+  },
+  "q4": {
+   "q": "Was zeigt `head -n 3 notes.txt`?",
+   "options": [
+    "Die letzten 3 Zeilen",
+    "Die 3 Wörter der Datei",
+    "Die ersten 3 Zeilen",
+    "Alles außer der 3. Zeile"
+   ],
+   "explain": "head zeigt den Anfang; -n 3 sind die ersten drei Zeilen. Für das Ende nimmt man tail."
+  }
+ },
+ "summary": [
+  "Kleine Datei: `cat`, große Datei: `less` (Leertaste, b, /Suche, q).",
+  "`head -n` zeigt den Anfang, `tail -n` das Ende; `tail -f` verfolgt live (Ende mit Ctrl+C).",
+  "Mit `wc -l`, `wc -w`, `wc` zählst du Zeilen, Wörter und Bytes.",
+  "Mit `|` verkettest du Werkzeuge, mit `>` schreibst du das Ergebnis in eine Datei; `>` überschreibt vorhandene Dateien.",
+  "Der Log-Pfad hängt von der Distribution ab: syslog oder messages."
+ ],
+ "glossary": [
+  {
+   "term": "Log",
+   "meaning": "Datei, in die ein Programm oder System Ereignisse der Reihe nach schreibt."
+  },
+  {
+   "term": "Pager",
+   "meaning": "Programm, das Text seitenweise anzeigt, z. B. less."
+  },
+  {
+   "term": "Pipe",
+   "meaning": "Das Zeichen |; macht die Ausgabe eines Befehls zur Eingabe des nächsten."
+  },
+  {
+   "term": "Umleitung",
+   "meaning": "Ausgabe in eine Datei statt auf den Bildschirm schreiben; > oder >>."
+  },
+  {
+   "term": "follow",
+   "meaning": "Das Ende einer Datei mit tail -f live verfolgen."
+  }
+ ]
+}

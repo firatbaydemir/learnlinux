@@ -1,0 +1,179 @@
+{
+ "title": "Command success: $?, &&, || and error messages",
+ "lead": "No output does not mean an error. Every command leaves an exit status; in this module you learn to read it, chain commands based on it and understand error messages.",
+ "objectives": [
+  "You read the last command's exit status with `echo $?` and tell 0 from non-zero.",
+  "You chain commands conditionally with `true`, `false`, `&&`, `||` and `;`.",
+  "You know the difference between stdout and stderr and separate errors with `2>`.",
+  "You read `Permission denied`, `No such file or directory` and `command not found` and find the cause.",
+  "You test files, numbers and strings with `test` and `[ ]`."
+ ],
+ "sections": [
+  {
+   "id": "status",
+   "title": "Exit status: $?",
+   "body": [
+    "When a command finishes it produces an **exit status**. **0 = success**, any other number = failure. A silent command (such as `mkdir`) may have succeeded or failed; to be sure, type `echo $?`.",
+    "Common codes: `1` general error, `2` misuse or missing path (`ls`), `126` not executable, `127` command not found, `130` interrupted with Ctrl+C.",
+    "Careful: `$?` is overwritten after every command. An `echo $?` typed right afterwards leaves its own result (0); read the code **immediately after the command in question**."
+   ],
+   "commands": [
+    {"cmd": "echo $?", "what": "Prints the exit status of the last command.", "where": "Checking commands that print nothing.", "why": "Shows with a number whether the command really worked.", "example": "pwd; echo $?"},
+    {"cmd": "true", "what": "Does nothing and always ends with 0.", "where": "Testing chains and loops when you need a 'successful' command.", "why": "Easily produces the success state.", "example": "true; echo $?"},
+    {"cmd": "false", "what": "Does nothing and always ends with 1.", "where": "Trying the error path.", "why": "Easily produces the failure state.", "example": "false; echo $?"}
+   ],
+   "tip": "No output is not an error. Most Unix commands are silent on success."
+  },
+  {
+   "id": "chain",
+   "title": "Chaining: &&, || and ;",
+   "body": [
+    "`A && B`: B runs only if A **succeeded** (0). `A || B`: B runs only if A **failed**. `A ; B`: B runs in every case.",
+    "The classic pattern: `mkdir lab && cd lab` (enter the folder if it was created). `A && B || C` acts like an if/else, but if B fails C runs too, so use it only for simple cases."
+   ],
+   "commands": [
+    {"cmd": "&&", "what": "Runs the right side if the left side succeeded.", "where": "Steps that depend on each other.", "why": "Prevents carrying on after a failed step.", "example": "mkdir lab && cd lab"},
+    {"cmd": "||", "what": "Runs the right side if the left side failed.", "where": "Error messages or fallback plans.", "why": "Reacts to failure automatically.", "example": "cd /nonexistent || echo failed"},
+    {"cmd": ";", "what": "Runs commands in order regardless of success.", "where": "Writing independent commands on one line.", "why": "Keeps the order, ignores the result.", "example": "pwd; whoami; hostname"}
+   ],
+   "warn": "In chains like `rm -r old_project ; ...` using `;` runs the destructive command even if the previous step failed. Join destructive steps with `&&`."
+  },
+  {
+   "id": "streams",
+   "title": "stdout and stderr",
+   "body": [
+    "Every command has two output channels: **stdout** (channel 1, normal output) and **stderr** (channel 2, error messages). Both appear on screen, but they can be redirected separately.",
+    "`>` sends only stdout to a file; the error stays on screen. `2>` sends errors to a file. `2>/dev/null` throws errors away. `2>&1` sends stderr to wherever stdout goes. Note: redirection **does not change the exit status**; even if the error is hidden, the command still failed."
+   ],
+   "commands": [
+    {"cmd": "2>", "what": "Writes error messages (stderr) to a file.", "where": "Inspecting errors later.", "why": "Separates normal output from errors.", "example": "ls /nonexistent 2> errors.txt"},
+    {"cmd": "2>/dev/null", "what": "Discards error messages.", "where": "Silencing expected, harmless errors.", "why": "Keeps output clean, but also hides real problems.", "example": "ls /nonexistent 2>/dev/null; echo $?"},
+    {"cmd": "2>&1", "what": "Redirects stderr to the same place as stdout.", "where": "Collecting output and errors in one file or pipeline.", "why": "Keeps the complete record in one place.", "example": "ls ~ /nonexistent > all.txt 2>&1"}
+   ]
+  },
+  {
+   "id": "errors",
+   "title": "Reading error messages",
+   "body": [
+    "An error message usually looks like `program: argument: reason`. The first word is the program that failed, the second the problem path, the last the reason.",
+    "**No such file or directory**: the path does not exist or has a typo; check where you are with `ls` and `pwd`. **Permission denied**: the path exists but you lack permission; look at `ls -l`. **command not found** (code 127): wrong command name or not installed; check with `type` / `which`. **Is a directory**: you gave a folder to a command that expects a file."
+   ],
+   "commands": [
+    {"cmd": "ls -l", "what": "Shows file permissions and owner.", "where": "Looking for the cause of Permission denied.", "why": "You see which permission is missing.", "example": "ls -l locked.txt"},
+    {"cmd": "type", "what": "Tells you whether a name is a command, builtin or alias.", "where": "On command not found errors.", "why": "Shows whether the command exists.", "example": "type ls"}
+   ],
+   "danger": "When you see Permission denied, do not reflexively type `sudo` or `chmod 777`. Understand the cause first; needlessly wide permissions are a security hole."
+  },
+  {
+   "id": "test",
+   "title": "Testing conditions: test and [ ]",
+   "body": [
+    "`test` (and its equivalent `[ ... ]`) checks a condition and prints nothing; it reports the result only through its exit status: 0 if true, 1 if false. That is why it fits so well with `&&` / `||`.",
+    "Common ones: `-f` regular file, `-d` directory, `-e` exists, `-r`/`-w`/`-x` readable/writable/executable, `-z` string empty. For numbers `-eq -ne -gt -lt`, for strings `=` and `!=`. Inside `[ ]` the **spaces** next to the brackets are mandatory."
+   ],
+   "commands": [
+    {"cmd": "test -f", "what": "Succeeds if the path exists and is a regular file.", "where": "Checking that a file exists.", "why": "You avoid running a command on a missing file and getting an error.", "example": "test -f notes.txt && echo yes"},
+    {"cmd": "[ -d ]", "what": "Succeeds if the path is a directory.", "where": "E.g. creating a folder only if it is missing.", "why": "Lets you act conditionally.", "example": "[ -d Documents ] && echo dir"},
+    {"cmd": "[ -gt ]", "what": "Compares numbers (-eq -ne -gt -lt).", "where": "Numeric checks.", "why": "Turns numeric conditions into an exit status.", "example": "[ 3 -gt 2 ] && echo gt"}
+   ],
+   "tip": "Classic pattern: `test -d backup || mkdir backup`. It creates the folder if missing and leaves it alone otherwise."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Run `pwd` first, then read its exit status right away with `echo $?`.", "hint": "Type two separate lines; the code should be 0."},
+  "t02": {"text": "List a path that does not exist: `ls /nonexistent`, and read the error message.", "hint": "The error goes to stderr; it still shows on screen."},
+  "t03": {"text": "Run `false`, then read its status with `echo $?`. What number do you get?", "hint": "`false` always fails."},
+  "t04": {"text": "In a single line write `mkdir lab && cd lab` to create the folder and enter it.", "hint": "`&&` runs the second command only if the first succeeded."},
+  "t05": {"text": "Type `cd /nonexistent || echo failed` and think about why `failed` is printed.", "hint": "When `cd` fails, `||` runs the right-hand side."},
+  "t06": {"text": "Predict: what does `cat missing.txt; echo $?` print and what is the code? Then run it to verify.", "hint": "`cat` prints an error when it cannot find the file and exits with 1."},
+  "t07": {"text": "Predict: what does `test -f notes.txt && echo yes || echo no` print? Run it to verify.", "hint": "`notes.txt` exists in home and is a regular file."},
+  "t08": {"text": "`cat locked.txt` gives 'Permission denied'. Understand why, fix it with `chmod` and read the file.", "hint": "Give yourself read permission: `chmod u+r locked.txt`."},
+  "t09": {"text": "`cp notes.txt backup/` fails because `backup` does not exist. Chain it: create the folder and copy the file.", "hint": "`mkdir backup && cp notes.txt backup/`."},
+  "t10": {"text": "Mini project: (1) write the error of `ls /nonexistent` to `errors.txt`, (2) write the output of `ls ~` to `files.txt`, (3) read the last command's status with `echo $?`.", "hint": "Use `2>` for the error and `>` for the output."},
+  "t11": {"text": "Mini project: in one line create the `project` folder, enter it, create the file `main.txt` and finally print `built`.", "hint": "Join four commands with `&&`; you can use `mkdir -p project`."},
+  "t12": {"text": "Challenge: create the `backup` folder if it is missing; copy `notes.txt` into it; if the copy succeeded write `saved` into `status.txt`, otherwise `failed`.", "hint": "`test -d backup || mkdir backup` and `cp ... && echo saved > status.txt || echo failed > status.txt`."},
+  "t13": {"text": "Challenge: does `notes.txt` contain `hello`? Test it in one line and print `found` or `missing`; discard grep's own output to `/dev/null`.", "hint": "`grep hello notes.txt > /dev/null && echo found || echo missing`."},
+  "t14": {"text": "Ticket: A colleague says 'I cannot read my report' and tried `cat Documents/raport.txt`. Find the right name with `ls Documents`, read the file with `cat` and write the exit status to `exit.txt`.", "hint": "The right name is `report.txt`. `cat Documents/report.txt; echo $? > exit.txt`."}
+ },
+ "vm": {
+  "intro": "Run the following commands on your own VM (Ubuntu/Rocky/Alma or WSL); we only use safe, read-only commands. Paste the output and check it.",
+  "tasks": {
+   "v01": {
+    "title": "Success and failure codes",
+    "text": "Run one successful and one failing command and read the code after each. Paste the whole output.",
+    "blocks": [
+     {"cmd": "ls /\necho $?\nls /nonexistent\necho $?", "expected": "bin  boot  dev  etc ...\n0\nls: cannot access '/nonexistent': No such file or directory\n2"}
+    ],
+    "differs": [
+     "A failing `ls` gives 2 (GNU ls); other commands may give 1. That is fine, what matters is that it is not 0.",
+     "If the message is localised it may be in another language; the code is the same."
+    ]
+   },
+   "v02": {
+    "title": "command not found: 127",
+    "text": "Run a command that does not exist and read the exit status.",
+    "blocks": [
+     {"cmd": "nonexistentcmd\necho $?", "expected": "bash: nonexistentcmd: command not found\n127"}
+    ],
+    "differs": [
+     "Ubuntu sometimes suggests a package with 'Command not found'; the code is still 127.",
+     "If you type `echo $?` twice the second gives 0; read it only right after the first command."
+    ]
+   },
+   "v03": {
+    "title": "How && and || behave",
+    "text": "Try the chains and see which side runs.",
+    "blocks": [
+     {"cmd": "true && echo ok\nfalse && echo never\nfalse || echo fallback\ntrue ; echo always", "expected": "ok\nfallback\nalways"}
+    ],
+    "differs": [
+     "If `never` appears you may have typed `;` instead of `&&`.",
+     "If nothing prints, look for a quote or spacing mistake."
+    ]
+   },
+   "v04": {
+    "title": "Permission denied",
+    "text": "Open a file you cannot read as a normal user and paste the error and status (read-only, nothing changes).",
+    "blocks": [
+     {"cmd": "cat /etc/shadow\necho $?", "expected": "cat: /etc/shadow: Permission denied\n1"}
+    ],
+    "differs": [
+     "If you are root the file opens; switch to a normal user (`su - student` or a new user).",
+     "On older systems you can try `/etc/sudoers` instead of `/etc/shadow`."
+    ]
+   },
+   "v05": {
+    "title": "Conditions with test",
+    "text": "Test file and directory conditions. Paste the result as `yes` / `no`.",
+    "blocks": [
+     {"cmd": "test -d /etc && echo yes || echo no\ntest -f /etc/nonexistent && echo yes || echo no", "expected": "yes\nno"}
+    ],
+    "differs": [
+     "If both print `yes` you may have typed `-e` instead of `-f`.",
+     "When you write `[ -d /etc ]`, do not forget the spaces around `[` and `]`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What is the exit status of a command that finished successfully?", "options": ["1", "0", "127", "255"], "explain": "0 means success; every non-zero value indicates a failure."},
+  "q2": {"q": "When does B run in the line `A && B`?", "options": ["Always", "Only if A fails", "Only if A succeeds (0)", "Never"], "explain": "`&&` acts like AND; B runs only if A ends with 0."},
+  "q3": {"q": "What does exit status 127 indicate?", "options": ["Command not found", "Permission denied", "Interrupted with Ctrl+C", "File not found"], "explain": "127 = command not found. A permission problem is 126, Ctrl+C is 130."},
+  "q4": {"q": "What does `ls /nonexistent 2>/dev/null; echo $?` do?", "options": ["Shows the error message and prints 0", "Creates the folder", "Prints nothing at all", "Hides the error message but the status stays non-zero"], "explain": "`2>/dev/null` only discards the message; the command still failed and `$?` is not 0."}
+ },
+ "summary": [
+  "Exit status: 0 is success, anything else is an error. Read it immediately with `echo $?`.",
+  "`&&` continues on success, `||` on failure, `;` in every case.",
+  "stdout is redirected with `>`, stderr with `2>`; redirection does not change the exit status.",
+  "Error message: program, path, reason. 127 = no such command, Permission denied = no permission.",
+  "`test` and `[ ]` turn conditions into an exit status."
+ ],
+ "glossary": [
+  {"term": "exit status", "meaning": "The number a command leaves when it finishes; 0 = success."},
+  {"term": "stdout", "meaning": "Standard output (channel 1); normal results."},
+  {"term": "stderr", "meaning": "Standard error (channel 2); error messages."},
+  {"term": "&&", "meaning": "Operator that runs the right side if the left side succeeded."},
+  {"term": "||", "meaning": "Operator that runs the right side if the left side failed."},
+  {"term": "/dev/null", "meaning": "A special file that swallows everything written to it."}
+ ]
+}

@@ -1,0 +1,141 @@
+{
+ "title": "What Is Linux? — Kernel, Distribution, Philosophy",
+ "lead": "Understand what Linux really is: a kernel, the distributions built around it, and the ideas that make the command line so powerful.",
+ "objectives": [
+  "You can explain the difference between the kernel, a distribution and the shell.",
+  "You know the two big distribution families (Debian and RHEL) and their package tools.",
+  "You find kernel version, distribution and architecture with `uname` and `/etc/os-release`.",
+  "You know the principle \"everything is a file\" and the purpose of the main top-level directories."
+ ],
+ "sections": [
+  {
+   "id": "kernel",
+   "title": "Kernel, distribution and shell",
+   "body": [
+    "**Linux** is strictly only the **kernel**: the core that talks to the hardware, schedules processes and manages memory. Linus Torvalds started it in 1991. Alone the kernel is not usable — you need tools, libraries and a way to type commands.",
+    "A **distribution** (distro) bundles the kernel with the GNU tools, a package manager, an installer and defaults. Ubuntu, Debian, Fedora, Rocky Linux and AlmaLinux are distros. The **shell** (usually `bash`) is the program that reads your commands and asks the kernel to run them.",
+    "Two files tell you what you are running: `uname` reports kernel and architecture, `/etc/os-release` reports the distribution. You will use both whenever you ask for help or read documentation."
+   ],
+   "commands": [
+    {"cmd": "uname -r", "what": "Prints the kernel release.", "where": "When checking the kernel version for support or bug reports.", "why": "The kernel version decides which hardware and features you have.", "example": "uname -r"},
+    {"cmd": "uname -a", "what": "Prints all system information in one line.", "where": "When you paste system details into a ticket.", "why": "Shows host name, kernel and architecture at once.", "example": "uname -a"},
+    {"cmd": "uname -m", "what": "Prints the machine architecture (x86_64, aarch64, ...).", "where": "Before downloading software or an ISO.", "why": "Packages are built per architecture.", "example": "uname -m"},
+    {"cmd": "cat /etc/os-release", "what": "Shows distribution name and version.", "where": "On any modern distribution.", "why": "A standard file, same format on Ubuntu, Rocky, Alma and others.", "example": "cat /etc/os-release"}
+   ],
+   "tip": "Kernel and distribution are versioned separately: Ubuntu 24.04 ships kernel 6.8, Rocky Linux 9 ships 5.14 with many backports."
+  },
+  {
+   "id": "family",
+   "title": "Distribution families and licences",
+   "body": [
+    "Distros group into **families**. The **Debian family** (Debian, Ubuntu, Mint) uses `.deb` packages and `apt`. The **RHEL family** (Red Hat Enterprise Linux, Rocky, AlmaLinux, Fedora) uses `.rpm` packages and `dnf`. Commands you learn in this course work on both; only package management differs.",
+    "The Linux kernel is released under GPL-2.0-only; tools and applications bundled in a distribution may use different licences. This openness supports many distros, while enterprise vendors may offer support and services as well as software. The `ID_LIKE` line in `/etc/os-release` tells you the family: Rocky reports `rhel fedora`, Ubuntu reports `debian`.",
+    "In this course your reference system is a **Rocky/Alma Linux** VM, with Ubuntu as an equal alternative. Use whichever you installed in module 0.2."
+   ],
+   "commands": [
+    {"cmd": "grep ID_LIKE /etc/os-release", "what": "Shows only the family line of the release file.", "where": "When you are unsure whether to use apt or dnf.", "why": "Turns a long file into the one fact you need.", "example": "grep ID_LIKE /etc/os-release"}
+   ],
+   "tip": "If `ID_LIKE` contains `debian` use `apt`; if it contains `rhel` or `fedora` use `dnf`."
+  },
+  {
+   "id": "philosophy",
+   "title": "Philosophy and the directory tree",
+   "body": [
+    "Unix thinking in four lines: **everything is a file** (disks, devices and processes show up as paths), **small tools do one thing well**, tools are **combined** with pipes, and configuration is **plain text** you can read and edit.",
+    "All files live in **one tree** starting at `/` (root directory). There are no drive letters. `/etc` holds configuration, `/home` the users' files, `/var` changing data such as logs, `/usr` programs and libraries, `/tmp` temporary files, `/dev` devices, `/proc` live kernel information. On modern systems `/bin` is just a link to `/usr/bin`.",
+    "A normal user works in the home directory `/home/student`. The administrator account is **root**; you will meet it carefully in later modules."
+   ],
+   "commands": [
+    {"cmd": "ls /", "what": "Lists the top level of the directory tree.", "where": "When getting oriented on an unknown system.", "why": "Shows the standard directories described above.", "example": "ls /"},
+    {"cmd": "ls /etc", "what": "Lists the configuration directory.", "where": "When looking for a system setting.", "why": "Nearly all system configuration is a text file here.", "example": "ls /etc"},
+    {"cmd": "cat /etc/shells", "what": "Lists the shells installed on the system.", "where": "When asking which shell programs exist.", "why": "Shows that the shell is just a replaceable program.", "example": "cat /etc/shells"}
+   ],
+   "tip": "When something is configurable, look in `/etc` first, then read the file — it is text."
+  }
+ ],
+ "tasks": {
+  "t01": {"text": "Show the kernel release with `uname -r`.", "hint": "-r means release."},
+  "t02": {"text": "Show the distribution information with `cat /etc/os-release`.", "hint": "Note the `NAME` and `ID_LIKE` lines."},
+  "t03": {"text": "Show all system information with `uname -a`.", "hint": "-a means all."},
+  "t04": {"text": "List the top level of the directory tree with `ls /`.", "hint": "Find `etc`, `home`, `usr`, `var` in the output."},
+  "t05": {"text": "List the configuration directory with `ls /etc`.", "hint": "These are mostly text files."},
+  "t06": {"text": "Show the installed shells with `cat /etc/shells`.", "hint": "`/bin/bash` should be listed."},
+  "t07": {"text": "Predict: which architecture will `uname -m` print on this system? Then run it.", "hint": "Most PCs and VMs use x86_64."},
+  "t08": {"text": "Predict: what does `cat /etc/hostname` contain? Run it to check.", "hint": "The default host name is `linux-lab`."},
+  "t09": {"text": "Predict: what does `echo $SHELL` print? Run it to check.", "hint": "It is the full path to your shell program."},
+  "t10": {"text": "Debug: `~/distro.txt` wrongly says `ID=windows`. Overwrite the file so that it contains `ID=linux`.", "hint": "`echo ID=linux > ~/distro.txt` replaces the content; check with `cat`."},
+  "t11": {"text": "Mini project: create the folder `~/about_linux`. Save the kernel release in `~/about_linux/kernel.txt` and the contents of `/etc/os-release` in `~/about_linux/distro.txt`.", "hint": "`uname -r > file` writes command output into a file."},
+  "t12": {"text": "Challenge: build `~/system_report.txt` with three lines: host name, kernel release and your user name.", "hint": "`>` creates the file, `>>` appends. Commands: `hostname`, `uname -r`, `whoami`."},
+  "t13": {"text": "Ticket: \"A colleague asks which distribution family this server belongs to. Save the `ID_LIKE` line of the release file in `~/ticket_answer.txt`.\"", "hint": "Combine `grep` for the line with `>` for the file."}
+ },
+ "vm": {
+  "intro": "These commands are harmless and read-only. Run them in the terminal of your VM (Rocky/Alma or Ubuntu) and compare.",
+  "tasks": {
+   "v01": {
+    "title": "Identify your system",
+    "text": "Show kernel release and distribution, and paste both outputs.",
+    "blocks": [
+     {"cmd": "uname -r\ncat /etc/os-release", "expected": "5.14.0-427.el9.x86_64\nNAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\nID_LIKE=\"rhel centos fedora\"\n..."}
+    ],
+    "differs": [
+     "On Ubuntu you see `NAME=\"Ubuntu\"` and a kernel like `6.8.0-...-generic` — that is correct.",
+     "On WSL the kernel name contains `microsoft-standard-WSL2`."
+    ]
+   },
+   "v02": {
+    "title": "Walk the directory tree",
+    "text": "List the top level and the configuration directory and paste the output of the first command.",
+    "blocks": [
+     {"cmd": "ls /\nls /etc | head -n 15", "expected": "afs  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+    ],
+    "differs": [
+     "The exact list varies by distribution, but `etc`, `home`, `usr` and `var` must be present.",
+     "`bin` appears as a link to `usr/bin` on modern systems; check with `ls -ld /bin`."
+    ]
+   },
+   "v03": {
+    "title": "Meet process 1",
+    "text": "Every system starts one first process. Find out its name.",
+    "blocks": [
+     {"cmd": "ps -p 1 -o comm=", "expected": "systemd"}
+    ],
+    "differs": [
+     "In some containers you may see `bash` or `init`; on a normal VM it is `systemd`.",
+     "If `ps` is missing, run `cat /proc/1/comm` instead."
+    ]
+   },
+   "v04": {
+    "title": "Check the link and your family",
+    "text": "Check that `/bin` is a link and decide whether your system uses apt or dnf.",
+    "blocks": [
+     {"cmd": "ls -ld /bin\ngrep ID_LIKE /etc/os-release\nwhich apt dnf", "expected": "lrwxrwxrwx. 1 root root 7 ... /bin -> usr/bin"}
+    ],
+    "differs": [
+     "`which` prints only the tool that exists: `apt` on Ubuntu, `dnf` on Rocky/Alma.",
+     "If `which` prints nothing for both, try `command -v dnf` or install `which` first."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {"q": "What is the Linux kernel?", "options": ["A complete operating system with desktop", "The core that manages hardware, memory and processes", "A text editor", "A package manager"], "explain": "Linux strictly means the kernel. A distribution adds tools, packages and an installer around it."},
+  "q2": {"q": "Which package tool belongs to the Rocky Linux / RHEL family?", "options": ["apt", "pacman", "zypper only", "dnf"], "explain": "RHEL-family systems use rpm packages managed by dnf; Debian and Ubuntu use apt."},
+  "q3": {"q": "Which file shows the name and version of the distribution?", "options": ["/etc/os-release", "/etc/hostname", "/proc/cpuinfo", "/var/log/messages"], "explain": "`/etc/os-release` is the standard file on all modern distributions."},
+  "q4": {"q": "What does \"everything is a file\" mean?", "options": ["Every file is a program", "There are no directories", "Devices, processes and settings are reached through paths and read with the same tools", "Files cannot be deleted"], "explain": "Disks appear under `/dev` and processes under `/proc`; the same tools such as `cat` and `ls` work on them."}
+ },
+ "summary": [
+  "Linux is the kernel; a distribution adds tools, packages and an installer; the shell reads your commands.",
+  "Debian family uses `apt`, RHEL family uses `dnf`; `ID_LIKE` in `/etc/os-release` tells you which.",
+  "`uname -r`, `uname -m` and `cat /etc/os-release` identify any system.",
+  "One tree from `/`: `/etc` configuration, `/home` users, `/var` data, `/usr` programs.",
+  "Unix philosophy: everything is a file, small tools, plain text configuration."
+ ],
+ "glossary": [
+  {"term": "kernel", "meaning": "The core of the operating system that controls hardware, memory and processes."},
+  {"term": "distribution", "meaning": "A complete system: kernel plus tools, packages, installer and defaults."},
+  {"term": "shell", "meaning": "The program that reads and runs your commands, usually bash."},
+  {"term": "package manager", "meaning": "The tool that installs and updates software: apt or dnf."},
+  {"term": "root directory", "meaning": "The top of the file tree, written `/`."},
+  {"term": "GPL", "meaning": "A family of free-software licences; the Linux kernel is licensed under GPL-2.0-only."}
+ ]
+}

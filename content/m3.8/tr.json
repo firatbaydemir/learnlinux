@@ -1,0 +1,448 @@
+{
+ "title": "Arşivleme ve sıkıştırma",
+ "lead": "tar, gzip ve zip ile dosyaları paketle, sıkıştır, güvenle geri aç ve yedeklerini doğrula.",
+ "objectives": [
+  "Arşivleme (tar: paketleme) ile sıkıştırma (gzip, bzip2, xz) arasındaki farkı açıklarsın.",
+  "`tar -czf`, `tar -tf` ve `tar -xzf -C` ile arşiv oluşturur, içini listeler ve yeni bir klasöre açarsın.",
+  "Tar bomb ve üzerine yazma risklerini bilir, açmadan önce her zaman listelersin.",
+  "`gzip -k`, `zip`/`unzip` kullanır ve sıkıştırma oranlarını karşılaştırırsın.",
+  "Tarihli bir yedek alır, `sha256sum` ile doğrularsın."
+ ],
+ "sections": [
+  {
+   "id": "concept",
+   "title": "Arşiv ve sıkıştırma farklı şeylerdir",
+   "body": [
+    "**Arşivlemek** birçok dosyayı ve klasörü yollarıyla, izinleriyle birlikte tek dosyada **paketlemektir**; boyut küçülmez. Bunu `tar` yapar (tape archive). **Sıkıştırmak** ise tek bir dosyanın boyutunu küçültmektir: `gzip` (hızlı, yaygın), `bzip2` (daha küçük, yavaş), `xz` (en küçük, en yavaş).",
+    "Pratikte ikisi birlikte kullanılır: önce `tar` paketler, sonra gzip sıkıştırır. Sonuç `.tar.gz` veya `.tgz` dosyasıdır. `tar` bu işi `-z` (gzip), `-j` (bzip2), `-J` (xz) bayraklarıyla tek komutta yapar.",
+    "Önemli ayrıntı: `gzip notes.txt` komutu orijinal dosyayı **siler** ve yerine `.gz` bırakır. Orijinali korumak için `-k` (keep) kullan."
+   ],
+   "commands": [
+    {
+     "cmd": "gzip -k",
+     "what": "Dosyayı sıkıştırır ve orijinali de saklar (`.gz` ekler).",
+     "where": "Büyük log veya metin dosyalarını küçültürken.",
+     "why": "`-k` olmadan orijinal silinir; `-k` ile güvenle denersin.",
+     "example": "gzip -k logs/app.log",
+     "nosim": true
+    },
+    {
+     "cmd": "gunzip",
+     "what": "`.gz` dosyasını açar; `.gz` dosyasını siler (`gzip -d` ile aynı).",
+     "where": "Sıkıştırılmış tek bir dosyayı eski haline getirirken.",
+     "why": "`gunzip -k` ile `.gz` yedeğini koruyabilirsin.",
+     "example": "gunzip logs/app.log.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "zcat",
+     "what": "Sıkıştırılmış dosyayı açmadan içeriğini ekrana yazar.",
+     "where": "Eski, sıkıştırılmış logları okurken veya `grep` ile aramak için.",
+     "why": "Diskte yer ve zaman harcamadan içeriğe bakarsın.",
+     "example": "zcat logs/app.log.gz | head",
+     "nosim": true
+    }
+   ],
+   "tip": "Boyut karşılaştırması için `ls -lh` kullan. Metin ve log dosyaları çok iyi sıkışır; zaten sıkışmış JPG, MP4 veya ZIP dosyaları neredeyse hiç küçülmez.",
+   "warn": "`gzip notes.txt` orijinali siler. Tek kopyan olan veriyi önce yedekle veya `-k` kullan."
+  },
+  {
+   "id": "tar",
+   "title": "tar: oluştur, listele, aç",
+   "body": [
+    "`tar` seçenekleri tek bir kelimede birleştirilebilir: **c** (create, oluştur), **x** (extract, aç), **t** (list, listele), **v** (verbose, ayrıntılı), **f** (file, arşiv dosya adı; **her zaman son harf**, hemen ardından ad gelir), **z/j/J** (gzip/bzip2/xz).",
+    "Arşive her zaman **göreli yol** ekle (`project`, `/home/student/project` değil). GNU tar baştaki `/` karakterini kaldırır ve uyarı verir; böylece açarken sistem dosyalarının üzerine yazılmaz.",
+    "`-C klasör` tar'ın işlem öncesi o klasöre geçmesini sağlar: açarken hedef klasörü, oluştururken kaynağın kökünü belirler. Hedef klasör önceden var olmalıdır."
+   ],
+   "commands": [
+    {
+     "cmd": "tar -czf",
+     "what": "Klasörü gzip ile sıkıştırılmış tek bir arşive paketler.",
+     "where": "Yedek alırken, projeyi göndermeden önce.",
+     "why": "Tek dosya taşımak, kopyalamak ve saklamak çok daha kolaydır.",
+     "example": "tar -czf backups/project.tar.gz project",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -tf",
+     "what": "Arşivi açmadan içindeki yolları listeler (`-z` gerekmez, tar türü kendisi anlar).",
+     "where": "Açmadan önce içeriği görmek için.",
+     "why": "Tar bomb ve üzerine yazma sürprizlerini önler.",
+     "example": "tar -tf backups/project.tar.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xzf -C",
+     "what": "Arşivi belirtilen (var olan) klasöre açar.",
+     "where": "Yedeği geri yüklerken; mevcut çalışma dizinini kirletmemek için.",
+     "why": "Her zaman yeni, boş bir klasöre aç; sonra kontrol et.",
+     "example": "tar -xzf backups/project.tar.gz -C restore",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xzf ... member",
+     "what": "Arşivden yalnızca belirttiğin dosyayı veya klasörü açar.",
+     "where": "Tek bir dosyayı yedekten kurtarırken.",
+     "why": "Tüm arşivi açıp çalışan dosyaların üzerine yazmazsın. Yol, `tar -tf` çıktısındaki gibi yazılmalıdır.",
+     "example": "tar -xzf backups/project.tar.gz -C restore project/notes.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "tar --exclude",
+     "what": "Kalıba uyan dosyaları arşive almaz.",
+     "where": "Log, geçici dosya veya `.git` gibi gereksiz verileri yedeklemeden çıkarırken.",
+     "why": "Yedek küçülür ve hızlanır. `--exclude` bayrağını arşivlenecek yoldan önce yaz.",
+     "example": "tar -czf backups/lab-nologs.tar.gz --exclude='*.log' .",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -cJf",
+     "what": "xz ile en yüksek sıkıştırmalı arşiv oluşturur (`-j` bzip2 içindir).",
+     "where": "Sık kullanılmayacak, uzun süre saklanacak arşivlerde.",
+     "why": "Daha küçük dosya; karşılığında daha yavaş ve daha çok işlemci.",
+     "example": "tar -cJf backups/project.tar.xz project",
+     "nosim": true
+    }
+   ],
+   "tip": "Ezberlemek için: **c**reate, e**x**tract, lis**t**; arkasından `f` ve dosya adı. Sıkıştırma türü açarken otomatik algılanır, `tar -xf` çoğu zaman yeter.",
+   "warn": "`f` bayrağından sonra mutlaka arşiv adı gelmeli. `tar -cfz backup.tgz project` yazarsan `z` arşiv adı sanılır ve dosyanın adı yanlış olur."
+  },
+  {
+   "id": "safe",
+   "title": "Güvenle açmak: tar bomb ve üzerine yazma",
+   "body": [
+    "Bazı arşivlerde üst klasör yoktur; açınca yüzlerce dosya doğrudan bulunduğun dizine dökülür (**tar bomb**). Temizlemesi zordur, çünkü hangi dosyaların arşivden geldiğini ayırt edemezsin. Çözüm: önce `tar -tf` (veya `tar -tvf`) ile listele, sonra boş, yeni bir klasöre aç.",
+    "`tar -x` aynı adlı mevcut dosyaların üzerine **sessizce yazar**. Bu yüzden asla çalışma klasörüne doğrudan açma.",
+    "İzinler ve sahipler: `tar` izinleri arşive kaydeder. **root** olarak açarsan sahipler ve izinler olduğu gibi geri gelir; normal kullanıcıda `umask` uygulanır. İzinleri açıkça korumak için `-p` kullan. Sahibi başka bir kullanıcı olan dosyaları geri yüklemek için `sudo` gerekir."
+   ],
+   "commands": [
+    {
+     "cmd": "tar -tvf",
+     "what": "Arşivi ayrıntılı listeler: izin, sahip, boyut, tarih ve yol.",
+     "where": "Açmadan önce izinleri ve üst klasör olup olmadığını görmek için.",
+     "why": "Tar bomb ve mutlak yol sorunlarını önceden görürsün.",
+     "example": "tar -tvf backups/project.tar.gz",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -xpf",
+     "what": "Arşivi dosya izinlerini koruyarak açar.",
+     "where": "İzinleri önemli olan yedekleri geri yüklerken.",
+     "why": "`umask` yüzünden izinlerin değişmesini önler.",
+     "example": "tar -xpf backups/project.tar.gz -C restore",
+     "nosim": true
+    },
+    {
+     "cmd": "sudo tar -xpf",
+     "what": "root olarak açar; sahip ve grup bilgileri de geri gelir.",
+     "where": "Sistem yedeklerini veya başka kullanıcılara ait dosyaları geri yüklerken.",
+     "why": "Sahiplik korunur; ama root hatayı da büyütür.",
+     "example": "sudo tar -xpf backups/project.tar.gz -C restore",
+     "nosim": true
+    }
+   ],
+   "tip": "Alışkanlık: `tar -tf backup.tar.gz | head` ile bak, `mkdir restore`, sonra `tar -xzf backup.tar.gz -C restore`.",
+   "danger": "Güvenmediğin bir arşivi root olarak, özellikle `/` hedefiyle (`-C /`) açma. Mutlak yollu veya `..` içeren üyeler sistem dosyalarının üzerine yazabilir. Önce snapshot al, önce listele."
+  },
+  {
+   "id": "zip",
+   "title": "zip ve unzip",
+   "body": [
+    "`zip` hem paketler hem sıkıştırır ve Windows/macOS ile uyumludur; dosya alışverişi için idealdir. Klasörler için `-r` (recursive) şarttır. Ubuntu'da `sudo apt install zip unzip`, Rocky/Alma'da `sudo dnf install zip unzip` ile kurulur.",
+    "`.tar.gz` ile fark: zip her dosyayı ayrı sıkıştırır, tek tek çıkarmak hızlıdır; ama Linux izinlerini ve sahipleri `tar` kadar güvenilir korumaz. Linux yedeklerinde `tar` tercih edilir."
+   ],
+   "commands": [
+    {
+     "cmd": "zip -r",
+     "what": "Klasörü alt klasörleriyle zip arşivine ekler.",
+     "where": "Windows/macOS kullanıcılarına dosya gönderirken.",
+     "why": "Her platformda açılır; `-r` olmadan klasörün içi eklenmez.",
+     "example": "zip -r backups/project.zip project",
+     "nosim": true
+    },
+    {
+     "cmd": "unzip -l",
+     "what": "Zip arşivinin içeriğini açmadan listeler.",
+     "where": "Açmadan önce kontrol için.",
+     "why": "`tar -tf` ile aynı güvenlik alışkanlığı.",
+     "example": "unzip -l backups/project.zip",
+     "nosim": true
+    },
+    {
+     "cmd": "unzip -d",
+     "what": "Zip arşivini belirtilen klasöre açar (yoksa oluşturur).",
+     "where": "Geri yüklerken.",
+     "why": "Dağınık dosyaları mevcut dizine dökmezsin.",
+     "example": "unzip backups/project.zip -d restore",
+     "nosim": true
+    }
+   ]
+  },
+  {
+   "id": "backup",
+   "title": "Basit yedek ve doğrulama",
+   "body": [
+    "Basit bir yedek: tarihli ad ver, tek komutla paketle, sağlama toplamı (checksum) üret. `date +%F` bugünü `2026-11-12` biçiminde yazar; böylece her yedeğin adı farklı olur ve eskisinin üzerine yazılmaz. Komut içinde `$(...)` kullanımı önce çalışır, çıktısı ada yerleşir.",
+    "`sha256sum` dosyanın parmak izini üretir. Yedeği başka yere kopyaladıktan sonra `sha256sum -c` ile kontrol edersen dosyanın bozulmadığını bilirsin. Yedek, **ayrı bir diskte veya makinede** da bulunmadıkça yedek sayılmaz; ayrıca açıp geri yüklemeyi bir kez dene.",
+    "Yedeği otomatik almak için zamanlayıcı kullanılır (`cron` veya systemd timer). Bu konu ayrı bir modülün işidir; burada yalnızca komutu elle çalıştırıyoruz."
+   ],
+   "commands": [
+    {
+     "cmd": "sha256sum",
+     "what": "Dosya için SHA-256 sağlama toplamını yazar.",
+     "where": "Yedeği veya indirdiğin dosyayı doğrularken.",
+     "why": "Tek bit değişse bile toplam değişir; bozulmayı fark edersin.",
+     "example": "sha256sum backups/project.tar.gz > backups/SHA256SUMS",
+     "nosim": true
+    },
+    {
+     "cmd": "sha256sum -c",
+     "what": "Kayıtlı toplamları dosyalarla karşılaştırır; `OK` veya `FAILED` yazar.",
+     "where": "Yedeği kopyaladıktan veya geri yüklemeden önce.",
+     "why": "Bozuk yedeği kriz anında değil, hemen öğrenirsin.",
+     "example": "sha256sum -c backups/SHA256SUMS",
+     "nosim": true
+    },
+    {
+     "cmd": "tar -czf ... $(date +%F)",
+     "what": "Adında bugünün tarihi olan bir yedek arşivi oluşturur.",
+     "where": "Düzenli ve elle alınan yedeklerde.",
+     "why": "Eski yedeklerin üzerine yazılmaz, sürümleri ayırt edersin.",
+     "example": "tar -czf backups/project-$(date +%F).tar.gz project",
+     "nosim": true
+    },
+    {
+     "cmd": "date +%F",
+     "what": "Bugünün tarihini `2026-11-12` biçiminde yazar.",
+     "where": "Dosya adlarında tarih damgası için.",
+     "why": "Tarihe göre sıralanabilen adlar üretir.",
+     "example": "date +%F"
+    }
+   ],
+   "tip": "3-2-1 kuralı: 3 kopya, 2 farklı ortam, 1 tanesi başka bir yerde."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "`lab` klasöründesin. `ls -R project` ile arşivlenecek proje ağacına bak.",
+   "hint": "-R büyük harf; alt klasörleri de listeler."
+  },
+  "t02": {
+   "text": "Yedekler için `backups` klasörünü oluştur: `mkdir backups`.",
+   "hint": "Klasörü `lab` içinde aç."
+  },
+  "t03": {
+   "text": "`project` klasörünü gzip ile `backups/project.tar.gz` arşivine paketle (`tar -czf ...`). Simülatör `tar` çalıştırmaz; komutun doğruluğu denetlenir.",
+   "hint": "Sıra: `tar -czf <archive> <source>`; `f` harfinden sonra arşiv adı gelir."
+  },
+  "t04": {
+   "text": "Arşivi açmadan içeriğini listele: `tar -tzf backups/project.tar.gz`.",
+   "hint": "`t` = list. `-tf` de kabul edilir."
+  },
+  "t05": {
+   "text": "`restore` klasörünü oluştur, sonra arşivi `-C` ile oraya aç: `tar -xzf backups/project.tar.gz -C restore`.",
+   "hint": "`mkdir restore` önce; `-C` hedef klasör var olmalı."
+  },
+  "t06": {
+   "text": "`logs/app.log` dosyasını orijinalini koruyarak sıkıştır: `gzip -k logs/app.log`.",
+   "hint": "`-k` = keep. Olmazsa orijinal silinir."
+  },
+  "t07": {
+   "text": "Arşivden yalnızca `project/notes.txt` dosyasını `restore` içine aç.",
+   "hint": "Üye adı `tar -tf` çıktısındaki gibi yazılır: `project/notes.txt`, komutun sonunda."
+  },
+  "t08": {
+   "text": "Tahmin et: `wc -l logs/*.log` toplam satır sayısı ne olur? Önce tahmin et, sonra çalıştır.",
+   "hint": "Üç dosya: `app.log`, `web.log`, `db.log`; son satır `total` olur."
+  },
+  "t09": {
+   "text": "Tahmin et: `find project -name '*.c' | sort` hangi iki yolu yazar? Çalıştırarak doğrula.",
+   "hint": "Yollar `project/src/...` ile başlar ve alfabetik sıralanır."
+  },
+  "t10": {
+   "text": "`lab` klasörünün tamamını `.log` dosyalarını hariç tutarak `backups/lab-nologs.tar.gz` arşivine paketle (`--exclude='*.log'`).",
+   "hint": "`--exclude` kalıbını tırnak içinde, kaynak (`.`) yolundan önce yaz."
+  },
+  "t11": {
+   "text": "`project` için adında bugünün tarihi olan bir yedek al: `backups/project-$(date +%F).tar.gz`.",
+   "hint": "`$(date +%F)` komut yerine koymadır, ad içinde kullanabilirsin."
+  },
+  "t12": {
+   "text": "Hata ayıkla: bir tar bomb `lab` dizinine `bomb1.txt`, `bomb2.txt`, `bomb3.txt` dosyalarını döktü. `cleanup` adlı klasör oluştur ve üçünü oraya taşı.",
+   "hint": "`mkdir cleanup`, sonra `mv bomb1.txt bomb2.txt bomb3.txt cleanup/`."
+  },
+  "t13": {
+   "text": "Mini proje: `staging` klasörü aç, `project` ağacını `cp -r` ile içine kopyala, `ls -R staging` ile doğrula, sonra `staging` klasörünü `staging.tar.gz` olarak paketle.",
+   "hint": "Adımlar: `mkdir staging`, `cp -r project staging/`, `ls -R staging`, `tar -czf staging.tar.gz staging`."
+  },
+  "t14": {
+   "text": "Meydan okuma: `project` klasörünü özyinelemeli olarak `backups/project.zip` dosyasına ekle (`zip -r`), `unzip -l` ile listele, sonra `sha256sum` ile toplamını üret. Üçü de bu sırayla çalıştırılmalı.",
+   "hint": "`zip -r backups/project.zip project`, `unzip -l backups/project.zip`, `sha256sum backups/project.zip`."
+  },
+  "t15": {
+   "text": "TICKET #3801 — Denetçiler logların sıkıştırılmış kopyasını istiyor, ama `logs` klasöründeki orijinaller yerinde kalmalı. `audit` klasörü aç, `logs/*.log` dosyalarını oraya kopyala, kopyaları `gzip` ile sıkıştır.",
+   "hint": "`mkdir audit`, `cp logs/*.log audit/`, `gzip audit/*.log`; `gzip` yalnızca kopyaları siler."
+  },
+  "t16": {
+   "text": "Tahmin et: `ls -1 project/src | wc -l` ne yazar? Çalıştırarak doğrula.",
+   "hint": "`src` altında iki `.c` dosyası var."
+  }
+ },
+ "vm": {
+  "intro": "Aşağıdaki komutları kendi VM'inde (Ubuntu/Rocky/Alma) çalıştır. Hepsi `~/lab` içinde kalır; gerçek verine dokunmaz. Yıkıcı bir adım yok ama arşivler aynı adlı dosyaların üzerine yazar: lab dışında deneme yapma. Büyük deneme öncesi snapshot almak iyi alışkanlıktır.",
+  "tasks": {
+   "v01": {
+    "title": "Deneme projesini kur",
+    "text": "`~/lab` altında küçük bir proje ve büyük bir log dosyası oluştur, projenin dosyalarını listele.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/lab/project/{src,docs}\ncd ~/lab\necho 'int main(void) { return 0; }' > project/src/main.c\necho 'Demo project' > project/docs/readme.txt\necho 'todo: backup' > project/notes.txt\nseq 1 200000 > big.log\nfind project -type f | sort",
+      "expected": "project/docs/readme.txt\nproject/notes.txt\nproject/src/main.c"
+     }
+    ],
+    "differs": [
+     "Sıra farklı olabilir; üç dosyanın görünmesi yeterli.",
+     "`seq` yoksa (çok nadir) `yes line | head -n 200000 > big.log` kullan."
+    ]
+   },
+   "v02": {
+    "title": "Arşivle ve açmadan listele",
+    "text": "`project` klasörünü `backup.tar.gz` yap, içeriği açmadan listele ve boyutuna bak.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ntar -czf backup.tar.gz project\ntar -tzf backup.tar.gz\nls -lh backup.tar.gz",
+      "expected": "project/\nproject/docs/\nproject/docs/readme.txt\nproject/notes.txt\nproject/src/\nproject/src/main.c\n-rw-r--r--. 1 student student 300 Nov 12 10:00 backup.tar.gz"
+     }
+    ],
+    "differs": [
+     "Listenin sırası farklı olabilir.",
+     "Boyut ve tarih farklıdır; önemli olan `project/` ile başlayan yolların görünmesi.",
+     "`Removing leading '/'` uyarısı mutlak yol verdiğinde çıkar; burada çıkmamalı."
+    ]
+   },
+   "v03": {
+    "title": "Güvenle geri yükle",
+    "text": "Arşivi yeni bir klasöre aç, sonra yalnızca tek bir dosyayı çıkar.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\nmkdir restore restore2\ntar -xzf backup.tar.gz -C restore\ntar -xzf backup.tar.gz -C restore2 project/notes.txt\nls -R restore restore2",
+      "expected": "restore:\nproject\n...\nrestore2:\nproject\n\nrestore2/project:\nnotes.txt"
+     }
+    ],
+    "differs": [
+     "`Cannot open: No such file or directory` görürsen `-C` klasörü yok; önce `mkdir` ile oluştur.",
+     "Bu üyeyi bulamazsa (`Not found in archive`) yolu `tar -tf` çıktısındaki gibi yaz."
+    ]
+   },
+   "v04": {
+    "title": "Sıkıştırma oranlarını karşılaştır",
+    "text": "`big.log` dosyasını gzip, bzip2 ve xz ile sıkıştır; orijinal kalsın. Boyutları karşılaştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ngzip -k big.log\nbzip2 -k big.log\nxz -k big.log\nls -l big.log*",
+      "expected": "-rw-r--r--. 1 student student 1228895 Nov 12 10:01 big.log\n-rw-r--r--. 1 student student  580000 Nov 12 10:01 big.log.bz2\n-rw-r--r--. 1 student student  480000 Nov 12 10:01 big.log.gz\n-rw-r--r--. 1 student student  400000 Nov 12 10:01 big.log.xz"
+     }
+    ],
+    "differs": [
+     "Sayılar farklı olur; sıralama genelde `xz` < `bzip2` < `gzip` < orijinal şeklindedir.",
+     "`bzip2: command not found` ise kur: Ubuntu `sudo apt install bzip2`, Rocky/Alma `sudo dnf install bzip2`.",
+     "Eski bir `gzip` `-k` bilmiyorsa önce `cp big.log big2.log` ile kopya al."
+    ]
+   },
+   "v05": {
+    "title": "Tarihli yedek ve sağlama toplamı",
+    "text": "Tarihli bir yedek al, sağlama toplamını kaydet ve doğrula. İsteğe bağlı olarak zip dene.",
+    "blocks": [
+     {
+      "cmd": "cd ~/lab\ntar -czf backup-$(date +%F).tar.gz project\nsha256sum backup-*.tar.gz > SHA256SUMS\nsha256sum -c SHA256SUMS",
+      "expected": "backup-2026-11-12.tar.gz: OK"
+     },
+     {
+      "cmd": "# İsteğe bağlı (zip kurulu değilse: sudo apt install zip unzip veya sudo dnf install zip unzip)\nzip -r project.zip project\nunzip -l project.zip",
+      "expected": "  adding: project/ (stored 0%)\n...\n---------\n  4 files"
+     }
+    ],
+    "differs": [
+     "`FAILED` görürsen arşivi toplamı aldıktan sonra değiştirmişsin; `sha256sum` komutunu yeniden çalıştır.",
+     "Sistem Türkçe/Almanca ise çıktı `OK` yerine çevrilmiş olabilir.",
+     "`backup-*.tar.gz` birden çok dosyayla eşleşirse hepsi için satır görürsün."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Hangi komut bir arşivin içeriğini açmadan yalnızca listeler?",
+   "options": [
+    "`tar -xzf backup.tar.gz`",
+    "`tar -tf backup.tar.gz`",
+    "`tar -czf backup.tar.gz`",
+    "`gzip -d backup.tar.gz`"
+   ],
+   "explain": "`t` listeler (list). `x` açar, `c` oluşturur; `gzip -d` ise açar."
+  },
+  "q2": {
+   "q": "`gzip notes.txt` komutundan sonra ne olur?",
+   "options": [
+    "`notes.txt` ve `notes.txt.gz` ikisi de kalır",
+    "Bir `.zip` dosyası oluşur",
+    "`notes.txt.gz` silinir",
+    "`notes.txt` silinir, yerine `notes.txt.gz` gelir"
+   ],
+   "explain": "gzip orijinali sıkıştırılmış dosyayla değiştirir. Orijinali korumak için `gzip -k` kullanılır."
+  },
+  "q3": {
+   "q": "Arşivi açmadan önce neden `tar -tf` ile listelenir?",
+   "options": [
+    "Tar bomb ve üzerine yazılacak dosyaları önceden görmek için",
+    "Açma işlemi daha hızlı olsun diye",
+    "`tar -x` listelemeden çalışmadığı için",
+    "Arşivi sıkıştırmak için"
+   ],
+   "explain": "Üst klasör yoksa dosyalar bulunduğun dizine dağılır; mevcut dosyaların üzerine de yazılabilir."
+  },
+  "q4": {
+   "q": "`tar -xzf backup.tar.gz -C restore` komutundaki `-C restore` ne yapar?",
+   "options": [
+    "Arşivi `restore` adıyla sıkıştırır",
+    "`restore` adlı dosyaları hariç tutar",
+    "Açmadan önce `restore` klasörüne geçer, dosyaları oraya açar",
+    "Arşivin sağlama toplamını denetler"
+   ],
+   "explain": "`-C` (change directory) hedef klasörü belirler; klasör önceden var olmalıdır."
+  }
+ },
+ "summary": [
+  "Arşivleme (`tar`) paketler, sıkıştırma (`gzip`, `bzip2`, `xz`) küçültür; `.tar.gz` ikisinin birleşimidir.",
+  "Oluştur: `tar -czf backup.tar.gz project`; listele: `tar -tf`; aç: `tar -xzf ... -C restore`.",
+  "Açmadan önce listele, yeni bir klasöre aç: tar bomb ve üzerine yazmadan korur.",
+  "`gzip` orijinali siler, `gzip -k` korur; zip Windows/macOS ile uyumludur.",
+  "Tarihli yedek al, `sha256sum` ile doğrula ve geri yüklemeyi dene."
+ ],
+ "glossary": [
+  {
+   "term": "arşiv",
+   "meaning": "Birçok dosya ve klasörün yollarıyla birlikte tek dosyada paketlenmesi (`tar`)."
+  },
+  {
+   "term": "sıkıştırma",
+   "meaning": "Verinin boyutunu küçültme; `gzip`, `bzip2`, `xz`."
+  },
+  {
+   "term": "tarball",
+   "meaning": "`tar` ile oluşturulmuş arşiv, çoğunlukla `.tar.gz`."
+  },
+  {
+   "term": "tar bomb",
+   "meaning": "Üst klasörü olmayan, açılınca dosyaları mevcut dizine döken arşiv."
+  },
+  {
+   "term": "göreli ve mutlak yol",
+   "meaning": "Mutlak yol `/` ile başlar; arşivde göreli yol tercih edilir."
+  },
+  {
+   "term": "sağlama toplamı (checksum)",
+   "meaning": "Dosyanın parmak izi (`sha256sum`); bozulmayı fark etmeni sağlar."
+  }
+ ]
+}

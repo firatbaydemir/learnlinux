@@ -1,0 +1,83 @@
+{
+  "title": "İş Kontrolü",
+  "lead": "Shell işlerini ön planda veya arka planda yönet, Ctrl+C ile iptal et, Ctrl+Z ile duraklat ve gerekirse nohup kullan.",
+  "objectives": [
+    "Ön plan, arka plan ve duraklatılmış shell işlerini ayırt edersin.",
+    "`jobs`, `bg` ve `fg` ile mevcut terminalin işlerini yönetirsin.",
+    "`nohup`'ın ne yaptığını ve neyin yerine geçmediğini bilirsin."
+  ],
+  "sections": [
+    {
+      "id": "signals",
+      "title": "Ön plan, Ctrl+C ve Ctrl+Z",
+      "body": [
+        "Ön plandaki komut terminali kullanır. `Ctrl+C` çoğunlukla SIGINT göndererek komutu iptal eder; `Ctrl+Z` ise SIGTSTP gönderip işi **duraklatır**. Duraklatılmış iş bitmiş değildir ve hâlâ kaynak tutabilir.",
+        "Komutun sonuna `&` koymak onu doğrudan arka planda başlatır. Bu, işin terminalden bağımsız olduğu anlamına gelmez; terminal oturumu kapandığında iş etkilenebilir."
+      ],
+      "commands": [
+        {"cmd": "sleep 300", "what": "Ön planda beş dakika bekler; terminali o sırada meşgul eder.", "where": "Kısa bir işin ön planda nasıl davrandığını denemek için.", "why": "Ctrl+C ve Ctrl+Z farkını güvenli biçimde gösterebilir.", "example": "sleep 300", "nosim": true},
+        {"cmd": "sleep 300 &", "what": "Bekleme komutunu arka planda başlatır.", "where": "Terminalde başka komutlar çalıştırmaya devam etmek için.", "why": "Shell bir iş numarası ve PID gösterir.", "example": "sleep 300 &", "nosim": true}
+      ],
+      "tip": "`Ctrl+Z` ile durdurduğun işi unutma; `jobs -l` ile bul ve işin amacına göre devam ettir veya sonlandır."
+    },
+    {
+      "id": "jobs",
+      "title": "jobs, bg ve fg",
+      "body": [
+        "`jobs -l` yalnızca mevcut shell oturumunun işlerini listeler. `bg %1` bir işi arka planda sürdürür; `fg %1` işi tekrar ön plana alır. `%1`, `jobs` çıktısındaki shell iş numarasıdır; PID değildir.",
+        "Arka plan işi terminale yazmaya devam edebilir. İş bittiğinde shell bildirim verir. İş numarasını tahmin etme; önce `jobs` çıktısını kontrol et."
+      ],
+      "commands": [
+        {"cmd": "jobs -l", "what": "Geçerli shell'in işleriyle durumlarını ve PID'lerini listeler.", "where": "Duraklatılmış ya da arka plan işi ararken.", "why": "İş numarasını ve durumunu görerek doğru işi seçersin.", "example": "jobs -l", "nosim": true},
+        {"cmd": "bg %1 / fg %1", "what": "Seçilen işi arka planda sürdürür veya ön plana getirir.", "where": "Duraklatılmış bir işi sürdürürken ya da terminal kontrolünü geri alırken.", "why": "Aynı işin terminalle etkileşim şeklini değiştirir.", "example": "bg %1", "nosim": true}
+      ],
+      "tip": "İş numarasını `jobs` belirler; süreç PID'sini `ps` veya `jobs -l` gösterir. Bunlar birbirinin yerine kullanılamaz."
+    },
+    {
+      "id": "nohup",
+      "title": "Oturumdan bağımsızlık: nohup",
+      "body": [
+        "`nohup` komutu SIGHUP sinyalini yok sayacak şekilde başlatır; genellikle oturum kapansa bile işin sürmesine yardım eder. Çıktıyı bir dosyaya yönlendirip komutu `&` ile başlatmak yaygın kullanımdır.",
+        "`nohup`, iş izleyicisi veya servis yöneticisi değildir. Uzun süreli üretim servisleri için `systemd`; kopan SSH oturumlarında etkileşimli işlere devam etmek için `tmux` ya da `screen` daha uygundur. Test işlerini sonlandırıp çıktılarını kontrol et."
+      ],
+      "commands": [
+        {"cmd": "nohup command > job.log 2>&1 &", "what": "Komutu SIGHUP'a karşı korur, çıktıyı dosyaya yönlendirir ve arka planda başlatır.", "where": "Kısa süreli, etkileşimsiz bir işi oturum kapanırken sürdürmek gerektiğinde.", "why": "Terminal çıktısı kaybolmaz ve iş kabuğu serbest bırakır.", "example": "nohup ./backup.sh > backup.log 2>&1 &", "nosim": true},
+        {"cmd": "tail -n 20 job.log", "what": "İşin son çıktı satırlarını gösterir.", "where": "Arka plan işinin ilerlemesini veya hata mesajlarını kontrol ederken.", "why": "İşi tekrar ön plana getirmeden günlük dosyasını incelersin.", "example": "tail -n 20 backup.log"}
+      ],
+      "warn": "Kendi test VM'inde kısa test yap. `nohup` işi otomatik durdurmaz; PID'yi ve günlük dosyasını takip et."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "Anlık görüntüde `sleep` işinin durumunu bul.", "hint": "`grep sleep ~/lab/jobs_snapshot.txt` satırında `Stopped` yazmalıdır."},
+    "t02": {"text": "`backup.sh` işinin mevcut durumunu görüntüle.", "hint": "`grep backup ~/lab/jobs_snapshot.txt` satırında `Running` bulunur."},
+    "t03": {"text": "Tahmin et: anlık görüntüde kaç iş duraklatılmış? `grep -c` ile doğrula.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` sayısını verir."},
+    "t04": {"text": "Duraklatılmış 1 numaralı işi sürdürmek için `bg %1` komutunu ve ardından `jobs -l` kontrolünü `~/lab/job_plan.txt` içine kaydet.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt`"},
+    "t05": {"text": "Planın sonuna işi ön plana alma ve iş bitince temizleme adımlarını ekle.", "hint": "`fg %1` ve `kill %1` ifadelerini dosyaya ekle."},
+    "t06": {"text": "Çıktıyı `backup.log` dosyasına yönlendiren bir nohup örneğini `~/lab/persistent_job.txt` içine yaz.", "hint": "`nohup ./backup.sh > backup.log 2>&1 &`"},
+    "t07": {"text": "Ticket #5401'e işin terminalden bağımsız olup olmadığını anlamak için `jobs -l` kontrolü ve nohup notu ekle.", "hint": "Kısa notu `~/lab/ticket_5401.txt` dosyasına kaydet."}
+  },
+  "vm": {
+    "intro": "Örnekleri kendi test VM'inde çalıştır. Shell işi yalnızca o shell oturumuna bağlıdır; kullanmadığın test işlerini kapat.",
+    "tasks": {
+      "v01": {"title": "Bir işi duraklat", "text": "Ön planda `sleep` başlat. Çalışırken `Ctrl+Z` bas, sonra aşağıdaki komutla shell işini kontrol et.", "blocks": [{"cmd": "sleep 300\n# Ctrl+Z'ye bastıktan sonra:\njobs -l", "expected": "[1]+ Stopped sleep 300"}], "differs": ["İş numarası 1 olmayabilir; kendi `jobs -l` çıktını esas al.", "Terminal emülatörünün Ctrl+Z tuşunu shell'e ilettiğinden emin ol."]},
+      "v02": {"title": "Arka plana al ve temizle", "text": "Önce `jobs -l` ile iş numarasını doğrula. Örnekteki `%1` yerine doğru numarayı kullan; işi arka planda başlatıp sonra temizle.", "blocks": [{"cmd": "bg %1\njobs -l\nkill %1", "expected": "İş Running olarak görünür."}], "differs": ["İş numaran farklıysa `%1` değerini değiştir.", "`kill %1` bu shell işine sinyal gönderir; yalnızca test `sleep` işinde kullan."]},
+      "v03": {"title": "Kısa nohup işi", "text": "Kısa bir komutla `nohup` çıktısını dosyaya yönlendir; tamamlanmasını bekleyip dosyayı oku.", "blocks": [{"cmd": "nohup sh -c 'sleep 2; echo done' > ~/job-output.txt 2>&1 &\nsleep 3\ncat ~/job-output.txt", "expected": "done"}], "differs": ["Komut hâlâ sürüyorsa birkaç saniye daha bekleyip `cat ~/job-output.txt` çalıştır.", "Dosya yolu veya izin hatası görürsen yazma dizininin kendi home dizinin olduğundan emin ol."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "`Ctrl+Z` çalışan bir işe ne yapar?", "options": ["İşi kalıcı olarak siler", "İşi duraklatır", "İşi root olarak başlatır", "Terminali kapatır"], "explain": "Ctrl+Z çoğunlukla SIGTSTP gönderir; iş duraklatılır ama tamamlanmış olmaz."},
+    "q2": {"q": "`bg %1` içindeki `%1` neyi belirtir?", "options": ["Shell iş numarasını", "PID 1'i", "Bir saniyeyi", "Nice değerini"], "explain": "Yüzdeyle kullanılan numara `jobs` çıktısındaki shell iş numarasıdır."},
+    "q3": {"q": "`nohup` ne sağlar?", "options": ["İşi bir systemd servisine dönüştürür", "İşi otomatik olarak zamanlar", "Bellek kullanımını sınırlar", "SIGHUP'a karşı korumaya yardımcı olur"], "explain": "nohup SIGHUP'ı yok sayacak şekilde komut başlatır; tek başına servis yöneticisi değildir."},
+    "q4": {"q": "İş numarası ile PID arasındaki fark nedir?", "options": ["Fark yoktur", "İş numarası yalnızca root içindir", "İş numarası shell'e, PID sürece aittir", "PID yalnızca arka plan işlerinde bulunur"], "explain": "Shell iş numarası mevcut oturuma aittir; PID sistemdeki süreci tanımlar."}
+  },
+  "summary": [
+    "`Ctrl+C` çoğunlukla işi iptal eder; `Ctrl+Z` duraklatır.",
+    "`jobs`, `bg` ve `fg` mevcut shell'in işlerini yönetir; `%N` shell iş numarasıdır.",
+    "`nohup` SIGHUP'a karşı korur ama servis yöneticisi değildir; çıktıyı dosyaya yönlendir ve işi takip et."
+  ],
+  "glossary": [
+    {"term": "foreground", "meaning": "Terminal kontrolünü alan, etkileşimli ön plan işi."},
+    {"term": "background job", "meaning": "Shell'de terminal kontrolü olmadan çalışan iş."},
+    {"term": "SIGHUP", "meaning": "Oturum veya terminal bağlantısı kapandığında süreçlere gönderilebilen sinyal."}
+  ]
+}

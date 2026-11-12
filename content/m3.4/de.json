@@ -1,0 +1,87 @@
+{
+  "title": "Suchen: grep und find",
+  "lead": "grep durchsucht Zeilen innerhalb von Dateien, find sucht Dateien und Verzeichnisse in einem Verzeichnisbaum. Kombiniere beide Werkzeuge, um Logs und Projektdateien schnell zu untersuchen.",
+  "objectives": [
+    "Dateiinhalte mit `grep` durchsuchen.",
+    "Die Optionen `-i`, `-n`, `-v` und `-c` erklären.",
+    "Dateien mit `find` nach Name und Typ finden.",
+    "Suchergebnisse mit Pipes und Umleitungen weiterverwenden."
+  ],
+  "sections": [
+    {
+      "id": "grep",
+      "title": "Dateiinhalte mit grep durchsuchen",
+      "body": [
+        "`grep MUSTER DATEI` gibt passende Zeilen aus. Das Muster kann einfacher Text oder ein regulärer Ausdruck sein. Mit `-i` wird die Groß-/Kleinschreibung ignoriert, `-n` zeigt Zeilennummern, `-v` wählt nicht passende Zeilen und `-c` zählt Trefferzeilen.",
+        "`grep` kann auch Text aus einer Pipe lesen, wenn kein Dateiname angegeben ist. So filterst du lange Ausgaben mit `Befehl | grep Muster`."
+      ],
+      "commands": [
+        {"cmd":"grep -n","what":"Zeigt zu passenden Zeilen auch die Zeilennummer.","where":"Wenn du eine Fundstelle in einer Datei lokalisieren möchtest.","why":"So kannst du das Ergebnis leichter finden und prüfen.","example":"grep -n ERROR logs/app.log"},
+        {"cmd":"grep -i","what":"Ignoriert Unterschiede zwischen Groß- und Kleinbuchstaben.","where":"Wenn Logmeldungen unterschiedlich geschrieben sind.","why":"`error`, `Error` und `ERROR` werden gefunden.","example":"grep -i error logs/app.log"},
+        {"cmd":"grep -v","what":"Zeigt Zeilen, die nicht zum Muster passen.","where":"Wenn unerwünschte Zeilen ausgeschlossen werden sollen.","why":"Filtert die Umkehrung einer Übereinstimmung.","example":"grep -v INFO logs/app.log"},
+        {"cmd":"grep -c","what":"Gibt die Anzahl der passenden Zeilen aus.","where":"Wenn du Ereignisse in einem Log zählen möchtest.","why":"Liefert eine Summe, ohne jede Zeile auszugeben.","example":"grep -c ERROR logs/app.log"}
+      ],
+      "tip":"Gib Muster und Dateiname als getrennte Argumente an. Setze Suchtext mit Sonderzeichen in Anführungszeichen."
+    },
+    {
+      "id": "find",
+      "title": "Das Dateisystem mit find durchsuchen",
+      "body": [
+        "`find START ...` durchsucht den Verzeichnisbaum ab dem angegebenen Pfad. `-name` wählt ein Namensmuster, `-type f` reguläre Dateien und `-type d` Verzeichnisse. Setze Dateimuster in Anführungszeichen, damit die Shell `*` nicht vor find erweitert.",
+        "`find` kann nach mehr als dem Namen suchen und seine Ausgabe an ein anderes Kommando weitergeben. `locate` durchsucht einen vorbereiteten Dateinamenindex; das geht schnell, aber neue Dateien sind möglicherweise noch nicht aufgenommen. Ein gezielter Startpfad vermeidet unnötige Systemverzeichnisse."
+      ],
+      "commands": [
+        {"cmd":"find . -name","what":"Sucht in einem Verzeichnisbaum nach Namen.","where":"Wenn der Name oder die Erweiterung einer Projektdatei bekannt ist.","why":"Unterverzeichnisse werden ebenfalls durchsucht.","example":"find project -name \"*.conf\""},
+        {"cmd":"find . -type f","what":"Wählt nur reguläre Dateien aus.","where":"Wenn Dateien von Verzeichnissen unterschieden werden sollen.","why":"Begrenzt die Ergebnisse auf einen Objekttyp.","example":"find project -type f -name \"*.txt\""},
+        {"cmd":"find . -type d","what":"Wählt nur Verzeichnisse aus.","where":"Wenn du Ordner in einem Projekt finden möchtest.","why":"Verhindert, dass Ordnernamen mit Dateinamen verwechselt werden.","example":"find project -type d"},
+        {"cmd":"locate","what":"Durchsucht schnell einen indizierten Dateinamensbestand.","where":"Wenn du den Pfad einer bekannten Datei systemweit finden möchtest.","why":"Bei aktuellem Index ist es schnell; neue Dateien sind möglicherweise noch nicht enthalten.","example":"locate sshd_config","nosim":true}
+      ],
+      "warn":"`find /` kann das ganze System durchsuchen und Berechtigungswarnungen ausgeben. Beginne mit einem engen Pfad wie deinem Projekt- oder Home-Verzeichnis."
+    },
+    {
+      "id": "combine",
+      "title": "Suchen kombinieren und Ergebnisse speichern",
+      "body": [
+        "`grep` und `find` beantworten unterschiedliche Fragen: grep findet Text in Dateien, find ermittelt Dateien anhand ihres Namens und Pfads. Speichere Ergebnisse mit `>` oder leite sie mit `|` an einen weiteren Filter weiter.",
+        "Prüfe Suchergebnisse, bevor du wichtige Dateien änderst. Die Befehle in diesem Modul suchen und lesen; eine Umleitung erstellt nur in deinem Arbeitsverzeichnis einen Bericht."
+      ],
+      "commands": [
+        {"cmd":"grep -r","what":"Durchsucht Dateien eines Verzeichnisses rekursiv.","where":"Wenn du wissen möchtest, wo ein Begriff oder eine Einstellung im Projekt vorkommt.","why":"Du musst Dateien nicht einzeln öffnen.","example":"grep -r TODO project"},
+        {"cmd":"find . -type f -name \"*.txt\" > list.txt","what":"Schreibt Pfade passender Textdateien in eine Liste.","where":"Wenn du Suchergebnisse später prüfen möchtest.","why":"Der Bericht bleibt wiederverwendbar erhalten.","example":"find project -type f -name \"*.txt\" > text_files.txt"}
+      ],
+      "tip":"Führe die Suche zuerst aus und prüfe die Ausgabe. Leite sie bei Bedarf danach in einen Bericht um."
+    }
+  ],
+  "tasks": {
+    "t01":{"text":"Zeige mit `grep` die `ERROR`-Zeilen aus `logs/app.log`.","hint":"Muster und Datei angeben: `grep ERROR logs/app.log`."},
+    "t02":{"text":"Suche in `logs/app.log` ohne Beachtung der Groß-/Kleinschreibung nach `warn`.","hint":"Verwende `grep -i warn logs/app.log`."},
+    "t03":{"text":"Finde die `404`-Zeile im Zugriffslog und gib ihre Zeilennummer mit aus.","hint":"Verwende `grep -n 404 logs/access.log`."},
+    "t04":{"text":"Finde im Baum `project` alle Namen mit der Endung `.conf`.","hint":"Verwende `find project -name \"*.conf\"`; setze das Muster in Anführungszeichen."},
+    "t05":{"text":"Finde unter `project` nur reguläre `.txt`-Dateien.","hint":"Verwende `find project -type f -name \"*.txt\"`."},
+    "t06":{"text":"Schätze, wie viele passende Zeilen `grep -c ERROR logs/app.log` meldet, und prüfe es anschließend.","hint":"Der Befehl gibt die Anzahl statt der Trefferzeilen aus."},
+    "t07":{"text":"Schätze, wie du mit einer Pipe nur `200`-Zeilen aus dem Zugriffslog filterst.","hint":"Versuche `cat logs/access.log | grep 200`."},
+    "t08":{"text":"Fehlersuche: Speichere die `ERROR`-Zeilen in `errors.txt` in deinem Home-Verzeichnis.","hint":"Leite stdout um: `grep ERROR logs/app.log > errors.txt`."},
+    "t09":{"text":"Zeige Logzeilen, die `INFO` nicht enthalten.","hint":"`-v` wählt nicht passende Zeilen: `grep -v INFO logs/app.log`."},
+    "t10":{"text":"Mini-Aufgabe: Suche in Projektdateien nach Zeilen mit `TODO`.","hint":"Durchsuche ein Verzeichnis rekursiv mit `grep -r TODO project`."},
+    "t11":{"text":"Mini-Aufgabe: Finde unter `logs` reguläre Dateien mit der Endung `.log`.","hint":"Verwende `find logs -type f -name \"*.log\"`."},
+    "t12":{"text":"Herausforderung: Suche unter `project` ohne Beachtung der Groß-/Kleinschreibung nach `todo` und zeige Zeilennummern.","hint":"Kombiniere Optionen mit `grep -rin todo project`."},
+    "t13":{"text":"Ticket: Speichere alle `.txt`-Pfade im Projekt in einem Bericht `text_files.txt`.","hint":"Verwende `find . -type f -name \"*.txt\" > text_files.txt`."}
+  },
+  "vm": {
+    "intro":"Lies vorhandene Texte und Pfade auf deiner VM. Diese Befehle ändern keine Systemdateien; lege Berichte in deinem Home-Verzeichnis ab.",
+    "tasks": {
+      "v01":{"title":"Ein Log durchsuchen","text":"Suche ohne Beachtung der Groß-/Kleinschreibung nach `error` in einem Systemlog und füge eine Trefferzeile ein.","blocks":[{"cmd":"grep -i error /var/log/messages | head -n 3","expected":"error"}],"differs":["Falls dieses Log nicht vorhanden ist, wähle ein Log deiner Distribution oder erstelle `~/lab/app.log` mit Beispielzeilen."]},
+      "v02":{"title":"Zeilennummern anzeigen","text":"Finde die `root`-Zeile in `/etc/passwd` mit Zeilennummer.","blocks":[{"cmd":"grep -n '^root:' /etc/passwd","expected":"1:root:"}],"differs":["Die Zeilennummer kann abweichen; die Ausgabe sollte `root` und davor eine Nummer enthalten."]},
+      "v03":{"title":"Nach Dateinamen suchen","text":"Finde unter `/etc` die Datei mit dem Namen `hostname`.","blocks":[{"cmd":"find /etc -type f -name hostname","expected":"/etc/hostname"}],"differs":["Die Ausgabe sollte den vollständigen Pfad enthalten. `find` erhält Startverzeichnis und Name als getrennte Argumente."]},
+      "v04":{"title":"Ergebnisse sicher speichern","text":"Erstelle `lab` in deinem Home-Verzeichnis, lege dort einen Bericht mit `.txt`-Dateien an und prüfe ihn.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["Ist der Bericht leer, prüfe, ob `cd ~/lab` erfolgreich war und die Dateinamen stimmen. Durchsuche nicht das ganze System."]}
+    }
+  },
+  "quiz": {
+    "q1":{"q":"Was macht `grep -i error file`?","options":["Zeigt nur die erste Zeile","Löscht die Datei","Zeigt passende Zeilen unabhängig von Groß-/Kleinschreibung","Benennt die Datei um"],"explain":"`-i` macht die Suche unabhängig von Groß- und Kleinschreibung."},
+    "q2":{"q":"Was ergänzt `grep -n` in der Ausgabe?","options":["Zeilennummern","Dateigrößen","Besitzernamen","Änderungszeiten"],"explain":"`-n` zeigt die Zeilennummer jedes Treffers."},
+    "q3":{"q":"Wonach sucht `find project -type f -name '*.txt'`?","options":["Nur nach Verzeichnissen","Nach Logs im ganzen System","Nach Zeilen mit txt","Nach regulären Dateien mit Endung .txt unter project"],"explain":"Der Startpfad ist `project`, der Typ ist reguläre Datei und das Namensmuster endet auf `.txt`."},
+    "q4":{"q":"Welcher Befehl durchsucht Dateiinhalte rekursiv nach `TODO`?","options":["`find project -type d`","`grep -r TODO project`","`sort TODO project`","`cut TODO project`"],"explain":"`grep -r` durchsucht Dateiinhalte rekursiv in einem Verzeichnisbaum."}
+  },
+  "summary":["`grep` durchsucht Dateiinhalte; `find` findet Dateien und Verzeichnisse in einem Baum.","`grep -i` ignoriert Groß-/Kleinschreibung, `-n` zeigt Zeilennummern, `-v` kehrt Treffer um und `-c` zählt sie.","`find -name` wählt ein Namensmuster, `-type f` reguläre Dateien und `-type d` Verzeichnisse.","Setze Dateimuster in Anführungszeichen, damit die Shell `*` nicht vor der Suche erweitert.","Beginne in einem engen Verzeichnis statt unnötig einen großen Baum zu durchsuchen."],
+  "glossary":[{"term":"grep","meaning":"Ein Suchwerkzeug, das passende Zeilen in Textdateien findet."},{"term":"find","meaning":"Ein Dateisuchwerkzeug, das an einem Verzeichnis beginnt und den Baum absteigt."},{"term":"regulärer Ausdruck","meaning":"Eine Mustersyntax zum Abgleichen von Text."},{"term":"rekursive Suche","meaning":"Eine Suche, die auch Unterverzeichnisse besucht."}]
+}

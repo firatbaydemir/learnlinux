@@ -1,0 +1,390 @@
+{
+ "title": "Berechtigungen",
+ "lead": "Lies die Ausgabe von `ls -l` und verwalte Datei- und Verzeichnisrechte richtig mit `chmod`, `chown` und `umask`.",
+ "objectives": [
+  "Du liest in `ls -l` das Typzeichen, die drei Rechte-Triplets, Besitzer und Gruppe.",
+  "Du erklärst, dass r, w, x bei Dateien und Verzeichnissen unterschiedliche Bedeutung haben.",
+  "Du weißt: Das Löschen einer Datei hängt am w+x-Recht des **übergeordneten Verzeichnisses**, nicht an der Datei.",
+  "Du vergibst Rechte oktal und symbolisch mit `chmod` und änderst Besitzer mit `chown`/`chgrp`.",
+  "Du zeigst rechnerisch, dass `umask` eine Bitmaske ist und keine Subtraktion."
+ ],
+ "sections": [
+  {
+   "id": "read",
+   "title": "Die Ausgabe von ls -l lesen",
+   "body": [
+    "`ls -l` liefert pro Datei eine Zeile: `-rw-r----- 1 student devs 120 Nov 12 10:00 report.txt`. Das erste Zeichen ist der **Typ**: `-` Datei, `d` Verzeichnis, `l` symbolischer Link. Die nächsten neun Zeichen sind drei Triplets: **Besitzer (u)**, **Gruppe (g)**, **Andere (o)**. Jedes Triplet steht für `rwx` (lesen, schreiben, ausführen); fehlt ein Recht, steht `-`.",
+    "Die beiden Namen nach der Zahl sind Besitzer und Gruppe (`student devs`); die `1` davor ist die Anzahl der Hardlinks. Das System prüft der Reihe nach: Bist du der Besitzer, gilt nur das Besitzer-Triplet; sonst, falls du in der Gruppe bist, das Gruppen-Triplet; sonst das für Andere. **root** und Prozesse mit passenden Capabilities können viele DAC-Prüfungen umgehen; andere Kontrollen wie SELinux oder ein schreibgeschütztes Dateisystem können den Zugriff trotzdem verweigern.",
+    "Deine Gruppen zeigt `id`. Eine neue Gruppenmitgliedschaft gilt für deinen Prozess erst nach einer neuen Anmeldung (oder mit `newgrp`)."
+   ],
+   "commands": [
+    {
+     "cmd": "ls -l",
+     "what": "Listet Dateien mit Typ, Rechten, Besitzer, Gruppe, Größe und Datum.",
+     "where": "Erste Anlaufstelle bei Rechteproblemen.",
+     "why": "Zeigt auf einen Blick, wer was darf.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "ls -ld",
+     "what": "Zeigt die Rechte des Verzeichnisses selbst (nicht seines Inhalts).",
+     "where": "Beim Prüfen von Verzeichnisrechten.",
+     "why": "`ls -l shared` listet den Inhalt; für das Verzeichnis selbst brauchst du `-d`.",
+     "example": "ls -ld shared"
+    },
+    {
+     "cmd": "stat",
+     "what": "Zeigt Dateidetails; Rechte oktal und symbolisch.",
+     "where": "Wenn du den Oktalwert prüfen willst.",
+     "why": "Du musst nicht zwischen `ls -l` und Oktal umrechnen.",
+     "example": "stat secret.txt"
+    },
+    {
+     "cmd": "id",
+     "what": "Zeigt Benutzer- und Gruppen-IDs.",
+     "where": "Bei der Frage 'Warum komme ich nicht ran?'.",
+     "why": "Bestimmt, welches Triplet für dich gilt.",
+     "example": "id"
+    }
+   ],
+   "tip": "Teile die Rechtezeichenkette in Dreiergruppen: `rw- r-- ---` heißt Besitzer liest und schreibt, Gruppe liest, Andere nichts."
+  },
+  {
+   "id": "meaning",
+   "title": "r, w, x: bei Datei und Verzeichnis",
+   "body": [
+    "**Bei Dateien:** `r` liest den Inhalt, `w` ändert den Inhalt, `x` führt die Datei als Programm aus. Neue Dateien werden **nie ausführbar** angelegt; für `./script.sh` brauchst du zuerst `chmod +x`.",
+    "**Bei Verzeichnissen:** `r` listet die Namen auf, `x` erlaubt das Betreten und den Zugriff auf Einträge über den Namen (`cd`, `cat vault/data.txt`), `w` erlaubt Anlegen, Löschen und Umbenennen von Einträgen. `w` allein nützt nichts; **w braucht x dazu**. Für einen Pfad brauchst du **x in jedem Verzeichnis** entlang des Pfades.",
+    "**Wichtige Regel:** Zum Löschen oder Verschieben einer Datei zählt nicht ihr eigenes Recht, sondern **w+x des übergeordneten Verzeichnisses**. Das Dateirecht regelt nur Lesen und Schreiben des Inhalts. Darum lässt sich eine `644`-Datei in einem `555`-Verzeichnis nicht löschen, und auch eine `777`-Datei dort nicht."
+   ],
+   "commands": [
+    {
+     "cmd": "cat",
+     "what": "Liest den Dateiinhalt; braucht r an der Datei und x an den Verzeichnissen im Pfad.",
+     "where": "Beim Testen von Leserechten.",
+     "why": "Unberechtigtes Lesen endet mit `Permission denied`.",
+     "example": "cat secret.txt"
+    },
+    {
+     "cmd": "rm",
+     "what": "Löscht eine Datei; Erfolg hängt an w+x des übergeordneten Verzeichnisses.",
+     "where": "Beim Verstehen von Löschfehlern.",
+     "why": "Das Verzeichnisrecht entscheidet, nicht das Dateirecht.",
+     "example": "rm locked/old.txt"
+    },
+    {
+     "cmd": "cd",
+     "what": "Wechselt in ein Verzeichnis; braucht x am Verzeichnis.",
+     "where": "Bei Zugriffsproblemen.",
+     "why": "Ohne x kommt man nicht hinein.",
+     "example": "cd vault"
+    }
+   ],
+   "tip": "Wenn du 'nicht löschen' sagst, schau nicht auf die Datei, sondern mit `ls -ld .` auf das **Verzeichnis**.",
+   "warn": "`chmod -R 777` ist keine Lösung. Es gibt allen Schreib- und Ausführrechte, versteckt die Ursache und öffnet Sicherheitslücken. Finde zuerst mit `ls -l` und `id` den wahren Grund."
+  },
+  {
+   "id": "chmod",
+   "title": "chmod: Rechte ändern",
+   "body": [
+    "In der Oktalschreibweise werden **r=4, w=2, x=1** addiert: `7`=rwx, `6`=rw-, `5`=r-x, `4`=r--, `0`=---. Die drei Ziffern gelten für Besitzer, Gruppe, Andere. Häufige Werte: `644` (normale Datei), `755` (Programm und Verzeichnis), `600` (private Datei), `700` (privates Verzeichnis), `664` und `775` (Gruppenarbeit).",
+    "Symbolisch schreibst du wer (`u`, `g`, `o`, `a`), Operation (`+`, `-`, `=`) und Recht (`r`, `w`, `x`): `chmod g+w,o-rx shared`. **Großes `X`** setzt x nur bei Verzeichnissen und bereits ausführbaren Dateien; `chmod -R u=rwX,go=rX data` setzt Verzeichnisse auf 755 und zuvor nicht ausführbare Dateien auf 644, erhält aber x bei bereits ausführbaren Dateien.",
+    "Nur der **Besitzer** (oder root) darf Rechte ändern; bei fremden Dateien erscheint `Operation not permitted`."
+   ],
+   "commands": [
+    {
+     "cmd": "chmod 640",
+     "what": "Setzt oktale Rechte: Besitzer rw-, Gruppe r--, Andere ---.",
+     "where": "Wenn du Rechte in einem Schritt festlegst.",
+     "why": "Das Ergebnis ist eindeutig und wiederholbar.",
+     "example": "chmod 640 notes.txt"
+    },
+    {
+     "cmd": "chmod +x",
+     "what": "Fügt das Ausführrecht hinzu.",
+     "where": "Wenn du ein Skript ausführbar machst.",
+     "why": "Ändert nur x, andere Rechte bleiben (abhängig von umask).",
+     "example": "chmod +x script.sh"
+    },
+    {
+     "cmd": "chmod g+w,o-rx",
+     "what": "Symbolisch: Gruppe bekommt Schreiben, Andere verlieren Lesen und Ausführen.",
+     "where": "Bei kleinen Korrekturen.",
+     "why": "Ändert nur die genannten Bits.",
+     "example": "chmod g+w,o-rx shared"
+    },
+    {
+     "cmd": "chmod -R u=rwX,go=rX",
+     "what": "Korrigiert einen Baum rekursiv: Dateien 644, Verzeichnisse 755.",
+     "where": "Bei Massenkorrekturen.",
+     "why": "Dank `X` bekommen Dateien kein unnötiges x.",
+     "example": "chmod -R u=rwX,go=rX data"
+    }
+   ],
+   "tip": "Schau zuerst mit `ls -l` auf das Ziel; bei `-R` prüfe das Pfadende besonders genau.",
+   "danger": "`chmod -R` mit falschem Wert auf `/` oder `~` beschädigt System oder Home (z. B. Schlüsselrechte für SSH, sudo). Mach in der VM vorher einen **Snapshot** und arbeite nur im Übungsordner."
+  },
+  {
+   "id": "owner",
+   "title": "chown und chgrp: Besitzer und Gruppe",
+   "body": [
+    "Jede Datei hat einen Besitzer und eine Gruppe. **Den Besitzer darf nur root ändern** (`sudo chown`). Ein normaler Benutzer darf die Gruppe seiner Datei nur auf eine Gruppe setzen, in der er Mitglied ist; im Simulator nutzen wir dafür `sudo chgrp`.",
+    "`chown alice:devs report.txt` setzt Besitzer und Gruppe zugleich. Typisch für Teamarbeit: Gruppe `devs`, Rechte `660` bei Dateien oder `770` bei Verzeichnissen; nur `devs`-Mitglieder haben Zugriff. Feinere Regeln (Rechte pro Benutzer) gehen mit ACLs (`getfacl`/`setfacl`); das kommt in späteren Modulen."
+   ],
+   "commands": [
+    {
+     "cmd": "sudo chown",
+     "what": "Ändert den Besitzer (und optional die Gruppe).",
+     "where": "Wenn du eine Datei an einen anderen Benutzer übergibst.",
+     "why": "Das kann nur root.",
+     "example": "sudo chown alice:devs report.txt"
+    },
+    {
+     "cmd": "sudo chgrp",
+     "what": "Ändert nur die Gruppe.",
+     "where": "Wenn du einem gemeinsamen Verzeichnis eine Gruppe zuweist.",
+     "why": "Behält den Besitzer und regelt den Gruppenzugriff.",
+     "example": "sudo chgrp devs team.txt"
+    }
+   ],
+   "tip": "Sei auch auf echten Systemen vorsichtig mit `chown -R`; prüfe den Pfad vorher mit `ls -ld`."
+  },
+  {
+   "id": "umask",
+   "title": "umask: Standardrechte",
+   "body": [
+    "Neue Dateien **starten** mit `666`, neue Verzeichnisse mit `777`; `umask` nimmt Bits per **Maske** weg: **neues Recht = Basis & ~umask**. Das ist keine Subtraktion. Beispiele (Datei, Basis 666): umask `022` → `644`; `027` → `640`; `077` → `600`; `002` → `664`.",
+    "Der Unterschied zeigt sich, wenn die umask Bits enthält, die in der Basis fehlen: Bei `025` ist `666 & ~025 = 642`, die Subtraktion würde `641` liefern (falsch). Bei `001` ergibt sich `666`, die Subtraktion würde `665` liefern. Weil x in der Basis fehlt, entstehen Dateien nie ausführbar.",
+    "`umask` gilt **pro Prozess**: nur in dieser Shell und in den daraus gestarteten Programmen. Dauerhaft setzt man es in `~/.bashrc` (Benutzer) oder `/etc/profile` (System)."
+   ],
+   "commands": [
+    {
+     "cmd": "umask",
+     "what": "Zeigt die aktuelle Maske oktal (z. B. `0022`).",
+     "where": "Um Rechte neuer Dateien zu verstehen.",
+     "why": "Erklärt, warum Dateien mit 644 entstehen.",
+     "example": "umask"
+    },
+    {
+     "cmd": "umask -S",
+     "what": "Zeigt die Maske symbolisch: `u=rwx,g=rx,o=rx`.",
+     "where": "Wenn du die erlaubten Bits direkt sehen willst.",
+     "why": "Zeigt die gesetzten Rechte statt der entfernten.",
+     "example": "umask -S",
+     "nosim": true
+    },
+    {
+     "cmd": "umask 027",
+     "what": "Setzt die Maske für diese Shell: neue Datei 640, Verzeichnis 750.",
+     "where": "Wenn du nach außen abgeschottet arbeitest.",
+     "why": "Wirkt auf alle folgenden neuen Dateien.",
+     "example": "umask 027"
+    }
+   ],
+   "tip": "In gemeinsamen Projektordnern nimm `umask 002`: neue Dateien `664`, Verzeichnisse `775`."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Liste mit `ls -l` die Rechte der Dateien im Ordner `lab`.",
+   "hint": "Lies die ersten 10 Zeichen jeder Zeile: Typ + drei Triplets."
+  },
+  "t02": {
+   "text": "Mache `script.sh` mit `chmod +x script.sh` ausführbar.",
+   "hint": "Prüfe danach mit `ls -l script.sh` die x-Bits."
+  },
+  "t03": {
+   "text": "Zeige mit `umask` die aktuelle Maske an.",
+   "hint": "Standardausgabe ist `0022`."
+  },
+  "t04": {
+   "text": "Setze `notes.txt` mit `chmod 640 notes.txt` auf Besitzer rw-, Gruppe r--, Andere ---.",
+   "hint": "6=rw-, 4=r--, 0=---."
+  },
+  "t05": {
+   "text": "Setze das Verzeichnis `shared` symbolisch auf `770`: Gruppe bekommt Schreiben, Andere verlieren Lesen und Ausführen (`chmod g+w,o-rx shared`).",
+   "hint": "Beide Operationen mit Komma trennen, ohne Leerzeichen."
+  },
+  "t06": {
+   "text": "Mache `alice` mit `sudo chown alice team.txt` zum Besitzer von `team.txt`.",
+   "hint": "Den Besitzer darf nur root ändern, also `sudo`."
+  },
+  "t07": {
+   "text": "Setze die Gruppe von `team.txt` mit `sudo chgrp devs team.txt` auf `devs`.",
+   "hint": "`ls -l team.txt` sollte `alice devs` zeigen."
+  },
+  "t08": {
+   "text": "Setze `umask 027` und lege mit `touch new.txt` eine Datei an. Mit welchen Rechten entsteht sie?",
+   "hint": "666 & ~027 = 640."
+  },
+  "t09": {
+   "text": "Vorhersage: `locked` ist `555`, darin liegt `old.txt` mit `644`. Funktioniert `rm locked/old.txt`? Führe es zur Kontrolle aus.",
+   "hint": "Zum Löschen braucht man w am Verzeichnis; prüfe mit `ls -ld locked`."
+  },
+  "t10": {
+   "text": "Vorhersage: Welche Rechte hat `predict.txt` nach `umask 025` und `touch predict.txt`? Rechne zuerst (666 & ~025), führe es dann aus und prüfe mit `ls -l predict.txt`.",
+   "hint": "Subtraktion gibt 641; die korrekte Maskenrechnung ergibt 642."
+  },
+  "t11": {
+   "text": "Vorhersage: Läuft `./deploy.sh`? Führe es zur Kontrolle aus.",
+   "hint": "Die Datei ist 644 ohne x-Bit: erwartet wird `Permission denied`."
+  },
+  "t12": {
+   "text": "Debugging: `locked/old.txt` lässt sich nicht löschen. Behebe das Problem und lösche die Datei.",
+   "hint": "Schau aufs Verzeichnis, nicht auf die Datei: `chmod u+w locked`, dann `rm`."
+  },
+  "t13": {
+   "text": "Debugging: `cat vault/data.txt` schlägt fehl. Behebe es und lies die Datei.",
+   "hint": "`vault` ist `600`: kein x, man kommt nicht hinein. `chmod u+x vault`."
+  },
+  "t14": {
+   "text": "Mini-Projekt: Lege Verzeichnis `team` mit `plan.txt` darin an; Verzeichnis `770`, Datei `660`; setze die Gruppe des Verzeichnisses mit `sudo chgrp devs team` auf `devs`.",
+   "hint": "Reihenfolge: `mkdir`, `touch`, zwei `chmod`, ein `chgrp`."
+  },
+  "t15": {
+   "text": "Challenge: Alles im Baum `data` ist `777`. Mache Verzeichnisse `755` und Dateien `644` (`data/a.txt`, `data/sub/b.txt`).",
+   "hint": "Nimm großes `X`: `chmod -R u=rwX,go=rX data`."
+  },
+  "t16": {
+   "text": "TICKET #4401 — Alice soll `report.txt` bearbeiten, die Gruppe `devs` auch schreiben dürfen, andere gar nicht. Setze Besitzer `alice`, Gruppe `devs`, Modus `660`.",
+   "hint": "Erst `chmod 660`, dann `sudo chown alice:devs`; nach dem Besitzerwechsel kannst du nicht mehr chmod ausführen."
+  },
+  "t17": {
+   "text": "TICKET #4402 — Im Verzeichnis `shared` legt das Team neue Dateien an, die die Gruppe nicht schreiben kann. Setze `umask 002` und lege mit `touch shared/log.txt` eine `664`-Datei an.",
+   "hint": "666 & ~002 = 664."
+  }
+ },
+ "vm": {
+  "intro": "Arbeite in deiner eigenen VM im Übungsordner `~/permlab`. Füge die Befehle der Reihe nach ein und kopiere die Ausgabe auf diese Seite. Mache vor zerstörerischen Schritten einen Snapshot.",
+  "tasks": {
+   "v01": {
+    "title": "Rechte lesen",
+    "text": "Lies die Rechtezeichenkette von Systemdateien und prüfe deine Identität.",
+    "blocks": [
+     {
+      "cmd": "ls -l /etc/passwd /etc/shadow /usr/bin/passwd\nls -ld /tmp /home\nid",
+      "expected": "-rw-r--r-- 1 root root  2345 Nov 12 10:00 /etc/passwd\n-rw-r----- 1 root shadow 1234 Nov 12 10:00 /etc/shadow\n-rwsr-xr-x 1 root root 59976 Nov 12 10:00 /usr/bin/passwd\ndrwxrwxrwt 15 root root 4096 Nov 12 10:00 /tmp"
+     }
+    ],
+    "differs": [
+     "Unter Rocky/Alma kann `/etc/shadow` die Rechte `----------` haben; das ist normal (root umgeht die Prüfung).",
+     "`s` (setuid) und `t` (sticky) sind Sonderbits; merke sie dir vorerst als 'x-ähnlich'."
+    ]
+   },
+   "v02": {
+    "title": "Mit chmod üben",
+    "text": "Lege Übungsordner und Datei an, setze die Rechte auf `640` und zeige das Ergebnis.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/permlab\ncd ~/permlab\ntouch notes.txt\nchmod 640 notes.txt\nls -l notes.txt\nstat -c '%a %A %U:%G' notes.txt",
+      "expected": "-rw-r----- 1 student student 0 Nov 12 10:00 notes.txt\n640 -rw-r----- student:student"
+     }
+    ],
+    "differs": [
+     "`stat -c` gibt es nur im GNU-stat; unter macOS/BSD funktioniert es nicht, du kannst es ignorieren.",
+     "Heißt dein Benutzer nicht `student`, siehst du deinen Namen; das ist in Ordnung."
+    ]
+   },
+   "v03": {
+    "title": "Löschen hängt am Verzeichnisrecht",
+    "text": "Setze das Verzeichnis auf `555`, versuche die Datei darin zu löschen und gib danach das Verzeichnisrecht zurück.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\nmkdir locked\ntouch locked/old.txt\nchmod 555 locked\nrm locked/old.txt\nls -ld locked\nchmod 755 locked\nrm locked/old.txt\nls locked",
+      "expected": "rm: cannot remove 'locked/old.txt': Permission denied\ndr-xr-xr-x 2 student student 4096 Nov 12 10:00 locked"
+     }
+    ],
+    "differs": [
+     "Als root klappt das Löschen, weil root Rechte umgeht; teste mit einem normalen Benutzer.",
+     "Die Meldung kann übersetzt sein (`Zugriff verweigert`, `Erişim engellendi`)."
+    ]
+   },
+   "v04": {
+    "title": "Wirkung von umask",
+    "text": "Setze die Maske auf `027` und sieh dir die Rechte einer neuen Datei und eines neuen Verzeichnisses an. Hinweis: Die Änderung gilt nur für diese Terminalsitzung.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\numask\numask 027\ntouch f027.txt\nmkdir d027\nls -ld f027.txt d027\numask 022",
+      "expected": "0022\n-rw-r----- 1 student student 0 Nov 12 10:00 f027.txt\ndrwxr-x--- 2 student student 4096 Nov 12 10:00 d027"
+     }
+    ],
+    "differs": [
+     "Deine Start-umask kann `0002` sein (Ubuntu mit benutzereigener Gruppe); das ist normal.",
+     "In einem neuen Terminal gilt wieder der alte Wert: umask gilt pro Prozess."
+    ]
+   },
+   "v05": {
+    "title": "chown und Aufräumen",
+    "text": "Mache root zum Besitzer der Datei und lösche dann das Verzeichnis: Da du im übergeordneten Verzeichnis schreiben darfst, wird auch die root-Datei gelöscht.",
+    "blocks": [
+     {
+      "cmd": "cd ~/permlab\ntouch owned.txt\nsudo chown root:root owned.txt\nls -l owned.txt\ncd ~\nrm -r ~/permlab\nls ~/permlab",
+      "expected": "-rw-r--r-- 1 root root 0 Nov 12 10:00 owned.txt\nls: cannot access '/home/student/permlab': No such file or directory"
+     }
+    ],
+    "differs": [
+     "Fragt `sudo` nach einem Passwort, gib dein eigenes ein.",
+     "Fragt `rm: remove write-protected regular file?`, tippe `y`: Das Löschen der root-Datei hängt am Verzeichnisrecht, nicht am Dateirecht.",
+     "Schreibe den Pfad bei `rm -r` sorgfältig; teste es nie auf `/` oder `~`."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "Welches Recht braucht man, um `notes.txt` zu löschen?",
+   "options": [
+    "w an der Datei",
+    "w und x am übergeordneten Verzeichnis",
+    "r an der Datei",
+    "Nur Besitzer der Datei sein"
+   ],
+   "explain": "Löschen entfernt den Verzeichniseintrag, deshalb braucht man w+x am übergeordneten Verzeichnis. Das Dateirecht ist nicht entscheidend."
+  },
+  "q2": {
+   "q": "Mit welchen Rechten entsteht eine neue Datei bei `umask 027`?",
+   "options": [
+    "750",
+    "600",
+    "640",
+    "027"
+   ],
+   "explain": "666 & ~027 = 640. Für ein Verzeichnis gilt 777 & ~027 = 750."
+  },
+  "q3": {
+   "q": "Was bewirkt `x` an einem Verzeichnis?",
+   "options": [
+    "Betreten und Zugriff auf Einträge über den Namen",
+    "Ausführen der enthaltenen Dateien",
+    "Löschen des Verzeichnisses",
+    "Auflisten der enthaltenen Namen"
+   ],
+   "explain": "x an Verzeichnissen ist das Durchgangsrecht (`cd`, Pfad durchlaufen). Auflisten geht mit r."
+  },
+  "q4": {
+   "q": "Warum ist `chmod -R 777` als Lösung für 'Permission denied' falsch?",
+   "options": [
+    "Der Befehl funktioniert nicht",
+    "Nur root darf ihn benutzen",
+    "Er ändert den Besitzer",
+    "Er gibt allen alle Rechte und versteckt die Ursache"
+   ],
+   "explain": "777 gibt jedem Lesen, Schreiben und Ausführen und schwächt die Sicherheit. Finde erst mit `ls -l` und `id` die Ursache und vergib nur die nötigsten Rechte."
+  }
+ },
+ "summary": [
+  "`ls -l`: Typzeichen + Triplets für Besitzer/Gruppe/Andere; r=4, w=2, x=1.",
+  "Bei Verzeichnissen: r=auflisten, w=anlegen/löschen/umbenennen (mit x), x=betreten/zugreifen; Löschen einer Datei hängt an w+x des Elternverzeichnisses.",
+  "`chmod` arbeitet oktal (`640`) oder symbolisch (`g+w`, `u=rwX`); `chown` kann nur root.",
+  "umask ist eine Maske, keine Subtraktion: neues Recht = Basis & ~umask (Datei 666, Verzeichnis 777).",
+  "`chmod -R 777` ist keine Lösung; wende das Prinzip der minimalen Rechte an."
+ ],
+ "glossary": [
+  {"term": "Rechte-Triplet", "meaning": "Eigener rwx-Satz für Besitzer, Gruppe und Andere."},
+  {"term": "Oktalmodus", "meaning": "Rechte als Summe r=4, w=2, x=1, z. B. 644."},
+  {"term": "umask", "meaning": "Bitmaske, die festlegt, welche Rechtebits bei neuen Dateien und Verzeichnissen entfernt werden."},
+  {"term": "Besitzer (owner)", "meaning": "Benutzer, dem die Datei gehört; darf Rechte ändern."},
+  {"term": "Gruppe", "meaning": "Benutzergemeinschaft mit gemeinsamen Rechten, z. B. devs."},
+  {"term": "Durchgangsrecht", "meaning": "Das x-Bit am Verzeichnis; erlaubt das Durchlaufen des Pfades und den Zugriff über den Namen."}
+ ]
+}

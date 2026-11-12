@@ -1,0 +1,140 @@
+{
+ "id": "2.6",
+ "level": 2,
+ "setup": {
+  "dirs": [
+   "/home/student/logs"
+  ],
+  "files": {
+   "/home/student/logs/app.log": "08:00:01 INFO server started\n08:00:05 INFO listening on port 80\n08:01:10 WARN disk usage 81%\n08:02:30 ERROR database timeout\n08:03:12 INFO request /index.html\n08:03:40 INFO request /about.html\n08:04:02 ERROR cannot open /var/www/missing.html\n08:04:30 INFO request /index.html\n08:05:11 WARN slow response 2300ms\n08:05:50 ERROR database timeout\n08:06:20 INFO request /index.html\n08:07:00 INFO shutdown complete\n"
+  }
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^cat (\\S*/)?notes\\.txt$", "ok": true},
+   "solution": ["cat notes.txt"]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^wc -l \\S*logs/app\\.log$", "out": "\\b12\\b", "of": "^wc -l"},
+   "solution": ["wc -l logs/app.log"]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {"cmd": "^head -n ?3 \\S*logs/app\\.log$", "ok": true},
+   "solution": ["head -n 3 logs/app.log"]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"cmd": "^tail -n ?4 \\S*logs/app\\.log$", "ok": true},
+   "solution": ["tail -n 4 logs/app.log"]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"cmd": "^cat -n \\S*notes\\.txt$", "ok": true},
+   "solution": ["cat -n notes.txt"]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"cmd": "^wc -w (\\S*/)?notes\\.txt$", "out": "\\b6\\b", "of": "^wc -w"},
+   "solution": ["wc -w notes.txt"]
+  },
+  {
+   "id": "t07",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"cmd": "^wc (\\S*/)?Documents/report\\.txt$", "ok": true},
+   "solution": ["wc Documents/report.txt"]
+  },
+  {
+   "id": "t08",
+   "kind": "guided",
+   "diff": 2,
+   "check": {"cmd": "^head -n ?2 \\S+ \\S+$", "out": "==> \\S+ <==", "of": "^head -n ?2 \\S+ \\S+$"},
+   "solution": ["head -n 2 Documents/list.csv Documents/report.txt"]
+  },
+  {
+   "id": "t09",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^wc -l (\\S*/)?notes\\.txt$", "out": "3 \\S*notes\\.txt", "of": "^wc -l (\\S*/)?notes\\.txt$"},
+   "solution": ["wc -l notes.txt"]
+  },
+  {
+   "id": "t10",
+   "kind": "predict",
+   "diff": 2,
+   "check": {"cmd": "^cat logs$", "ok": false},
+   "solution": ["cat logs"]
+  },
+  {
+   "id": "t11",
+   "kind": "predict",
+   "diff": 3,
+   "check": {"cmd": "^head -n ?6 \\S*logs/app\\.log \\| tail -n ?1$", "out": "about\\.html"},
+   "solution": ["head -n 6 logs/app.log | tail -n 1"]
+  },
+  {
+   "id": "t12",
+   "kind": "debug",
+   "diff": 2,
+   "check": {"cmd": "^tail -n ?5 \\S*logs/app\\.log$", "ok": true},
+   "solution": ["tail -n 5 logs/app.log"]
+  },
+  {
+   "id": "t13",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {"exists": "~/errors.txt", "type": "f"},
+    {"linesMin": ["~/errors.txt", 3]},
+    {"contains": ["~/errors.txt", "database timeout"]},
+    {"cmd": "^wc -l (\\S*/)?errors\\.txt$", "ok": true}
+   ],
+   "solution": ["grep ERROR logs/app.log > errors.txt", "wc -l errors.txt"]
+  },
+  {
+   "id": "t14",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {"equals": ["~/middle.txt", "08:02:30 ERROR database timeout\n08:03:12 INFO request /index.html\n08:03:40 INFO request /about.html\n"]},
+   "solution": ["head -n 6 logs/app.log | tail -n 3 > middle.txt"]
+  },
+  {
+   "id": "t15",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {"equals": ["~/first_errors.txt", "08:02:30 ERROR database timeout\n08:04:02 ERROR cannot open /var/www/missing.html\n"]},
+    {"cmd": "^grep -c ERROR \\S*logs/app\\.log$", "out": "\\b3\\b", "of": "^grep -c"}
+   ],
+   "solution": ["grep ERROR logs/app.log | head -n 2 > first_errors.txt", "grep -c ERROR logs/app.log"]
+  }
+ ],
+ "vm": [
+  {"id": "v01", "expect": "NAME=|PRETTY_NAME|VERSION"},
+  {"id": "v02", "expect": "root:x:0:0"},
+  {"id": "v03", "expect": "\\d+\\s+/etc/passwd"},
+  {"id": "v04", "expect": null},
+  {"id": "v05", "expect": "new entry"}
+ ],
+ "quiz": [
+  {"id": "q1", "answer": 1},
+  {"id": "q2", "answer": 3},
+  {"id": "q3", "answer": 0},
+  {"id": "q4", "answer": 2}
+ ]
+}

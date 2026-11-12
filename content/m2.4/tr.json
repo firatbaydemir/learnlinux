@@ -1,0 +1,329 @@
+{
+ "title": "Kopyalama ve Taşıma",
+ "lead": "cp ile dosya ve klasör kopyala, mv ile taşı veya yeniden adlandır; üzerine yazma tuzaklarından -i, -n ve -v ile kendini koru.",
+ "objectives": [
+  "cp ile dosya ve (-r ile) klasör kopyalarsın; yedek için cp -a kullanırsın.",
+  "mv ile dosya ve klasörleri taşır veya yeniden adlandırırsın.",
+  "Hedefin var olup olmadığını düşünür, üzerine yazmayı -i, -n ve -v ile kontrol altına alırsın."
+ ],
+ "sections": [
+  {
+   "id": "copy",
+   "title": "Kopyalama: cp",
+   "body": [
+    "`cp KAYNAK HEDEF` kaynağın bir **kopyasını** oluşturur; kaynak yerinde kalır. Hedef var olan bir klasörse kopya onun içine girer, değilse hedef yeni dosya adı olur.",
+    "Klasörleri kopyalamak için **`-r`** (recursive) gerekir; yoksa `cp` klasörü atlar ve hata verir. Sahiplik, izin ve zaman damgasını da korumak istersen `cp -a` (archive) kullan; yedeklerde en güvenli seçenektir."
+   ],
+   "commands": [
+    {
+     "cmd": "cp",
+     "what": "Bir dosyayı kopyalar; kaynak değişmez.",
+     "where": "Dosyayı değiştirmeden önce yedek almak veya başka yere koymak için.",
+     "why": "Orijinal bozulursa elinde kopya olur.",
+     "example": "cp draft.txt draft_copy.txt"
+    },
+    {
+     "cmd": "cp -r",
+     "what": "Klasörü içindekilerle birlikte kopyalar.",
+     "where": "Proje veya fotoğraf klasörünü yedeklerken.",
+     "why": "-r olmadan klasör kopyalanmaz.",
+     "example": "cp -r photos backup/"
+    },
+    {
+     "cmd": "cp -a",
+     "what": "Arşiv kopyası: alt klasörleri, izinleri, sahibi ve zaman damgalarını korur.",
+     "where": "Gerçek yedeklerde ve sistem dosyalarını kopyalarken.",
+     "why": "Kopya orijinalle olabildiğince aynı olur.",
+     "example": "cp -a photos backup/"
+    }
+   ],
+   "tip": "Kopyalamadan sonra `ls` ile hem kaynağı hem hedefi kontrol et."
+  },
+  {
+   "id": "move",
+   "title": "Taşıma ve yeniden adlandırma: mv",
+   "body": [
+    "`mv KAYNAK HEDEF` dosyayı **taşır**: kaynak yok olur, hedefte görünür. Linux'ta ayrı bir 'yeniden adlandır' komutu yoktur; aynı klasörde taşımak = yeniden adlandırmaktır (`mv old.txt new.txt`).",
+    "Klasörler için `-r` gerekmez. Birden fazla kaynak verirsen son argüman mutlaka var olan bir **klasör** olmalıdır: `mv a.txt b.txt folder/`. Aynı dosya sistemi içinde `mv` veriyi kopyalamaz, yalnızca kaydı değiştirir; bu yüzden çok hızlıdır."
+   ],
+   "commands": [
+    {
+     "cmd": "mv",
+     "what": "Dosya veya klasörü başka klasöre taşır.",
+     "where": "Dosyaları düzenlerken, yanlış yere konmuş dosyayı düzeltirken.",
+     "why": "Kopya bırakmaz; yer kaplamaz.",
+     "example": "mv wrong/report.txt inbox/"
+    },
+    {
+     "cmd": "mv old new",
+     "what": "Aynı klasörde ad değiştirir (hedef yoksa yeniden adlandırma olur).",
+     "where": "Dosya veya klasör adını düzeltmek için.",
+     "why": "Yeniden adlandırma = aynı yerde taşıma.",
+     "example": "mv todo.txt tasks.txt"
+    },
+    {
+     "cmd": "mv a b folder/",
+     "what": "Birden çok dosyayı tek komutla bir klasöre taşır.",
+     "where": "Toplu düzenleme.",
+     "why": "Tek komut, az hata.",
+     "example": "mv inbox/mail1.txt inbox/mail2.txt backup/"
+    }
+   ],
+   "tip": "Taşımadan önce hedef klasörün var olduğundan emin ol: yoksa `mv a.txt folder` dosyayı `folder` adıyla yeniden adlandırır!"
+  },
+  {
+   "id": "safety",
+   "title": "Üzerine yazma ve güvenlik seçenekleri",
+   "body": [
+    "`cp` ve `mv` hedefte aynı adlı bir dosya varsa **sormadan üzerine yazar**; eski içerik geri gelmez. Sessizce veri kaybetmenin en yaygın yolu budur.",
+    "Güvenlik için üç seçenek: **`-i`** (interactive) üzerine yazmadan önce sorar, **`-n`** (no-clobber) var olan dosyaya dokunmaz, **`-v`** (verbose) ne yaptığını satır satır yazar. Çoğu dağıtımda root için `cp` ve `mv` zaten `-i` alias'ıdır, normal kullanıcıda değil."
+   ],
+   "commands": [
+    {
+     "cmd": "cp -i",
+     "what": "Hedef varsa üzerine yazmadan önce onay ister (y/n).",
+     "where": "Hedefin var olup olmadığından emin olmadığında.",
+     "why": "Yanlışlıkla veri kaybını önler.",
+     "example": "cp -i tasks.txt draft.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cp -n",
+     "what": "Var olan dosyanın üzerine hiç yazmaz.",
+     "where": "Toplu kopyalarda eski dosyaları korumak için.",
+     "why": "Sessiz ama güvenli: hedef değişmez.",
+     "example": "cp -n tasks.txt draft.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "cp -v",
+     "what": "Her kopyalanan dosyayı ekrana yazar.",
+     "where": "Çok dosyalı işlemlerde ne olduğunu görmek için.",
+     "why": "Sonucu doğrulamak kolaylaşır.",
+     "example": "cp -v tasks.txt tasks_v.txt"
+    },
+    {
+     "cmd": "mv -i",
+     "what": "Taşırken hedef varsa sorar.",
+     "where": "Aynı adlı dosya olabilecek klasöre taşırken.",
+     "why": "Hedefteki dosya kaybolmaz.",
+     "example": "mv -i draft.txt backup/",
+     "nosim": true
+    }
+   ],
+   "warn": "`cp a b` ve `mv a b` hedef `b` varsa **onsuz üzerine yazar**. Önce `ls b` ile bak veya `-i` / `-n` ekle.",
+   "danger": "Yanlış hedef yazmak (örneğin `mv notes.txt /etc/hosts`) önemli bir sistem dosyasını silebilir. Sistem klasörlerinde denemeden önce VM snapshot'ı al; yetki yoksa komut zaten hata verir.",
+   "tip": "Kalıcı olarak güvenli olmak için `alias cp='cp -i'` ve `alias mv='mv -i'` tanımlayabilirsin (kabuk ayar dosyasına eklenir)."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Çalışma klasörüne gir: `cd lab`.",
+   "hint": "Bundan sonraki görevler `~/lab` içinde geçer."
+  },
+  "t02": {
+   "text": "`draft.txt` dosyasının `draft_copy.txt` adlı bir kopyasını oluştur: `cp draft.txt draft_copy.txt`.",
+   "hint": "Önce kaynak, sonra hedef. `ls` ile her ikisinin de durduğunu gör."
+  },
+  "t03": {
+   "text": "`todo.txt` dosyasını `tasks.txt` olarak yeniden adlandır: `mv todo.txt tasks.txt`.",
+   "hint": "Yeniden adlandırma aynı klasörde taşımadır; `todo.txt` artık yok olmalı."
+  },
+  "t04": {
+   "text": "Yedek klasörü oluştur: `mkdir backup`.",
+   "hint": "Sonraki adımların hedefi bu klasör."
+  },
+  "t05": {
+   "text": "`draft.txt` dosyasını `backup` klasörüne kopyala: `cp draft.txt backup/`.",
+   "hint": "Sondaki `/` hedefin klasör olduğunu vurgular."
+  },
+  "t06": {
+   "text": "`photos` klasörünü içindekilerle birlikte `backup` içine kopyala: `cp -r photos backup/`.",
+   "hint": "Klasör için `-r` şart."
+  },
+  "t07": {
+   "text": "`draft_copy.txt` dosyasını hem taşı hem yeniden adlandır: `mv draft_copy.txt backup/draft_old.txt`.",
+   "hint": "Hedefte yeni ad verirsen taşırken adı da değiştirmiş olursun."
+  },
+  "t08": {
+   "text": "Tahmin et: `cp photos backup` (`-r` olmadan) ne yapar? Sonra çalıştırıp doğrula.",
+   "hint": "Hata beklenir: klasör atlanır ('-r not specified')."
+  },
+  "t09": {
+   "text": "Tahmin et: `cat backup/draft.txt` ne gösterir? Çalıştırıp doğrula.",
+   "hint": "Kopya, orijinalin içeriğiyle aynıdır: `draft v1`."
+  },
+  "t10": {
+   "text": "Tahmin et: var olmayan dosyayı taşımayı dene: `mv ghost.txt backup`. Başarılı olur mu?",
+   "hint": "'No such file or directory' beklenir."
+  },
+  "t11": {
+   "text": "Hata ayıklama: `report.txt` yanlışlıkla `wrong` klasöründe kalmış. Onu `inbox` klasörüne taşı.",
+   "hint": "`mv wrong/report.txt inbox/`. Sonra `ls wrong inbox` ile kontrol et."
+  },
+  "t12": {
+   "text": "Mini proje: `archive/2026` klasörünü `mkdir -p` ile oluştur, sonra `inbox/mail1.txt` dosyasını oraya `jan.txt` adıyla taşı.",
+   "hint": "İki komut: `mkdir -p archive/2026`, sonra `mv inbox/mail1.txt archive/2026/jan.txt`."
+  },
+  "t13": {
+   "text": "Meydan okuma: `photos` klasörünü `pictures` olarak yeniden adlandır, sonra `pictures` klasörünü içindekilerle `~/Documents` içine kopyala.",
+   "hint": "Önce `mv`, sonra `cp -r`; hedef `~/Documents` var olan bir klasör."
+  },
+  "t14": {
+   "text": "TICKET #2410 — Muhasebe, `inbox` klasörünün yedeğini `backup/inbox_2026` adıyla istiyor. Orijinal `inbox` yerinde ve eksiksiz kalmalı.",
+   "hint": "Klasör kopyası: `cp -r inbox backup/inbox_2026`. Hedef yok olduğu için yeni ad olur."
+  },
+  "t15": {
+   "text": "`-v` ile kopyala ve ne yaptığını gör: `cp -v tasks.txt tasks_v.txt`.",
+   "hint": "-v her kopyalanan dosyayı yazar; sonuç `ls` ile doğrulanır."
+  },
+  "t16": {
+   "text": "Tahmin et: `cp tasks.txt draft.txt` hedefin üzerine yazar. Çalıştır, sonra `cat draft.txt` ile içeriği oku. Ne görürsün?",
+   "hint": "`draft v1` gitti; yerinde `buy milk` var. Gerçek sistemde `-i` ile bu önlenirdi."
+  }
+ },
+ "vm": {
+  "intro": "VM'inde `~/vmlab` adlı güvenli bir klasörde çalış; gerçek verilerin olduğu klasörlerde `cp` ve `mv` ile deneme yapma.",
+  "tasks": {
+   "v01": {
+    "title": "Dosya kopyala",
+    "text": "Bir dosya oluştur, kopyala ve `ls -l` çıktısını yapıştır.",
+    "blocks": [
+     {
+      "cmd": "mkdir -p ~/vmlab && cd ~/vmlab\necho \"original content\" > original.txt\ncp original.txt copy.txt\nls -l",
+      "expected": "total 8\n-rw-r--r--. 1 student student 17 Jan 10 10:00 copy.txt\n-rw-r--r--. 1 student student 17 Jan 10 10:00 original.txt"
+     }
+    ],
+    "differs": [
+     "Tarih, saat ve sahip farklı olabilir; `copy.txt` ve `original.txt` görünmeli.",
+     "`.` işareti (SELinux) yalnızca Rocky/Alma'da çıkar; Ubuntu'da yoktur."
+    ]
+   },
+   "v02": {
+    "title": "Klasör kopyala",
+    "text": "Bir proje klasörü oluştur, `cp -r` ile yedekle ve `ls -R` çıktısını yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\nmkdir -p project/src\ntouch project/src/main.c\ncp -r project project_backup\nls -R",
+      "expected": ".:\ncopy.txt  original.txt  project  project_backup\n\n./project:\nsrc\n..."
+     }
+    ],
+    "differs": [
+     "`cp: -r not specified` hatası alıyorsan `-r` yazmayı unutmuşsun.",
+     "Sıralama farklı olabilir; hem `project` hem `project_backup` görünmeli."
+    ]
+   },
+   "v03": {
+    "title": "Taşı ve yeniden adlandır",
+    "text": "Dosyayı yeniden adlandır, sonra yeni bir klasöre taşı ve sonucu yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\nmv copy.txt renamed.txt\nmkdir moved\nmv renamed.txt moved/\nls . moved",
+      "expected": ".:\nmoved  original.txt  project  project_backup\n\nmoved:\nrenamed.txt"
+     }
+    ],
+    "differs": [
+     "`mv: cannot stat` görürsen kaynak adı yanlış; önce `ls` ile bak.",
+     "`moved/` klasörünü oluşturmazsan `mv renamed.txt moved/` hata verir."
+    ]
+   },
+   "v04": {
+    "title": "Üzerine yazmayı engelle",
+    "text": "`-n` ile var olan dosyanın korunduğunu göster. Dikkat: `-n` olmadan içerik kaybolurdu.",
+    "blocks": [
+     {
+      "cmd": "cd ~/vmlab\necho \"keep me\" > keep.txt\necho \"new\" > other.txt\ncp -n other.txt keep.txt\ncat keep.txt",
+      "expected": "keep me"
+     }
+    ],
+    "differs": [
+     "`new` görüyorsan `-n` yazılmamış ya da çok eski bir `cp` sürümü kullanıyorsun; `cp -i` ile `n` cevabını dene.",
+     "`-i` kullanırsan `overwrite 'keep.txt'?` sorusuna `n` yaz."
+    ]
+   },
+   "v05": {
+    "title": "Temizlik",
+    "text": "Çalışma klasörünü sil. Önce içine bak; hata yoksa \"Yaptım\"a bas.",
+    "blocks": [
+     {
+      "cmd": "ls -R ~/vmlab\nrm -r ~/vmlab\nls ~/vmlab",
+      "expected": "ls: cannot access '/home/student/vmlab': No such file or directory"
+     }
+    ],
+    "differs": [
+     "`rm: cannot remove ... Is a directory` görürsen `-r` unutulmuş."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "`cp photos backup/` klasör için neden hata verir?",
+   "options": [
+    "backup klasörü korumalıdır",
+    "Klasörleri kopyalamak için -r gerekir",
+    "cp yalnızca .txt dosyalarını kopyalar",
+    "Önce klasörün adı değiştirilmelidir"
+   ],
+   "explain": "`cp` klasörleri varsayılan olarak atlar; içindekilerle birlikte kopyalamak için `cp -r` (veya `cp -a`) kullan."
+  },
+  "q2": {
+   "q": "Aynı klasörde bir dosyayı yeniden adlandırmak için hangi komut kullanılır?",
+   "options": [
+    "rename",
+    "cp",
+    "mv",
+    "touch"
+   ],
+   "explain": "Linux'ta yeniden adlandırma aynı klasörde taşımadır: `mv old new`."
+  },
+  "q3": {
+   "q": "Hedef dosya zaten varken `cp -i a b` ne yapar?",
+   "options": [
+    "Üzerine yazmadan önce sorar",
+    "Hedefi sessizce siler",
+    "Dosyaları birleştirir",
+    "Hedefi yok sayar ve kopyalamaz"
+   ],
+   "explain": "`-i` (interactive) üzerine yazmadan önce onay ister. Sormadan hiç yazmamak için `-n` kullanılır."
+  },
+  "q4": {
+   "q": "Yedek alırken izinleri ve zaman damgalarını korumak için en uygun seçenek hangisidir?",
+   "options": [
+    "cp -v",
+    "cp -n",
+    "cp -i",
+    "cp -a"
+   ],
+   "explain": "`cp -a` (archive) özyinelemeli kopyalar ve izin, sahip ve zaman damgalarını korur."
+  }
+ },
+ "summary": [
+  "`cp source target` kopyalar, `cp -r` klasörleri, `cp -a` izinleri de koruyarak kopyalar.",
+  "`mv source target` taşır; aynı klasörde yeniden adlandırma olur ve klasörler için `-r` gerekmez.",
+  "Hedef varsa `cp` ve `mv` sormadan üzerine yazar; `-i` sorar, `-n` korur, `-v` gösterir.",
+  "Çalıştırmadan önce hedefin var olup olmadığını ve yerini `ls` ile kontrol et."
+ ],
+ "glossary": [
+  {
+   "term": "kaynak / hedef",
+   "meaning": "Kopyalanan veya taşınan öğe / gideceği yer."
+  },
+  {
+   "term": "recursive (-r)",
+   "meaning": "Klasörü alt klasörleri ve içindekilerle birlikte işlemek."
+  },
+  {
+   "term": "üzerine yazma",
+   "meaning": "Aynı adlı hedef dosyanın içeriğinin yenisiyle değiştirilmesi."
+  },
+  {
+   "term": "arşiv kopyası (-a)",
+   "meaning": "İzin, sahip ve zaman damgalarını koruyan özyinelemeli kopya."
+  },
+  {
+   "term": "yeniden adlandırma",
+   "meaning": "Aynı klasörde mv ile adı değiştirmek."
+  }
+ ]
+}

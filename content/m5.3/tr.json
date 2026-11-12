@@ -1,0 +1,85 @@
+{
+  "title": "Süreç Kontrolü",
+  "lead": "Süreçleri sinyallerle güvenli biçimde durdur, isim veya PID ile hedefle ve CPU önceliğini ayarla.",
+  "objectives": [
+    "`kill` komutunun süreçlere sinyal gönderdiğini ve SIGTERM ile SIGKILL farkını açıklarsın.",
+    "Süreci hedeflemeden önce PID ve komut satırını doğrularsın.",
+    "`pkill`, `nice` ve `renice` kullanımını ve izin sınırlarını tanırsın."
+  ],
+  "sections": [
+    {
+      "id": "signals",
+      "title": "Sinyaller: kill, SIGTERM ve SIGKILL",
+      "body": [
+        "`kill PID` varsayılan olarak **SIGTERM (15)** gönderir. Sürece temiz kapanma ve veriyi kaydetme fırsatı verir. Yanıt vermeyen süreçte son çare olarak **SIGKILL (9)** kullanılır; süreç bunu yakalayamaz veya görmezden gelemez.",
+        "`kill` bir sinyal gönderir; her zaman “öldür” anlamına gelmez. Önce `ps` veya `pgrep` ile PID'yi ve komut adını doğrula. Özellikle `kill -9` ve toplu hedefleme veri kaybına yol açabilir."
+      ],
+      "commands": [
+        {"cmd": "kill -TERM PID", "what": "Belirtilen PID'ye nazik kapanma sinyali gönderir.", "where": "Bir uygulama kapatılırken veya kontrollü durdurulurken.", "why": "Sürecin temizlik yapmasına ve veriyi kaydetmesine fırsat verir.", "example": "kill -TERM 2210", "nosim": true},
+        {"cmd": "kill -KILL PID", "what": "Süreci çekirdek tarafından hemen sonlandırır.", "where": "Yalnızca SIGTERM'e yanıt vermeyen süreçte son çare olarak.", "why": "Süreç bunu yakalayamaz; kaydedilmemiş işler kaybolabilir.", "example": "kill -KILL 2210", "nosim": true}
+      ],
+      "tip": "Sinyal adını açıkça yaz: `kill -TERM PID`. Kapatma tamamlandı mı diye `ps -p PID` ile tekrar kontrol et.",
+      "warn": "Bir süreç yöneticisi veya üretim sunucusunda PID'yi doğrulamadan sinyal gönderme. PID 1'i veya bilmediğin sistem süreçlerini hedefleme."
+    },
+    {
+      "id": "target",
+      "title": "Süreç bulma ve isimle hedefleme",
+      "body": [
+        "`ps` bir süreç anlık görüntüsü verir; `pgrep` ada göre PID arar. `pkill` eşleşen süreçlere sinyal gönderir. Ad eşleşmesi beklenenden fazla süreci kapsayabileceğinden önce `pgrep -a` çıktısını incele.",
+        "`pkill -TERM -x worker` yalnızca tam süreç adı eşleşmelerini hedefler. Komut satırına göre eşleştirme gerekiyorsa `-f` kullanılabilir; bu seçenek çok geniş eşleşme riski taşır."
+      ],
+      "commands": [
+        {"cmd": "pgrep -a -x worker", "what": "Tam adı worker olan süreçleri PID ve komutuyla listeler.", "where": "Bir süreci sinyallemeden önce hedefi doğrularken.", "why": "Yanlış PID'yi ya da benzer ada sahip başka bir süreci hedefleme riskini azaltır.", "example": "pgrep -a -x sleep", "nosim": true},
+        {"cmd": "pkill -TERM -x worker", "what": "Tam adı worker olan süreçlere SIGTERM gönderir.", "where": "Doğrulanmış bir süreç grubunu kapatırken.", "why": "PID'leri tek tek yazmadan nazik kapanma isteği gönderir.", "example": "pkill -TERM -x sleep", "nosim": true}
+      ],
+      "tip": "`pkill` kullanmadan önce aynı eşleşme için `pgrep -a` çalıştır; kaç sürecin etkileneceğini gör.",
+      "danger": "`pkill -f` komut satırının herhangi bir yerindeki metni eşleştirir. Kısa veya genel bir desenle çalıştırma."
+    },
+    {
+      "id": "priority",
+      "title": "CPU önceliği: nice ve renice",
+      "body": [
+        "Nice değeri **-20 ile 19** arasındadır: sayı yükseldikçe süreç daha nazik davranır ve CPU önceliği düşer. Normal kullanıcı kendi sürecinin önceliğini düşürebilir; yükseltmek genellikle yönetici yetkisi ister.",
+        "`nice` yeni komutu belirli öncelikle başlatır; `renice` çalışan sürecin değerini değiştirir. Bu ayar CPU planlamasını etkiler, sürece ayrılmış belleği veya CPU miktarını sınırlamaz."
+      ],
+      "commands": [
+        {"cmd": "nice -n 10 command", "what": "Yeni komutu nice değeri 10 ile başlatır.", "where": "Yedekleme gibi arka plan işlerinde.", "why": "Etkileşimli işlerin CPU'ya erişmesini kolaylaştırır.", "example": "nice -n 10 sleep 60", "nosim": true},
+        {"cmd": "renice 10 -p PID", "what": "Çalışan sürecin nice değerini 10 yapar.", "where": "Çalışan bir arka plan işinin önceliğini düşürürken.", "why": "Süreci yeniden başlatmadan CPU önceliğini ayarlar.", "example": "renice 10 -p 2210", "nosim": true}
+      ],
+      "tip": "Nice değeri ile süreç durumu farklı şeylerdir: `ps -o pid,ni,stat,comm -p PID` ile ayrı ayrı incele."
+    }
+  ],
+  "tasks": {
+    "t01": {"text": "`~/lab/ps_snapshot.txt` içinden alice kullanıcısının süreçlerini `grep` ile bul.", "hint": "Dosya `USER` sütunuyla başlıyor; `grep alice ~/lab/ps_snapshot.txt` dene."},
+    "t02": {"text": "Anlık görüntüde `python3` sürecinin PID'sini bul.", "hint": "`grep python3 ~/lab/ps_snapshot.txt` satırındaki ikinci alan PID'dir."},
+    "t03": {"text": "Tahmin et: dosyada `python3` kaç satırda geçiyor? Sonra `grep -c` ile doğrula.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` eşleşen satırları sayar."},
+    "t04": {"text": "Güvenli kapatma planını `~/lab/term_plan.txt` dosyasına kaydet: PID 2210 için `kill -TERM` kullan.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt`"},
+    "t05": {"text": "Yedekleme komutunu daha düşük CPU önceliğiyle başlatma örneğini `~/lab/priority_plan.txt` içine yaz.", "hint": "`nice -n 10 ./backup.sh` biçimini kullan."},
+    "t06": {"text": "Kapatma planına PID doğrulaması ve SIGTERM'den sonra beklemeyi ekle; SIGKILL'i yalnızca son çare olarak belirt.", "hint": "Planını `~/lab/escalation_plan.txt` içine kaydet."},
+    "t07": {"text": "Ticket #5301 için PID 2210'un `python3` olduğunu ve önce nazik SIGTERM denenmesini bildiren kısa not oluştur.", "hint": "Notu `~/lab/ticket_5301.txt` dosyasına yaz."}
+  },
+  "vm": {
+    "intro": "Bu komutlar yalnızca kendi test VM'inde çalıştırılmalıdır. Rastgele PID'ye sinyal gönderme; süreç adını ve PID'yi kontrol et.",
+    "tasks": {
+      "v01": {"title": "Kontrollü süreç başlat", "text": "Kısa ömürlü bir test süreci başlat, PID'sini not et ve `ps` ile doğrula. İş bitince kapat.", "blocks": [{"cmd": "sleep 300 &\necho $!\nps -o pid,ni,comm -p $!", "expected": "PID ve sleep komutu görünür."}], "differs": ["Shell arka plan işi numarası da yazdırabilir; PID, `echo $!` satırındadır.", "PID farklı olabilir; örnek sayı bekleme."]},
+      "v02": {"title": "Önce SIGTERM dene", "text": "Az önce başlattığın test sürecinin gerçek PID'sini kullan. SIGTERM gönder, kısa süre bekle ve sürecin kapandığını doğrula.", "blocks": [{"cmd": "kill -TERM PID\nsleep 1\nps -p PID || echo 'process stopped'", "expected": "process stopped"}], "differs": ["PID yazan yere v01'de gördüğün sayıyı gir; `PID` sözcüğünü aynen çalıştırma.", "Süreç hâlâ görünüyorsa PID'nin doğru olduğundan emin ol; başka sürece sinyal gönderme."]},
+      "v03": {"title": "Nice değerini gözle", "text": "Düşük öncelikli bir test süreci başlat; `ps` çıktısındaki NI değerini gör ve ardından kendi sürecini kapat.", "blocks": [{"cmd": "nice -n 10 sleep 60 &\nps -o pid,ni,comm -p $!\nkill -TERM $!", "expected": "NI sütununda 10 ve komut sütununda sleep."}], "differs": ["Bazı `ps` sürümlerinde sütun başlıkları farklı hizalanır; NI değeri 10 olmalıdır.", "Sonlandırma komutunu kendi shell'inin başlattığı son PID için çalıştır."]}
+    }
+  },
+  "quiz": {
+    "q1": {"q": "`kill PID` varsayılan olarak hangi sinyali gönderir?", "options": ["SIGKILL", "SIGTERM", "SIGSTOP", "SIGHUP"], "explain": "Varsayılan sinyal SIGTERM'dir; süreçten temiz biçimde kapanması istenir."},
+    "q2": {"q": "SIGKILL ne zaman kullanılmalıdır?", "options": ["Her uygulama kapanışında", "PID'yi kontrol etmeden", "SIGTERM başarısız olduğunda son çare olarak", "Nice değerini değiştirmek için"], "explain": "SIGKILL süreçte yakalanamaz ve temizlik fırsatı vermez; yalnızca son çare olmalıdır."},
+    "q3": {"q": "Nice değeri 0'dan 10'a çıkarsa ne olur?", "options": ["CPU önceliği düşer", "Süreç mutlaka durur", "Bellek sınırı yükselir", "Süreç root olur"], "explain": "Daha yüksek nice değeri CPU planlayıcısında daha düşük öncelik anlamına gelir."},
+    "q4": {"q": "Bir süreci `pkill` ile hedeflemeden önce ne yapmalısın?", "options": ["PID 1'i denemelisin", "SIGKILL göndermelisin", "`pkill -f` ile geniş desen kullanmalısın", "`pgrep -a` ile eşleşmeleri doğrulamalısın"], "explain": "Önce eşleşen süreçleri görmek hedefi ve olası yan etkileri doğrular."}
+  },
+  "summary": [
+    "`kill` varsayılan olarak SIGTERM yollar; SIGKILL son çaredir.",
+    "Sinyal göndermeden önce `ps` veya `pgrep -a` ile PID ve komutu doğrula.",
+    "`nice` yeni, `renice` çalışan sürecin CPU önceliğini ayarlar; yüksek nice daha düşük önceliktir."
+  ],
+  "glossary": [
+    {"term": "signal", "meaning": "Çekirdeğin sürece gönderdiği kontrol bildirimi."},
+    {"term": "PID", "meaning": "Çalışan bir sürecin benzersiz süreç kimliği."},
+    {"term": "nice", "meaning": "CPU zamanlamasında sürecin göreli önceliğini etkileyen değer."}
+  ]
+}

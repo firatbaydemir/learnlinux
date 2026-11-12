@@ -1,0 +1,98 @@
+{
+  "title": "Metin Filtreleme: sort, uniq, cut ve tr",
+  "lead": "Satırları sıralayarak, tekrarları sayarak, alanları seçerek ve karakterleri dönüştürerek ham metni anlamlı bir rapora çevir.",
+  "objectives": [
+    "`sort` ile metin ve sayıları sıralarsın.",
+    "`uniq` ile ardışık tekrarları birleştirir veya sayarsın.",
+    "`cut` ile ayraçlı metinden alan seçersin.",
+    "`tr` ile karakterleri dönüştürür ve araçları pipeline'da birleştirirsin."
+  ],
+  "sections": [
+    {
+      "id": "sort",
+      "title": "Satırları sort ile sırala",
+      "body": [
+        "`sort DOSYA` satırları alfabetik/metinsel olarak sıralar. `-r` sıralamayı tersine çevirir; `-n` sayıları metin yerine sayısal değer olarak sıralar. Örneğin normal sıralamada `100`, `2`'den önce gelebilir.",
+        "`sort` sonucu ekrana yazar, kaynak dosyayı değiştirmez. Sıralanmış çıktıyı saklamak için farklı bir hedef dosyaya yönlendir."
+      ],
+      "commands": [
+        {"cmd":"sort","what":"Satırları metinsel olarak sıralar.","where":"Bir listeyi alfabetik düzene getirirken.","why":"Benzer satırları yan yana toplar.","example":"sort data/fruits.txt"},
+        {"cmd":"sort -r","what":"Sıralama sırasını tersine çevirir.","where":"En sondaki değerleri önce görmek istediğinde.","why":"Aynı sıralamanın tersini üretir.","example":"sort -r data/fruits.txt"},
+        {"cmd":"sort -n","what":"Satırları sayısal değerlerine göre sıralar.","where":"Satır başına bir sayı bulunan dosyalarda.","why":"`2` ile `100` gibi değerleri doğru sayısal sıraya koyar.","example":"sort -n data/numbers.txt"}
+      ],
+      "tip":"`sort` varsayılan olarak metin sıralar. Sayılar için `-n` kullan ve gerekirse `head` ile ilk satırları kontrol et."
+    },
+    {
+      "id": "uniq",
+      "title": "Tekrarları uniq ile birleştir",
+      "body": [
+        "`uniq` yalnızca birbirine bitişik aynı satırları birleştirir. Tekrarlar dosyanın farklı yerlerindeyse önce `sort` ile yan yana getir.",
+        "`uniq -c` her benzersiz satırın önüne tekrar sayısını koyar. Bu çıktı, basit sıklık raporları üretmek için kullanışlıdır."
+      ],
+      "commands": [
+        {"cmd":"uniq","what":"Ardışık aynı satırları tek satıra indirir.","where":"Sıralanmış listelerde tekrarları kaldırırken.","why":"Her değerin bir kopyasını bırakır.","example":"sort data/fruits.txt | uniq"},
+        {"cmd":"uniq -c","what":"Ardışık tekrarları birleştirip adetlerini yazar.","where":"Bir listedeki değerlerin sıklığını çıkarırken.","why":"Değer ve sayısını birlikte gösterir.","example":"sort data/fruits.txt | uniq -c"}
+      ],
+      "warn":"`uniq` kendi başına tüm dosyada tekrar aramaz; yalnızca yan yana olan tekrarları yakalar. Genel kullanım `sort | uniq` şeklindedir."
+    },
+    {
+      "id": "cuttr",
+      "title": "Alanları cut ile seç, karakterleri tr ile dönüştür",
+      "body": [
+        "`cut -dAYRAÇ -fALAN` ayraçla ayrılmış satırlardan alan seçer. CSV'de virgül, `/etc/passwd` içinde iki nokta üst üste kullanılır. Birden fazla alanı virgülle yazabilirsin: `-f1,3`.",
+        "`tr SET1 SET2` standart girdideki karakterleri dönüştürür. Örneğin ASCII küçük harflerini büyüğe çevirebilirsin. `cut`, `sort`, `uniq` ve `tr` stdin/stdout kullandığından pipe ile birleştirilebilir."
+      ],
+      "commands": [
+        {"cmd":"cut -d, -f1","what":"Virgülle ayrılmış satırların ilk alanını seçer.","where":"CSV dosyasından bir sütun alırken.","why":"Gereksiz sütunları sonuçtan çıkarır.","example":"cut -d, -f1 data/employees.csv"},
+        {"cmd":"cut -d, -f1,3","what":"İlk ve üçüncü alanları seçer.","where":"Birden fazla sütuna ihtiyaç duyduğunda.","why":"Sadece gerekli veriyi tutar.","example":"cut -d, -f1,3 data/employees.csv"},
+        {"cmd":"tr 'a-z' 'A-Z'","what":"ASCII küçük harfleri büyük harflere dönüştürür.","where":"Metni standart bir harf biçimine getirirken.","why":"Karakter dönüşümünü pipeline içinde yapar.","example":"echo hello | tr 'a-z' 'A-Z'"}
+      ],
+      "tip":"Düzenli aralıklarla ayrılmış metinde `cut` yerine `awk` daha esnek olabilir; bu modülde sabit ayraçlı satırlara odaklanıyoruz."
+    },
+    {
+      "id": "pipeline",
+      "title": "Araçları pipeline'da birleştir",
+      "body": [
+        "Metin filtreleri küçük ve tek amaçlıdır. Örneğin bir logdan durum kodu alanını seç, sırala ve `uniq -c` ile say. Sonucu ekranda doğruladıktan sonra `>` ile bir rapor dosyasına kaydedebilirsin.",
+        "Sıra önemlidir: `sort | uniq -c` tekrarları sayar, ardından `sort -rn` sayıya göre büyükten küçüğe sıralar."
+      ],
+      "commands": [
+        {"cmd":"sort | uniq -c | sort -rn","what":"Değerlerin sıklığını sayıp çoktan aza sıralar.","where":"Kayıt veya listelerde en sık görülen değerleri bulurken.","why":"Birden fazla küçük aracı tek rapora dönüştürür.","example":"cut -d' ' -f2 data/access.log | sort | uniq -c | sort -rn"},
+        {"cmd":"cut -d, -f2","what":"CSV içinden belirtilen alanı pipe'a aktarır.","where":"Bir sütunu başka filtrelere hazırlarken.","why":"Her aracı tek bir işe ayırır.","example":"cut -d, -f2 data/employees.csv | sort | uniq"}
+      ],
+      "warn":"`>` hedef dosyanın eski içeriğini ezer. Kaynak dosyanın üzerine yazma; rapor için ayrı bir ad seç."
+    }
+  ],
+  "tasks": {
+    "t01":{"text":"`data/fruits.txt` satırlarını alfabetik sırala.","hint":"`sort data/fruits.txt`."},
+    "t02":{"text":"Aynı meyve listesini ters sırada göster.","hint":"`sort -r data/fruits.txt`."},
+    "t03":{"text":"`data/numbers.txt` içindeki sayıları sayısal olarak sırala.","hint":"`sort -n data/numbers.txt`."},
+    "t04":{"text":"Meyve listesindeki tekrarları kaldır; önce sıralamayı unutma.","hint":"`sort data/fruits.txt | uniq`."},
+    "t05":{"text":"Her meyvenin kaç kez geçtiğini say.","hint":"`sort data/fruits.txt | uniq -c`."},
+    "t06":{"text":"CSV dosyasından yalnızca çalışan adlarını, yani ilk sütunu çıkar.","hint":"Ayraç virgül olduğu için `cut -d, -f1 data/employees.csv` kullan."},
+    "t07":{"text":"Tahmin et: çalışan CSV'sindeki bölüm adlarının sıklığı nedir? İlk alan olan başlık da çıktıda kalır.","hint":"`cut -d, -f2 data/employees.csv | sort | uniq -c`."},
+    "t08":{"text":"Tahmin et: metinsel `sort` ile sıralanan sayıların ilk satırı ne olur? Çalıştırıp gör.","hint":"Düz `sort` sayıları metin gibi karşılaştırır; `10` ilk gelebilir."},
+    "t09":{"text":"Hata ayıklama: `data/mixed.txt` içindeki benzersiz satırları sıralı biçimde `unique.txt` dosyasına yaz.","hint":"Önce sırala, sonra `uniq` uygula ve çıktıyı yönlendir."},
+    "t10":{"text":"Mini görev: `hello` metnini `tr` ile büyük harfe çevir.","hint":"`echo hello | tr 'a-z' 'A-Z'`."},
+    "t11":{"text":"Mini görev: `reports/departments.txt` dosyasına çalışanların benzersiz bölüm adlarını yaz.","hint":"İkinci CSV sütununu kes, sırala ve `uniq` ile rapora yönlendir."},
+    "t12":{"text":"Meydan okuma: erişim kaydındaki durum kodlarını sıklığına göre büyükten küçüğe sırala.","hint":"İkinci alanı `cut` ile al; ardından `sort | uniq -c | sort -rn`."},
+    "t13":{"text":"Ticket: Erişim kaydındaki durum kodu adetlerini `reports/status_count.txt` dosyasına yaz.","hint":"İkinci alanı çıkar, sırala, `uniq -c` uygula ve rapora yönlendir."}
+  },
+  "vm": {
+    "intro":"Kendi VM'inde bu filtreler yalnızca girdi okur. Sonuç dosyaları için home dizininde ayrı adlar kullan.",
+    "tasks": {
+      "v01":{"title":"Sayısal sıralama","text":"`/etc/passwd` dosyasındaki kullanıcı kimliklerini sayısal sırala ve ilk birkaç satırı yapıştır.","blocks":[{"cmd":"cut -d: -f3 /etc/passwd | sort -n | head -n 5","expected":"0\n1\n2"}],"differs":["Çıktıdaki kimlikler dağıtıma göre değişebilir; sayısal sırada artmaları beklenir."]},
+      "v02":{"title":"CSV alanı seç","text":"Home dizinindeki rapor CSV'sinden isim alanını çıkar; mevcut değilse komuttaki yolu kendi CSV dosyanla değiştir.","blocks":[{"cmd":"cut -d, -f1 ~/Documents/list.csv","expected":"name\nalice\nbob"}],"differs":["CSV'nin ayıracı virgül değilse `-d` değerini değiştir. İlk satır başlık olabilir."]},
+      "v03":{"title":"Sıklıkları say","text":"`/etc/passwd` içindeki login shell alanlarını say ve sıklık tablosunu yapıştır.","blocks":[{"cmd":"cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn","expected":"\\d+\\s+\\S+"}],"differs":["Sayılar dağıtıma göre değişir. `uniq -c` öncesinde `sort` olduğundan emin ol."]},
+      "v04":{"title":"Küçük rapor üret","text":"Kendi home dizininde örnek durum kodlarını hazırla, sırala ve sayım raporunu görüntüle.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && printf '200\\n404\\n200\\n500\\n200\\n' > status.txt && sort status.txt | uniq -c | sort -rn > status_report.txt && cat status_report.txt"}],"differs":["`status_report.txt` boşsa `status.txt` dosyasını ve yönlendirme sırasını kontrol et. Raporu kaynağın üzerine yazma."]}
+    }
+  },
+  "quiz": {
+    "q1":{"q":"Sayısal satırları sayısal değerlerine göre sıralayan seçenek hangisidir?","options":["`sort -r`","`sort -n`","`uniq -c`","`cut -n`"],"explain":"`sort -n` sayısal sıralama yapar."},
+    "q2":{"q":"`uniq` neden genellikle `sort` sonrasında kullanılır?","options":["`uniq` yalnız CSV okur","`sort` dosyayı yedekler","`uniq` tüm metni büyük harfe çevirir","`uniq` yalnızca ardışık tekrarları birleştirir"],"explain":"Sıralama aynı değerleri yan yana getirir; böylece `uniq` hepsini birleştirebilir."},
+    "q3":{"q":"`cut -d, -f2 file.csv` neyi seçer?","options":["Virgülle ayrılan ikinci alanı","İkinci satırı","İkinci karakteri","Dosyanın boyutunu"],"explain":"`-d,` virgülü ayraç yapar, `-f2` ikinci alanı seçer."},
+    "q4":{"q":"`tr 'a-z' 'A-Z'` ne yapar?","options":["Satırları ters sıralar","Tekrarları sayar","Küçük ASCII harflerini büyük harflere dönüştürür","İkinci sütunu çıkarır"],"explain":"`tr` karakter kümelerini dönüştürür; bu örnek ASCII küçük harflerini büyütür."}
+  },
+  "summary":["`sort` metinsel sıralar; sayılar için `sort -n`, ters sıra için `sort -r` kullan.","`uniq` yalnızca ardışık tekrarları birleştirir; genellikle önce `sort` gerekir.","`uniq -c` her benzersiz satırın tekrar sayısını verir.","`cut -dAYRAÇ -fALAN` ayraçlı satırlardan alan seçer.","`tr` karakter dönüştürür; pipe ile küçük araçları birleştir ve raporları ayrı dosyaya yaz."],
+  "glossary":[{"term":"filtre","meaning":"Girdiyi okuyup seçilmiş veya dönüştürülmüş çıktıyı yazan komut."},{"term":"ayraç","meaning":"Bir satırdaki alanları birbirinden ayıran karakter."},{"term":"alan","meaning":"Ayraçla bölünmüş bir satırın sütunlarından biri."},{"term":"sıklık tablosu","meaning":"Her değerin kaç kez geçtiğini gösteren liste."}]
+}

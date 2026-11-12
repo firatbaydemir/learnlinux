@@ -1,0 +1,370 @@
+{
+ "title": "Dosya okuma: cat, less, head, tail, wc",
+ "lead": "Her dosya için doğru araç vardır: küçük dosyayı cat, büyüğünü less ile oku; başı için head, sonu ve canlı log için tail, sayım için wc kullan.",
+ "objectives": [
+  "Dosya boyutuna göre doğru aracı seçersin (cat, less, head, tail).",
+  "head ve tail ile -n seçeneğini kullanıp bir dosyanın başını ve sonunu okursun.",
+  "wc ile satır, kelime ve bayt sayarsın; grep -c ve | ile küçük bir log analizi yaparsın."
+ ],
+ "sections": [
+  {
+   "id": "choose",
+   "title": "Doğru aracı seçmek",
+   "body": [
+    "Linux'ta ayarların, logların ve notların çoğu düz metin dosyasıdır. Onları okumak için tek bir komut yok; **dosyanın boyutuna ve amacına** göre seçersin.",
+    "Küçük dosya: `cat`. Büyük dosya: `less`. Başı: `head`. Sonu: `tail`. Canlı takip: `tail -f`. Boyut fikri: `wc`. Önce `wc -l` ile boyuta bakmak iyi bir alışkanlıktır."
+   ],
+   "tip": "Şüphen varsa önce `wc -l notes.txt` ile satır sayısına bak; sonra karar ver."
+  },
+  {
+   "id": "cat_less",
+   "title": "Tamamını okumak: cat ve less",
+   "body": [
+    "`cat` dosyanın tamamını hemen ekrana döker; kısa dosyalar için hızlı ve pratiktir. `cat -n` satırları numaralandırır.",
+    "`less` dosyayı sayfa sayfa açar, terminali kilitlemez. İçindeyken **Boşluk** bir sayfa aşağı, **b** bir sayfa yukarı iner, `/kelime` arar, **q** çıkar. Simülatörde `less` basitçe `cat` gibi çalışır; gerçek etkisini VM'inde dene."
+   ],
+   "commands": [
+    {
+     "cmd": "cat",
+     "what": "Dosyanın tamamını ekrana yazar.",
+     "where": "Kısa dosyalarda (notlar, /etc/hostname).",
+     "why": "En hızlı yol; ama durdurulamaz.",
+     "example": "cat notes.txt"
+    },
+    {
+     "cmd": "cat -n",
+     "what": "Satırları numaralandırarak yazar.",
+     "where": "Bir satırdan söz ederken (hata 7. satırda).",
+     "why": "Satır numarası konuşmayı ve hata ayıklamayı kolaylaştırır.",
+     "example": "cat -n notes.txt"
+    },
+    {
+     "cmd": "less",
+     "what": "Dosyayı sayfa sayfa açar; Boşluk, b, /arama, q.",
+     "where": "Uzun metinler ve loglar.",
+     "why": "Terminali doldurmaz, içinde arama yapabilirsin.",
+     "example": "less /var/log/messages",
+     "nosim": true
+    }
+   ],
+   "warn": "Çok büyük bir dosyayı `cat` ile açarsan ekran dakikalarca akar. Durdurmak için `Ctrl+C` bas ve bir dahaki sefere `less` kullan.",
+   "danger": "Program (ikili) dosyalarını `cat` ile yazma: terminal bozulur. Bozulursa `reset` yaz. Metin mi emin değilsen `less` ile bak."
+  },
+  {
+   "id": "head_tail",
+   "title": "Başı ve sonu: head ve tail",
+   "body": [
+    "`head` ilk 10 satırı, `tail` son 10 satırı gösterir. Sayıyı `-n` ile değiştirirsin: `head -n 3 notes.txt`.",
+    "Loglara yeni kayıtlar sona eklenir; bu yüzden en yeni olaylar için `tail` kullanılır. `tail -f` dosyayı **izler** ve eklenen satırları anında gösterir; çıkmak için `Ctrl+C`. Birden çok dosya verirsen her biri     `==> name <==` başlığıyla ayrılır. "
+   ],
+   "commands": [
+    {
+     "cmd": "head -n",
+     "what": "Dosyanın ilk n satırını gösterir.",
+     "where": "Başlık satırı veya yapılandırma başı için.",
+     "why": "Büyük dosyanın içeriğine hızlı bakış.",
+     "example": "head -n 3 logs/app.log"
+    },
+    {
+     "cmd": "tail -n",
+     "what": "Dosyanın son n satırını gösterir.",
+     "where": "Logdaki en yeni kayıtlar için.",
+     "why": "Hatalar genellikle sondadır.",
+     "example": "tail -n 4 logs/app.log"
+    },
+    {
+     "cmd": "tail -f",
+     "what": "Dosyayı izler; yeni satırları canlı yazar.",
+     "where": "Çalışan bir servisin logunu takip ederken.",
+     "why": "Sorunu oluştuğu anda yakalarsın.",
+     "example": "tail -f logs/app.log",
+     "nosim": true
+    }
+   ],
+   "tip": "`tail -f` kapanmaz; yeni satır gelmese de bekler. Çıkmak için `Ctrl+C`."
+  },
+  {
+   "id": "wc",
+   "title": "Saymak: wc",
+   "body": [
+    "`wc` (word count) satır, kelime ve bayt sayısını verir. `-l` yalnızca satır, `-w` yalnızca kelime, `-c` yalnızca bayt sayar. Seçeneksiz kullanırsan üçü yan yana gelir: `3 6 33 notes.txt`.",
+    "Bir dosyayı açmadan önce `wc -l` ile boyutunu öğrenmek, `cat` kazalarını önler."
+   ],
+   "commands": [
+    {
+     "cmd": "wc -l",
+     "what": "Satır sayısını verir.",
+     "where": "Log veya liste uzunluğunu öğrenirken.",
+     "why": "Dosyanın büyüklüğü hakkında hızlı fikir.",
+     "example": "wc -l logs/app.log"
+    },
+    {
+     "cmd": "wc -w",
+     "what": "Kelime sayısını verir.",
+     "where": "Metin uzunluğu, tek kelimelik dosyalar.",
+     "why": "İçeriğin boyutunu ölçmek.",
+     "example": "wc -w notes.txt"
+    },
+    {
+     "cmd": "wc",
+     "what": "Satır, kelime ve bayt sayısını birlikte verir.",
+     "where": "Genel bakış gerektiğinde.",
+     "why": "Tek komutla üç ölçü.",
+     "example": "wc Documents/report.txt"
+    }
+   ]
+  },
+  {
+   "id": "combine",
+   "title": "Birleştirmek: boru ve yönlendirme",
+   "body": [
+    "`|` (boru) bir komutun çıktısını sonrakine girdi yapar: `head -n 6 app.log | tail -n 3` dosyanın 4-6. satırlarını verir. `>` çıktıyı ekrana değil dosyaya yazar.",
+    "`grep ERROR app.log` yalnızca ERROR içeren satırları gösterir; `grep -c` bunları sayar. Ayrıntısı sonraki modüllerde; burada okuma araçlarıyla birleştiriyoruz."
+   ],
+   "commands": [
+    {
+     "cmd": "head | tail",
+     "what": "Dosyanın ortadaki satırlarını seçer.",
+     "where": "Belirli satır aralığı gerektiğinde.",
+     "why": "Her iki aracı zincirleyerek aralık elde edersin.",
+     "example": "head -n 6 logs/app.log | tail -n 3"
+    },
+    {
+     "cmd": "grep -c",
+     "what": "Deseni içeren satırları sayar.",
+     "where": "Kaç hata var sorusunda.",
+     "why": "Satırları tek tek saymaktan kurtarır.",
+     "example": "grep -c ERROR logs/app.log"
+    },
+    {
+     "cmd": ">",
+     "what": "Çıktıyı bir dosyaya yazar.",
+     "where": "Sonucu saklarken veya bilete eklerken.",
+     "why": "Çıktı kalıcı olur.",
+     "example": "grep ERROR logs/app.log > errors.txt"
+    }
+   ],
+   "warn": "`>` hedef dosya varsa içeriğini siler. Mevcut bir dosyanın adını yazmadan önce iki kez düşün; eklemek için `>>` kullan.",
+   "danger": "`cat notes.txt > notes.txt` gibi aynı dosyayı hem okuyup hem yazarsan dosya boşalır ve veri kaybolur. Çıktıyı her zaman farklı bir dosyaya yaz."
+  },
+  {
+   "id": "paths",
+   "title": "Dağıtıma göre log yolları",
+   "body": [
+    "Ana sistem logu Debian/Ubuntu'da `/var/log/syslog`, RHEL/Rocky/Alma'da `/var/log/messages`'dır. Birinde olmayan dosya `No such file or directory` verir; hata komutta değil, yoldadır.",
+    "Çoğu log dosyasını okumak için `sudo` gerekir (örneğin `sudo less /var/log/secure`). Önce `ls /var/log` ile bak."
+   ],
+   "tip": "Dosya yoksa `ls /var/log` ile gerçek adı bul. Gerekirse `sudo journalctl -n 20` de son kayıtları gösterir."
+  }
+ ],
+ "tasks": {
+  "t01": {
+   "text": "Küçük bir dosyayı `cat notes.txt` ile oku.",
+   "hint": "Dosya kısa olduğu için cat uygun."
+  },
+  "t02": {
+   "text": "`logs/app.log` kaç satır? `wc -l logs/app.log` ile öğren.",
+   "hint": "Seçenek küçük harf L."
+  },
+  "t03": {
+   "text": "`head -n 3 logs/app.log` ile logun ilk 3 satırını göster.",
+   "hint": "-n sonrası satır sayısı gelir."
+  },
+  "t04": {
+   "text": "`tail -n 4 logs/app.log` ile son 4 satırı göster.",
+   "hint": "Son satır 'shutdown complete' olmalı."
+  },
+  "t05": {
+   "text": "`cat -n notes.txt` ile satırları numaralandırarak oku.",
+   "hint": "-n satır numarası ekler."
+  },
+  "t06": {
+   "text": "`wc -w notes.txt` ile kelime sayısını bul.",
+   "hint": "Üç satır, her satırda iki kelime."
+  },
+  "t07": {
+   "text": "`wc Documents/report.txt` ile satır, kelime ve bayt değerlerini birlikte gör.",
+   "hint": "Seçenek yok: üç sayı gelir."
+  },
+  "t08": {
+   "text": "İki dosyanın başını tek komutla göster: `head -n 2 Documents/list.csv Documents/report.txt`.",
+   "hint": "Her dosya `==> name <==` başlığıyla ayrılır."
+  },
+  "t09": {
+   "text": "Tahmin et: `wc -l notes.txt` kaç gösterir? Çalıştırıp doğrula.",
+   "hint": "`cat -n` ile gördüğün satır sayısına bak."
+  },
+  "t10": {
+   "text": "Tahmin et: `cat logs` ne olur? Çalıştırıp hatayı oku.",
+   "hint": "logs bir dizindir, dosya değil; 'Is a directory' beklenir."
+  },
+  "t11": {
+   "text": "Tahmin et: `head -n 6 logs/app.log | tail -n 1` hangi satırı yazar? Çalıştırıp doğrula.",
+   "hint": "İlk 6 satırın sonuncusu, yani 6. satır."
+  },
+  "t12": {
+   "text": "Hata ayıkla: bir arkadaşın `tail 5 logs/app.log` yazdı ve `5` dosyasını bulamadı. Doğru komutla son 5 satırı göster.",
+   "hint": "Satır sayısı için `-n` gerekir."
+  },
+  "t13": {
+   "text": "Mini proje: `grep ERROR logs/app.log > errors.txt` ile hataları `errors.txt` dosyasına yaz, sonra `wc -l errors.txt` ile say.",
+   "hint": "Üç ERROR satırı olmalı."
+  },
+  "t14": {
+   "text": "Meydan okuma: `logs/app.log` dosyasının yalnızca 4., 5. ve 6. satırlarını `middle.txt` dosyasına yaz.",
+   "hint": "Önce ilk 6 satırı al, sonra bunların son 3'ünü; sonucu `>` ile yönlendir."
+  },
+  "t15": {
+   "text": "Ticket: 'Sunucuda kaç hata var ve ilk iki hata hangisi?' İlk iki ERROR satırını `first_errors.txt` dosyasına kaydet ve toplam ERROR sayısını `grep -c` ile göster.",
+   "hint": "`grep ERROR logs/app.log | head -n 2 > first_errors.txt`, sonra `grep -c ERROR logs/app.log`."
+  }
+ },
+ "vm": {
+  "intro": "VM'inde yalnızca okuma yapacaksın; hiçbir dosya silinmez. Sistem dosyalarını okumak güvenlidir, ama dosyaları yönlendirmeyle ezmemeye dikkat et.",
+  "tasks": {
+   "v01": {
+    "title": "Küçük dosyayı cat ile oku",
+    "text": "Dağıtım bilgisini yazdır ve çıktıyı yapıştır.",
+    "blocks": [
+     {
+      "cmd": "cat /etc/os-release",
+      "expected": "NAME=\"Ubuntu\"\nVERSION=\"24.04 LTS (Noble Numbat)\"\n..."
+     }
+    ],
+    "differs": [
+     "Rocky/Alma'da `NAME=\"Rocky Linux\"` görürsün; alanlar farklı olabilir.",
+     "`No such file` alırsan WSL veya konteynerde olabilirsin; `cat /etc/hostname` dene."
+    ]
+   },
+   "v02": {
+    "title": "Başı ve sonu oku",
+    "text": "Kullanıcı dosyasının ilk 5 ve son 3 satırını göster.",
+    "blocks": [
+     {
+      "cmd": "head -n 5 /etc/passwd\ntail -n 3 /etc/passwd",
+      "expected": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n..."
+     }
+    ],
+    "differs": [
+     "Ubuntu'da ikinci satır `daemon`, RHEL'de `bin` olabilir.",
+     "İlk satır her zaman `root:x:0:0` ile başlamalı."
+    ]
+   },
+   "v03": {
+    "title": "Satır say",
+    "text": "`/etc/passwd` dosyasının satır sayısını ve `/etc/hostname` dosyasının üç ölçüsünü bul.",
+    "blocks": [
+     {
+      "cmd": "wc -l /etc/passwd\nwc /etc/hostname",
+      "expected": "32 /etc/passwd\n 1  1 10 /etc/hostname"
+     }
+    ],
+    "differs": [
+     "Satır sayın kuruluma göre farklıdır; önemli olan sayı ve dosya adının görünmesi.",
+     "`wc /etc/hostname` çıktısındaki ilk sayı satır, ikincisi kelime, üçüncüsü bayttır."
+    ]
+   },
+   "v04": {
+    "title": "less ile gez",
+    "text": "Ana logu aç: Ubuntu'da `/var/log/syslog`, RHEL/Rocky/Alma'da `/var/log/messages`. Boşluk, b, /error ve q tuşlarını dene. Yaptıysan \"Yaptım\" düğmesine bas.",
+    "blocks": [
+     {
+      "cmd": "# Ubuntu\nsudo less /var/log/syslog\n# Rocky / Alma\nsudo less /var/log/messages"
+     }
+    ],
+    "differs": [
+     "Dosya yoksa `ls /var/log` ile adına bak; bazı sistemlerde yalnızca `sudo journalctl -n 50` vardır.",
+     "less'ten çıkamıyorsan `q` tuşuna bas."
+    ]
+   },
+   "v05": {
+    "title": "Canlı takip (tail -f)",
+    "text": "İki terminal aç. Birincide dosyayı izle; ikincide ona satır ekle. Çıktıda yeni satırı görürsen birinci terminalde `Ctrl+C` ile çık ve izleme çıktısını yapıştır.",
+    "blocks": [
+     {
+      "cmd": "# Terminal 1\ntouch ~/live.log\ntail -f ~/live.log"
+     },
+     {
+      "cmd": "# Terminal 2\necho \"new entry\" >> ~/live.log",
+      "expected": "new entry"
+     }
+    ],
+    "differs": [
+     "Terminal 1 boş kalır ve bekler; bu normaldir, satır eklenene kadar bir şey çıkmaz.",
+     "Tek terminalin varsa `tail -f` komutunu `Ctrl+Z` ile durdurma; ikinci bir sekme veya pencere aç."
+    ]
+   }
+  }
+ },
+ "quiz": {
+  "q1": {
+   "q": "5 GB'lık bir log dosyasını güvenle incelemek için hangi araç uygundur?",
+   "options": [
+    "cat: hepsini bir anda yazar",
+    "less: sayfa sayfa gösterir",
+    "mkdir: klasör oluşturur",
+    "rm: dosyayı siler"
+   ],
+   "explain": "less yalnızca ekrana sığanı gösterir ve içinde arama yaptırır; cat ise tüm dosyayı ekrana akıtır."
+  },
+  "q2": {
+   "q": "`tail -f` komutundaki `-f` ne yapar?",
+   "options": [
+    "Dosyayı zorla siler",
+    "Dosya adını gizler",
+    "Daha hızlı okur",
+    "Dosyayı izler ve yeni satırları canlı gösterir"
+   ],
+   "explain": "-f 'follow' demektir; çıkmak için Ctrl+C basılır."
+  },
+  "q3": {
+   "q": "Bir dosyadaki yalnızca satır sayısını hangi komut verir?",
+   "options": [
+    "wc -l notes.txt",
+    "wc -w notes.txt",
+    "head notes.txt",
+    "cat -n notes.txt"
+   ],
+   "explain": "wc -l satırları sayar; -w kelimeleri sayar."
+  },
+  "q4": {
+   "q": "`head -n 3 notes.txt` ne gösterir?",
+   "options": [
+    "Son 3 satırı",
+    "Dosyadaki 3 kelimeyi",
+    "İlk 3 satırı",
+    "Dosyanın 3. satırı hariç hepsini"
+   ],
+   "explain": "head başı gösterir; -n 3 ilk üç satırdır. Sonu için tail kullanılır."
+  }
+ },
+ "summary": [
+  "Küçük dosya için `cat`, büyük dosya için `less` (Boşluk, b, /arama, q).",
+  "`head -n` başı, `tail -n` sonu gösterir; `tail -f` canlı izler (Ctrl+C ile çık).",
+  "`wc -l`, `wc -w`, `wc` ile satır, kelime ve bayt sayarsın.",
+  "`|` ile araçları zincirler, `>` ile sonucu dosyaya yazarsın; `>` var olan dosyayı ezer.",
+  "Log yolu dağıtıma göre değişir: syslog veya messages."
+ ],
+ "glossary": [
+  {
+   "term": "log",
+   "meaning": "Bir programın veya sistemin olayları sırayla yazdığı dosya."
+  },
+  {
+   "term": "pager",
+   "meaning": "Metni sayfa sayfa gösteren program; less gibi."
+  },
+  {
+   "term": "boru (pipe)",
+   "meaning": "| işareti; bir komutun çıktısını sonrakinin girdisi yapar."
+  },
+  {
+   "term": "yönlendirme",
+   "meaning": "Çıktıyı ekran yerine dosyaya yazmak; > veya >>."
+  },
+  {
+   "term": "follow",
+   "meaning": "tail -f ile bir dosyanın sonunu canlı izlemek."
+  }
+ ]
+}

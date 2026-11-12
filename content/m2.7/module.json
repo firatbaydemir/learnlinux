@@ -1,0 +1,270 @@
+{
+ "id": "2.7",
+ "level": 2,
+ "setup": {
+  "dirs": [
+   "/home/student/Documents"
+  ],
+  "files": {
+   "/home/student/todo.txt": "buy milk\nwrite report\ncall bob\n",
+   "/home/student/app.conf": "port=8080\nmode=debug\n",
+   "/home/student/app.conf.bak": "port=80\nmode=prod\n",
+   "/home/student/.todo.txt.swp": "swap data\n",
+   "/home/student/server.log": "INFO start\nERROR disk full\nINFO retry\nERROR disk full\nINFO done\n"
+  }
+ },
+ "tasks": [
+  {
+   "id": "t01",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "contains": ["~/hello.txt", "hello editor"]
+   },
+   "solution": [
+    "echo \"hello editor\" > hello.txt"
+   ]
+  },
+  {
+   "id": "t02",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "cmd": "^cat hello\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "cat hello.txt"
+   ]
+  },
+  {
+   "id": "t03",
+   "kind": "warmup",
+   "diff": 1,
+   "check": {
+    "equals": ["~/todo.txt.bak", "buy milk\nwrite report\ncall bob\n"]
+   },
+   "solution": [
+    "cp todo.txt todo.txt.bak"
+   ]
+  },
+  {
+   "id": "t04",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "contains": ["~/todo.txt", "buy bread"]
+   },
+   "solution": [
+    "echo \"buy bread\" >> todo.txt"
+   ]
+  },
+  {
+   "id": "t05",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^cat -n todo\\.txt$",
+    "ok": true
+   },
+   "solution": [
+    "cat -n todo.txt"
+   ]
+  },
+  {
+   "id": "t06",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^grep -n report todo\\.txt$",
+    "ok": true,
+    "out": "2:write report"
+   },
+   "solution": [
+    "grep -n report todo.txt"
+   ]
+  },
+  {
+   "id": "t07",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "cmd": "^wc -l todo\\.txt$",
+    "ok": true,
+    "out": "\\b4\\b"
+   },
+   "solution": [
+    "wc -l todo.txt"
+   ]
+  },
+  {
+   "id": "t08",
+   "kind": "predict",
+   "diff": 2,
+   "check": {
+    "cmd": "^echo \\S+ > /etc/\\w+$",
+    "ok": false
+   },
+   "solution": [
+    "echo test > /etc/motd"
+   ]
+  },
+  {
+   "id": "t09",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "equals": ["~/app.conf", "port=80\nmode=prod\n"]
+   },
+   "solution": [
+    "cp app.conf.bak app.conf"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "absent": "~/.todo.txt.swp"
+   },
+   "solution": [
+    "rm .todo.txt.swp"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "contains": ["~/scripts/hello.sh", "#!/bin/bash"]
+    },
+    {
+     "contains": ["~/scripts/hello.sh", "echo hello"]
+    },
+    {
+     "mode": ["~/scripts/hello.sh", "755"]
+    }
+   ],
+   "solution": [
+    "mkdir scripts",
+    "printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh",
+    "chmod 755 scripts/hello.sh"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "seq": [
+      "^cp (\\./|~/)?notes\\.txt (\\./|~/)?notes\\.txt\\.bak$",
+      "meeting at 10.*>> (\\./|~/)?notes\\.txt$"
+     ],
+     "ok": true
+    },
+    {
+     "exists": "~/notes.txt.bak",
+     "type": "f"
+    },
+    {
+     "contains": ["~/notes.txt", "meeting at 10"]
+    }
+   ],
+   "solution": [
+    "cp notes.txt notes.txt.bak",
+    "echo \"meeting at 10\" >> notes.txt"
+   ]
+  },
+  {
+   "id": "t13",
+   "kind": "challenge",
+   "diff": 3,
+   "check": [
+    {
+     "contains": ["~/errors.txt", "ERROR disk full"]
+    },
+    {
+     "linesMin": ["~/errors.txt", 2]
+    },
+    {
+     "cmd": "^grep ERROR server\\.log",
+     "ok": true
+    }
+   ],
+   "solution": [
+    "grep ERROR server.log > errors.txt"
+   ]
+  },
+  {
+   "id": "t14",
+   "kind": "ticket",
+   "diff": 3,
+   "check": [
+    {
+     "contains": ["~/welcome.txt", "Welcome to linux-lab"]
+    },
+    {
+     "contains": ["~/Documents/welcome.txt", "Welcome to linux-lab"]
+    },
+    {
+     "mode": ["~/Documents/welcome.txt", "444"]
+    }
+   ],
+   "solution": [
+    "echo \"Welcome to linux-lab\" > welcome.txt",
+    "cp welcome.txt Documents/welcome.txt",
+    "chmod 444 Documents/welcome.txt"
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "answer": 1
+  },
+  {
+   "id": "q2",
+   "answer": 3
+  },
+  {
+   "id": "q3",
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "answer": 2
+  }
+ ],
+ "vm": [
+  {
+   "id": "v01",
+   "expect": "hello nano"
+  },
+  {
+   "id": "v02",
+   "expect": "(?=[\\s\\S]*line one)(?=[\\s\\S]*line two)"
+  },
+  {
+   "id": "v03",
+   "expect": "hello vim"
+  },
+  {
+   "id": "v04",
+   "expect": "keep"
+  },
+  {
+   "id": "v05",
+   "expect": "\\b19\\b"
+  },
+  {
+   "id": "v06",
+   "expect": "nano"
+  },
+  {
+   "id": "v07",
+   "expect": "hosts\\.bak"
+  }
+ ]
+}
