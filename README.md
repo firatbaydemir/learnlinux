@@ -85,9 +85,7 @@ Yeni modül ekleme ve içerik kuralları için [CONTRIBUTING.md](CONTRIBUTING.md
 
 Bu projenin kodu ve eğitim içeriği MIT lisansı altındadır. Ayrıntılar için [LICENSE](LICENSE) dosyasına bak.
 
-#####
 
-```markdown
 # Linux-Grundlagenakademie
 
 Ein unabhängiges, statisches Lernprojekt, um Linux-Grundlagen praktisch im Browser zu erlernen. Es benötigt weder eine serverseitige Anwendung noch eine Internetverbindung zur Laufzeit.
@@ -170,11 +168,8 @@ Nachdem du das Repository auf GitHub hochgeladen hast, wähle unter **Settings �
 ## Mitwirken
 
 Informationen zum Hinzufügen neuer Module und zu den Inhaltsregeln findest du in [CONTRIBUTING.md](CONTRIBUTING.md).
-```
 
-#######
 
-````markdown
 # Linux Fundamentals Academy
 
 An independent, static educational project for learning Linux fundamentals through hands-on practice in the browser. It requires no server-side application or internet connection at runtime.
