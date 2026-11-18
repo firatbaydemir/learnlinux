@@ -440,6 +440,46 @@
     "Yalnızca `cleanup` 0 döndürürse"
    ],
    "explain": "EXIT tuzağı normal çıkışta, hatada ve çoğu sinyalde çalışır; SIGKILL yakalanamaz."
+  },
+  "q5": {
+   "q": "`for f in *.log; do ...; done` döngüsü neyin üzerinde döner?",
+   "options": [
+    "Yalnızca ilk dosya",
+    "Eşleşen her dosya adı",
+    "Dosya içeriğindeki satırlar",
+    "Alt dizinlerdeki tüm dosyalar"
+   ],
+   "explain": "Glob eşleşen dosya adlarına genişler; değişkeni her zaman `\"$f\"` biçiminde tırnakla."
+  },
+  "q6": {
+   "q": "Fonksiyondan değer döndürmenin yaygın yolu hangisidir?",
+   "options": [
+    "`return \"metin\"`",
+    "`export` ile",
+    "`exit` ile fonksiyon biter",
+    "`echo` ile yazıp `$(...)` ile yakalamak"
+   ],
+   "explain": "`return` yalnızca 0–255 çıkış kodu verir; metin için `echo` ve komut ikamesi kullanılır."
+  },
+  "q7": {
+   "q": "Döngüde `\"$@\"` ile `$*` (tırnaksız) arasındaki fark nedir?",
+   "options": [
+    "`\"$@\"` her argümanı ayrı ve bozulmadan korur",
+    "Fark yoktur",
+    "`$*` boşlukları korur",
+    "`\"$@\"` yalnızca ilk argümanı verir"
+   ],
+   "explain": "`\"$@\"` boşluk içeren argümanları tek parça bırakır; tırnaksız `$*` kelimelere böler."
+  },
+  "q8": {
+   "q": "`while read -r line; do ...; done < dosya` içindeki `-r` ne sağlar?",
+   "options": [
+    "Satırları tersine çevirir",
+    "Dosyayı salt okunur açar",
+    "Ters eğik çizgileri yorumlamaz",
+    "Boş satırları atlar"
+   ],
+   "explain": "`-r` ters eğik çizgiyi kaçış olarak işlemez; satırlar olduğu gibi okunur."
   }
  },
  "summary": [
@@ -452,15 +492,45 @@
   "`bash -n`, `bash -x` ve `shellcheck` hataları çalıştırmadan veya adım adım gösterir."
  ],
  "glossary": [
-  {"term": "döngü (loop)", "meaning": "Bir komut bloğunu tekrar tekrar çalıştıran yapı: `for`, `while`."},
-  {"term": "kelime bölme (word splitting)", "meaning": "Tırnaksız değişkenin boşluklardan parçalanması."},
-  {"term": "IFS", "meaning": "Kabuğun kelimeleri ayırmakta kullandığı karakterler (alan ayırıcı)."},
-  {"term": "case", "meaning": "Bir değeri desenlerle karşılaştıran çok yollu dallanma."},
-  {"term": "local", "meaning": "Değişkeni fonksiyonla sınırlayan anahtar kelime."},
-  {"term": "dizi (array)", "meaning": "Birden çok değeri tek adda tutan Bash değişkeni."},
-  {"term": "trap", "meaning": "Bir sinyal veya çıkışta çalışacak komutu tanımlar."},
-  {"term": "mktemp", "meaning": "Benzersiz adlı geçici dosya veya dizin oluşturur."},
-  {"term": "shellcheck", "meaning": "Kabuk script'leri için statik analiz aracı."},
-  {"term": "bash -x", "meaning": "Her komutu çalıştırmadan önce açılımlarıyla yazan izleme kipi."}
+  {
+   "term": "döngü (loop)",
+   "meaning": "Bir komut bloğunu tekrar tekrar çalıştıran yapı: `for`, `while`."
+  },
+  {
+   "term": "kelime bölme (word splitting)",
+   "meaning": "Tırnaksız değişkenin boşluklardan parçalanması."
+  },
+  {
+   "term": "IFS",
+   "meaning": "Kabuğun kelimeleri ayırmakta kullandığı karakterler (alan ayırıcı)."
+  },
+  {
+   "term": "case",
+   "meaning": "Bir değeri desenlerle karşılaştıran çok yollu dallanma."
+  },
+  {
+   "term": "local",
+   "meaning": "Değişkeni fonksiyonla sınırlayan anahtar kelime."
+  },
+  {
+   "term": "dizi (array)",
+   "meaning": "Birden çok değeri tek adda tutan Bash değişkeni."
+  },
+  {
+   "term": "trap",
+   "meaning": "Bir sinyal veya çıkışta çalışacak komutu tanımlar."
+  },
+  {
+   "term": "mktemp",
+   "meaning": "Benzersiz adlı geçici dosya veya dizin oluşturur."
+  },
+  {
+   "term": "shellcheck",
+   "meaning": "Kabuk script'leri için statik analiz aracı."
+  },
+  {
+   "term": "bash -x",
+   "meaning": "Her komutu çalıştırmadan önce açılımlarıyla yazan izleme kipi."
+  }
  ]
 }

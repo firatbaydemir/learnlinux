@@ -149,6 +149,22 @@
    ],
    "commands": [
     {
+     "cmd": "lsattr",
+     "what": "Dosya özniteliklerini (ör. `i` değiştirilemez, `a` yalnızca ekleme) listeler.",
+     "where": "Root bile silemiyorsa izinlerden önce öznitelikleri kontrol etmek için.",
+     "why": "İzin bitleri (rwx) ile öznitelikler ayrı mekanizmalardır.",
+     "example": "lsattr file.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "chattr",
+     "what": "Dosya özniteliğini değiştirir; `+i` dosyayı değiştirilemez ve silinemez yapar.",
+     "where": "Kritik bir dosyayı kazara değişikliğe karşı korumak için (ext4/xfs).",
+     "why": "Geri almak için `sudo chattr -i dosya`.",
+     "example": "sudo chattr +i file.txt",
+     "nosim": true
+    },
+    {
      "cmd": "sudo mkdir /srv/project",
      "what": "Sistem altında paylaşılan klasörü root yetkisiyle oluşturur.",
      "where": "Takım için kalıcı çalışma alanı açarken.",
@@ -364,6 +380,46 @@
     "`find / -perm -4000 -type f 2>/dev/null`"
    ],
    "explain": "`-perm -4000` setuid biti açık olanları bulur; `2>/dev/null` yetki hatalarını gizler."
+  },
+  "q5": {
+   "q": "`chmod u+s` bir çalıştırılabilir dosyada ne sağlar?",
+   "options": [
+    "Dosyayı salt okunur yapar",
+    "Dosya, çalıştıran değil sahibi olarak çalışır",
+    "Dosyayı yalnızca grup çalıştırabilir",
+    "Dosyanın silinmesini engeller"
+   ],
+   "explain": "Setuid bit: süreç dosya sahibinin etkin UID'siyle çalışır; `passwd` buna örnektir."
+  },
+  "q6": {
+   "q": "`chmod 2775 dir` içindeki baştaki `2` neyi ayarlar?",
+   "options": [
+    "Sticky bit",
+    "Setuid",
+    "Setgid",
+    "Hiçbirini"
+   ],
+   "explain": "Baştaki rakam: 4 = setuid, 2 = setgid, 1 = sticky."
+  },
+  "q7": {
+   "q": "Sticky bit'li klasörde bir kullanıcı neyi silebilir?",
+   "options": [
+    "Herkesin dosyasını",
+    "Hiçbir dosyayı",
+    "Yalnızca klasörün grubunun dosyalarını",
+    "Yalnızca kendi dosyalarını (veya sahibi/root ise)"
+   ],
+   "explain": "Sticky bit, silme/yeniden adlandırmayı dosya sahibi, klasör sahibi ve root ile sınırlar."
+  },
+  "q8": {
+   "q": "`lsattr` çıktısındaki `i` özniteliği ne anlama gelir?",
+   "options": [
+    "Dosya değiştirilemez ve silinemez (immutable)",
+    "Dosya gizlidir",
+    "Dosya sıkıştırılmıştır",
+    "Dosya yalnızca eklenebilir"
+   ],
+   "explain": "`chattr +i` root dahi olsa değiştirme/silmeyi engeller; yalnızca ekleme için `a` kullanılır."
   }
  },
  "summary": [

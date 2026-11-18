@@ -147,6 +147,22 @@
   "t08": {
    "text": "TICKET #3001 — Laboratuvar VM raporu istiyor: makine adı, çekirdek sürümü ve kullanıcı adını (bu sırayla) `~/vm-report.txt` dosyasına satır satır yaz.",
    "hint": "İlk komutta `>`, sonraki ikisinde `>>`."
+  },
+  "t09": {
+   "text": "Adım adım: `whoami > ~/whoami.txt` mantığıyla kullanıcı adını `~/whoami.txt` dosyasına yaz.",
+   "hint": "`>` çıktıyı dosyaya yazar."
+  },
+  "t10": {
+   "text": "Kendi notun: `uname -r` neyi gösterir? Kısa notu (içinde `uname`) `~/kernel.txt` dosyasına yaz.",
+   "hint": "`echo '...' > ~/kernel.txt`"
+  },
+  "t11": {
+   "text": "Sık hata: VM'de değişiklik yapmadan önce ne unutulur? Notu (içinde `snapshot`) `~/vm-pitfalls.txt` dosyasına yaz.",
+   "hint": "Geri dönüş noktası = anlık görüntü (snapshot)."
+  },
+  "t12": {
+   "text": "Meydan okuma: NAT ile bridged ağ farkını bir cümleyle `~/net-note.txt` dosyasına yaz (`bridged` geçsin).",
+   "hint": "NAT: VM ana makinenin arkasında; bridged: VM LAN'dan kendi IP'sini alır."
   }
  },
  "vm": {
@@ -307,6 +323,46 @@
     "ARM64 ISO ile UTM"
    ],
    "explain": "Apple Silicon ARM'dır; UTM ARM64 konukları doğal çalıştırır."
+  },
+  "q5": {
+   "q": "İndirdiğin ISO'nun SHA-256 toplamını Linux'ta nasıl hesaplarsın?",
+   "options": [
+    "cat dosya.iso",
+    "sha256sum dosya.iso",
+    "ls -l dosya.iso",
+    "uname dosya.iso"
+   ],
+   "explain": "`sha256sum` özeti hesaplar; sonucu sitedeki değerle karşılaştır."
+  },
+  "q6": {
+   "q": "Hangi ağ modunda VM yerel ağdan kendi IP adresini alır ve diğer cihazlarla aynı ağda görünür?",
+   "options": [
+    "NAT",
+    "Host-only",
+    "Internal",
+    "Bridged"
+   ],
+   "explain": "Bridged, VM'i fiziksel ağa köprüler; NAT'ta VM ana makinenin arkasında gizlenir."
+  },
+  "q7": {
+   "q": "Ana bilgisayardan VM'e SSH ile bağlanmanın bir avantajı nedir?",
+   "options": [
+    "Tanıdık terminal, kopyala-yapıştır ve VM penceresi olmadan çalışma",
+    "İşlemciyi hızlandırır",
+    "ISO'yu gereksiz kılar",
+    "Snapshot almak için zorunludur"
+   ],
+   "explain": "SSH rahat bir terminal ve kolay kopyalama sağlar; hız veya snapshot ile ilgisi yoktur."
+  },
+  "q8": {
+   "q": "Snapshot'a geri döndüğünde, snapshot'tan sonra yaptığın değişikliklere ne olur?",
+   "options": [
+    "Korunur",
+    "Ana bilgisayara taşınır",
+    "Atılır",
+    "Şifrelenir"
+   ],
+   "explain": "Geri dönmek VM'i snapshot anındaki duruma getirir; sonraki değişiklikler kaybolur."
   }
  },
  "summary": [

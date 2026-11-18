@@ -131,6 +131,22 @@
    ],
    "commands": [
     {
+     "cmd": "lsof",
+     "what": "Listet offene Dateien und die zugehörigen Prozesse; `-i :80` zeigt, wer Port 80 nutzt.",
+     "where": "Um bei belegtem Port, nicht löschbarer Datei oder nicht aushängbarem Datenträger den Verursacher zu finden.",
+     "why": "Sockets und Geräte sind unter Linux auch Dateien, daher zeigt lsof auch Netzwerk.",
+     "example": "sudo lsof -i :80",
+     "nosim": true
+    },
+    {
+     "cmd": "fuser",
+     "what": "Zeigt PIDs der Prozesse, die eine Datei, ein Verzeichnis oder einen Port nutzen.",
+     "where": "Bei `umount`-Fehler „target is busy“: `fuser -vm /mnt/disk`.",
+     "why": "`fuser -k` beendet Prozesse; nicht ohne Prüfung des Ziels verwenden.",
+     "example": "fuser -v /var/log/syslog",
+     "nosim": true
+    },
+    {
      "cmd": "cat /proc/$$/status",
      "what": "Zeigt Name, Zustand, PID, PPID und UID deiner Shell.",
      "where": "Für Details, die ps nicht zeigt.",
@@ -396,6 +412,46 @@
     "ps -ef"
    ],
    "explain": "`ps -ef` (UNIX-Stil) zeigt PPID. `ps aux` (BSD-Stil) nicht; dafür nimm `ps -o pid,ppid,...`."
+  },
+  "q5": {
+   "q": "Was bedeutet `S` in der Spalte `STAT` von `ps aux`?",
+   "options": [
+    "Angehalten (stopped)",
+    "Unterbrechbarer Schlaf, wartet auf Ereignis",
+    "Zombie",
+    "Läuft"
+   ],
+   "explain": "`S` = interruptible sleep; `T` angehalten, `Z` Zombie, `R` läuft/lauffähig."
+  },
+  "q6": {
+   "q": "Wer wird neuer Elternprozess, wenn der Elternprozess endet?",
+   "options": [
+    "Keiner",
+    "Die Shell von root",
+    "Der Kernel",
+    "PID 1 (init/systemd)"
+   ],
+   "explain": "Verwaiste Prozesse übernimmt PID 1; er räumt sie per `wait` ab."
+  },
+  "q7": {
+   "q": "Wo findest du offene Dateien und Umgebung eines Prozesses unter `/proc`?",
+   "options": [
+    "`/proc/<PID>/`",
+    "`/var/run/<PID>`",
+    "`/sys/proc/<PID>`",
+    "`/etc/proc/<PID>`"
+   ],
+   "explain": "Pro Prozess gibt es `/proc/<PID>/`: `fd/`, `environ`, `status`, `cmdline`."
+  },
+  "q8": {
+   "q": "Was unterscheidet `ps -ef` von `ps aux`?",
+   "options": [
+    "`-ef` zeigt nur eigene Prozesse",
+    "`aux` zeigt keine PID",
+    "Verschiedene Syntax (POSIX / BSD), beide listen fast alle Prozesse",
+    "Beide liefern identische Ausgabe"
+   ],
+   "explain": "`-ef` ist POSIX, `aux` BSD-Stil; Spalten unterscheiden sich (`-ef` hat PPID, `aux` %CPU/%MEM)."
   }
  },
  "summary": [

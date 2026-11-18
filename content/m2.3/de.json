@@ -80,7 +80,39 @@
    "warn": "Lies vor ENTER noch einmal genau, welchen Ordner `rm -r` löscht. Im falschen Verzeichnis zerstört es dein ganzes Projekt.",
    "danger": "Tippe auf einem echten System niemals `rm -rf /` oder `rm -rf ~`. Das führt zu unwiderruflichem Datenverlust; nur der Simulator lehnt es hier ab."
   },
-  {"id": "safedelete", "title": "Sicher löschen: Checkliste", "body": ["Szenario: Du willst alte Logs in `~/practice/logs` aufräumen. Schritt 1 `ls logs` (was liegt dort?), Schritt 2 `rm -i logs/old.log` (jede Datei bestätigen), Schritt 3 `ls logs` (weg?). Erst danach kommt `rm -r` in Frage.", "`rm -i` fragt vor jeder Datei (`y` = ja). `rm -I` fragt nur einmal bei mehr als drei Dateien oder rekursivem Löschen: weniger Rückfragen, trotzdem ein Sicherheitsnetz."], "commands": [{"cmd": "rm -i", "what": "Fragt vor jedem Löschen nach.", "where": "Beim manuellen Löschen in einem wichtigen Ordner.", "why": "Ein Tippfehler kostet ein 'n', nicht deine Daten.", "example": "rm -i old.log"}, {"cmd": "rm -I", "what": "Fragt einmal vor dem Löschen von mehr als drei Dateien oder rekursiv.", "where": "Bei Massenlöschungen wie `rm -I *.tmp`.", "why": "Weniger Rückfragen als `-i`, aber eine letzte Warnung.", "example": "rm -I *.tmp"}, {"cmd": "rmdir -p", "what": "Entfernt einen leeren Ordner und seine leeren Elternordner.", "where": "Beim Aufräumen leerer verschachtelter Ordner.", "why": "Räumt eine leere Kette auf; stoppt beim ersten nicht leeren Ordner.", "example": "rmdir -p a/b/c"}], "tip": "Führe dasselbe Muster zuerst mit `ls` aus (`ls *.tmp`), ersetze dann `ls` durch `rm`: Du löschst genau das, was du gesehen hast.", "warn": "Platzhalter wie in `rm *` werden vor dem Befehl expandiert. Ein verirrtes Leerzeichen (`rm * .tmp`) löscht alles."}
+  {
+   "id": "safedelete",
+   "title": "Sicher löschen: Checkliste",
+   "body": [
+    "Szenario: Du willst alte Logs in `~/practice/logs` aufräumen. Schritt 1 `ls logs` (was liegt dort?), Schritt 2 `rm -i logs/old.log` (jede Datei bestätigen), Schritt 3 `ls logs` (weg?). Erst danach kommt `rm -r` in Frage.",
+    "`rm -i` fragt vor jeder Datei (`y` = ja). `rm -I` fragt nur einmal bei mehr als drei Dateien oder rekursivem Löschen: weniger Rückfragen, trotzdem ein Sicherheitsnetz."
+   ],
+   "commands": [
+    {
+     "cmd": "rm -i",
+     "what": "Fragt vor jedem Löschen nach.",
+     "where": "Beim manuellen Löschen in einem wichtigen Ordner.",
+     "why": "Ein Tippfehler kostet ein 'n', nicht deine Daten.",
+     "example": "rm -i old.log"
+    },
+    {
+     "cmd": "rm -I",
+     "what": "Fragt einmal vor dem Löschen von mehr als drei Dateien oder rekursiv.",
+     "where": "Bei Massenlöschungen wie `rm -I *.tmp`.",
+     "why": "Weniger Rückfragen als `-i`, aber eine letzte Warnung.",
+     "example": "rm -I *.tmp"
+    },
+    {
+     "cmd": "rmdir -p",
+     "what": "Entfernt einen leeren Ordner und seine leeren Elternordner.",
+     "where": "Beim Aufräumen leerer verschachtelter Ordner.",
+     "why": "Räumt eine leere Kette auf; stoppt beim ersten nicht leeren Ordner.",
+     "example": "rmdir -p a/b/c"
+    }
+   ],
+   "tip": "Führe dasselbe Muster zuerst mit `ls` aus (`ls *.tmp`), ersetze dann `ls` durch `rm`: Du löschst genau das, was du gesehen hast.",
+   "warn": "Platzhalter wie in `rm *` werden vor dem Befehl expandiert. Ein verirrtes Leerzeichen (`rm * .tmp`) löscht alles."
+  }
  ],
  "tasks": {
   "t01": {
@@ -188,6 +220,46 @@
     "touch"
    ],
    "explain": "`touch datei` erstellt eine leere Datei oder aktualisiert den Zeitstempel."
+  },
+  "q5": {
+   "q": "Was macht `touch datei`, wenn die Datei schon existiert?",
+   "options": [
+    "Gibt einen Fehler aus",
+    "Löscht den Inhalt",
+    "Aktualisiert nur den Zeitstempel, Inhalt bleibt",
+    "Benennt die Datei um"
+   ],
+   "explain": "`touch` legt eine leere Datei an, falls sie fehlt, sonst aktualisiert es nur die Änderungszeit; der Inhalt bleibt."
+  },
+  "q6": {
+   "q": "Wie viele Dateien erzeugt `touch bericht{1..3}.txt`?",
+   "options": [
+    "3 (bericht1.txt, bericht2.txt, bericht3.txt)",
+    "1 (bericht{1..3}.txt)",
+    "0, Fehler",
+    "2"
+   ],
+   "explain": "Die Shell führt die Brace-Expansion aus: `bericht1.txt bericht2.txt bericht3.txt`."
+  },
+  "q7": {
+   "q": "Womit löschst du ein Verzeichnis samt Inhalt?",
+   "options": [
+    "rmdir verzeichnis",
+    "rm verzeichnis",
+    "mkdir -d verzeichnis",
+    "rm -r verzeichnis"
+   ],
+   "explain": "`rmdir` löscht nur leere Verzeichnisse, `rm` allein keine Verzeichnisse; rekursiv mit `rm -r`. Vorsicht: kein Papierkorb."
+  },
+  "q8": {
+   "q": "Welche Gewohnheit ist vor `rm -rf` am sichersten?",
+   "options": [
+    "Sofort ausführen",
+    "Dasselbe Muster vorher mit `ls` auflisten und prüfen",
+    "Zuerst `sudo` voranstellen",
+    "Fehlermeldungen unterdrücken"
+   ],
+   "explain": "Prüfe Pfad/Wildcard vorher mit `ls`; `rm -rf` fragt nicht nach und ist nicht rückgängig zu machen."
   }
  },
  "summary": [

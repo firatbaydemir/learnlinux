@@ -141,6 +141,74 @@
     "uname -r >> ~/vm-report.txt",
     "whoami >> ~/vm-report.txt"
    ]
+  },
+  {
+   "id": "t09",
+   "kind": "guided",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/whoami.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/whoami.txt",
+      "student"
+     ]
+    }
+   ],
+   "solution": [
+    "whoami > ~/whoami.txt"
+   ]
+  },
+  {
+   "id": "t10",
+   "kind": "mini",
+   "diff": 2,
+   "check": [
+    {
+     "exists": "~/kernel.txt",
+     "type": "f"
+    },
+    {
+     "contains": [
+      "~/kernel.txt",
+      "uname"
+     ]
+    }
+   ],
+   "solution": [
+    "echo 'uname -r shows the kernel version' > ~/kernel.txt"
+   ]
+  },
+  {
+   "id": "t11",
+   "kind": "debug",
+   "diff": 2,
+   "check": {
+    "contains": [
+     "~/vm-pitfalls.txt",
+     "snapshot"
+    ]
+   },
+   "solution": [
+    "echo 'Mistake: changing the VM without a snapshot first' > ~/vm-pitfalls.txt"
+   ]
+  },
+  {
+   "id": "t12",
+   "kind": "challenge",
+   "diff": 3,
+   "check": {
+    "contains": [
+     "~/net-note.txt",
+     "bridged"
+    ]
+   },
+   "solution": [
+    "echo 'NAT: VM behind host; bridged: VM gets own LAN IP' > ~/net-note.txt"
+   ]
   }
  ],
  "vm": [
@@ -193,6 +261,22 @@
   {
    "id": "q4",
    "answer": 3
+  },
+  {
+   "id": "q5",
+   "answer": 1
+  },
+  {
+   "id": "q6",
+   "answer": 3
+  },
+  {
+   "id": "q7",
+   "answer": 0
+  },
+  {
+   "id": "q8",
+   "answer": 2
   }
  ]
 }

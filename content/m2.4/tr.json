@@ -115,7 +115,39 @@
    "danger": "Yanlış hedef yazmak (örneğin `mv notes.txt /etc/hosts`) önemli bir sistem dosyasını silebilir. Sistem klasörlerinde denemeden önce VM snapshot'ı al; yetki yoksa komut zaten hata verir.",
    "tip": "Kalıcı olarak güvenli olmak için `alias cp='cp -i'` ve `alias mv='mv -i'` tanımlayabilirsin (kabuk ayar dosyasına eklenir)."
   },
-  {"id": "preserve", "title": "Koruma ve güncelleme: -p, -u, rsync", "body": ["Senaryo: bir yedek klasörünü tazeliyorsun. Düz `cp` kopyaya yeni zaman damgası ve sahip verir; `cp -p` izin, sahip ve zamanı korur, böylece aslının ne zaman değiştiğini görebilirsin.", "`cp -u` ve `mv -u` yalnızca kaynak hedeften yeniyse veya hedef yoksa kopyalar/taşır. Sürekli eşitlediğin büyük klasörler için özel araç (`rsync`, bkz. modül 2.8) daha uygundur."], "commands": [{"cmd": "cp -p", "what": "Kopyalar; izin, sahip ve zaman damgalarını korur.", "where": "`notes.txt` yedeklenirken değişiklik zamanı korunmalıysa.", "why": "`-p` olmadan her kopya yepyeni görünür, geçmiş kaybolur.", "example": "cp -p notes.txt notes.bak"}, {"cmd": "cp -u", "what": "Yalnızca kaynak yeniyse veya hedef yoksa kopyalar.", "where": "`cp -u *.txt backup/` ile `~/backup` tazelenirken.", "why": "Değişmeyenleri atlar, daha yeni hedefi ezmez.", "example": "cp -u notes.txt backup/"}, {"cmd": "mv -u", "what": "Yalnızca kaynak yeniyse veya hedef yoksa taşır.", "where": "İki rapor klasörünü birleştirirken.", "why": "Yeni dosyanın eskisiyle değiştirilmesini önler.", "example": "mv -u report.txt archive/"}], "tip": "Bayrakları birleştir: `cp -pv a b` öznitelikleri korur ve yaptığını yazdırır.", "warn": "`-u` yalnızca zaman damgasına bakar, içeriğe değil. Saati yanlış bir dosya atlanabilir."}
+  {
+   "id": "preserve",
+   "title": "Koruma ve güncelleme: -p, -u, rsync",
+   "body": [
+    "Senaryo: bir yedek klasörünü tazeliyorsun. Düz `cp` kopyaya yeni zaman damgası ve sahip verir; `cp -p` izin, sahip ve zamanı korur, böylece aslının ne zaman değiştiğini görebilirsin.",
+    "`cp -u` ve `mv -u` yalnızca kaynak hedeften yeniyse veya hedef yoksa kopyalar/taşır. Sürekli eşitlediğin büyük klasörler için özel araç (`rsync`, bkz. modül 2.8) daha uygundur."
+   ],
+   "commands": [
+    {
+     "cmd": "cp -p",
+     "what": "Kopyalar; izin, sahip ve zaman damgalarını korur.",
+     "where": "`notes.txt` yedeklenirken değişiklik zamanı korunmalıysa.",
+     "why": "`-p` olmadan her kopya yepyeni görünür, geçmiş kaybolur.",
+     "example": "cp -p notes.txt notes.bak"
+    },
+    {
+     "cmd": "cp -u",
+     "what": "Yalnızca kaynak yeniyse veya hedef yoksa kopyalar.",
+     "where": "`cp -u *.txt backup/` ile `~/backup` tazelenirken.",
+     "why": "Değişmeyenleri atlar, daha yeni hedefi ezmez.",
+     "example": "cp -u notes.txt backup/"
+    },
+    {
+     "cmd": "mv -u",
+     "what": "Yalnızca kaynak yeniyse veya hedef yoksa taşır.",
+     "where": "İki rapor klasörünü birleştirirken.",
+     "why": "Yeni dosyanın eskisiyle değiştirilmesini önler.",
+     "example": "mv -u report.txt archive/"
+    }
+   ],
+   "tip": "Bayrakları birleştir: `cp -pv a b` öznitelikleri korur ve yaptığını yazdırır.",
+   "warn": "`-u` yalnızca zaman damgasına bakar, içeriğe değil. Saati yanlış bir dosya atlanabilir."
+  }
  ],
  "tasks": {
   "t01": {
@@ -297,6 +329,46 @@
     "cp -a"
    ],
    "explain": "`cp -a` (archive) özyinelemeli kopyalar ve izin, sahip ve zaman damgalarını korur."
+  },
+  "q5": {
+   "q": "Bir klasörü içeriğiyle kopyalamak için hangi seçenek gerekir?",
+   "options": [
+    "-i",
+    "-r",
+    "-n",
+    "-v"
+   ],
+   "explain": "`cp -r` klasörleri özyinelemeli kopyalar; `-i` sorar, `-n` üzerine yazmaz, `-v` ayrıntı gösterir."
+  },
+  "q6": {
+   "q": "`mv a.txt b.txt` b.txt zaten varsa ve seçenek yoksa ne olur?",
+   "options": [
+    "Hata verir",
+    "Önce sorar",
+    "b.txt sessizce üzerine yazılır",
+    "İki dosya birleştirilir"
+   ],
+   "explain": "`mv` ve `cp` varsayılan olarak sormadan üzerine yazar; korunmak için `-i` veya `-n` kullan."
+  },
+  "q7": {
+   "q": "Hedefi mevcut dosyayı ASLA ezmeyen seçenek hangisidir?",
+   "options": [
+    "-v",
+    "-r",
+    "-a",
+    "-n"
+   ],
+   "explain": "`-n` (no-clobber) var olan dosyanın üzerine yazmaz; `-i` ise her seferinde sorar."
+  },
+  "q8": {
+   "q": "`mv rapor.txt /tmp/` ne yapar?",
+   "options": [
+    "Dosyayı /tmp içine taşır; eski yerinde kalmaz",
+    "Dosyayı /tmp'ye kopyalar",
+    "Dosyayı /tmp olarak yeniden adlandırır",
+    "Hata verir"
+   ],
+   "explain": "Hedef var olan bir dizinse `mv` dosyayı içine taşır; kaynak artık eski yerde değildir."
   }
  },
  "summary": [

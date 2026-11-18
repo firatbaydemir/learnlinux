@@ -16,10 +16,37 @@
     "Kennst du die Partition, suchst du mit `du`, **welcher Ordner** den Platz belegt. `du -sh folder` liefert die Summe; `du -h --max-depth=1 folder | sort -h` listet Unterordner von klein nach groÃŸ. Manchmal ist Platz frei, aber Dateien lassen sich nicht anlegen: die Inodes sind aufgebraucht, prÃ¼fe mit `df -i`."
    ],
    "commands": [
-    {"cmd": "df -h", "what": "Zeigt GrÃ¶ÃŸe und Belegung der Partitionen in lesbaren Einheiten.", "where": "Erster Befehl bei Langsamkeit oder 'Disk full'-Fehlern.", "why": "Zeigt auf einen Blick, welcher EinhÃ¤ngepunkt betroffen ist.", "example": "df -h"},
-    {"cmd": "du -sh", "what": "Zeigt die GesamtgrÃ¶ÃŸe eines Ordners.", "where": "Nachdem df die volle Partition gezeigt hat.", "why": "Grenzt den verursachenden Ordner ein.", "example": "du -sh /var/log", "nosim": true},
-    {"cmd": "du --max-depth=1", "what": "Listet OrdnergrÃ¶ÃŸen eine Ebene tiefer; mit sort -h sortieren.", "where": "Bei der Suche nach dem grÃ¶ÃŸten Ordner.", "why": "Du gehst gezielt vor, ohne den ganzen Baum zu durchlaufen.", "example": "du -h --max-depth=1 /var | sort -h", "nosim": true},
-    {"cmd": "df -i", "what": "Zeigt die Belegung der Inodes (Dateianzahl).", "where": "Platz ist frei, aber Dateien lassen sich nicht anlegen.", "why": "Millionen winziger Dateien kÃ¶nnen Inodes erschÃ¶pfen.", "example": "df -i", "nosim": true}
+    {
+     "cmd": "df -h",
+     "what": "Zeigt GrÃ¶ÃŸe und Belegung der Partitionen in lesbaren Einheiten.",
+     "where": "Erster Befehl bei Langsamkeit oder 'Disk full'-Fehlern.",
+     "why": "Zeigt auf einen Blick, welcher EinhÃ¤ngepunkt betroffen ist.",
+     "example": "df -h"
+    },
+    {
+     "cmd": "du -sh",
+     "what": "Zeigt die GesamtgrÃ¶ÃŸe eines Ordners.",
+     "where": "Nachdem df die volle Partition gezeigt hat.",
+     "why": "Grenzt den verursachenden Ordner ein.",
+     "example": "du -sh /var/log",
+     "nosim": true
+    },
+    {
+     "cmd": "du --max-depth=1",
+     "what": "Listet OrdnergrÃ¶ÃŸen eine Ebene tiefer; mit sort -h sortieren.",
+     "where": "Bei der Suche nach dem grÃ¶ÃŸten Ordner.",
+     "why": "Du gehst gezielt vor, ohne den ganzen Baum zu durchlaufen.",
+     "example": "du -h --max-depth=1 /var | sort -h",
+     "nosim": true
+    },
+    {
+     "cmd": "df -i",
+     "what": "Zeigt die Belegung der Inodes (Dateianzahl).",
+     "where": "Platz ist frei, aber Dateien lassen sich nicht anlegen.",
+     "why": "Millionen winziger Dateien kÃ¶nnen Inodes erschÃ¶pfen.",
+     "example": "df -i",
+     "nosim": true
+    }
    ],
    "tip": "`df` findet die Partition, `du` den Ordner. Erst df, dann du.",
    "warn": "PrÃ¼fe mit `ls -l`, was eine Datei ist, bevor du sie lÃ¶schst. Bei einer Logdatei eines laufenden Dienstes ist Leeren (`: > file`) oft besser als LÃ¶schen; im Zweifel frage deinen Administrator."
@@ -32,10 +59,22 @@
     "`uptime` zeigt die Laufzeit und die **Load Average** (1, 5, 15 Minuten). Liegt die Last dauerhaft Ã¼ber der Anzahl deiner CPU-Kerne, staut sich Arbeit."
    ],
    "commands": [
-    {"cmd": "free -h", "what": "Zeigt RAM- und Swap-Nutzung in lesbaren Einheiten.", "where": "Bei Verdacht auf Speichermangel.", "why": "available nennt den wirklich freien Speicher.", "example": "free -h"},
-    {"cmd": "uptime", "what": "Zeigt Laufzeit, Benutzeranzahl und Load Average.", "where": "Schnellcheck bei einem langsamen Server.", "why": "Die Load Average zeigt einen Trend, keine Momentaufnahme.", "example": "uptime"}
+    {
+     "cmd": "free -h",
+     "what": "Zeigt RAM- und Swap-Nutzung in lesbaren Einheiten.",
+     "where": "Bei Verdacht auf Speichermangel.",
+     "why": "available nennt den wirklich freien Speicher.",
+     "example": "free -h"
+    },
+    {
+     "cmd": "uptime",
+     "what": "Zeigt Laufzeit, Benutzeranzahl und Load Average.",
+     "where": "Schnellcheck bei einem langsamen Server.",
+     "why": "Die Load Average zeigt einen Trend, keine Momentaufnahme.",
+     "example": "uptime"
+    }
    ],
-      "tip": "FÃ¼r einen Bericht nutze `df -h > report.txt`, zum AnhÃ¤ngen `>>`. (`>` und `>>` im Detail in Modul 3.2.)"
+   "tip": "FÃ¼r einen Bericht nutze `df -h > report.txt`, zum AnhÃ¤ngen `>>`. (`>` und `>>` im Detail in Modul 3.2.)"
   },
   {
    "id": "net",
@@ -45,29 +84,99 @@
     "Geht ping zur IP, aber nicht zum Namen, liegt es an **DNS** (`/etc/resolv.conf`). Geht gar nichts, prÃ¼fe Kabel, VM-Netzwerkeinstellung oder Gateway. `ss -tuln` zeigt, auf welchen Ports die Maschine lauscht (z. B. 22 fÃ¼r SSH)."
    ],
    "commands": [
-    {"cmd": "ip -br a", "what": "Listet Schnittstellen, Status und IP-Adressen kurz auf.", "where": "Erster Schritt bei Netzwerkproblemen.", "why": "Ohne IP lohnt sich ein Blick auf hÃ¶here Schichten nicht.", "example": "ip -br a", "nosim": true},
-    {"cmd": "ip route", "what": "Zeigt die Routingtabelle und das Standard-Gateway.", "where": "Wenn du nach auÃŸen nicht ankommst.", "why": "Ohne default-via-Zeile kann Verkehr nicht hinaus.", "example": "ip route", "nosim": true},
-    {"cmd": "ping -c 3", "what": "Sendet 3 Testpakete an ein Ziel; meldet Verlust und Latenz.", "where": "Beim Testen von Verbindung und DNS.", "why": "Ohne -c lÃ¤uft ping endlos.", "example": "ping -c 3 1.1.1.1", "nosim": true},
-    {"cmd": "ss -tuln", "what": "Listet lauschende TCP/UDP-Ports numerisch.", "where": "Um zu sehen, ob ein Dienst auf seinem Port lauscht.", "why": "PrÃ¼ft die Serverseite bei 'Ich komme nicht drauf'.", "example": "ss -tuln", "nosim": true}
+    {
+     "cmd": "ip -br a",
+     "what": "Listet Schnittstellen, Status und IP-Adressen kurz auf.",
+     "where": "Erster Schritt bei Netzwerkproblemen.",
+     "why": "Ohne IP lohnt sich ein Blick auf hÃ¶here Schichten nicht.",
+     "example": "ip -br a",
+     "nosim": true
+    },
+    {
+     "cmd": "ip route",
+     "what": "Zeigt die Routingtabelle und das Standard-Gateway.",
+     "where": "Wenn du nach auÃŸen nicht ankommst.",
+     "why": "Ohne default-via-Zeile kann Verkehr nicht hinaus.",
+     "example": "ip route",
+     "nosim": true
+    },
+    {
+     "cmd": "ping -c 3",
+     "what": "Sendet 3 Testpakete an ein Ziel; meldet Verlust und Latenz.",
+     "where": "Beim Testen von Verbindung und DNS.",
+     "why": "Ohne -c lÃ¤uft ping endlos.",
+     "example": "ping -c 3 1.1.1.1",
+     "nosim": true
+    },
+    {
+     "cmd": "ss -tuln",
+     "what": "Listet lauschende TCP/UDP-Ports numerisch.",
+     "where": "Um zu sehen, ob ein Dienst auf seinem Port lauscht.",
+     "why": "PrÃ¼ft die Serverseite bei 'Ich komme nicht drauf'.",
+     "example": "ss -tuln",
+     "nosim": true
+    }
    ],
    "danger": "Auf einem Remote-Server trennen Befehle wie `ip link set eth0 down` deine SSH-Verbindung, und du sperrst dich aus. Stelle sicher, dass du Konsolenzugang hast, bevor du Netzwerkeinstellungen Ã¤nderst."
   }
  ],
  "tasks": {
-  "t01": {"text": "Sieh dir die Belegung der Partitionen mit `df -h` an.", "hint": "-h gibt lesbare Einheiten (G, M)."},
-  "t02": {"text": "Zeige den Speicherstatus mit `free -h`.", "hint": "Achte auf die Spalte available."},
-  "t03": {"text": "Zeige die Load Average mit `uptime`.", "hint": "Drei Zahlen: 1, 5, 15 Minuten."},
-  "t04": {"text": "Lies den Beispielbericht `~/reports/df_sample.txt` mit `cat` und finde die Spalte Use%.", "hint": "`cat ~/reports/df_sample.txt`"},
-  "t05": {"text": "Speichere die Ausgabe von `df -h` mit `>` in `~/disk_report.txt`.", "hint": "`df -h > ~/disk_report.txt`. Ein einzelnes `>` Ã¼berschreibt die Datei. (Details zu `>` in Modul 3.2.)"},
-  "t06": {"text": "HÃ¤nge die Ausgabe von `free -h` an dieselbe Datei an (`>>`).", "hint": "`>>` hÃ¤ngt an, `>` Ã¼berschreibt; falls Ã¼berschrieben, wiederhole t05. (Details in Modul 3.2.)"},
-  "t07": {"text": "HÃ¤nge auch die Ausgabe von `uptime` an `~/disk_report.txt` an.", "hint": "Wieder `>>` verwenden."},
-  "t08": {"text": "Vorhersage: Welcher EinhÃ¤ngepunkt gehÃ¶rt zur Zeile mit 95% in `~/reports/df_sample.txt`? PrÃ¼fe dann mit `grep 95% ~/reports/df_sample.txt`.", "hint": "Die Spalte Mounted on am Zeilenende. (`grep` im Detail in Modul 3.4.)"},
-  "t09": {"text": "Vorhersage: Was sagt `~/reports/ping_sample.txt` Ã¼ber das Netzwerk? Sieh die Verlustrate mit `grep loss ~/reports/ping_sample.txt`.", "hint": "100% packet loss heiÃŸt, das Ziel wurde nie erreicht. (`grep` im Detail in Modul 3.4.)"},
-  "t10": {"text": "Vorhersage: Welche IP hat die Schnittstelle eth0 in `~/reports/ip_sample.txt`? PrÃ¼fe mit `grep eth0 ~/reports/ip_sample.txt`.", "hint": "Das /24 ist die Netzmaske, nicht Teil der IP. (`grep` im Detail in Modul 3.4.)"},
-  "t11": {"text": "Die Platte fÃ¼llt sich. Sieh mit `ls -l ~/logs` nach; das alte Debug-Log `old_debug.log` ist unnÃ¶tig, lÃ¶sche es, aber fasse `app.log` nicht an.", "hint": "`rm ~/logs/old_debug.log`. PrÃ¼fe den genauen Namen vor dem LÃ¶schen mit ls."},
-  "t12": {"text": "Mini-Projekt: Erstelle den Bericht `~/health.txt`. Er soll der Reihe nach die Ãœberschrift `== disk ==`, die Ausgabe von `df -h`, die Ãœberschrift `== memory ==` und die Ausgabe von `free -h` enthalten.", "hint": "Erste Zeile `echo \"== disk ==\" > ~/health.txt`, der Rest mit `>>`. (`>` / `>>` im Detail in Modul 3.2.)"},
-  "t13": {"text": "Challenge: Schreibe aus `~/reports/df_sample.txt` nur die 95%-Zeile nach `~/alert.txt` und die Anzahl solcher Zeilen nach `~/alert_count.txt`.", "hint": "`grep` filtert die Zeile, `grep -c` zÃ¤hlt; beides mit `>` umleiten. (`grep` â†’ Modul 3.4, `>` â†’ 3.2.)"},
-  "t14": {"text": "Ticket: \"Die Anwendung meldet 'No space left on device'.\" Finde den vollen EinhÃ¤ngepunkt in `~/reports/df_sample.txt` und schreibe seinen Namen in `~/full_mount.txt`. LÃ¶sche auÃŸerdem die unnÃ¶tige `~/logs/core.dump`.", "hint": "Die volle ist die 95%-Zeile. Der EinhÃ¤ngepunkt ist `/var`: `echo /var > ~/full_mount.txt`. (`>` im Detail in Modul 3.2.)"}
+  "t01": {
+   "text": "Sieh dir die Belegung der Partitionen mit `df -h` an.",
+   "hint": "-h gibt lesbare Einheiten (G, M)."
+  },
+  "t02": {
+   "text": "Zeige den Speicherstatus mit `free -h`.",
+   "hint": "Achte auf die Spalte available."
+  },
+  "t03": {
+   "text": "Zeige die Load Average mit `uptime`.",
+   "hint": "Drei Zahlen: 1, 5, 15 Minuten."
+  },
+  "t04": {
+   "text": "Lies den Beispielbericht `~/reports/df_sample.txt` mit `cat` und finde die Spalte Use%.",
+   "hint": "`cat ~/reports/df_sample.txt`"
+  },
+  "t05": {
+   "text": "Speichere die Ausgabe von `df -h` mit `>` in `~/disk_report.txt`.",
+   "hint": "`df -h > ~/disk_report.txt`. Ein einzelnes `>` Ã¼berschreibt die Datei. (Details zu `>` in Modul 3.2.)"
+  },
+  "t06": {
+   "text": "HÃ¤nge die Ausgabe von `free -h` an dieselbe Datei an (`>>`).",
+   "hint": "`>>` hÃ¤ngt an, `>` Ã¼berschreibt; falls Ã¼berschrieben, wiederhole t05. (Details in Modul 3.2.)"
+  },
+  "t07": {
+   "text": "HÃ¤nge auch die Ausgabe von `uptime` an `~/disk_report.txt` an.",
+   "hint": "Wieder `>>` verwenden."
+  },
+  "t08": {
+   "text": "Vorhersage: Welcher EinhÃ¤ngepunkt gehÃ¶rt zur Zeile mit 95% in `~/reports/df_sample.txt`? PrÃ¼fe dann mit `grep 95% ~/reports/df_sample.txt`.",
+   "hint": "Die Spalte Mounted on am Zeilenende. (`grep` im Detail in Modul 3.4.)"
+  },
+  "t09": {
+   "text": "Vorhersage: Was sagt `~/reports/ping_sample.txt` Ã¼ber das Netzwerk? Sieh die Verlustrate mit `grep loss ~/reports/ping_sample.txt`.",
+   "hint": "100% packet loss heiÃŸt, das Ziel wurde nie erreicht. (`grep` im Detail in Modul 3.4.)"
+  },
+  "t10": {
+   "text": "Vorhersage: Welche IP hat die Schnittstelle eth0 in `~/reports/ip_sample.txt`? PrÃ¼fe mit `grep eth0 ~/reports/ip_sample.txt`.",
+   "hint": "Das /24 ist die Netzmaske, nicht Teil der IP. (`grep` im Detail in Modul 3.4.)"
+  },
+  "t11": {
+   "text": "Die Platte fÃ¼llt sich. Sieh mit `ls -l ~/logs` nach; das alte Debug-Log `old_debug.log` ist unnÃ¶tig, lÃ¶sche es, aber fasse `app.log` nicht an.",
+   "hint": "`rm ~/logs/old_debug.log`. PrÃ¼fe den genauen Namen vor dem LÃ¶schen mit ls."
+  },
+  "t12": {
+   "text": "Mini-Projekt: Erstelle den Bericht `~/health.txt`. Er soll der Reihe nach die Ãœberschrift `== disk ==`, die Ausgabe von `df -h`, die Ãœberschrift `== memory ==` und die Ausgabe von `free -h` enthalten.",
+   "hint": "Erste Zeile `echo \"== disk ==\" > ~/health.txt`, der Rest mit `>>`. (`>` / `>>` im Detail in Modul 3.2.)"
+  },
+  "t13": {
+   "text": "Challenge: Schreibe aus `~/reports/df_sample.txt` nur die 95%-Zeile nach `~/alert.txt` und die Anzahl solcher Zeilen nach `~/alert_count.txt`.",
+   "hint": "`grep` filtert die Zeile, `grep -c` zÃ¤hlt; beides mit `>` umleiten. (`grep` â†’ Modul 3.4, `>` â†’ 3.2.)"
+  },
+  "t14": {
+   "text": "Ticket: \"Die Anwendung meldet 'No space left on device'.\" Finde den vollen EinhÃ¤ngepunkt in `~/reports/df_sample.txt` und schreibe seinen Namen in `~/full_mount.txt`. LÃ¶sche auÃŸerdem die unnÃ¶tige `~/logs/core.dump`.",
+   "hint": "Die volle ist die 95%-Zeile. Der EinhÃ¤ngepunkt ist `/var`: `echo /var > ~/full_mount.txt`. (`>` im Detail in Modul 3.2.)"
+  }
  },
  "vm": {
   "intro": "Die Befehle hier lesen nur Informationen und sind auf deiner VM sicher. FÃ¼ge die Ausgabe ein, wir prÃ¼fen sie automatisch.",
@@ -75,40 +184,157 @@
    "v01": {
     "title": "Plattenbelegung",
     "text": "FÃ¼hre `df -h` aus und fÃ¼ge die Ausgabe ein. Notiere den FÃ¼llstand der Root-Partition (`/`).",
-    "blocks": [{"cmd": "df -h\ndf -i /", "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        19G  4.1G   14G  23% /"}],
-    "differs": ["Die Partition kann `/dev/vda1`, `/dev/mapper/...` oder `/dev/nvme0n1p2` heiÃŸen; wichtig ist die Spalte Use%.", "Viele `tmpfs`/`loop`-Zeilen sind normal (Ubuntu snap); konzentriere dich auf die `/`-Zeile."]
+    "blocks": [
+     {
+      "cmd": "df -h\ndf -i /",
+      "expected": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        19G  4.1G   14G  23% /"
+     }
+    ],
+    "differs": [
+     "Die Partition kann `/dev/vda1`, `/dev/mapper/...` oder `/dev/nvme0n1p2` heiÃŸen; wichtig ist die Spalte Use%.",
+     "Viele `tmpfs`/`loop`-Zeilen sind normal (Ubuntu snap); konzentriere dich auf die `/`-Zeile."
+    ]
    },
    "v02": {
     "title": "Platzsuche",
     "text": "Sortiere die GrÃ¶ÃŸen deines Home-Verzeichnisses und der Ordner unter /var. FÃ¼ge die grÃ¶ÃŸten 5 Zeilen ein.",
-    "blocks": [{"cmd": "du -sh ~\nsudo du -xh /var --max-depth=1 2>/dev/null | sort -h | tail -5", "expected": "120M\t/var/cache\n1.1G\t/var/lib\n1.4G\t/var"}],
-    "differs": ["Fehlt `sort -h` (sehr altes System), nutze `sort -n` und `du -k`.", "Fragt sudo nach einem Passwort, gib das Passwort deines VM-Benutzers ein; es wird beim Tippen nicht angezeigt."]
+    "blocks": [
+     {
+      "cmd": "du -sh ~\nsudo du -xh /var --max-depth=1 2>/dev/null | sort -h | tail -5",
+      "expected": "120M\t/var/cache\n1.1G\t/var/lib\n1.4G\t/var"
+     }
+    ],
+    "differs": [
+     "Fehlt `sort -h` (sehr altes System), nutze `sort -n` und `du -k`.",
+     "Fragt sudo nach einem Passwort, gib das Passwort deines VM-Benutzers ein; es wird beim Tippen nicht angezeigt."
+    ]
    },
    "v03": {
     "title": "IP und Routing",
     "text": "Zeige deine Schnittstellen und das Standard-Gateway; fÃ¼ge die Ausgabe ein.",
-    "blocks": [{"cmd": "ip -br a\nip route", "expected": "lo      UNKNOWN  127.0.0.1/8\nenp0s3  UP       10.0.2.15/24\ndefault via 10.0.2.2 dev enp0s3"}],
-    "differs": ["Der Schnittstellenname kann `eth0`, `enp0s3` oder `ens160` sein.", "Bei VirtualBox-NAT ist die IP meist 10.0.2.15; bei Bridged kommt sie aus dem Bereich deines Routers.", "Gibt es gar keine IP, prÃ¼fe, ob die Netzwerkkarte der VM verbunden und auf NAT/Bridged gestellt ist."]
+    "blocks": [
+     {
+      "cmd": "ip -br a\nip route",
+      "expected": "lo      UNKNOWN  127.0.0.1/8\nenp0s3  UP       10.0.2.15/24\ndefault via 10.0.2.2 dev enp0s3"
+     }
+    ],
+    "differs": [
+     "Der Schnittstellenname kann `eth0`, `enp0s3` oder `ens160` sein.",
+     "Bei VirtualBox-NAT ist die IP meist 10.0.2.15; bei Bridged kommt sie aus dem Bereich deines Routers.",
+     "Gibt es gar keine IP, prÃ¼fe, ob die Netzwerkkarte der VM verbunden und auf NAT/Bridged gestellt ist."
+    ]
    },
    "v04": {
     "title": "Verbindungs- und DNS-Test",
     "text": "Pinge erst eine IP, dann einen Namen. FÃ¼ge beide Ausgaben ein.",
-    "blocks": [{"cmd": "ping -c 3 1.1.1.1\nping -c 3 example.com", "expected": "3 packets transmitted, 3 received, 0% packet loss"}],
-    "differs": ["Geht die IP, aber der Name nicht, ist es ein DNS-Problem; sieh in `cat /etc/resolv.conf`.", "Manche Netze blockieren ICMP; schlÃ¤gt ping fehl, das Web funktioniert aber, liegt das Problem an ping selbst."]
+    "blocks": [
+     {
+      "cmd": "ping -c 3 1.1.1.1\nping -c 3 example.com",
+      "expected": "3 packets transmitted, 3 received, 0% packet loss"
+     }
+    ],
+    "differs": [
+     "Geht die IP, aber der Name nicht, ist es ein DNS-Problem; sieh in `cat /etc/resolv.conf`.",
+     "Manche Netze blockieren ICMP; schlÃ¤gt ping fehl, das Web funktioniert aber, liegt das Problem an ping selbst."
+    ]
    },
    "v05": {
     "title": "Lauschende Ports",
     "text": "Liste die Ports auf, auf denen deine Maschine lauscht, und fÃ¼ge die Ausgabe ein.",
-    "blocks": [{"cmd": "ss -tuln", "expected": "tcp   LISTEN  0  128  0.0.0.0:22  0.0.0.0:*"}],
-    "differs": ["Ist SSH nicht installiert, erscheint 22 nicht; fÃ¼r dieses Modul ist das in Ordnung.", "Fehlt `ss`, versuche auf alten Systemen `netstat -tuln`."]
+    "blocks": [
+     {
+      "cmd": "ss -tuln",
+      "expected": "tcp   LISTEN  0  128  0.0.0.0:22  0.0.0.0:*"
+     }
+    ],
+    "differs": [
+     "Ist SSH nicht installiert, erscheint 22 nicht; fÃ¼r dieses Modul ist das in Ordnung.",
+     "Fehlt `ss`, versuche auf alten Systemen `netstat -tuln`."
+    ]
    }
   }
  },
  "quiz": {
-  "q1": {"q": "Mit welchem Befehl siehst du, welche Partition voll ist?", "options": ["du -sh", "df -h", "free -h", "uptime"], "explain": "`df` zeigt die Partitionsbelegung, `du` OrdnergrÃ¶ÃŸen."},
-  "q2": {"q": "`/var` ist zu 95 % voll. Wie findest du den grÃ¶ÃŸten Unterordner?", "options": ["ping -c 3 /var", "df -i", "du -h --max-depth=1 /var | sort -h", "ip route"], "explain": "du liefert UnterordnergrÃ¶ÃŸen, sort -h ordnet sie von klein nach groÃŸ."},
-  "q3": {"q": "`ping 1.1.1.1` funktioniert, `ping example.com` nicht. Wahrscheinlichstes Problem?", "options": ["DNS (NamensauflÃ¶sung)", "Kabel abgezogen", "Platte voll", "Zu wenig RAM"], "explain": "Die IP ist erreichbar, Namen werden nicht aufgelÃ¶st: prÃ¼fe die DNS-Einstellung."},
-  "q4": {"q": "Welcher Befehl zeigt, auf welchen Ports die Maschine lauscht?", "options": ["ip -br a", "ping -c 3", "df -h", "ss -tuln"], "explain": "`ss -tuln` listet lauschende TCP/UDP-Ports numerisch auf."}
+  "q1": {
+   "q": "Mit welchem Befehl siehst du, welche Partition voll ist?",
+   "options": [
+    "du -sh",
+    "df -h",
+    "free -h",
+    "uptime"
+   ],
+   "explain": "`df` zeigt die Partitionsbelegung, `du` OrdnergrÃ¶ÃŸen."
+  },
+  "q2": {
+   "q": "`/var` ist zu 95 % voll. Wie findest du den grÃ¶ÃŸten Unterordner?",
+   "options": [
+    "ping -c 3 /var",
+    "df -i",
+    "du -h --max-depth=1 /var | sort -h",
+    "ip route"
+   ],
+   "explain": "du liefert UnterordnergrÃ¶ÃŸen, sort -h ordnet sie von klein nach groÃŸ."
+  },
+  "q3": {
+   "q": "`ping 1.1.1.1` funktioniert, `ping example.com` nicht. Wahrscheinlichstes Problem?",
+   "options": [
+    "DNS (NamensauflÃ¶sung)",
+    "Kabel abgezogen",
+    "Platte voll",
+    "Zu wenig RAM"
+   ],
+   "explain": "Die IP ist erreichbar, Namen werden nicht aufgelÃ¶st: prÃ¼fe die DNS-Einstellung."
+  },
+  "q4": {
+   "q": "Welcher Befehl zeigt, auf welchen Ports die Maschine lauscht?",
+   "options": [
+    "ip -br a",
+    "ping -c 3",
+    "df -h",
+    "ss -tuln"
+   ],
+   "explain": "`ss -tuln` listet lauschende TCP/UDP-Ports numerisch auf."
+  },
+  "q5": {
+   "q": "Welcher Befehl zeigt die Speichernutzung in lesbaren Einheiten?",
+   "options": [
+    "df -h",
+    "free -h",
+    "du -h",
+    "uptime"
+   ],
+   "explain": "`free -h` fasst RAM und Swap zusammen; `df` Datenträger, `du` Verzeichnisgröße, `uptime` die Last."
+  },
+  "q6": {
+   "q": "Was zeigen die drei Zahlen in der `uptime`-Ausgabe (z. B. 0.15, 0.10, 0.05)?",
+   "options": [
+    "Plattenbelegung",
+    "Speichernutzung",
+    "Netzwerklatenz",
+    "Lastdurchschnitt der letzten 1, 5 und 15 Minuten"
+   ],
+   "explain": "Die drei Werte sind die durchschnittliche Systemlast der letzten 1, 5 und 15 Minuten; Vergleich mit der CPU-Kernzahl."
+  },
+  "q7": {
+   "q": "Womit prüft man schnell, ob ein Ziel im Netz erreichbar ist?",
+   "options": [
+    "ping",
+    "df",
+    "free",
+    "uname"
+   ],
+   "explain": "`ping` sendet ICMP-Echo-Anfragen; kommt Antwort, ist das Ziel erreichbar. Manche Netze blockieren ICMP."
+  },
+  "q8": {
+   "q": "Was bedeutet `Use%` 100 in der `df -h`-Ausgabe?",
+   "options": [
+    "Nichts, ist normal",
+    "Der Arbeitsspeicher ist voll",
+    "Auf dieses Dateisystem kann nicht mehr geschrieben werden",
+    "Das Netz fällt aus"
+   ],
+   "explain": "In ein volles Dateisystem lässt sich nichts mehr schreiben; Dienste und Logs können fehlschlagen. Mit `du` den Platzfresser finden."
+  }
  },
  "summary": [
   "`df -h` beantwortet, welche Partition, `du -sh` / `du --max-depth=1`, welcher Ordner voll ist.",
@@ -117,9 +343,21 @@
   "Mach Ausgaben mit `>` und `>>` zum Bericht; prÃ¼fe vor dem LÃ¶schen mit `ls -l`."
  ],
  "glossary": [
-  {"term": "Inode", "meaning": "Eintrag mit Informationen Ã¼ber eine Datei; ihre Anzahl ist begrenzt."},
-  {"term": "Load Average", "meaning": "Durchschnittliche Zahl lauffÃ¤higer Prozesse Ã¼ber 1, 5 und 15 Minuten."},
-  {"term": "Gateway", "meaning": "Ausgang aus dem lokalen Netz nach auÃŸen (meist der Router)."},
-  {"term": "DNS", "meaning": "System, das Namen in IP-Adressen Ã¼bersetzt."}
+  {
+   "term": "Inode",
+   "meaning": "Eintrag mit Informationen Ã¼ber eine Datei; ihre Anzahl ist begrenzt."
+  },
+  {
+   "term": "Load Average",
+   "meaning": "Durchschnittliche Zahl lauffÃ¤higer Prozesse Ã¼ber 1, 5 und 15 Minuten."
+  },
+  {
+   "term": "Gateway",
+   "meaning": "Ausgang aus dem lokalen Netz nach auÃŸen (meist der Router)."
+  },
+  {
+   "term": "DNS",
+   "meaning": "System, das Namen in IP-Adressen Ã¼bersetzt."
+  }
  ]
 }

@@ -14,7 +14,8 @@
     "**Terminal**, bilgisayara metinle komut verdiğin penceredir. İçinde çalışan program **kabuk** (shell) olarak adlandırılır; en yaygını `bash`'tir. Kabuk, yazdığın satırı okur, çalıştırır ve sonucu ekrana yazar.",
     "Her satırın başındaki **prompt** sana üç şeyi söyler: kim olduğunu, hangi makinede çalıştığını ve hangi dizinde olduğunu. Örnek: `student@linux-lab:~$` — kullanıcı `student`, makine `linux-lab`, `~` ev dizini demektir. Sondaki `$` normal kullanıcıyı, `#` ise yönetici (root) kullanıcıyı gösterir."
    ],
-   "tip": "Bir komutu yazıp Enter'a basana kadar hiçbir şey çalışmaz. Hata yaparsan Backspace ile düzeltebilirsin."
+   "tip": "Bir komutu yazıp Enter'a basana kadar hiçbir şey çalışmaz. Hata yaparsan Backspace ile düzeltebilirsin.",
+   "warn": "Sık hata: Prompttaki `$` işaretini komutla birlikte yazmak. `$` yalnızca bir göstergedir; örneklerde yalnızca ondan sonrasını yaz. Komutlar büyük/küçük harfe duyarlıdır: `LS` ≠ `ls`."
   },
   {
    "id": "first",
@@ -90,7 +91,7 @@
      "example": "history"
     }
    ],
-      "tip": "Tab'a iki kez basarsan olası tamamlamaların listesi çıkar. Örnek: `whoa` yazıp Tab'a bas."
+   "tip": "Tab'a iki kez basarsan olası tamamlamaların listesi çıkar. Örnek: `whoa` yazıp Tab'a bas."
   },
   {
    "id": "preview",
@@ -216,6 +217,46 @@
     "Alt"
    ],
    "explain": "Tab tamamlar; iki kez basarsan seçenekleri listeler."
+  },
+  "q5": {
+   "q": "`whoami` ne yazar?",
+   "options": [
+    "Makine adını",
+    "Geçerli kullanıcı adını",
+    "Çalışma dizinini",
+    "Çekirdek sürümünü"
+   ],
+   "explain": "`whoami` etkin kullanıcıyı gösterir; makine adı için `hostname`, dizin için `pwd`."
+  },
+  "q6": {
+   "q": "`man` sayfasından hangi tuşla çıkarsın?",
+   "options": [
+    "Esc",
+    "Enter",
+    "Ctrl+D",
+    "q"
+   ],
+   "explain": "`man` bir sayfalayıcı kullanır; `q` çıkar, `/kelime` arar."
+  },
+  "q7": {
+   "q": "Terminalde ↑ (yukarı ok) tuşuna basınca ne olur?",
+   "options": [
+    "Önceki komut satıra gelir",
+    "Ekran temizlenir",
+    "Üst dizine çıkılır",
+    "Oturum kapanır"
+   ],
+   "explain": "Ok tuşları komut geçmişinde gezinir; `history` tüm listeyi gösterir."
+  },
+  "q8": {
+   "q": "`history` komutu ne yapar?",
+   "options": [
+    "Ekranı temizler",
+    "Disk kullanımını gösterir",
+    "Daha önce yazdığın komutları listeler",
+    "Kullanıcıları listeler"
+   ],
+   "explain": "`history` numaralı komut geçmişini gösterir; `!N` ile N. komutu yeniden çalıştırabilirsin."
   }
  },
  "summary": [

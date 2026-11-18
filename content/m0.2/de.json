@@ -147,6 +147,22 @@
   "t08": {
    "text": "TICKET #3001 — Das Labor braucht einen VM-Bericht: Schreibe Rechnername, Kernel-Version und Benutzername (in dieser Reihenfolge) zeilenweise in `~/vm-report.txt`.",
    "hint": "Erster Befehl mit `>`, die nächsten zwei mit `>>`."
+  },
+  "t09": {
+   "text": "Schritt für Schritt: Schreibe den Benutzernamen nach dem Muster `whoami > ~/whoami.txt` in `~/whoami.txt`.",
+   "hint": "`>` schreibt die Ausgabe in eine Datei."
+  },
+  "t10": {
+   "text": "Eigene Notiz: Was zeigt `uname -r`? Schreibe eine kurze Notiz (mit `uname`) in `~/kernel.txt`.",
+   "hint": "`echo '...' > ~/kernel.txt`"
+  },
+  "t11": {
+   "text": "Häufiger Fehler: Was wird vor Änderungen an der VM vergessen? Schreibe die Notiz (mit `snapshot`) in `~/vm-pitfalls.txt`.",
+   "hint": "Rückkehrpunkt = Snapshot."
+  },
+  "t12": {
+   "text": "Herausforderung: Beschreibe den Unterschied zwischen NAT und Bridged in einem Satz in `~/net-note.txt` (mit `bridged`).",
+   "hint": "NAT: VM hinter dem Host; Bridged: VM erhält eine eigene IP im LAN."
   }
  },
  "vm": {
@@ -307,6 +323,46 @@
     "UTM mit ARM64-ISO"
    ],
    "explain": "Apple Silicon ist ARM; UTM führt ARM64-Gäste nativ aus."
+  },
+  "q5": {
+   "q": "Wie berechnest du unter Linux die SHA-256-Summe einer heruntergeladenen ISO?",
+   "options": [
+    "cat datei.iso",
+    "sha256sum datei.iso",
+    "ls -l datei.iso",
+    "uname datei.iso"
+   ],
+   "explain": "`sha256sum` berechnet die Prüfsumme; vergleiche sie mit dem Wert der Webseite."
+  },
+  "q6": {
+   "q": "In welchem Netzwerkmodus erhält die VM eine eigene IP im lokalen Netz und ist wie andere Geräte sichtbar?",
+   "options": [
+    "NAT",
+    "Host-only",
+    "Internal",
+    "Bridged"
+   ],
+   "explain": "Bridged verbindet die VM mit dem physischen Netz; bei NAT liegt sie hinter dem Host."
+  },
+  "q7": {
+   "q": "Was ist ein Vorteil, sich vom Host per SSH mit der VM zu verbinden?",
+   "options": [
+    "Gewohntes Terminal, Copy & Paste und Arbeiten ohne VM-Fenster",
+    "Beschleunigt die CPU",
+    "Macht die ISO überflüssig",
+    "Ist für Snapshots Pflicht"
+   ],
+   "explain": "SSH bietet ein komfortables Terminal und einfaches Kopieren; mit Tempo oder Snapshots hat es nichts zu tun."
+  },
+  "q8": {
+   "q": "Was passiert beim Zurücksetzen auf einen Snapshot mit Änderungen, die danach gemacht wurden?",
+   "options": [
+    "Sie bleiben erhalten",
+    "Sie wandern auf den Host",
+    "Sie werden verworfen",
+    "Sie werden verschlüsselt"
+   ],
+   "explain": "Die Wiederherstellung bringt die VM in den Zustand des Snapshots; spätere Änderungen gehen verloren."
   }
  },
  "summary": [

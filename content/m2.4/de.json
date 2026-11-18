@@ -115,7 +115,39 @@
    "danger": "Ein falsches Ziel (zum Beispiel `mv notes.txt /etc/hosts`) kann eine wichtige Systemdatei zerstören. Mache vor Experimenten in der Nähe von Systemordnern einen VM-Snapshot; ohne Rechte schlägt der Befehl einfach fehl.",
    "tip": "Für dauerhaften Schutz kannst du `alias cp='cp -i'` und `alias mv='mv -i'` definieren (in die Shell-Konfigurationsdatei eintragen)."
   },
-  {"id": "preserve", "title": "Erhalten und aktualisieren: -p, -u, rsync", "body": ["Szenario: Du aktualisierst einen Backup-Ordner. Ein einfaches `cp` gibt der Kopie neuen Zeitstempel und Besitzer; `cp -p` behält Rechte, Besitzer und Zeit, so siehst du weiterhin, wann das Original geändert wurde.", "`cp -u` und `mv -u` kopieren bzw. verschieben nur, wenn die Quelle neuer ist oder das Ziel fehlt. Für große Ordner, die du wiederholt abgleichst, passt ein Spezialwerkzeug (`rsync`, siehe Modul 2.8) besser."], "commands": [{"cmd": "cp -p", "what": "Kopiert und behält Rechte, Besitzer und Zeitstempel.", "where": "Beim Sichern von `notes.txt`, wenn die Änderungszeit erhalten bleiben soll.", "why": "Ohne `-p` wirkt jede Kopie brandneu, die Historie geht verloren.", "example": "cp -p notes.txt notes.bak"}, {"cmd": "cp -u", "what": "Kopiert nur, wenn die Quelle neuer ist oder das Ziel fehlt.", "where": "Beim Auffrischen von `~/backup` mit `cp -u *.txt backup/`.", "why": "Überspringt Unverändertes und überschreibt kein neueres Ziel.", "example": "cp -u notes.txt backup/"}, {"cmd": "mv -u", "what": "Verschiebt nur, wenn die Quelle neuer ist oder das Ziel fehlt.", "where": "Beim Zusammenführen zweier Berichtsordner.", "why": "Verhindert, dass eine neuere Datei durch eine ältere ersetzt wird.", "example": "mv -u report.txt archive/"}], "tip": "Optionen kombinieren: `cp -pv a b` erhält Attribute und zeigt an, was passiert.", "warn": "`-u` vergleicht nur Zeitstempel, nicht den Inhalt. Eine Datei mit falscher Uhrzeit kann übersprungen werden."}
+  {
+   "id": "preserve",
+   "title": "Erhalten und aktualisieren: -p, -u, rsync",
+   "body": [
+    "Szenario: Du aktualisierst einen Backup-Ordner. Ein einfaches `cp` gibt der Kopie neuen Zeitstempel und Besitzer; `cp -p` behält Rechte, Besitzer und Zeit, so siehst du weiterhin, wann das Original geändert wurde.",
+    "`cp -u` und `mv -u` kopieren bzw. verschieben nur, wenn die Quelle neuer ist oder das Ziel fehlt. Für große Ordner, die du wiederholt abgleichst, passt ein Spezialwerkzeug (`rsync`, siehe Modul 2.8) besser."
+   ],
+   "commands": [
+    {
+     "cmd": "cp -p",
+     "what": "Kopiert und behält Rechte, Besitzer und Zeitstempel.",
+     "where": "Beim Sichern von `notes.txt`, wenn die Änderungszeit erhalten bleiben soll.",
+     "why": "Ohne `-p` wirkt jede Kopie brandneu, die Historie geht verloren.",
+     "example": "cp -p notes.txt notes.bak"
+    },
+    {
+     "cmd": "cp -u",
+     "what": "Kopiert nur, wenn die Quelle neuer ist oder das Ziel fehlt.",
+     "where": "Beim Auffrischen von `~/backup` mit `cp -u *.txt backup/`.",
+     "why": "Überspringt Unverändertes und überschreibt kein neueres Ziel.",
+     "example": "cp -u notes.txt backup/"
+    },
+    {
+     "cmd": "mv -u",
+     "what": "Verschiebt nur, wenn die Quelle neuer ist oder das Ziel fehlt.",
+     "where": "Beim Zusammenführen zweier Berichtsordner.",
+     "why": "Verhindert, dass eine neuere Datei durch eine ältere ersetzt wird.",
+     "example": "mv -u report.txt archive/"
+    }
+   ],
+   "tip": "Optionen kombinieren: `cp -pv a b` erhält Attribute und zeigt an, was passiert.",
+   "warn": "`-u` vergleicht nur Zeitstempel, nicht den Inhalt. Eine Datei mit falscher Uhrzeit kann übersprungen werden."
+  }
  ],
  "tasks": {
   "t01": {
@@ -297,6 +329,46 @@
     "cp -a"
    ],
    "explain": "`cp -a` (archive) kopiert rekursiv und bewahrt Rechte, Besitzer und Zeitstempel."
+  },
+  "q5": {
+   "q": "Welche Option ist nötig, um ein Verzeichnis samt Inhalt zu kopieren?",
+   "options": [
+    "-i",
+    "-r",
+    "-n",
+    "-v"
+   ],
+   "explain": "`cp -r` kopiert Verzeichnisse rekursiv; `-i` fragt nach, `-n` überschreibt nie, `-v` zeigt Details."
+  },
+  "q6": {
+   "q": "Was passiert bei `mv a.txt b.txt`, wenn b.txt existiert und keine Option gesetzt ist?",
+   "options": [
+    "Fehlermeldung",
+    "Rückfrage",
+    "b.txt wird stillschweigend überschrieben",
+    "Beide Dateien werden zusammengeführt"
+   ],
+   "explain": "`mv` und `cp` überschreiben standardmäßig ohne Nachfrage; Schutz mit `-i` oder `-n`."
+  },
+  "q7": {
+   "q": "Welche Option überschreibt eine vorhandene Zieldatei NIE?",
+   "options": [
+    "-v",
+    "-r",
+    "-a",
+    "-n"
+   ],
+   "explain": "`-n` (no-clobber) überschreibt nie; `-i` fragt jedes Mal nach."
+  },
+  "q8": {
+   "q": "Was bewirkt `mv bericht.txt /tmp/`?",
+   "options": [
+    "Verschiebt die Datei nach /tmp; am alten Ort ist sie weg",
+    "Kopiert die Datei nach /tmp",
+    "Benennt die Datei in /tmp um",
+    "Gibt einen Fehler aus"
+   ],
+   "explain": "Ist das Ziel ein vorhandenes Verzeichnis, verschiebt `mv` die Datei hinein; die Quelle existiert danach nicht mehr."
   }
  },
  "summary": [

@@ -149,6 +149,22 @@
    ],
    "commands": [
     {
+     "cmd": "lsattr",
+     "what": "Listet Dateiattribute (z. B. `i` unveränderlich, `a` nur anhängen).",
+     "where": "Wenn selbst root nicht löschen kann: erst Attribute prüfen.",
+     "why": "Rechtebits (rwx) und Attribute sind getrennte Mechanismen.",
+     "example": "lsattr file.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "chattr",
+     "what": "Ändert Dateiattribute; `+i` macht eine Datei unveränderlich und nicht löschbar.",
+     "where": "Um kritische Dateien vor versehentlichen Änderungen zu schützen (ext4/xfs).",
+     "why": "Rückgängig mit `sudo chattr -i datei`.",
+     "example": "sudo chattr +i file.txt",
+     "nosim": true
+    },
+    {
      "cmd": "sudo mkdir /srv/project",
      "what": "Legt den gemeinsamen Ordner unter `/srv` mit root-Rechten an.",
      "where": "Beim Einrichten eines dauerhaften Teamarbeitsplatzes.",
@@ -364,6 +380,46 @@
     "`find / -perm -4000 -type f 2>/dev/null`"
    ],
    "explain": "`-perm -4000` findet Dateien mit gesetztem setuid-Bit; `2>/dev/null` blendet Rechtefehler aus."
+  },
+  "q5": {
+   "q": "Was bewirkt `chmod u+s` bei einer ausführbaren Datei?",
+   "options": [
+    "Macht sie schreibgeschützt",
+    "Sie läuft mit den Rechten des Besitzers statt des Aufrufers",
+    "Nur die Gruppe darf sie ausführen",
+    "Verhindert das Löschen"
+   ],
+   "explain": "Setuid-Bit: der Prozess läuft mit der effektiven UID des Besitzers; Beispiel `passwd`."
+  },
+  "q6": {
+   "q": "Was setzt die führende `2` in `chmod 2775 dir`?",
+   "options": [
+    "Sticky-Bit",
+    "Setuid",
+    "Setgid",
+    "Nichts davon"
+   ],
+   "explain": "Die führende Ziffer: 4 = setuid, 2 = setgid, 1 = sticky."
+  },
+  "q7": {
+   "q": "Was darf ein Benutzer in einem Verzeichnis mit Sticky-Bit löschen?",
+   "options": [
+    "Dateien aller Benutzer",
+    "Keine Datei",
+    "Nur Dateien der Verzeichnisgruppe",
+    "Nur eigene Dateien (oder als Verzeichnisbesitzer/root)"
+   ],
+   "explain": "Das Sticky-Bit beschränkt Löschen/Umbenennen auf Dateibesitzer, Verzeichnisbesitzer und root."
+  },
+  "q8": {
+   "q": "Was bedeutet das Attribut `i` in der `lsattr`-Ausgabe?",
+   "options": [
+    "Datei ist unveränderlich und nicht löschbar (immutable)",
+    "Datei ist versteckt",
+    "Datei ist komprimiert",
+    "An die Datei darf nur angehängt werden"
+   ],
+   "explain": "`chattr +i` verhindert Ändern/Löschen selbst für root; zum reinen Anhängen dient `a`."
   }
  },
  "summary": [

@@ -336,6 +336,46 @@
     "Alles außer der 3. Zeile"
    ],
    "explain": "head zeigt den Anfang; -n 3 sind die ersten drei Zeilen. Für das Ende nimmt man tail."
+  },
+  "q5": {
+   "q": "Womit gibst du eine kleine Datei komplett auf einmal aus?",
+   "options": [
+    "cat",
+    "less",
+    "tail -f",
+    "wc -l"
+   ],
+   "explain": "`cat` gibt die ganze Datei aus; bei großen Dateien ist ein Pager wie `less` sicherer."
+  },
+  "q6": {
+   "q": "Mit welcher Taste verlässt man `less`?",
+   "options": [
+    "x",
+    "Ctrl+X",
+    "Esc",
+    "q"
+   ],
+   "explain": "`q` beendet less. Suchen mit `/wort`, nächster Treffer mit `n`."
+  },
+  "q7": {
+   "q": "Welcher Befehl zeigt die letzten 20 Zeilen einer Logdatei?",
+   "options": [
+    "head -n 20 log",
+    "cat -20 log",
+    "tail -n 20 log",
+    "wc -n 20 log"
+   ],
+   "explain": "`tail -n N` zeigt die letzten N Zeilen, `head -n N` die ersten N."
+  },
+  "q8": {
+   "q": "Was liefert `grep -c ERROR app.log`?",
+   "options": [
+    "Die Zeilen mit ERROR selbst",
+    "Die Anzahl der Zeilen mit ERROR",
+    "Die Gesamtzahl der Zeilen",
+    "Die Position des Wortes ERROR"
+   ],
+   "explain": "`-c` gibt die Anzahl passender Zeilen aus; die Zeilen selbst sieht man mit `grep` ohne `-c`."
   }
  },
  "summary": [

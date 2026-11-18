@@ -336,6 +336,46 @@
     "Everything except line 3"
    ],
    "explain": "head shows the start; -n 3 means the first three lines. For the end use tail."
+  },
+  "q5": {
+   "q": "Which is suited to dump a small file to the screen in one go?",
+   "options": [
+    "cat",
+    "less",
+    "tail -f",
+    "wc -l"
+   ],
+   "explain": "`cat` prints the whole file; for large files a pager like `less` is safer."
+  },
+  "q6": {
+   "q": "Which key quits `less`?",
+   "options": [
+    "x",
+    "Ctrl+X",
+    "Esc",
+    "q"
+   ],
+   "explain": "`q` quits less. Search with `/word`, next match with `n`."
+  },
+  "q7": {
+   "q": "Which command shows the last 20 lines of a log file?",
+   "options": [
+    "head -n 20 log",
+    "cat -20 log",
+    "tail -n 20 log",
+    "wc -n 20 log"
+   ],
+   "explain": "`tail -n N` shows the last N lines, `head -n N` the first N."
+  },
+  "q8": {
+   "q": "What does `grep -c ERROR app.log` output?",
+   "options": [
+    "The ERROR lines themselves",
+    "The number of lines containing ERROR",
+    "The total number of lines",
+    "The position of the word ERROR"
+   ],
+   "explain": "`-c` prints the count of matching lines; to see the lines use `grep` without `-c`."
   }
  },
  "summary": [

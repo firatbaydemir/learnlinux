@@ -436,6 +436,46 @@
     "The script runs normally"
    ],
    "explain": "Without the x bit the kernel refuses to start the file: Permission denied. Fix it with `chmod +x run.sh`."
+  },
+  "q5": {
+   "q": "What happens with `name = \"Ali\"` instead of `name=\"Ali\"`?",
+   "options": [
+    "Same result",
+    "The variable stays empty",
+    "Bash tries to run a command called `name`",
+    "It aborts with a syntax error"
+   ],
+   "explain": "No spaces are allowed around `=` in assignments; otherwise `name` is treated as a command."
+  },
+  "q6": {
+   "q": "What does `$?` contain?",
+   "options": [
+    "The script's PID",
+    "The exit code of the last command",
+    "The number of arguments",
+    "All arguments"
+   ],
+   "explain": "`0` means success, non-zero means failure; `$$` is the PID, `$#` the argument count."
+  },
+  "q7": {
+   "q": "Which condition checks that a file exists?",
+   "options": [
+    "`if [ -d file ]`",
+    "`if [ -z file ]`",
+    "`if [ file ]`",
+    "`if [ -e file ]`"
+   ],
+   "explain": "`-e` tests existence, `-f` a regular file, `-d` a directory; `-z` tests an empty string."
+  },
+  "q8": {
+   "q": "What is `#!/bin/bash` on the first line for?",
+   "options": [
+    "It names the interpreter that runs the script",
+    "It is a comment with no effect",
+    "It grants execute permission",
+    "It backs up the script"
+   ],
+   "explain": "The shebang tells the kernel the interpreter; execute permission still needs `chmod +x`."
   }
  },
  "summary": [

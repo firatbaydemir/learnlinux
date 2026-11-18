@@ -408,6 +408,46 @@
     "Die Regel gilt sofort, geht aber bei Reload oder Neustart verloren"
    ],
    "explain": "Standard ist die Runtime-Konfiguration: sofort wirksam, nicht dauerhaft. Für dauerhaft brauchst du `--permanent` und `--reload`."
+  },
+  "q5": {
+   "q": "Was zeigt `ip -br a`?",
+   "options": [
+    "Nur die Routing-Tabelle",
+    "Schnittstellen und Adressen als Kurztabelle",
+    "Offene Ports",
+    "DNS-Server"
+   ],
+   "explain": "`-br` (brief) fasst Schnittstellenstatus und IP-Adressen einzeilig zusammen."
+  },
+  "q6": {
+   "q": "Was fügt `-p` in `ss -tulpn` hinzu?",
+   "options": [
+    "Den Protokollnamen",
+    "Die Portnummer",
+    "Paketzähler",
+    "Den lauschenden Prozess (PID/Name)"
+   ],
+   "explain": "`-p` zeigt den Prozess hinter dem Socket; für fremde Prozesse ist root nötig."
+  },
+  "q7": {
+   "q": "Was passiert, wenn ein Dienst `127.0.0.1:80` statt `0.0.0.0:80` bindet?",
+   "options": [
+    "Nur lokal erreichbar",
+    "Für alle erreichbar",
+    "Dienst startet nicht",
+    "Nur IPv6 funktioniert"
+   ],
+   "explain": "`127.0.0.1` ist Loopback; Verbindungen von außen werden nicht angenommen."
+  },
+  "q8": {
+   "q": "Was bedeutet `default via 10.0.0.1 dev eth0` in `ip route`?",
+   "options": [
+    "eth0 ist down",
+    "10.0.0.1 ist die lokale Adresse",
+    "Unbekannte Ziele gehen über Gateway 10.0.0.1",
+    "10.0.0.1 ist der DNS-Server"
+   ],
+   "explain": "Die `default`-Zeile gilt, wenn keine andere Route passt."
   }
  },
  "summary": [

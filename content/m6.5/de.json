@@ -436,6 +436,46 @@
     "Das Skript läuft normal"
    ],
    "explain": "Ohne x-Bit startet der Kernel die Datei nicht: Permission denied. Mit `chmod +x run.sh` behebst du das."
+  },
+  "q5": {
+   "q": "Was passiert bei `name = \"Ali\"` statt `name=\"Ali\"`?",
+   "options": [
+    "Gleiches Ergebnis",
+    "Variable bleibt leer",
+    "Bash versucht, ein Kommando `name` auszuführen",
+    "Abbruch mit Syntaxfehler"
+   ],
+   "explain": "Bei Zuweisungen darf um `=` kein Leerzeichen stehen; sonst ist `name` ein Befehl."
+  },
+  "q6": {
+   "q": "Was enthält `$?`?",
+   "options": [
+    "Die PID des Skripts",
+    "Den Exit-Code des letzten Befehls",
+    "Die Anzahl der Argumente",
+    "Alle Argumente"
+   ],
+   "explain": "`0` heißt Erfolg, alles andere Fehler; `$$` ist die PID, `$#` die Argumentzahl."
+  },
+  "q7": {
+   "q": "Welche Bedingung prüft, ob eine Datei existiert?",
+   "options": [
+    "`if [ -d datei ]`",
+    "`if [ -z datei ]`",
+    "`if [ datei ]`",
+    "`if [ -e datei ]`"
+   ],
+   "explain": "`-e` prüft Existenz, `-f` reguläre Datei, `-d` Verzeichnis; `-z` testet leere Strings."
+  },
+  "q8": {
+   "q": "Wozu dient `#!/bin/bash` in der ersten Zeile?",
+   "options": [
+    "Legt den Interpreter des Skripts fest",
+    "Ist nur ein Kommentar ohne Wirkung",
+    "Erteilt das Ausführungsrecht",
+    "Sichert das Skript"
+   ],
+   "explain": "Der Shebang nennt dem Kernel den Interpreter; das Ausführungsrecht braucht weiterhin `chmod +x`."
   }
  },
  "summary": [

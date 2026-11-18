@@ -336,6 +336,46 @@
     "Dosyanın 3. satırı hariç hepsini"
    ],
    "explain": "head başı gösterir; -n 3 ilk üç satırdır. Sonu için tail kullanılır."
+  },
+  "q5": {
+   "q": "Küçük bir dosyayı tek seferde tamamen ekrana basmak için hangisi uygundur?",
+   "options": [
+    "cat",
+    "less",
+    "tail -f",
+    "wc -l"
+   ],
+   "explain": "`cat` dosyanın tamamını yazar; büyük dosyada `less` gibi sayfalayıcı daha güvenlidir."
+  },
+  "q6": {
+   "q": "`less` içinde çıkmak için hangi tuşa basılır?",
+   "options": [
+    "x",
+    "Ctrl+X",
+    "Esc",
+    "q"
+   ],
+   "explain": "`q` less'ten çıkar. Arama için `/kelime`, sonraki eşleşme için `n` kullanılır."
+  },
+  "q7": {
+   "q": "Bir log dosyasının son 20 satırını hangi komut gösterir?",
+   "options": [
+    "head -n 20 log",
+    "cat -20 log",
+    "tail -n 20 log",
+    "wc -n 20 log"
+   ],
+   "explain": "`tail -n N` son N satırı, `head -n N` ilk N satırı gösterir."
+  },
+  "q8": {
+   "q": "`grep -c ERROR app.log` ne verir?",
+   "options": [
+    "ERROR içeren satırların kendisini",
+    "ERROR içeren satırların sayısını",
+    "Dosyadaki toplam satırı",
+    "ERROR kelimesinin konumunu"
+   ],
+   "explain": "`-c` eşleşen satırların sayısını yazar; satırları görmek için `-c`'siz `grep` kullan."
   }
  },
  "summary": [

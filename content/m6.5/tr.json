@@ -436,6 +436,46 @@
     "Script normal çalışır"
    ],
    "explain": "x biti yoksa çekirdek dosyayı başlatmaz: Permission denied. `chmod +x run.sh` ile düzeltilir."
+  },
+  "q5": {
+   "q": "Betikte `name=\"Ali\"` yerine `name = \"Ali\"` yazılırsa ne olur?",
+   "options": [
+    "Aynı sonucu verir",
+    "Değişken boş kalır",
+    "Bash `name` adlı komutu çalıştırmaya çalışır",
+    "Sözdizimi hatası ile kapanır"
+   ],
+   "explain": "Atamada `=` çevresinde boşluk olamaz; aksi halde `name` komut sayılır."
+  },
+  "q6": {
+   "q": "`$?` neyi içerir?",
+   "options": [
+    "Betiğin PID'ini",
+    "Son komutun çıkış kodunu",
+    "Argüman sayısını",
+    "Tüm argümanları"
+   ],
+   "explain": "`0` başarı, sıfırdan farklı değer hatadır; `$$` PID, `$#` argüman sayısıdır."
+  },
+  "q7": {
+   "q": "Dosyanın varlığını denetleyen doğru koşul hangisidir?",
+   "options": [
+    "`if [ -d dosya ]`",
+    "`if [ -z dosya ]`",
+    "`if [ dosya ]`",
+    "`if [ -e dosya ]`"
+   ],
+   "explain": "`-e` varlık, `-f` normal dosya, `-d` dizin denetler; `-z` boş dizgi testidir."
+  },
+  "q8": {
+   "q": "Betiğin ilk satırındaki `#!/bin/bash` ne işe yarar?",
+   "options": [
+    "Betiği hangi yorumlayıcının çalıştıracağını belirtir",
+    "Yorum satırıdır, etkisizdir",
+    "Çalıştırma iznini verir",
+    "Betiği yedekler"
+   ],
+   "explain": "Shebang çekirdeğe yorumlayıcıyı söyler; çalıştırma izni için yine `chmod +x` gerekir."
   }
  },
  "summary": [

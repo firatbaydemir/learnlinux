@@ -220,7 +220,7 @@
    "tip": "Für Dauerhaftigkeit füge dieselbe `export`-Zeile in `~/.bashrc` ein."
   },
   {
-      "id": "globbing",
+   "id": "globbing",
    "title": "Platzhalter (Globbing)",
    "body": [
     "Platzhalter werden von der **Shell** aufgelöst, nicht vom Befehl. `*` steht für beliebig viel (auch nichts), `?` für genau ein Zeichen, `[abc]` für eines der Zeichen in den Klammern. Bei `ls *.txt` wandelt die Shell das Muster zuerst in Dateinamen um und übergibt sie dann an `ls`.",
@@ -513,6 +513,46 @@
     "f1 f2 f3"
    ],
    "explain": "Die Shell führt die Klammererweiterung aus und erzeugt drei getrennte Wörter."
+  },
+  "q5": {
+   "q": "Wozu dient die Tab-Taste im Terminal?",
+   "options": [
+    "Führt den Befehl aus",
+    "Leert den Bildschirm",
+    "Beendet die Sitzung",
+    "Vervollständigt Befehls- und Dateinamen"
+   ],
+   "explain": "Tab vervollständigt automatisch; bei Mehrdeutigkeit listet zweimaliges Drücken die Optionen."
+  },
+  "q6": {
+   "q": "Mit welchem Kürzel durchsuchst du frühere Befehle rückwärts?",
+   "options": [
+    "Ctrl+L",
+    "Ctrl+R",
+    "Ctrl+Z",
+    "Ctrl+A"
+   ],
+   "explain": "`Ctrl+R` startet die inkrementelle Suche in der Historie; `Ctrl+L` leert den Bildschirm, `Ctrl+A` springt zum Zeilenanfang."
+  },
+  "q7": {
+   "q": "Was bewirkt `echo \"Heute: $(date +%F)\"`?",
+   "options": [
+    "Setzt die Ausgabe von `date` in den Text ein",
+    "Gibt `$(date +%F)` wörtlich aus",
+    "Gibt einen Fehler aus",
+    "Ändert das Datum"
+   ],
+   "explain": "`$(...)` ist Befehlsersetzung: der Befehl läuft, seine Ausgabe wird eingesetzt. Doppelte Anführungszeichen verhindern das nicht, einfache schon."
+  },
+  "q8": {
+   "q": "Wie definierst du in der aktuellen Sitzung `ll` als Kurzform für `ls -l`?",
+   "options": [
+    "export ll=ls -l",
+    "set ll ls -l",
+    "alias ll='ls -l'",
+    "ln ll ls -l"
+   ],
+   "explain": "`alias name='befehl'` definiert eine Kurzform; dauerhaft per Eintrag in `~/.bashrc`. `export` ist für Variablen."
   }
  },
  "summary": [

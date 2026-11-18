@@ -305,6 +305,46 @@
     "nproc"
    ],
    "explain": "ps ile --sort=-%mem belleğe göre azalan sıralar; head ilk satırları gösterir."
+  },
+  "q5": {
+   "q": "`free -h` çıktısında `buff/cache` bellek için hangisi doğrudur?",
+   "options": [
+    "Kalıcı olarak ayrılmıştır, boşaltılamaz",
+    "Gerekirse uygulamalara geri verilebilir",
+    "Takas alanıdır",
+    "Çekirdeğe aittir ve hiç serbest kalmaz"
+   ],
+   "explain": "Sayfa önbelleği ihtiyaç olunca geri alınır; bu yüzden `available` asıl ölçüdür."
+  },
+  "q6": {
+   "q": "Hangi komut disk G/Ç istatistiklerini aygıt bazında gösterir?",
+   "options": [
+    "`free`",
+    "`uptime`",
+    "`ps`",
+    "`iostat -x`"
+   ],
+   "explain": "`iostat` (sysstat paketi) aygıt başına verimi, bekleme süresini ve kullanımı gösterir."
+  },
+  "q7": {
+   "q": "`top` içinde `wa` değeri yüksekse en olası neden nedir?",
+   "options": [
+    "Süreçler disk/G/Ç beklemesinde",
+    "CPU aşırı ısınmış",
+    "Bellek dolu",
+    "Ağ bağlantısı kopmuş"
+   ],
+   "explain": "`wa` = I/O wait: CPU boşta ama G/Ç tamamlanmasını bekliyor."
+  },
+  "q8": {
+   "q": "`uptime` üç yük ortalaması hangi aralıkları gösterir?",
+   "options": [
+    "1, 5 ve 60 saniye",
+    "1, 10 ve 30 dakika",
+    "1, 5 ve 15 dakika",
+    "5, 15 ve 60 dakika"
+   ],
+   "explain": "Yük ortalamaları son 1, 5 ve 15 dakikadır."
   }
  },
  "summary": [

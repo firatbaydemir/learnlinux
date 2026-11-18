@@ -410,6 +410,46 @@
     "Prüft die Prüfsumme des Archivs"
    ],
    "explain": "`-C` (change directory) legt das Zielverzeichnis fest; es muss vorher existieren."
+  },
+  "q5": {
+   "q": "Was bedeuten `c`, `z`, `f` in `tar -czf out.tar.gz dir`?",
+   "options": [
+    "extract, zip, filter",
+    "create, gzip-Kompression, Dateiname",
+    "check, zero, force",
+    "copy, zip, format"
+   ],
+   "explain": "`c` create, `z` gzip, `f` leitet den Archivdateinamen ein."
+  },
+  "q6": {
+   "q": "Womit komprimiert man, ohne die Originaldatei zu löschen?",
+   "options": [
+    "`gzip -d f`",
+    "`gzip -r f`",
+    "`gzip -k f`",
+    "`gunzip f`"
+   ],
+   "explain": "`gzip` ersetzt das Original normalerweise durch `.gz`; `-k` (keep) behält es."
+  },
+  "q7": {
+   "q": "Wie extrahiert man nur eine einzelne Datei aus einem Archiv?",
+   "options": [
+    "`tar -tf a.tar pfad/datei`",
+    "`tar -cf a.tar pfad/datei`",
+    "`tar -xzf a.tar` und löschen",
+    "`tar -xf a.tar pfad/datei`"
+   ],
+   "explain": "Gibt man nach `-x` den Pfad im Archiv an, wird nur dieser Eintrag extrahiert; Pfad vorher mit `-tf` ermitteln."
+  },
+  "q8": {
+   "q": "Wozu braucht man `-r` in `zip -r out.zip dir`?",
+   "options": [
+    "Nimmt den Verzeichnisinhalt samt Unterverzeichnissen auf",
+    "Verschlüsselt das Archiv",
+    "Löscht die Originaldateien",
+    "Erhöht die Kompression"
+   ],
+   "explain": "Ohne `-r` fügt zip nur den Verzeichniseintrag hinzu, nicht den Inhalt."
   }
  },
  "summary": [

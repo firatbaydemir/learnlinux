@@ -342,6 +342,46 @@
     "patch -R < change.patch"
    ],
    "explain": "`patch -R` kehrt den Patch um; die Patch-Datei wird von der Standardeingabe gelesen."
+  },
+  "q5": {
+   "q": "Was meldet `cmp a b`, wenn die Dateien verschieden sind?",
+   "options": [
+    "Alle Unterschiede zeilenweise",
+    "Nur gemeinsame Zeilen",
+    "Byte- und Zeilenposition des ersten Unterschieds",
+    "Einen fertigen Patch"
+   ],
+   "explain": "`cmp` vergleicht byteweise und meldet den ersten Unterschied; geeignet für Binärdateien."
+  },
+  "q6": {
+   "q": "Was macht `diff -r dir_a dir_b`?",
+   "options": [
+    "Sortiert nur Dateinamen",
+    "Vergleicht beide Verzeichnisbäume inklusive Unterverzeichnissen",
+    "Kehrt die Unterschiede um",
+    "Führt die Verzeichnisse zusammen"
+   ],
+   "explain": "`-r` (rekursiv) geht in Unterverzeichnisse; Dateien nur in einer Seite erscheinen als `Only in ...`."
+  },
+  "q7": {
+   "q": "Was zeigt `comm -12 a b` (sortierte Eingaben)?",
+   "options": [
+    "Nur Zeilen aus a",
+    "Nur Zeilen aus b",
+    "Alle Zeilen beider Dateien",
+    "Zeilen, die in beiden Dateien vorkommen"
+   ],
+   "explain": "`-1` und `-2` blenden die Spalten nur-a und nur-b aus; es bleiben die gemeinsamen Zeilen (Spalte 3)."
+  },
+  "q8": {
+   "q": "Was bewirkt `-p1` in `patch -p1 < fix.diff`?",
+   "options": [
+    "Entfernt die erste Verzeichniskomponente der Pfade im Patch",
+    "Macht den Patch rückgängig",
+    "Legt zuerst ein Backup an",
+    "Wendet nur den ersten Teil an"
+   ],
+   "explain": "`-pN` entfernt die ersten N Pfadkomponenten; so passen Präfixe wie `a/src/x.c` zum Zielbaum."
   }
  },
  "summary": [

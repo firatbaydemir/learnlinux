@@ -405,78 +405,78 @@
     "title": "Read service state",
     "text": "Check ssh, cron and your time service without changing anything. Paste the output.",
     "blocks": [
-      {
-       "cmd": "# Rocky/RHEL\nsystemctl status sshd --no-pager\nsystemctl is-active crond chronyd\nsystemctl is-enabled sshd\n# Ubuntu\nsystemctl status ssh --no-pager\nsystemctl is-active cron\nsystemctl is-enabled ssh",
-       "expected": "● sshd.service - OpenSSH server daemon\n     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; ...)\n     Active: active (running) since ...\nactive\nactive\nenabled"
-      },
-      {
-       "cmd": "systemctl list-units --failed --no-pager",
-       "expected": "0 loaded units listed."
-      }
+     {
+      "cmd": "# Rocky/RHEL\nsystemctl status sshd --no-pager\nsystemctl is-active crond chronyd\nsystemctl is-enabled sshd\n# Ubuntu\nsystemctl status ssh --no-pager\nsystemctl is-active cron\nsystemctl is-enabled ssh",
+      "expected": "● sshd.service - OpenSSH server daemon\n     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; ...)\n     Active: active (running) since ...\nactive\nactive\nenabled"
+     },
+     {
+      "cmd": "systemctl list-units --failed --no-pager",
+      "expected": "0 loaded units listed."
+     }
     ],
     "differs": [
-      "`Unit sshd.service could not be found` on Ubuntu: use `ssh` instead of `sshd`.",
-      "If `chronyd` is not found, your system uses `systemd-timesyncd` (Ubuntu); try `systemctl status systemd-timesyncd`.",
-      "Failed units in the list are not an error of this exercise; just note them."
+     "`Unit sshd.service could not be found` on Ubuntu: use `ssh` instead of `sshd`.",
+     "If `chronyd` is not found, your system uses `systemd-timesyncd` (Ubuntu); try `systemctl status systemd-timesyncd`.",
+     "Failed units in the list are not an error of this exercise; just note them."
     ]
    },
    "v02": {
     "title": "Read the journal",
     "text": "Read the journal with filters and check how much space it uses. Paste the output.",
     "blocks": [
-      {
-       "cmd": "journalctl -b -n 10 --no-pager\njournalctl -p err -b --no-pager | tail -n 5\njournalctl --since \"1 hour ago\" --no-pager | wc -l\njournalctl --disk-usage",
-       "expected": "... linux-lab systemd[1]: Started ...\n1234\nArchived and active journals take up 48.0M in the file system."
-      }
+     {
+      "cmd": "journalctl -b -n 10 --no-pager\njournalctl -p err -b --no-pager | tail -n 5\njournalctl --since \"1 hour ago\" --no-pager | wc -l\njournalctl --disk-usage",
+      "expected": "... linux-lab systemd[1]: Started ...\n1234\nArchived and active journals take up 48.0M in the file system."
+     }
     ],
     "differs": [
-      "`Permission denied` or a hint about the `systemd-journal` group: run the commands with `sudo`.",
-      "`-- No entries --` for `-p err` is good news: there were no errors.",
-      "If the journal only has the current boot, it is not persistent yet (see `ls /var/log/journal`)."
+     "`Permission denied` or a hint about the `systemd-journal` group: run the commands with `sudo`.",
+     "`-- No entries --` for `-p err` is good news: there were no errors.",
+     "If the journal only has the current boot, it is not persistent yet (see `ls /var/log/journal`)."
     ]
    },
    "v03": {
     "title": "Classic logs and dmesg",
     "text": "Read the end of the general and the login log, then the kernel log. Use the file names of your family.",
     "blocks": [
-      {
-       "cmd": "# Rocky/RHEL\nsudo tail -n 5 /var/log/messages\nsudo tail -n 5 /var/log/secure\n# Ubuntu\nsudo tail -n 5 /var/log/syslog\nsudo tail -n 5 /var/log/auth.log\n# both\nsudo dmesg | tail -n 5\nls /etc/logrotate.d",
-       "expected": "Nov 12 10:01:02 linux-lab systemd[1]: ...\nNov 12 10:02:11 linux-lab sudo[2101]: student : TTY=pts/0 ; ...\n[ 12.345678] ..."
-      }
+     {
+      "cmd": "# Rocky/RHEL\nsudo tail -n 5 /var/log/messages\nsudo tail -n 5 /var/log/secure\n# Ubuntu\nsudo tail -n 5 /var/log/syslog\nsudo tail -n 5 /var/log/auth.log\n# both\nsudo dmesg | tail -n 5\nls /etc/logrotate.d",
+      "expected": "Nov 12 10:01:02 linux-lab systemd[1]: ...\nNov 12 10:02:11 linux-lab sudo[2101]: student : TTY=pts/0 ; ...\n[ 12.345678] ..."
+     }
     ],
     "differs": [
-      "`No such file or directory` for syslog/messages: the other family's file name, or rsyslog is not installed. The journal has the same data.",
-      "On Ubuntu, `dmesg` without sudo may be blocked; use `sudo dmesg`."
+     "`No such file or directory` for syslog/messages: the other family's file name, or rsyslog is not installed. The journal has the same data.",
+     "On Ubuntu, `dmesg` without sudo may be blocked; use `sudo dmesg`."
     ]
    },
    "v04": {
     "title": "Create your own service",
     "text": "Create `linux-lab-demo.service`, load it, start it and look at its state and log. **Snapshot first.** The unit only runs `sleep 3600`.",
     "blocks": [
-      {
-       "cmd": "sudo tee /etc/systemd/system/linux-lab-demo.service > /dev/null <<'EOF'\n[Unit]\nDescription=Linux Lab demo\n\n[Service]\nExecStart=/usr/bin/sleep 3600\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\nEOF\nsudo systemctl daemon-reload\nsudo systemctl start linux-lab-demo.service\nsystemctl status linux-lab-demo.service --no-pager\nsystemctl is-enabled linux-lab-demo.service\njournalctl -u linux-lab-demo.service -n 5 --no-pager",
-       "expected": "● linux-lab-demo.service - Linux Lab demo\n     Loaded: loaded (/etc/systemd/system/linux-lab-demo.service; disabled; ...)\n     Active: active (running) since ...\ndisabled\n... systemd[1]: Started Linux Lab demo."
-      }
+     {
+      "cmd": "sudo tee /etc/systemd/system/linux-lab-demo.service > /dev/null <<'EOF'\n[Unit]\nDescription=Linux Lab demo\n\n[Service]\nExecStart=/usr/bin/sleep 3600\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\nEOF\nsudo systemctl daemon-reload\nsudo systemctl start linux-lab-demo.service\nsystemctl status linux-lab-demo.service --no-pager\nsystemctl is-enabled linux-lab-demo.service\njournalctl -u linux-lab-demo.service -n 5 --no-pager",
+      "expected": "● linux-lab-demo.service - Linux Lab demo\n     Loaded: loaded (/etc/systemd/system/linux-lab-demo.service; disabled; ...)\n     Active: active (running) since ...\ndisabled\n... systemd[1]: Started Linux Lab demo."
+     }
     ],
     "differs": [
-      "`Failed to start ... No such file or directory`: check the path with `which sleep`; on some systems it is `/bin/sleep`.",
-      "`is-enabled` says `disabled` because you used start only; that is the difference between start and enable.",
-      "If `sudo` is missing the heredoc, copy the file in two steps: write it in your home and `sudo cp` it to /etc/systemd/system/."
+     "`Failed to start ... No such file or directory`: check the path with `which sleep`; on some systems it is `/bin/sleep`.",
+     "`is-enabled` says `disabled` because you used start only; that is the difference between start and enable.",
+     "If `sudo` is missing the heredoc, copy the file in two steps: write it in your home and `sudo cp` it to /etc/systemd/system/."
     ]
    },
    "v05": {
     "title": "Remove your service again",
     "text": "Stop and remove only `linux-lab-demo.service`, then check that systemd no longer knows it. Do not touch any other unit.",
     "blocks": [
-      {
-       "cmd": "sudo systemctl stop linux-lab-demo.service\nsudo rm /etc/systemd/system/linux-lab-demo.service\nsudo systemctl daemon-reload\nsystemctl status linux-lab-demo.service --no-pager",
-       "expected": "Unit linux-lab-demo.service could not be found."
-      }
+     {
+      "cmd": "sudo systemctl stop linux-lab-demo.service\nsudo rm /etc/systemd/system/linux-lab-demo.service\nsudo systemctl daemon-reload\nsystemctl status linux-lab-demo.service --no-pager",
+      "expected": "Unit linux-lab-demo.service could not be found."
+     }
     ],
     "differs": [
-      "If you also ran `enable`, run `sudo systemctl disable linux-lab-demo.service` before the `rm`.",
-      "`Unit ... not found` or `inactive (dead)` both mean the service is gone or not running.",
-      "Check the file name in `rm` twice: it must be exactly the demo file."
+     "If you also ran `enable`, run `sudo systemctl disable linux-lab-demo.service` before the `rm`.",
+     "`Unit ... not found` or `inactive (dead)` both mean the service is gone or not running.",
+     "Check the file name in `rm` twice: it must be exactly the demo file."
     ]
    }
   }
@@ -521,6 +521,46 @@
     "Run systemctl daemon-reload"
    ],
    "explain": "daemon-reload makes systemd read the new or changed unit file."
+  },
+  "q5": {
+   "q": "Which command shows whether a service runs, plus recent log lines?",
+   "options": [
+    "`systemctl enable ssh`",
+    "`journalctl -k`",
+    "`systemctl status ssh`",
+    "`systemctl list-units`"
+   ],
+   "explain": "`status` shows state, PID and the latest journal lines."
+  },
+  "q6": {
+   "q": "What does `journalctl -u ssh -f` do?",
+   "options": [
+    "Follows the ssh unit's logs live",
+    "Restarts ssh",
+    "Deletes logs",
+    "Shows only kernel messages"
+   ],
+   "explain": "`-u` selects the unit, `-f` follows new entries (like `tail -f`)."
+  },
+  "q7": {
+   "q": "What makes the journal persistent across reboots?",
+   "options": [
+    "`journalctl --keep`",
+    "`systemctl enable journal`",
+    "Nothing, it is always persistent",
+    "A `/var/log/journal` directory or `Storage=persistent`"
+   ],
+   "explain": "Without the directory the journal lives in `/run` and is lost at reboot."
+  },
+  "q8": {
+   "q": "What does `systemctl mask` do?",
+   "options": [
+    "Hides the service",
+    "Prevents the unit from being started at all",
+    "Masks logs",
+    "Reloads the service"
+   ],
+   "explain": "`mask` links the unit to `/dev/null`; it cannot be started manually or as a dependency."
   }
  },
  "summary": [
@@ -532,14 +572,41 @@
   "Never stop sshd on a remote VM; never delete or vacuum logs you still need."
  ],
  "glossary": [
-  {"term": "systemd", "meaning": "The init system (PID 1) that starts and supervises services."},
-  {"term": "unit", "meaning": "An object managed by systemd: service, target, timer, mount and more."},
-  {"term": "target", "meaning": "A group of units that describes a system state, e.g. multi-user.target."},
-  {"term": "timer", "meaning": "A unit that starts another unit on a schedule; alternative to cron."},
-  {"term": "daemon-reload", "meaning": "Makes systemd re-read unit files after you changed them."},
-  {"term": "mask", "meaning": "Links a unit to /dev/null so that it cannot be started."},
-  {"term": "journal", "meaning": "systemd's binary log database, read with journalctl."},
-  {"term": "rsyslog", "meaning": "The classic syslog daemon that writes text logs to /var/log."},
-  {"term": "logrotate", "meaning": "Tool that rotates, compresses and deletes old log files by rules."}
+  {
+   "term": "systemd",
+   "meaning": "The init system (PID 1) that starts and supervises services."
+  },
+  {
+   "term": "unit",
+   "meaning": "An object managed by systemd: service, target, timer, mount and more."
+  },
+  {
+   "term": "target",
+   "meaning": "A group of units that describes a system state, e.g. multi-user.target."
+  },
+  {
+   "term": "timer",
+   "meaning": "A unit that starts another unit on a schedule; alternative to cron."
+  },
+  {
+   "term": "daemon-reload",
+   "meaning": "Makes systemd re-read unit files after you changed them."
+  },
+  {
+   "term": "mask",
+   "meaning": "Links a unit to /dev/null so that it cannot be started."
+  },
+  {
+   "term": "journal",
+   "meaning": "systemd's binary log database, read with journalctl."
+  },
+  {
+   "term": "rsyslog",
+   "meaning": "The classic syslog daemon that writes text logs to /var/log."
+  },
+  {
+   "term": "logrotate",
+   "meaning": "Tool that rotates, compresses and deletes old log files by rules."
+  }
  ]
 }

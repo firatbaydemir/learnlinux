@@ -305,6 +305,46 @@
     "nproc"
    ],
    "explain": "ps mit --sort=-%mem sortiert absteigend nach Speicher; head zeigt die ersten Zeilen."
+  },
+  "q5": {
+   "q": "Was gilt für `buff/cache` in der Ausgabe von `free -h`?",
+   "options": [
+    "Fest reserviert, nicht freigebbar",
+    "Kann bei Bedarf an Anwendungen zurückgegeben werden",
+    "Es ist der Swap",
+    "Gehört dem Kernel und wird nie frei"
+   ],
+   "explain": "Der Seitencache wird bei Bedarf freigegeben; deshalb ist `available` maßgeblich."
+  },
+  "q6": {
+   "q": "Welcher Befehl zeigt E/A-Statistiken pro Gerät?",
+   "options": [
+    "`free`",
+    "`uptime`",
+    "`ps`",
+    "`iostat -x`"
+   ],
+   "explain": "`iostat` (Paket sysstat) zeigt Durchsatz, Wartezeit und Auslastung je Gerät."
+  },
+  "q7": {
+   "q": "Was ist die wahrscheinlichste Ursache für hohes `wa` in `top`?",
+   "options": [
+    "Prozesse warten auf Festplatten-E/A",
+    "CPU überhitzt",
+    "Speicher voll",
+    "Netzwerk getrennt"
+   ],
+   "explain": "`wa` = I/O wait: die CPU ist untätig und wartet auf E/A."
+  },
+  "q8": {
+   "q": "Welche Zeiträume zeigen die drei Load-Werte von `uptime`?",
+   "options": [
+    "1, 5 und 60 Sekunden",
+    "1, 10 und 30 Minuten",
+    "1, 5 und 15 Minuten",
+    "5, 15 und 60 Minuten"
+   ],
+   "explain": "Die Load-Averages gelten für 1, 5 und 15 Minuten."
   }
  },
  "summary": [

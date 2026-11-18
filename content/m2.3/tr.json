@@ -80,7 +80,39 @@
    "warn": "`rm -r` ile hangi klasörü sildiğini ENTER'a basmadan önce bir kez daha oku. Yanlış dizinde çalıştırmak tüm projeni yok eder.",
    "danger": "Gerçek sistemde `rm -rf /` veya `rm -rf ~` yazma. Geri dönüşü olmayan bir yok olmaya yol açar; bu kitapta yalnızca simülatörde reddedilir."
   },
-  {"id": "safedelete", "title": "Güvenli silme: kontrol listesi", "body": ["Senaryo: `~/practice/logs` içindeki eski günlükleri temizleyeceksin. Adım 1 `ls logs` (içinde ne var?), adım 2 `rm -i logs/old.log` (her dosyayı onayla), adım 3 `ls logs` (gitti mi?). `rm -r` ancak bundan sonra gündeme gelir.", "`rm -i` her dosyadan önce sorar (`y` = evet). `rm -I` yalnızca üçten fazla dosya veya özyinelemeli silmede bir kez sorar: daha az gürültü, yine de güvenlik ağı."], "commands": [{"cmd": "rm -i", "what": "Her silmeden önce onay ister.", "where": "Önemli bir klasörde elle silerken.", "why": "Yazım hatası verilerini değil, yalnızca bir 'n' kaybettirir.", "example": "rm -i old.log"}, {"cmd": "rm -I", "what": "Üçten fazla dosya veya özyinelemeli silmeden önce bir kez sorar.", "where": "`rm -I *.tmp` gibi toplu silmelerde.", "why": "`-i`'den az soru sorar ama son uyarıyı korur.", "example": "rm -I *.tmp"}, {"cmd": "rmdir -p", "what": "Boş klasörü ve boş üst klasörlerini siler.", "where": "İç içe boş klasörleri toplarken.", "why": "Boş zinciri tek seferde temizler; ilk dolu klasörde durur.", "example": "rmdir -p a/b/c"}], "tip": "Önce aynı kalıbı `ls` ile çalıştır (`ls *.tmp`), sonra `ls` yerine `rm` yaz: tam olarak gördüğünü silersin.", "warn": "`rm *` gibi joker karakterler komut çalışmadan önce genişler. Fazladan bir boşluk (`rm * .tmp`) her şeyi siler."}
+  {
+   "id": "safedelete",
+   "title": "Güvenli silme: kontrol listesi",
+   "body": [
+    "Senaryo: `~/practice/logs` içindeki eski günlükleri temizleyeceksin. Adım 1 `ls logs` (içinde ne var?), adım 2 `rm -i logs/old.log` (her dosyayı onayla), adım 3 `ls logs` (gitti mi?). `rm -r` ancak bundan sonra gündeme gelir.",
+    "`rm -i` her dosyadan önce sorar (`y` = evet). `rm -I` yalnızca üçten fazla dosya veya özyinelemeli silmede bir kez sorar: daha az gürültü, yine de güvenlik ağı."
+   ],
+   "commands": [
+    {
+     "cmd": "rm -i",
+     "what": "Her silmeden önce onay ister.",
+     "where": "Önemli bir klasörde elle silerken.",
+     "why": "Yazım hatası verilerini değil, yalnızca bir 'n' kaybettirir.",
+     "example": "rm -i old.log"
+    },
+    {
+     "cmd": "rm -I",
+     "what": "Üçten fazla dosya veya özyinelemeli silmeden önce bir kez sorar.",
+     "where": "`rm -I *.tmp` gibi toplu silmelerde.",
+     "why": "`-i`'den az soru sorar ama son uyarıyı korur.",
+     "example": "rm -I *.tmp"
+    },
+    {
+     "cmd": "rmdir -p",
+     "what": "Boş klasörü ve boş üst klasörlerini siler.",
+     "where": "İç içe boş klasörleri toplarken.",
+     "why": "Boş zinciri tek seferde temizler; ilk dolu klasörde durur.",
+     "example": "rmdir -p a/b/c"
+    }
+   ],
+   "tip": "Önce aynı kalıbı `ls` ile çalıştır (`ls *.tmp`), sonra `ls` yerine `rm` yaz: tam olarak gördüğünü silersin.",
+   "warn": "`rm *` gibi joker karakterler komut çalışmadan önce genişler. Fazladan bir boşluk (`rm * .tmp`) her şeyi siler."
+  }
  ],
  "tasks": {
   "t01": {
@@ -188,6 +220,46 @@
     "touch"
    ],
    "explain": "`touch dosya` boş dosya oluşturur veya zaman damgasını günceller."
+  },
+  "q5": {
+   "q": "`touch dosya` dosya zaten varsa ne yapar?",
+   "options": [
+    "Hata verir",
+    "İçeriğini siler",
+    "İçeriğine dokunmadan zaman damgasını günceller",
+    "Dosyayı yeniden adlandırır"
+   ],
+   "explain": "`touch` yoksa boş dosya oluşturur, varsa yalnızca değiştirilme zamanını günceller; içerik korunur."
+  },
+  "q6": {
+   "q": "`touch rapor{1..3}.txt` kaç dosya oluşturur?",
+   "options": [
+    "3 (rapor1.txt, rapor2.txt, rapor3.txt)",
+    "1 (rapor{1..3}.txt)",
+    "0, hata verir",
+    "2"
+   ],
+   "explain": "Süslü parantez (brace) açılımını kabuk yapar: `rapor1.txt rapor2.txt rapor3.txt` olur."
+  },
+  "q7": {
+   "q": "İçinde dosya olan bir klasörü içeriğiyle birlikte silmek için ne kullanılır?",
+   "options": [
+    "rmdir klasor",
+    "rm klasor",
+    "mkdir -d klasor",
+    "rm -r klasor"
+   ],
+   "explain": "`rmdir` yalnızca boş klasörü siler, `rm` tek başına klasörü silmez; özyinelemeli silme `rm -r`. Dikkatli kullan: geri dönüş yoktur."
+  },
+  "q8": {
+   "q": "`rm -rf` komutunu çalıştırmadan önce en güvenli alışkanlık hangisidir?",
+   "options": [
+    "Hemen çalıştırmak",
+    "Aynı kalıbı önce `ls` ile listeleyip doğrulamak",
+    "Önce `sudo` eklemek",
+    "Hata mesajını gizlemek"
+   ],
+   "explain": "Silmeden önce `ls` ile aynı yolu/joker karakteri kontrol et; `rm -rf` onay sormaz ve geri alınamaz."
   }
  },
  "summary": [

@@ -16,7 +16,13 @@
     {"id": "t04", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/job_plan.txt", "bg %1"]}, "solution": ["echo 'bg %1; jobs -l' > ~/lab/job_plan.txt"]},
     {"id": "t05", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/job_plan.txt", "fg %1"]}, {"contains": ["~/lab/job_plan.txt", "kill %1"]}], "solution": ["echo 'fg %1; return with Ctrl+Z; kill %1 when finished' >> ~/lab/job_plan.txt"]},
     {"id": "t06", "kind": "challenge", "diff": 3, "check": {"contains": ["~/lab/persistent_job.txt", "nohup"]}, "solution": ["echo 'nohup ./backup.sh > backup.log 2>&1 &' > ~/lab/persistent_job.txt"]},
-    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5401.txt", "jobs -l"]}, {"contains": ["~/lab/ticket_5401.txt", "nohup"]}], "solution": ["echo 'Check jobs -l; use nohup only if the job must outlive the session' > ~/lab/ticket_5401.txt"]}
+    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5401.txt", "jobs -l"]}, {"contains": ["~/lab/ticket_5401.txt", "nohup"]}], "solution": ["echo 'Check jobs -l; use nohup only if the job must outlive the session' > ~/lab/ticket_5401.txt"]},
+    {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "report", "of": "^grep Done \\S*jobs_snapshot\\.txt$"}, "solution": ["grep Done ~/lab/jobs_snapshot.txt"]},
+    {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "1", "of": "^grep -c Running \\S*jobs_snapshot\\.txt$"}, "solution": ["grep -c Running ~/lab/jobs_snapshot.txt"]},
+    {"id": "t10", "kind": "guided", "diff": 2, "check": {"out": "Done", "of": "^grep report \\S*jobs_snapshot\\.txt$"}, "solution": ["grep report ~/lab/jobs_snapshot.txt"]},
+    {"id": "t11", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/disown_note.txt", "disown"]}, "solution": ["echo 'disown -h %2 detaches a job from SIGHUP' > ~/lab/disown_note.txt"]},
+    {"id": "t12", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/stop_plan.txt", "Ctrl+Z"]}, {"contains": ["~/lab/stop_plan.txt", "bg"]}], "solution": ["echo 'Ctrl+Z stops the job; bg %1 resumes it in the background' > ~/lab/stop_plan.txt"]},
+    {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/lab/pitfalls_5401.txt", "kill %2"]}, "solution": ["echo 'Mistake: plain job number 2 is not %2; use kill %2 for job 2' > ~/lab/pitfalls_5401.txt"]}
   ],
   "vm": [
     {"id": "v01", "expect": "Stopped|sleep"},
@@ -27,6 +33,10 @@
     {"id": "q1", "answer": 1},
     {"id": "q2", "answer": 0},
     {"id": "q3", "answer": 3},
-    {"id": "q4", "answer": 2}
+    {"id": "q4", "answer": 2},
+  {"id": "q5", "answer": 1},
+  {"id": "q6", "answer": 3},
+  {"id": "q7", "answer": 0},
+  {"id": "q8", "answer": 2}
   ]
 }

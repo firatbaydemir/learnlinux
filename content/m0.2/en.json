@@ -147,6 +147,22 @@
   "t08": {
    "text": "TICKET #3001 — The lab needs a VM report: write hostname, kernel version and user name (in that order) into `~/vm-report.txt`, one per line.",
    "hint": "First command with `>`, the next two with `>>`."
+  },
+  "t09": {
+   "text": "Step by step: write your user name into `~/whoami.txt` using `whoami > ~/whoami.txt`.",
+   "hint": "`>` writes output to a file."
+  },
+  "t10": {
+   "text": "Your own note: what does `uname -r` show? Write a short note (including `uname`) into `~/kernel.txt`.",
+   "hint": "`echo '...' > ~/kernel.txt`"
+  },
+  "t11": {
+   "text": "Common mistake: what is forgotten before changing a VM? Write the note (including `snapshot`) into `~/vm-pitfalls.txt`.",
+   "hint": "A rollback point = snapshot."
+  },
+  "t12": {
+   "text": "Challenge: describe the difference between NAT and bridged networking in one sentence in `~/net-note.txt` (include `bridged`).",
+   "hint": "NAT: VM behind the host; bridged: VM gets its own LAN IP."
   }
  },
  "vm": {
@@ -307,6 +323,46 @@
     "UTM with an ARM64 ISO"
    ],
    "explain": "Apple Silicon is ARM; UTM runs ARM64 guests natively."
+  },
+  "q5": {
+   "q": "How do you compute the SHA-256 sum of a downloaded ISO on Linux?",
+   "options": [
+    "cat file.iso",
+    "sha256sum file.iso",
+    "ls -l file.iso",
+    "uname file.iso"
+   ],
+   "explain": "`sha256sum` computes the digest; compare it with the value on the download page."
+  },
+  "q6": {
+   "q": "In which network mode does the VM get its own LAN IP and appear like any other device?",
+   "options": [
+    "NAT",
+    "Host-only",
+    "Internal",
+    "Bridged"
+   ],
+   "explain": "Bridged attaches the VM to the physical network; with NAT it sits behind the host."
+  },
+  "q7": {
+   "q": "What is one advantage of connecting to the VM over SSH from the host?",
+   "options": [
+    "Familiar terminal, copy-paste and working without the VM window",
+    "It speeds up the CPU",
+    "It makes the ISO unnecessary",
+    "It is required for snapshots"
+   ],
+   "explain": "SSH gives a comfortable terminal and easy copying; it has nothing to do with speed or snapshots."
+  },
+  "q8": {
+   "q": "When you roll back to a snapshot, what happens to changes made after it was taken?",
+   "options": [
+    "They are kept",
+    "They move to the host",
+    "They are discarded",
+    "They are encrypted"
+   ],
+   "explain": "Rolling back restores the VM to the snapshot state; later changes are lost."
   }
  },
  "summary": [

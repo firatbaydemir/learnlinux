@@ -16,7 +16,13 @@
     {"id": "t04", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/install_plan.txt", "apt update"]}, "solution": ["echo 'sudo apt update before installing on Debian or Ubuntu' > ~/lab/install_plan.txt"]},
     {"id": "t05", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/install_plan.txt", "dnf install"]}, {"contains": ["~/lab/install_plan.txt", "apt install"]}], "solution": ["echo 'sudo dnf install cowsay; sudo apt install cowsay' >> ~/lab/install_plan.txt"]},
     {"id": "t06", "kind": "challenge", "diff": 3, "check": {"contains": ["~/lab/cleanup_plan.txt", "autoremove"]}, "solution": ["echo 'Remove only the test package; review the autoremove list before confirming' > ~/lab/cleanup_plan.txt"]},
-    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5501.txt", "httpd"]}, {"contains": ["~/lab/ticket_5501.txt", "apache2"]}], "solution": ["echo 'Check the distribution; use httpd on RHEL-family systems or apache2 on Debian-family systems' > ~/lab/ticket_5501.txt"]}
+    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5501.txt", "httpd"]}, {"contains": ["~/lab/ticket_5501.txt", "apache2"]}], "solution": ["echo 'Check the distribution; use httpd on RHEL-family systems or apache2 on Debian-family systems' > ~/lab/ticket_5501.txt"]},
+    {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "apache2", "of": "^grep Debian \\S*package_notes\\.txt$"}, "solution": ["grep Debian ~/lab/package_notes.txt"]},
+    {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "2", "of": "^grep -c RHEL \\S*package_notes\\.txt$"}, "solution": ["grep -c RHEL ~/lab/package_notes.txt"]},
+    {"id": "t10", "kind": "guided", "diff": 2, "check": {"out": "Ubuntu", "of": "^grep dpkg \\S*package_notes\\.txt$"}, "solution": ["grep dpkg ~/lab/package_notes.txt"]},
+    {"id": "t11", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/search_plan.txt", "apt search"]}, "solution": ["echo 'apt search nginx; dnf search nginx' > ~/lab/search_plan.txt"]},
+    {"id": "t12", "kind": "mini", "diff": 2, "check": {"contains": ["~/lab/query_plan.txt", "rpm -qa"]}, "solution": ["echo 'rpm -qa on RHEL family; dpkg -l on Debian family' > ~/lab/query_plan.txt"]},
+    {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/lab/pitfalls_5501.txt", "-y"]}, "solution": ["echo 'Mistake: -y skips the confirmation; read the package list first' > ~/lab/pitfalls_5501.txt"]}
   ],
   "vm": [
     {"id": "v01", "expect": "ID=|Ubuntu|Debian|Rocky|Alma|Fedora"},
@@ -28,6 +34,10 @@
     {"id": "q1", "answer": 0},
     {"id": "q2", "answer": 2},
     {"id": "q3", "answer": 1},
-    {"id": "q4", "answer": 3}
+    {"id": "q4", "answer": 3},
+  {"id": "q5", "answer": 2},
+  {"id": "q6", "answer": 0},
+  {"id": "q7", "answer": 3},
+  {"id": "q8", "answer": 1}
   ]
 }

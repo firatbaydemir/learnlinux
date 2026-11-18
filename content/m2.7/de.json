@@ -272,6 +272,46 @@
     "Nichts, die Datei lässt sich neu erzeugen"
    ],
    "explain": "Ein Backup (`sudo cp datei datei.bak`) ermöglicht schnelle Wiederherstellung nach einem Fehler."
+  },
+  "q5": {
+   "q": "In welchen Modus wechselt man in vim, um Text einzugeben?",
+   "options": [
+    "Befehlsmodus",
+    "Visueller Modus",
+    "Einfügemodus (`i`)",
+    "Ex-Modus (`:`)"
+   ],
+   "explain": "Beim Start bist du im Normalmodus; `i` wechselt in den Einfügemodus, `Esc` zurück."
+  },
+  "q6": {
+   "q": "Was gibt man in vim ein, um zu SPEICHERN und zu beenden?",
+   "options": [
+    ":wq",
+    ":q!",
+    ":w!q",
+    "ZZZ"
+   ],
+   "explain": "`:wq` schreibt und beendet (`ZZ` ebenso); `:q!` beendet ohne Speichern."
+  },
+  "q7": {
+   "q": "Welche Taste macht im vim-Normalmodus die letzte Änderung rückgängig?",
+   "options": [
+    "r",
+    "u",
+    "x",
+    "p"
+   ],
+   "explain": "`u` macht rückgängig (undo), `Ctrl+R` wiederholt; `x` löscht ein Zeichen, `p` fügt ein."
+  },
+  "q8": {
+   "q": "Wie sucht man in vim im Normalmodus nach einem Wort?",
+   "options": [
+    ":wort",
+    "?? wort",
+    "find wort",
+    "/wort"
+   ],
+   "explain": "`/wort` sucht vorwärts, `n` springt zum nächsten Treffer; `?wort` sucht rückwärts."
   }
  },
  "summary": [

@@ -17,7 +17,13 @@
     {"id": "t04", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/term_plan.txt", "kill -TERM 2210"]}, "solution": ["echo 'kill -TERM 2210' > ~/lab/term_plan.txt"]},
     {"id": "t05", "kind": "mini", "diff": 2, "check": {"contains": ["~/lab/priority_plan.txt", "nice -n 10"]}, "solution": ["echo 'nice -n 10 ./backup.sh' > ~/lab/priority_plan.txt"]},
     {"id": "t06", "kind": "challenge", "diff": 3, "check": {"contains": ["~/lab/escalation_plan.txt", "SIGKILL"]}, "solution": ["echo 'verify PID; send SIGTERM; wait; use SIGKILL only if needed' > ~/lab/escalation_plan.txt"]},
-    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5301.txt", "2210"]}, {"contains": ["~/lab/ticket_5301.txt", "python3"]}], "solution": ["echo 'PID 2210 is python3; inspect it and request SIGTERM first' > ~/lab/ticket_5301.txt"]}
+    {"id": "t07", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/lab/ticket_5301.txt", "2210"]}, {"contains": ["~/lab/ticket_5301.txt", "python3"]}], "solution": ["echo 'PID 2210 is python3; inspect it and request SIGTERM first' > ~/lab/ticket_5301.txt"]},
+    {"id": "t08", "kind": "predict", "diff": 2, "check": {"out": "3305", "of": "^grep java \\S*ps_snapshot\\.txt$"}, "solution": ["grep java ~/lab/ps_snapshot.txt"]},
+    {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "1", "of": "^grep -c alice \\S*ps_snapshot\\.txt$"}, "solution": ["grep -c alice ~/lab/ps_snapshot.txt"]},
+    {"id": "t10", "kind": "guided", "diff": 2, "check": {"out": "1203", "of": "^grep bash \\S*ps_snapshot\\.txt$"}, "solution": ["grep bash ~/lab/ps_snapshot.txt"]},
+    {"id": "t11", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/pkill_check.txt", "pgrep -a"]}, "solution": ["echo 'pgrep -a -x worker before pkill -TERM -x worker' > ~/lab/pkill_check.txt"]},
+    {"id": "t12", "kind": "mini", "diff": 2, "check": {"contains": ["~/lab/renice_plan.txt", "renice"]}, "solution": ["echo 'renice 10 -p 2210' > ~/lab/renice_plan.txt"]},
+    {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/lab/pitfalls_5301.txt", "pkill -f"]}, "solution": ["echo 'Mistake: pkill -f with a short pattern can match unrelated processes' > ~/lab/pitfalls_5301.txt"]}
   ],
   "vm": [
     {"id": "v01", "expect": "PID|sleep"},
@@ -28,6 +34,10 @@
     {"id": "q1", "answer": 1},
     {"id": "q2", "answer": 2},
     {"id": "q3", "answer": 0},
-    {"id": "q4", "answer": 3}
+    {"id": "q4", "answer": 3},
+  {"id": "q5", "answer": 2},
+  {"id": "q6", "answer": 0},
+  {"id": "q7", "answer": 1},
+  {"id": "q8", "answer": 3}
   ]
 }

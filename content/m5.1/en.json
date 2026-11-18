@@ -131,6 +131,22 @@
    ],
    "commands": [
     {
+     "cmd": "lsof",
+     "what": "Lists open files and the processes holding them; `-i :80` shows who uses port 80.",
+     "where": "To find who holds a busy port, an undeletable file or a device that will not unmount.",
+     "why": "Sockets and devices are files on Linux, so lsof also shows network use.",
+     "example": "sudo lsof -i :80",
+     "nosim": true
+    },
+    {
+     "cmd": "fuser",
+     "what": "Shows PIDs of processes using a file, directory or port.",
+     "where": "When `umount` says \"target is busy\": `fuser -vm /mnt/disk`.",
+     "why": "`fuser -k` kills processes; do not use it without verifying the target.",
+     "example": "fuser -v /var/log/syslog",
+     "nosim": true
+    },
+    {
      "cmd": "cat /proc/$$/status",
      "what": "Shows name, state, PID, PPID and UID of your shell.",
      "where": "For details that ps does not show.",
@@ -396,6 +412,46 @@
     "ps -ef"
    ],
    "explain": "`ps -ef` (UNIX style) shows PPID. `ps aux` (BSD style) does not; for it use `ps -o pid,ppid,...`."
+  },
+  "q5": {
+   "q": "What does `S` in the `STAT` column of `ps aux` mean?",
+   "options": [
+    "Stopped",
+    "Interruptible sleep, waiting for an event",
+    "Zombie",
+    "Running"
+   ],
+   "explain": "`S` = interruptible sleep; `T` stopped, `Z` zombie, `R` running/runnable."
+  },
+  "q6": {
+   "q": "Who becomes the parent of a process whose parent has exited?",
+   "options": [
+    "Nobody",
+    "root's shell",
+    "The kernel",
+    "PID 1 (init/systemd)"
+   ],
+   "explain": "Orphans are adopted by PID 1, which reaps them with `wait`."
+  },
+  "q7": {
+   "q": "Where under `/proc` do you find a process's open files and environment?",
+   "options": [
+    "`/proc/<PID>/`",
+    "`/var/run/<PID>`",
+    "`/sys/proc/<PID>`",
+    "`/etc/proc/<PID>`"
+   ],
+   "explain": "Each process has `/proc/<PID>/`: `fd/`, `environ`, `status`, `cmdline`."
+  },
+  "q8": {
+   "q": "How does `ps -ef` differ from `ps aux`?",
+   "options": [
+    "`-ef` shows only your own processes",
+    "`aux` shows no PID",
+    "Different syntax (POSIX / BSD), both list nearly all processes",
+    "They produce identical output"
+   ],
+   "explain": "`-ef` is POSIX, `aux` BSD style; columns differ (`-ef` has PPID, `aux` %CPU/%MEM)."
   }
  },
  "summary": [

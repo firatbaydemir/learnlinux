@@ -342,6 +342,46 @@
     "patch -R < change.patch"
    ],
    "explain": "`patch -R` reverses the patch; the patch file is read from standard input."
+  },
+  "q5": {
+   "q": "What does `cmp a b` report when the files differ?",
+   "options": [
+    "All differences line by line",
+    "Only common lines",
+    "Byte and line position of the first difference",
+    "A ready-made patch"
+   ],
+   "explain": "`cmp` compares byte by byte and reports the first difference; suited for binary files."
+  },
+  "q6": {
+   "q": "What does `diff -r dir_a dir_b` do?",
+   "options": [
+    "Only sorts file names",
+    "Compares both directory trees including subdirectories",
+    "Reverses the differences",
+    "Merges the directories"
+   ],
+   "explain": "`-r` (recursive) descends into subdirectories; files present on one side only show as `Only in ...`."
+  },
+  "q7": {
+   "q": "What does `comm -12 a b` show (sorted input)?",
+   "options": [
+    "Only lines from a",
+    "Only lines from b",
+    "All lines of both files",
+    "Lines common to both files"
+   ],
+   "explain": "`-1` and `-2` suppress the only-in-a and only-in-b columns, leaving common lines (column 3)."
+  },
+  "q8": {
+   "q": "What does `-p1` do in `patch -p1 < fix.diff`?",
+   "options": [
+    "Strips the first directory component from paths in the patch",
+    "Reverses the patch",
+    "Makes a backup first",
+    "Applies only the first hunk"
+   ],
+   "explain": "`-pN` strips the first N path components so prefixes like `a/src/x.c` fit the target tree."
   }
  },
  "summary": [

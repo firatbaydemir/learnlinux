@@ -521,6 +521,46 @@
     "systemctl daemon-reload çalıştırırım"
    ],
    "explain": "daemon-reload, systemd'in yeni veya değişen unit dosyasını okumasını sağlar."
+  },
+  "q5": {
+   "q": "Bir servisin çalışıp çalışmadığını ve son log satırlarını hangi komut verir?",
+   "options": [
+    "`systemctl enable ssh`",
+    "`journalctl -k`",
+    "`systemctl status ssh`",
+    "`systemctl list-units`"
+   ],
+   "explain": "`status` durum, PID ve son journal satırlarını birlikte gösterir."
+  },
+  "q6": {
+   "q": "`journalctl -u ssh -f` ne yapar?",
+   "options": [
+    "ssh unit'inin loglarını canlı izler",
+    "ssh'ı yeniden başlatır",
+    "Logları siler",
+    "Yalnızca çekirdek mesajlarını gösterir"
+   ],
+   "explain": "`-u` unit seçer, `-f` yeni girdileri takip eder (`tail -f` gibi)."
+  },
+  "q7": {
+   "q": "Journal'ı yeniden başlatmalar arasında kalıcı yapmak için ne gerekir?",
+   "options": [
+    "`journalctl --keep`",
+    "`systemctl enable journal`",
+    "Hiçbir şey, zaten kalıcıdır",
+    "`/var/log/journal` dizini veya `Storage=persistent`"
+   ],
+   "explain": "Dizin yoksa journal `/run` altında tutulur ve açılışta silinir; dizin oluşturmak ya da `Storage=persistent` yeter."
+  },
+  "q8": {
+   "q": "`systemctl mask` ne yapar?",
+   "options": [
+    "Servisi gizler",
+    "Unit'in hiçbir şekilde başlatılmasını engeller",
+    "Logları maskeler",
+    "Servisi yeniden yükler"
+   ],
+   "explain": "`mask` unit'i `/dev/null`'a bağlar; elle ya da bağımlılıkla başlatılamaz."
   }
  },
  "summary": [
@@ -532,14 +572,41 @@
   "Uzak bir VM'de sshd'yi asla durdurma; hâlâ ihtiyacın olan logları asla silme ya da vacuum yapma."
  ],
  "glossary": [
-  {"term": "systemd", "meaning": "Servisleri başlatan ve denetleyen init sistemi (PID 1)."},
-  {"term": "unit", "meaning": "systemd'in yönettiği nesne: service, target, timer, mount ve daha fazlası."},
-  {"term": "target", "meaning": "Bir sistem durumunu tanımlayan unit grubu, örn. multi-user.target."},
-  {"term": "timer", "meaning": "Başka bir unit'i zamanlamayla başlatan unit; cron'a alternatif."},
-  {"term": "daemon-reload", "meaning": "Unit dosyaları değiştikten sonra systemd'in onları yeniden okumasını sağlar."},
-  {"term": "mask", "meaning": "Unit'i /dev/null'a bağlar, böylece başlatılamaz."},
-  {"term": "journal", "meaning": "systemd'in ikili log veritabanı; journalctl ile okunur."},
-  {"term": "rsyslog", "meaning": "Metin logları /var/log içine yazan klasik syslog daemon'u."},
-  {"term": "logrotate", "meaning": "Eski log dosyalarını kurallarla döndüren, sıkıştıran ve silen araç."}
+  {
+   "term": "systemd",
+   "meaning": "Servisleri başlatan ve denetleyen init sistemi (PID 1)."
+  },
+  {
+   "term": "unit",
+   "meaning": "systemd'in yönettiği nesne: service, target, timer, mount ve daha fazlası."
+  },
+  {
+   "term": "target",
+   "meaning": "Bir sistem durumunu tanımlayan unit grubu, örn. multi-user.target."
+  },
+  {
+   "term": "timer",
+   "meaning": "Başka bir unit'i zamanlamayla başlatan unit; cron'a alternatif."
+  },
+  {
+   "term": "daemon-reload",
+   "meaning": "Unit dosyaları değiştikten sonra systemd'in onları yeniden okumasını sağlar."
+  },
+  {
+   "term": "mask",
+   "meaning": "Unit'i /dev/null'a bağlar, böylece başlatılamaz."
+  },
+  {
+   "term": "journal",
+   "meaning": "systemd'in ikili log veritabanı; journalctl ile okunur."
+  },
+  {
+   "term": "rsyslog",
+   "meaning": "Metin logları /var/log içine yazan klasik syslog daemon'u."
+  },
+  {
+   "term": "logrotate",
+   "meaning": "Eski log dosyalarını kurallarla döndüren, sıkıştıran ve silen araç."
+  }
  ]
 }

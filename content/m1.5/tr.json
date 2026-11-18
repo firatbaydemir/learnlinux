@@ -220,7 +220,7 @@
    "tip": "Kalıcı yapmak için aynı `export` satırını `~/.bashrc` dosyasına ekle."
   },
   {
-      "id": "globbing",
+   "id": "globbing",
    "title": "Joker karakterler (globbing)",
    "body": [
     "Joker karakterleri **kabuk** açar, komut değil. `*` her şeyi (boş dahil), `?` tam bir karakteri, `[abc]` köşeli parantezdeki karakterlerden birini temsil eder. `ls *.txt` ifadesini kabuk önce dosya adlarına çevirir, sonra `ls`'e verir.",
@@ -253,8 +253,8 @@
    "tip": "Gizli dosyalar (`.` ile başlayanlar) `*` ile eşleşmez."
   },
   {
-      "id": "expansion",
-      "title": "Süslü parantez ve komut yerine koyma",
+   "id": "expansion",
+   "title": "Süslü parantez ve komut yerine koyma",
    "body": [
     "Süslü parantez (brace) açılımı metin üretir: `file{1,2,3}.txt` üç ada, `f{1..3}` ise `f1 f2 f3`'e dönüşür. Dosya olması gerekmez; bu yüzden toplu `touch` ve `mkdir` için idealdir.",
     "`$(komut)` komutu çalıştırır ve **çıktısını** yerine koyar: `echo \"Today: $(date)\"`. Çıktıyı değişkene atamak için de kullanılır: `USERNAME=$(whoami)`."
@@ -513,6 +513,46 @@
     "f1 f2 f3"
    ],
    "explain": "Brace açılımı kabuk tarafından yapılır ve üç ayrı kelime üretir."
+  },
+  "q5": {
+   "q": "Tab tuşu terminalde ne işe yarar?",
+   "options": [
+    "Komutu çalıştırır",
+    "Ekranı temizler",
+    "Oturumu kapatır",
+    "Komut ve dosya adlarını tamamlar"
+   ],
+   "explain": "Tab otomatik tamamlama yapar; belirsizse iki kez basınca seçenekleri listeler."
+  },
+  "q6": {
+   "q": "Önceki komutlar arasında geriye doğru arama yapmak için hangi kısayol kullanılır?",
+   "options": [
+    "Ctrl+L",
+    "Ctrl+R",
+    "Ctrl+Z",
+    "Ctrl+A"
+   ],
+   "explain": "`Ctrl+R` geçmişte artımlı arama başlatır; `Ctrl+L` ekranı temizler, `Ctrl+A` satır başına gider."
+  },
+  "q7": {
+   "q": "`echo \"Bugün: $(date +%F)\"` ne yapar?",
+   "options": [
+    "`date` çıktısını metne yerleştirir",
+    "`$(date +%F)` metnini aynen yazar",
+    "Hata verir",
+    "Tarihi değiştirir"
+   ],
+   "explain": "`$(...)` komut ikamesidir: içindeki komut çalışır, çıktısı yerine konur. Çift tırnak bunu engellemez, tek tırnak engeller."
+  },
+  "q8": {
+   "q": "Geçerli oturumda `ll` adlı kısayolu `ls -l` olarak tanımlamak için ne yazılır?",
+   "options": [
+    "export ll=ls -l",
+    "set ll ls -l",
+    "alias ll='ls -l'",
+    "ln ll ls -l"
+   ],
+   "explain": "`alias ad='komut'` kısayol tanımlar; kalıcı olması için `~/.bashrc` dosyasına yazılır. `export` değişken içindir."
   }
  },
  "summary": [

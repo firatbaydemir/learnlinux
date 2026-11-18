@@ -410,6 +410,46 @@
     "Arşivin sağlama toplamını denetler"
    ],
    "explain": "`-C` (change directory) hedef klasörü belirler; klasör önceden var olmalıdır."
+  },
+  "q5": {
+   "q": "`tar -czf out.tar.gz dir` içinde `c`, `z`, `f` ne anlama gelir?",
+   "options": [
+    "çıkar, zip, filtre",
+    "oluştur, gzip ile sıkıştır, dosya adı",
+    "kontrol et, sıfırla, zorla",
+    "kopyala, zip, format"
+   ],
+   "explain": "`c` create, `z` gzip, `f` ardından arşiv dosya adı gelir."
+  },
+  "q6": {
+   "q": "Özgün dosyayı silmeden sıkıştırmak için hangisi kullanılır?",
+   "options": [
+    "`gzip -d f`",
+    "`gzip -r f`",
+    "`gzip -k f`",
+    "`gunzip f`"
+   ],
+   "explain": "`gzip` normalde özgün dosyayı `.gz` ile değiştirir; `-k` (keep) özgün dosyayı korur."
+  },
+  "q7": {
+   "q": "Arşivden yalnızca tek bir dosyayı çıkarmak için nasıl yazılır?",
+   "options": [
+    "`tar -tf a.tar yol/dosya`",
+    "`tar -cf a.tar yol/dosya`",
+    "`tar -xzf a.tar` ve sil",
+    "`tar -xf a.tar yol/dosya`"
+   ],
+   "explain": "`-x` sonrasına arşivdeki tam yol verilirse yalnızca o üye çıkarılır; yolu `-tf` ile öğren."
+  },
+  "q8": {
+   "q": "`zip -r out.zip dir` içindeki `-r` neden gerekir?",
+   "options": [
+    "Dizinin içeriğini alt dizinlerle ekler",
+    "Arşivi şifreler",
+    "Özgün dosyaları siler",
+    "Sıkıştırmayı artırır"
+   ],
+   "explain": "`-r` olmadan zip yalnızca dizinin kendisini ekler, içindekileri değil."
   }
  },
  "summary": [

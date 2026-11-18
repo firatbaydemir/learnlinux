@@ -177,7 +177,7 @@
  "tasks": {
   "t01": {
    "text": "Editörsüz dosya oluştur: `echo \"hello editor\" > hello.txt`.",
-      "hint": "`>` dosyayı oluşturur veya üzerine yazar (ayrıntısı modül 3.2'de)."
+   "hint": "`>` dosyayı oluşturur veya üzerine yazar (ayrıntısı modül 3.2'de)."
   },
   "t02": {
    "text": "`cat hello.txt` ile dosyanın içeriğini göster.",
@@ -189,7 +189,7 @@
   },
   "t04": {
    "text": "Editörsüz `todo.txt` sonuna satır ekle: `echo \"buy bread\" >> todo.txt`.",
-      "hint": "Eklemek için iki tane `>` kullan (`>>` ayrıntısı modül 3.2'de)."
+   "hint": "Eklemek için iki tane `>` kullan (`>>` ayrıntısı modül 3.2'de)."
   },
   "t05": {
    "text": "`cat -n todo.txt` ile `todo.txt` dosyasını satır numaralarıyla göster.",
@@ -197,7 +197,7 @@
   },
   "t06": {
    "text": "`report` geçen satırı numarasıyla bul: `grep -n report todo.txt`.",
-      "hint": "`-n` satır numarasını başa yazar. `grep` ayrıntılı olarak modül 3.4'te anlatılır."
+   "hint": "`-n` satır numarasını başa yazar. `grep` ayrıntılı olarak modül 3.4'te anlatılır."
   },
   "t07": {
    "text": "Tahmin et: `todo.txt` şimdi kaç satır? `wc -l todo.txt` ile kontrol et.",
@@ -217,7 +217,7 @@
   },
   "t11": {
    "text": "Mini proje: `scripts` klasörünü oluştur, `scripts/hello.sh` dosyasına `#!/bin/bash` ve `echo hello` satırlarını yaz (`printf` ve `\\n` kullan), sonra modunu 755 yap.",
-      "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, sonra `chmod 755 scripts/hello.sh`. `chmod` ayrıntısı modül 4.4'te."
+   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, sonra `chmod 755 scripts/hello.sh`. `chmod` ayrıntısı modül 4.4'te."
   },
   "t12": {
    "text": "Zorlu görev: önce `notes.txt` dosyasını `notes.txt.bak` olarak yedekle, sonra `notes.txt` sonuna `meeting at 10` satırını ekle.",
@@ -225,11 +225,11 @@
   },
   "t13": {
    "text": "Zorlu görev: `server.log` içinden yalnızca `ERROR` içeren satırları `errors.txt` dosyasına kaydet.",
-      "hint": "`grep` desen dosya; çıktıyı `>` ile yönlendir. `grep` → modül 3.4, `>` → modül 3.2."
+   "hint": "`grep` desen dosya; çıktıyı `>` ile yönlendir. `grep` → modül 3.4, `>` → modül 3.2."
   },
   "t14": {
    "text": "BİLET #2705 — Yeni çalışanlar için karşılama notu gerekiyor. `~/welcome.txt` dosyasını `Welcome to linux-lab` içeriğiyle oluştur, bir kopyasını `~/Documents/welcome.txt` olarak koy ve kopyayı herkes için salt okunur yap (mod 444).",
-      "hint": "`echo`, `cp`, `chmod 444`. `chmod` ayrıntısı modül 4.4'te."
+   "hint": "`echo`, `cp`, `chmod 444`. `chmod` ayrıntısı modül 4.4'te."
   }
  },
  "quiz": {
@@ -272,6 +272,46 @@
     "Hiçbir şey, dosya yeniden üretilebilir"
    ],
    "explain": "Yedek (`sudo cp dosya dosya.bak`) hata sonrası hızlı geri yükleme sağlar."
+  },
+  "q5": {
+   "q": "vim'de metin yazmaya başlamak için hangi moda geçilir?",
+   "options": [
+    "Komut modu",
+    "Görsel mod",
+    "Ekleme modu (`i`)",
+    "Ex modu (`:`)"
+   ],
+   "explain": "Açılışta komut (normal) moddasın; `i` ekleme moduna geçirir, `Esc` normal moda döndürür."
+  },
+  "q6": {
+   "q": "vim'de değişiklikleri KAYDEDİP çıkmak için ne yazılır?",
+   "options": [
+    ":wq",
+    ":q!",
+    ":w!q",
+    "ZZZ"
+   ],
+   "explain": "`:wq` yazar ve çıkar (`ZZ` de aynı işi görür); `:q!` kaydetmeden çıkar."
+  },
+  "q7": {
+   "q": "vim normal modda yanlış yaptığın son değişikliği geri almak için hangi tuş?",
+   "options": [
+    "r",
+    "u",
+    "x",
+    "p"
+   ],
+   "explain": "`u` geri alır (undo), `Ctrl+R` yeniden uygular; `x` karakter siler, `p` yapıştırır."
+  },
+  "q8": {
+   "q": "vim'de bir kelimeyi dosya içinde aramak için normal modda ne yazılır?",
+   "options": [
+    ":kelime",
+    "?? kelime",
+    "find kelime",
+    "/kelime"
+   ],
+   "explain": "`/kelime` ileri arar, `n` sonraki eşleşmeye gider; `?kelime` geriye doğru arar."
   }
  },
  "summary": [

@@ -19,7 +19,10 @@
    "kind": "warmup",
    "diff": 1,
    "check": {
-    "contains": ["~/hello.txt", "hello editor"]
+    "contains": [
+     "~/hello.txt",
+     "hello editor"
+    ]
    },
    "solution": [
     "echo \"hello editor\" > hello.txt"
@@ -42,7 +45,10 @@
    "kind": "warmup",
    "diff": 1,
    "check": {
-    "equals": ["~/todo.txt.bak", "buy milk\nwrite report\ncall bob\n"]
+    "equals": [
+     "~/todo.txt.bak",
+     "buy milk\nwrite report\ncall bob\n"
+    ]
    },
    "solution": [
     "cp todo.txt todo.txt.bak"
@@ -53,7 +59,10 @@
    "kind": "guided",
    "diff": 2,
    "check": {
-    "contains": ["~/todo.txt", "buy bread"]
+    "contains": [
+     "~/todo.txt",
+     "buy bread"
+    ]
    },
    "solution": [
     "echo \"buy bread\" >> todo.txt"
@@ -114,7 +123,10 @@
    "kind": "debug",
    "diff": 2,
    "check": {
-    "equals": ["~/app.conf", "port=80\nmode=prod\n"]
+    "equals": [
+     "~/app.conf",
+     "port=80\nmode=prod\n"
+    ]
    },
    "solution": [
     "cp app.conf.bak app.conf"
@@ -137,13 +149,22 @@
    "diff": 2,
    "check": [
     {
-     "contains": ["~/scripts/hello.sh", "#!/bin/bash"]
+     "contains": [
+      "~/scripts/hello.sh",
+      "#!/bin/bash"
+     ]
     },
     {
-     "contains": ["~/scripts/hello.sh", "echo hello"]
+     "contains": [
+      "~/scripts/hello.sh",
+      "echo hello"
+     ]
     },
     {
-     "mode": ["~/scripts/hello.sh", "755"]
+     "mode": [
+      "~/scripts/hello.sh",
+      "755"
+     ]
     }
    ],
    "solution": [
@@ -169,7 +190,10 @@
      "type": "f"
     },
     {
-     "contains": ["~/notes.txt", "meeting at 10"]
+     "contains": [
+      "~/notes.txt",
+      "meeting at 10"
+     ]
     }
    ],
    "solution": [
@@ -183,10 +207,16 @@
    "diff": 3,
    "check": [
     {
-     "contains": ["~/errors.txt", "ERROR disk full"]
+     "contains": [
+      "~/errors.txt",
+      "ERROR disk full"
+     ]
     },
     {
-     "linesMin": ["~/errors.txt", 2]
+     "linesMin": [
+      "~/errors.txt",
+      2
+     ]
     },
     {
      "cmd": "^grep ERROR server\\.log",
@@ -203,13 +233,22 @@
    "diff": 3,
    "check": [
     {
-     "contains": ["~/welcome.txt", "Welcome to linux-lab"]
+     "contains": [
+      "~/welcome.txt",
+      "Welcome to linux-lab"
+     ]
     },
     {
-     "contains": ["~/Documents/welcome.txt", "Welcome to linux-lab"]
+     "contains": [
+      "~/Documents/welcome.txt",
+      "Welcome to linux-lab"
+     ]
     },
     {
-     "mode": ["~/Documents/welcome.txt", "444"]
+     "mode": [
+      "~/Documents/welcome.txt",
+      "444"
+     ]
     }
    ],
    "solution": [
@@ -235,6 +274,22 @@
   {
    "id": "q4",
    "answer": 2
+  },
+  {
+   "id": "q5",
+   "answer": 2
+  },
+  {
+   "id": "q6",
+   "answer": 0
+  },
+  {
+   "id": "q7",
+   "answer": 1
+  },
+  {
+   "id": "q8",
+   "answer": 3
   }
  ],
  "vm": [

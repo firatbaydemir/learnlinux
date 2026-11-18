@@ -521,6 +521,46 @@
     "systemctl daemon-reload ausführen"
    ],
    "explain": "daemon-reload sorgt dafür, dass systemd die neue oder geänderte Unit-Datei liest."
+  },
+  "q5": {
+   "q": "Welcher Befehl zeigt, ob ein Dienst läuft, samt letzten Logzeilen?",
+   "options": [
+    "`systemctl enable ssh`",
+    "`journalctl -k`",
+    "`systemctl status ssh`",
+    "`systemctl list-units`"
+   ],
+   "explain": "`status` zeigt Zustand, PID und letzte Journalzeilen."
+  },
+  "q6": {
+   "q": "Was macht `journalctl -u ssh -f`?",
+   "options": [
+    "Verfolgt die Logs der ssh-Unit live",
+    "Startet ssh neu",
+    "Löscht Logs",
+    "Zeigt nur Kernelmeldungen"
+   ],
+   "explain": "`-u` wählt die Unit, `-f` folgt neuen Einträgen (wie `tail -f`)."
+  },
+  "q7": {
+   "q": "Was macht das Journal über Neustarts hinweg persistent?",
+   "options": [
+    "`journalctl --keep`",
+    "`systemctl enable journal`",
+    "Nichts, es ist immer persistent",
+    "Verzeichnis `/var/log/journal` oder `Storage=persistent`"
+   ],
+   "explain": "Fehlt das Verzeichnis, liegt das Journal in `/run` und geht beim Neustart verloren."
+  },
+  "q8": {
+   "q": "Was bewirkt `systemctl mask`?",
+   "options": [
+    "Versteckt den Dienst",
+    "Verhindert jeden Start der Unit",
+    "Maskiert Logs",
+    "Lädt den Dienst neu"
+   ],
+   "explain": "`mask` verlinkt die Unit auf `/dev/null`; sie lässt sich weder manuell noch als Abhängigkeit starten."
   }
  },
  "summary": [
@@ -532,14 +572,41 @@
   "Stoppe nie sshd auf einer entfernten VM; lösche oder vakuumiere nie Logs, die du noch brauchst."
  ],
  "glossary": [
-  {"term": "systemd", "meaning": "Das Init-System (PID 1), das Dienste startet und überwacht."},
-  {"term": "Unit", "meaning": "Ein von systemd verwaltetes Objekt: service, target, timer, mount und mehr."},
-  {"term": "Target", "meaning": "Eine Gruppe von Units, die einen Systemzustand beschreibt, z. B. multi-user.target."},
-  {"term": "Timer", "meaning": "Eine Unit, die eine andere zeitgesteuert startet; Alternative zu cron."},
-  {"term": "daemon-reload", "meaning": "Lässt systemd die Unit-Dateien nach einer Änderung neu einlesen."},
-  {"term": "mask", "meaning": "Verlinkt eine Unit auf /dev/null, sodass sie nicht gestartet werden kann."},
-  {"term": "Journal", "meaning": "Die binäre Log-Datenbank von systemd, gelesen mit journalctl."},
-  {"term": "rsyslog", "meaning": "Der klassische Syslog-Daemon, der Textlogs nach /var/log schreibt."},
-  {"term": "logrotate", "meaning": "Werkzeug, das alte Logdateien nach Regeln rotiert, komprimiert und löscht."}
+  {
+   "term": "systemd",
+   "meaning": "Das Init-System (PID 1), das Dienste startet und überwacht."
+  },
+  {
+   "term": "Unit",
+   "meaning": "Ein von systemd verwaltetes Objekt: service, target, timer, mount und mehr."
+  },
+  {
+   "term": "Target",
+   "meaning": "Eine Gruppe von Units, die einen Systemzustand beschreibt, z. B. multi-user.target."
+  },
+  {
+   "term": "Timer",
+   "meaning": "Eine Unit, die eine andere zeitgesteuert startet; Alternative zu cron."
+  },
+  {
+   "term": "daemon-reload",
+   "meaning": "Lässt systemd die Unit-Dateien nach einer Änderung neu einlesen."
+  },
+  {
+   "term": "mask",
+   "meaning": "Verlinkt eine Unit auf /dev/null, sodass sie nicht gestartet werden kann."
+  },
+  {
+   "term": "Journal",
+   "meaning": "Die binäre Log-Datenbank von systemd, gelesen mit journalctl."
+  },
+  {
+   "term": "rsyslog",
+   "meaning": "Der klassische Syslog-Daemon, der Textlogs nach /var/log schreibt."
+  },
+  {
+   "term": "logrotate",
+   "meaning": "Werkzeug, das alte Logdateien nach Regeln rotiert, komprimiert und löscht."
+  }
  ]
 }

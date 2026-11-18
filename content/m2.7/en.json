@@ -272,6 +272,46 @@
     "Nothing, the file can be regenerated"
    ],
    "explain": "A backup (`sudo cp file file.bak`) lets you restore quickly after an error."
+  },
+  "q5": {
+   "q": "Which mode do you enter in vim to start typing text?",
+   "options": [
+    "Command mode",
+    "Visual mode",
+    "Insert mode (`i`)",
+    "Ex mode (`:`)"
+   ],
+   "explain": "vim starts in normal mode; `i` enters insert mode, `Esc` returns."
+  },
+  "q6": {
+   "q": "What do you type in vim to SAVE and quit?",
+   "options": [
+    ":wq",
+    ":q!",
+    ":w!q",
+    "ZZZ"
+   ],
+   "explain": "`:wq` writes and quits (`ZZ` does too); `:q!` quits without saving."
+  },
+  "q7": {
+   "q": "Which key undoes your last change in vim normal mode?",
+   "options": [
+    "r",
+    "u",
+    "x",
+    "p"
+   ],
+   "explain": "`u` undoes, `Ctrl+R` redoes; `x` deletes a character, `p` pastes."
+  },
+  "q8": {
+   "q": "How do you search for a word in vim from normal mode?",
+   "options": [
+    ":word",
+    "?? word",
+    "find word",
+    "/word"
+   ],
+   "explain": "`/word` searches forward, `n` jumps to the next match; `?word` searches backward."
   }
  },
  "summary": [

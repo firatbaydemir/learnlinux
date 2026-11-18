@@ -347,6 +347,46 @@
     "`/home/student` ve `/root`"
    ],
    "explain": "Normal kullanıcılar `/home/<ad>` altındadır; root'un ev dizini ayrı olarak `/root`'tur."
+  },
+  "q5": {
+   "q": "Linux'ta tüm dosya sisteminin başlangıç noktası nedir?",
+   "options": [
+    "C:\\",
+    "/ (kök dizin)",
+    "/root",
+    "/home"
+   ],
+   "explain": "Linux'ta sürücü harfi yoktur; her şey tek bir ağaç olan `/` altında dallanır. `/root` yalnızca root'un ana dizinidir."
+  },
+  "q6": {
+   "q": "Çalışan çekirdek ve süreç bilgisini dosya gibi gösteren sanal dizin hangisidir?",
+   "options": [
+    "/opt",
+    "/tmp",
+    "/usr",
+    "/proc"
+   ],
+   "explain": "`/proc` diskte yer kaplamaz; çekirdek ve süreç durumunu dosya olarak sunar (ör. `/proc/cpuinfo`)."
+  },
+  "q7": {
+   "q": "Aygıt dosyaları (disk, terminal vb.) hangi dizindedir?",
+   "options": [
+    "/dev",
+    "/etc",
+    "/var",
+    "/bin"
+   ],
+   "explain": "Donanım `/dev` altında dosya olarak görünür (ör. `/dev/sda`, `/dev/null`)."
+  },
+  "q8": {
+   "q": "Yeniden başlatmada içeriği silinebilen geçici dosyalar için hangi dizin kullanılır?",
+   "options": [
+    "/etc",
+    "/usr",
+    "/tmp",
+    "/boot"
+   ],
+   "explain": "`/tmp` geçici dosyalar içindir; önemli veriyi orada tutma. Ayarlar `/etc`, programlar `/usr` altındadır."
   }
  },
  "summary": [

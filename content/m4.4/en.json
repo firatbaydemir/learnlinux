@@ -370,6 +370,46 @@
     "It gives everyone full access and hides the real cause"
    ],
    "explain": "777 grants everyone read, write and execute and weakens security. First find the cause with `ls -l` and `id`, then grant only the minimum needed."
+  },
+  "q5": {
+   "q": "Which permissions does `chmod 640 f` set?",
+   "options": [
+    "rw-r-xr--",
+    "rwxr-----",
+    "rw-r-----",
+    "r--rw----"
+   ],
+   "explain": "6 = rw (owner), 4 = r (group), 0 = none (others)."
+  },
+  "q6": {
+   "q": "What does `chmod g+w f` do?",
+   "options": [
+    "Gives everyone write access",
+    "Adds write for the group, keeping other bits",
+    "Changes the group",
+    "Removes write access"
+   ],
+   "explain": "In symbolic mode `+` adds; `u/g/o/a` selects who it applies to."
+  },
+  "q7": {
+   "q": "Which command changes owner and group at once?",
+   "options": [
+    "`chmod alice:devs f`",
+    "`chgrp alice:devs f`",
+    "`chown :devs f`",
+    "`chown alice:devs f`"
+   ],
+   "explain": "`chown user:group` changes both; `chgrp` and `chown :group` change only the group."
+  },
+  "q8": {
+   "q": "Which mode does a new directory get with `umask 022`?",
+   "options": [
+    "755",
+    "644",
+    "777",
+    "700"
+   ],
+   "explain": "Directories start from 777, files from 666; subtracting mask 022 gives 755 and 644."
   }
  },
  "summary": [
@@ -380,11 +420,29 @@
   "`chmod -R 777` is not a fix; apply the principle of least privilege."
  ],
  "glossary": [
-  {"term": "permission triplet", "meaning": "A separate rwx set for owner, group and others."},
-  {"term": "octal mode", "meaning": "Permissions written as the sum r=4, w=2, x=1, e.g. 644."},
-  {"term": "umask", "meaning": "Bit mask that defines which permission bits are removed from new files and directories."},
-  {"term": "owner", "meaning": "The user the file belongs to; may change permissions."},
-  {"term": "group", "meaning": "A set of users sharing permissions, e.g. devs."},
-  {"term": "traverse permission", "meaning": "The x bit on a directory; allows passing through the path and access by name."}
+  {
+   "term": "permission triplet",
+   "meaning": "A separate rwx set for owner, group and others."
+  },
+  {
+   "term": "octal mode",
+   "meaning": "Permissions written as the sum r=4, w=2, x=1, e.g. 644."
+  },
+  {
+   "term": "umask",
+   "meaning": "Bit mask that defines which permission bits are removed from new files and directories."
+  },
+  {
+   "term": "owner",
+   "meaning": "The user the file belongs to; may change permissions."
+  },
+  {
+   "term": "group",
+   "meaning": "A set of users sharing permissions, e.g. devs."
+  },
+  {
+   "term": "traverse permission",
+   "meaning": "The x bit on a directory; allows passing through the path and access by name."
+  }
  ]
 }

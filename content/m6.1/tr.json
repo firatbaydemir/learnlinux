@@ -408,6 +408,46 @@
     "Kural hemen geçerli olur ama reload veya yeniden başlatmada kaybolur"
    ],
    "explain": "Varsayılan runtime yapılandırmasıdır: hemen etkilidir, kalıcı değildir. Kalıcı yapmak için `--permanent` ve `--reload` gerekir."
+  },
+  "q5": {
+   "q": "`ip -br a` neyi gösterir?",
+   "options": [
+    "Yalnızca yönlendirme tablosunu",
+    "Arayüzleri ve adreslerini kısa tabloda",
+    "Açık portları",
+    "DNS sunucularını"
+   ],
+   "explain": "`-br` (brief) arayüz durumu ve IP adreslerini tek satırda özetler."
+  },
+  "q6": {
+   "q": "`ss -tulpn` içindeki `-p` seçeneği ne ekler?",
+   "options": [
+    "Protokol adını",
+    "Port numarasını",
+    "Paket sayacını",
+    "Dinleyen süreci (PID/ad)"
+   ],
+   "explain": "`-p` soketi açan süreci gösterir; başka kullanıcıların süreçleri için root gerekir."
+  },
+  "q7": {
+   "q": "Bir hizmet `0.0.0.0:80` yerine `127.0.0.1:80` dinliyorsa ne olur?",
+   "options": [
+    "Yalnızca yerel makineden erişilir",
+    "Herkes erişir",
+    "Hizmet başlamaz",
+    "Yalnızca IPv6 çalışır"
+   ],
+   "explain": "`127.0.0.1` loopback'tir; dışarıdan gelen bağlantılar kabul edilmez."
+  },
+  "q8": {
+   "q": "`ip route` çıktısında `default via 10.0.0.1 dev eth0` ne anlama gelir?",
+   "options": [
+    "eth0 arayüzü kapalıdır",
+    "10.0.0.1 yerel adrestir",
+    "Bilinmeyen hedefler 10.0.0.1 geçidine gider",
+    "DNS sunucusu 10.0.0.1'dir"
+   ],
+   "explain": "`default` satırı başka hiçbir yol eşleşmediğinde kullanılan geçittir."
   }
  },
  "summary": [

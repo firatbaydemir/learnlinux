@@ -347,6 +347,46 @@
     "`/home/student` und `/root`"
    ],
    "explain": "Normale Benutzer liegen unter `/home/<name>`; das Home von root ist separat `/root`."
+  },
+  "q5": {
+   "q": "Was ist der Ausgangspunkt des gesamten Linux-Dateisystems?",
+   "options": [
+    "C:\\",
+    "/ (Wurzelverzeichnis)",
+    "/root",
+    "/home"
+   ],
+   "explain": "Linux kennt keine Laufwerksbuchstaben; alles hängt in einem Baum unter `/`. `/root` ist nur das Home von root."
+  },
+  "q6": {
+   "q": "Welches virtuelle Verzeichnis zeigt Kernel- und Prozessinfos als Dateien?",
+   "options": [
+    "/opt",
+    "/tmp",
+    "/usr",
+    "/proc"
+   ],
+   "explain": "`/proc` belegt keinen Plattenplatz; es stellt Kernel- und Prozesszustand als Dateien bereit (z. B. `/proc/cpuinfo`)."
+  },
+  "q7": {
+   "q": "In welchem Verzeichnis liegen Gerätedateien (Platte, Terminal usw.)?",
+   "options": [
+    "/dev",
+    "/etc",
+    "/var",
+    "/bin"
+   ],
+   "explain": "Hardware erscheint unter `/dev` als Dateien (z. B. `/dev/sda`, `/dev/null`)."
+  },
+  "q8": {
+   "q": "Welches Verzeichnis ist für temporäre Dateien, die beim Neustart gelöscht werden können?",
+   "options": [
+    "/etc",
+    "/usr",
+    "/tmp",
+    "/boot"
+   ],
+   "explain": "`/tmp` ist für temporäre Dateien; keine wichtigen Daten dort ablegen. Konfiguration liegt in `/etc`, Programme in `/usr`."
   }
  },
  "summary": [

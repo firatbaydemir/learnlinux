@@ -131,6 +131,22 @@
    ],
    "commands": [
     {
+     "cmd": "lsof",
+     "what": "Açık dosyaları ve bu dosyaları açan süreçleri listeler; `-i :80` 80 portunu kullananı gösterir.",
+     "where": "Bir port, silinemeyen dosya veya umount edilemeyen disk için kimin kullandığını bulmak için.",
+     "why": "Linux’ta soket ve aygıt da dosyadır; bu yüzden lsof ağı da gösterir.",
+     "example": "sudo lsof -i :80",
+     "nosim": true
+    },
+    {
+     "cmd": "fuser",
+     "what": "Bir dosya, dizin veya portu kullanan süreçlerin PID’lerini gösterir.",
+     "where": "`umount` “target is busy” verdiğinde: `fuser -vm /mnt/disk`.",
+     "why": "`fuser -k` süreçleri öldürür; hedefi doğrulamadan kullanma.",
+     "example": "fuser -v /var/log/syslog",
+     "nosim": true
+    },
+    {
      "cmd": "cat /proc/$$/status",
      "what": "Kabuğunun adını, durumunu, PID, PPID ve UID'sini gösterir.",
      "where": "ps'in göstermediği ayrıntılar için.",
@@ -396,6 +412,46 @@
     "ps -ef"
    ],
    "explain": "`ps -ef` (UNIX stili) PPID gösterir. `ps aux` (BSD stili) göstermez; onun için `ps -o pid,ppid,...` kullan."
+  },
+  "q5": {
+   "q": "`ps aux` içindeki `STAT` sütununda `S` ne demektir?",
+   "options": [
+    "Durdurulmuş (stopped)",
+    "Kesintisiz olmayan uyku; olay bekliyor",
+    "Zombi",
+    "Çalışıyor"
+   ],
+   "explain": "`S` = interruptible sleep; `T` durdurulmuş, `Z` zombi, `R` çalışıyor/çalışmaya hazır."
+  },
+  "q6": {
+   "q": "Ebeveyni sonlanan bir sürecin yeni ebeveyni kim olur?",
+   "options": [
+    "Hiç ebeveyni kalmaz",
+    "Kök kullanıcının kabuğu",
+    "Çekirdek",
+    "PID 1 (init/systemd)"
+   ],
+   "explain": "Yetim süreçler PID 1 tarafından sahiplenilir; o da bitince onları `wait` ile toplar."
+  },
+  "q7": {
+   "q": "Bir sürecin açık dosyalarını ve ortamını `/proc` altında nerede bulursun?",
+   "options": [
+    "`/proc/<PID>/`",
+    "`/var/run/<PID>`",
+    "`/sys/proc/<PID>`",
+    "`/etc/proc/<PID>`"
+   ],
+   "explain": "Her süreç için `/proc/<PID>/` vardır: `fd/`, `environ`, `status`, `cmdline`."
+  },
+  "q8": {
+   "q": "`ps -ef` ile `ps aux` arasındaki fark nedir?",
+   "options": [
+    "`-ef` yalnızca kendi süreçlerini gösterir",
+    "`aux` PID göstermez",
+    "İkisi farklı sözdizimi (POSIX / BSD) kullanır, çoğu süreci listeler",
+    "İkisi tamamen aynı çıktıyı verir"
+   ],
+   "explain": "`-ef` UNIX/POSIX, `aux` BSD biçimidir; sütunlar farklıdır (`-ef` PPID verir, `aux` %CPU/%MEM)."
   }
  },
  "summary": [

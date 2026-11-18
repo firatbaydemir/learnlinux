@@ -347,6 +347,46 @@
     "`/home/student` and `/root`"
    ],
    "explain": "Normal users live under `/home/<name>`; root's home is separately `/root`."
+  },
+  "q5": {
+   "q": "What is the starting point of the whole Linux filesystem?",
+   "options": [
+    "C:\\",
+    "/ (root directory)",
+    "/root",
+    "/home"
+   ],
+   "explain": "Linux has no drive letters; everything branches from the single tree under `/`. `/root` is only root's home."
+  },
+  "q6": {
+   "q": "Which virtual directory exposes kernel and process info as files?",
+   "options": [
+    "/opt",
+    "/tmp",
+    "/usr",
+    "/proc"
+   ],
+   "explain": "`/proc` uses no disk space; it presents kernel and process state as files (e.g. `/proc/cpuinfo`)."
+  },
+  "q7": {
+   "q": "Which directory holds device files (disk, terminal, etc.)?",
+   "options": [
+    "/dev",
+    "/etc",
+    "/var",
+    "/bin"
+   ],
+   "explain": "Hardware appears as files under `/dev` (e.g. `/dev/sda`, `/dev/null`)."
+  },
+  "q8": {
+   "q": "Which directory is for temporary files that may be wiped on reboot?",
+   "options": [
+    "/etc",
+    "/usr",
+    "/tmp",
+    "/boot"
+   ],
+   "explain": "`/tmp` is for temporary files; don't keep important data there. Config lives in `/etc`, programs in `/usr`."
   }
  },
  "summary": [

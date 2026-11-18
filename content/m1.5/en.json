@@ -220,7 +220,7 @@
    "tip": "To make it permanent, add the same `export` line to `~/.bashrc`."
   },
   {
-      "id": "globbing",
+   "id": "globbing",
    "title": "Wildcards (globbing)",
    "body": [
     "The **shell** expands wildcards, not the command. `*` matches anything (including nothing), `?` exactly one character, `[abc]` one of the characters in brackets. For `ls *.txt` the shell first turns the pattern into file names, then hands them to `ls`.",
@@ -513,6 +513,46 @@
     "f1 f2 f3"
    ],
    "explain": "The shell performs brace expansion and produces three separate words."
+  },
+  "q5": {
+   "q": "What is the Tab key for in the terminal?",
+   "options": [
+    "Runs the command",
+    "Clears the screen",
+    "Ends the session",
+    "Completes command and file names"
+   ],
+   "explain": "Tab auto-completes; if ambiguous, pressing it twice lists the options."
+  },
+  "q6": {
+   "q": "Which shortcut searches backwards through previous commands?",
+   "options": [
+    "Ctrl+L",
+    "Ctrl+R",
+    "Ctrl+Z",
+    "Ctrl+A"
+   ],
+   "explain": "`Ctrl+R` starts an incremental history search; `Ctrl+L` clears the screen, `Ctrl+A` jumps to line start."
+  },
+  "q7": {
+   "q": "What does `echo \"Today: $(date +%F)\"` do?",
+   "options": [
+    "Inserts the output of `date` into the text",
+    "Prints `$(date +%F)` literally",
+    "Gives an error",
+    "Changes the date"
+   ],
+   "explain": "`$(...)` is command substitution: the command runs and its output is inserted. Double quotes allow it, single quotes block it."
+  },
+  "q8": {
+   "q": "How do you define `ll` as a shortcut for `ls -l` in the current session?",
+   "options": [
+    "export ll=ls -l",
+    "set ll ls -l",
+    "alias ll='ls -l'",
+    "ln ll ls -l"
+   ],
+   "explain": "`alias name='cmd'` defines a shortcut; make it permanent in `~/.bashrc`. `export` is for variables."
   }
  },
  "summary": [

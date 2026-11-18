@@ -17,8 +17,20 @@
     "Nach dem Login landest du in deinem **Home-Verzeichnis**, z. B. `/home/student`. Kurz schreibt man es `~`; das ist auch die `~` im Prompt."
    ],
    "commands": [
-    {"cmd": "pwd", "what": "Zeigt das aktuelle Verzeichnis als vollständigen Pfad an.", "where": "Vor jeder Aktion, besonders vor dem Löschen und Kopieren.", "why": "Verhindert, dass du im falschen Verzeichnis die falsche Aktion ausführst.", "example": "pwd"},
-    {"cmd": "echo ~", "what": "Gibt die Auflösung des Kürzels `~` aus, also den vollständigen Pfad des Home-Verzeichnisses.", "where": "Wenn du den Pfad deines Home-Verzeichnisses wissen willst.", "why": "`~` wird von der Shell aufgelöst; Befehle sehen den echten Pfad.", "example": "echo ~"}
+    {
+     "cmd": "pwd",
+     "what": "Zeigt das aktuelle Verzeichnis als vollständigen Pfad an.",
+     "where": "Vor jeder Aktion, besonders vor dem Löschen und Kopieren.",
+     "why": "Verhindert, dass du im falschen Verzeichnis die falsche Aktion ausführst.",
+     "example": "pwd"
+    },
+    {
+     "cmd": "echo ~",
+     "what": "Gibt die Auflösung des Kürzels `~` aus, also den vollständigen Pfad des Home-Verzeichnisses.",
+     "where": "Wenn du den Pfad deines Home-Verzeichnisses wissen willst.",
+     "why": "`~` wird von der Shell aufgelöst; Befehle sehen den echten Pfad.",
+     "example": "echo ~"
+    }
    ],
    "tip": "Eine `~` im Prompt bedeutet, dass du im Home-Verzeichnis bist; in einem anderen Verzeichnis erscheint nur der letzte Ordnername wie `Documents`."
   },
@@ -30,10 +42,34 @@
     "Optionen beginnen mit `-` und lassen sich kombinieren: `-l` ausführliche Liste, `-a` inklusive versteckter Dateien, `-h` Größen menschenlesbar (K, M, G). `ls -lah` liefert alle drei auf einmal."
    ],
    "commands": [
-    {"cmd": "ls", "what": "Listet die Dateien und Ordner im aktuellen Verzeichnis auf.", "where": "Wenn du ein Verzeichnis betreten hast oder prüfen willst, ob etwas existiert.", "why": "Dort zu arbeiten, wo du nicht weißt, was liegt, ist gefährlich.", "example": "ls"},
-    {"cmd": "ls /etc", "what": "Listet den Inhalt des angegebenen Verzeichnisses auf, ohne hineinzuwechseln.", "where": "Um in ein anderes Verzeichnis hineinzuschauen.", "why": "Du schaust nach, ohne das Arbeitsverzeichnis zu ändern.", "example": "ls /etc"},
-    {"cmd": "ls -a", "what": "Zeigt auch versteckte Dateien, deren Name mit einem Punkt beginnt.", "where": "Bei der Suche nach Konfigurationsdateien.", "why": "Versteckte Dateien erscheinen in der normalen `ls`-Ausgabe nicht.", "example": "ls -a"},
-    {"cmd": "ls -lh", "what": "Ausführliche Liste; Größen in K/M/G.", "where": "Wenn du dir Dateigrößen ansiehst.", "why": "Einfacher, als Byte-Zahlen zu lesen.", "example": "ls -lh ~"}
+    {
+     "cmd": "ls",
+     "what": "Listet die Dateien und Ordner im aktuellen Verzeichnis auf.",
+     "where": "Wenn du ein Verzeichnis betreten hast oder prüfen willst, ob etwas existiert.",
+     "why": "Dort zu arbeiten, wo du nicht weißt, was liegt, ist gefährlich.",
+     "example": "ls"
+    },
+    {
+     "cmd": "ls /etc",
+     "what": "Listet den Inhalt des angegebenen Verzeichnisses auf, ohne hineinzuwechseln.",
+     "where": "Um in ein anderes Verzeichnis hineinzuschauen.",
+     "why": "Du schaust nach, ohne das Arbeitsverzeichnis zu ändern.",
+     "example": "ls /etc"
+    },
+    {
+     "cmd": "ls -a",
+     "what": "Zeigt auch versteckte Dateien, deren Name mit einem Punkt beginnt.",
+     "where": "Bei der Suche nach Konfigurationsdateien.",
+     "why": "Versteckte Dateien erscheinen in der normalen `ls`-Ausgabe nicht.",
+     "example": "ls -a"
+    },
+    {
+     "cmd": "ls -lh",
+     "what": "Ausführliche Liste; Größen in K/M/G.",
+     "where": "Wenn du dir Dateigrößen ansiehst.",
+     "why": "Einfacher, als Byte-Zahlen zu lesen.",
+     "example": "ls -lh ~"
+    }
    ],
    "tip": "Wird die `ls`-Ausgabe in einem Verzeichnis mit vielen Dateien zu lang, sieh dir mit `ls -l | head` die ersten Zeilen an. (`|` gibt die Ausgabe des ersten Befehls an den zweiten weiter, `head` zeigt die ersten 10 Zeilen; Details in Modul 3.2 und 2.6.)"
   },
@@ -46,11 +82,41 @@
     "Groß-/Kleinschreibung zählt: `Documents` und `documents` sind verschiedene Namen. Enthält ein Name Leerzeichen, verwende Anführungszeichen: `cd \"My Files\"`."
    ],
    "commands": [
-    {"cmd": "cd Documents", "what": "Wechselt in den Ordner `Documents` im aktuellen Verzeichnis.", "where": "Beim Hinabsteigen in einen Unterordner.", "why": "Relativer Pfad: beginnt dort, wo du gerade bist.", "example": "cd Documents"},
-    {"cmd": "cd ..", "what": "Geht ein Verzeichnis nach oben.", "where": "Beim Verlassen eines Ordners.", "why": "`..` steht in jedem Verzeichnis für das übergeordnete.", "example": "cd .."},
-    {"cmd": "cd ~", "what": "Wechselt ins Home-Verzeichnis.", "where": "Wenn du dich verlaufen hast.", "why": "Funktioniert von überall aus.", "example": "cd ~"},
-    {"cmd": "cd -", "what": "Kehrt ins vorherige Verzeichnis zurück und gibt dessen Pfad aus.", "where": "Beim Hin- und Herwechseln zwischen zwei Verzeichnissen.", "why": "Erspart dir, lange Pfade erneut einzutippen.", "example": "cd -"},
-    {"cmd": "cd", "what": "Ohne Argument wechselt es ins Home-Verzeichnis.", "where": "Um schnell nach Hause zurückzukehren.", "why": "Dasselbe wie `cd ~`, nur kürzer.", "example": "cd"}
+    {
+     "cmd": "cd Documents",
+     "what": "Wechselt in den Ordner `Documents` im aktuellen Verzeichnis.",
+     "where": "Beim Hinabsteigen in einen Unterordner.",
+     "why": "Relativer Pfad: beginnt dort, wo du gerade bist.",
+     "example": "cd Documents"
+    },
+    {
+     "cmd": "cd ..",
+     "what": "Geht ein Verzeichnis nach oben.",
+     "where": "Beim Verlassen eines Ordners.",
+     "why": "`..` steht in jedem Verzeichnis für das übergeordnete.",
+     "example": "cd .."
+    },
+    {
+     "cmd": "cd ~",
+     "what": "Wechselt ins Home-Verzeichnis.",
+     "where": "Wenn du dich verlaufen hast.",
+     "why": "Funktioniert von überall aus.",
+     "example": "cd ~"
+    },
+    {
+     "cmd": "cd -",
+     "what": "Kehrt ins vorherige Verzeichnis zurück und gibt dessen Pfad aus.",
+     "where": "Beim Hin- und Herwechseln zwischen zwei Verzeichnissen.",
+     "why": "Erspart dir, lange Pfade erneut einzutippen.",
+     "example": "cd -"
+    },
+    {
+     "cmd": "cd",
+     "what": "Ohne Argument wechselt es ins Home-Verzeichnis.",
+     "where": "Um schnell nach Hause zurückzukehren.",
+     "why": "Dasselbe wie `cd ~`, nur kürzer.",
+     "example": "cd"
+    }
    ],
    "tip": "Wenn du dich verlaufen hast, tippe `cd` und prüfe mit `pwd`: Du bist wieder im Home-Verzeichnis."
   },
@@ -63,8 +129,20 @@
     "`..` ist das übergeordnete Verzeichnis, `.` das aktuelle; sie lassen sich verketten: `cd ../..` geht zwei Ebenen nach oben. Bist du in `/usr/bin`, bringt dich `cd ../..` zur Wurzel `/`."
    ],
    "commands": [
-    {"cmd": "cd /usr/bin", "what": "Wechselt über den absoluten Pfad direkt nach `/usr/bin`.", "where": "Wenn du unabhängig vom aktuellen Ort ein Ziel ansteuerst.", "why": "Das Ergebnis ist immer dasselbe.", "example": "cd /usr/bin"},
-    {"cmd": "cd ../..", "what": "Geht zwei Verzeichnisse nach oben.", "where": "Um schnell aus einem tiefen Ordner herauszukommen.", "why": "Im relativen Pfad lässt sich `..` verketten.", "example": "cd ../.."}
+    {
+     "cmd": "cd /usr/bin",
+     "what": "Wechselt über den absoluten Pfad direkt nach `/usr/bin`.",
+     "where": "Wenn du unabhängig vom aktuellen Ort ein Ziel ansteuerst.",
+     "why": "Das Ergebnis ist immer dasselbe.",
+     "example": "cd /usr/bin"
+    },
+    {
+     "cmd": "cd ../..",
+     "what": "Geht zwei Verzeichnisse nach oben.",
+     "where": "Um schnell aus einem tiefen Ordner herauszukommen.",
+     "why": "Im relativen Pfad lässt sich `..` verketten.",
+     "example": "cd ../.."
+    }
    ],
    "tip": "Bist du unsicher, schreibe den absoluten Pfad; bei kurzen Strecken ist der relative Pfad schneller."
   },
@@ -76,8 +154,21 @@
     "In der Ausgabe von `ls -a` siehst du zwei besondere Einträge: `.` (das aktuelle Verzeichnis) und `..` (das übergeordnete). Das sind keine echten Dateien, sondern Kürzel, die in jedem Verzeichnis vorhanden sind."
    ],
    "commands": [
-    {"cmd": "ls -a ~", "what": "Listet alles im Home-Verzeichnis auf, einschließlich versteckter Dateien.", "where": "Bei der Suche nach Konfigurationsdateien.", "why": "Dateien wie `.bashrc` erscheinen nur auf diese Weise.", "example": "ls -a ~"},
-    {"cmd": "ls -A", "what": "Zeigt versteckte Dateien ohne `.` und `..`.", "where": "Für eine sauberere Liste (auf der echten VM).", "why": "Wie `-a`, aber ohne die beiden Kürzel-Einträge.", "example": "ls -A ~", "nosim": true}
+    {
+     "cmd": "ls -a ~",
+     "what": "Listet alles im Home-Verzeichnis auf, einschließlich versteckter Dateien.",
+     "where": "Bei der Suche nach Konfigurationsdateien.",
+     "why": "Dateien wie `.bashrc` erscheinen nur auf diese Weise.",
+     "example": "ls -a ~"
+    },
+    {
+     "cmd": "ls -A",
+     "what": "Zeigt versteckte Dateien ohne `.` und `..`.",
+     "where": "Für eine sauberere Liste (auf der echten VM).",
+     "why": "Wie `-a`, aber ohne die beiden Kürzel-Einträge.",
+     "example": "ls -A ~",
+     "nosim": true
+    }
    ],
    "warn": "Lösche oder beschädige Konfigurationsdateien wie `.bashrc` und `.profile` nicht; deine Shell-Umgebung könnte kaputtgehen."
   },
@@ -90,8 +181,20 @@
     "Die oberste Zeile `total` ist die Summe der auf dem Datenträger belegten Blöcke. Die Details zu den Berechtigungen lernst du in späteren Modulen kennen."
    ],
    "commands": [
-    {"cmd": "ls -l", "what": "Ausführliche Liste mit Typ, Berechtigungen, Besitzer, Größe, Datum und Name.", "where": "Wenn du Besitzer oder Berechtigungen einer Datei prüfst.", "why": "Alle wichtigen Informationen zur Datei in einer Zeile.", "example": "ls -l"},
-    {"cmd": "ls -ld ~", "what": "Zeigt ein Verzeichnis selbst (nicht seinen Inhalt) ausführlich an.", "where": "Wenn du Berechtigungen oder Besitzer eines Verzeichnisses prüfst.", "why": "Ohne `-d` schaut `ls` in das Verzeichnis hinein.", "example": "ls -ld ~"}
+    {
+     "cmd": "ls -l",
+     "what": "Ausführliche Liste mit Typ, Berechtigungen, Besitzer, Größe, Datum und Name.",
+     "where": "Wenn du Besitzer oder Berechtigungen einer Datei prüfst.",
+     "why": "Alle wichtigen Informationen zur Datei in einer Zeile.",
+     "example": "ls -l"
+    },
+    {
+     "cmd": "ls -ld ~",
+     "what": "Zeigt ein Verzeichnis selbst (nicht seinen Inhalt) ausführlich an.",
+     "where": "Wenn du Berechtigungen oder Besitzer eines Verzeichnisses prüfst.",
+     "why": "Ohne `-d` schaut `ls` in das Verzeichnis hinein.",
+     "example": "ls -ld ~"
+    }
    ],
    "tip": "Beginnt die Zeile mit `d`, ist es ein Ordner, beginnt sie mit `-`, eine Datei."
   },
@@ -104,28 +207,83 @@
     "Weiteres Kürzel: Die Tasten **↑/↓** holen frühere Befehle zurück. Diese Funktionen laufen in einer echten Shell (in deiner VM)."
    ],
    "commands": [
-    {"cmd": "cd Doc + Tab", "what": "Tippst du `Doc` und drückst Tab, wird zu `Documents/` vervollständigt.", "where": "Bei jedem Befehl, wenn du Datei- und Ordnernamen schreibst.", "why": "Weniger Tippen, keine Fehler.", "example": "cd Doc", "nosim": true}
+    {
+     "cmd": "cd Doc + Tab",
+     "what": "Tippst du `Doc` und drückst Tab, wird zu `Documents/` vervollständigt.",
+     "where": "Bei jedem Befehl, wenn du Datei- und Ordnernamen schreibst.",
+     "why": "Weniger Tippen, keine Fehler.",
+     "example": "cd Doc",
+     "nosim": true
+    }
    ],
    "tip": "Mach es dir zur Gewohnheit: Drücke Tab, bevor du einen Namen komplett ausschreibst."
   }
  ],
  "tasks": {
-  "t01": {"text": "Zeige mit `pwd` das aktuelle Verzeichnis an.", "hint": "Die Ausgabe ist ein vollständiger Pfad, der mit `/` beginnt."},
-  "t02": {"text": "Liste mit `ls` den Inhalt des Home-Verzeichnisses auf.", "hint": "`ls` ohne Argument schaut ins aktuelle Verzeichnis."},
-  "t03": {"text": "Wechsle mit `cd Documents` in den Ordner `Documents`.", "hint": "Im Prompt muss sich der Verzeichnisname ändern."},
-  "t04": {"text": "Liste mit `ls -l` ausführlich auf.", "hint": "`-l` ist ein kleines L."},
-  "t05": {"text": "Liste mit `ls -a` inklusive versteckter Dateien auf.", "hint": "`.hidden_notes.txt` sollte erscheinen."},
-  "t06": {"text": "Wechsle über den absoluten Pfad in das Verzeichnis `~/projects/website`.", "hint": "`cd ~/projects/website`."},
-  "t07": {"text": "Wechsle über den relativen Pfad in den Unterordner `css`.", "hint": "Du bist schon in `website`: `cd css`."},
-  "t08": {"text": "Wechsle aus `css` mithilfe von `..` in den Nachbarordner `images`.", "hint": "Erst eins hoch, dann hinunter: `cd ../images`."},
-  "t09": {"text": "Kehre mit `cd -` ins vorherige Verzeichnis zurück.", "hint": "Vergiss das Minuszeichen nicht."},
-  "t10": {"text": "Kehre mit `cd` ohne Argument ins Home-Verzeichnis zurück.", "hint": "`cd` oder `cd ~`."},
-  "t11": {"text": "Vorhersage: Du bist in `/usr/bin` und tippst `cd /usr/bin/../..`. Wo landest du? Überlege zuerst, führe dann den Befehl aus und prüfe mit `pwd`.", "hint": "Jedes `..` geht eine Ebene hoch: `/usr/bin` → `/usr` → `/`."},
-  "t12": {"text": "Vorhersage: Welchen Typ, Besitzer und welche Berechtigungen hat die Datei `/etc/hostname`? Prüfe mit `ls -l /etc/hostname`.", "hint": "Ist das erste Zeichen `-`, ist es eine normale Datei; der Besitzer ist `root`."},
-  "t13": {"text": "Fehlersuche: Ein Freund tippt `cd ~/downloads` und erhält `No such file or directory`. Wechsle mit dem richtigen Namen in den Ordner `Downloads`.", "hint": "In Linux zählt die Groß-/Kleinschreibung: `Downloads`."},
-  "t14": {"text": "Mini-Projekt: Wechsle nach `~/projects/website/css`, liste den Inhalt auf und gehe dann zwei Ebenen nach oben, sodass du in `~/projects` landest.", "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."},
-  "t15": {"text": "Schwierige Aufgabe: Liste mit einem einzigen `ls`-Befehl den Inhalt von `~/Documents` und `~/projects/website` auf, einschließlich versteckter Dateien.", "hint": "`ls` akzeptiert mehrere Pfade; kombiniere es mit `-a`."},
-  "t16": {"text": "TICKET #1101 — Ein Kollege braucht den vollständigen Pfad des Ordners `images` im Projekt `website`. Wechsle in den Ordner, zeige den Pfad mit `pwd` an und kehre dann ins Home-Verzeichnis zurück.", "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."}
+  "t01": {
+   "text": "Zeige mit `pwd` das aktuelle Verzeichnis an.",
+   "hint": "Die Ausgabe ist ein vollständiger Pfad, der mit `/` beginnt."
+  },
+  "t02": {
+   "text": "Liste mit `ls` den Inhalt des Home-Verzeichnisses auf.",
+   "hint": "`ls` ohne Argument schaut ins aktuelle Verzeichnis."
+  },
+  "t03": {
+   "text": "Wechsle mit `cd Documents` in den Ordner `Documents`.",
+   "hint": "Im Prompt muss sich der Verzeichnisname ändern."
+  },
+  "t04": {
+   "text": "Liste mit `ls -l` ausführlich auf.",
+   "hint": "`-l` ist ein kleines L."
+  },
+  "t05": {
+   "text": "Liste mit `ls -a` inklusive versteckter Dateien auf.",
+   "hint": "`.hidden_notes.txt` sollte erscheinen."
+  },
+  "t06": {
+   "text": "Wechsle über den absoluten Pfad in das Verzeichnis `~/projects/website`.",
+   "hint": "`cd ~/projects/website`."
+  },
+  "t07": {
+   "text": "Wechsle über den relativen Pfad in den Unterordner `css`.",
+   "hint": "Du bist schon in `website`: `cd css`."
+  },
+  "t08": {
+   "text": "Wechsle aus `css` mithilfe von `..` in den Nachbarordner `images`.",
+   "hint": "Erst eins hoch, dann hinunter: `cd ../images`."
+  },
+  "t09": {
+   "text": "Kehre mit `cd -` ins vorherige Verzeichnis zurück.",
+   "hint": "Vergiss das Minuszeichen nicht."
+  },
+  "t10": {
+   "text": "Kehre mit `cd` ohne Argument ins Home-Verzeichnis zurück.",
+   "hint": "`cd` oder `cd ~`."
+  },
+  "t11": {
+   "text": "Vorhersage: Du bist in `/usr/bin` und tippst `cd /usr/bin/../..`. Wo landest du? Überlege zuerst, führe dann den Befehl aus und prüfe mit `pwd`.",
+   "hint": "Jedes `..` geht eine Ebene hoch: `/usr/bin` → `/usr` → `/`."
+  },
+  "t12": {
+   "text": "Vorhersage: Welchen Typ, Besitzer und welche Berechtigungen hat die Datei `/etc/hostname`? Prüfe mit `ls -l /etc/hostname`.",
+   "hint": "Ist das erste Zeichen `-`, ist es eine normale Datei; der Besitzer ist `root`."
+  },
+  "t13": {
+   "text": "Fehlersuche: Ein Freund tippt `cd ~/downloads` und erhält `No such file or directory`. Wechsle mit dem richtigen Namen in den Ordner `Downloads`.",
+   "hint": "In Linux zählt die Groß-/Kleinschreibung: `Downloads`."
+  },
+  "t14": {
+   "text": "Mini-Projekt: Wechsle nach `~/projects/website/css`, liste den Inhalt auf und gehe dann zwei Ebenen nach oben, sodass du in `~/projects` landest.",
+   "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."
+  },
+  "t15": {
+   "text": "Schwierige Aufgabe: Liste mit einem einzigen `ls`-Befehl den Inhalt von `~/Documents` und `~/projects/website` auf, einschließlich versteckter Dateien.",
+   "hint": "`ls` akzeptiert mehrere Pfade; kombiniere es mit `-a`."
+  },
+  "t16": {
+   "text": "TICKET #1101 — Ein Kollege braucht den vollständigen Pfad des Ordners `images` im Projekt `website`. Wechsle in den Ordner, zeige den Pfad mit `pwd` an und kehre dann ins Home-Verzeichnis zurück.",
+   "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."
+  }
  },
  "vm": {
   "intro": "Führe diese Aufgaben auf deiner eigenen VM aus (Ubuntu, Rocky, Alma oder WSL). Alle sind nur lesend; nichts wird verändert.",
@@ -133,40 +291,155 @@
    "v01": {
     "title": "Wo bin ich?",
     "text": "Öffne das Terminal; gib das aktuelle Verzeichnis und den Pfad deines Home-Verzeichnisses aus und füge die Ausgabe ein.",
-    "blocks": [{"cmd": "pwd\necho ~", "expected": "/home/student\n/home/student"}],
-    "differs": ["Heißt dein Benutzer nicht `student`, erscheint im Pfad dein eigener Name; das ist normal.", "Lautet die Ausgabe `/root`, arbeitest du als root; wechsle zu einem normalen Benutzer."]
+    "blocks": [
+     {
+      "cmd": "pwd\necho ~",
+      "expected": "/home/student\n/home/student"
+     }
+    ],
+    "differs": [
+     "Heißt dein Benutzer nicht `student`, erscheint im Pfad dein eigener Name; das ist normal.",
+     "Lautet die Ausgabe `/root`, arbeitest du als root; wechsle zu einem normalen Benutzer."
+    ]
    },
    "v02": {
     "title": "Versteckte Dateien finden",
     "text": "Liste das Home-Verzeichnis inklusive versteckter Dateien auf und finde die Datei `.bashrc`.",
-    "blocks": [{"cmd": "ls -a ~", "expected": ".  ..  .bash_logout  .bashrc  .profile  Desktop  Documents ..."}],
-    "differs": ["Du siehst vielleicht viele versteckte Ordner (`.cache`, `.config`); das ist normal.", "Auch unter WSL liegt `.bashrc` im Home-Verzeichnis; achte darauf, unter `~` zu suchen."]
+    "blocks": [
+     {
+      "cmd": "ls -a ~",
+      "expected": ".  ..  .bash_logout  .bashrc  .profile  Desktop  Documents ..."
+     }
+    ],
+    "differs": [
+     "Du siehst vielleicht viele versteckte Ordner (`.cache`, `.config`); das ist normal.",
+     "Auch unter WSL liegt `.bashrc` im Home-Verzeichnis; achte darauf, unter `~` zu suchen."
+    ]
    },
    "v03": {
     "title": "Absolut, relativ und cd -",
     "text": "Wechsle über den absoluten Pfad nach `/var/log`, gehe mit `..` nach oben, kehre mit `cd -` zurück und gib die Pfade aus.",
-    "blocks": [{"cmd": "cd /var/log\npwd\ncd ..\npwd\ncd -\ncd /etc\npwd", "expected": "/var/log\n/var\n/var/log\n/etc"}],
-    "differs": ["`cd -` gibt den vorherigen Pfad selbst auch aus; eine zusätzliche Zeile ist normal.", "Gibt es `/var/log` nicht (sehr minimales Image), versuche es mit `cd /usr/bin`."]
+    "blocks": [
+     {
+      "cmd": "cd /var/log\npwd\ncd ..\npwd\ncd -\ncd /etc\npwd",
+      "expected": "/var/log\n/var\n/var/log\n/etc"
+     }
+    ],
+    "differs": [
+     "`cd -` gibt den vorherigen Pfad selbst auch aus; eine zusätzliche Zeile ist normal.",
+     "Gibt es `/var/log` nicht (sehr minimales Image), versuche es mit `cd /usr/bin`."
+    ]
    },
    "v04": {
     "title": "ls -l lesen",
     "text": "Liste die Datei `/etc/passwd` ausführlich auf; lies Typ, Berechtigungen, Besitzer und Größe ab.",
-    "blocks": [{"cmd": "ls -l /etc/passwd", "expected": "-rw-r--r-- 1 root root 1234 Nov 12 10:32 /etc/passwd"}],
-    "differs": ["Steht am Ende der Berechtigungen ein `.` oder `+` (SELinux/ACL), ist das normal.", "Größe und Datum unterscheiden sich je nach System."]
+    "blocks": [
+     {
+      "cmd": "ls -l /etc/passwd",
+      "expected": "-rw-r--r-- 1 root root 1234 Nov 12 10:32 /etc/passwd"
+     }
+    ],
+    "differs": [
+     "Steht am Ende der Berechtigungen ein `.` oder `+` (SELinux/ACL), ist das normal.",
+     "Größe und Datum unterscheiden sich je nach System."
+    ]
    },
    "v05": {
     "title": "Tab-Vervollständigung",
     "text": "Tippe `cd Doc` und drücke, ohne Enter zu drücken, Tab; es sollte zu `Documents/` vervollständigt werden. Tippe dann `cd ~/` und drücke zweimal Tab, um die Liste zu sehen. Wenn du es getan hast, sage „Erledigt“.",
-    "blocks": [{"cmd": "cd Doc<Tab>"}],
-    "differs": ["Wird nichts vervollständigt, gibt es den Ordner `Documents` nicht oder du bist nicht im Home-Verzeichnis; prüfe mit `pwd`.", "Auf manchen minimalen Systemen wird für die Vervollständigung das Paket `bash-completion` benötigt."]
+    "blocks": [
+     {
+      "cmd": "cd Doc<Tab>"
+     }
+    ],
+    "differs": [
+     "Wird nichts vervollständigt, gibt es den Ordner `Documents` nicht oder du bist nicht im Home-Verzeichnis; prüfe mit `pwd`.",
+     "Auf manchen minimalen Systemen wird für die Vervollständigung das Paket `bash-completion` benötigt."
+    ]
    }
   }
  },
  "quiz": {
-  "q1": {"q": "Was macht der Befehl `pwd`?", "options": ["Listet Dateien auf", "Zeigt das aktuelle Verzeichnis als vollständigen Pfad an", "Wechselt das Verzeichnis", "Ändert das Passwort"], "explain": "`pwd` (print working directory) gibt das Arbeitsverzeichnis aus."},
-  "q2": {"q": "Was macht `cd ..`?", "options": ["Wechselt ins Home-Verzeichnis", "Bleibt an Ort und Stelle", "Geht ein Verzeichnis nach oben", "Kehrt ins vorherige Verzeichnis zurück"], "explain": "`..` ist das übergeordnete Verzeichnis; für Home nimmt man `cd ~`, für das vorherige `cd -`."},
-  "q3": {"q": "Was verwendest du, um versteckte Dateien zu sehen?", "options": ["ls -a", "ls -l", "ls -h", "ls -r"], "explain": "`-a` zeigt Dateien, deren Name mit einem Punkt beginnt."},
-  "q4": {"q": "Was bedeutet es, wenn eine Zeile der `ls -l`-Ausgabe mit `d` beginnt?", "options": ["Gelöschte Datei", "Ausführbare Datei", "Symbolischer Link", "Verzeichnis"], "explain": "Das erste Zeichen zeigt den Typ: `d` Verzeichnis, `-` Datei, `l` symbolischer Link."}
+  "q1": {
+   "q": "Was macht der Befehl `pwd`?",
+   "options": [
+    "Listet Dateien auf",
+    "Zeigt das aktuelle Verzeichnis als vollständigen Pfad an",
+    "Wechselt das Verzeichnis",
+    "Ändert das Passwort"
+   ],
+   "explain": "`pwd` (print working directory) gibt das Arbeitsverzeichnis aus."
+  },
+  "q2": {
+   "q": "Was macht `cd ..`?",
+   "options": [
+    "Wechselt ins Home-Verzeichnis",
+    "Bleibt an Ort und Stelle",
+    "Geht ein Verzeichnis nach oben",
+    "Kehrt ins vorherige Verzeichnis zurück"
+   ],
+   "explain": "`..` ist das übergeordnete Verzeichnis; für Home nimmt man `cd ~`, für das vorherige `cd -`."
+  },
+  "q3": {
+   "q": "Was verwendest du, um versteckte Dateien zu sehen?",
+   "options": [
+    "ls -a",
+    "ls -l",
+    "ls -h",
+    "ls -r"
+   ],
+   "explain": "`-a` zeigt Dateien, deren Name mit einem Punkt beginnt."
+  },
+  "q4": {
+   "q": "Was bedeutet es, wenn eine Zeile der `ls -l`-Ausgabe mit `d` beginnt?",
+   "options": [
+    "Gelöschte Datei",
+    "Ausführbare Datei",
+    "Symbolischer Link",
+    "Verzeichnis"
+   ],
+   "explain": "Das erste Zeichen zeigt den Typ: `d` Verzeichnis, `-` Datei, `l` symbolischer Link."
+  },
+  "q5": {
+   "q": "Welcher Befehl listet ausführlich mit lesbaren Größen (K, M, G)?",
+   "options": [
+    "ls -a",
+    "ls -R",
+    "ls -lh",
+    "ls -d"
+   ],
+   "explain": "`-l` Langformat, `-h` lesbare Größen; `-a` zeigt versteckte Dateien, `-R` auch Unterverzeichnisse."
+  },
+  "q6": {
+   "q": "Welcher ist ein absoluter Pfad?",
+   "options": [
+    "/etc/hosts",
+    "etc/hosts",
+    "../etc/hosts",
+    "~etc/hosts"
+   ],
+   "explain": "Ein absoluter Pfad beginnt mit `/` und zeigt von überall auf dieselbe Datei; relative Pfade hängen vom aktuellen Verzeichnis ab."
+  },
+  "q7": {
+   "q": "Was macht `cd -`?",
+   "options": [
+    "Wechselt ins Home-Verzeichnis",
+    "Wechselt ins Wurzelverzeichnis",
+    "Wechselt ein Verzeichnis nach oben",
+    "Kehrt ins zuletzt besuchte Verzeichnis zurück"
+   ],
+   "explain": "`cd -` wechselt nach `OLDPWD`; Home mit `cd` oder `cd ~`, nach oben mit `cd ..`."
+  },
+  "q8": {
+   "q": "Was bedeuten die Einträge `.` und `..`?",
+   "options": [
+    "Versteckte Systemdateien, sollten gelöscht werden",
+    "Aktuelles und übergeordnetes Verzeichnis",
+    "Wurzel- und Home-Verzeichnis",
+    "Leere Dateien"
+   ],
+   "explain": "In jedem Verzeichnis steht `.` für es selbst und `..` für das übergeordnete; mit `ls -a` sichtbar."
+  }
  },
  "summary": [
   "`pwd` sagt dir, wo du bist, `ls`, was da ist, und `cd`, wohin du gehst.",
@@ -176,11 +449,29 @@
   "Vervollständige mit Tab; achte auf Groß-/Kleinschreibung."
  ],
  "glossary": [
-  {"term": "Arbeitsverzeichnis", "meaning": "Das Verzeichnis, in dem du dich gerade befindest und in dem Befehle standardmäßig arbeiten."},
-  {"term": "Home-Verzeichnis", "meaning": "Das Verzeichnis des Benutzers; abgekürzt mit `~`, zum Beispiel `/home/student`."},
-  {"term": "absoluter Pfad", "meaning": "Die vollständige Adresse ab der Wurzel `/`."},
-  {"term": "relativer Pfad", "meaning": "Ein Pfad, der vom aktuellen Verzeichnis aus beginnt."},
-  {"term": "versteckte Datei", "meaning": "Eine Datei, deren Name mit einem Punkt beginnt und die mit `ls -a` sichtbar wird."},
-  {"term": "Tab-Vervollständigung", "meaning": "Die Shell vervollständigt einen Namen, wenn du den Anfang tippst und Tab drückst."}
+  {
+   "term": "Arbeitsverzeichnis",
+   "meaning": "Das Verzeichnis, in dem du dich gerade befindest und in dem Befehle standardmäßig arbeiten."
+  },
+  {
+   "term": "Home-Verzeichnis",
+   "meaning": "Das Verzeichnis des Benutzers; abgekürzt mit `~`, zum Beispiel `/home/student`."
+  },
+  {
+   "term": "absoluter Pfad",
+   "meaning": "Die vollständige Adresse ab der Wurzel `/`."
+  },
+  {
+   "term": "relativer Pfad",
+   "meaning": "Ein Pfad, der vom aktuellen Verzeichnis aus beginnt."
+  },
+  {
+   "term": "versteckte Datei",
+   "meaning": "Eine Datei, deren Name mit einem Punkt beginnt und die mit `ls -a` sichtbar wird."
+  },
+  {
+   "term": "Tab-Vervollständigung",
+   "meaning": "Die Shell vervollständigt einen Namen, wenn du den Anfang tippst und Tab drückst."
+  }
  ]
 }

@@ -14,7 +14,8 @@
     "The **terminal** is the window where you give the computer text commands. The program running inside it is the **shell**; the most common one is `bash`. The shell reads your line, runs it and prints the result.",
     "The **prompt** at the start of each line tells you three things: who you are, which machine you are on and which directory you are in. Example: `student@linux-lab:~$` — user `student`, machine `linux-lab`, `~` means the home directory. A trailing `$` marks a normal user, `#` marks the administrator (root)."
    ],
-   "tip": "Nothing runs until you press Enter. Use Backspace to fix typos."
+   "tip": "Nothing runs until you press Enter. Use Backspace to fix typos.",
+   "warn": "Common mistake: typing the prompt's `$` along with the command. `$` is only an indicator; type just what follows it. Commands are case-sensitive: `LS` ≠ `ls`."
   },
   {
    "id": "first",
@@ -90,7 +91,7 @@
      "example": "history"
     }
    ],
-      "tip": "Pressing Tab twice lists all possible completions. Try typing `whoa` and press Tab."
+   "tip": "Pressing Tab twice lists all possible completions. Try typing `whoa` and press Tab."
   },
   {
    "id": "preview",
@@ -216,6 +217,46 @@
     "Alt"
    ],
    "explain": "Tab completes; pressed twice it lists the options."
+  },
+  "q5": {
+   "q": "What does `whoami` print?",
+   "options": [
+    "The machine name",
+    "The current user name",
+    "The working directory",
+    "The kernel version"
+   ],
+   "explain": "`whoami` shows the active user; use `hostname` for the machine and `pwd` for the directory."
+  },
+  "q6": {
+   "q": "Which key quits a `man` page?",
+   "options": [
+    "Esc",
+    "Enter",
+    "Ctrl+D",
+    "q"
+   ],
+   "explain": "`man` uses a pager; `q` quits and `/word` searches."
+  },
+  "q7": {
+   "q": "What happens when you press ↑ (up arrow) in the terminal?",
+   "options": [
+    "The previous command appears on the line",
+    "The screen is cleared",
+    "You go to the parent directory",
+    "The session ends"
+   ],
+   "explain": "Arrow keys browse the command history; `history` lists it all."
+  },
+  "q8": {
+   "q": "What does the `history` command do?",
+   "options": [
+    "Clears the screen",
+    "Shows disk usage",
+    "Lists commands you typed earlier",
+    "Lists users"
+   ],
+   "explain": "`history` shows the numbered command history; `!N` re-runs command N."
   }
  },
  "summary": [

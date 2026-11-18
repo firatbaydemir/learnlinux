@@ -149,6 +149,22 @@
    ],
    "commands": [
     {
+     "cmd": "lsattr",
+     "what": "Lists file attributes (e.g. `i` immutable, `a` append-only).",
+     "where": "When even root cannot delete a file, check attributes before permissions.",
+     "why": "Permission bits (rwx) and attributes are separate mechanisms.",
+     "example": "lsattr file.txt",
+     "nosim": true
+    },
+    {
+     "cmd": "chattr",
+     "what": "Changes file attributes; `+i` makes a file immutable and undeletable.",
+     "where": "To protect a critical file from accidental changes (ext4/xfs).",
+     "why": "Undo with `sudo chattr -i file`.",
+     "example": "sudo chattr +i file.txt",
+     "nosim": true
+    },
+    {
      "cmd": "sudo mkdir /srv/project",
      "what": "Creates the shared folder under `/srv` with root privileges.",
      "where": "When setting up a permanent team workspace.",
@@ -364,6 +380,46 @@
     "`find / -perm -4000 -type f 2>/dev/null`"
    ],
    "explain": "`-perm -4000` finds files with the setuid bit set; `2>/dev/null` hides permission errors."
+  },
+  "q5": {
+   "q": "What does `chmod u+s` do on an executable?",
+   "options": [
+    "Makes it read-only",
+    "It runs as the file owner rather than the caller",
+    "Only the group can run it",
+    "Prevents deletion"
+   ],
+   "explain": "Setuid bit: the process runs with the owner's effective UID; `passwd` is an example."
+  },
+  "q6": {
+   "q": "What does the leading `2` in `chmod 2775 dir` set?",
+   "options": [
+    "Sticky bit",
+    "Setuid",
+    "Setgid",
+    "None of them"
+   ],
+   "explain": "The leading digit: 4 = setuid, 2 = setgid, 1 = sticky."
+  },
+  "q7": {
+   "q": "What may a user delete in a directory with the sticky bit?",
+   "options": [
+    "Everyone's files",
+    "No files",
+    "Only files of the directory's group",
+    "Only their own files (or as directory owner/root)"
+   ],
+   "explain": "The sticky bit limits deletion/renaming to the file owner, directory owner and root."
+  },
+  "q8": {
+   "q": "What does the `i` attribute in `lsattr` output mean?",
+   "options": [
+    "File is immutable and cannot be changed or deleted",
+    "File is hidden",
+    "File is compressed",
+    "File is append-only"
+   ],
+   "explain": "`chattr +i` blocks modification/deletion even for root; append-only is `a`."
   }
  },
  "summary": [

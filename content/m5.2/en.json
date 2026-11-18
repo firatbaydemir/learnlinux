@@ -305,6 +305,46 @@
     "nproc"
    ],
    "explain": "ps with --sort=-%mem sorts by memory descending; head shows the first lines."
+  },
+  "q5": {
+   "q": "What is true of `buff/cache` in `free -h` output?",
+   "options": [
+    "Permanently reserved, cannot be freed",
+    "Can be reclaimed for applications when needed",
+    "It is swap space",
+    "Belongs to the kernel and is never freed"
+   ],
+   "explain": "Page cache is reclaimed on demand, which is why `available` is the key figure."
+  },
+  "q6": {
+   "q": "Which command shows per-device disk I/O statistics?",
+   "options": [
+    "`free`",
+    "`uptime`",
+    "`ps`",
+    "`iostat -x`"
+   ],
+   "explain": "`iostat` (sysstat package) shows throughput, wait time and utilisation per device."
+  },
+  "q7": {
+   "q": "What is the most likely cause of a high `wa` value in `top`?",
+   "options": [
+    "Processes are waiting on disk I/O",
+    "CPU overheating",
+    "Memory is full",
+    "Network is down"
+   ],
+   "explain": "`wa` = I/O wait: the CPU is idle waiting for I/O to complete."
+  },
+  "q8": {
+   "q": "Which intervals do the three load averages in `uptime` cover?",
+   "options": [
+    "1, 5 and 60 seconds",
+    "1, 10 and 30 minutes",
+    "1, 5 and 15 minutes",
+    "5, 15 and 60 minutes"
+   ],
+   "explain": "Load averages cover the last 1, 5 and 15 minutes."
   }
  },
  "summary": [

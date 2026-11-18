@@ -115,7 +115,39 @@
    "danger": "Typing a wrong target (for example `mv notes.txt /etc/hosts`) can destroy an important system file. Take a VM snapshot before experimenting near system folders; without privileges the command simply fails.",
    "tip": "For permanent safety you can define `alias cp='cp -i'` and `alias mv='mv -i'` (added to your shell configuration file)."
   },
-  {"id": "preserve", "title": "Preserving and updating: -p, -u, rsync", "body": ["Scenario: you refresh a backup folder. A plain `cp` gives the copy a new timestamp and owner; `cp -p` keeps mode, owner and time, so you can still see when the original was changed.", "`cp -u` and `mv -u` copy or move only if the source is newer than the target or the target is missing. For large folders that you sync repeatedly, a dedicated tool (`rsync`, see module 2.8) is the better fit."], "commands": [{"cmd": "cp -p", "what": "Copies and preserves mode, owner and timestamps.", "where": "When backing up `notes.txt` and the modification time must stay.", "why": "Without `-p` every copy looks brand new, which hides history.", "example": "cp -p notes.txt notes.bak"}, {"cmd": "cp -u", "what": "Copies only if the source is newer or the target is missing.", "where": "When refreshing `~/backup` with `cp -u *.txt backup/`.", "why": "Skips unchanged files and never overwrites a newer target.", "example": "cp -u notes.txt backup/"}, {"cmd": "mv -u", "what": "Moves only if the source is newer or the target is missing.", "where": "When merging two folders of reports.", "why": "Protects the newer file from being replaced by an older one.", "example": "mv -u report.txt archive/"}], "tip": "Combine flags: `cp -pv a b` preserves attributes and prints what it did.", "warn": "`-u` compares timestamps only, not content. A file with a wrong clock can be skipped."}
+  {
+   "id": "preserve",
+   "title": "Preserving and updating: -p, -u, rsync",
+   "body": [
+    "Scenario: you refresh a backup folder. A plain `cp` gives the copy a new timestamp and owner; `cp -p` keeps mode, owner and time, so you can still see when the original was changed.",
+    "`cp -u` and `mv -u` copy or move only if the source is newer than the target or the target is missing. For large folders that you sync repeatedly, a dedicated tool (`rsync`, see module 2.8) is the better fit."
+   ],
+   "commands": [
+    {
+     "cmd": "cp -p",
+     "what": "Copies and preserves mode, owner and timestamps.",
+     "where": "When backing up `notes.txt` and the modification time must stay.",
+     "why": "Without `-p` every copy looks brand new, which hides history.",
+     "example": "cp -p notes.txt notes.bak"
+    },
+    {
+     "cmd": "cp -u",
+     "what": "Copies only if the source is newer or the target is missing.",
+     "where": "When refreshing `~/backup` with `cp -u *.txt backup/`.",
+     "why": "Skips unchanged files and never overwrites a newer target.",
+     "example": "cp -u notes.txt backup/"
+    },
+    {
+     "cmd": "mv -u",
+     "what": "Moves only if the source is newer or the target is missing.",
+     "where": "When merging two folders of reports.",
+     "why": "Protects the newer file from being replaced by an older one.",
+     "example": "mv -u report.txt archive/"
+    }
+   ],
+   "tip": "Combine flags: `cp -pv a b` preserves attributes and prints what it did.",
+   "warn": "`-u` compares timestamps only, not content. A file with a wrong clock can be skipped."
+  }
  ],
  "tasks": {
   "t01": {
@@ -297,6 +329,46 @@
     "cp -a"
    ],
    "explain": "`cp -a` (archive) copies recursively and preserves permissions, owner and timestamps."
+  },
+  "q5": {
+   "q": "Which option is needed to copy a directory with its contents?",
+   "options": [
+    "-i",
+    "-r",
+    "-n",
+    "-v"
+   ],
+   "explain": "`cp -r` copies directories recursively; `-i` prompts, `-n` never overwrites, `-v` is verbose."
+  },
+  "q6": {
+   "q": "What happens with `mv a.txt b.txt` if b.txt exists and no option is given?",
+   "options": [
+    "It errors",
+    "It asks first",
+    "b.txt is silently overwritten",
+    "The files are merged"
+   ],
+   "explain": "`mv` and `cp` overwrite without asking by default; use `-i` or `-n` for protection."
+  },
+  "q7": {
+   "q": "Which option NEVER overwrites an existing destination file?",
+   "options": [
+    "-v",
+    "-r",
+    "-a",
+    "-n"
+   ],
+   "explain": "`-n` (no-clobber) never overwrites; `-i` prompts each time."
+  },
+  "q8": {
+   "q": "What does `mv report.txt /tmp/` do?",
+   "options": [
+    "Moves the file into /tmp; it's gone from the old place",
+    "Copies the file to /tmp",
+    "Renames the file to /tmp",
+    "Errors"
+   ],
+   "explain": "If the target is an existing directory, `mv` moves the file into it; the source no longer exists."
   }
  },
  "summary": [

@@ -17,10 +17,37 @@
     "Kılavuz **bölümlere** ayrılır: 1 = kullanıcı komutları, 5 = dosya biçimleri (örn. `/etc/passwd`), 8 = yönetim komutları. Aynı ad birden fazla bölümde olabilir: `man passwd` komutu, `man 5 passwd` dosya biçimini gösterir. Simülatörde sayfalar kısadır ve bölüm numarası desteklenmez; gerçek VM'de tam sayfayı görürsün."
    ],
    "commands": [
-    {"cmd": "man", "what": "Bir komutun kılavuz sayfasını açar.", "where": "Yeni bir komut veya seçenek öğrenirken.", "why": "Sistemle birlikte gelen, sürümüne uygun doğru bilgidir.", "example": "man ls"},
-    {"cmd": "man <section>", "what": "Belirli bir kılavuz bölümünü açar.", "where": "Aynı ad hem komut hem dosya biçimi olduğunda.", "why": "Doğru sayfaya doğrudan ulaşırsın.", "example": "man 5 passwd", "nosim": true},
-    {"cmd": "whatis", "what": "Bir komutun tek satırlık açıklamasını verir.", "where": "Komutun ne işe yaradığını hızlıca hatırlamak için.", "why": "Sayfayı açmadan özet alırsın.", "example": "whatis ls", "nosim": true},
-    {"cmd": "apropos", "what": "Anahtar kelimeyle kılavuz sayfası arar.", "where": "Komutun adını bilmiyor ama işini biliyorsan.", "why": "'Dosya kopyala' diye aratıp cp'yi bulursun.", "example": "apropos copy", "nosim": true}
+    {
+     "cmd": "man",
+     "what": "Bir komutun kılavuz sayfasını açar.",
+     "where": "Yeni bir komut veya seçenek öğrenirken.",
+     "why": "Sistemle birlikte gelen, sürümüne uygun doğru bilgidir.",
+     "example": "man ls"
+    },
+    {
+     "cmd": "man <section>",
+     "what": "Belirli bir kılavuz bölümünü açar.",
+     "where": "Aynı ad hem komut hem dosya biçimi olduğunda.",
+     "why": "Doğru sayfaya doğrudan ulaşırsın.",
+     "example": "man 5 passwd",
+     "nosim": true
+    },
+    {
+     "cmd": "whatis",
+     "what": "Bir komutun tek satırlık açıklamasını verir.",
+     "where": "Komutun ne işe yaradığını hızlıca hatırlamak için.",
+     "why": "Sayfayı açmadan özet alırsın.",
+     "example": "whatis ls",
+     "nosim": true
+    },
+    {
+     "cmd": "apropos",
+     "what": "Anahtar kelimeyle kılavuz sayfası arar.",
+     "where": "Komutun adını bilmiyor ama işini biliyorsan.",
+     "why": "'Dosya kopyala' diye aratıp cp'yi bulursun.",
+     "example": "apropos copy",
+     "nosim": true
+    }
    ],
    "tip": "Sayfada kaybolursan `q` ile çık. Aramak için `/` yaz, kelimeyi gir, Enter'a bas; sonraki eşleşme `n`.",
    "warn": "`whatis` ve `apropos` bir indekse (mandb) dayanır; yeni kurulmuş minimal sistemlerde boş dönebilir. Bu durumda `sudo mandb` çalıştır."
@@ -34,9 +61,28 @@
     "Hızlı karar: harici program için önce `--help`, ayrıntı için `man`; kabuk içi komut için `help`."
    ],
    "commands": [
-    {"cmd": "--help", "what": "Komutun kısa kullanım özetini yazar.", "where": "Bir seçeneği hızlıca hatırlamak için.", "why": "man'dan çok daha hızlıdır.", "example": "ls --help"},
-    {"cmd": "help", "what": "Bash'in kendi (kabuk içi) komutları hakkında yardım verir.", "where": "cd, type, history gibi komutlar için.", "why": "Bu komutların ayrı man sayfası olmayabilir.", "example": "help"},
-    {"cmd": "less", "what": "Uzun çıktıyı sayfa sayfa gösterir.", "where": "Uzun --help veya dosya çıktısında.", "why": "Gezinme tuşları man ile aynıdır.", "example": "ls --help | less", "nosim": true}
+    {
+     "cmd": "--help",
+     "what": "Komutun kısa kullanım özetini yazar.",
+     "where": "Bir seçeneği hızlıca hatırlamak için.",
+     "why": "man'dan çok daha hızlıdır.",
+     "example": "ls --help"
+    },
+    {
+     "cmd": "help",
+     "what": "Bash'in kendi (kabuk içi) komutları hakkında yardım verir.",
+     "where": "cd, type, history gibi komutlar için.",
+     "why": "Bu komutların ayrı man sayfası olmayabilir.",
+     "example": "help"
+    },
+    {
+     "cmd": "less",
+     "what": "Uzun çıktıyı sayfa sayfa gösterir.",
+     "where": "Uzun --help veya dosya çıktısında.",
+     "why": "Gezinme tuşları man ile aynıdır.",
+     "example": "ls --help | less",
+     "nosim": true
+    }
    ],
    "tip": "Yardımı yazdığında üstteki satırı kaçırma: `Usage:` satırı sana kullanım biçimini verir."
   },
@@ -49,8 +95,20 @@
     "Örnek: `cp [OPTION]... SOURCE... DEST` → seçenekler isteğe bağlı, en az bir kaynak ve bir hedef zorunlu. `ls` hiç argüman almadan da çalışır çünkü her şey köşeli parantezdedir."
    ],
    "commands": [
-    {"cmd": "ls --help", "what": "Kullanım kalıbını (Usage) gösterir.", "where": "Argümanların sırasını öğrenmek için.", "why": "Kalıbı okuyabilirsen her yeni komutu çözersin.", "example": "ls --help"},
-    {"cmd": "man cat", "what": "SYNOPSIS bölümünü içeren sayfayı açar.", "where": "Alıştırma için basit bir örnek.", "why": "Köşeli parantez ve ... işaretlerini gerçek sayfada görürsün.", "example": "man cat"}
+    {
+     "cmd": "ls --help",
+     "what": "Kullanım kalıbını (Usage) gösterir.",
+     "where": "Argümanların sırasını öğrenmek için.",
+     "why": "Kalıbı okuyabilirsen her yeni komutu çözersin.",
+     "example": "ls --help"
+    },
+    {
+     "cmd": "man cat",
+     "what": "SYNOPSIS bölümünü içeren sayfayı açar.",
+     "where": "Alıştırma için basit bir örnek.",
+     "why": "Köşeli parantez ve ... işaretlerini gerçek sayfada görürsün.",
+     "example": "man cat"
+    }
    ],
    "tip": "Zorunlu olanı bulmak için köşeli parantez dışında kalan parçalara bak."
   },
@@ -63,11 +121,43 @@
     "`PATH` içeriğini görmek için `echo $PATH`. `alias` ve `command -v` gerçek VM'de de çalışır, simülatörde yoktur."
    ],
    "commands": [
-    {"cmd": "which", "what": "Komutun dosya yolunu gösterir.", "where": "Programın nerede kurulu olduğunu öğrenmek için.", "why": "Doğru sürümü çalıştırdığını doğrularsın.", "example": "which ls"},
-    {"cmd": "type", "what": "Komutun türünü (program, builtin, alias) söyler.", "where": "Beklenmedik davranışı incelerken.", "why": "Builtin ile harici programı ayırt edersin.", "example": "type cd"},
-    {"cmd": "echo $PATH", "what": "Komutların aranacağı klasörleri yazar.", "where": "'command not found' incelemesinde.", "why": "Programın klasörü PATH'te mi görürsün.", "example": "echo $PATH"},
-    {"cmd": "command -v", "what": "Komut varsa yolunu/adını yazar; yoksa sessiz kalır.", "where": "Betiklerde 'kurulu mu?' kontrolünde.", "why": "Taşınabilir bir varlık denetimidir.", "example": "command -v ls", "nosim": true},
-    {"cmd": "alias", "what": "Tanımlı kısayolları listeler.", "where": "`ll` gibi komutların nereden geldiğini anlamak için.", "why": "type'ın 'alias' dediği şeyin kaynağını görürsün.", "example": "alias", "nosim": true}
+    {
+     "cmd": "which",
+     "what": "Komutun dosya yolunu gösterir.",
+     "where": "Programın nerede kurulu olduğunu öğrenmek için.",
+     "why": "Doğru sürümü çalıştırdığını doğrularsın.",
+     "example": "which ls"
+    },
+    {
+     "cmd": "type",
+     "what": "Komutun türünü (program, builtin, alias) söyler.",
+     "where": "Beklenmedik davranışı incelerken.",
+     "why": "Builtin ile harici programı ayırt edersin.",
+     "example": "type cd"
+    },
+    {
+     "cmd": "echo $PATH",
+     "what": "Komutların aranacağı klasörleri yazar.",
+     "where": "'command not found' incelemesinde.",
+     "why": "Programın klasörü PATH'te mi görürsün.",
+     "example": "echo $PATH"
+    },
+    {
+     "cmd": "command -v",
+     "what": "Komut varsa yolunu/adını yazar; yoksa sessiz kalır.",
+     "where": "Betiklerde 'kurulu mu?' kontrolünde.",
+     "why": "Taşınabilir bir varlık denetimidir.",
+     "example": "command -v ls",
+     "nosim": true
+    },
+    {
+     "cmd": "alias",
+     "what": "Tanımlı kısayolları listeler.",
+     "where": "`ll` gibi komutların nereden geldiğini anlamak için.",
+     "why": "type'ın 'alias' dediği şeyin kaynağını görürsün.",
+     "example": "alias",
+     "nosim": true
+    }
    ],
    "tip": "Bir komut tuhaf çalışıyorsa önce `type komut` ile türüne bak."
   },
@@ -80,9 +170,27 @@
     "Sonucu `| wc -l` ile sayabilir, `> dosya` ile kaydedebilirsin (`|` ve `>` ayrıntısı modül 3.2'de, `wc` modül 3.4–3.5'te; şimdilik: `|` çıktıyı sonraki komuta verir, `wc -l` satır sayar, `>` dosyaya yazar). `-maxdepth 1` gerçek sistemde derinliği sınırlar (simülatör bunu yok sayar)."
    ],
    "commands": [
-    {"cmd": "find", "what": "Klasör ağacında koşula uyan dosyaları arar.", "where": "Dosyanın yerini unuttuğunda.", "why": "Adı, türü veya boyutuyla ağacı tarar.", "example": "find . -name \"*.txt\""},
-    {"cmd": "find -type", "what": "Yalnızca dosya (f) veya klasör (d) bulur.", "where": "Klasörleri ayrı saymak için.", "why": "Sonucu daraltırsın.", "example": "find ~ -type d"},
-    {"cmd": "find | wc -l", "what": "Bulunanların sayısını verir.", "where": "Kaç eşleşme olduğunu bilmek için.", "why": "Uzun listeyi okumadan sayı alırsın.", "example": "find ~ -name \"*.txt\" | wc -l"}
+    {
+     "cmd": "find",
+     "what": "Klasör ağacında koşula uyan dosyaları arar.",
+     "where": "Dosyanın yerini unuttuğunda.",
+     "why": "Adı, türü veya boyutuyla ağacı tarar.",
+     "example": "find . -name \"*.txt\""
+    },
+    {
+     "cmd": "find -type",
+     "what": "Yalnızca dosya (f) veya klasör (d) bulur.",
+     "where": "Klasörleri ayrı saymak için.",
+     "why": "Sonucu daraltırsın.",
+     "example": "find ~ -type d"
+    },
+    {
+     "cmd": "find | wc -l",
+     "what": "Bulunanların sayısını verir.",
+     "where": "Kaç eşleşme olduğunu bilmek için.",
+     "why": "Uzun listeyi okumadan sayı alırsın.",
+     "example": "find ~ -name \"*.txt\" | wc -l"
+    }
    ],
    "tip": "Hata mesajlarını gizlemek için gerçek sistemde `2>/dev/null` ekle.",
    "warn": "`find ... -delete` veya `-exec rm` ile silme yapma; önce yalnızca `find` ile listeyi gör, sonra karar ver."
@@ -96,9 +204,28 @@
     "Gizli bilgi (parola) içeren komutlar geçmişe yazılır; bunu unutma."
    ],
    "commands": [
-    {"cmd": "history", "what": "Geçmiş komutları numaralı listeler.", "where": "Daha önce ne yazdığını hatırlamak için.", "why": "Uzun komutu yeniden yazmadan bulursun.", "example": "history"},
-    {"cmd": "history | tail", "what": "Yalnızca son komutları gösterir.", "where": "Uzun geçmişte.", "why": "Liste kısa kalır.", "example": "history | tail -n 5"},
-    {"cmd": "!!", "what": "Son komutu tekrar çalıştırır.", "where": "`sudo !!` ile yetkili yeniden deneme.", "why": "Zaman kazandırır.", "example": "!!", "nosim": true}
+    {
+     "cmd": "history",
+     "what": "Geçmiş komutları numaralı listeler.",
+     "where": "Daha önce ne yazdığını hatırlamak için.",
+     "why": "Uzun komutu yeniden yazmadan bulursun.",
+     "example": "history"
+    },
+    {
+     "cmd": "history | tail",
+     "what": "Yalnızca son komutları gösterir.",
+     "where": "Uzun geçmişte.",
+     "why": "Liste kısa kalır.",
+     "example": "history | tail -n 5"
+    },
+    {
+     "cmd": "!!",
+     "what": "Son komutu tekrar çalıştırır.",
+     "where": "`sudo !!` ile yetkili yeniden deneme.",
+     "why": "Zaman kazandırır.",
+     "example": "!!",
+     "nosim": true
+    }
    ],
    "tip": "Ctrl+R yazıp komutun bir parçasını gir: Bash eşleşeni getirir."
   },
@@ -111,29 +238,89 @@
     "Bu, 'dosya veya dizin yok' hatasından farklıdır: o, komut bulundu ama verdiğin dosya yoktur."
    ],
    "commands": [
-    {"cmd": "echo $?", "what": "Son komutun çıkış kodunu yazar.", "where": "Komutun başarısını kontrol ederken.", "why": "0 başarı, 127 komut yok demektir.", "example": "nosuchcmd; echo $?"},
-    {"cmd": "type", "what": "Komut var mı, nerede?", "where": "Hata sonrası ilk kontrol.", "why": "Yazım hatasını ayıklar.", "example": "type nosuchcmd"}
+    {
+     "cmd": "echo $?",
+     "what": "Son komutun çıkış kodunu yazar.",
+     "where": "Komutun başarısını kontrol ederken.",
+     "why": "0 başarı, 127 komut yok demektir.",
+     "example": "nosuchcmd; echo $?"
+    },
+    {
+     "cmd": "type",
+     "what": "Komut var mı, nerede?",
+     "where": "Hata sonrası ilk kontrol.",
+     "why": "Yazım hatasını ayıklar.",
+     "example": "type nosuchcmd"
+    }
    ],
    "tip": "Gerçek sistemde Ubuntu bazen 'Command 'x' not found, did you mean...' ile öneri verir; öneriyi dikkatle oku."
   }
  ],
  "tasks": {
-  "t01": {"text": "`man ls` ile `ls` komutunun kılavuz sayfasını aç.", "hint": "Sim sayfası kısadır; NAME, SYNOPSIS ve DESCRIPTION'a bak."},
-  "t02": {"text": "`ls --help` ile kısa kullanım özetini göster.", "hint": "Çift tire: --help."},
-  "t03": {"text": "`type cd` yaz. Çıktıda 'builtin' çıkıyor mu? Bu ne demek?", "hint": "Builtin: Bash'in içinde, ayrı program değil."},
-  "t04": {"text": "`which ls` ile `ls` komutunun yolunu bul.", "hint": "Çıktı /usr/bin/ ile başlar."},
-  "t05": {"text": "`man cat` aç ve SYNOPSIS satırını oku: hangi parça isteğe bağlı?", "hint": "Köşeli parantez içindekiler isteğe bağlıdır."},
-  "t06": {"text": "`help` yaz ve bilinen komutların listesini gör.", "hint": "Argümansız yaz."},
-  "t07": {"text": "`find . -name \"*.txt\"` ile geçerli klasörün altındaki tüm `.txt` dosyalarını bul.", "hint": "Deseni tırnak içine al."},
-  "t08": {"text": "`history` ile şu ana kadar yazdığın komutları listele.", "hint": "Numaralı liste gelir."},
-  "t09": {"text": "`man ls | head -n 3` ile sayfanın yalnızca ilk üç satırını göster.", "hint": "Pipe: | (çıktıyı sonraki komuta verir; ayrıntısı modül 3.2'de)."},
-  "t10": {"text": "Tahmin et: `nosuchcmd; echo $?` hangi sayıyı yazar? Sonra çalıştırıp doğrula.", "hint": "Komut yok → çıkış kodu 127."},
-  "t11": {"text": "Tahmin et: `find ~ -type d | wc -l` home altında kaç klasör sayar (home dahil)? Çalıştır ve doğrula.", "hint": "Desktop, Documents, Downloads ve home'un kendisi."},
-  "t12": {"text": "Debug: `man mkdirr` hata veriyor ('No manual entry'). Doğru komutun kılavuzunu `man mkdir` ile aç.", "hint": "Yazım hatası: fazladan r."},
-  "t13": {"text": "Mini: `todo.txt` dosyasının nerede olduğunu `find` ile bul ve yolu `~/path.txt` dosyasına kaydet.", "hint": "`find ~ -name todo.txt > ~/path.txt`; sonra `cat ~/path.txt` ile bak. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"},
-  "t14": {"text": "Challenge: Home altındaki `.txt` dosyalarının sayısını tek komutta bulup `~/count.txt` dosyasına yaz.", "hint": "`find`, pipe, `wc -l` (satır sayar; modül 3.4–3.5) ve yönlendirme (`>`, modül 3.2). Sonuç dosya sayısıdır; sizin oluşturduğunuz .txt dosyaları da sayılır."},
-  "t15": {"text": "TICKET #4410 — Destek: 'ls nerede kurulu, cd ne tür bir komut?' Yolu `~/ls_path.txt` dosyasına, `cd` türünü `~/cd_type.txt` dosyasına kaydet.", "hint": "`which ls > ...` ve `type cd > ...`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"},
-  "t16": {"text": "TICKET #4411 — Öğretmen ne denediğini görmek istiyor: önce `which ls` çalıştır, sonra geçmişi `~/hist.txt` dosyasına kaydet.", "hint": "`history > ~/hist.txt`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"}
+  "t01": {
+   "text": "`man ls` ile `ls` komutunun kılavuz sayfasını aç.",
+   "hint": "Sim sayfası kısadır; NAME, SYNOPSIS ve DESCRIPTION'a bak."
+  },
+  "t02": {
+   "text": "`ls --help` ile kısa kullanım özetini göster.",
+   "hint": "Çift tire: --help."
+  },
+  "t03": {
+   "text": "`type cd` yaz. Çıktıda 'builtin' çıkıyor mu? Bu ne demek?",
+   "hint": "Builtin: Bash'in içinde, ayrı program değil."
+  },
+  "t04": {
+   "text": "`which ls` ile `ls` komutunun yolunu bul.",
+   "hint": "Çıktı /usr/bin/ ile başlar."
+  },
+  "t05": {
+   "text": "`man cat` aç ve SYNOPSIS satırını oku: hangi parça isteğe bağlı?",
+   "hint": "Köşeli parantez içindekiler isteğe bağlıdır."
+  },
+  "t06": {
+   "text": "`help` yaz ve bilinen komutların listesini gör.",
+   "hint": "Argümansız yaz."
+  },
+  "t07": {
+   "text": "`find . -name \"*.txt\"` ile geçerli klasörün altındaki tüm `.txt` dosyalarını bul.",
+   "hint": "Deseni tırnak içine al."
+  },
+  "t08": {
+   "text": "`history` ile şu ana kadar yazdığın komutları listele.",
+   "hint": "Numaralı liste gelir."
+  },
+  "t09": {
+   "text": "`man ls | head -n 3` ile sayfanın yalnızca ilk üç satırını göster.",
+   "hint": "Pipe: | (çıktıyı sonraki komuta verir; ayrıntısı modül 3.2'de)."
+  },
+  "t10": {
+   "text": "Tahmin et: `nosuchcmd; echo $?` hangi sayıyı yazar? Sonra çalıştırıp doğrula.",
+   "hint": "Komut yok → çıkış kodu 127."
+  },
+  "t11": {
+   "text": "Tahmin et: `find ~ -type d | wc -l` home altında kaç klasör sayar (home dahil)? Çalıştır ve doğrula.",
+   "hint": "Desktop, Documents, Downloads ve home'un kendisi."
+  },
+  "t12": {
+   "text": "Debug: `man mkdirr` hata veriyor ('No manual entry'). Doğru komutun kılavuzunu `man mkdir` ile aç.",
+   "hint": "Yazım hatası: fazladan r."
+  },
+  "t13": {
+   "text": "Mini: `todo.txt` dosyasının nerede olduğunu `find` ile bul ve yolu `~/path.txt` dosyasına kaydet.",
+   "hint": "`find ~ -name todo.txt > ~/path.txt`; sonra `cat ~/path.txt` ile bak. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
+  },
+  "t14": {
+   "text": "Challenge: Home altındaki `.txt` dosyalarının sayısını tek komutta bulup `~/count.txt` dosyasına yaz.",
+   "hint": "`find`, pipe, `wc -l` (satır sayar; modül 3.4–3.5) ve yönlendirme (`>`, modül 3.2). Sonuç dosya sayısıdır; sizin oluşturduğunuz .txt dosyaları da sayılır."
+  },
+  "t15": {
+   "text": "TICKET #4410 — Destek: 'ls nerede kurulu, cd ne tür bir komut?' Yolu `~/ls_path.txt` dosyasına, `cd` türünü `~/cd_type.txt` dosyasına kaydet.",
+   "hint": "`which ls > ...` ve `type cd > ...`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
+  },
+  "t16": {
+   "text": "TICKET #4411 — Öğretmen ne denediğini görmek istiyor: önce `which ls` çalıştır, sonra geçmişi `~/hist.txt` dosyasına kaydet.",
+   "hint": "`history > ~/hist.txt`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
+  }
  },
  "vm": {
   "intro": "VM'inde (Ubuntu, Rocky, Alma veya WSL) aşağıdaki komutları çalıştır. Yıkıcı bir komut yok; yine de okuyucuda (man) `q` ile çıkmayı unutma.",
@@ -141,58 +328,195 @@
    "v01": {
     "title": "Kılavuz sayfasını aç",
     "text": "`man ls` aç, `/` ile `long` ara, `q` ile çık. Sonra ilk satırları yapıştır.",
-    "blocks": [{"cmd": "man ls | head -n 5", "expected": "LS(1)    User Commands\n\nNAME\n       ls - list directory contents"}],
-    "differs": ["Sayfa dilin Türkçe/Almancaysa başlıklar çevrilmiş olabilir.", "'No manual entry' alırsan kılavuz paketi eksiktir: `sudo apt install man-db` veya `sudo dnf install man-db`."]
+    "blocks": [
+     {
+      "cmd": "man ls | head -n 5",
+      "expected": "LS(1)    User Commands\n\nNAME\n       ls - list directory contents"
+     }
+    ],
+    "differs": [
+     "Sayfa dilin Türkçe/Almancaysa başlıklar çevrilmiş olabilir.",
+     "'No manual entry' alırsan kılavuz paketi eksiktir: `sudo apt install man-db` veya `sudo dnf install man-db`."
+    ]
    },
    "v02": {
     "title": "--help özeti",
     "text": "`ls --help` çıktısının ilk satırlarını yapıştır.",
-    "blocks": [{"cmd": "ls --help | head -n 5", "expected": "Usage: ls [OPTION]... [FILE]...\nList information about the FILEs (the current directory by default)."}],
-    "differs": ["macOS veya BusyBox'ta `--help` biçimi farklı olabilir; Linux VM'de çalıştır."]
+    "blocks": [
+     {
+      "cmd": "ls --help | head -n 5",
+      "expected": "Usage: ls [OPTION]... [FILE]...\nList information about the FILEs (the current directory by default)."
+     }
+    ],
+    "differs": [
+     "macOS veya BusyBox'ta `--help` biçimi farklı olabilir; Linux VM'de çalıştır."
+    ]
    },
    "v03": {
     "title": "Komut türleri",
     "text": "`cd`, `ls` ve `which ls` komutlarının türünü ve yolunu yapıştır.",
-    "blocks": [{"cmd": "type cd\ntype ls\nwhich ls", "expected": "cd is a shell builtin\nls is aliased to `ls --color=auto'\n/usr/bin/ls"}],
-    "differs": ["`ls` bir alias olabilir (Ubuntu/Rocky'de renk için); bu normaldir.", "Bazı dağıtımlarda `/bin/ls` çıkar (`/bin`, `/usr/bin`'e bağlıdır)."]
+    "blocks": [
+     {
+      "cmd": "type cd\ntype ls\nwhich ls",
+      "expected": "cd is a shell builtin\nls is aliased to `ls --color=auto'\n/usr/bin/ls"
+     }
+    ],
+    "differs": [
+     "`ls` bir alias olabilir (Ubuntu/Rocky'de renk için); bu normaldir.",
+     "Bazı dağıtımlarda `/bin/ls` çıkar (`/bin`, `/usr/bin`'e bağlıdır)."
+    ]
    },
    "v04": {
     "title": "find ile ara",
     "text": "Home'unda `.txt` dosyalarını bul. Çıktı kişiye özel olduğundan yalnızca 'Yaptım' de.",
-    "blocks": [{"cmd": "find ~ -maxdepth 2 -name \"*.txt\" 2>/dev/null"}],
-    "differs": ["Hiç çıktı yoksa home'unda .txt dosyan yok demektir: önce `touch ~/notes.txt` ile oluştur."]
+    "blocks": [
+     {
+      "cmd": "find ~ -maxdepth 2 -name \"*.txt\" 2>/dev/null"
+     }
+    ],
+    "differs": [
+     "Hiç çıktı yoksa home'unda .txt dosyan yok demektir: önce `touch ~/notes.txt` ile oluştur."
+    ]
    },
    "v05": {
     "title": "whatis ve apropos",
     "text": "`ls` için tek satırlık açıklamayı ve 'copy' içeren komutları ara.",
-    "blocks": [{"cmd": "whatis ls\napropos copy | head -n 5", "expected": "ls (1) - list directory contents\ncp (1) - copy files and directories"}],
-    "differs": ["'nothing appropriate' görürsen indeks yoktur: `sudo mandb` çalıştırıp tekrar dene.", "Ubuntu/Rocky'de `apropos` çıktısı farklı sayıda satır verebilir."]
+    "blocks": [
+     {
+      "cmd": "whatis ls\napropos copy | head -n 5",
+      "expected": "ls (1) - list directory contents\ncp (1) - copy files and directories"
+     }
+    ],
+    "differs": [
+     "'nothing appropriate' görürsen indeks yoktur: `sudo mandb` çalıştırıp tekrar dene.",
+     "Ubuntu/Rocky'de `apropos` çıktısı farklı sayıda satır verebilir."
+    ]
    },
    "v06": {
     "title": "command not found",
     "text": "Var olmayan bir komutu çalıştır ve çıkış kodunu yapıştır.",
-    "blocks": [{"cmd": "nosuchcmd; echo $?", "expected": "bash: nosuchcmd: command not found\n127"}],
-    "differs": ["Ubuntu 'Command 'nosuchcmd' not found, did you mean...' diye öneri verebilir; son satır yine 127 olmalı.", "Zsh kullanıyorsan mesaj 'zsh: command not found: nosuchcmd' olur."]
+    "blocks": [
+     {
+      "cmd": "nosuchcmd; echo $?",
+      "expected": "bash: nosuchcmd: command not found\n127"
+     }
+    ],
+    "differs": [
+     "Ubuntu 'Command 'nosuchcmd' not found, did you mean...' diye öneri verebilir; son satır yine 127 olmalı.",
+     "Zsh kullanıyorsan mesaj 'zsh: command not found: nosuchcmd' olur."
+    ]
    },
    "v07": {
     "title": "Geçmişe bak",
     "text": "Son beş komutunu listele.",
-    "blocks": [{"cmd": "history | tail -n 5", "expected": "  498  which ls\n  499  nosuchcmd\n  500  history | tail -n 5"}],
-    "differs": ["Numaralar farklı olur; bu normaldir.", "Yeni açılmış bir terminalde liste kısa olabilir."]
+    "blocks": [
+     {
+      "cmd": "history | tail -n 5",
+      "expected": "  498  which ls\n  499  nosuchcmd\n  500  history | tail -n 5"
+     }
+    ],
+    "differs": [
+     "Numaralar farklı olur; bu normaldir.",
+     "Yeni açılmış bir terminalde liste kısa olabilir."
+    ]
    },
    "v08": {
     "title": "Kılavuz bölümleri",
     "text": "`/etc/passwd` dosyasının biçimini açıklayan 5. bölüm sayfasını aç ve ilk satırları yapıştır.",
-    "blocks": [{"cmd": "man 5 passwd | head -n 5", "expected": "PASSWD(5)   File Formats Manual\n\nNAME\n       passwd - password file"}],
-    "differs": ["`man passwd` (bölüm 1) başka bir sayfadır: parola değiştirme komutu.", "Sayfa yoksa `man-db` veya `man-pages` paketi eksiktir."]
+    "blocks": [
+     {
+      "cmd": "man 5 passwd | head -n 5",
+      "expected": "PASSWD(5)   File Formats Manual\n\nNAME\n       passwd - password file"
+     }
+    ],
+    "differs": [
+     "`man passwd` (bölüm 1) başka bir sayfadır: parola değiştirme komutu.",
+     "Sayfa yoksa `man-db` veya `man-pages` paketi eksiktir."
+    ]
    }
   }
  },
  "quiz": {
-  "q1": {"q": "Bir man sayfasında metin aramak ve sayfadan çıkmak için hangi tuşlar kullanılır?", "options": ["`f` ve `x`", "`/` ve `q`", "`s` ve `e`", "`?` ve `Esc`"], "explain": "`/kelime` arar, `n` sonraki eşleşmeye gider, `q` çıkar."},
-  "q2": {"q": "`ls [OPTION]... [FILE]...` kalıbında `[ ]` ve `...` ne anlama gelir?", "options": ["Zorunlu ve yasak", "Köşeli parantezli parça gizlidir", "İsteğe bağlı ve birden fazla yazılabilir", "Sadece yorum satırıdır"], "explain": "Köşeli parantez isteğe bağlıdır, üç nokta önceki parçanın tekrarlanabileceğini gösterir."},
-  "q3": {"q": "`nosuchcmd; echo $?` çıktısındaki sayı nedir?", "options": ["127", "0", "1", "255"], "explain": "'Command not found' durumunda Bash çıkış kodu olarak 127 döndürür."},
-  "q4": {"q": "`cd` komutunun harici bir program olmadığını hangi komutla görürsün?", "options": ["`find cd`", "`ls cd`", "`man -f cd`", "`type cd`"], "explain": "`type cd` çıktısı `cd is a shell builtin` olur; yani Bash'in içindedir."}
+  "q1": {
+   "q": "Bir man sayfasında metin aramak ve sayfadan çıkmak için hangi tuşlar kullanılır?",
+   "options": [
+    "`f` ve `x`",
+    "`/` ve `q`",
+    "`s` ve `e`",
+    "`?` ve `Esc`"
+   ],
+   "explain": "`/kelime` arar, `n` sonraki eşleşmeye gider, `q` çıkar."
+  },
+  "q2": {
+   "q": "`ls [OPTION]... [FILE]...` kalıbında `[ ]` ve `...` ne anlama gelir?",
+   "options": [
+    "Zorunlu ve yasak",
+    "Köşeli parantezli parça gizlidir",
+    "İsteğe bağlı ve birden fazla yazılabilir",
+    "Sadece yorum satırıdır"
+   ],
+   "explain": "Köşeli parantez isteğe bağlıdır, üç nokta önceki parçanın tekrarlanabileceğini gösterir."
+  },
+  "q3": {
+   "q": "`nosuchcmd; echo $?` çıktısındaki sayı nedir?",
+   "options": [
+    "127",
+    "0",
+    "1",
+    "255"
+   ],
+   "explain": "'Command not found' durumunda Bash çıkış kodu olarak 127 döndürür."
+  },
+  "q4": {
+   "q": "`cd` komutunun harici bir program olmadığını hangi komutla görürsün?",
+   "options": [
+    "`find cd`",
+    "`ls cd`",
+    "`man -f cd`",
+    "`type cd`"
+   ],
+   "explain": "`type cd` çıktısı `cd is a shell builtin` olur; yani Bash'in içindedir."
+  },
+  "q5": {
+   "q": "Ne yaptığını bilmediğin bir komutun kısa özetini hangi komut verir?",
+   "options": [
+    "which",
+    "pwd",
+    "whatis",
+    "history"
+   ],
+   "explain": "`whatis komut` man sayfasının tek satırlık açıklamasını yazar; `which` yalnızca yolu bulur."
+  },
+  "q6": {
+   "q": "Adını tam hatırlamadığın komutu anahtar kelimeyle aramak için ne kullanılır?",
+   "options": [
+    "man -k kelime (apropos)",
+    "cd kelime",
+    "pwd kelime",
+    "echo kelime"
+   ],
+   "explain": "`man -k` (= `apropos`) man sayfası başlık ve özetlerinde arama yapar."
+  },
+  "q7": {
+   "q": "`/etc/passwd` dosyasının biçimini anlatan man sayfasına hangi komutla ulaşırsın?",
+   "options": [
+    "man passwd",
+    "man 1 passwd.conf",
+    "man 8 passwd",
+    "man 5 passwd"
+   ],
+   "explain": "`passwd` hem komut (bölüm 1) hem dosya biçimi (bölüm 5) adıdır; `man 5 passwd` dosya biçimini açar."
+  },
+  "q8": {
+   "q": "Birçok komutta kısa kullanım özetini görmek için hangi seçenek yaygındır?",
+   "options": [
+    "--run",
+    "--help",
+    "--quit",
+    "--list-all"
+   ],
+   "explain": "`komut --help` seçenekleri hızlıca listeler; ayrıntı için `man komut`."
+  }
  },
  "summary": [
   "`man komut` ayrıntılı kılavuz, `komut --help` kısa özet, `help` kabuk içi komutlar içindir.",
@@ -202,11 +526,29 @@
   "`history` geçmişi listeler; `command not found` çıkış kodu 127'dir."
  ],
  "glossary": [
-  {"term": "man sayfası", "meaning": "Bir komutun sistemle gelen kılavuz sayfası."},
-  {"term": "SYNOPSIS", "meaning": "Komutun kullanım kalıbını gösteren man bölümü."},
-  {"term": "builtin", "meaning": "Bash'in içinde gömülü olan, ayrı programı olmayan komut."},
-  {"term": "PATH", "meaning": "Komutların aranacağı klasörlerin listesi."},
-  {"term": "çıkış kodu", "meaning": "Komutun bitince bıraktığı sayı; 0 başarı, 127 komut bulunamadı."},
-  {"term": "pager", "meaning": "Uzun metni sayfa sayfa gösteren program (less)."}
+  {
+   "term": "man sayfası",
+   "meaning": "Bir komutun sistemle gelen kılavuz sayfası."
+  },
+  {
+   "term": "SYNOPSIS",
+   "meaning": "Komutun kullanım kalıbını gösteren man bölümü."
+  },
+  {
+   "term": "builtin",
+   "meaning": "Bash'in içinde gömülü olan, ayrı programı olmayan komut."
+  },
+  {
+   "term": "PATH",
+   "meaning": "Komutların aranacağı klasörlerin listesi."
+  },
+  {
+   "term": "çıkış kodu",
+   "meaning": "Komutun bitince bıraktığı sayı; 0 başarı, 127 komut bulunamadı."
+  },
+  {
+   "term": "pager",
+   "meaning": "Uzun metni sayfa sayfa gösteren program (less)."
+  }
  ]
 }

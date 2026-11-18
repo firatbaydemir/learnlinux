@@ -440,6 +440,46 @@
     "Nur wenn `cleanup` 0 zurückgibt"
    ],
    "explain": "Die EXIT-Falle läuft bei normalem Ende, Fehlern und den meisten Signalen; SIGKILL lässt sich nicht abfangen."
+  },
+  "q5": {
+   "q": "Worüber iteriert `for f in *.log; do ...; done`?",
+   "options": [
+    "Nur die erste Datei",
+    "Jeden passenden Dateinamen",
+    "Zeilen im Dateiinhalt",
+    "Alle Dateien in Unterverzeichnissen"
+   ],
+   "explain": "Der Glob wird zu den passenden Dateinamen; Variable immer als `\"$f\"` quoten."
+  },
+  "q6": {
+   "q": "Wie gibt man üblicherweise einen Wert aus einer Funktion zurück?",
+   "options": [
+    "`return \"text\"`",
+    "Mit `export`",
+    "`exit` beendet die Funktion",
+    "Mit `echo` ausgeben und per `$(...)` erfassen"
+   ],
+   "explain": "`return` liefert nur einen Exit-Code 0–255; für Text nutzt man `echo` und Kommandosubstitution."
+  },
+  "q7": {
+   "q": "Was ist der Unterschied zwischen `\"$@\"` und unquotiertem `$*`?",
+   "options": [
+    "`\"$@\"` erhält jedes Argument getrennt und unversehrt",
+    "Kein Unterschied",
+    "`$*` erhält Leerzeichen",
+    "`\"$@\"` liefert nur das erste Argument"
+   ],
+   "explain": "`\"$@\"` lässt Argumente mit Leerzeichen intakt; unquotiertes `$*` wird in Wörter zerlegt."
+  },
+  "q8": {
+   "q": "Was bewirkt `-r` in `while read -r line; do ...; done < datei`?",
+   "options": [
+    "Kehrt Zeilen um",
+    "Öffnet die Datei schreibgeschützt",
+    "Interpretiert Backslashes nicht",
+    "Überspringt Leerzeilen"
+   ],
+   "explain": "`-r` behandelt Backslashes nicht als Escape; Zeilen bleiben unverändert."
   }
  },
  "summary": [
@@ -452,15 +492,45 @@
   "`bash -n`, `bash -x` und `shellcheck` zeigen Fehler ohne Ausführung oder Schritt für Schritt."
  ],
  "glossary": [
-  {"term": "Schleife (loop)", "meaning": "Struktur, die einen Befehlsblock wiederholt: `for`, `while`."},
-  {"term": "Word Splitting", "meaning": "Zerlegen einer unquotierten Variablen an Leerzeichen."},
-  {"term": "IFS", "meaning": "Zeichen, an denen die Shell Wörter trennt (Feldtrenner)."},
-  {"term": "case", "meaning": "Mehrfachverzweigung, die einen Wert mit Mustern vergleicht."},
-  {"term": "local", "meaning": "Schlüsselwort, das eine Variable auf die Funktion begrenzt."},
-  {"term": "Array", "meaning": "Bash-Variable, die mehrere Werte unter einem Namen hält."},
-  {"term": "trap", "meaning": "Legt einen Befehl fest, der bei einem Signal oder beim Beenden läuft."},
-  {"term": "mktemp", "meaning": "Erzeugt eine temporäre Datei oder ein Verzeichnis mit eindeutigem Namen."},
-  {"term": "shellcheck", "meaning": "Statisches Analysewerkzeug für Shell-Skripte."},
-  {"term": "bash -x", "meaning": "Trace-Modus, der jeden Befehl mit Expansionen vor der Ausführung ausgibt."}
+  {
+   "term": "Schleife (loop)",
+   "meaning": "Struktur, die einen Befehlsblock wiederholt: `for`, `while`."
+  },
+  {
+   "term": "Word Splitting",
+   "meaning": "Zerlegen einer unquotierten Variablen an Leerzeichen."
+  },
+  {
+   "term": "IFS",
+   "meaning": "Zeichen, an denen die Shell Wörter trennt (Feldtrenner)."
+  },
+  {
+   "term": "case",
+   "meaning": "Mehrfachverzweigung, die einen Wert mit Mustern vergleicht."
+  },
+  {
+   "term": "local",
+   "meaning": "Schlüsselwort, das eine Variable auf die Funktion begrenzt."
+  },
+  {
+   "term": "Array",
+   "meaning": "Bash-Variable, die mehrere Werte unter einem Namen hält."
+  },
+  {
+   "term": "trap",
+   "meaning": "Legt einen Befehl fest, der bei einem Signal oder beim Beenden läuft."
+  },
+  {
+   "term": "mktemp",
+   "meaning": "Erzeugt eine temporäre Datei oder ein Verzeichnis mit eindeutigem Namen."
+  },
+  {
+   "term": "shellcheck",
+   "meaning": "Statisches Analysewerkzeug für Shell-Skripte."
+  },
+  {
+   "term": "bash -x",
+   "meaning": "Trace-Modus, der jeden Befehl mit Expansionen vor der Ausführung ausgibt."
+  }
  ]
 }

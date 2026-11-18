@@ -370,6 +370,46 @@
     "Herkese tam yetki verir ve gerçek nedeni gizler"
    ],
    "explain": "777 herkese okuma, yazma ve çalıştırma verir; güvenliği bozar. Önce `ls -l` ve `id` ile nedeni bul, gereken en az izni ver."
+  },
+  "q5": {
+   "q": "`chmod 640 f` hangi izni verir?",
+   "options": [
+    "rw-r-xr--",
+    "rwxr-----",
+    "rw-r-----",
+    "r--rw----"
+   ],
+   "explain": "6 = rw (sahip), 4 = r (grup), 0 = hiçbiri (diğerleri)."
+  },
+  "q6": {
+   "q": "`chmod g+w f` ne yapar?",
+   "options": [
+    "Herkese yazma izni verir",
+    "Gruba yazma izni ekler, diğer izinleri korur",
+    "Grubu değiştirir",
+    "Yazma iznini kaldırır"
+   ],
+   "explain": "Sembolik kipte `+` mevcut izinlere ekler; `u/g/o/a` kime uygulanacağını seçer."
+  },
+  "q7": {
+   "q": "Dosya sahibini ve grubunu aynı anda değiştiren komut hangisidir?",
+   "options": [
+    "`chmod alice:devs f`",
+    "`chgrp alice:devs f`",
+    "`chown :devs f`",
+    "`chown alice:devs f`"
+   ],
+   "explain": "`chown kullanıcı:grup` ikisini birden değiştirir; `chgrp` yalnızca grubu, `chown :grup` de yalnızca grubu."
+  },
+  "q8": {
+   "q": "`umask 022` iken yeni dizin hangi izinle oluşur?",
+   "options": [
+    "755",
+    "644",
+    "777",
+    "700"
+   ],
+   "explain": "Dizinler 777'den, dosyalar 666'dan başlar; maske 022 çıkarılınca dizin 755, dosya 644 olur."
   }
  },
  "summary": [
@@ -380,11 +420,29 @@
   "`chmod -R 777` çözüm değildir; en az yetki ilkesini uygula."
  ],
  "glossary": [
-  {"term": "izin üçlüsü", "meaning": "Sahip, grup ve diğerleri için ayrı rwx kümesi."},
-  {"term": "sekizlik mod", "meaning": "r=4, w=2, x=1 toplamıyla yazılan izin, ör. 644."},
-  {"term": "umask", "meaning": "Yeni dosya ve klasörlerden hangi izin bitlerinin kapatılacağını belirleyen bit maskesi."},
-  {"term": "sahip (owner)", "meaning": "Dosyanın kullanıcı kimliği; izin değiştirebilir."},
-  {"term": "grup", "meaning": "Aynı izinleri paylaşan kullanıcı topluluğu, ör. devs."},
-  {"term": "geçiş izni", "meaning": "Klasördeki x biti; yoldan geçmeye ve ada erişmeye izin verir."}
+  {
+   "term": "izin üçlüsü",
+   "meaning": "Sahip, grup ve diğerleri için ayrı rwx kümesi."
+  },
+  {
+   "term": "sekizlik mod",
+   "meaning": "r=4, w=2, x=1 toplamıyla yazılan izin, ör. 644."
+  },
+  {
+   "term": "umask",
+   "meaning": "Yeni dosya ve klasörlerden hangi izin bitlerinin kapatılacağını belirleyen bit maskesi."
+  },
+  {
+   "term": "sahip (owner)",
+   "meaning": "Dosyanın kullanıcı kimliği; izin değiştirebilir."
+  },
+  {
+   "term": "grup",
+   "meaning": "Aynı izinleri paylaşan kullanıcı topluluğu, ör. devs."
+  },
+  {
+   "term": "geçiş izni",
+   "meaning": "Klasördeki x biti; yoldan geçmeye ve ada erişmeye izin verir."
+  }
  ]
 }

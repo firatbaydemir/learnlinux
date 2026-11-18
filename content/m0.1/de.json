@@ -17,10 +17,34 @@
     "Zwei Quellen verraten dir, was du betreibst: `uname` meldet Kernel und Architektur, `/etc/os-release` meldet die Distribution. Du brauchst beides, wenn du um Hilfe bittest oder Dokumentation liest."
    ],
    "commands": [
-    {"cmd": "uname -r", "what": "Gibt das Kernel-Release aus.", "where": "Beim Prüfen der Kernel-Version für Support oder Fehlerberichte.", "why": "Die Kernel-Version bestimmt, welche Hardware und Funktionen du hast.", "example": "uname -r"},
-    {"cmd": "uname -a", "what": "Gibt alle Systeminformationen in einer Zeile aus.", "where": "Wenn du Systemdetails in ein Ticket einfügst.", "why": "Zeigt Hostname, Kernel und Architektur auf einmal.", "example": "uname -a"},
-    {"cmd": "uname -m", "what": "Gibt die Maschinenarchitektur aus (x86_64, aarch64, ...).", "where": "Vor dem Herunterladen von Software oder einer ISO.", "why": "Pakete werden pro Architektur gebaut.", "example": "uname -m"},
-    {"cmd": "cat /etc/os-release", "what": "Zeigt Name und Version der Distribution.", "where": "Auf jeder modernen Distribution.", "why": "Eine Standarddatei, gleiches Format auf Ubuntu, Rocky, Alma und anderen.", "example": "cat /etc/os-release"}
+    {
+     "cmd": "uname -r",
+     "what": "Gibt das Kernel-Release aus.",
+     "where": "Beim Prüfen der Kernel-Version für Support oder Fehlerberichte.",
+     "why": "Die Kernel-Version bestimmt, welche Hardware und Funktionen du hast.",
+     "example": "uname -r"
+    },
+    {
+     "cmd": "uname -a",
+     "what": "Gibt alle Systeminformationen in einer Zeile aus.",
+     "where": "Wenn du Systemdetails in ein Ticket einfügst.",
+     "why": "Zeigt Hostname, Kernel und Architektur auf einmal.",
+     "example": "uname -a"
+    },
+    {
+     "cmd": "uname -m",
+     "what": "Gibt die Maschinenarchitektur aus (x86_64, aarch64, ...).",
+     "where": "Vor dem Herunterladen von Software oder einer ISO.",
+     "why": "Pakete werden pro Architektur gebaut.",
+     "example": "uname -m"
+    },
+    {
+     "cmd": "cat /etc/os-release",
+     "what": "Zeigt Name und Version der Distribution.",
+     "where": "Auf jeder modernen Distribution.",
+     "why": "Eine Standarddatei, gleiches Format auf Ubuntu, Rocky, Alma und anderen.",
+     "example": "cat /etc/os-release"
+    }
    ],
    "tip": "Kernel und Distribution werden getrennt versioniert: Ubuntu 24.04 liefert Kernel 6.8, Rocky Linux 9 liefert 5.14 mit vielen Backports."
   },
@@ -33,9 +57,16 @@
     "In diesem Kurs ist dein Referenzsystem eine **Rocky/Alma-Linux**-VM, Ubuntu ist eine gleichwertige Alternative. Nutze, was du in Modul 0.2 installiert hast."
    ],
    "commands": [
-    {"cmd": "grep ID_LIKE /etc/os-release", "what": "Zeigt nur die Familienzeile der Release-Datei.", "where": "Wenn du unsicher bist, ob du apt oder dnf nutzen sollst.", "why": "Macht aus einer langen Datei die eine Information, die du brauchst.", "example": "grep ID_LIKE /etc/os-release"}
+    {
+     "cmd": "grep ID_LIKE /etc/os-release",
+     "what": "Zeigt nur die Familienzeile der Release-Datei.",
+     "where": "Wenn du unsicher bist, ob du apt oder dnf nutzen sollst.",
+     "why": "Macht aus einer langen Datei die eine Information, die du brauchst.",
+     "example": "grep ID_LIKE /etc/os-release"
+    }
    ],
-   "tip": "Enthält `ID_LIKE` den Wert `debian`, nutze `apt`; enthält es `rhel` oder `fedora`, nutze `dnf`."
+   "tip": "Enthält `ID_LIKE` den Wert `debian`, nutze `apt`; enthält es `rhel` oder `fedora`, nutze `dnf`.",
+   "warn": "Häufiger Fehler: `apt` von Ubuntu auf Rocky/RHEL zu versuchen. Prüfe zuerst mit `cat /etc/os-release` die Distribution; der Paketmanager hängt von der Familie ab (`apt` / `dnf`)."
   },
   {
    "id": "philosophy",
@@ -46,27 +77,84 @@
     "Ein normaler Benutzer arbeitet im Home-Verzeichnis `/home/student`. Das Administratorkonto heißt **root**; du lernst es in späteren Modulen vorsichtig kennen."
    ],
    "commands": [
-    {"cmd": "ls /", "what": "Listet die oberste Ebene des Verzeichnisbaums auf.", "where": "Zur Orientierung auf einem unbekannten System.", "why": "Zeigt die oben beschriebenen Standardverzeichnisse.", "example": "ls /"},
-    {"cmd": "ls /etc", "what": "Listet das Konfigurationsverzeichnis auf.", "where": "Wenn du eine Systemeinstellung suchst.", "why": "Fast jede Systemkonfiguration ist hier eine Textdatei.", "example": "ls /etc"},
-    {"cmd": "cat /etc/shells", "what": "Listet die auf dem System installierten Shells auf.", "where": "Wenn du wissen willst, welche Shell-Programme existieren.", "why": "Zeigt, dass die Shell nur ein austauschbares Programm ist.", "example": "cat /etc/shells"}
+    {
+     "cmd": "ls /",
+     "what": "Listet die oberste Ebene des Verzeichnisbaums auf.",
+     "where": "Zur Orientierung auf einem unbekannten System.",
+     "why": "Zeigt die oben beschriebenen Standardverzeichnisse.",
+     "example": "ls /"
+    },
+    {
+     "cmd": "ls /etc",
+     "what": "Listet das Konfigurationsverzeichnis auf.",
+     "where": "Wenn du eine Systemeinstellung suchst.",
+     "why": "Fast jede Systemkonfiguration ist hier eine Textdatei.",
+     "example": "ls /etc"
+    },
+    {
+     "cmd": "cat /etc/shells",
+     "what": "Listet die auf dem System installierten Shells auf.",
+     "where": "Wenn du wissen willst, welche Shell-Programme existieren.",
+     "why": "Zeigt, dass die Shell nur ein austauschbares Programm ist.",
+     "example": "cat /etc/shells"
+    }
    ],
    "tip": "Ist etwas konfigurierbar, schau zuerst in `/etc` und lies dann die Datei — sie ist Text."
   }
  ],
  "tasks": {
-  "t01": {"text": "Zeige das Kernel-Release mit `uname -r` an.", "hint": "-r steht für release."},
-  "t02": {"text": "Zeige die Distributionsinformationen mit `cat /etc/os-release` an.", "hint": "Achte auf die Zeilen `NAME` und `ID_LIKE`."},
-  "t03": {"text": "Zeige alle Systeminformationen mit `uname -a` an.", "hint": "-a steht für all."},
-  "t04": {"text": "Liste die oberste Ebene des Verzeichnisbaums mit `ls /` auf.", "hint": "Finde `etc`, `home`, `usr`, `var` in der Ausgabe."},
-  "t05": {"text": "Liste das Konfigurationsverzeichnis mit `ls /etc` auf.", "hint": "Das sind überwiegend Textdateien."},
-  "t06": {"text": "Zeige die installierten Shells mit `cat /etc/shells` an.", "hint": "`/bin/bash` sollte aufgeführt sein."},
-  "t07": {"text": "Vorhersage: Welche Architektur gibt `uname -m` auf diesem System aus? Führe es dann aus.", "hint": "Die meisten PCs und VMs nutzen x86_64."},
-  "t08": {"text": "Vorhersage: Was enthält `cat /etc/hostname`? Führe es zur Kontrolle aus.", "hint": "Der Standard-Hostname ist `linux-lab`."},
-  "t09": {"text": "Vorhersage: Was gibt `echo $SHELL` aus? Führe es zur Kontrolle aus.", "hint": "Es ist der vollständige Pfad zu deinem Shell-Programm."},
-  "t10": {"text": "Fehlersuche: `~/distro.txt` enthält fälschlich `ID=windows`. Überschreibe die Datei so, dass sie `ID=linux` enthält.", "hint": "`echo ID=linux > ~/distro.txt` ersetzt den Inhalt; prüfe mit `cat`."},
-  "t11": {"text": "Mini-Projekt: Erstelle den Ordner `~/about_linux`. Speichere das Kernel-Release in `~/about_linux/kernel.txt` und den Inhalt von `/etc/os-release` in `~/about_linux/distro.txt`.", "hint": "`uname -r > file` schreibt die Ausgabe eines Befehls in eine Datei."},
-  "t12": {"text": "Challenge: Erstelle `~/system_report.txt` mit drei Zeilen: Hostname, Kernel-Release und dein Benutzername.", "hint": "`>` erzeugt die Datei, `>>` hängt an. Befehle: `hostname`, `uname -r`, `whoami`."},
-  "t13": {"text": "Ticket: \"Ein Kollege fragt, zu welcher Distributionsfamilie dieser Server gehört. Speichere die `ID_LIKE`-Zeile der Release-Datei in `~/ticket_answer.txt`.\"", "hint": "Kombiniere `grep` für die Zeile mit `>` für die Datei."}
+  "t01": {
+   "text": "Zeige das Kernel-Release mit `uname -r` an.",
+   "hint": "-r steht für release."
+  },
+  "t02": {
+   "text": "Zeige die Distributionsinformationen mit `cat /etc/os-release` an.",
+   "hint": "Achte auf die Zeilen `NAME` und `ID_LIKE`."
+  },
+  "t03": {
+   "text": "Zeige alle Systeminformationen mit `uname -a` an.",
+   "hint": "-a steht für all."
+  },
+  "t04": {
+   "text": "Liste die oberste Ebene des Verzeichnisbaums mit `ls /` auf.",
+   "hint": "Finde `etc`, `home`, `usr`, `var` in der Ausgabe."
+  },
+  "t05": {
+   "text": "Liste das Konfigurationsverzeichnis mit `ls /etc` auf.",
+   "hint": "Das sind überwiegend Textdateien."
+  },
+  "t06": {
+   "text": "Zeige die installierten Shells mit `cat /etc/shells` an.",
+   "hint": "`/bin/bash` sollte aufgeführt sein."
+  },
+  "t07": {
+   "text": "Vorhersage: Welche Architektur gibt `uname -m` auf diesem System aus? Führe es dann aus.",
+   "hint": "Die meisten PCs und VMs nutzen x86_64."
+  },
+  "t08": {
+   "text": "Vorhersage: Was enthält `cat /etc/hostname`? Führe es zur Kontrolle aus.",
+   "hint": "Der Standard-Hostname ist `linux-lab`."
+  },
+  "t09": {
+   "text": "Vorhersage: Was gibt `echo $SHELL` aus? Führe es zur Kontrolle aus.",
+   "hint": "Es ist der vollständige Pfad zu deinem Shell-Programm."
+  },
+  "t10": {
+   "text": "Fehlersuche: `~/distro.txt` enthält fälschlich `ID=windows`. Überschreibe die Datei so, dass sie `ID=linux` enthält.",
+   "hint": "`echo ID=linux > ~/distro.txt` ersetzt den Inhalt; prüfe mit `cat`."
+  },
+  "t11": {
+   "text": "Mini-Projekt: Erstelle den Ordner `~/about_linux`. Speichere das Kernel-Release in `~/about_linux/kernel.txt` und den Inhalt von `/etc/os-release` in `~/about_linux/distro.txt`.",
+   "hint": "`uname -r > file` schreibt die Ausgabe eines Befehls in eine Datei."
+  },
+  "t12": {
+   "text": "Challenge: Erstelle `~/system_report.txt` mit drei Zeilen: Hostname, Kernel-Release und dein Benutzername.",
+   "hint": "`>` erzeugt die Datei, `>>` hängt an. Befehle: `hostname`, `uname -r`, `whoami`."
+  },
+  "t13": {
+   "text": "Ticket: \"Ein Kollege fragt, zu welcher Distributionsfamilie dieser Server gehört. Speichere die `ID_LIKE`-Zeile der Release-Datei in `~/ticket_answer.txt`.\"",
+   "hint": "Kombiniere `grep` für die Zeile mit `>` für die Datei."
+  }
  },
  "vm": {
   "intro": "Diese Befehle sind harmlos und nur lesend. Führe sie im Terminal deiner VM (Rocky/Alma oder Ubuntu) aus und vergleiche.",
@@ -75,7 +163,10 @@
     "title": "Dein System identifizieren",
     "text": "Zeige Kernel-Release und Distribution an und füge beide Ausgaben ein.",
     "blocks": [
-     {"cmd": "uname -r\ncat /etc/os-release", "expected": "5.14.0-427.el9.x86_64\nNAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\nID_LIKE=\"rhel centos fedora\"\n..."}
+     {
+      "cmd": "uname -r\ncat /etc/os-release",
+      "expected": "5.14.0-427.el9.x86_64\nNAME=\"Rocky Linux\"\nVERSION=\"9.4 (Blue Onyx)\"\nID=\"rocky\"\nID_LIKE=\"rhel centos fedora\"\n..."
+     }
     ],
     "differs": [
      "Auf Ubuntu siehst du `NAME=\"Ubuntu\"` und einen Kernel wie `6.8.0-...-generic` — das ist korrekt.",
@@ -86,7 +177,10 @@
     "title": "Durch den Verzeichnisbaum wandern",
     "text": "Liste die oberste Ebene und das Konfigurationsverzeichnis auf und füge die Ausgabe des ersten Befehls ein.",
     "blocks": [
-     {"cmd": "ls /\nls /etc | head -n 15", "expected": "bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+     {
+      "cmd": "ls /\nls /etc | head -n 15",
+      "expected": "bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"
+     }
     ],
     "differs": [
      "Die genaue Liste variiert je nach Distribution, aber `etc`, `home`, `usr` und `var` müssen vorhanden sein.",
@@ -97,7 +191,10 @@
     "title": "Prozess 1 kennenlernen",
     "text": "Jedes System startet einen ersten Prozess. Finde seinen Namen heraus.",
     "blocks": [
-     {"cmd": "ps -p 1 -o comm=", "expected": "systemd"}
+     {
+      "cmd": "ps -p 1 -o comm=",
+      "expected": "systemd"
+     }
     ],
     "differs": [
      "In manchen Containern siehst du `bash` oder `init`; auf einer normalen VM ist es `systemd`.",
@@ -108,7 +205,10 @@
     "title": "Link und Familie prüfen",
     "text": "Prüfe, dass `/bin` ein Link ist, und entscheide, ob dein System apt oder dnf nutzt.",
     "blocks": [
-     {"cmd": "ls -ld /bin\ngrep ID_LIKE /etc/os-release\nwhich apt dnf", "expected": "lrwxrwxrwx. 1 root root 7 ... /bin -> usr/bin"}
+     {
+      "cmd": "ls -ld /bin\ngrep ID_LIKE /etc/os-release\nwhich apt dnf",
+      "expected": "lrwxrwxrwx. 1 root root 7 ... /bin -> usr/bin"
+     }
     ],
     "differs": [
      "`which` gibt nur das vorhandene Werkzeug aus: `apt` auf Ubuntu, `dnf` auf Rocky/Alma.",
@@ -118,10 +218,86 @@
   }
  },
  "quiz": {
-  "q1": {"q": "Was ist der Linux-Kernel?", "options": ["Ein vollständiges Betriebssystem mit Desktop", "Der Kern, der Hardware, Speicher und Prozesse verwaltet", "Ein Texteditor", "Ein Paketmanager"], "explain": "Linux bedeutet streng genommen den Kernel. Eine Distribution ergänzt Werkzeuge, Pakete und einen Installer."},
-  "q2": {"q": "Welches Paketwerkzeug gehört zur Rocky-Linux-/RHEL-Familie?", "options": ["apt", "pacman", "nur zypper", "dnf"], "explain": "RHEL-Systeme nutzen rpm-Pakete, die von dnf verwaltet werden; Debian und Ubuntu nutzen apt."},
-  "q3": {"q": "Welche Datei zeigt Name und Version der Distribution?", "options": ["/etc/os-release", "/etc/hostname", "/proc/cpuinfo", "/var/log/messages"], "explain": "`/etc/os-release` ist die Standarddatei auf allen modernen Distributionen."},
-  "q4": {"q": "Was bedeutet \"Alles ist eine Datei\"?", "options": ["Jede Datei ist ein Programm", "Es gibt keine Verzeichnisse", "Geräte, Prozesse und Einstellungen sind über Pfade erreichbar und werden mit denselben Werkzeugen gelesen", "Dateien können nicht gelöscht werden"], "explain": "Platten erscheinen unter `/dev` und Prozesse unter `/proc`; dieselben Werkzeuge wie `cat` und `ls` funktionieren darauf."}
+  "q1": {
+   "q": "Was ist der Linux-Kernel?",
+   "options": [
+    "Ein vollständiges Betriebssystem mit Desktop",
+    "Der Kern, der Hardware, Speicher und Prozesse verwaltet",
+    "Ein Texteditor",
+    "Ein Paketmanager"
+   ],
+   "explain": "Linux bedeutet streng genommen den Kernel. Eine Distribution ergänzt Werkzeuge, Pakete und einen Installer."
+  },
+  "q2": {
+   "q": "Welches Paketwerkzeug gehört zur Rocky-Linux-/RHEL-Familie?",
+   "options": [
+    "apt",
+    "pacman",
+    "nur zypper",
+    "dnf"
+   ],
+   "explain": "RHEL-Systeme nutzen rpm-Pakete, die von dnf verwaltet werden; Debian und Ubuntu nutzen apt."
+  },
+  "q3": {
+   "q": "Welche Datei zeigt Name und Version der Distribution?",
+   "options": [
+    "/etc/os-release",
+    "/etc/hostname",
+    "/proc/cpuinfo",
+    "/var/log/messages"
+   ],
+   "explain": "`/etc/os-release` ist die Standarddatei auf allen modernen Distributionen."
+  },
+  "q4": {
+   "q": "Was bedeutet \"Alles ist eine Datei\"?",
+   "options": [
+    "Jede Datei ist ein Programm",
+    "Es gibt keine Verzeichnisse",
+    "Geräte, Prozesse und Einstellungen sind über Pfade erreichbar und werden mit denselben Werkzeugen gelesen",
+    "Dateien können nicht gelöscht werden"
+   ],
+   "explain": "Platten erscheinen unter `/dev` und Prozesse unter `/proc`; dieselben Werkzeuge wie `cat` und `ls` funktionieren darauf."
+  },
+  "q5": {
+   "q": "Welcher Befehl zeigt die Version des laufenden Kernels?",
+   "options": [
+    "hostname",
+    "whoami",
+    "uname -r",
+    "pwd"
+   ],
+   "explain": "`uname -r` gibt die Kernel-Version aus; `hostname` den Rechnernamen, `whoami` den Benutzer."
+  },
+  "q6": {
+   "q": "In `/etc/os-release` steht `ID_LIKE=debian`. Welches Paketwerkzeug ist wahrscheinlich vorhanden?",
+   "options": [
+    "apt",
+    "dnf",
+    "pacman",
+    "rpm-ostree"
+   ],
+   "explain": "Die Debian-Familie nutzt `apt`/`dpkg`; `dnf` gehört zur RHEL-Familie."
+  },
+  "q7": {
+   "q": "In welchem Verzeichnis liegen die systemweiten Konfigurationsdateien?",
+   "options": [
+    "/home",
+    "/var",
+    "/usr",
+    "/etc"
+   ],
+   "explain": "`/etc` enthält Konfiguration, `/home` Benutzerdaten, `/var` veränderliche Daten (Logs), `/usr` Programme."
+  },
+  "q8": {
+   "q": "Unter welcher Lizenz steht der Linux-Kernel?",
+   "options": [
+    "Closed Source, kommerzielle Lizenz",
+    "GNU GPL (v2)",
+    "Nur Windows-EULA",
+    "Lizenzfrei, gemeinfrei"
+   ],
+   "explain": "Der Kernel ist unter GPLv2 frei: Quellcode einsehbar, änderbar und unter gleicher Lizenz weitergebbar."
+  }
  },
  "summary": [
   "Linux ist der Kernel; eine Distribution ergänzt Werkzeuge, Pakete und Installer; die Shell liest deine Befehle.",
@@ -131,11 +307,29 @@
   "Unix-Philosophie: Alles ist eine Datei, kleine Werkzeuge, Konfiguration in Klartext."
  ],
  "glossary": [
-  {"term": "kernel", "meaning": "Der Kern des Betriebssystems, der Hardware, Speicher und Prozesse steuert."},
-  {"term": "distribution", "meaning": "Ein vollständiges System: Kernel plus Werkzeuge, Pakete, Installer und Voreinstellungen."},
-  {"term": "shell", "meaning": "Das Programm, das deine Befehle liest und ausführt, meist bash."},
-  {"term": "package manager", "meaning": "Das Werkzeug, das Software installiert und aktualisiert: apt oder dnf."},
-  {"term": "root directory", "meaning": "Die Spitze des Dateibaums, geschrieben `/`."},
-  {"term": "GPL", "meaning": "Eine Familie freier Softwarelizenzen; der Linux-Kernel ist unter GPL-2.0-only lizenziert."}
+  {
+   "term": "kernel",
+   "meaning": "Der Kern des Betriebssystems, der Hardware, Speicher und Prozesse steuert."
+  },
+  {
+   "term": "distribution",
+   "meaning": "Ein vollständiges System: Kernel plus Werkzeuge, Pakete, Installer und Voreinstellungen."
+  },
+  {
+   "term": "shell",
+   "meaning": "Das Programm, das deine Befehle liest und ausführt, meist bash."
+  },
+  {
+   "term": "package manager",
+   "meaning": "Das Werkzeug, das Software installiert und aktualisiert: apt oder dnf."
+  },
+  {
+   "term": "root directory",
+   "meaning": "Die Spitze des Dateibaums, geschrieben `/`."
+  },
+  {
+   "term": "GPL",
+   "meaning": "Eine Familie freier Softwarelizenzen; der Linux-Kernel ist unter GPL-2.0-only lizenziert."
+  }
  ]
 }

@@ -14,7 +14,8 @@
     "Das **Terminal** ist das Fenster, in dem du dem Computer per Text Befehle gibst. Das darin laufende Programm heißt **Shell**; am verbreitetsten ist `bash`. Die Shell liest deine Zeile, führt sie aus und zeigt das Ergebnis an.",
     "Der **Prompt** am Zeilenanfang verrät drei Dinge: wer du bist, auf welchem Rechner du arbeitest und in welchem Verzeichnis du dich befindest. Beispiel: `student@linux-lab:~$` — Benutzer `student`, Rechner `linux-lab`, `~` steht für das Home-Verzeichnis. Das `$` am Ende zeigt einen normalen Benutzer, `#` den Administrator (root)."
    ],
-   "tip": "Nichts wird ausgeführt, bis du Enter drückst. Fehler korrigierst du mit der Rücktaste."
+   "tip": "Nichts wird ausgeführt, bis du Enter drückst. Fehler korrigierst du mit der Rücktaste.",
+   "warn": "Häufiger Fehler: das `$` des Prompts mitzutippen. `$` ist nur eine Anzeige; tippe in Beispielen nur, was danach steht. Befehle sind groß-/kleinschreibungsabhängig: `LS` ≠ `ls`."
   },
   {
    "id": "first",
@@ -90,7 +91,7 @@
      "example": "history"
     }
    ],
-      "tip": "Zweimal Tab zeigt alle möglichen Vervollständigungen. Probiere: `whoa` tippen, dann Tab."
+   "tip": "Zweimal Tab zeigt alle möglichen Vervollständigungen. Probiere: `whoa` tippen, dann Tab."
   },
   {
    "id": "preview",
@@ -216,6 +217,46 @@
     "Alt"
    ],
    "explain": "Tab vervollständigt; zweimal gedrückt listet es die Möglichkeiten auf."
+  },
+  "q5": {
+   "q": "Was gibt `whoami` aus?",
+   "options": [
+    "Den Rechnernamen",
+    "Den aktuellen Benutzernamen",
+    "Das Arbeitsverzeichnis",
+    "Die Kernel-Version"
+   ],
+   "explain": "`whoami` zeigt den aktiven Benutzer; `hostname` den Rechnernamen, `pwd` das Verzeichnis."
+  },
+  "q6": {
+   "q": "Mit welcher Taste verlässt du eine `man`-Seite?",
+   "options": [
+    "Esc",
+    "Enter",
+    "Ctrl+D",
+    "q"
+   ],
+   "explain": "`man` nutzt einen Pager; `q` beendet, `/wort` sucht."
+  },
+  "q7": {
+   "q": "Was passiert im Terminal beim Drücken von ↑ (Pfeil hoch)?",
+   "options": [
+    "Der vorherige Befehl erscheint in der Zeile",
+    "Der Bildschirm wird geleert",
+    "Es geht ins übergeordnete Verzeichnis",
+    "Die Sitzung endet"
+   ],
+   "explain": "Pfeiltasten blättern durch die Befehlshistorie; `history` zeigt die ganze Liste."
+  },
+  "q8": {
+   "q": "Was macht der Befehl `history`?",
+   "options": [
+    "Leert den Bildschirm",
+    "Zeigt die Festplattenbelegung",
+    "Listet zuvor eingegebene Befehle auf",
+    "Listet Benutzer auf"
+   ],
+   "explain": "`history` zeigt die nummerierte Befehlshistorie; mit `!N` führst du Befehl N erneut aus."
   }
  },
  "summary": [

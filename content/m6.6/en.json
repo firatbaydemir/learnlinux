@@ -440,6 +440,46 @@
     "Only if `cleanup` returns 0"
    ],
    "explain": "The EXIT trap runs on normal exit, on errors and on most signals; SIGKILL cannot be caught."
+  },
+  "q5": {
+   "q": "What does `for f in *.log; do ...; done` iterate over?",
+   "options": [
+    "Only the first file",
+    "Every matching file name",
+    "Lines in the file content",
+    "All files in subdirectories"
+   ],
+   "explain": "The glob expands to matching file names; always quote the variable as `\"$f\"`."
+  },
+  "q6": {
+   "q": "What is the usual way to return a value from a function?",
+   "options": [
+    "`return \"text\"`",
+    "With `export`",
+    "`exit` ends the function",
+    "Print with `echo` and capture with `$(...)`"
+   ],
+   "explain": "`return` only gives an exit code 0–255; for text use `echo` and command substitution."
+  },
+  "q7": {
+   "q": "What is the difference between `\"$@\"` and unquoted `$*`?",
+   "options": [
+    "`\"$@\"` keeps each argument separate and intact",
+    "No difference",
+    "`$*` preserves spaces",
+    "`\"$@\"` yields only the first argument"
+   ],
+   "explain": "`\"$@\"` keeps arguments with spaces whole; unquoted `$*` is word-split."
+  },
+  "q8": {
+   "q": "What does `-r` do in `while read -r line; do ...; done < file`?",
+   "options": [
+    "Reverses lines",
+    "Opens the file read-only",
+    "Does not interpret backslashes",
+    "Skips blank lines"
+   ],
+   "explain": "`-r` does not treat backslash as an escape; lines are read as they are."
   }
  },
  "summary": [
@@ -452,15 +492,45 @@
   "`bash -n`, `bash -x` and `shellcheck` show errors without running or step by step."
  ],
  "glossary": [
-  {"term": "loop", "meaning": "A construct that repeats a block of commands: `for`, `while`."},
-  {"term": "word splitting", "meaning": "Splitting an unquoted variable at whitespace."},
-  {"term": "IFS", "meaning": "The characters the shell uses to separate words (field separator)."},
-  {"term": "case", "meaning": "Multi-way branch that compares a value with patterns."},
-  {"term": "local", "meaning": "Keyword that limits a variable to a function."},
-  {"term": "array", "meaning": "A Bash variable holding several values under one name."},
-  {"term": "trap", "meaning": "Defines a command to run on a signal or at exit."},
-  {"term": "mktemp", "meaning": "Creates a temporary file or directory with a unique name."},
-  {"term": "shellcheck", "meaning": "Static analysis tool for shell scripts."},
-  {"term": "bash -x", "meaning": "Trace mode that prints every command with its expansions before running it."}
+  {
+   "term": "loop",
+   "meaning": "A construct that repeats a block of commands: `for`, `while`."
+  },
+  {
+   "term": "word splitting",
+   "meaning": "Splitting an unquoted variable at whitespace."
+  },
+  {
+   "term": "IFS",
+   "meaning": "The characters the shell uses to separate words (field separator)."
+  },
+  {
+   "term": "case",
+   "meaning": "Multi-way branch that compares a value with patterns."
+  },
+  {
+   "term": "local",
+   "meaning": "Keyword that limits a variable to a function."
+  },
+  {
+   "term": "array",
+   "meaning": "A Bash variable holding several values under one name."
+  },
+  {
+   "term": "trap",
+   "meaning": "Defines a command to run on a signal or at exit."
+  },
+  {
+   "term": "mktemp",
+   "meaning": "Creates a temporary file or directory with a unique name."
+  },
+  {
+   "term": "shellcheck",
+   "meaning": "Static analysis tool for shell scripts."
+  },
+  {
+   "term": "bash -x",
+   "meaning": "Trace mode that prints every command with its expansions before running it."
+  }
  ]
 }

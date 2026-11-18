@@ -408,6 +408,46 @@
     "The rule applies immediately but is lost on reload or reboot"
    ],
    "explain": "The default is the runtime configuration: effective at once, not persistent. To make it permanent you need `--permanent` and `--reload`."
+  },
+  "q5": {
+   "q": "What does `ip -br a` show?",
+   "options": [
+    "Only the routing table",
+    "Interfaces and addresses in a brief table",
+    "Open ports",
+    "DNS servers"
+   ],
+   "explain": "`-br` (brief) summarises interface state and IP addresses on one line each."
+  },
+  "q6": {
+   "q": "What does `-p` in `ss -tulpn` add?",
+   "options": [
+    "The protocol name",
+    "The port number",
+    "Packet counters",
+    "The listening process (PID/name)"
+   ],
+   "explain": "`-p` shows the process owning the socket; other users' processes need root."
+  },
+  "q7": {
+   "q": "What happens if a service listens on `127.0.0.1:80` instead of `0.0.0.0:80`?",
+   "options": [
+    "Reachable from the local host only",
+    "Reachable by everyone",
+    "The service fails to start",
+    "Only IPv6 works"
+   ],
+   "explain": "`127.0.0.1` is loopback; connections from outside are not accepted."
+  },
+  "q8": {
+   "q": "What does `default via 10.0.0.1 dev eth0` in `ip route` mean?",
+   "options": [
+    "eth0 is down",
+    "10.0.0.1 is the local address",
+    "Unknown destinations go via gateway 10.0.0.1",
+    "10.0.0.1 is the DNS server"
+   ],
+   "explain": "The `default` line is used when no other route matches."
   }
  },
  "summary": [

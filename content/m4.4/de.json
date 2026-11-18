@@ -370,6 +370,46 @@
     "Er gibt allen alle Rechte und versteckt die Ursache"
    ],
    "explain": "777 gibt jedem Lesen, Schreiben und Ausführen und schwächt die Sicherheit. Finde erst mit `ls -l` und `id` die Ursache und vergib nur die nötigsten Rechte."
+  },
+  "q5": {
+   "q": "Welche Rechte setzt `chmod 640 f`?",
+   "options": [
+    "rw-r-xr--",
+    "rwxr-----",
+    "rw-r-----",
+    "r--rw----"
+   ],
+   "explain": "6 = rw (Besitzer), 4 = r (Gruppe), 0 = nichts (andere)."
+  },
+  "q6": {
+   "q": "Was bewirkt `chmod g+w f`?",
+   "options": [
+    "Gibt allen Schreibrecht",
+    "Fügt der Gruppe Schreibrecht hinzu, andere Rechte bleiben",
+    "Ändert die Gruppe",
+    "Entfernt das Schreibrecht"
+   ],
+   "explain": "Im symbolischen Modus fügt `+` hinzu; `u/g/o/a` wählt den Adressaten."
+  },
+  "q7": {
+   "q": "Welcher Befehl ändert Besitzer und Gruppe gleichzeitig?",
+   "options": [
+    "`chmod alice:devs f`",
+    "`chgrp alice:devs f`",
+    "`chown :devs f`",
+    "`chown alice:devs f`"
+   ],
+   "explain": "`chown benutzer:gruppe` ändert beides; `chgrp` und `chown :gruppe` nur die Gruppe."
+  },
+  "q8": {
+   "q": "Welche Rechte hat ein neues Verzeichnis bei `umask 022`?",
+   "options": [
+    "755",
+    "644",
+    "777",
+    "700"
+   ],
+   "explain": "Verzeichnisse starten bei 777, Dateien bei 666; mit Maske 022 ergibt sich 755 bzw. 644."
   }
  },
  "summary": [
@@ -380,11 +420,29 @@
   "`chmod -R 777` ist keine Lösung; wende das Prinzip der minimalen Rechte an."
  ],
  "glossary": [
-  {"term": "Rechte-Triplet", "meaning": "Eigener rwx-Satz für Besitzer, Gruppe und Andere."},
-  {"term": "Oktalmodus", "meaning": "Rechte als Summe r=4, w=2, x=1, z. B. 644."},
-  {"term": "umask", "meaning": "Bitmaske, die festlegt, welche Rechtebits bei neuen Dateien und Verzeichnissen entfernt werden."},
-  {"term": "Besitzer (owner)", "meaning": "Benutzer, dem die Datei gehört; darf Rechte ändern."},
-  {"term": "Gruppe", "meaning": "Benutzergemeinschaft mit gemeinsamen Rechten, z. B. devs."},
-  {"term": "Durchgangsrecht", "meaning": "Das x-Bit am Verzeichnis; erlaubt das Durchlaufen des Pfades und den Zugriff über den Namen."}
+  {
+   "term": "Rechte-Triplet",
+   "meaning": "Eigener rwx-Satz für Besitzer, Gruppe und Andere."
+  },
+  {
+   "term": "Oktalmodus",
+   "meaning": "Rechte als Summe r=4, w=2, x=1, z. B. 644."
+  },
+  {
+   "term": "umask",
+   "meaning": "Bitmaske, die festlegt, welche Rechtebits bei neuen Dateien und Verzeichnissen entfernt werden."
+  },
+  {
+   "term": "Besitzer (owner)",
+   "meaning": "Benutzer, dem die Datei gehört; darf Rechte ändern."
+  },
+  {
+   "term": "Gruppe",
+   "meaning": "Benutzergemeinschaft mit gemeinsamen Rechten, z. B. devs."
+  },
+  {
+   "term": "Durchgangsrecht",
+   "meaning": "Das x-Bit am Verzeichnis; erlaubt das Durchlaufen des Pfades und den Zugriff über den Namen."
+  }
  ]
 }
