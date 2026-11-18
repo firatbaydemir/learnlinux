@@ -238,7 +238,7 @@
   },
   "t07": {
    "text": "alice'in süreçlerini say: `grep alice ~/lab/ps_snapshot.txt | wc -l`.",
-   "hint": "`wc -l` pipe'tan sonra satırları sayar."
+   "hint": "`wc -l` pipe'tan sonra satırları sayar. (`wc` → modül 2.6; `|` → modül 3.2.)"
   },
   "t08": {
    "text": "Anlık görüntüdeki zombiyi `grep defunct ~/lab/ps_snapshot.txt` ile bul. Hangi PID, hangi kullanıcı?",
@@ -258,27 +258,27 @@
   },
   "t12": {
    "text": "Anlık görüntüyü CPU'ya göre büyükten küçüğe sırala ve iki satır göster: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 2`.",
-   "hint": "`-k3` = üçüncü sütun, `-n` sayısal, `-r` ters."
+   "hint": "`-k3` = üçüncü sütun, `-n` sayısal, `-r` ters. (`sort` → modül 3.5.)"
   },
   "t13": {
    "text": "Mini proje: tüm root süreçlerinin PID'lerini `~/lab/root_pids.txt` dosyasına yaz. `grep ^root` ile filtrele, `tr -s ' '` ile boşlukları sıkıştır, `cut -d' ' -f2` ile 2. sütunu al, `>` ile yönlendir.",
-   "hint": "Tek pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`."
+   "hint": "Tek pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`. (`grep` → modül 3.4; `tr/cut` → modül 3.5; `>` → modül 3.2.)"
   },
   "t14": {
    "text": "Hata ayıkla: `~/lab/fix.txt` içinde `kill -9 1701` yazıyor. Bu yanlış, zombi öldürülemez. Dosyanın üzerine daha iyi komutu yaz: ebeveyne sinyal gönder, örn. `kill -s SIGCHLD 1500`.",
-   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. Ebeveyn PID'si 1500 (bkz. t09)."
+   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. Ebeveyn PID'si 1500 (bkz. t09). (`>` → modül 3.2.)"
   },
   "t15": {
    "text": "Zor görev: anlık görüntüde en yüksek CPU kullanan süreci `sort` ile bul. Onun için **kibar** durdurma komutunu `~/lab/decision.txt` dosyasına yaz (çalıştırma).",
-   "hint": "PID 1620. Kibar, sinyal 15 demek: `echo \"kill -15 1620\" > ~/lab/decision.txt`."
+   "hint": "PID 1620. Kibar, sinyal 15 demek: `echo \"kill -15 1620\" > ~/lab/decision.txt`. (`>` → modül 3.2.)"
   },
   "t16": {
    "text": "TICKET #5110 — Sunucu yavaş. Alice'in işinden şüpheleniliyor. En meşgul sürecin kullanıcısını, PID'sini ve komutunu `~/lab/report.txt` dosyasına yaz.",
-   "hint": "Anlık görüntüde `sort` veya `grep` kullan; sonra `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`."
+   "hint": "Anlık görüntüde `sort` veya `grep` kullan; sonra `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`. (`sort/grep` → modül 3.4/3.5; `>` → modül 3.2.)"
   },
   "t17": {
    "text": "Kabuk PID'ni bir dosyaya kaydet: `echo $$ > ~/lab/mypid.txt`.",
-   "hint": "`>` echo çıktısını dosyaya yazar."
+   "hint": "`>` echo çıktısını dosyaya yazar. (`>` → modül 3.2.)"
   }
  },
  "vm": {

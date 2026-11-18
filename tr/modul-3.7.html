@@ -200,7 +200,7 @@ patching file work.txt
 port=80
 host=linux-lab
 mode=prod</pre>
-<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>patch: command not found</code> görürsen: Ubuntu&#x27;da <code>sudo apt install patch</code>, Rocky/Alma&#x27;da <code>sudo dnf install patch</code>.</li><li><code>--dry-run</code> desteklenmezse (çok eski sürüm) o satırı atla.</li><li><code>Hunk #1 FAILED</code> görürsen <code>work.txt</code>, <code>v1.txt</code> ile aynı değildir; <code>cp v1.txt work.txt</code> ile yeniden başla.</li></ul></details>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li><code>patch: command not found</code> görürsen: Ubuntu&#x27;da <code>sudo apt install patch</code>, Rocky/Alma&#x27;da <code>sudo dnf install patch</code>. (<code>sudo</code> modül 4.3&#x27;te, <code>apt</code>/<code>dnf</code> modül 5.5&#x27;te.)</li><li><code>--dry-run</code> desteklenmezse (çok eski sürüm) o satırı atla.</li><li><code>Hunk #1 FAILED</code> görürsen <code>work.txt</code>, <code>v1.txt</code> ile aynı değildir; <code>cp v1.txt work.txt</code> ile yeniden başla.</li></ul></details>
 <label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Sağlama toplamı</h3><span class="status" aria-hidden="true"></span></header><p>Özet hesapla, sonra dosyayı değiştirip <code>sha256sum -c</code> ile bozulmayı yakala. Çıktıyı yapıştır.</p>

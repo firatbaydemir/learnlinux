@@ -258,7 +258,7 @@
   },
   "t02": {
    "text": "How many servers are in `~/lab/servers.txt`? Count with `wc -l` and guess how many rounds a loop would run.",
-   "hint": "`wc -l ~/lab/servers.txt` prints the line count."
+   "hint": "`wc -l ~/lab/servers.txt` prints the line count. (`wc` → module 2.6.)"
   },
   "t03": {
    "text": "Append with `>>` (without overwriting) a `for i in 1 2 3; do ... done` loop to `loop.sh`: three lines with `printf`.",
@@ -266,7 +266,7 @@
   },
   "t04": {
    "text": "Make `loop.sh` executable (mode 755).",
-   "hint": "`chmod 755 ~/scripts/loop.sh` or `chmod +x`; check with `ls -l` for `-rwxr-xr-x`."
+   "hint": "`chmod 755 ~/scripts/loop.sh` or `chmod +x`; check with `ls -l` for `-rwxr-xr-x`. (`chmod` → module 4.4.)"
   },
   "t05": {
    "text": "Write `~/scripts/readlines.sh` using the pattern `while IFS= read -r host; do ... done < ~/lab/servers.txt` that prints every server with `echo`.",
@@ -274,7 +274,7 @@
   },
   "t06": {
    "text": "Set `F=\"my notes.txt\"` and create the file with `touch \"$F\"`. What would have happened without quotes?",
-   "hint": "Two commands: first the assignment, then `touch \"$F\"`. Check with `ls`."
+   "hint": "Two commands: first the assignment, then `touch \"$F\"`. Check with `ls`. (`touch` → module 2.3.)"
   },
   "t07": {
    "text": "Write `~/scripts/arr.sh`: it defines the array `hosts=(web01 web02 db01)` and prints it with `for h in \"${hosts[@]}\"; do ... done`.",
@@ -282,7 +282,7 @@
   },
   "t08": {
    "text": "Guess the output of `./scripts/count.sh | wc -l` before running it: how many lines? Then run it and verify.",
-   "hint": "The script contains three `echo` lines; look with `cat scripts/count.sh`."
+   "hint": "The script contains three `echo` lines; look with `cat scripts/count.sh`. (`cat` → module 2.6.)"
   },
   "t09": {
    "text": "Set an empty variable with `DIR=` and run `echo \"rm -rf $DIR/\"`. Which path would it delete? Guess, then verify.",
@@ -290,7 +290,7 @@
   },
   "t10": {
    "text": "`~/scripts/hello.sh` does not run (`Permission denied`). Fix it and run it.",
-   "hint": "`ls -l ~/scripts` shows the permissions; `chmod +x` adds them; then `~/scripts/hello.sh`."
+   "hint": "`ls -l ~/scripts` shows the permissions; `chmod +x` adds them; then `~/scripts/hello.sh`. (`chmod` → module 4.4.)"
   },
   "t11": {
    "text": "The line `rm -rf $DIR/*` in `~/scripts/clean.sh` is dangerous. Rewrite the file: keep `DIR=/home/student/tmpwork`, and make the delete line use `\"${DIR:?}/\"*`.",
@@ -310,7 +310,7 @@
   },
   "t15": {
    "text": "Which servers logged an `ERROR` in `~/lab/app.log`? Write the unique, sorted server names to `~/lab/failed_hosts.txt`.",
-   "hint": "`grep ERROR`, then `cut -d' ' -f4`, `sort -u`; redirect the output with `>` into the file."
+   "hint": "`grep ERROR`, then `cut -d' ' -f4`, `sort -u`; redirect the output with `>` into the file. (`grep` → module 3.4; `cut/sort` → module 3.5; `>` → module 3.2.)"
   },
   "t16": {
    "text": "Ticket: The nightly cleanup script deleted more than expected on a server because the variable was empty. Write `~/scripts/cleanup.sh`: `set -euo pipefail`, `DIR=/home/student/tmpwork`, a `trap` on exit, `\"${DIR:?}/\"*` for deleting; make it executable.",

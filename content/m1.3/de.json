@@ -77,7 +77,7 @@
    "body": [
     "`find <Startpunkt> <Bedingungen>` durchläuft einen Verzeichnisbaum und gibt aus, was der Bedingung entspricht. Die beiden häufigsten Bedingungen: `-name` (nach Name) und `-type` (`f` Datei, `d` Verzeichnis).",
     "Setze Platzhalter **in Anführungszeichen**: `find . -name \"*.txt\"`. Ohne Anführungszeichen expandiert die Shell das Muster zuerst selbst und das Ergebnis täuscht. Als Startpunkt steht `.` für das aktuelle Verzeichnis und `~` für das Home-Verzeichnis.",
-    "Du kannst das Ergebnis mit `| wc -l` zählen und mit `> Datei` speichern. `-maxdepth 1` begrenzt auf einem echten System die Tiefe (der Simulator ignoriert das)."
+    "Du kannst das Ergebnis mit `| wc -l` zählen und mit `> Datei` speichern (`|` und `>` stehen in Modul 3.2, `wc` in Modul 3.4–3.5; vorerst: `|` gibt die Ausgabe an den nächsten Befehl weiter, `wc -l` zählt Zeilen, `>` schreibt in eine Datei). `-maxdepth 1` begrenzt auf einem echten System die Tiefe (der Simulator ignoriert das)."
    ],
    "commands": [
     {"cmd": "find", "what": "Sucht im Verzeichnisbaum nach Dateien, die einer Bedingung entsprechen.", "where": "Wenn du vergessen hast, wo eine Datei liegt.", "why": "Er durchsucht den Baum nach Name, Typ oder Größe.", "example": "find . -name \"*.txt\""},
@@ -91,7 +91,7 @@
    "id": "history",
    "title": "history: frühere Befehle",
    "body": [
-    "`history` listet die Befehle, die du in dieser und in früheren Sitzungen eingegeben hast, nummeriert auf. Ist die Liste lang, hole dir mit `history | tail -n 10` die letzten zehn Befehle.",
+    "`history` listet die Befehle, die du in dieser und in früheren Sitzungen eingegeben hast, nummeriert auf. Ist die Liste lang, hole dir mit `history | tail -n 10` die letzten zehn Befehle (`|` und `tail` stehen in Modul 3.2 und 3.4–3.5).",
     "In der echten Bash holt **Pfeil nach oben** den vorherigen Befehl, **Strg+R** sucht im Verlauf, `!!` führt den letzten Befehl und `!42` den Befehl Nr. 42 erneut aus. Der Simulator unterstützt `!!` nicht; die Pfeiltasten funktionieren.",
     "Befehle mit vertraulichen Daten (Passwörtern) werden in den Verlauf geschrieben; denk daran."
    ],
@@ -126,14 +126,14 @@
   "t06": {"text": "Gib `help` ein und sieh dir die Liste der bekannten Befehle an.", "hint": "Ohne Argument eingeben."},
   "t07": {"text": "Finde mit `find . -name \"*.txt\"` alle `.txt`-Dateien unterhalb des aktuellen Verzeichnisses.", "hint": "Setze das Muster in Anführungszeichen."},
   "t08": {"text": "Liste mit `history` die bisher eingegebenen Befehle auf.", "hint": "Es erscheint eine nummerierte Liste."},
-  "t09": {"text": "Zeige mit `man ls | head -n 3` nur die ersten drei Zeilen der Seite.", "hint": "Pipe: |."},
+  "t09": {"text": "Zeige mit `man ls | head -n 3` nur die ersten drei Zeilen der Seite.", "hint": "Pipe: | (gibt die Ausgabe an den nächsten Befehl weiter; siehe Modul 3.2)."},
   "t10": {"text": "Vorhersage: Welche Zahl gibt `nosuchcmd; echo $?` aus? Führe es dann aus und prüfe.", "hint": "Befehl fehlt → Exit-Code 127."},
   "t11": {"text": "Vorhersage: Wie viele Verzeichnisse zählt `find ~ -type d | wc -l` unter Home (Home eingeschlossen)? Führe es aus und prüfe.", "hint": "Desktop, Documents, Downloads und Home selbst."},
   "t12": {"text": "Debug: `man mkdirr` liefert einen Fehler ('No manual entry'). Öffne mit `man mkdir` das Handbuch des richtigen Befehls.", "hint": "Tippfehler: ein überzähliges r."},
-  "t13": {"text": "Mini: Finde mit `find` heraus, wo die Datei `todo.txt` liegt, und speichere den Pfad in der Datei `~/path.txt`.", "hint": "`find ~ -name todo.txt > ~/path.txt`; sieh danach mit `cat ~/path.txt` nach."},
-  "t14": {"text": "Challenge: Ermittle die Anzahl der `.txt`-Dateien unter Home in einem einzigen Befehl und schreibe sie in die Datei `~/count.txt`.", "hint": "`find`, Pipe, `wc -l` und Umleitung. Das Ergebnis ist die Dateianzahl; selbst angelegte .txt-Dateien zählen mit."},
-  "t15": {"text": "TICKET #4410 — Support: 'Wo ist ls installiert, und was für ein Befehl ist cd?' Speichere den Pfad in der Datei `~/ls_path.txt` und die Art von `cd` in der Datei `~/cd_type.txt`.", "hint": "`which ls > ...` und `type cd > ...`."},
-  "t16": {"text": "TICKET #4411 — Die Lehrkraft möchte sehen, was du ausprobiert hast: Führe zuerst `which ls` aus und speichere dann den Verlauf in der Datei `~/hist.txt`.", "hint": "`history > ~/hist.txt`."}
+  "t13": {"text": "Mini: Finde mit `find` heraus, wo die Datei `todo.txt` liegt, und speichere den Pfad in der Datei `~/path.txt`.", "hint": "`find ~ -name todo.txt > ~/path.txt`; sieh danach mit `cat ~/path.txt` nach. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"},
+  "t14": {"text": "Challenge: Ermittle die Anzahl der `.txt`-Dateien unter Home in einem einzigen Befehl und schreibe sie in die Datei `~/count.txt`.", "hint": "`find`, Pipe, `wc -l` (zählt Zeilen; Modul 3.4–3.5) und Umleitung (`>`, Modul 3.2). Das Ergebnis ist die Dateianzahl; selbst angelegte .txt-Dateien zählen mit."},
+  "t15": {"text": "TICKET #4410 — Support: 'Wo ist ls installiert, und was für ein Befehl ist cd?' Speichere den Pfad in der Datei `~/ls_path.txt` und die Art von `cd` in der Datei `~/cd_type.txt`.", "hint": "`which ls > ...` und `type cd > ...`. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"},
+  "t16": {"text": "TICKET #4411 — Die Lehrkraft möchte sehen, was du ausprobiert hast: Führe zuerst `which ls` aus und speichere dann den Verlauf in der Datei `~/hist.txt`.", "hint": "`history > ~/hist.txt`. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"}
  },
  "vm": {
   "intro": "Führe in deiner VM (Ubuntu, Rocky, Alma oder WSL) die folgenden Befehle aus. Es ist kein zerstörerischer Befehl dabei; vergiss trotzdem nicht, den Pager (man) mit `q` zu verlassen.",

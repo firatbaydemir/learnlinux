@@ -432,7 +432,7 @@
      }
     ],
     "differs": [
-     "Bei `patch: command not found`: Ubuntu `sudo apt install patch`, Rocky/Alma `sudo dnf install patch`.",
+     "Bei `patch: command not found`: Ubuntu `sudo apt install patch`, Rocky/Alma `sudo dnf install patch`. (`sudo` in Modul 4.3, `apt`/`dnf` in Modul 5.5.)",
      "Wird `--dry-run` nicht unterstützt (sehr alte Version), lass diese Zeile weg.",
      "Bei `Hunk #1 FAILED` ist `work.txt` nicht identisch mit `v1.txt`; starte mit `cp v1.txt work.txt` neu."
     ]

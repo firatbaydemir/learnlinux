@@ -92,8 +92,8 @@
       "title": "Environment variables: env and $USER",
       "body": [
         "The shell stores information in **environment variables**. `$USER` holds the user name, `$HOME` the home directory, `$SHELL` the shell and `$HOSTNAME` the machine name. You use a value by putting `$` in front: `echo $USER`.",
-        "`env` lists all variables as `NAME=value`. To pick a single one from the long output, combine it with `grep` using `|` (pipe): `env | grep USER`.",
-        "Variables are handy in scripts: `echo \"$USER@$(hostname)\"` combines the user and the machine. The output of the command inside `$(...)` is inserted in its place."
+        "`env` lists all variables as `NAME=value`. To pick a single one from the long output, combine it with `grep` using `|` (pipe): `env | grep USER`. (`|` and `grep` are covered in modules 3.2 and 3.4.)",
+                "Variables are handy in scripts: `echo \"$USER@$(hostname)\"` combines the user and the machine. The output of the command inside `$(...)` is inserted in its place."
       ],
       "commands": [
         {"cmd": "env", "what": "Lists all environment variables.", "where": "When investigating where a setting comes from.", "why": "Shows the values you are running with.", "example": "env"},
@@ -120,11 +120,11 @@
     "t11": {"text": "Predict: is the user `student` in the group `devs`? Then verify with `groups`.", "hint": "Say your guess first, then run the command."},
     "t12": {"text": "Predict: what does `echo \"$USER@$(hostname)\"` print? Verify by running it.", "hint": "`$USER` and `$(hostname)` are replaced by their values before the command runs."},
     "t13": {"text": "The file `~/kernel.txt` contains an old kernel version. Fix it so it holds the real kernel version.", "hint": "`uname -r > ~/kernel.txt` overwrites the old content. Then check with `cat ~/kernel.txt`."},
-    "t14": {"text": "Create `~/me.txt` containing, in order, the output of `whoami`, `id` and `hostname` (3 lines).", "hint": "Use `>` for the first and `>>` for the others: `whoami > ~/me.txt`, `id >> ~/me.txt`."},
-    "t15": {"text": "Write the readable distribution name, without the `PRETTY_NAME=` prefix, into `~/distro.txt`.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` takes what follows the `=` sign."},
-    "t16": {"text": "Write only the major number (first number) of the kernel version into `~/major.txt`.", "hint": "Take the output of `uname -r`, split it at the dot with `cut -d. -f1` and keep the first field."},
+    "t14": {"text": "Create `~/me.txt` containing, in order, the output of `whoami`, `id` and `hostname` (3 lines).", "hint": "Use `>` for the first and `>>` for the others: `whoami > ~/me.txt`, `id >> ~/me.txt`. (`>` writes output to a file, `>>` appends; details in module 3.2.)"},
+    "t15": {"text": "Write the readable distribution name, without the `PRETTY_NAME=` prefix, into `~/distro.txt`.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` takes what follows the `=` sign. (`cut` is covered in module 3.5, `grep` and `|` in modules 3.4 and 3.2.)"},
+    "t16": {"text": "Write only the major number (first number) of the kernel version into `~/major.txt`.", "hint": "Take the output of `uname -r`, split it at the dot with `cut -d. -f1` and keep the first field. (`cut` is covered in module 3.5.)"},
     "t17": {"text": "Ticket: Support wants system information. Write the machine name, kernel version, user name and the `df -h` output, in that order, into `~/sysinfo.txt`.", "hint": "Start with `hostname > ~/sysinfo.txt`, then append the other four outputs with `>>`."},
-    "t18": {"text": "Ticket: The administrator asks whether the account `student` is in the `wheel` group. As evidence, save only the output containing `wheel` into `~/admin_check.txt`.", "hint": "`id | grep wheel > ~/admin_check.txt`"}
+    "t18": {"text": "Ticket: The administrator asks whether the account `student` is in the `wheel` group. As evidence, save only the output containing `wheel` into `~/admin_check.txt`.", "hint": "`id | grep wheel > ~/admin_check.txt` (`|` passes output to the next command, `grep` filters; details in modules 3.2 and 3.4.)"}
   },
   "vm": {
     "intro": "All commands in this section are read-only; you can run them safely on your VM. Output may differ by distribution; what matters is that you recognise the structure.",
@@ -197,7 +197,7 @@
       },
       "v07": {
         "title": "See the administrator identity",
-        "text": "Run `whoami` with `sudo`: the command now runs as root. If it asks for a password, type your account's password (it is not shown while typing).",
+        "text": "Run `whoami` with `sudo`: the command now runs as root. If it asks for a password, type your account's password (it is not shown while typing). `sudo` is covered in module 4.3.",
         "blocks": [
           {"cmd": "whoami\nsudo whoami\nwhoami", "expected": "student\nroot\nstudent"}
         ],

@@ -61,7 +61,7 @@ backup
 bin
 daemon
 games</pre>
-<details class="differs"><summary>Meine Ausgabe sieht anders aus</summary><ul><li>Die Namen unterscheiden sich je nach Distribution; nur die alphabetische Reihenfolge zählt. Mit <code>| grep root</code> prüfst du, ob <code>root</code> existiert.</li></ul></details>
+<details class="differs"><summary>Meine Ausgabe sieht anders aus</summary><ul><li>Die Namen unterscheiden sich je nach Distribution; nur die alphabetische Reihenfolge zählt. Mit <code>| grep root</code> prüfst du, ob <code>root</code> existiert.</li><li><code>cut</code> wird in Modul 3.5 ausführlich erklärt; hier genügt es, <code>-d:</code> (Trennzeichen) und <code>-f1</code> (1. Feld) zu kennen.</li></ul></details>
 <label class="lbl">Füge deine Ausgabe hier ein</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Prüfen</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Häufigkeitstabelle</h3><span class="status" aria-hidden="true"></span></header><p>Zähle, welche Login-Shells in <code>/etc/passwd</code> benutzt werden, und ordne sie.</p>
@@ -69,7 +69,7 @@ games</pre>
 </code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn">Kopieren</button></div></div><p class="lbl">Beispiel der erwarteten Ausgabe</p><pre class="out">     24 /usr/sbin/nologin
       3 /bin/bash
       1 /bin/sync</pre>
-<details class="differs"><summary>Meine Ausgabe sieht anders aus</summary><ul><li>Zahlen und Shells hängen von deinem System ab.</li><li>Siehst du nur eine Zeile, prüfe, dass <code>sort</code> vor <code>uniq -c</code> steht.</li></ul></details>
+<details class="differs"><summary>Meine Ausgabe sieht anders aus</summary><ul><li>Zahlen und Shells hängen von deinem System ab.</li><li>Siehst du nur eine Zeile, prüfe, dass <code>sort</code> vor <code>uniq -c</code> steht.</li><li><code>cut -d: -f7</code> holt das siebte Feld (Login-Shell); <code>cut</code> wird in Modul 3.5 erklärt.</li></ul></details>
 <label class="lbl">Füge deine Ausgabe hier ein</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Prüfen</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v04" data-expect="0"><header><h3>Mit tee eine Kopie behalten</h3><span class="status" aria-hidden="true"></span></header><p>Speichere eine Liste mit <code>tee</code> in einer Datei, während du sie zählst, und prüfe die Datei. Wenn es geklappt hat, drücke &quot;Erledigt&quot;.</p>

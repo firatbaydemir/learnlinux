@@ -147,7 +147,7 @@
     "blocks": [
      {"cmd": "cd ~/lab\nawk '{c[$2]++} END {for (k in c) print k, c[k]}' access.log | sort\nsed -n '/404/p' access.log\nps aux | awk 'NR>1 {print $1}' | sort | uniq -c | sort -rn | head -3", "expected": "200 3\n404 1\n500 1\n10.0.0.2 404\n    120 root\n     35 student\n      4 www-data"}
     ],
-    "differs": ["Son komutun sayıları ve kullanıcıları sistemine göre farklıdır; önemli olan her satırın `sayı kullanıcı` biçiminde olmasıdır.", "`for (k in c)` sırası belirsizdir; bu yüzden `sort` ekledik."]
+    "differs": ["Son komutun sayıları ve kullanıcıları sistemine göre farklıdır; önemli olan her satırın `sayı kullanıcı` biçiminde olmasıdır. (`ps` modül 5.1'de anlatılır.)", "`for (k in c)` sırası belirsizdir; bu yüzden `sort` ekledik."]
    }
   }
  },

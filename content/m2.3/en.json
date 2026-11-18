@@ -241,7 +241,7 @@
     ],
     "differs": [
      "On a localised system the message may be translated.",
-     "If the folder was created you are root; use a normal user and remove it with `sudo rmdir /etc/practice`."
+     "If the folder was created you are root; use a normal user and remove it with `sudo rmdir /etc/practice` (`sudo` runs a command with admin rights; details in module 4.3)."
     ]
    },
    "v03": {

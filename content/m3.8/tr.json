@@ -345,7 +345,7 @@
     ],
     "differs": [
      "Sayılar farklı olur; sıralama genelde `xz` < `bzip2` < `gzip` < orijinal şeklindedir.",
-     "`bzip2: command not found` ise kur: Ubuntu `sudo apt install bzip2`, Rocky/Alma `sudo dnf install bzip2`.",
+     "`bzip2: command not found` ise kur: Ubuntu `sudo apt install bzip2`, Rocky/Alma `sudo dnf install bzip2`. (`sudo` modül 4.3'te, `apt`/`dnf` modül 5.5'te.)",
      "Eski bir `gzip` `-k` bilmiyorsa önce `cp big.log big2.log` ile kopya al."
     ]
    },

@@ -237,7 +237,7 @@
   },
   "t16": {
    "text": "TICKET #4503 — Es braucht einen neuen Ordner `dropbox`: Gruppe `devs`, neue Dateien gehören der Gruppe, Mitglieder dürfen sich nicht gegenseitig löschen, Fremde kommen nicht hinein. Lege `README.txt` hinein mit dem Text `uploads only`.",
-   "hint": "setgid + sticky = 3, dann `770`: `3770`. `echo uploads only > dropbox/README.txt`."
+   "hint": "setgid + sticky = 3, dann `770`: `3770`. `echo uploads only > dropbox/README.txt`. (`>` und `>>` → Modul 3.2.)"
   }
  },
  "vm": {
@@ -268,7 +268,7 @@
      }
     ],
     "differs": [
-     "Die Liste hängt von der Distribution ab; `passwd`, `mount` oder `su` zu sehen genügt.",
+     "Die Liste hängt von der Distribution ab; `passwd`, `mount` oder `su` zu sehen genügt. (`find` → Modul 3.4.)",
      "Dauert `find` lange, warte; `-xdev` durchsucht nur das Hauptdateisystem und ist daher schnell.",
      "Siehst du einen unbekannten Pfad, merke ihn dir; bei einer echten Prüfung würde er untersucht."
     ]

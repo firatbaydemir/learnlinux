@@ -50,13 +50,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "`~/lab/ps_snapshot.txt` içinden alice kullanıcısının süreçlerini `grep` ile bul.", "hint": "Dosya `USER` sütunuyla başlıyor; `grep alice ~/lab/ps_snapshot.txt` dene."},
-    "t02": {"text": "Anlık görüntüde `python3` sürecinin PID'sini bul.", "hint": "`grep python3 ~/lab/ps_snapshot.txt` satırındaki ikinci alan PID'dir."},
-    "t03": {"text": "Tahmin et: dosyada `python3` kaç satırda geçiyor? Sonra `grep -c` ile doğrula.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` eşleşen satırları sayar."},
-    "t04": {"text": "Güvenli kapatma planını `~/lab/term_plan.txt` dosyasına kaydet: PID 2210 için `kill -TERM` kullan.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt`"},
+    "t01": {"text": "`~/lab/ps_snapshot.txt` içinden alice kullanıcısının süreçlerini `grep` ile bul.", "hint": "Dosya `USER` sütunuyla başlıyor; `grep alice ~/lab/ps_snapshot.txt` dene. (`grep` → modül 3.4.)"},
+    "t02": {"text": "Anlık görüntüde `python3` sürecinin PID'sini bul.", "hint": "`grep python3 ~/lab/ps_snapshot.txt` satırındaki ikinci alan PID'dir. (`grep` → modül 3.4.)"},
+    "t03": {"text": "Tahmin et: dosyada `python3` kaç satırda geçiyor? Sonra `grep -c` ile doğrula.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` eşleşen satırları sayar. (`grep` → modül 3.4.)"},
+    "t04": {"text": "Güvenli kapatma planını `~/lab/term_plan.txt` dosyasına kaydet: PID 2210 için `kill -TERM` kullan.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt` (`>` → modül 3.2.)"},
     "t05": {"text": "Yedekleme komutunu daha düşük CPU önceliğiyle başlatma örneğini `~/lab/priority_plan.txt` içine yaz.", "hint": "`nice -n 10 ./backup.sh` biçimini kullan."},
     "t06": {"text": "Kapatma planına PID doğrulaması ve SIGTERM'den sonra beklemeyi ekle; SIGKILL'i yalnızca son çare olarak belirt.", "hint": "Planını `~/lab/escalation_plan.txt` içine kaydet."},
-    "t07": {"text": "Ticket #5301 için PID 2210'un `python3` olduğunu ve önce nazik SIGTERM denenmesini bildiren kısa not oluştur.", "hint": "Notu `~/lab/ticket_5301.txt` dosyasına yaz."}
+    "t07": {"text": "Ticket #5301 için PID 2210'un `python3` olduğunu ve önce nazik SIGTERM denenmesini bildiren kısa not oluştur.", "hint": "Notu `~/lab/ticket_5301.txt` dosyasına yaz. (`>` → modül 3.2.)"}
   },
   "vm": {
     "intro": "Bu komutlar yalnızca kendi test VM'inde çalıştırılmalıdır. Rastgele PID'ye sinyal gönderme; süreç adını ve PID'yi kontrol et.",

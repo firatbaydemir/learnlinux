@@ -48,13 +48,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Find the high-level package manager for the RHEL family in the package notes.", "hint": "The line from `grep RHEL ~/lab/package_notes.txt` contains `dnf`."},
-    "t02": {"text": "Find the high-level package manager for Ubuntu/Debian.", "hint": "The line from `grep Ubuntu ~/lab/package_notes.txt` contains `apt`."},
-    "t03": {"text": "Predict how many lines contain `package`, then verify with `grep -c`.", "hint": "`grep -c package ~/lab/package_notes.txt`"},
-    "t04": {"text": "Write in `~/lab/install_plan.txt` that Ubuntu/Debian should refresh repository lists before installing.", "hint": "Record the command `sudo apt update`."},
+    "t01": {"text": "Find the high-level package manager for the RHEL family in the package notes.", "hint": "The line from `grep RHEL ~/lab/package_notes.txt` contains `dnf`. (`grep` → module 3.4.)"},
+    "t02": {"text": "Find the high-level package manager for Ubuntu/Debian.", "hint": "The line from `grep Ubuntu ~/lab/package_notes.txt` contains `apt`. (`grep` → module 3.4.)"},
+    "t03": {"text": "Predict how many lines contain `package`, then verify with `grep -c`.", "hint": "`grep -c package ~/lab/package_notes.txt` (`grep` → module 3.4.)"},
+    "t04": {"text": "Write in `~/lab/install_plan.txt` that Ubuntu/Debian should refresh repository lists before installing.", "hint": "Record the command `sudo apt update`. (`>` → module 3.2.)"},
     "t05": {"text": "Add the `cowsay` installation command for both the RHEL and Debian families to your plan.", "hint": "`sudo dnf install cowsay` and `sudo apt install cowsay`."},
     "t06": {"text": "Write a cleanup plan reminding you to review `autoremove` suggestions before removing a test package.", "hint": "Save the note in `~/lab/cleanup_plan.txt`."},
-    "t07": {"text": "For ticket #5501, note that you should identify the distribution and that the web package is named `httpd` or `apache2` depending on the family.", "hint": "Write the note to `~/lab/ticket_5501.txt`."}
+    "t07": {"text": "For ticket #5501, note that you should identify the distribution and that the web package is named `httpd` or `apache2` depending on the family.", "hint": "Write the note to `~/lab/ticket_5501.txt`. (`>` → module 3.2.)"}
   },
   "vm": {
     "intro": "Installing and removing packages changes your system. Work only in your own test VM, never on a production system, and always read confirmation prompts.",

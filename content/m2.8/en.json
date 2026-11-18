@@ -35,7 +35,7 @@
     {"cmd": "free -h", "what": "Shows RAM and swap usage in readable units.", "where": "When you suspect memory pressure.", "why": "available tells the real free memory.", "example": "free -h"},
     {"cmd": "uptime", "what": "Shows uptime, user count and load average.", "where": "Quick check on a slow server.", "why": "Load average shows a trend, not a snapshot.", "example": "uptime"}
    ],
-   "tip": "To make a report, use `df -h > report.txt`, and `>>` to append."
+      "tip": "To make a report, use `df -h > report.txt`, and `>>` to append. (Details on `>` and `>>` in module 3.2.)"
   },
   {
    "id": "net",
@@ -58,16 +58,16 @@
   "t02": {"text": "Show memory status with `free -h`.", "hint": "Look at the available column."},
   "t03": {"text": "Show the load average with `uptime`.", "hint": "Three numbers: 1, 5, 15 minutes."},
   "t04": {"text": "Read the sample report `~/reports/df_sample.txt` with `cat` and find the Use% column.", "hint": "`cat ~/reports/df_sample.txt`"},
-  "t05": {"text": "Save the output of `df -h` to `~/disk_report.txt` with `>`.", "hint": "`df -h > ~/disk_report.txt`. A single `>` overwrites the file."},
-  "t06": {"text": "Append the output of `free -h` to the same file (`>>`).", "hint": "`>>` appends, `>` overwrites; if you overwrote it, repeat t05."},
+  "t05": {"text": "Save the output of `df -h` to `~/disk_report.txt` with `>`.", "hint": "`df -h > ~/disk_report.txt`. A single `>` overwrites the file. (Details on `>` in module 3.2.)"},
+  "t06": {"text": "Append the output of `free -h` to the same file (`>>`).", "hint": "`>>` appends, `>` overwrites; if you overwrote it, repeat t05. (Details in module 3.2.)"},
   "t07": {"text": "Append the output of `uptime` to `~/disk_report.txt` too.", "hint": "Use `>>` again."},
-  "t08": {"text": "Predict: which mount point is the line with 95% in `~/reports/df_sample.txt`? Then verify with `grep 95% ~/reports/df_sample.txt`.", "hint": "The Mounted on column at the end of the line."},
-  "t09": {"text": "Predict: what does `~/reports/ping_sample.txt` say about the network? See the loss rate with `grep loss ~/reports/ping_sample.txt`.", "hint": "100% packet loss means the target was never reached."},
-  "t10": {"text": "Predict: what is the IP of interface eth0 in `~/reports/ip_sample.txt`? Verify with `grep eth0 ~/reports/ip_sample.txt`.", "hint": "The /24 is the netmask, not part of the IP."},
+  "t08": {"text": "Predict: which mount point is the line with 95% in `~/reports/df_sample.txt`? Then verify with `grep 95% ~/reports/df_sample.txt`.", "hint": "The Mounted on column at the end of the line. (Details on `grep` in module 3.4.)"},
+  "t09": {"text": "Predict: what does `~/reports/ping_sample.txt` say about the network? See the loss rate with `grep loss ~/reports/ping_sample.txt`.", "hint": "100% packet loss means the target was never reached. (Details on `grep` in module 3.4.)"},
+  "t10": {"text": "Predict: what is the IP of interface eth0 in `~/reports/ip_sample.txt`? Verify with `grep eth0 ~/reports/ip_sample.txt`.", "hint": "The /24 is the netmask, not part of the IP. (Details on `grep` in module 3.4.)"},
   "t11": {"text": "The disk is bloating. Look with `ls -l ~/logs`; the old debug log `old_debug.log` is useless, delete it but do not touch `app.log`.", "hint": "`rm ~/logs/old_debug.log`. Check the exact name with ls before deleting."},
-  "t12": {"text": "Mini project: build the report `~/health.txt`. It should contain, in order, the heading `== disk ==`, the `df -h` output, the heading `== memory ==` and the `free -h` output.", "hint": "First line `echo \"== disk ==\" > ~/health.txt`, the rest with `>>`."},
-  "t13": {"text": "Challenge: from `~/reports/df_sample.txt` write only the 95% line to `~/alert.txt` and the number of such lines to `~/alert_count.txt`.", "hint": "`grep` filters the line, `grep -c` counts; redirect both with `>`."},
-  "t14": {"text": "Ticket: \"The application throws 'No space left on device'.\" Find the full mount point in `~/reports/df_sample.txt` and write its name to `~/full_mount.txt`. Also delete the useless `~/logs/core.dump`.", "hint": "The full one is the 95% line. The mount point is `/var`: `echo /var > ~/full_mount.txt`."}
+  "t12": {"text": "Mini project: build the report `~/health.txt`. It should contain, in order, the heading `== disk ==`, the `df -h` output, the heading `== memory ==` and the `free -h` output.", "hint": "First line `echo \"== disk ==\" > ~/health.txt`, the rest with `>>`. (Details on `>` / `>>` in module 3.2.)"},
+  "t13": {"text": "Challenge: from `~/reports/df_sample.txt` write only the 95% line to `~/alert.txt` and the number of such lines to `~/alert_count.txt`.", "hint": "`grep` filters the line, `grep -c` counts; redirect both with `>`. (`grep` â†’ module 3.4, `>` â†’ 3.2.)"},
+  "t14": {"text": "Ticket: \"The application throws 'No space left on device'.\" Find the full mount point in `~/reports/df_sample.txt` and write its name to `~/full_mount.txt`. Also delete the useless `~/logs/core.dump`.", "hint": "The full one is the 95% line. The mount point is `/var`: `echo /var > ~/full_mount.txt`. (Details on `>` in module 3.2.)"}
  },
  "vm": {
   "intro": "The commands here only read information, so they are safe on your VM. Paste the output and we will check it automatically.",

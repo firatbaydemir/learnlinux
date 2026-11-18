@@ -90,7 +90,16 @@
      "example": "history"
     }
    ],
-   "tip": "Tab'a iki kez basarsan olası tamamlamaların listesi çıkar. Örnek: `whoa` yazıp Tab'a bas."
+      "tip": "Tab'a iki kez basarsan olası tamamlamaların listesi çıkar. Örnek: `whoa` yazıp Tab'a bas."
+  },
+  {
+   "id": "preview",
+   "title": "İleride sık göreceğin işaretler",
+   "body": [
+    "Bu kursta bazı komutlar ve işaretler, asıl modüllerinden önce görevlerde çıkacak. Şimdilik yalnızca ne işe yaradıklarını bil; ayrıntıları ilgili modülde öğreneceksin.",
+    "`cd dizin` bulunduğun dizini değiştirir (ayrıntı: modül 1.1). `>` bir komutun çıktısını ekrana değil dosyaya yazar, `>>` dosyanın sonuna ekler (modül 3.2). `cat dosya` dosyanın içeriğini ekrana basar (modül 2.6). `|` (pipe) bir komutun çıktısını sonrakine girdi yapar (modül 3.2). `&&` ve `;` komutları art arda çalıştırır (modül 1.4). `sudo` komutu yönetici yetkisiyle çalıştırır (modül 4.3). `mkdir` ve `touch` klasör ve boş dosya oluşturur (modül 2.3); `grep`, `head`, `tail`, `wc` metin süzer ve sayar (modül 3.4–3.5)."
+   ],
+   "tip": "Bu listeyi ezberleme. Bir göreve takılınca buraya dön; aynı işaretlerle o modüle gelince tam kartlarla çalışacaksın."
   }
  ],
  "tasks": {
@@ -148,7 +157,7 @@
   },
   "t14": {
    "text": "Meydan okuma: ev dizininde `echo Hello > first.txt` ile bir dosya oluştur, sonra `cat first.txt` ile içeriğini oku.",
-   "hint": "> işareti çıktıyı dosyaya yazar. Önce `cd ~` ile ev dizinine dön."
+   "hint": "> işareti çıktıyı dosyaya yazar, `cd` dizin değiştirir, `cat` dosyayı okur (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd ~` ile ev dizinine dön."
   },
   "t15": {
    "text": "Tahmin et: `cd ~/Documents`, sonra `cd ..`, sonra `pwd`. Çalıştırmadan önce hangi yolu göreceğini tahmin et, sonra doğrula.",
@@ -160,11 +169,11 @@
   },
   "t17": {
    "text": "Mini proje: `whoami > hello.txt` ile kullanıcı adını bir dosyaya yaz, sonra `cat hello.txt` ile oku.",
-   "hint": "`>` komutun çıktısını dosyaya yönlendirir. Önce `cd ~`."
+   "hint": "`>` komutun çıktısını dosyaya yönlendirir (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd ~`."
   },
   "t18": {
    "text": "TICKET #1001 — Destek ekibi sistem bilgisi istiyor: ev dizininde `info.txt` dosyasına önce çekirdek sürümünü (`uname -r`), sonra makine adını (`hostname`) yaz. Dosyada 2 satır olmalı.",
-   "hint": "İlkinde `>`, ikincisinde `>>` (ekle) kullan; yoksa ilk satır silinir."
+   "hint": "İlkinde `>`, ikincisinde `>>` (ekle) kullan; yoksa ilk satır silinir. Bu işaretler için \"İleride sık göreceğin işaretler\" bölümüne bak."
   }
  },
  "quiz": {

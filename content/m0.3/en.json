@@ -90,7 +90,16 @@
      "example": "history"
     }
    ],
-   "tip": "Pressing Tab twice lists all possible completions. Try typing `whoa` and press Tab."
+      "tip": "Pressing Tab twice lists all possible completions. Try typing `whoa` and press Tab."
+  },
+  {
+   "id": "preview",
+   "title": "Symbols you will see later",
+   "body": [
+    "In this course some commands and symbols appear in tasks before their own module. For now just know what they do; you will learn the details in the matching module.",
+    "`cd dir` changes your current directory (details: module 1.1). `>` writes a command's output into a file instead of the screen, `>>` appends to the end of a file (module 3.2). `cat file` prints a file's content (module 2.6). `|` (pipe) feeds one command's output into the next (module 3.2). `&&` and `;` run commands one after another (module 1.4). `sudo` runs a command with administrator rights (module 4.3). `mkdir` and `touch` create folders and empty files (module 2.3); `grep`, `head`, `tail`, `wc` filter and count text (modules 3.4–3.5)."
+   ],
+   "tip": "Do not memorize this list. Come back here when a task puzzles you; you will work with full cards for the same symbols when you reach their module."
   }
  ],
  "tasks": {
@@ -148,7 +157,7 @@
   },
   "t14": {
    "text": "Challenge: in your home directory create a file with `echo Hello > first.txt`, then read it with `cat first.txt`.",
-   "hint": "The > writes output into a file. First return home with `cd ~`."
+   "hint": "The > writes output into a file, `cd` changes directory, `cat` reads a file (see \"Symbols you will see later\"). First return home with `cd ~`."
   },
   "t15": {
    "text": "Predict: `cd ~/Documents`, then `cd ..`, then `pwd`. Predict which path you will see before running it, then check.",
@@ -160,11 +169,11 @@
   },
   "t17": {
    "text": "Mini project: write your user name into a file with `whoami > hello.txt`, then read it with `cat hello.txt`.",
-   "hint": "`>` redirects output into a file. `cd ~` first."
+   "hint": "`>` redirects output into a file (see \"Symbols you will see later\"). `cd ~` first."
   },
   "t18": {
    "text": "TICKET #1001 — Support needs system info: in your home directory write the kernel version (`uname -r`) and then the host name (`hostname`) into `info.txt`. The file must have 2 lines.",
-   "hint": "Use `>` for the first and `>>` (append) for the second; otherwise the first line is lost."
+   "hint": "Use `>` for the first and `>>` (append) for the second; otherwise the first line is lost. See \"Symbols you will see later\" for these symbols."
   }
  },
  "quiz": {

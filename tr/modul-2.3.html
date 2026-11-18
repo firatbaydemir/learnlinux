@@ -69,7 +69,7 @@ src  test
 <article class="vmt card" data-vm="v02" data-expect="1"><header><h3>Korumayı gör</h3><span class="status" aria-hidden="true"></span></header><p>Normal kullanıcıyla sistem dizininde klasör açmayı dene ve hata mesajını yapıştır.</p>
 <div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tp">/etc/practice</span></span>
 </code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir /etc/practice">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">mkdir: cannot create directory ‘/etc/practice’: Permission denied</pre>
-<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Sistemin Türkçe/Almanca ise mesaj çevrilmiş olabilir.</li><li>Hata yerine klasör oluştuysa root olarak çalışıyorsun; normal kullanıcıyla dene ve klasörü <code>sudo rmdir /etc/practice</code> ile sil.</li></ul></details>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Sistemin Türkçe/Almanca ise mesaj çevrilmiş olabilir.</li><li>Hata yerine klasör oluştuysa root olarak çalışıyorsun; normal kullanıcıyla dene ve klasörü <code>sudo rmdir /etc/practice</code> ile sil (<code>sudo</code> yönetici yetkisiyle çalıştırır; ayrıntısı modül 4.3&#x27;te).</li></ul></details>
 <label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v03" data-expect="0"><header><h3>Temizlik</h3><span class="status" aria-hidden="true"></span></header><p>Önce içine bak, sonra deneme klasörünü sil. Hata yoksa &quot;Yaptım&quot; de.</p>

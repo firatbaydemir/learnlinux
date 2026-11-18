@@ -166,7 +166,7 @@
     },
     "t07": {
       "text": "Create a `texts` directory and copy names that start with `doc` and end in `.txt` into it. Do not copy `notes.md`.",
-      "hint": "Run `mkdir texts`, then `cp doc*.txt texts`."
+      "hint": "Run `mkdir texts`, then `cp doc*.txt texts`. (`mkdir` is covered in module 2.3, `cp` in module 2.4.)"
     },
     "t08": {
       "text": "Predict: does `echo '$HOME'` print the variable's value or the literal `$HOME` text? Run it to check.",
@@ -178,19 +178,19 @@
     },
     "t10": {
       "text": "Debug: target the name `old report.txt` as one argument and remove that file.",
-      "hint": "Quote the name containing a space: `rm \"old report.txt\"`."
+      "hint": "Quote the name containing a space: `rm \"old report.txt\"`. (`rm` is covered in module 2.3.)"
     },
     "t11": {
       "text": "Mini project: create a `backup` directory and copy only `.jpg` and `.png` files into it.",
-      "hint": "Use `mkdir backup`, followed by `cp *.jpg *.png backup`."
+      "hint": "Use `mkdir backup`, followed by `cp *.jpg *.png backup`. (`mkdir` is covered in module 2.3, `cp` in module 2.4.)"
     },
     "t12": {
       "text": "Challenge: create the names `log_1.txt`, `log_2.txt` and `log_3.txt` with brace expansion, then remove all three with the `log_?` pattern.",
-      "hint": "Run `touch log_{1,2,3}.txt` first, then `rm log_?.txt`."
+      "hint": "Run `touch log_{1,2,3}.txt` first, then `rm log_?.txt`. (`touch` and `rm` are covered in module 2.3.)"
     },
     "t13": {
       "text": "Ticket: Rename `my file.txt`, which contains a space, to `my_file.txt`. Make sure the original name stays one argument.",
-      "hint": "Use `mv \"my file.txt\" my_file.txt`."
+      "hint": "Use `mv \"my file.txt\" my_file.txt`. (`mv` is covered in module 2.4.)"
     }
   },
   "vm": {

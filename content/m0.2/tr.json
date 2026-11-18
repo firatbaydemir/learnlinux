@@ -46,7 +46,7 @@
    "id": "create",
    "title": "VM oluştur ve kur",
    "body": [
-    "VirtualBox/UTM'de yeni VM oluştur, ISO'yu bağla; 2 CPU, 4 GB RAM ve 25 GB disk ver. Başlat ve kurucuyu izle: dili seç, diski seç (otomatik bölümleme yeterli), root parolası belirle, **normal bir kullanıcı oluştur ve \"yönetici\" kutusunu işaretle** (kullanıcıyı `wheel`/`sudo` grubuna ekler).",
+    "VirtualBox/UTM'de yeni VM oluştur, ISO'yu bağla; 2 CPU, 4 GB RAM ve 25 GB disk ver. Başlat ve kurucuyu izle: dili seç, diski seç (otomatik bölümleme yeterli), root parolası belirle, **normal bir kullanıcı oluştur ve \"yönetici\" kutusunu işaretle** (kullanıcıyı `wheel`/`sudo` grubuna ekler). Böylece komutun başına **`sudo`** yazarak tek tek yönetici (root) yetkisiyle çalıştırabilirsin; ayrıntısı modül 4.3'te.",
     "Önce **Minimal** kurulumu seç; araçları sonra kendin eklersin. Yeniden başlatmadan sonra ISO'yu çıkar ve normal kullanıcınla giriş yap. `cat /etc/os-release` ile hangi sistemi kurduğunu gör.",
     "**WSL**'de bu tek komuttur (yönetici PowerShell): `wsl --install -d Ubuntu-24.04`. Yeniden başlat ve istenince kullanıcı adını oluştur."
    ],

@@ -65,13 +65,13 @@
     "title": "Kullanıcıları çıkar ve sırala",
     "text": "`/etc/passwd` ilk alanını al, sırala ve ilk beş adı göster.",
     "blocks": [{"cmd": "cut -d: -f1 /etc/passwd | sort | head -n 5", "expected": "_apt\nbackup\nbin\ndaemon\ngames"}],
-    "differs": ["Adlar dağıtıma göre değişir; yalnızca alfabetik sıra önemlidir. `root` var mı diye `| grep root` ile bakabilirsin."]
+    "differs": ["Adlar dağıtıma göre değişir; yalnızca alfabetik sıra önemlidir. `root` var mı diye `| grep root` ile bakabilirsin.", "`cut` komutu modül 3.5'te ayrıntılı anlatılır; burada yalnızca `-d:` (ayırıcı) ve `-f1` (1. alan) parametrelerini bilmen yeterli."]
    },
    "v03": {
     "title": "Sıklık tablosu",
     "text": "`/etc/passwd` içinde hangi login shell'lerin kullanıldığını say ve sırala.",
     "blocks": [{"cmd": "cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn", "expected": "     24 /usr/sbin/nologin\n      3 /bin/bash\n      1 /bin/sync"}],
-    "differs": ["Sayılar ve shell'ler sistemine göre değişir.", "Tek satır görüyorsan `uniq -c`'den önce `sort` olduğundan emin ol."]
+    "differs": ["Sayılar ve shell'ler sistemine göre değişir.", "Tek satır görüyorsan `uniq -c`'den önce `sort` olduğundan emin ol.", "`cut -d: -f7` yedinci alanı (login shell) alır; `cut` modül 3.5'te anlatılır."]
    },
    "v04": {
     "title": "tee ile kopya tut",

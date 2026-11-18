@@ -61,7 +61,7 @@
   }
  ],
  "tasks": {
-  "t01": {"text": "Try your sudo rights with `sudo whoami`. The output must be `root`.", "hint": "`student` is in the wheel group, so sudo works."},
+  "t01": {"text": "Try your sudo rights with `sudo whoami`. The output must be `root`.", "hint": "`student` is in the wheel group, so sudo works. (`sudo` → module 4.3.)"},
   "t02": {"text": "Show alice's account record with `grep alice /etc/passwd`.", "hint": "Field 6 is the home directory."},
   "t03": {"text": "List which users have a home directory with `ls /home`.", "hint": "Each user has one folder."},
   "t04": {"text": "Read the password hashes with `sudo cat /etc/shadow`. The file is root-only.", "hint": "Put `sudo` first; hashes start with `$6$...`."},
@@ -72,9 +72,9 @@
   "t09": {"text": "Predict: what does `cat /etc/shadow` do as a normal user? Run it and verify.", "hint": "Expect Permission denied|Erişim engellendi|Zugriff verweigert."},
   "t10": {"text": "Predict: how do the permissions of alice's home directory look? Guess first, then verify with `sudo ls -ld /home/alice`.", "hint": "A private home: `drwx------` (700)."},
   "t11": {"text": "Predict: what does `id carol` return for an account that does not exist yet? Run it.", "hint": "Expect a `no such user` error."},
-  "t12": {"text": "Debug: the `userdel -r alice` in `~/offboard.sh` deletes the home directory that must be kept for the audit. Rewrite the script so it contains `sudo userdel alice` without `-r`.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Use single quotes."},
-  "t13": {"text": "Mini project: write a three-line plan into `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` and `sudo usermod -aG devs carol`.", "hint": "Use `>` on the first line and `>>` on the rest."},
-  "t14": {"text": "Challenge: the script `~/onboard.sh` must create `dave` with `-m -s /bin/bash -G devs`, then force a password change at first login with `chage -d 0 dave`. Make the script `chmod 750`.", "hint": "Two `echo` commands and one `chmod`; use `sudo`."},
+  "t12": {"text": "Debug: the `userdel -r alice` in `~/offboard.sh` deletes the home directory that must be kept for the audit. Rewrite the script so it contains `sudo userdel alice` without `-r`.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Use single quotes. (`>` and `>>` → module 3.2.)"},
+  "t13": {"text": "Mini project: write a three-line plan into `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` and `sudo usermod -aG devs carol`.", "hint": "Use `>` on the first line and `>>` on the rest. (`>` and `>>` → module 3.2.)"},
+  "t14": {"text": "Challenge: the script `~/onboard.sh` must create `dave` with `-m -s /bin/bash -G devs`, then force a password change at first login with `chage -d 0 dave`. Make the script `chmod 750`.", "hint": "Two `echo` commands and one `chmod`; use `sudo`. (`chmod` → module 4.4.)"},
   "t15": {"text": "TICKET #4210: `eve` has left the company. First lock the account, then delete it (keeping the home directory). Write the commands in order into `~/offboard_eve.txt`.", "hint": "`sudo usermod -L eve` and `sudo userdel eve`; do not use `-r`."},
   "t16": {"text": "TICKET #4211: `frank` will become an administrator on the server (Rocky/Alma). Write the command into `~/frank.txt`.", "hint": "`sudo usermod -aG wheel frank`; do not forget `-a`."}
  },

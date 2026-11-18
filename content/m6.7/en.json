@@ -95,11 +95,11 @@
   }
  ],
  "tasks": {
-  "t01": {"text": "Create the folders `~/bin` and `~/units` with one command: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` accepts several paths."},
+  "t01": {"text": "Create the folders `~/bin` and `~/units` with one command: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` accepts several paths. (`mkdir` → module 2.3.)"},
   "t02": {"text": "Read the cron sample file: `cat ~/sample/crontab.txt`. It has three job lines.", "hint": "Lines are: minute hour day month weekday command."},
   "t03": {"text": "Write `~/bin/backup.sh` with `printf`: first line `#!/bin/bash`, second line `echo backup done`.", "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"},
-  "t04": {"text": "Make `~/bin/backup.sh` executable (mode 755).", "hint": "`chmod 755 ~/bin/backup.sh` or `chmod +x`."},
-  "t05": {"text": "Write `~/units/backup.service`: in `[Service]` put `Type=oneshot` and `ExecStart=/home/student/bin/backup.sh`.", "hint": "Separate lines with `\\n` in one `printf` and end with `> ~/units/backup.service`."},
+  "t04": {"text": "Make `~/bin/backup.sh` executable (mode 755).", "hint": "`chmod 755 ~/bin/backup.sh` or `chmod +x`. (`chmod` → module 4.4.)"},
+  "t05": {"text": "Write `~/units/backup.service`: in `[Service]` put `Type=oneshot` and `ExecStart=/home/student/bin/backup.sh`.", "hint": "Separate lines with `\\n` in one `printf` and end with `> ~/units/backup.service`. (`>` → module 3.2.)"},
   "t06": {"text": "Write `~/units/backup.timer`: under `[Timer]` `OnCalendar=*-*-* 02:30:00` and `Persistent=true`, under `[Install]` `WantedBy=timers.target`.", "hint": "Use single quotes in the sim so the shell does not expand `*`."},
   "t07": {"text": "Predict: how many lines in `~/sample/list-timers.txt` contain `timer`? Then verify with `grep -c timer ~/sample/list-timers.txt`.", "hint": "The header has no lowercase `timer`; there are two timer lines."},
   "t08": {"text": "Predict: which time does the `Next elapse` line in `~/sample/analyze.txt` show? Look with `grep 'Next elapse' ~/sample/analyze.txt`.", "hint": "The expression was Monday 08:00; find the next Monday."},
@@ -108,7 +108,7 @@
   "t11": {"text": "Mini project (user timer): create the folder `~/.config/systemd/user`. `notes.service` must contain `ExecStart=/usr/bin/touch /home/student/notes.txt`; `notes.timer` must contain `OnCalendar=hourly` and `WantedBy=timers.target`.", "hint": "Three commands: `mkdir -p`, one `printf` for the service, one for the timer."},
   "t12": {"text": "Mini project (cron comparison): write two cron lines to `~/units/backup.cron`: `30 2 * * * /home/student/bin/backup.sh` and `0 8 * * 1 /home/student/bin/report.sh`.", "hint": "Use `>` for the first line and `>>` for the second."},
   "t13": {"text": "Challenge: for a `cleanup` job write `~/units/cleanup.service` (`ExecStart=/home/student/bin/cleanup.sh`, `Type=oneshot`) and `~/units/cleanup.timer`. Timer: 10 minutes after boot (`OnBootSec=10min`), then every hour (`OnUnitActiveSec=1h`), random delay up to 5 minutes (`RandomizedDelaySec=5min`), `WantedBy=timers.target`.", "hint": "It is an interval timer, not a calendar one: do not use `OnCalendar`."},
-  "t14": {"text": "Ticket: \"The nightly backup has been failing silently for a few days.\" Write only the `Failed` lines of `~/sample/journal.txt` to `~/units/failed.txt`.", "hint": "`grep Failed ... > ...`"},
+  "t14": {"text": "Ticket: \"The nightly backup has been failing silently for a few days.\" Write only the `Failed` lines of `~/sample/journal.txt` to `~/units/failed.txt`.", "hint": "`grep Failed ... > ...` (`grep` → module 3.4; `>` → module 3.2.)"},
   "t15": {"text": "Ticket: \"The weekly report must run every Monday at 08:00, and still run after boot if the machine was off.\" Write `~/units/report.timer` (`OnCalendar`, the setting that catches up a missed run, `WantedBy=timers.target`).", "hint": "Monday 08:00 = `Mon *-*-* 08:00:00`; catch-up = `Persistent=true`."},
   "t16": {"text": "Count how many lines the journal sample has with `wc -l ~/sample/journal.txt`.", "hint": "Look at the number at the start of the output."}
  },

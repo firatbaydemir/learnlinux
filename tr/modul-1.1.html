@@ -45,7 +45,7 @@
 </code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -a" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -a">Kopyala</button></div></div></article>
 <article class="cmd"><h3><code>ls -lh</code></h3><dl><dt>Ne işe yarar?</dt><dd>Ayrıntılı liste; boyutları K/M/G olarak yazar.</dd><dt>Nerede kullanılır?</dt><dd>Dosya boyutlarına bakarken.</dd><dt>Neden önemli?</dt><dd>Bayt sayısını okumaktan kolaydır.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-lh</span> <span class="tp">~</span></span>
 </code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -lh ~" title="Tıklayınca terminale yazılır">▶ Simülatörde dene</button><button type="button" class="copy" data-copy="ls -lh ~">Kopyala</button></div></div></article>
-<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Bol dosyalı dizinde <code>ls</code> sonucu uzun gelirse <code>ls -l | head</code> ile ilk satırlara bak.</p></aside>
+<aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Bol dosyalı dizinde <code>ls</code> sonucu uzun gelirse <code>ls -l | head</code> ile ilk satırlara bak. (<code>|</code> ilk komutun çıktısını ikinciye verir, <code>head</code> ilk 10 satırı gösterir; ayrıntısı modül 3.2 ve 2.6&#x27;da.)</p></aside>
 </section>
 <section id="cd"><h2>Hedefe git: cd</h2>
 <p><code>cd</code> (change directory) çalışma dizinini değiştirir. Başarılıysa hiçbir şey yazmaz; sonucu prompt&#x27;tan veya <code>pwd</code> ile görürsün. Dizin yoksa hata alırsın.</p>

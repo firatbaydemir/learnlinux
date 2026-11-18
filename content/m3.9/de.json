@@ -104,12 +104,12 @@
   "t08": {"text": "VORHERSAGE: Was gibt `echo \"$HOME\" '$HOME'` aus? Raten, dann ausführen.", "hint": "Doppelte Quotes expandieren, einfache nicht."},
   "t09": {"text": "VORHERSAGE: Was gibt `grep -q FATAL run.log || echo none` aus? Raten, dann ausführen.", "hint": "Ohne `FATAL` liefert `grep` 1; dann führt `||` den rechten Befehl aus."},
   "t10": {"text": "FEHLER SUCHEN: Jemand tippte `find . -name *.log` und bekam nur `run.log`; die Dateien unter `logs/` fehlen. Korrigiere den Befehl und schreibe die vollständige Liste in `all_logs.txt`.", "hint": "Führe erst `find . -name *.log` aus: Die Shell hat `*.log` zu `run.log` expandiert. Setze das Muster in Quotes."},
-  "t11": {"text": "FEHLER SUCHEN: `./hello.sh` meldet „Permission denied“. Behebe das und starte es; das Ergebnis soll in `hello.out` stehen.", "hint": "Prüfe mit `ls -l hello.sh` die Rechte; dann `chmod +x hello.sh`."},
+  "t11": {"text": "FEHLER SUCHEN: `./hello.sh` meldet „Permission denied“. Behebe das und starte es; das Ergebnis soll in `hello.out` stehen.", "hint": "Prüfe mit `ls -l hello.sh` die Rechte; dann `chmod +x hello.sh`. (`chmod` in Modul 4.4.)"},
   "t12": {"text": "MINI-PROJEKT: Filtere die `ERROR`-Zeilen, zeige sie an und speichere sie zugleich in `errors.txt` (`tee`); hänge dann die Ausgabe von `wc -l errors.txt` mit `>>` an `summary.txt` an.", "hint": "`grep ERROR run.log | tee errors.txt`, danach `wc -l errors.txt >> summary.txt`."},
   "t13": {"text": "HERAUSFORDERUNG: Lösche alle `.tmp`-Dateien unter `project` mit `find` und `-exec rm {} \\;`. (Der Simulator führt `-exec` nicht aus; die korrekte Schreibweise wird geprüft.)", "hint": "`find project -name \"*.tmp\" -exec rm {} \\;`; das `\\;` ist wichtig. Auf der echten VM erst mit `-print` testen."},
   "t14": {"text": "HERAUSFORDERUNG: Ermittle die Zeilenzahl aller `.txt`-Dateien auf dem sicheren Weg: `-print0` mit `xargs -0` und `wc -l`. (`xargs` gibt es im Simulator nicht; die Schreibweise wird geprüft.)", "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."},
   "t15": {"text": "HERAUSFORDERUNG: Finde in `access.log` die häufigste IP samt Anzahl und schreibe nur diese eine Zeile in `top.txt`.", "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."},
-  "t16": {"text": "TICKET #3901 — Support: „Für das Morgenmeeting brauchen wir ein Skript, das die `ERROR`- und `WARN`-Zeilen aus `run.log` sortiert nach `problems.txt` schreibt; wir führen es täglich aus.“ Schreibe `check.sh` (Shebang + `grep -E ... | sort > problems.txt`), mache es ausführbar und starte es.", "hint": "Mit `printf` oder `echo` in einfachen Quotes schreiben, `chmod +x check.sh`, `./check.sh`."}
+  "t16": {"text": "TICKET #3901 — Support: „Für das Morgenmeeting brauchen wir ein Skript, das die `ERROR`- und `WARN`-Zeilen aus `run.log` sortiert nach `problems.txt` schreibt; wir führen es täglich aus.“ Schreibe `check.sh` (Shebang + `grep -E ... | sort > problems.txt`), mache es ausführbar und starte es.", "hint": "Mit `printf` oder `echo` in einfachen Quotes schreiben, `chmod +x check.sh`, `./check.sh`. (`chmod` in Modul 4.4.)"}
  },
  "vm": {
   "intro": "Führe die folgenden Schritte auf deiner eigenen VM aus (Ubuntu, Rocky oder Alma). Probiere alles unter `~/adv`; nutze `-delete` oder `rm -r` niemals dort, wo echte Daten liegen.",
@@ -164,7 +164,7 @@
      {"cmd": "cd ~/adv\ncat > hello.sh <<'EOF'\n#!/bin/bash\nname=\"${1:-world}\"\necho \"Hello, $name\"\nEOF\n./hello.sh\nchmod +x hello.sh\n./hello.sh student\necho $?", "expected": "bash: ./hello.sh: Permission denied\nHello, student\n0"}
     ],
     "differs": [
-     "Läuft das erste `./hello.sh` doch, vergibt dein Dateisystem (z. B. manche WSL-Einbindungen) das `x`-Recht schon.",
+     "Läuft das erste `./hello.sh` doch, vergibt dein Dateisystem (z. B. manche WSL-Einbindungen) das `x`-Recht schon. (`chmod` in Modul 4.4.)",
      "Siehst du `hello.sh: command not found`, fehlt das Präfix `./`; das aktuelle Verzeichnis steht nicht in `PATH`."
     ]
    }

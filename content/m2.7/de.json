@@ -177,7 +177,7 @@
  "tasks": {
   "t01": {
    "text": "Lege eine Datei ohne Editor an: `echo \"hello editor\" > hello.txt`.",
-   "hint": "`>` erstellt die Datei oder überschreibt sie."
+   "hint": "`>` erstellt die Datei oder überschreibt sie (Details in Modul 3.2)."
   },
   "t02": {
    "text": "Zeige den Inhalt der Datei mit `cat hello.txt`.",
@@ -189,7 +189,7 @@
   },
   "t04": {
    "text": "Hänge ohne Editor eine Zeile an `todo.txt` an: `echo \"buy bread\" >> todo.txt`.",
-   "hint": "Zum Anhängen zwei `>` verwenden."
+   "hint": "Zum Anhängen zwei `>` verwenden (`>>` Details in Modul 3.2)."
   },
   "t05": {
    "text": "Zeige `todo.txt` mit Zeilennummern: `cat -n todo.txt`.",
@@ -197,7 +197,7 @@
   },
   "t06": {
    "text": "Finde die Zeile mit `report` samt Nummer: `grep -n report todo.txt`.",
-   "hint": "`-n` setzt die Zeilennummer davor."
+   "hint": "`-n` setzt die Zeilennummer davor. `grep` wird ausführlich in Modul 3.4 erklärt."
   },
   "t07": {
    "text": "Vorhersage: Wie viele Zeilen hat `todo.txt` jetzt? Prüfe mit `wc -l todo.txt`.",
@@ -217,7 +217,7 @@
   },
   "t11": {
    "text": "Mini-Projekt: Lege den Ordner `scripts` an, schreibe in `scripts/hello.sh` die Zeilen `#!/bin/bash` und `echo hello` (mit `printf` und `\\n`) und setze den Modus 755.",
-   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, dann `chmod 755 scripts/hello.sh`."
+   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, dann `chmod 755 scripts/hello.sh`. Details zu `chmod` in Modul 4.4."
   },
   "t12": {
    "text": "Challenge: Sichere zuerst `notes.txt` als `notes.txt.bak`, hänge dann die Zeile `meeting at 10` an `notes.txt` an.",
@@ -225,11 +225,11 @@
   },
   "t13": {
    "text": "Challenge: Speichere aus `server.log` nur die Zeilen mit `ERROR` in `errors.txt`.",
-   "hint": "`grep` Muster Datei, Ausgabe mit `>` umleiten."
+   "hint": "`grep` Muster Datei, Ausgabe mit `>` umleiten. `grep` → Modul 3.4, `>` → Modul 3.2."
   },
   "t14": {
    "text": "TICKET #2705 — Neue Mitarbeiter brauchen eine Willkommensnotiz. Erstelle `~/welcome.txt` mit dem Inhalt `Welcome to linux-lab`, lege eine Kopie als `~/Documents/welcome.txt` ab und mache die Kopie für alle schreibgeschützt (Modus 444).",
-   "hint": "`echo`, `cp`, `chmod 444`."
+   "hint": "`echo`, `cp`, `chmod 444`. Details zu `chmod` in Modul 4.4."
   }
  },
  "quiz": {

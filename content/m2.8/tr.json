@@ -35,7 +35,7 @@
     {"cmd": "free -h", "what": "RAM ve swap kullanımını okunur birimlerle gösterir.", "where": "Bellek sıkıntısından şüphelenince.", "why": "available değeri gerçek boş belleği söyler.", "example": "free -h"},
     {"cmd": "uptime", "what": "Çalışma süresi, kullanıcı sayısı ve yük ortalamasını gösterir.", "where": "Sunucu yavaşsa hızlı kontrol için.", "why": "Yük ortalaması anlık değil, trend verir.", "example": "uptime"}
    ],
-   "tip": "Çıktıyı raporlamak için `df -h > report.txt`, ekleme için `>>` kullan."
+   "tip": "Çıktıyı raporlamak için `df -h > report.txt`, ekleme için `>>` kullan. (`>` ve `>>` ayrıntısı modül 3.2'de.)"
   },
   {
    "id": "net",
@@ -58,16 +58,16 @@
   "t02": {"text": "`free -h` ile bellek durumunu göster.", "hint": "available sütununa bak."},
   "t03": {"text": "`uptime` ile yük ortalamasını göster.", "hint": "Üç sayı: 1, 5, 15 dakika."},
   "t04": {"text": "Örnek rapor `~/reports/df_sample.txt` dosyasını `cat` ile oku ve Use% sütununu bul.", "hint": "`cat ~/reports/df_sample.txt`"},
-  "t05": {"text": "`df -h` çıktısını `>` ile `~/disk_report.txt` dosyasına kaydet.", "hint": "`df -h > ~/disk_report.txt`. Tek `>` dosyanın üzerine yazar."},
-  "t06": {"text": "`free -h` çıktısını aynı dosyanın sonuna ekle (`>>`).", "hint": "`>>` ekler, `>` üzerine yazar; yanlış yaparsan t05'i tekrarla."},
+  "t05": {"text": "`df -h` çıktısını `>` ile `~/disk_report.txt` dosyasına kaydet.", "hint": "`df -h > ~/disk_report.txt`. Tek `>` dosyanın üzerine yazar. (`>` ayrıntısı modül 3.2'de.)"},
+    "t06": {"text": "`free -h` çıktısını aynı dosyanın sonuna ekle (`>>`)." , "hint": "`>>` ekler, `>` üzerine yazar; yanlış yaparsan t05'i tekrarla. (Ayrıntısı modül 3.2'de.)"},
   "t07": {"text": "`uptime` çıktısını da `~/disk_report.txt` dosyasına ekle.", "hint": "Yine `>>` kullan."},
-  "t08": {"text": "Tahmin et: `~/reports/df_sample.txt` içinde 95% geçen satır hangi bağlama noktası? Sonra `grep 95% ~/reports/df_sample.txt` ile doğrula.", "hint": "Satırın sonundaki Mounted on sütunu."},
-  "t09": {"text": "Tahmin et: `~/reports/ping_sample.txt` ağ hakkında ne söylüyor? `grep loss ~/reports/ping_sample.txt` ile kayıp oranını gör.", "hint": "100% packet loss hedefe hiç ulaşılamadığı anlamına gelir."},
-  "t10": {"text": "Tahmin et: `~/reports/ip_sample.txt` içinde eth0 arayüzünün IP'si ne? `grep eth0 ~/reports/ip_sample.txt` ile doğrula.", "hint": "Satırdaki /24 ağ maskesidir, IP değil."},
+  "t08": {"text": "Tahmin et: `~/reports/df_sample.txt` içinde 95% geçen satır hangi bağlama noktası? Sonra `grep 95% ~/reports/df_sample.txt` ile doğrula.", "hint": "Satırın sonundaki Mounted on sütunu. (`grep` ayrıntısı modül 3.4'te.)"},
+  "t09": {"text": "Tahmin et: `~/reports/ping_sample.txt` ağ hakkında ne söylüyor? `grep loss ~/reports/ping_sample.txt` ile kayıp oranını gör.", "hint": "100% packet loss hedefe hiç ulaşılamadığı anlamına gelir. (`grep` ayrıntısı modül 3.4'te.)"},
+  "t10": {"text": "Tahmin et: `~/reports/ip_sample.txt` içinde eth0 arayüzünün IP'si ne? `grep eth0 ~/reports/ip_sample.txt` ile doğrula.", "hint": "Satırdaki /24 ağ maskesidir, IP değil. (`grep` ayrıntısı modül 3.4'te.)"},
   "t11": {"text": "Disk şişiyor. `ls -l ~/logs` ile bak; eski hata ayıklama logu `old_debug.log` gereksiz, onu sil ama `app.log` dosyasına dokunma.", "hint": "`rm ~/logs/old_debug.log`. Silmeden önce ls ile doğru ismi kontrol et."},
-  "t12": {"text": "Mini proje: `~/health.txt` raporu hazırla. İçinde sırayla `== disk ==` başlığı, `df -h` çıktısı, `== memory ==` başlığı ve `free -h` çıktısı olsun.", "hint": "İlk satır `echo \"== disk ==\" > ~/health.txt`, sonrakiler `>>`."},
-  "t13": {"text": "Meydan okuma: `~/reports/df_sample.txt` içinden yalnızca %95 dolu satırı `~/alert.txt` dosyasına, bu satırların sayısını `~/alert_count.txt` dosyasına yaz.", "hint": "`grep` satırı süzer, `grep -c` sayar; her ikisini `>` ile yönlendir."},
-  "t14": {"text": "Ticket: \"Uygulama 'No space left on device' hatası veriyor.\" `~/reports/df_sample.txt` içinden dolu bağlama noktasını bul ve adını `~/full_mount.txt` dosyasına yaz. Ayrıca gereksiz `~/logs/core.dump` dosyasını sil.", "hint": "Dolu olan 95% satırıdır. Mount noktası `/var`: `echo /var > ~/full_mount.txt`."}
+  "t12": {"text": "Mini proje: `~/health.txt` raporu hazırla. İçinde sırayla `== disk ==` başlığı, `df -h` çıktısı, `== memory ==` başlığı ve `free -h` çıktısı olsun.", "hint": "İlk satır `echo \"== disk ==\" > ~/health.txt`, sonrakiler `>>`. (`>` / `>>` ayrıntısı modül 3.2'de.)"},
+  "t13": {"text": "Meydan okuma: `~/reports/df_sample.txt` içinden yalnızca %95 dolu satırı `~/alert.txt` dosyasına, bu satırların sayısını `~/alert_count.txt` dosyasına yaz.", "hint": "`grep` satırı süzer, `grep -c` sayar; her ikisini `>` ile yönlendir. (`grep` → modül 3.4, `>` → 3.2.)"},
+  "t14": {"text": "Ticket: \"Uygulama 'No space left on device' hatası veriyor.\" `~/reports/df_sample.txt` içinden dolu bağlama noktasını bul ve adını `~/full_mount.txt` dosyasına yaz. Ayrıca gereksiz `~/logs/core.dump` dosyasını sil.", "hint": "Dolu olan 95% satırıdır. Mount noktası `/var`: `echo /var > ~/full_mount.txt`. (`>` ayrıntısı modül 3.2'de.)"}
  },
  "vm": {
   "intro": "Bu bölümdeki komutlar yalnızca okuma yapar; VM'inde güvenle çalıştırabilirsin. Çıktını yapıştır, otomatik kontrol edelim.",

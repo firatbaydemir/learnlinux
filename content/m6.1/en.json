@@ -228,15 +228,15 @@
   },
   "t05": {
    "text": "Write only the gateway address into `~/net/gateway.txt`.",
-   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; field 3 is the gateway."
+   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; field 3 is the gateway. (`grep` → module 3.4; `cut` → module 3.5; `>` → module 3.2.)"
   },
   "t06": {
    "text": "Write the number of listening (LISTEN) lines into `~/net/listen_count.txt`.",
-   "hint": "A pipeline like `grep LISTEN ... | wc -l > file`."
+   "hint": "A pipeline like `grep LISTEN ... | wc -l > file`. (`wc` → module 2.6.)"
   },
   "t07": {
    "text": "Write the externally exposed listeners (LISTEN lines that are not `127.0.0.1`) into `~/net/exposed.txt`.",
-   "hint": "Pipe two `grep`s together; use `-v 127.0.0.1` in the second."
+   "hint": "Pipe two `grep`s together; use `-v 127.0.0.1` in the second. (`grep` → module 3.4.)"
   },
   "t08": {
    "text": "Predict: which process listens on port 8080? Then verify with `grep 8080 ~/net/ss.txt`.",
@@ -252,23 +252,23 @@
   },
   "t11": {
    "text": "Debug: the `nameserver` in `~/net/resolv.conf` is invalid. Rewrite the file so it has two lines: `nameserver 192.168.1.1` and `nameserver 1.1.1.1`.",
-   "hint": "`printf 'line1\\nline2\\n' > file` writes two lines; look at the error with `cat` first."
+   "hint": "`printf 'line1\\nline2\\n' > file` writes two lines; look at the error with `cat` first. (`cat` → module 2.6.)"
   },
   "t12": {
    "text": "Debug: the script `~/net/check_ports.sh` does not run. Find the cause, fix it and run the script.",
-   "hint": "Check permissions with `ls -l`; `chmod 755`, then `~/net/check_ports.sh`."
+   "hint": "Check permissions with `ls -l`; `chmod 755`, then `~/net/check_ports.sh`. (`chmod` → module 4.4.)"
   },
   "t13": {
    "text": "Mini report: write the host name, the gateway address and the number of listening services (3 lines, in that order) into `~/net/report.txt`.",
-   "hint": "Use `>` in the first command and `>>` in the following ones; `hostname` gives the host name."
+   "hint": "Use `>` in the first command and `>>` in the following ones; `hostname` gives the host name. (`>/>>` → module 3.2.)"
   },
   "t14": {
    "text": "Hard: from the LISTEN lines of `ss.txt` write only the port numbers, numerically sorted and without duplicates, into `~/net/ports.txt` (one port per line).",
-   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file`"
+   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file` (`tr/cut/sort/uniq` → module 3.5.)"
   },
   "t15": {
    "text": "Hard: write the firewalld plan for opening 8080/tcp permanently into `~/net/fw_plan.txt` as two lines: first the command containing `--permanent --add-port=8080/tcp`, then `firewall-cmd --reload`. (You write the plan, you do not run it.)",
-   "hint": "`echo 'command' > file`, use `>>` for the second line. Use quotes."
+   "hint": "`echo 'command' > file`, use `>>` for the second line. Use quotes. (`>/>>` → module 3.2.)"
   },
   "t16": {
    "text": "Ticket: Users cannot reach the name `intranet.lab`. The internal server's address is `192.168.1.50`. Add this mapping to `~/net/hosts` (do not delete existing lines).",
@@ -276,7 +276,7 @@
   },
   "t17": {
    "text": "Ticket: A security audit wants proof that PostgreSQL (port 5432) listens only on the local address. Save the relevant `ss.txt` line into `~/net/audit.txt`.",
-   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; the line must contain `127.0.0.1:5432`."
+   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; the line must contain `127.0.0.1:5432`. (`grep` → module 3.4.)"
   }
  },
  "vm": {

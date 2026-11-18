@@ -238,7 +238,7 @@
   },
   "t07": {
    "text": "Count the processes of alice: `grep alice ~/lab/ps_snapshot.txt | wc -l`.",
-   "hint": "`wc -l` counts lines after the pipe."
+   "hint": "`wc -l` counts lines after the pipe. (`wc` → module 2.6; `|` → module 3.2.)"
   },
   "t08": {
    "text": "Find the zombie in the snapshot with `grep defunct ~/lab/ps_snapshot.txt`. Which PID and which user?",
@@ -258,27 +258,27 @@
   },
   "t12": {
    "text": "Sort the snapshot by CPU, highest first, and show two lines: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 2`.",
-   "hint": "`-k3` = third column, `-n` numeric, `-r` reverse."
+   "hint": "`-k3` = third column, `-n` numeric, `-r` reverse. (`sort` → module 3.5.)"
   },
   "t13": {
    "text": "Mini project: write the PIDs of all root processes into `~/lab/root_pids.txt`. Filter with `grep ^root`, squeeze spaces with `tr -s ' '`, pick column 2 with `cut -d' ' -f2`, redirect with `>`.",
-   "hint": "One pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`."
+   "hint": "One pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`. (`grep` → module 3.4; `tr/cut` → module 3.5; `>` → module 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/fix.txt` says `kill -9 1701`. That is wrong, a zombie cannot be killed. Overwrite the file with the better command: signal the parent, e.g. `kill -s SIGCHLD 1500`.",
-   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. The parent PID is 1500 (see t09)."
+   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. The parent PID is 1500 (see t09). (`>` → module 3.2.)"
   },
   "t15": {
    "text": "Challenge: find the process with the highest CPU usage in the snapshot using `sort`. Write the **polite** stop command for it into `~/lab/decision.txt` (do not run it).",
-   "hint": "It is PID 1620. Polite means signal 15: `echo \"kill -15 1620\" > ~/lab/decision.txt`."
+   "hint": "It is PID 1620. Polite means signal 15: `echo \"kill -15 1620\" > ~/lab/decision.txt`. (`>` → module 3.2.)"
   },
   "t16": {
    "text": "TICKET #5110 — The server is slow. Alice's job is suspected. Write the user, PID and command of the busiest process into `~/lab/report.txt`.",
-   "hint": "Use `sort` or `grep` on the snapshot; then `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`."
+   "hint": "Use `sort` or `grep` on the snapshot; then `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`. (`sort/grep` → module 3.4/3.5; `>` → module 3.2.)"
   },
   "t17": {
    "text": "Save your shell PID to a file: `echo $$ > ~/lab/mypid.txt`.",
-   "hint": "`>` writes the output of `echo` into the file."
+   "hint": "`>` writes the output of `echo` into the file. (`>` → module 3.2.)"
   }
  },
  "vm": {

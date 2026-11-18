@@ -76,11 +76,11 @@
   "t10": {"text": "Read the link's type with `stat ~/info/link.txt`.", "hint": "The output says `symbolic link`."},
   "t11": {"text": "Predict: which letter does the line of `ls -ld ~/info` start with? Run it.", "hint": "A folder starts with `d`: `drwx...`."},
   "t12": {"text": "Predict: what does `stat` do for the non-existent `~/info/missing.txt`? Run it.", "hint": "It fails: No such file or directory."},
-  "t13": {"text": "Try a broken link: create a link without target using `ln -s nothing.txt ~/broken`, then run `cat ~/broken`.", "hint": "The link exists, the target does not; `cat` reports an error."},
-  "t14": {"text": "Debug: `~/info/picture.jpg` is really plain text. Rename it to `picture.txt`.", "hint": "Look inside with `cat`, then rename with `mv`."},
-  "t15": {"text": "Mini project: create the folder `~/inventory`, write a file with `echo version1 > ~/inventory/v1.txt`, create the link `current` with target `v1.txt` and verify with `ls -l ~/inventory`.", "hint": "Order: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`."},
+  "t13": {"text": "Try a broken link: create a link without target using `ln -s nothing.txt ~/broken`, then run `cat ~/broken`.", "hint": "The link exists, the target does not; `cat` reports an error. (`cat` prints a file to the screen; details in module 2.6.)"},
+  "t14": {"text": "Debug: `~/info/picture.jpg` is really plain text. Rename it to `picture.txt`.", "hint": "Look inside with `cat`, then rename with `mv`. (`cat` is in module 2.6, `mv` in module 2.4.)"},
+  "t15": {"text": "Mini project: create the folder `~/inventory`, write a file with `echo version1 > ~/inventory/v1.txt`, create the link `current` with target `v1.txt` and verify with `ls -l ~/inventory`.", "hint": "Order: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`. (`>` redirects output to a file, details in module 3.2; `mkdir` in module 2.3.)"},
   "t16": {"text": "Hard task: create `~/shortcut` as a link to `~/info/data.txt`, inspect it with `ls -l ~/shortcut` and `stat ~/shortcut`, then delete the link. `data.txt` must remain.", "hint": "`rm` removes only the link and does not touch the target."},
-  "t17": {"text": "Ticket #2520: The audit team wants the size of `~/info/data.txt` in bytes in the file `~/size.txt`. Redirect the output into the file.", "hint": "`wc -c ~/info/data.txt > ~/size.txt`"}
+  "t17": {"text": "Ticket #2520: The audit team wants the size of `~/info/data.txt` in bytes in the file `~/size.txt`. Redirect the output into the file.", "hint": "`wc -c ~/info/data.txt > ~/size.txt` (`>` redirects output to a file; details in module 3.2.)"}
  },
  "vm": {
   "intro": "Try it on your VM. There are no destructive commands here; you only create small test files in your home directory.",

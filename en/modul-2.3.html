@@ -69,7 +69,7 @@ src  test
 <article class="vmt card" data-vm="v02" data-expect="1"><header><h3>See the protection</h3><span class="status" aria-hidden="true"></span></header><p>As a normal user try to create a folder in a system directory and paste the error.</p>
 <div class="code"><pre><code><span class="ln"><span class="tk">mkdir</span> <span class="tp">/etc/practice</span></span>
 </code></pre><div class="codebtns"><button type="button" class="copy" data-copy="mkdir /etc/practice">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">mkdir: cannot create directory ‘/etc/practice’: Permission denied</pre>
-<details class="differs"><summary>My output looks different</summary><ul><li>On a localised system the message may be translated.</li><li>If the folder was created you are root; use a normal user and remove it with <code>sudo rmdir /etc/practice</code>.</li></ul></details>
+<details class="differs"><summary>My output looks different</summary><ul><li>On a localised system the message may be translated.</li><li>If the folder was created you are root; use a normal user and remove it with <code>sudo rmdir /etc/practice</code> (<code>sudo</code> runs a command with admin rights; details in module 4.3).</li></ul></details>
 <label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v03" data-expect="0"><header><h3>Clean up</h3><span class="status" aria-hidden="true"></span></header><p>Look inside first, then delete the practice folder. If no errors, press &quot;Done&quot;.</p>

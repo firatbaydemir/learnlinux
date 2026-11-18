@@ -35,7 +35,7 @@
     {"cmd": "ls -a", "what": "Zeigt auch versteckte Dateien, deren Name mit einem Punkt beginnt.", "where": "Bei der Suche nach Konfigurationsdateien.", "why": "Versteckte Dateien erscheinen in der normalen `ls`-Ausgabe nicht.", "example": "ls -a"},
     {"cmd": "ls -lh", "what": "Ausführliche Liste; Größen in K/M/G.", "where": "Wenn du dir Dateigrößen ansiehst.", "why": "Einfacher, als Byte-Zahlen zu lesen.", "example": "ls -lh ~"}
    ],
-   "tip": "Wird die `ls`-Ausgabe in einem Verzeichnis mit vielen Dateien zu lang, sieh dir mit `ls -l | head` die ersten Zeilen an."
+   "tip": "Wird die `ls`-Ausgabe in einem Verzeichnis mit vielen Dateien zu lang, sieh dir mit `ls -l | head` die ersten Zeilen an. (`|` gibt die Ausgabe des ersten Befehls an den zweiten weiter, `head` zeigt die ersten 10 Zeilen; Details in Modul 3.2 und 2.6.)"
   },
   {
    "id": "cd",

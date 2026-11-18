@@ -302,8 +302,8 @@ def build_root(ui_all):
 
 def write_precache_manifest():
     urls = ["./", "index.html", "manifest.webmanifest", "service-worker.js"]
-    urls.extend(sorted(str(p.relative_to(V3)) for lang in LANGS for p in (V3 / lang).glob("*.html")))
-    urls.extend(sorted(str(p.relative_to(V3)) for folder in ("shared", "icons")
+    urls.extend(sorted(p.relative_to(V3).as_posix() for lang in LANGS for p in (V3 / lang).glob("*.html")))
+    urls.extend(sorted(p.relative_to(V3).as_posix() for folder in ("shared", "icons")
                        for p in (V3 / folder).rglob("*") if p.is_file()))
     revision = hashlib.sha256()
     for url in urls:

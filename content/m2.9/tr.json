@@ -12,11 +12,11 @@
     "t02":{"text":"Simülatörde `df -h` çalıştır ve disk doluluk raporunu incele.","hint":"`-h` boyutları okunabilir birimlerle gösterir."},
     "t03":{"text":"Örnek disk ağacını `cat ~/disklab/lsblk.txt` ile oku; ikinci disk hangi adla görünüyor?","hint":"Çıktıda `sdb` satırını ara."},
     "t04":{"text":"Bir bağlama noktası hazırlamak için `~/disklab/archive` dizinini oluştur.","hint":"`mkdir -p ~/disklab/archive`"},
-    "t05":{"text":"Tahmin et: örnek fstab'da `/data` için hangi UUID kullanılıyor? `grep data ~/disklab/fstab.sample` ile doğrula.","hint":"UUID, satırın başında `UUID=` sonrasındadır."},
+    "t05":{"text":"Tahmin et: örnek fstab'da `/data` için hangi UUID kullanılıyor? `grep data ~/disklab/fstab.sample` ile doğrula.","hint":"UUID, satırın başında `UUID=` sonrasındadır. (`grep` bir kalıbı satır satır arar; ayrıntısı modül 3.4'te.)"},
     "t06":{"text":"Hatalı/geçici örnek kaydı kaldır: `~/disklab/fstab.tmp` dosyasını sil.","hint":"Tam yolu ve dosya adını kontrol ettikten sonra `rm ~/disklab/fstab.tmp`."},
-    "t07":{"text":"Mini proje: `/data` için UUID ve `nofail` seçeneğini içeren bir bağlama planını `~/disklab/mount-plan.txt` dosyasına yaz.","hint":"Tek satırı `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt` ile kaydedebilirsin."},
+    "t07":{"text":"Mini proje: `/data` için UUID ve `nofail` seçeneğini içeren bir bağlama planını `~/disklab/mount-plan.txt` dosyasına yaz.","hint":"Tek satırı `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt` ile kaydedebilirsin. (`>` çıktıyı dosyaya yönlendirir; ayrıntısı modül 3.2'de.)"},
     "t08":{"text":"Meydan okuma: örnek fstab dosyasının yedeğini `~/disklab/fstab.backup` adıyla oluştur.","hint":"`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"},
-    "t09":{"text":"Ticket: \"Yeni disk görünmüyor.\" Destek notuna önce `lsblk`, sonra `df -hT` ile kontrol edilmesini yaz.","hint":"Komutları bir metin satırına `echo` ile kaydet."}
+    "t09":{"text":"Ticket: \"Yeni disk görünmüyor.\" Destek notuna önce `lsblk`, sonra `df -hT` ile kontrol edilmesini yaz.","hint":"Komutları bir metin satırına `echo` ile kaydet. (`>` ile dosyaya yazabilirsin; ayrıntısı modül 3.2'de.)"}
   },
   "vm":{"intro":"Bu görevler disk bilgisini okur; bölüm tablosu veya dosya sistemi değiştirmez. Komutları kendi VM'inde çalıştır ve çıktındaki aygıt adlarını paylaşmadan önce gözden geçir.","tasks":{
     "v01":{"title":"Disk ve dosya sistemi ağacı","text":"Diskleri, bölümleri ve dosya sistemi türlerini listele. Sistem diskinin adını tahmin etmek yerine bağlama noktalarını kontrol et.","blocks":[{"cmd":"lsblk -f","expected":"NAME FSTYPE FSVER LABEL UUID FSAVAIL FSUSE% MOUNTPOINTS"}],"differs":["Sütunlar ve aygıt adları dağıtıma göre değişir; `sda`, `vda` veya `nvme0n1` görebilirsin.","Boş bir ek disk varsa FSTYPE ve MOUNTPOINTS sütunları boş olabilir."]},

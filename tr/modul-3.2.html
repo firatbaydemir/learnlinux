@@ -61,7 +61,7 @@ backup
 bin
 daemon
 games</pre>
-<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Adlar dağıtıma göre değişir; yalnızca alfabetik sıra önemlidir. <code>root</code> var mı diye <code>| grep root</code> ile bakabilirsin.</li></ul></details>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Adlar dağıtıma göre değişir; yalnızca alfabetik sıra önemlidir. <code>root</code> var mı diye <code>| grep root</code> ile bakabilirsin.</li><li><code>cut</code> komutu modül 3.5&#x27;te ayrıntılı anlatılır; burada yalnızca <code>-d:</code> (ayırıcı) ve <code>-f1</code> (1. alan) parametrelerini bilmen yeterli.</li></ul></details>
 <label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Sıklık tablosu</h3><span class="status" aria-hidden="true"></span></header><p><code>/etc/passwd</code> içinde hangi login shell&#x27;lerin kullanıldığını say ve sırala.</p>
@@ -69,7 +69,7 @@ games</pre>
 </code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn">Kopyala</button></div></div><p class="lbl">Beklenen çıktı örneği</p><pre class="out">     24 /usr/sbin/nologin
       3 /bin/bash
       1 /bin/sync</pre>
-<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Sayılar ve shell&#x27;ler sistemine göre değişir.</li><li>Tek satır görüyorsan <code>uniq -c</code>&#x27;den önce <code>sort</code> olduğundan emin ol.</li></ul></details>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Sayılar ve shell&#x27;ler sistemine göre değişir.</li><li>Tek satır görüyorsan <code>uniq -c</code>&#x27;den önce <code>sort</code> olduğundan emin ol.</li><li><code>cut -d: -f7</code> yedinci alanı (login shell) alır; <code>cut</code> modül 3.5&#x27;te anlatılır.</li></ul></details>
 <label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v04" data-expect="0"><header><h3>tee ile kopya tut</h3><span class="status" aria-hidden="true"></span></header><p>Bir listeyi sayarken <code>tee</code> ile dosyaya kaydet ve dosyayı kontrol et. Çalıştıysa &quot;Yaptım&quot;a bas.</p>

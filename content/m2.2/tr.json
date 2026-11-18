@@ -75,7 +75,7 @@
   "t10": {"text": "`ls -l ~/link.txt` ile linki incele. Okun (`->`) ucunda ne var?", "hint": "Satır `l` ile başlar."},
   "t11": {"text": "`cat ~/link.txt` çıktısı ne olur? Tahmin et, sonra çalıştır.", "hint": "Link hedefi okur."},
   "t12": {"text": "Debug: `~/projects/app` içindeyken `config.txt` bulunamıyor; dosya bir üst dizinde. Göreli yol `../` kullanarak `cat` ile oku.", "hint": "Önce `cd ~/projects/app`, sonra `cat ../config.txt`."},
-  "t13": {"text": "Mini proje: `~/lab/docs` ve `~/lab/bin` dizinlerini kur, `echo hello linux > ~/lab/docs/readme.txt` ile dosya yaz, `~/lab/bin/readme-link` adında ona sembolik link ver.", "hint": "`mkdir -p`, `echo ... >` ve `ln -s HEDEF LINK`."},
+  "t13": {"text": "Mini proje: `~/lab/docs` ve `~/lab/bin` dizinlerini kur, `echo hello linux > ~/lab/docs/readme.txt` ile dosya yaz, `~/lab/bin/readme-link` adında ona sembolik link ver.", "hint": "`mkdir -p`, `echo ... >` ve `ln -s HEDEF LINK`. (`mkdir` modül 2.3'te, `>` çıktıyı dosyaya yazar, modül 3.2'de anlatılır.)"},
   "t14": {"text": "Zor görev: `~/lab/bin` içine geç ve **göreli hedefle** (`../docs/readme.txt`) `rel-link` linkini oluştur; sonra `cat rel-link` ile oku.", "hint": "Göreli hedef linkin bulunduğu dizinden hesaplanır."},
   "t15": {"text": "Ticket: Uygulama yapılandırmayı `~/app/current/config.txt` yolunda arıyor, gerçek dosya `~/releases/v2/config.txt` içinde. `~/app/current` sembolik linkini `~/releases/v2` dizinine kur ve `cat ~/app/current/config.txt` ile doğrula.", "hint": "`mkdir -p ~/app`, sonra `ln -s ~/releases/v2 ~/app/current`."},
   "t16": {"text": "Gizli dosyaları da görmek için `ls -la ~` çalıştır.", "hint": "`-a` gizli dosyaları, `-l` ayrıntıyı getirir."}

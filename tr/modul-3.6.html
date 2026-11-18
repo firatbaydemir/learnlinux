@@ -186,7 +186,7 @@ ps aux | awk &#x27;NR&gt;1 {print $1}&#x27; | sort | uniq -c | sort -rn | head -
     120 root
      35 student
       4 www-data</pre>
-<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Son komutun sayıları ve kullanıcıları sistemine göre farklıdır; önemli olan her satırın <code>sayı kullanıcı</code> biçiminde olmasıdır.</li><li><code>for (k in c)</code> sırası belirsizdir; bu yüzden <code>sort</code> ekledik.</li></ul></details>
+<details class="differs"><summary>Çıktım farklı çıktı</summary><ul><li>Son komutun sayıları ve kullanıcıları sistemine göre farklıdır; önemli olan her satırın <code>sayı kullanıcı</code> biçiminde olmasıdır. (<code>ps</code> modül 5.1&#x27;de anlatılır.)</li><li><code>for (k in c)</code> sırası belirsizdir; bu yüzden <code>sort</code> ekledik.</li></ul></details>
 <label class="lbl">Çıktını buraya yapıştır</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Kontrol et</button></p><p class="fb" aria-live="polite"></p>
 </article>
 </section>

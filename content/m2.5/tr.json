@@ -76,11 +76,11 @@
   "t10": {"text": "`stat ~/info/link.txt` ile linkin türünü oku.", "hint": "Çıktıda `symbolic link` yazar."},
   "t11": {"text": "Tahmin et: `ls -ld ~/info` satırı hangi harfle başlar? Çalıştır.", "hint": "Klasör `d` ile başlar: `drwx...`."},
   "t12": {"text": "Tahmin et: var olmayan `~/info/missing.txt` için `stat` ne yapar? Çalıştır.", "hint": "Hata verir: No such file or directory."},
-  "t13": {"text": "Kırık link dene: `ln -s nothing.txt ~/broken` ile hedefi olmayan link kur, sonra `cat ~/broken` çalıştır.", "hint": "Link vardır ama hedef yoktur; `cat` hata verir."},
-  "t14": {"text": "Hata ayıklama: `~/info/picture.jpg` aslında düz metin. Adını `picture.txt` yap.", "hint": "`cat` ile içine bak, sonra `mv` ile yeniden adlandır."},
-  "t15": {"text": "Mini proje: `~/inventory` klasörünü aç, içine `echo version1 > ~/inventory/v1.txt` ile dosya yaz, `current` adlı linki `v1.txt` hedefiyle kur ve `ls -l ~/inventory` ile doğrula.", "hint": "Sıra: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`."},
+  "t13": {"text": "Kırık link dene: `ln -s nothing.txt ~/broken` ile hedefi olmayan link kur, sonra `cat ~/broken` çalıştır.", "hint": "Link vardır ama hedef yoktur; `cat` hata verir. (`cat` dosyayı ekrana yazar; ayrıntısı modül 2.6'da.)"},
+  "t14": {"text": "Hata ayıklama: `~/info/picture.jpg` aslında düz metin. Adını `picture.txt` yap.", "hint": "`cat` ile içine bak, sonra `mv` ile yeniden adlandır. (`cat` modül 2.6'da, `mv` modül 2.4'te.)"},
+  "t15": {"text": "Mini proje: `~/inventory` klasörünü aç, içine `echo version1 > ~/inventory/v1.txt` ile dosya yaz, `current` adlı linki `v1.txt` hedefiyle kur ve `ls -l ~/inventory` ile doğrula.", "hint": "Sıra: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`. (`>` çıktıyı dosyaya yazar, ayrıntısı modül 3.2'de; `mkdir` modül 2.3'te.)"},
   "t16": {"text": "Zor görev: `~/shortcut` linkini `~/info/data.txt` için kur, `ls -l ~/shortcut` ve `stat ~/shortcut` ile incele, sonra linki sil. `data.txt` yerinde kalmalı.", "hint": "`rm` yalnızca linki kaldırır; hedefe dokunmaz."},
-  "t17": {"text": "Ticket #2520: Denetim ekibi `~/info/data.txt` dosyasının bayt boyutunu `~/size.txt` içinde istiyor. Çıktıyı dosyaya yönlendirerek hazırla.", "hint": "`wc -c ~/info/data.txt > ~/size.txt`"}
+  "t17": {"text": "Ticket #2520: Denetim ekibi `~/info/data.txt` dosyasının bayt boyutunu `~/size.txt` içinde istiyor. Çıktıyı dosyaya yönlendirerek hazırla.", "hint": "`wc -c ~/info/data.txt > ~/size.txt` (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"}
  },
  "vm": {
   "intro": "Kendi VM'inde dene. Burada yıkıcı komut yok; yalnızca home dizininde küçük deneme dosyaları açarsın.",

@@ -234,35 +234,35 @@
   },
   "t10": {
    "text": "Vorhersage: Was gibt `grep -c java ~/lab/ps_snapshot.txt` aus? Erst überlegen, dann ausführen.",
-   "hint": "-c zählt die passenden Zeilen."
+   "hint": "-c zählt die passenden Zeilen. (`grep` → Modul 3.4.)"
   },
   "t11": {
    "text": "Vorhersage: Was gibt `cut -d ' ' -f 1 ~/lab/loadavg.txt` aus? Erst überlegen, dann ausführen.",
-   "hint": "-d legt das Trennzeichen fest, -f 1 ist das erste Feld."
+   "hint": "-d legt das Trennzeichen fest, -f 1 ist das erste Feld. (`cut` → Modul 3.5.)"
   },
   "t12": {
    "text": "Finde die größten CPU-Verbraucher im Snapshot: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 3`. Welcher Prozess steht vorn?",
-   "hint": "-k3 ist die Spalte %CPU, -n numerisch, -r absteigend."
+   "hint": "-k3 ist die Spalte %CPU, -n numerisch, -r absteigend. (`sort` → Modul 3.5.)"
   },
   "t13": {
    "text": "Mini: Speichere die 2 größten Speicherverbraucher aus `~/lab/ps_snapshot.txt` in `~/lab/top_mem.txt`. Sortiere mit `sort -k4 -nr` nach Spalte 4, nimm mit `head -n 2` zwei Zeilen und leite mit `>` um.",
-   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt`"
+   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt` (`sort/head` → Modul 3.5/3.2; `>` → Modul 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/monitor_cmds.txt` listet falsche Befehle (`nprocs` gibt es nicht und `free -m` ist nicht lesbar). Schreibe die Datei mit `printf` neu, sodass sie je Zeile `cores: nproc`, `memory: free -h` und `disk: df -h` enthält.",
-   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt`"
+   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt` (`>` → Modul 3.2.)"
   },
   "t15": {
    "text": "Mini: `~/lab/du_report.txt` enthält Größen in KB. Speichere die 3 größten Einträge mit `sort -nr`, `head -n 3` und `>` in `~/lab/biggest.txt`.",
-   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt`"
+   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt` (`sort/head` → Modul 3.5/3.2; `>` → Modul 3.2.)"
   },
   "t16": {
    "text": "Challenge: Baue `~/lab/report.txt` aus drei Teilen: der 1-Minuten-Last aus `~/lab/loadavg.txt` (nutze `cut`), der Zeile `MemAvailable` aus `~/lab/meminfo.txt` (nutze `grep`, mit `>>` anhängen) und deinem Urteil `overloaded` (nutze `echo`, anhängen).",
-   "hint": "Der erste Befehl nutzt `>`, die anderen `>>`, damit nichts überschrieben wird."
+   "hint": "Der erste Befehl nutzt `>`, die anderen `>>`, damit nichts überschrieben wird. (`>/>>` → Modul 3.2.)"
   },
   "t17": {
    "text": "TICKET #5201 — Der Server linux-lab ist sehr langsam. In `~/lab/top_snapshot.txt` liegt die Ausgabe von `top -b -n 1`. Finde den Prozess mit der höchsten CPU-Last und schreibe seinen Namen und seinen Benutzer in `~/lab/culprit.txt`.",
-   "hint": "Sieh dir mit `head -n 9 ~/lab/top_snapshot.txt` die erste Prozesszeile an, dann `echo \"name user\" > ~/lab/culprit.txt`."
+   "hint": "Sieh dir mit `head -n 9 ~/lab/top_snapshot.txt` die erste Prozesszeile an, dann `echo \"name user\" > ~/lab/culprit.txt`. (`>` → Modul 3.2.)"
   }
  },
  "quiz": {

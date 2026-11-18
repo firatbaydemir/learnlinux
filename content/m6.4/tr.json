@@ -89,22 +89,22 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "`~/lvm/vgs.txt` örnek çıktısını `cat` ile oku. Hangi VG'nin boş yeri var?", "hint": "`cat ~/lvm/vgs.txt` — VFree sütununa bak."},
-    "t02": {"text": "`~/lvm/lvs.txt` içinde yalnızca `vg_data` hacimlerini `grep` ile göster.", "hint": "`grep vg_data ~/lvm/lvs.txt`"},
-    "t03": {"text": "Düzenlemeden önce yedek al: `~/lvm/fstab.test` dosyasını `~/lvm/fstab.bak` olarak kopyala.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak`"},
-    "t04": {"text": "`~/lvm/lab.sh` dosyasını oluştur: ilk satır `truncate -s 300M ~/lvm-lab/disk1.img`, ikinci satır `sudo losetup -f --show ~/lvm-lab/disk1.img` (ikincisini `>>` ile ekle).", "hint": "İlk satır için `printf '...\\n' > ~/lvm/lab.sh`, sonrakiler için `>>`."},
+    "t01": {"text": "`~/lvm/vgs.txt` örnek çıktısını `cat` ile oku. Hangi VG'nin boş yeri var?", "hint": "`cat ~/lvm/vgs.txt` — VFree sütununa bak. (`cat` → modül 2.6.)"},
+    "t02": {"text": "`~/lvm/lvs.txt` içinde yalnızca `vg_data` hacimlerini `grep` ile göster.", "hint": "`grep vg_data ~/lvm/lvs.txt` (`grep` → modül 3.4.)"},
+    "t03": {"text": "Düzenlemeden önce yedek al: `~/lvm/fstab.test` dosyasını `~/lvm/fstab.bak` olarak kopyala.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak` (`cp` → modül 2.4.)"},
+    "t04": {"text": "`~/lvm/lab.sh` dosyasını oluştur: ilk satır `truncate -s 300M ~/lvm-lab/disk1.img`, ikinci satır `sudo losetup -f --show ~/lvm-lab/disk1.img` (ikincisini `>>` ile ekle).", "hint": "İlk satır için `printf '...\\n' > ~/lvm/lab.sh`, sonrakiler için `>>`. (`>/>>` → modül 3.2.)"},
     "t05": {"text": "`lab.sh` sonuna iki satır ekle: `sudo pvcreate /dev/loop0` ve `sudo vgcreate vg_data /dev/loop0`.", "hint": "`printf '...\\n' >> ~/lvm/lab.sh` iki kez."},
     "t06": {"text": "`lab.sh` sonuna `sudo lvcreate -L 200M -n lv_web vg_data` ve `sudo mkfs.xfs /dev/vg_data/lv_web` satırlarını ekle.", "hint": "Yine `>>` ile ekle; `>` dosyayı sıfırlar."},
     "t07": {"text": "Tahmin et: `grep -c vg_data ~/lvm/lvs.txt` kaç yazacak? Sonra çalıştırıp doğrula.", "hint": "`-c` eşleşen satırları sayar."},
     "t08": {"text": "Tahmin et: `grep xfs ~/lvm/fs.txt` XFS için küçültme hakkında ne diyor? Çalıştırıp doğrula.", "hint": "XFS büyür ama küçülmez."},
     "t09": {"text": "Hata ayıkla: `~/lvm/grow.sh` içindeki `lvextend` dosya sistemini büyütmüyor. Satırı `-r` ekleyerek düzelt: `lvextend -r -L +2G /dev/vg_data/lv_web`.", "hint": "Dosyayı `echo '...' > ~/lvm/grow.sh` ile yeniden yaz."},
     "t10": {"text": "Hata ayıkla: `~/lvm/fstab.test` içinde aygıt adı yanlış yazılmış (`lv_wb`). Satırı `/dev/vg_data/lv_web /srv/web xfs defaults 0 0` olarak düzelt.", "hint": "Önce `cat ~/lvm/fstab.test`, sonra tek satırı yeniden yaz."},
-    "t11": {"text": "Mini proje: `lvs.txt` içinden `vg_data` satırlarını seç, yalnızca ilk sütunu (LV adı) kes ve `~/lvm/data-lvs.txt` dosyasına yaz.", "hint": "`grep ... | cut -d' ' -f1 > file`"},
-    "t12": {"text": "Mini proje: `~/lvm/check.sh` oluştur; içinde sırayla `pvs`, `vgs`, `lvs` olsun. Sonra çalıştırılabilir yap (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` sonra `chmod 755`."},
+    "t11": {"text": "Mini proje: `lvs.txt` içinden `vg_data` satırlarını seç, yalnızca ilk sütunu (LV adı) kes ve `~/lvm/data-lvs.txt` dosyasına yaz.", "hint": "`grep ... | cut -d' ' -f1 > file` (`grep` → modül 3.4; `cut` → modül 3.5.)"},
+    "t12": {"text": "Mini proje: `~/lvm/check.sh` oluştur; içinde sırayla `pvs`, `vgs`, `lvs` olsun. Sonra çalıştırılabilir yap (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` sonra `chmod 755`. (`chmod` → modül 4.4.)"},
     "t13": {"text": "Zor görev: `~/lvm/runbook.txt` dosyasına sırasıyla `pvcreate`, `vgcreate`, `lvcreate`, `mkfs.xfs` ve `lvextend -r` komutlarını (her biri ayrı satır) yaz. Aygıt `/dev/loop0`, VG `vg_data`, LV `lv_web`.", "hint": "Tek `printf` ile `\\n` ayırarak yazabilirsin."},
-    "t14": {"text": "Zor görev: `lvs.txt` içinde her VG'nin kaç LV'si var? Boşlukları sıkıştır (`tr -s`), VG sütununu kes, `sort` ve `uniq -c` ile say.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c`"},
+    "t14": {"text": "Zor görev: `lvs.txt` içinde her VG'nin kaç LV'si var? Boşlukları sıkıştır (`tr -s`), VG sütununu kes, `sort` ve `uniq -c` ile say.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c` (`tr/cut/sort/uniq` → modül 3.5.)"},
     "t15": {"text": "Ticket: `vg_sys` dolu (VFree 0), `lv_root` 5G'ye ihtiyaç duyuyor. `~/lvm/ticket-fix.sh` dosyasına sırayla yaz: yeni PV `/dev/loop1`, `vgextend vg_sys /dev/loop1`, `lvextend -r -L +5G /dev/vg_sys/lv_root`.", "hint": "Üç satır: `pvcreate`, `vgextend`, `lvextend -r`."},
-    "t16": {"text": "Mount noktasını hazırla: `~/mnt/web` dizinini oluştur ve içine boş `index.html` koy.", "hint": "`mkdir -p` ve `touch`."}
+    "t16": {"text": "Mount noktasını hazırla: `~/mnt/web` dizinini oluştur ve içine boş `index.html` koy.", "hint": "`mkdir -p` ve `touch`. (`mkdir/touch` → modül 2.3.)"}
   },
   "vm": {
     "intro": "Bu görevleri VM'inde yap. Önce **snapshot al**. Yalnızca loop aygıt kullan; gerçek disk adı yazma.",

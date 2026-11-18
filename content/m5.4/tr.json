@@ -48,13 +48,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Anlık görüntüde `sleep` işinin durumunu bul.", "hint": "`grep sleep ~/lab/jobs_snapshot.txt` satırında `Stopped` yazmalıdır."},
-    "t02": {"text": "`backup.sh` işinin mevcut durumunu görüntüle.", "hint": "`grep backup ~/lab/jobs_snapshot.txt` satırında `Running` bulunur."},
-    "t03": {"text": "Tahmin et: anlık görüntüde kaç iş duraklatılmış? `grep -c` ile doğrula.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` sayısını verir."},
-    "t04": {"text": "Duraklatılmış 1 numaralı işi sürdürmek için `bg %1` komutunu ve ardından `jobs -l` kontrolünü `~/lab/job_plan.txt` içine kaydet.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt`"},
+    "t01": {"text": "Anlık görüntüde `sleep` işinin durumunu bul.", "hint": "`grep sleep ~/lab/jobs_snapshot.txt` satırında `Stopped` yazmalıdır. (`grep` → modül 3.4.)"},
+    "t02": {"text": "`backup.sh` işinin mevcut durumunu görüntüle.", "hint": "`grep backup ~/lab/jobs_snapshot.txt` satırında `Running` bulunur. (`grep` → modül 3.4.)"},
+    "t03": {"text": "Tahmin et: anlık görüntüde kaç iş duraklatılmış? `grep -c` ile doğrula.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` sayısını verir. (`grep` → modül 3.4.)"},
+    "t04": {"text": "Duraklatılmış 1 numaralı işi sürdürmek için `bg %1` komutunu ve ardından `jobs -l` kontrolünü `~/lab/job_plan.txt` içine kaydet.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt` (`>` → modül 3.2.)"},
     "t05": {"text": "Planın sonuna işi ön plana alma ve iş bitince temizleme adımlarını ekle.", "hint": "`fg %1` ve `kill %1` ifadelerini dosyaya ekle."},
     "t06": {"text": "Çıktıyı `backup.log` dosyasına yönlendiren bir nohup örneğini `~/lab/persistent_job.txt` içine yaz.", "hint": "`nohup ./backup.sh > backup.log 2>&1 &`"},
-    "t07": {"text": "Ticket #5401'e işin terminalden bağımsız olup olmadığını anlamak için `jobs -l` kontrolü ve nohup notu ekle.", "hint": "Kısa notu `~/lab/ticket_5401.txt` dosyasına kaydet."}
+    "t07": {"text": "Ticket #5401'e işin terminalden bağımsız olup olmadığını anlamak için `jobs -l` kontrolü ve nohup notu ekle.", "hint": "Kısa notu `~/lab/ticket_5401.txt` dosyasına kaydet. (`>` → modül 3.2.)"}
   },
   "vm": {
     "intro": "Örnekleri kendi test VM'inde çalıştır. Shell işi yalnızca o shell oturumuna bağlıdır; kullanmadığın test işlerini kapat.",

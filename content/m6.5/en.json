@@ -236,11 +236,11 @@
   },
   "t02": {
    "text": "Write your first script with `printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh`.",
-   "hint": "`\\n` is a line break; the file gets two lines. Check with `cat ~/bin/hello.sh`."
+   "hint": "`\\n` is a line break; the file gets two lines. Check with `cat ~/bin/hello.sh`. (`cat` → module 2.6.)"
   },
   "t03": {
    "text": "Make the script executable with `chmod +x ~/bin/hello.sh`.",
-   "hint": "Look at `ls -l ~/bin/hello.sh`: the permissions now contain `x`."
+   "hint": "Look at `ls -l ~/bin/hello.sh`: the permissions now contain `x`. (`ls -l` → module 2.5.)"
   },
   "t04": {
    "text": "Run the script by its path: `~/bin/hello.sh`.",
@@ -248,7 +248,7 @@
   },
   "t05": {
    "text": "Write `~/bin/vars.sh` with the lines `#!/bin/bash`, `NAME=student` and `echo \"Hello $NAME\"` (use `printf`), make it executable and run it.",
-   "hint": "Three commands: `printf ... > ~/bin/vars.sh`, `chmod +x`, then run it. Output: `Hello student`."
+   "hint": "Three commands: `printf ... > ~/bin/vars.sh`, `chmod +x`, then run it. Output: `Hello student`. (`chmod` → module 4.4.)"
   },
   "t06": {
    "text": "Predict: what do `'$HOME'` and `\"$HOME\"` print? Then check with `echo '$HOME' \"$HOME\"`.",
@@ -256,11 +256,11 @@
   },
   "t07": {
    "text": "Predict the exit code of a search without a match. Run `grep carol ~/users.txt; echo $?`.",
-   "hint": "grep finds nothing in this file and answers with a non-zero code."
+   "hint": "grep finds nothing in this file and answers with a non-zero code. (`grep` → module 3.4.)"
   },
   "t08": {
    "text": "Write `~/bin/check.sh` (shebang, then `if [ -f \"$1\" ]; then`, `echo \"exists\"`, `else`, `echo \"missing\"`, `fi`) and make it executable. The simulator cannot run `if`; you will run it in the VM.",
-   "hint": "Use one `printf` with `\\n` between the lines, then `chmod +x`."
+   "hint": "Use one `printf` with `\\n` between the lines, then `chmod +x`. (`chmod` → module 4.4.)"
   },
   "t09": {
    "text": "Use `test` or `[ ]` twice: check that `~/notes.txt` is a file (`-f`) and that `~/Documents` is a directory (`-d`). Add `&& echo ok` to see the result.",

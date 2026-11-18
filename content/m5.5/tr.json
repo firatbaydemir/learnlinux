@@ -48,13 +48,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Paket notlarında RHEL ailesi için kullanılan üst düzey paket yöneticisini bul.", "hint": "`grep RHEL ~/lab/package_notes.txt` satırında `dnf` geçer."},
-    "t02": {"text": "Ubuntu/Debian ailesi için kullanılan üst düzey paket yöneticisini bul.", "hint": "`grep Ubuntu ~/lab/package_notes.txt` satırında `apt` geçer."},
-    "t03": {"text": "Tahmin et: kaç satırda `package` kelimesi geçiyor? `grep -c` ile doğrula.", "hint": "`grep -c package ~/lab/package_notes.txt`"},
-    "t04": {"text": "Ubuntu/Debian için paket kurulumundan önce depo listesini yenileme adımını `~/lab/install_plan.txt` dosyasına yaz.", "hint": "`sudo apt update` ifadesini kaydet."},
+    "t01": {"text": "Paket notlarında RHEL ailesi için kullanılan üst düzey paket yöneticisini bul.", "hint": "`grep RHEL ~/lab/package_notes.txt` satırında `dnf` geçer. (`grep` → modül 3.4.)"},
+    "t02": {"text": "Ubuntu/Debian ailesi için kullanılan üst düzey paket yöneticisini bul.", "hint": "`grep Ubuntu ~/lab/package_notes.txt` satırında `apt` geçer. (`grep` → modül 3.4.)"},
+    "t03": {"text": "Tahmin et: kaç satırda `package` kelimesi geçiyor? `grep -c` ile doğrula.", "hint": "`grep -c package ~/lab/package_notes.txt` (`grep` → modül 3.4.)"},
+    "t04": {"text": "Ubuntu/Debian için paket kurulumundan önce depo listesini yenileme adımını `~/lab/install_plan.txt` dosyasına yaz.", "hint": "`sudo apt update` ifadesini kaydet. (`>` → modül 3.2.)"},
     "t05": {"text": "Planına hem RHEL ailesi hem Debian ailesi için `cowsay` kurulum komutunu ekle.", "hint": "Sırasıyla `sudo dnf install cowsay` ve `sudo apt install cowsay`."},
     "t06": {"text": "Test paketini kaldırırken `autoremove` önerilerini inceleme uyarısı içeren bir temizlik planı yaz.", "hint": "Notu `~/lab/cleanup_plan.txt` içine kaydet."},
-    "t07": {"text": "Ticket #5501 için dağıtımı kontrol etmeyi ve web paketi adının aileye göre `httpd` veya `apache2` olduğunu bildiren not oluştur.", "hint": "Notu `~/lab/ticket_5501.txt` dosyasına yaz."}
+    "t07": {"text": "Ticket #5501 için dağıtımı kontrol etmeyi ve web paketi adının aileye göre `httpd` veya `apache2` olduğunu bildiren not oluştur.", "hint": "Notu `~/lab/ticket_5501.txt` dosyasına yaz. (`>` → modül 3.2.)"}
   },
   "vm": {
     "intro": "Paket kurma ve kaldırma sistemde değişiklik yapar. Yalnızca kendi test VM'inde çalış; üretim sisteminde paket işlemi yapma ve onay ekranlarını mutlaka oku.",

@@ -258,7 +258,7 @@
   },
   "t02": {
    "text": "Wie viele Server stehen in `~/lab/servers.txt`? Zähle mit `wc -l` und schätze, wie viele Runden eine Schleife drehen würde.",
-   "hint": "`wc -l ~/lab/servers.txt` gibt die Zeilenzahl aus."
+   "hint": "`wc -l ~/lab/servers.txt` gibt die Zeilenzahl aus. (`wc` → Modul 2.6.)"
   },
   "t03": {
    "text": "Hänge mit `>>` (ohne Überschreiben) eine `for i in 1 2 3; do ... done`-Schleife an `loop.sh` an: drei Zeilen mit `printf`.",
@@ -266,7 +266,7 @@
   },
   "t04": {
    "text": "Mache `loop.sh` ausführbar (Rechte 755).",
-   "hint": "`chmod 755 ~/scripts/loop.sh` oder `chmod +x`; prüfe mit `ls -l` auf `-rwxr-xr-x`."
+   "hint": "`chmod 755 ~/scripts/loop.sh` oder `chmod +x`; prüfe mit `ls -l` auf `-rwxr-xr-x`. (`chmod` → Modul 4.4.)"
   },
   "t05": {
    "text": "Schreibe `~/scripts/readlines.sh` mit dem Muster `while IFS= read -r host; do ... done < ~/lab/servers.txt`, das jeden Server mit `echo` ausgibt.",
@@ -274,7 +274,7 @@
   },
   "t06": {
    "text": "Setze `F=\"my notes.txt\"` und lege die Datei mit `touch \"$F\"` an. Was wäre ohne Anführungszeichen passiert?",
-   "hint": "Zwei Befehle: erst die Zuweisung, dann `touch \"$F\"`. Prüfe mit `ls`."
+   "hint": "Zwei Befehle: erst die Zuweisung, dann `touch \"$F\"`. Prüfe mit `ls`. (`touch` → Modul 2.3.)"
   },
   "t07": {
    "text": "Schreibe `~/scripts/arr.sh`: Es definiert das Array `hosts=(web01 web02 db01)` und gibt es mit `for h in \"${hosts[@]}\"; do ... done` aus.",
@@ -282,7 +282,7 @@
   },
   "t08": {
    "text": "Schätze die Ausgabe von `./scripts/count.sh | wc -l`, bevor du es startest: wie viele Zeilen? Führe es dann aus und prüfe.",
-   "hint": "Das Skript enthält drei `echo`-Zeilen; sieh mit `cat scripts/count.sh` nach."
+   "hint": "Das Skript enthält drei `echo`-Zeilen; sieh mit `cat scripts/count.sh` nach. (`cat` → Modul 2.6.)"
   },
   "t09": {
    "text": "Setze mit `DIR=` eine leere Variable und führe `echo \"rm -rf $DIR/\"` aus. Welchen Pfad würde es löschen? Schätze, dann prüfe.",
@@ -290,7 +290,7 @@
   },
   "t10": {
    "text": "`~/scripts/hello.sh` läuft nicht (`Permission denied`). Repariere es und führe es aus.",
-   "hint": "`ls -l ~/scripts` zeigt die Rechte; `chmod +x` ergänzt sie; dann `~/scripts/hello.sh`."
+   "hint": "`ls -l ~/scripts` zeigt die Rechte; `chmod +x` ergänzt sie; dann `~/scripts/hello.sh`. (`chmod` → Modul 4.4.)"
   },
   "t11": {
    "text": "Die Zeile `rm -rf $DIR/*` in `~/scripts/clean.sh` ist gefährlich. Schreibe die Datei neu: `DIR=/home/student/tmpwork` bleibt, die Löschzeile nutzt `\"${DIR:?}/\"*`.",
@@ -310,7 +310,7 @@
   },
   "t15": {
    "text": "Welche Server haben in `~/lab/app.log` einen `ERROR` gemeldet? Schreibe die eindeutigen, sortierten Servernamen in `~/lab/failed_hosts.txt`.",
-   "hint": "`grep ERROR`, dann `cut -d' ' -f4`, `sort -u`; leite die Ausgabe mit `>` in die Datei um."
+   "hint": "`grep ERROR`, dann `cut -d' ' -f4`, `sort -u`; leite die Ausgabe mit `>` in die Datei um. (`grep` → Modul 3.4; `cut/sort` → Modul 3.5; `>` → Modul 3.2.)"
   },
   "t16": {
    "text": "Ticket: Das nächtliche Aufräumskript hat auf einem Server mehr gelöscht als gedacht, weil die Variable leer war. Schreibe `~/scripts/cleanup.sh`: `set -euo pipefail`, `DIR=/home/student/tmpwork`, ein `trap` beim Beenden, `\"${DIR:?}/\"*` beim Löschen; ausführbar.",

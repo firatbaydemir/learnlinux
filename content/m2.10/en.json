@@ -12,11 +12,11 @@
     "t02":{"text":"List the sample SSH files in the simulator with `ls ~/.ssh`.","hint":"This virtual directory contains only a sample configuration and host-key record."},
     "t03":{"text":"Read the sample manifest with `cat ~/transfer/manifest.txt`. Which file is being transferred?","hint":"Find the `report.txt` entry in the manifest."},
     "t04":{"text":"Model a one-file transfer: copy `report.txt` as `report.remote.txt`.","hint":"`cp ~/transfer/report.txt ~/transfer/report.remote.txt`"},
-    "t05":{"text":"Predict: which key type does the sample host record use? Check with `grep linux-lab ~/.ssh/known_hosts.sample`.","hint":"The line contains `ssh-ed25519`."},
+    "t05":{"text":"Predict: which key type does the sample host record use? Check with `grep linux-lab ~/.ssh/known_hosts.sample`.","hint":"The line contains `ssh-ed25519`. (`grep` searches text lines; details in module 3.4.)"},
     "t06":{"text":"Remove the old local copy `~/transfer/old_copy.txt`, not the source file.","hint":"Give `rm` only the exact path of the old copy."},
     "t07":{"text":"Mini project: copy the sample SSH configuration to `~/ops/connection-plan.txt` and verify the `Host linux-lab` and `Port 22` lines.","hint":"First run `cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt`, then read it with `cat`."},
     "t08":{"text":"Challenge: prepare a synchronized copy of the report at `~/transfer/sync-copy.txt`.","hint":"Copy it with `cp`, then verify its contents with `cat`."},
-    "t09":{"text":"Ticket: \"One file needs to be copied now; a directory backup needs regular synchronization.\" Recommend `scp` for the file and `rsync` for synchronization in the support note.","hint":"Write both tool names to a note file."}
+    "t09":{"text":"Ticket: \"One file needs to be copied now; a directory backup needs regular synchronization.\" Recommend `scp` for the file and `rsync` for synchronization in the support note.","hint":"Write both tool names to a note file. (`>` redirects output to a file; details in module 3.2.)"}
   },
   "vm":{"intro":"These commands display the client version and configuration. They do not connect to a remote host or transfer files; use only authorized servers for real connections.","tasks":{
     "v01":{"title":"SSH client version","text":"Verify that the SSH client is installed; do not start a connection to a remote system.","blocks":[{"cmd":"ssh -V","expected":"OpenSSH_9.6p1"}],"differs":["The version number varies by distribution; seeing `OpenSSH` is enough.","The output is often written to stderr, but it is visible in the terminal."]},

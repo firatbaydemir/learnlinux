@@ -49,11 +49,11 @@
   "t06": {"text": "Leite den Fehler mit `ls lab/missing.txt 2> errors.txt` nach `errors.txt` um.", "hint": "Der Fehler erscheint nicht mehr am Bildschirm."},
   "t07": {"text": "Übergib die Datei mit `cat < lab/names.txt` als stdin.", "hint": "`<` liest die Eingabe aus einer Datei."},
   "t08": {"text": "Vorhersage: Erscheint bei `ls lab/missing.txt > result.txt` der Fehler am Bildschirm? Ist `result.txt` gefüllt? Führe es aus und prüfe.", "hint": "`>` leitet nur stdout um; der Fehler liegt auf stderr."},
-  "t09": {"text": "Vorhersage: Was gibt `cat lab/names.txt | wc -l` aus? Führe es aus und prüfe.", "hint": "`wc -l` zählt Zeilen; wie viele Zeilen hat die Datei?"},
+  "t09": {"text": "Vorhersage: Was gibt `cat lab/names.txt | wc -l` aus? Führe es aus und prüfe.", "hint": "`wc -l` zählt Zeilen; wie viele Zeilen hat die Datei? (`|` gibt die Ausgabe an den nächsten Befehl weiter; Modul 3.2. `wc`: Modul 3.5.)"},
   "t10": {"text": "Fehlersuche: `ls lab missing_dir > all.txt` zeigt den Fehler am Bildschirm, in `all.txt` landet er nicht. Sorge dafür, dass `all.txt` Liste und Fehler enthält.", "hint": "Hänge `2>&1` ans Ende des Befehls."},
   "t11": {"text": "Mini-Projekt: Baue `build.log`. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. Die Datei muss 3 Zeilen haben.", "hint": "Der erste nutzt `>`, die anderen `>>` und `2>>`."},
   "t12": {"text": "Herausforderung: Verwirf die Fehler von `ls lab missing_dir` nach `/dev/null` und speichere die normale Ausgabe in `found.txt`.", "hint": "Zwei Umleitungen: `2>/dev/null` und `> found.txt`."},
-  "t13": {"text": "Ticket: Der Prüfer möchte die Anzahl der Benutzer aus `lab/names.txt` in `~/count.txt` (nur die Zahl).", "hint": "`wc -l < file` gibt die Anzahl ohne Dateinamen aus; speichere mit `>`."}
+  "t13": {"text": "Ticket: Der Prüfer möchte die Anzahl der Benutzer aus `lab/names.txt` in `~/count.txt` (nur die Zahl).", "hint": "`wc -l < file` gibt die Anzahl ohne Dateinamen aus; speichere mit `>`. (`wc` zählt Zeilen; Modul 3.5.)"}
  },
  "vm": {
   "intro": "Diese Befehle laufen im Home-Verzeichnis deiner VM und schreiben nur Dateien, die du selbst anlegst; benutze trotzdem keinen Namen einer wichtigen Datei.",

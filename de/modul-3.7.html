@@ -200,7 +200,7 @@ patching file work.txt
 port=80
 host=linux-lab
 mode=prod</pre>
-<details class="differs"><summary>Meine Ausgabe sieht anders aus</summary><ul><li>Bei <code>patch: command not found</code>: Ubuntu <code>sudo apt install patch</code>, Rocky/Alma <code>sudo dnf install patch</code>.</li><li>Wird <code>--dry-run</code> nicht unterstützt (sehr alte Version), lass diese Zeile weg.</li><li>Bei <code>Hunk #1 FAILED</code> ist <code>work.txt</code> nicht identisch mit <code>v1.txt</code>; starte mit <code>cp v1.txt work.txt</code> neu.</li></ul></details>
+<details class="differs"><summary>Meine Ausgabe sieht anders aus</summary><ul><li>Bei <code>patch: command not found</code>: Ubuntu <code>sudo apt install patch</code>, Rocky/Alma <code>sudo dnf install patch</code>. (<code>sudo</code> in Modul 4.3, <code>apt</code>/<code>dnf</code> in Modul 5.5.)</li><li>Wird <code>--dry-run</code> nicht unterstützt (sehr alte Version), lass diese Zeile weg.</li><li>Bei <code>Hunk #1 FAILED</code> ist <code>work.txt</code> nicht identisch mit <code>v1.txt</code>; starte mit <code>cp v1.txt work.txt</code> neu.</li></ul></details>
 <label class="lbl">Füge deine Ausgabe hier ein</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Prüfen</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Prüfsummen</h3><span class="status" aria-hidden="true"></span></header><p>Berechne Hashes, ändere dann eine Datei und erkenne die Abweichung mit <code>sha256sum -c</code>. Füge die Ausgabe ein.</p>

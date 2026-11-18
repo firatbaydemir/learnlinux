@@ -234,35 +234,35 @@
   },
   "t10": {
    "text": "Tahmin et: `grep -c java ~/lab/ps_snapshot.txt` kaç yazar? Önce düşün, sonra çalıştır.",
-   "hint": "-c eşleşen satırları sayar."
+   "hint": "-c eşleşen satırları sayar. (`grep` → modül 3.4.)"
   },
   "t11": {
    "text": "Tahmin et: `cut -d ' ' -f 1 ~/lab/loadavg.txt` ne yazar? Önce düşün, sonra çalıştır.",
-   "hint": "-d ayırıcıyı belirler, -f 1 ilk alandır."
+   "hint": "-d ayırıcıyı belirler, -f 1 ilk alandır. (`cut` → modül 3.5.)"
   },
   "t12": {
    "text": "Anlık görüntüdeki en çok CPU tüketenleri bul: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 3`. İlk süreç hangisi?",
-   "hint": "-k3 %CPU sütunudur, -n sayısal, -r azalan sıra."
+   "hint": "-k3 %CPU sütunudur, -n sayısal, -r azalan sıra. (`sort` → modül 3.5.)"
   },
   "t13": {
    "text": "Mini: `~/lab/ps_snapshot.txt` içindeki en çok bellek tüketen 2 süreci `~/lab/top_mem.txt` dosyasına kaydet. `sort -k4 -nr` ile 4. sütuna göre sırala, `head -n 2` ile iki satır al ve `>` ile yönlendir.",
-   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt`"
+   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt` (`sort/head` → modül 3.5/3.2; `>` → modül 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/monitor_cmds.txt` yanlış komutlar listeliyor (`nprocs` diye komut yok ve `free -m` okunabilir değil). Dosyayı `printf` ile yeniden yaz: her satırda bir tane olmak üzere `cores: nproc`, `memory: free -h` ve `disk: df -h` içersin.",
-   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt`"
+   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt` (`>` → modül 3.2.)"
   },
   "t15": {
    "text": "Mini: `~/lab/du_report.txt` boyutları KB olarak içerir. En büyük 3 kaydı `sort -nr`, `head -n 3` ve `>` ile `~/lab/biggest.txt` dosyasına kaydet.",
-   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt`"
+   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt` (`sort/head` → modül 3.5/3.2; `>` → modül 3.2.)"
   },
   "t16": {
    "text": "Challenge: `~/lab/report.txt` dosyasını üç parçadan kur: `~/lab/loadavg.txt` içindeki 1 dakikalık yük (`cut` kullan), `~/lab/meminfo.txt` içindeki `MemAvailable` satırı (`grep` kullan, `>>` ile ekle) ve kararın `overloaded` (`echo` kullan, ekle).",
-   "hint": "İlk komut `>`, diğerleri `>>` kullanır; böylece hiçbir şey ezilmez."
+   "hint": "İlk komut `>`, diğerleri `>>` kullanır; böylece hiçbir şey ezilmez. (`>/>>` → modül 3.2.)"
   },
   "t17": {
    "text": "TICKET #5201 — linux-lab sunucusu çok yavaş. `~/lab/top_snapshot.txt` içinde `top -b -n 1` çıktısı var. En yüksek CPU kullanan süreci bul ve adını ile kullanıcısını `~/lab/culprit.txt` dosyasına yaz.",
-   "hint": "`head -n 9 ~/lab/top_snapshot.txt` ile ilk süreç satırına bak, sonra `echo \"name user\" > ~/lab/culprit.txt`."
+   "hint": "`head -n 9 ~/lab/top_snapshot.txt` ile ilk süreç satırına bak, sonra `echo \"name user\" > ~/lab/culprit.txt`. (`>` → modül 3.2.)"
   }
  },
  "quiz": {

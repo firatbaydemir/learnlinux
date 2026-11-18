@@ -91,22 +91,22 @@
  ],
  "tasks": {
   "t01": {"text": "Read the persistent SELinux mode with `cat ~/lab/selinux_config`.", "hint": "Look at the `SELINUX=` line."},
-  "t02": {"text": "Count the denied records in the audit log with `grep -c denied ~/lab/audit.log`.", "hint": "-c prints the line count."},
+  "t02": {"text": "Count the denied records in the audit log with `grep -c denied ~/lab/audit.log`.", "hint": "-c prints the line count. (`grep` → module 3.4.)"},
   "t03": {"text": "List the httpd booleans with `grep httpd ~/lab/booleans.txt`.", "hint": "The file has the form `name --> state`."},
   "t04": {"text": "Change into the lab directory with `cd ~/lab`.", "hint": "Later tasks then need no path."},
-  "t05": {"text": "The label in `context.txt` is `user:role:type:level`. Print the **type** field with `cut -d: -f3 context.txt`.", "hint": "Delimiter is a colon, type is field three. Be in the lab directory first."},
-  "t06": {"text": "Write only the httpd records to `httpd_denials.txt` with `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt`.", "hint": "Single quotes around a pattern with double quotes; > redirects output to a file."},
+  "t05": {"text": "The label in `context.txt` is `user:role:type:level`. Print the **type** field with `cut -d: -f3 context.txt`.", "hint": "Delimiter is a colon, type is field three. Be in the lab directory first. (`cut` → module 3.5.)"},
+  "t06": {"text": "Write only the httpd records to `httpd_denials.txt` with `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt`.", "hint": "Single quotes around a pattern with double quotes; > redirects output to a file. (`>` → module 3.2.)"},
   "t07": {"text": "Find the AppArmor line in complain mode with `grep complain aa_status.txt`.", "hint": "You expect a line with 'complain mode'."},
   "t08": {"text": "Predict: how many records in `audit.log` have `permissive=1` (not blocked)? Then verify with `grep -c permissive=1 audit.log`.", "hint": "Look at the permissive value at the end of each line."},
   "t09": {"text": "Predict: how many booleans in `booleans.txt` are off? Then verify with `grep -c ' off$' booleans.txt`.", "hint": "$ marks the end of the line."},
   "t10": {"text": "Debug: `broken_config` has `SELINUX=disabled`. Rewrite the file so it has `SELINUX=enforcing` and `SELINUXTYPE=targeted`.", "hint": "`printf 'SELINUX=enforcing\\nSELINUXTYPE=targeted\\n' > broken_config`"},
   "t11": {"text": "Debug: `runbook.sh` uses `setenforce 0` and does not make the boolean persistent. Rewrite it with the single line `setsebool -P httpd_can_network_connect on`.", "hint": "`echo '...' > runbook.sh` overwrites the existing content."},
   "t12": {"text": "Mini project: write a script `fix_web.sh`. Line 1: `semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"`, line 2: `restorecon -Rv /srv/web`. Then make it executable with `chmod 755`.", "hint": "Use `>` for the first line and `>>` for the second."},
-  "t13": {"text": "Mini project: run `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` to write how often each program was denied into `top_comm.txt`.", "hint": "Field 10 is `comm=...`; `uniq -c` needs `sort` first."},
-  "t14": {"text": "Challenge: write the lines of `webfiles.txt` that do not have the web type (`httpd_sys_content_t`) to `wrong_labels.txt`.", "hint": "`grep -v` selects non-matching lines."},
+  "t13": {"text": "Mini project: run `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` to write how often each program was denied into `top_comm.txt`.", "hint": "Field 10 is `comm=...`; `uniq -c` needs `sort` first. (`sort/uniq` → module 3.5.)"},
+  "t14": {"text": "Challenge: write the lines of `webfiles.txt` that do not have the web type (`httpd_sys_content_t`) to `wrong_labels.txt`.", "hint": "`grep -v` selects non-matching lines. (`grep` → module 3.4.)"},
   "t15": {"text": "Challenge: write the booleans in `booleans.txt` that are on to `booleans_on.txt`.", "hint": "Lines end with `on`: `' on$'`."},
   "t16": {"text": "Ticket: The website returns 403. After checking `webfiles.txt` and `audit.log`: `about.html` has the `user_home_t` label. Write a one-line note in `ticket.txt`: wrong type `user_home_t`, correct type `httpd_sys_content_t`, fix `restorecon`.", "hint": "`echo '...' > ticket.txt`; include all three terms."},
-  "t17": {"text": "Ticket: The web app cannot connect to port 8888; the log shows `name_connect` and `unreserved_port_t`. Write this command into `fix_port.sh`: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Write the command with `echo` in single quotes and redirect with `>`."}
+  "t17": {"text": "Ticket: The web app cannot connect to port 8888; the log shows `name_connect` and `unreserved_port_t`. Write this command into `fix_port.sh`: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Write the command with `echo` in single quotes and redirect with `>`. (`>` → module 3.2.)"}
  },
  "vm": {
   "intro": "Do this part on a Rocky/Alma VM (SELinux ships there). On Ubuntu go to v06. Before anything else take a **VM snapshot** (module 0.2). Work in a fresh lab, not on a live server.",

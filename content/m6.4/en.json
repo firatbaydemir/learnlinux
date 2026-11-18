@@ -89,22 +89,22 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Read the sample output `~/lvm/vgs.txt` with `cat`. Which VG has free space?", "hint": "`cat ~/lvm/vgs.txt` — look at the VFree column."},
-    "t02": {"text": "Show only the `vg_data` volumes from `~/lvm/lvs.txt` using `grep`.", "hint": "`grep vg_data ~/lvm/lvs.txt`"},
-    "t03": {"text": "Back up before editing: copy `~/lvm/fstab.test` to `~/lvm/fstab.bak`.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak`"},
-    "t04": {"text": "Create `~/lvm/lab.sh`: first line `truncate -s 300M ~/lvm-lab/disk1.img`, second line `sudo losetup -f --show ~/lvm-lab/disk1.img` (append the second with `>>`).", "hint": "Use `printf '...\\n' > ~/lvm/lab.sh` for the first line, `>>` for the next ones."},
+    "t01": {"text": "Read the sample output `~/lvm/vgs.txt` with `cat`. Which VG has free space?", "hint": "`cat ~/lvm/vgs.txt` — look at the VFree column. (`cat` → module 2.6.)"},
+    "t02": {"text": "Show only the `vg_data` volumes from `~/lvm/lvs.txt` using `grep`.", "hint": "`grep vg_data ~/lvm/lvs.txt` (`grep` → module 3.4.)"},
+    "t03": {"text": "Back up before editing: copy `~/lvm/fstab.test` to `~/lvm/fstab.bak`.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak` (`cp` → module 2.4.)"},
+    "t04": {"text": "Create `~/lvm/lab.sh`: first line `truncate -s 300M ~/lvm-lab/disk1.img`, second line `sudo losetup -f --show ~/lvm-lab/disk1.img` (append the second with `>>`).", "hint": "Use `printf '...\\n' > ~/lvm/lab.sh` for the first line, `>>` for the next ones. (`>/>>` → module 3.2.)"},
     "t05": {"text": "Append two lines to `lab.sh`: `sudo pvcreate /dev/loop0` and `sudo vgcreate vg_data /dev/loop0`.", "hint": "`printf '...\\n' >> ~/lvm/lab.sh` twice."},
     "t06": {"text": "Append `sudo lvcreate -L 200M -n lv_web vg_data` and `sudo mkfs.xfs /dev/vg_data/lv_web` to `lab.sh`.", "hint": "Append with `>>`; `>` would reset the file."},
     "t07": {"text": "Predict: what will `grep -c vg_data ~/lvm/lvs.txt` print? Then run it to verify.", "hint": "`-c` counts matching lines."},
     "t08": {"text": "Predict: what does `grep xfs ~/lvm/fs.txt` say about shrinking XFS? Run it to verify.", "hint": "XFS grows but never shrinks."},
     "t09": {"text": "Debug: the `lvextend` in `~/lvm/grow.sh` does not grow the filesystem. Fix the line by adding `-r`: `lvextend -r -L +2G /dev/vg_data/lv_web`.", "hint": "Rewrite the file with `echo '...' > ~/lvm/grow.sh`."},
     "t10": {"text": "Debug: `~/lvm/fstab.test` has a wrong device name (`lv_wb`). Fix the line to `/dev/vg_data/lv_web /srv/web xfs defaults 0 0`.", "hint": "First `cat ~/lvm/fstab.test`, then rewrite the single line."},
-    "t11": {"text": "Mini project: select the `vg_data` lines from `lvs.txt`, cut only the first column (LV name) and write it to `~/lvm/data-lvs.txt`.", "hint": "`grep ... | cut -d' ' -f1 > file`"},
-    "t12": {"text": "Mini project: create `~/lvm/check.sh` containing `pvs`, `vgs`, `lvs` in that order. Then make it executable (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` then `chmod 755`."},
+    "t11": {"text": "Mini project: select the `vg_data` lines from `lvs.txt`, cut only the first column (LV name) and write it to `~/lvm/data-lvs.txt`.", "hint": "`grep ... | cut -d' ' -f1 > file` (`grep` → module 3.4; `cut` → module 3.5.)"},
+    "t12": {"text": "Mini project: create `~/lvm/check.sh` containing `pvs`, `vgs`, `lvs` in that order. Then make it executable (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` then `chmod 755`. (`chmod` → module 4.4.)"},
     "t13": {"text": "Challenge: write to `~/lvm/runbook.txt` the commands `pvcreate`, `vgcreate`, `lvcreate`, `mkfs.xfs` and `lvextend -r` in that order, one per line. Device `/dev/loop0`, VG `vg_data`, LV `lv_web`.", "hint": "One `printf` with `\\n` separators works."},
-    "t14": {"text": "Challenge: how many LVs does each VG have in `lvs.txt`? Squeeze spaces (`tr -s`), cut the VG column, then count with `sort` and `uniq -c`.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c`"},
+    "t14": {"text": "Challenge: how many LVs does each VG have in `lvs.txt`? Squeeze spaces (`tr -s`), cut the VG column, then count with `sort` and `uniq -c`.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c` (`tr/cut/sort/uniq` → module 3.5.)"},
     "t15": {"text": "Ticket: `vg_sys` is full (VFree 0) and `lv_root` needs 5G more. Write to `~/lvm/ticket-fix.sh` in order: new PV `/dev/loop1`, `vgextend vg_sys /dev/loop1`, `lvextend -r -L +5G /dev/vg_sys/lv_root`.", "hint": "Three lines: `pvcreate`, `vgextend`, `lvextend -r`."},
-    "t16": {"text": "Prepare the mount point: create the directory `~/mnt/web` and put an empty `index.html` in it.", "hint": "`mkdir -p` and `touch`."}
+    "t16": {"text": "Prepare the mount point: create the directory `~/mnt/web` and put an empty `index.html` in it.", "hint": "`mkdir -p` and `touch`. (`mkdir/touch` → module 2.3.)"}
   },
   "vm": {
     "intro": "Do these tasks on your VM. **Take a snapshot** first. Use loop devices only; never type a real disk name.",

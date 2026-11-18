@@ -95,11 +95,11 @@
   }
  ],
  "tasks": {
-  "t01": {"text": "Erstelle die Ordner `~/bin` und `~/units` mit einem Befehl: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` akzeptiert mehrere Pfade."},
+  "t01": {"text": "Erstelle die Ordner `~/bin` und `~/units` mit einem Befehl: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` akzeptiert mehrere Pfade. (`mkdir` → Modul 2.3.)"},
   "t02": {"text": "Lies die cron-Beispieldatei: `cat ~/sample/crontab.txt`. Sie hat drei Aufgabenzeilen.", "hint": "Die Zeilen lauten: Minute Stunde Tag Monat Wochentag Befehl."},
   "t03": {"text": "Schreibe `~/bin/backup.sh` mit `printf`: erste Zeile `#!/bin/bash`, zweite Zeile `echo backup done`.", "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"},
-  "t04": {"text": "Mache `~/bin/backup.sh` ausführbar (Modus 755).", "hint": "`chmod 755 ~/bin/backup.sh` oder `chmod +x`."},
-  "t05": {"text": "Schreibe `~/units/backup.service`: In `[Service]` stehen `Type=oneshot` und `ExecStart=/home/student/bin/backup.sh`.", "hint": "Trenne die Zeilen mit `\\n` in einem `printf` und beende mit `> ~/units/backup.service`."},
+  "t04": {"text": "Mache `~/bin/backup.sh` ausführbar (Modus 755).", "hint": "`chmod 755 ~/bin/backup.sh` oder `chmod +x`. (`chmod` → Modul 4.4.)"},
+  "t05": {"text": "Schreibe `~/units/backup.service`: In `[Service]` stehen `Type=oneshot` und `ExecStart=/home/student/bin/backup.sh`.", "hint": "Trenne die Zeilen mit `\\n` in einem `printf` und beende mit `> ~/units/backup.service`. (`>` → Modul 3.2.)"},
   "t06": {"text": "Schreibe `~/units/backup.timer`: unter `[Timer]` `OnCalendar=*-*-* 02:30:00` und `Persistent=true`, unter `[Install]` `WantedBy=timers.target`.", "hint": "Nutze im Sim einfache Anführungszeichen, damit die Shell `*` nicht expandiert."},
   "t07": {"text": "Sage voraus: Wie viele Zeilen in `~/sample/list-timers.txt` enthalten `timer`? Prüfe dann mit `grep -c timer ~/sample/list-timers.txt`.", "hint": "Die Kopfzeile enthält kein kleingeschriebenes `timer`; es gibt zwei Timer-Zeilen."},
   "t08": {"text": "Sage voraus: Welche Zeit zeigt die Zeile `Next elapse` in `~/sample/analyze.txt`? Sieh nach mit `grep 'Next elapse' ~/sample/analyze.txt`.", "hint": "Der Ausdruck war Montag 08:00; finde den nächsten Montag."},
@@ -108,7 +108,7 @@
   "t11": {"text": "Mini-Projekt (Benutzer-Timer): Erstelle den Ordner `~/.config/systemd/user`. `notes.service` muss `ExecStart=/usr/bin/touch /home/student/notes.txt` enthalten; `notes.timer` muss `OnCalendar=hourly` und `WantedBy=timers.target` enthalten.", "hint": "Drei Befehle: `mkdir -p`, ein `printf` für den Service, eines für den Timer."},
   "t12": {"text": "Mini-Projekt (cron-Vergleich): Schreibe zwei cron-Zeilen in `~/units/backup.cron`: `30 2 * * * /home/student/bin/backup.sh` und `0 8 * * 1 /home/student/bin/report.sh`.", "hint": "Nimm `>` für die erste Zeile und `>>` für die zweite."},
   "t13": {"text": "Challenge: Schreibe für eine `cleanup`-Aufgabe `~/units/cleanup.service` (`ExecStart=/home/student/bin/cleanup.sh`, `Type=oneshot`) und `~/units/cleanup.timer`. Timer: 10 Minuten nach dem Boot (`OnBootSec=10min`), dann jede Stunde (`OnUnitActiveSec=1h`), zufällige Verzögerung bis 5 Minuten (`RandomizedDelaySec=5min`), `WantedBy=timers.target`.", "hint": "Es ist ein Intervall-Timer, kein Kalender-Timer: nimm kein `OnCalendar`."},
-  "t14": {"text": "Ticket: \"Das nächtliche Backup schlägt seit einigen Tagen still fehl.\" Schreibe nur die `Failed`-Zeilen aus `~/sample/journal.txt` nach `~/units/failed.txt`.", "hint": "`grep Failed ... > ...`"},
+  "t14": {"text": "Ticket: \"Das nächtliche Backup schlägt seit einigen Tagen still fehl.\" Schreibe nur die `Failed`-Zeilen aus `~/sample/journal.txt` nach `~/units/failed.txt`.", "hint": "`grep Failed ... > ...` (`grep` → Modul 3.4; `>` → Modul 3.2.)"},
   "t15": {"text": "Ticket: \"Der Wochenbericht muss jeden Montag um 08:00 laufen und auch nach dem Boot nachlaufen, wenn die Maschine aus war.\" Schreibe `~/units/report.timer` (`OnCalendar`, die Einstellung zum Nachholen, `WantedBy=timers.target`).", "hint": "Montag 08:00 = `Mon *-*-* 08:00:00`; Nachholen = `Persistent=true`."},
   "t16": {"text": "Zähle mit `wc -l ~/sample/journal.txt`, wie viele Zeilen das Journal-Beispiel hat.", "hint": "Schau auf die Zahl am Anfang der Ausgabe."}
  },

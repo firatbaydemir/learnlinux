@@ -12,11 +12,11 @@
     "t02":{"text":"Run `df -h` in the simulator and inspect the disk usage report.","hint":"`-h` displays readable sizes."},
     "t03":{"text":"Read the sample disk tree with `cat ~/disklab/lsblk.txt`. What is the second disk called?","hint":"Look for the `sdb` line."},
     "t04":{"text":"Create `~/disklab/archive` as a mount-point directory.","hint":"`mkdir -p ~/disklab/archive`"},
-    "t05":{"text":"Predict: which UUID does the sample fstab use for `/data`? Verify with `grep data ~/disklab/fstab.sample`.","hint":"The UUID follows `UUID=` at the start of the line."},
+    "t05":{"text":"Predict: which UUID does the sample fstab use for `/data`? Verify with `grep data ~/disklab/fstab.sample`.","hint":"The UUID follows `UUID=` at the start of the line. (`grep` searches line by line for a pattern; details in module 3.4.)"},
     "t06":{"text":"Remove the incorrect or temporary sample entry in `~/disklab/fstab.tmp`.","hint":"Check the path and name, then run `rm ~/disklab/fstab.tmp`."},
-    "t07":{"text":"Mini project: write a mount plan for `/data` with a UUID and the `nofail` option to `~/disklab/mount-plan.txt`.","hint":"Save one line with `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt`."},
+    "t07":{"text":"Mini project: write a mount plan for `/data` with a UUID and the `nofail` option to `~/disklab/mount-plan.txt`.","hint":"Save one line with `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt`. (`>` redirects output to a file; details in module 3.2.)"},
     "t08":{"text":"Challenge: make a backup of the sample fstab at `~/disklab/fstab.backup`.","hint":"`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"},
-    "t09":{"text":"Ticket: \"The new disk is not visible.\" Write in the support note that `lsblk` should be checked first, followed by `df -hT`.","hint":"Save both commands in a text line with `echo`."}
+    "t09":{"text":"Ticket: \"The new disk is not visible.\" Write in the support note that `lsblk` should be checked first, followed by `df -hT`.","hint":"Save both commands in a text line with `echo`. (`>` writes to a file; details in module 3.2.)"}
   },
   "vm":{"intro":"These tasks only read disk information; they do not change partition tables or file systems. Run them in your VM and review the output before sharing device names.","tasks":{
     "v01":{"title":"Disk and file-system tree","text":"List disks, partitions, and file-system types. Check mount points instead of guessing which disk is the system disk from its name.","blocks":[{"cmd":"lsblk -f","expected":"NAME FSTYPE FSVER LABEL UUID FSAVAIL FSUSE% MOUNTPOINTS"}],"differs":["Columns and device names vary by distribution; you may see `sda`, `vda`, or `nvme0n1`.","A blank extra disk may have empty FSTYPE and MOUNTPOINTS columns."]},

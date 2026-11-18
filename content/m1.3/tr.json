@@ -77,7 +77,7 @@
    "body": [
     "`find <başlangıç> <koşullar>` bir klasör ağacını gezer ve koşula uyanları yazar. En sık kullanılan iki koşul: `-name` (ada göre) ve `-type` (`f` dosya, `d` klasör).",
     "Joker karakteri **tırnak içine** al: `find . -name \"*.txt\"`. Tırnak yoksa kabuk deseni önce kendisi genişletir ve sonuç yanıltıcı olur. Başlangıç noktası `.` geçerli klasör, `~` home'dur.",
-    "Sonucu `| wc -l` ile sayabilir, `> dosya` ile kaydedebilirsin. `-maxdepth 1` gerçek sistemde derinliği sınırlar (simülatör bunu yok sayar)."
+    "Sonucu `| wc -l` ile sayabilir, `> dosya` ile kaydedebilirsin (`|` ve `>` ayrıntısı modül 3.2'de, `wc` modül 3.4–3.5'te; şimdilik: `|` çıktıyı sonraki komuta verir, `wc -l` satır sayar, `>` dosyaya yazar). `-maxdepth 1` gerçek sistemde derinliği sınırlar (simülatör bunu yok sayar)."
    ],
    "commands": [
     {"cmd": "find", "what": "Klasör ağacında koşula uyan dosyaları arar.", "where": "Dosyanın yerini unuttuğunda.", "why": "Adı, türü veya boyutuyla ağacı tarar.", "example": "find . -name \"*.txt\""},
@@ -91,7 +91,7 @@
    "id": "history",
    "title": "history: geçmiş komutlar",
    "body": [
-    "`history` bu oturumda ve önceki oturumlarda yazdığın komutları numaralı listeler. Uzunsa `history | tail -n 10` ile son on komutu al.",
+    "`history` bu oturumda ve önceki oturumlarda yazdığın komutları numaralı listeler. Uzunsa `history | tail -n 10` ile son on komutu al (`|` ve `tail` ayrıntısı modül 3.2 ve 3.4–3.5'te).",
     "Gerçek Bash'te **ok yukarı** önceki komutu getirir, **Ctrl+R** geçmişte arar, `!!` son komutu, `!42` 42 numaralı komutu yeniden çalıştırır. Simülatör `!!` desteklemez; ok tuşları çalışır.",
     "Gizli bilgi (parola) içeren komutlar geçmişe yazılır; bunu unutma."
    ],
@@ -126,14 +126,14 @@
   "t06": {"text": "`help` yaz ve bilinen komutların listesini gör.", "hint": "Argümansız yaz."},
   "t07": {"text": "`find . -name \"*.txt\"` ile geçerli klasörün altındaki tüm `.txt` dosyalarını bul.", "hint": "Deseni tırnak içine al."},
   "t08": {"text": "`history` ile şu ana kadar yazdığın komutları listele.", "hint": "Numaralı liste gelir."},
-  "t09": {"text": "`man ls | head -n 3` ile sayfanın yalnızca ilk üç satırını göster.", "hint": "Pipe: |."},
+  "t09": {"text": "`man ls | head -n 3` ile sayfanın yalnızca ilk üç satırını göster.", "hint": "Pipe: | (çıktıyı sonraki komuta verir; ayrıntısı modül 3.2'de)."},
   "t10": {"text": "Tahmin et: `nosuchcmd; echo $?` hangi sayıyı yazar? Sonra çalıştırıp doğrula.", "hint": "Komut yok → çıkış kodu 127."},
   "t11": {"text": "Tahmin et: `find ~ -type d | wc -l` home altında kaç klasör sayar (home dahil)? Çalıştır ve doğrula.", "hint": "Desktop, Documents, Downloads ve home'un kendisi."},
   "t12": {"text": "Debug: `man mkdirr` hata veriyor ('No manual entry'). Doğru komutun kılavuzunu `man mkdir` ile aç.", "hint": "Yazım hatası: fazladan r."},
-  "t13": {"text": "Mini: `todo.txt` dosyasının nerede olduğunu `find` ile bul ve yolu `~/path.txt` dosyasına kaydet.", "hint": "`find ~ -name todo.txt > ~/path.txt`; sonra `cat ~/path.txt` ile bak."},
-  "t14": {"text": "Challenge: Home altındaki `.txt` dosyalarının sayısını tek komutta bulup `~/count.txt` dosyasına yaz.", "hint": "`find`, pipe, `wc -l` ve yönlendirme. Sonuç dosya sayısıdır; sizin oluşturduğunuz .txt dosyaları da sayılır."},
-  "t15": {"text": "TICKET #4410 — Destek: 'ls nerede kurulu, cd ne tür bir komut?' Yolu `~/ls_path.txt` dosyasına, `cd` türünü `~/cd_type.txt` dosyasına kaydet.", "hint": "`which ls > ...` ve `type cd > ...`."},
-  "t16": {"text": "TICKET #4411 — Öğretmen ne denediğini görmek istiyor: önce `which ls` çalıştır, sonra geçmişi `~/hist.txt` dosyasına kaydet.", "hint": "`history > ~/hist.txt`."}
+  "t13": {"text": "Mini: `todo.txt` dosyasının nerede olduğunu `find` ile bul ve yolu `~/path.txt` dosyasına kaydet.", "hint": "`find ~ -name todo.txt > ~/path.txt`; sonra `cat ~/path.txt` ile bak. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"},
+  "t14": {"text": "Challenge: Home altındaki `.txt` dosyalarının sayısını tek komutta bulup `~/count.txt` dosyasına yaz.", "hint": "`find`, pipe, `wc -l` (satır sayar; modül 3.4–3.5) ve yönlendirme (`>`, modül 3.2). Sonuç dosya sayısıdır; sizin oluşturduğunuz .txt dosyaları da sayılır."},
+  "t15": {"text": "TICKET #4410 — Destek: 'ls nerede kurulu, cd ne tür bir komut?' Yolu `~/ls_path.txt` dosyasına, `cd` türünü `~/cd_type.txt` dosyasına kaydet.", "hint": "`which ls > ...` ve `type cd > ...`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"},
+  "t16": {"text": "TICKET #4411 — Öğretmen ne denediğini görmek istiyor: önce `which ls` çalıştır, sonra geçmişi `~/hist.txt` dosyasına kaydet.", "hint": "`history > ~/hist.txt`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"}
  },
  "vm": {
   "intro": "VM'inde (Ubuntu, Rocky, Alma veya WSL) aşağıdaki komutları çalıştır. Yıkıcı bir komut yok; yine de okuyucuda (man) `q` ile çıkmayı unutma.",

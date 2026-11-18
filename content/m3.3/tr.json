@@ -166,7 +166,7 @@
     },
     "t07": {
       "text": "`texts` klasörünü oluştur ve `doc` ile başlayan `.txt` dosyalarını içine kopyala. `notes.md` dosyasını kopyalama.",
-      "hint": "`mkdir texts` komutundan sonra `cp doc*.txt texts` çalıştır."
+      "hint": "`mkdir texts` komutundan sonra `cp doc*.txt texts` çalıştır. (`mkdir` modül 2.3'te, `cp` modül 2.4'te anlatılır.)"
     },
     "t08": {
       "text": "Tahmin et: `echo '$HOME'` değişkenin değerini mi, yoksa `$HOME` metnini mi yazar? Komutu çalıştırıp kontrol et.",
@@ -178,19 +178,19 @@
     },
     "t10": {
       "text": "Hata ayıklama: `old report.txt` adındaki dosyayı tek bir argüman olarak hedefleyip kaldır.",
-      "hint": "Boşluklu adı tırnakla: `rm \"old report.txt\"`."
+      "hint": "Boşluklu adı tırnakla: `rm \"old report.txt\"`. (`rm` modül 2.3'te anlatılır.)"
     },
     "t11": {
       "text": "Mini proje: `backup` klasörünü oluştur ve yalnızca `.jpg` ile `.png` dosyalarını bu klasöre kopyala.",
-      "hint": "`mkdir backup` ardından `cp *.jpg *.png backup` kullan."
+      "hint": "`mkdir backup` ardından `cp *.jpg *.png backup` kullan. (`mkdir` modül 2.3'te, `cp` modül 2.4'te anlatılır.)"
     },
     "t12": {
       "text": "Meydan okuma: `log_1.txt`, `log_2.txt` ve `log_3.txt` adlarını süslü parantezle oluştur; ardından `log_?` deseniyle bu üç dosyayı kaldır.",
-      "hint": "Önce `touch log_{1,2,3}.txt`, sonra `rm log_?.txt` çalıştır."
+      "hint": "Önce `touch log_{1,2,3}.txt`, sonra `rm log_?.txt` çalıştır. (`touch`, `rm` modül 2.3'te anlatılır.)"
     },
     "t13": {
       "text": "Ticket: Boşluk içeren `my file.txt` adını `my_file.txt` olarak yeniden adlandır. Adın tek argüman olmasına dikkat et.",
-      "hint": "`mv \"my file.txt\" my_file.txt` komutunu kullan."
+      "hint": "`mv \"my file.txt\" my_file.txt` komutunu kullan. (`mv` modül 2.4'te anlatılır.)"
     }
   },
   "vm": {

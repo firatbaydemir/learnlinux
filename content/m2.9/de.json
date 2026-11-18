@@ -12,11 +12,11 @@
     "t02":{"text":"Führe `df -h` im Simulator aus und sieh dir den Belegungsbericht an.","hint":"`-h` zeigt lesbare Größenangaben."},
     "t03":{"text":"Lies den Beispielbaum mit `cat ~/disklab/lsblk.txt`. Wie heißt das zweite Laufwerk?","hint":"Suche die Zeile `sdb`."},
     "t04":{"text":"Erstelle das Verzeichnis `~/disklab/archive` als Einhängepunkt.","hint":"`mkdir -p ~/disklab/archive`"},
-    "t05":{"text":"Vorhersage: Welche UUID gehört in der Beispiel-fstab zu `/data`? Prüfe mit `grep data ~/disklab/fstab.sample`.","hint":"Die UUID steht nach `UUID=` am Zeilenanfang."},
+    "t05":{"text":"Vorhersage: Welche UUID gehört in der Beispiel-fstab zu `/data`? Prüfe mit `grep data ~/disklab/fstab.sample`.","hint":"Die UUID steht nach `UUID=` am Zeilenanfang. (`grep` sucht zeilenweise nach einem Muster; Details in Modul 3.4.)"},
     "t06":{"text":"Entferne den fehlerhaften bzw. temporären Beispieleintrag in `~/disklab/fstab.tmp`.","hint":"Prüfe Pfad und Namen, dann `rm ~/disklab/fstab.tmp`."},
-    "t07":{"text":"Mini-Projekt: Schreibe einen Einhängeplan für `/data` mit UUID und Option `nofail` in `~/disklab/mount-plan.txt`.","hint":"Speichere eine Zeile mit `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt`."},
+    "t07":{"text":"Mini-Projekt: Schreibe einen Einhängeplan für `/data` mit UUID und Option `nofail` in `~/disklab/mount-plan.txt`.","hint":"Speichere eine Zeile mit `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt`. (`>` leitet die Ausgabe in eine Datei um; Details in Modul 3.2.)"},
     "t08":{"text":"Challenge: Erstelle eine Sicherung der Beispieldatei unter `~/disklab/fstab.backup`.","hint":"`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"},
-    "t09":{"text":"Ticket: \"Das neue Laufwerk wird nicht angezeigt.\" Schreibe in die Supportnotiz, dass zuerst `lsblk` und danach `df -hT` geprüft werden.","hint":"Speichere beide Befehle mit `echo` in einer Textzeile."}
+    "t09":{"text":"Ticket: \"Das neue Laufwerk wird nicht angezeigt.\" Schreibe in die Supportnotiz, dass zuerst `lsblk` und danach `df -hT` geprüft werden.","hint":"Speichere beide Befehle mit `echo` in einer Textzeile. (`>` schreibt in eine Datei; Details in Modul 3.2.)"}
   },
   "vm":{"intro":"Diese Aufgaben lesen nur Laufwerksinformationen; sie ändern weder Partitionstabellen noch Dateisysteme. Führe die Befehle in deiner VM aus und prüfe die Ausgabe, bevor du Gerätenamen weitergibst.","tasks":{
     "v01":{"title":"Laufwerks- und Dateisystembaum","text":"Liste Laufwerke, Partitionen und Dateisystemtypen. Prüfe Einhängepunkte, statt die Systemplatte anhand ihres Namens zu erraten.","blocks":[{"cmd":"lsblk -f","expected":"NAME FSTYPE FSVER LABEL UUID FSAVAIL FSUSE% MOUNTPOINTS"}],"differs":["Spalten und Gerätenamen hängen von der Distribution ab; du kannst `sda`, `vda` oder `nvme0n1` sehen.","Bei einem leeren Zusatzlaufwerk können FSTYPE und MOUNTPOINTS leer sein."]},

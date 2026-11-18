@@ -35,7 +35,7 @@
     {"cmd": "ls -a", "what": "Adı noktayla başlayan gizli dosyaları da gösterir.", "where": "Ayar dosyalarını ararken.", "why": "Gizli dosyalar normal `ls` çıktısında görünmez.", "example": "ls -a"},
     {"cmd": "ls -lh", "what": "Ayrıntılı liste; boyutları K/M/G olarak yazar.", "where": "Dosya boyutlarına bakarken.", "why": "Bayt sayısını okumaktan kolaydır.", "example": "ls -lh ~"}
    ],
-   "tip": "Bol dosyalı dizinde `ls` sonucu uzun gelirse `ls -l | head` ile ilk satırlara bak."
+   "tip": "Bol dosyalı dizinde `ls` sonucu uzun gelirse `ls -l | head` ile ilk satırlara bak. (`|` ilk komutun çıktısını ikinciye verir, `head` ilk 10 satırı gösterir; ayrıntısı modül 3.2 ve 2.6'da.)"
   },
   {
    "id": "cd",

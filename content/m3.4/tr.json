@@ -59,13 +59,13 @@
     "t04":{"text":"`project` ağacında `.conf` ile biten adları bul.","hint":"`find project -name \"*.conf\"`; deseni tırnakla."},
     "t05":{"text":"`project` içinde yalnızca normal `.txt` dosyalarını bul.","hint":"`find project -type f -name \"*.txt\"`."},
     "t06":{"text":"Tahmin et: `grep -c ERROR logs/app.log` kaç eşleşen satır verir? Sonra doğrula.","hint":"Komut eşleşen satırları değil, toplam adedi yazar."},
-    "t07":{"text":"Tahmin et: erişim kayıtlarından yalnızca `200` içeren satırlar nasıl süzülür? Pipe kullan.","hint":"`cat logs/access.log | grep 200`."},
-    "t08":{"text":"Hata ayıklama: `ERROR` satırlarını home dizinindeki `errors.txt` dosyasına kaydet.","hint":"`grep ERROR logs/app.log > errors.txt` ile stdout'u yönlendir."},
+    "t07":{"text":"Tahmin et: erişim kayıtlarından yalnızca `200` içeren satırlar nasıl süzülür? Pipe kullan.","hint":"`cat logs/access.log | grep 200`. (`cat` modül 2.6, `|` modül 3.2'de.)"},
+    "t08":{"text":"Hata ayıklama: `ERROR` satırlarını home dizinindeki `errors.txt` dosyasına kaydet.","hint":"`grep ERROR logs/app.log > errors.txt` ile stdout'u yönlendir (`>` modül 3.2'de)."},
     "t09":{"text":"`INFO` içermeyen log satırlarını göster.","hint":"`-v`, eşleşmeyen satırları seçer: `grep -v INFO logs/app.log`."},
     "t10":{"text":"Mini görev: `project` dosyalarında `TODO` ifadesinin geçtiği satırları ara.","hint":"Dizin içinde özyinelemeli arama için `grep -r TODO project`."},
     "t11":{"text":"Mini görev: `logs` ağacında `.log` ile biten normal dosyaları bul.","hint":"`find logs -type f -name \"*.log\"`."},
     "t12":{"text":"Meydan okuma: `project` içinde `todo` sözcüğünü harf duyarsız ve satır numaralı ara.","hint":"`grep -rin todo project` seçenekleri birleştirebilirsin."},
-    "t13":{"text":"Ticket: Projedeki tüm `.txt` yollarını `text_files.txt` adlı rapora kaydet.","hint":"`find . -type f -name \"*.txt\" > text_files.txt`."}
+    "t13":{"text":"Ticket: Projedeki tüm `.txt` yollarını `text_files.txt` adlı rapora kaydet.","hint":"`find . -type f -name \"*.txt\" > text_files.txt` (`>` modül 3.2'de)."}
   },
   "vm": {
     "intro":"Kendi VM'inde var olan metinleri ve dosya yollarını oku. Komutlar sistem dosyalarını değiştirmez; rapor oluştururken home dizinini kullan.",
@@ -73,7 +73,7 @@
       "v01":{"title":"Logda metin ara","text":"Sistem logunda `error` sözcüğünü harf duyarsız ara ve eşleşen satırlardan birini yapıştır.","blocks":[{"cmd":"grep -i error /var/log/messages | head -n 3","expected":"error"}],"differs":["Dosya yoksa dağıtımındaki bir log dosyasını seç veya `~/lab/app.log` oluşturup örnek satırlar yaz."]},
       "v02":{"title":"Satır numarasını gör","text":"`/etc/passwd` içinde `root` satırını satır numarasıyla bul.","blocks":[{"cmd":"grep -n '^root:' /etc/passwd","expected":"1:root:"}],"differs":["Satır numarası sistemine göre değişebilir; çıktıda `root` ve önünde bir numara olması yeterlidir."]},
       "v03":{"title":"Dosya adıyla ara","text":"`/etc` altında adı `hostname` olan dosyayı bul.","blocks":[{"cmd":"find /etc -type f -name hostname","expected":"/etc/hostname"}],"differs":["Çıktı tam yol içermelidir. `find` başlangıç dizinini ve adı ayrı argümanlar olarak alır."]},
-      "v04":{"title":"Sonuçları güvenle kaydet","text":"Home dizininde `lab` oluştur ve yalnızca orada `.txt` dosyalarını listeleyen bir rapor üret. Raporun içeriğini kontrol et.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["Rapor boşsa `cd ~/lab` adımının ve dosya adlarının doğru olduğuna bak. Aramayı tüm sistemde çalıştırma."]}
+      "v04":{"title":"Sonuçları güvenle kaydet","text":"Home dizininde `lab` oluştur ve yalnızca orada `.txt` dosyalarını listeleyen bir rapor üret. Raporun içeriğini kontrol et.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["Rapor boşsa `cd ~/lab` adımının ve dosya adlarının doğru olduğuna bak. Aramayı tüm sistemde çalıştırma. (`mkdir`/`touch` modül 2.3, `>` modül 3.2'de.)"]}
     }
   },
   "quiz": {

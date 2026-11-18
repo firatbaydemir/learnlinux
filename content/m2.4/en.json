@@ -151,7 +151,7 @@
   },
   "t09": {
    "text": "Predict: what does `cat backup/draft.txt` show? Run it to verify.",
-   "hint": "The copy has the same content as the original: `draft v1`."
+   "hint": "The copy has the same content as the original: `draft v1`. (`cat` prints file contents; details in module 2.6.)"
   },
   "t10": {
    "text": "Predict: try to move a file that does not exist: `mv ghost.txt backup`. Does it succeed?",
@@ -187,7 +187,7 @@
   "tasks": {
    "v01": {
     "title": "Copy a file",
-    "text": "Create a file, copy it and paste the `ls -l` output.",
+    "text": "Create a file, copy it and paste the `ls -l` output. (`echo ... > file` writes text to a file, `mkdir` creates a folder; details in modules 3.2 and 2.3.)",
     "blocks": [
      {
       "cmd": "mkdir -p ~/vmlab && cd ~/vmlab\necho \"original content\" > original.txt\ncp original.txt copy.txt\nls -l",

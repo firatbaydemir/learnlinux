@@ -89,22 +89,22 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Lies die Beispielausgabe `~/lvm/vgs.txt` mit `cat`. Welche VG hat freien Platz?", "hint": "`cat ~/lvm/vgs.txt` — schau auf die Spalte VFree."},
-    "t02": {"text": "Zeige mit `grep` nur die `vg_data`-Volumes aus `~/lvm/lvs.txt`.", "hint": "`grep vg_data ~/lvm/lvs.txt`"},
-    "t03": {"text": "Sichere vor dem Bearbeiten: kopiere `~/lvm/fstab.test` nach `~/lvm/fstab.bak`.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak`"},
-    "t04": {"text": "Erstelle `~/lvm/lab.sh`: erste Zeile `truncate -s 300M ~/lvm-lab/disk1.img`, zweite Zeile `sudo losetup -f --show ~/lvm-lab/disk1.img` (die zweite mit `>>` anhängen).", "hint": "Für die erste Zeile `printf '...\\n' > ~/lvm/lab.sh`, für die folgenden `>>`."},
+    "t01": {"text": "Lies die Beispielausgabe `~/lvm/vgs.txt` mit `cat`. Welche VG hat freien Platz?", "hint": "`cat ~/lvm/vgs.txt` — schau auf die Spalte VFree. (`cat` → Modul 2.6.)"},
+    "t02": {"text": "Zeige mit `grep` nur die `vg_data`-Volumes aus `~/lvm/lvs.txt`.", "hint": "`grep vg_data ~/lvm/lvs.txt` (`grep` → Modul 3.4.)"},
+    "t03": {"text": "Sichere vor dem Bearbeiten: kopiere `~/lvm/fstab.test` nach `~/lvm/fstab.bak`.", "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak` (`cp` → Modul 2.4.)"},
+    "t04": {"text": "Erstelle `~/lvm/lab.sh`: erste Zeile `truncate -s 300M ~/lvm-lab/disk1.img`, zweite Zeile `sudo losetup -f --show ~/lvm-lab/disk1.img` (die zweite mit `>>` anhängen).", "hint": "Für die erste Zeile `printf '...\\n' > ~/lvm/lab.sh`, für die folgenden `>>`. (`>/>>` → Modul 3.2.)"},
     "t05": {"text": "Hänge zwei Zeilen an `lab.sh` an: `sudo pvcreate /dev/loop0` und `sudo vgcreate vg_data /dev/loop0`.", "hint": "Zweimal `printf '...\\n' >> ~/lvm/lab.sh`."},
     "t06": {"text": "Hänge `sudo lvcreate -L 200M -n lv_web vg_data` und `sudo mkfs.xfs /dev/vg_data/lv_web` an `lab.sh` an.", "hint": "Mit `>>` anhängen; `>` würde die Datei zurücksetzen."},
     "t07": {"text": "Vorhersage: Was gibt `grep -c vg_data ~/lvm/lvs.txt` aus? Führe es danach zur Kontrolle aus.", "hint": "`-c` zählt passende Zeilen."},
     "t08": {"text": "Vorhersage: Was sagt `grep xfs ~/lvm/fs.txt` über das Verkleinern von XFS? Führe es zur Kontrolle aus.", "hint": "XFS wächst, schrumpft aber nie."},
     "t09": {"text": "Debug: Das `lvextend` in `~/lvm/grow.sh` vergrößert das Dateisystem nicht. Repariere die Zeile mit `-r`: `lvextend -r -L +2G /dev/vg_data/lv_web`.", "hint": "Schreibe die Datei mit `echo '...' > ~/lvm/grow.sh` neu."},
     "t10": {"text": "Debug: In `~/lvm/fstab.test` ist der Gerätename falsch (`lv_wb`). Korrigiere die Zeile zu `/dev/vg_data/lv_web /srv/web xfs defaults 0 0`.", "hint": "Erst `cat ~/lvm/fstab.test`, dann die einzelne Zeile neu schreiben."},
-    "t11": {"text": "Mini-Projekt: Wähle die `vg_data`-Zeilen aus `lvs.txt`, schneide nur die erste Spalte (LV-Name) aus und schreibe sie in `~/lvm/data-lvs.txt`.", "hint": "`grep ... | cut -d' ' -f1 > file`"},
-    "t12": {"text": "Mini-Projekt: Erstelle `~/lvm/check.sh` mit `pvs`, `vgs`, `lvs` in dieser Reihenfolge. Mache sie danach ausführbar (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` dann `chmod 755`."},
+    "t11": {"text": "Mini-Projekt: Wähle die `vg_data`-Zeilen aus `lvs.txt`, schneide nur die erste Spalte (LV-Name) aus und schreibe sie in `~/lvm/data-lvs.txt`.", "hint": "`grep ... | cut -d' ' -f1 > file` (`grep` → Modul 3.4; `cut` → Modul 3.5.)"},
+    "t12": {"text": "Mini-Projekt: Erstelle `~/lvm/check.sh` mit `pvs`, `vgs`, `lvs` in dieser Reihenfolge. Mache sie danach ausführbar (`755`).", "hint": "`printf 'pvs\\nvgs\\nlvs\\n' > ...` dann `chmod 755`. (`chmod` → Modul 4.4.)"},
     "t13": {"text": "Challenge: Schreibe in `~/lvm/runbook.txt` die Befehle `pvcreate`, `vgcreate`, `lvcreate`, `mkfs.xfs` und `lvextend -r` in dieser Reihenfolge, je einen pro Zeile. Gerät `/dev/loop0`, VG `vg_data`, LV `lv_web`.", "hint": "Ein `printf` mit `\\n` als Trenner genügt."},
-    "t14": {"text": "Challenge: Wie viele LVs hat jede VG in `lvs.txt`? Komprimiere Leerzeichen (`tr -s`), schneide die VG-Spalte aus und zähle mit `sort` und `uniq -c`.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c`"},
+    "t14": {"text": "Challenge: Wie viele LVs hat jede VG in `lvs.txt`? Komprimiere Leerzeichen (`tr -s`), schneide die VG-Spalte aus und zähle mit `sort` und `uniq -c`.", "hint": "`tr -s ' ' < file | cut -d' ' -f2 | sort | uniq -c` (`tr/cut/sort/uniq` → Modul 3.5.)"},
     "t15": {"text": "Ticket: `vg_sys` ist voll (VFree 0) und `lv_root` braucht 5G mehr. Schreibe der Reihe nach in `~/lvm/ticket-fix.sh`: neues PV `/dev/loop1`, `vgextend vg_sys /dev/loop1`, `lvextend -r -L +5G /dev/vg_sys/lv_root`.", "hint": "Drei Zeilen: `pvcreate`, `vgextend`, `lvextend -r`."},
-    "t16": {"text": "Bereite den Mountpoint vor: Lege das Verzeichnis `~/mnt/web` an und lege eine leere `index.html` hinein.", "hint": "`mkdir -p` und `touch`."}
+    "t16": {"text": "Bereite den Mountpoint vor: Lege das Verzeichnis `~/mnt/web` an und lege eine leere `index.html` hinein.", "hint": "`mkdir -p` und `touch`. (`mkdir/touch` → Modul 2.3.)"}
   },
   "vm": {
     "intro": "Mach diese Aufgaben in deiner VM. Mach zuerst einen **Snapshot**. Nutze nur Loop-Geräte; tippe nie einen echten Plattennamen.",

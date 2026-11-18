@@ -12,11 +12,11 @@
     "t02":{"text":"Simülatörde `ls ~/.ssh` ile örnek SSH dosyalarını listele.","hint":"Bu sanal klasör yalnızca örnek yapılandırma ve host-key kaydı içerir."},
     "t03":{"text":"`cat ~/transfer/manifest.txt` ile örnek manifesti oku; hangi dosya aktarılacak?","hint":"Manifestte `report.txt` satırını bul."},
     "t04":{"text":"Tek dosyalı aktarımı modelle: `report.txt` dosyasını `report.remote.txt` adıyla kopyala.","hint":"`cp ~/transfer/report.txt ~/transfer/report.remote.txt`"},
-    "t05":{"text":"Tahmin et: örnek host kaydı hangi anahtar türünü kullanıyor? `grep linux-lab ~/.ssh/known_hosts.sample` ile kontrol et.","hint":"Satırda `ssh-ed25519` görmelisin."},
+    "t05":{"text":"Tahmin et: örnek host kaydı hangi anahtar türünü kullanıyor? `grep linux-lab ~/.ssh/known_hosts.sample` ile kontrol et.","hint":"Satırda `ssh-ed25519` görmelisin. (`grep` arama komutu; ayrıntısı modül 3.4'te.)"},
     "t06":{"text":"Eski yerel kopyayı `~/transfer/old_copy.txt` kaldır; kaynağa dokunma.","hint":"Yalnızca eski kopyanın tam yolunu `rm` komutuna ver."},
     "t07":{"text":"Mini proje: örnek SSH yapılandırmasını `~/ops/connection-plan.txt` adıyla kopyala ve `Host linux-lab` ile `Port 22` satırlarını doğrula.","hint":"Önce `cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt`, ardından `cat` ile oku."},
     "t08":{"text":"Meydan okuma: raporun eşitlenecek bir kopyasını `~/transfer/sync-copy.txt` adıyla hazırla.","hint":"`cp` ile kopyala; içeriğin aynı kaldığını `cat` ile kontrol et."},
-    "t09":{"text":"Ticket: \"Bir dosya hemen kopyalanmalı; klasör yedeği düzenli eşitlenmeli.\" Destek notunda dosya için `scp`, eşitleme için `rsync` öner.","hint":"İki aracın adını not dosyasına yaz."}
+    "t09":{"text":"Ticket: \"Bir dosya hemen kopyalanmalı; klasör yedeği düzenli eşitlenmeli.\" Destek notunda dosya için `scp`, eşitleme için `rsync` öner.","hint":"İki aracın adını not dosyasına yaz. (`>` çıktıyı dosyaya yönlendirir; ayrıntısı modül 3.2'de.)"}
   },
   "vm":{"intro":"Bu bölümdeki komutlar sürüm ve istemci yapılandırmasını görüntüler. Uzak hosta bağlanma veya dosya gönderme adımı yoktur; gerçek bağlantı için yalnızca izinli bir sunucu kullan.","tasks":{
     "v01":{"title":"SSH istemci sürümü","text":"SSH istemcisinin kurulu olduğunu doğrula; uzak sistemle bağlantı başlatma.","blocks":[{"cmd":"ssh -V","expected":"OpenSSH_9.6p1"}],"differs":["Sürüm numarası dağıtıma göre değişir; `OpenSSH` metnini görmen yeterlidir.","Çıktı genellikle standart hata akışına yazılır; terminalde görünür."]},

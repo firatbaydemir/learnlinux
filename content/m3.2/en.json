@@ -65,13 +65,13 @@
     "title": "Extract and sort users",
     "text": "Take the first field of `/etc/passwd`, sort it and show the first five names.",
     "blocks": [{"cmd": "cut -d: -f1 /etc/passwd | sort | head -n 5", "expected": "_apt\nbackup\nbin\ndaemon\ngames"}],
-    "differs": ["Names differ per distribution; only the alphabetical order matters. Use `| grep root` to check that `root` exists."]
+    "differs": ["Names differ per distribution; only the alphabetical order matters. Use `| grep root` to check that `root` exists.", "`cut` is covered in detail in module 3.5; here it is enough to know `-d:` (delimiter) and `-f1` (1st field)."]
    },
    "v03": {
     "title": "Frequency table",
     "text": "Count which login shells are used in `/etc/passwd` and rank them.",
     "blocks": [{"cmd": "cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn", "expected": "     24 /usr/sbin/nologin\n      3 /bin/bash\n      1 /bin/sync"}],
-    "differs": ["Counts and shells vary per system.", "If you see only one line, check that `sort` comes before `uniq -c`."]
+    "differs": ["Counts and shells vary per system.", "If you see only one line, check that `sort` comes before `uniq -c`.", "`cut -d: -f7` takes the seventh field (login shell); `cut` is covered in module 3.5."]
    },
    "v04": {
     "title": "Keep a copy with tee",

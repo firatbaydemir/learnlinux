@@ -236,11 +236,11 @@
   },
   "t02": {
    "text": "İlk script'ini `printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh` ile yaz.",
-   "hint": "`\\n` satır sonudur; dosya iki satır olur. `cat ~/bin/hello.sh` ile kontrol et."
+   "hint": "`\\n` satır sonudur; dosya iki satır olur. `cat ~/bin/hello.sh` ile kontrol et. (`cat` → modül 2.6.)"
   },
   "t03": {
    "text": "Script'i `chmod +x ~/bin/hello.sh` ile çalıştırılabilir yap.",
-   "hint": "`ls -l ~/bin/hello.sh` çıktısında izinlerde artık `x` var."
+   "hint": "`ls -l ~/bin/hello.sh` çıktısında izinlerde artık `x` var. (`ls -l` → modül 2.5.)"
   },
   "t04": {
    "text": "Script'i yoluyla çalıştır: `~/bin/hello.sh`.",
@@ -248,7 +248,7 @@
   },
   "t05": {
    "text": "`~/bin/vars.sh` dosyasını `#!/bin/bash`, `NAME=student` ve `echo \"Hello $NAME\"` satırlarıyla yaz (`printf` kullan), çalıştırılabilir yap ve çalıştır.",
-   "hint": "Üç komut: `printf ... > ~/bin/vars.sh`, `chmod +x`, sonra çalıştır. Çıktı: `Hello student`."
+   "hint": "Üç komut: `printf ... > ~/bin/vars.sh`, `chmod +x`, sonra çalıştır. Çıktı: `Hello student`. (`chmod` → modül 4.4.)"
   },
   "t06": {
    "text": "Tahmin et: `'$HOME'` ve `\"$HOME\"` ne yazdırır? Sonra `echo '$HOME' \"$HOME\"` ile kontrol et.",
@@ -256,11 +256,11 @@
   },
   "t07": {
    "text": "Eşleşme bulamayan bir aramanın çıkış kodunu tahmin et. `grep carol ~/users.txt; echo $?` çalıştır.",
-   "hint": "grep bu dosyada hiçbir şey bulamaz ve sıfırdan farklı bir kodla cevap verir."
+   "hint": "grep bu dosyada hiçbir şey bulamaz ve sıfırdan farklı bir kodla cevap verir. (`grep` → modül 3.4.)"
   },
   "t08": {
    "text": "`~/bin/check.sh` yaz (shebang, sonra `if [ -f \"$1\" ]; then`, `echo \"exists\"`, `else`, `echo \"missing\"`, `fi`) ve çalıştırılabilir yap. Simülatör `if` çalıştıramaz; VM'de çalıştıracaksın.",
-   "hint": "Satırlar arasına `\\n` koyarak tek `printf` kullan, sonra `chmod +x`."
+   "hint": "Satırlar arasına `\\n` koyarak tek `printf` kullan, sonra `chmod +x`. (`chmod` → modül 4.4.)"
   },
   "t09": {
    "text": "`test` veya `[ ]` ile iki kontrol yap: `~/notes.txt` bir dosya mı (`-f`) ve `~/Documents` bir klasör mü (`-d`)? Sonucu görmek için `&& echo ok` ekle.",

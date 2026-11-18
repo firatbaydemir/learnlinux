@@ -91,22 +91,22 @@
  ],
  "tasks": {
   "t01": {"text": "`cat ~/lab/selinux_config` ile kalıcı SELinux modunu oku.", "hint": "Dosyada `SELINUX=` satırına bak."},
-  "t02": {"text": "`grep -c denied ~/lab/audit.log` ile audit logundaki reddedilen kayıtları say.", "hint": "-c satır sayısını yazar."},
+  "t02": {"text": "`grep -c denied ~/lab/audit.log` ile audit logundaki reddedilen kayıtları say.", "hint": "-c satır sayısını yazar. (`grep` → modül 3.4.)"},
   "t03": {"text": "`grep httpd ~/lab/booleans.txt` ile httpd booleanlarını listele.", "hint": "Dosya `isim --> durum` biçiminde."},
   "t04": {"text": "`cd ~/lab` ile lab dizinine geç.", "hint": "Sonraki görevlerde yol yazmak zorunda kalmazsın."},
-  "t05": {"text": "`context.txt` içindeki etiket `user:role:type:level` biçiminde. `cut -d: -f3 context.txt` ile **type** alanını yazdır.", "hint": "Ayraç iki nokta, üçüncü alan type. Önce lab dizininde ol."},
-  "t06": {"text": "Yalnızca httpd kayıtlarını `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt` ile `httpd_denials.txt` dosyasına yaz.", "hint": "Tek tırnak içinde çift tırnaklı desen; > çıktıyı dosyaya yönlendirir."},
+  "t05": {"text": "`context.txt` içindeki etiket `user:role:type:level` biçiminde. `cut -d: -f3 context.txt` ile **type** alanını yazdır.", "hint": "Ayraç iki nokta, üçüncü alan type. Önce lab dizininde ol. (`cut` → modül 3.5.)"},
+  "t06": {"text": "Yalnızca httpd kayıtlarını `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt` ile `httpd_denials.txt` dosyasına yaz.", "hint": "Tek tırnak içinde çift tırnaklı desen; > çıktıyı dosyaya yönlendirir. (`>` → modül 3.2.)"},
   "t07": {"text": "`grep complain aa_status.txt` ile AppArmor'da complain modundaki satırı bul.", "hint": "Çıktıda 'complain mode' geçen satır beklenir."},
   "t08": {"text": "Tahmin et: `audit.log` içinde kaç kayıt `permissive=1` (engellenmemiş)? Sonra `grep -c permissive=1 audit.log` ile doğrula.", "hint": "Satırların sonundaki permissive değerine bak."},
   "t09": {"text": "Tahmin et: `booleans.txt` içinde kaç boolean kapalı (off)? Sonra `grep -c ' off$' booleans.txt` ile doğrula.", "hint": "$ satır sonunu belirtir."},
   "t10": {"text": "Hata ayıkla: `broken_config` dosyasında `SELINUX=disabled` var. Dosyayı `SELINUX=enforcing` ve `SELINUXTYPE=targeted` olacak şekilde yeniden yaz.", "hint": "`printf 'SELINUX=enforcing\\nSELINUXTYPE=targeted\\n' > broken_config`"},
   "t11": {"text": "Hata ayıkla: `runbook.sh` hem `setenforce 0` kullanıyor hem boolean'ı kalıcı yapmıyor. Dosyayı tek satırlık `setsebool -P httpd_can_network_connect on` içeriğiyle yeniden yaz.", "hint": "`echo '...' > runbook.sh` mevcut içeriğin üzerine yazar."},
   "t12": {"text": "Mini proje: `fix_web.sh` betiği yaz. Satır 1: `semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"`, satır 2: `restorecon -Rv /srv/web`. Sonra çalıştırılabilir yap: `chmod 755`.", "hint": "İlk satır için `>`, ikinci için `>>` kullan."},
-  "t13": {"text": "Mini proje: `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` ile hangi programın kaç kez reddedildiğini `top_comm.txt` dosyasına yaz.", "hint": "10. alan `comm=...`; `uniq -c` saymadan önce `sort` gerekir."},
-  "t14": {"text": "Meydan okuma: `webfiles.txt` içinde web tipi (`httpd_sys_content_t`) olmayan satırları `wrong_labels.txt` dosyasına yaz.", "hint": "`grep -v` eşleşmeyenleri seçer."},
+  "t13": {"text": "Mini proje: `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` ile hangi programın kaç kez reddedildiğini `top_comm.txt` dosyasına yaz.", "hint": "10. alan `comm=...`; `uniq -c` saymadan önce `sort` gerekir. (`sort/uniq` → modül 3.5.)"},
+  "t14": {"text": "Meydan okuma: `webfiles.txt` içinde web tipi (`httpd_sys_content_t`) olmayan satırları `wrong_labels.txt` dosyasına yaz.", "hint": "`grep -v` eşleşmeyenleri seçer. (`grep` → modül 3.4.)"},
   "t15": {"text": "Meydan okuma: `booleans.txt` içinde açık (on) olan booleanları `booleans_on.txt` dosyasına yaz.", "hint": "Satır sonu `on` ile bitiyor: `' on$'`."},
   "t16": {"text": "Ticket: Web sitesi 403 veriyor. `webfiles.txt` ve `audit.log` incelendi: `about.html` dosyası `user_home_t` etiketli. `ticket.txt` dosyasına tek satırlık not yaz: yanlış tip `user_home_t`, doğru tip `httpd_sys_content_t`, çözüm `restorecon`.", "hint": "`echo '...' > ticket.txt`; üç terimi de içersin."},
-  "t17": {"text": "Ticket: Web uygulaması 8888 portuna bağlanamıyor; logda `name_connect` ve `unreserved_port_t` var. `fix_port.sh` dosyasına şu komutu yaz: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Komutu tek tırnak içinde `echo` ile yaz ve `>` ile yönlendir."}
+  "t17": {"text": "Ticket: Web uygulaması 8888 portuna bağlanamıyor; logda `name_connect` ve `unreserved_port_t` var. `fix_port.sh` dosyasına şu komutu yaz: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Komutu tek tırnak içinde `echo` ile yaz ve `>` ile yönlendir. (`>` → modül 3.2.)"}
  },
  "vm": {
   "intro": "Bu bölümü Rocky/Alma VM'inde yap (SELinux orada gelir). Ubuntu kullanıyorsan v06'ya git. Her şeyden önce **VM snapshot'ı** al (modül 0.2). Sıfırdan kurulu bir laboratuvarda çalış, canlı sunucuda değil.",

@@ -46,7 +46,7 @@
    "id": "create",
    "title": "VM erstellen und installieren",
    "body": [
-    "Lege in VirtualBox/UTM eine neue VM an, binde die ISO ein und gib ihr 2 CPUs, 4 GB RAM und 25 GB Festplatte. Starte sie und folge dem Installer: Sprache wählen, Festplatte wählen (automatische Partitionierung genügt), Root-Passwort setzen, **einen normalen Benutzer anlegen und „Administrator“ ankreuzen** (fügt ihn der Gruppe `wheel`/`sudo` hinzu).",
+    "Lege in VirtualBox/UTM eine neue VM an, binde die ISO ein und gib ihr 2 CPUs, 4 GB RAM und 25 GB Festplatte. Starte sie und folge dem Installer: Sprache wählen, Festplatte wählen (automatische Partitionierung genügt), Root-Passwort setzen, **einen normalen Benutzer anlegen und „Administrator“ ankreuzen** (fügt ihn der Gruppe `wheel`/`sudo` hinzu). Damit kannst du **`sudo`** vor einen einzelnen Befehl setzen, um ihn mit Administratorrechten (root) auszuführen; Details in Modul 4.3.",
     "Wähle zuerst die **Minimal**-Installation; Werkzeuge ergänzt du selbst. Entferne nach dem Neustart die ISO und melde dich mit deinem normalen Benutzer an. Mit `cat /etc/os-release` siehst du, welches System du gebaut hast.",
     "Unter **WSL** genügt ein Befehl in der Administrator-PowerShell: `wsl --install -d Ubuntu-24.04`. Starte neu und lege auf Nachfrage deinen Benutzernamen an."
    ],

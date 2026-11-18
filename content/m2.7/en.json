@@ -177,7 +177,7 @@
  "tasks": {
   "t01": {
    "text": "Create a file without an editor: `echo \"hello editor\" > hello.txt`.",
-   "hint": "`>` creates or overwrites the file."
+   "hint": "`>` creates or overwrites the file (details in module 3.2)."
   },
   "t02": {
    "text": "Show the content of the file with `cat hello.txt`.",
@@ -189,7 +189,7 @@
   },
   "t04": {
    "text": "Append a line to `todo.txt` without an editor: `echo \"buy bread\" >> todo.txt`.",
-   "hint": "Use two `>` characters to append."
+   "hint": "Use two `>` characters to append (`>>` details in module 3.2)."
   },
   "t05": {
    "text": "Show `todo.txt` with line numbers using `cat -n todo.txt`.",
@@ -197,7 +197,7 @@
   },
   "t06": {
    "text": "Find the line with `report` and show its number: `grep -n report todo.txt`.",
-   "hint": "`-n` prints the line number in front."
+   "hint": "`-n` prints the line number in front. `grep` is covered in detail in module 3.4."
   },
   "t07": {
    "text": "Predict: how many lines does `todo.txt` have now? Check with `wc -l todo.txt`.",
@@ -217,7 +217,7 @@
   },
   "t11": {
    "text": "Mini project: create the folder `scripts`, write `scripts/hello.sh` containing the lines `#!/bin/bash` and `echo hello` (use `printf` with `\\n`), then make it mode 755.",
-   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, then `chmod 755 scripts/hello.sh`."
+   "hint": "`printf '#!/bin/bash\\necho hello\\n' > scripts/hello.sh`, then `chmod 755 scripts/hello.sh`. `chmod` details in module 4.4."
   },
   "t12": {
    "text": "Challenge: first back up `notes.txt` as `notes.txt.bak`, then append the line `meeting at 10` to `notes.txt`.",
@@ -225,11 +225,11 @@
   },
   "t13": {
    "text": "Challenge: from `server.log` save only the lines containing `ERROR` into `errors.txt`.",
-   "hint": "`grep` pattern file, with the output redirected using `>`."
+   "hint": "`grep` pattern file, with the output redirected using `>`. `grep` → module 3.4, `>` → module 3.2."
   },
   "t14": {
    "text": "TICKET #2705 — New hires need a welcome note. Create `~/welcome.txt` containing `Welcome to linux-lab`, put a copy into `~/Documents/welcome.txt`, and make the copy read-only for everyone (mode 444).",
-   "hint": "`echo`, `cp`, `chmod 444`."
+   "hint": "`echo`, `cp`, `chmod 444`. `chmod` details in module 4.4."
   }
  },
  "quiz": {

@@ -151,7 +151,7 @@
   },
   "t09": {
    "text": "Tahmin et: `cat backup/draft.txt` ne gösterir? Çalıştırıp doğrula.",
-   "hint": "Kopya, orijinalin içeriğiyle aynıdır: `draft v1`."
+   "hint": "Kopya, orijinalin içeriğiyle aynıdır: `draft v1`. (`cat` dosya içeriğini yazdırır; ayrıntısı modül 2.6'da.)"
   },
   "t10": {
    "text": "Tahmin et: var olmayan dosyayı taşımayı dene: `mv ghost.txt backup`. Başarılı olur mu?",
@@ -187,7 +187,7 @@
   "tasks": {
    "v01": {
     "title": "Dosya kopyala",
-    "text": "Bir dosya oluştur, kopyala ve `ls -l` çıktısını yapıştır.",
+    "text": "Bir dosya oluştur, kopyala ve `ls -l` çıktısını yapıştır. (`echo ... > dosya` metni dosyaya yazar, `mkdir` klasör açar; ayrıntıları modül 3.2 ve 2.3'te.)",
     "blocks": [
      {
       "cmd": "mkdir -p ~/vmlab && cd ~/vmlab\necho \"original content\" > original.txt\ncp original.txt copy.txt\nls -l",

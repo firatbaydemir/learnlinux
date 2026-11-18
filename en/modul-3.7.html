@@ -200,7 +200,7 @@ patching file work.txt
 port=80
 host=linux-lab
 mode=prod</pre>
-<details class="differs"><summary>My output looks different</summary><ul><li>If you see <code>patch: command not found</code>: on Ubuntu <code>sudo apt install patch</code>, on Rocky/Alma <code>sudo dnf install patch</code>.</li><li>If <code>--dry-run</code> is not supported (very old version), skip that line.</li><li>If you see <code>Hunk #1 FAILED</code>, <code>work.txt</code> is not identical to <code>v1.txt</code>; start over with <code>cp v1.txt work.txt</code>.</li></ul></details>
+<details class="differs"><summary>My output looks different</summary><ul><li>If you see <code>patch: command not found</code>: on Ubuntu <code>sudo apt install patch</code>, on Rocky/Alma <code>sudo dnf install patch</code>. (<code>sudo</code> is in module 4.3, <code>apt</code>/<code>dnf</code> in module 5.5.)</li><li>If <code>--dry-run</code> is not supported (very old version), skip that line.</li><li>If you see <code>Hunk #1 FAILED</code>, <code>work.txt</code> is not identical to <code>v1.txt</code>; start over with <code>cp v1.txt work.txt</code>.</li></ul></details>
 <label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v05" data-expect="1"><header><h3>Checksums</h3><span class="status" aria-hidden="true"></span></header><p>Compute hashes, then modify a file and catch the corruption with <code>sha256sum -c</code>. Paste the output.</p>

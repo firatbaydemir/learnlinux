@@ -48,13 +48,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Finde in den Paketnotizen den übergeordneten Paketmanager für die RHEL-Familie.", "hint": "Die Zeile von `grep RHEL ~/lab/package_notes.txt` enthält `dnf`."},
-    "t02": {"text": "Finde den übergeordneten Paketmanager für Ubuntu/Debian.", "hint": "Die Zeile von `grep Ubuntu ~/lab/package_notes.txt` enthält `apt`."},
-    "t03": {"text": "Schätze, in wie vielen Zeilen `package` vorkommt, und prüfe es mit `grep -c`.", "hint": "`grep -c package ~/lab/package_notes.txt`"},
-    "t04": {"text": "Schreibe in `~/lab/install_plan.txt`, dass Ubuntu/Debian vor der Installation die Paketlisten auffrischen sollte.", "hint": "Speichere den Ausdruck `sudo apt update`."},
+    "t01": {"text": "Finde in den Paketnotizen den übergeordneten Paketmanager für die RHEL-Familie.", "hint": "Die Zeile von `grep RHEL ~/lab/package_notes.txt` enthält `dnf`. (`grep` → Modul 3.4.)"},
+    "t02": {"text": "Finde den übergeordneten Paketmanager für Ubuntu/Debian.", "hint": "Die Zeile von `grep Ubuntu ~/lab/package_notes.txt` enthält `apt`. (`grep` → Modul 3.4.)"},
+    "t03": {"text": "Schätze, in wie vielen Zeilen `package` vorkommt, und prüfe es mit `grep -c`.", "hint": "`grep -c package ~/lab/package_notes.txt` (`grep` → Modul 3.4.)"},
+    "t04": {"text": "Schreibe in `~/lab/install_plan.txt`, dass Ubuntu/Debian vor der Installation die Paketlisten auffrischen sollte.", "hint": "Speichere den Ausdruck `sudo apt update`. (`>` → Modul 3.2.)"},
     "t05": {"text": "Ergänze Installationsbefehle für `cowsay` für die RHEL- und die Debian-Familie.", "hint": "`sudo dnf install cowsay` und `sudo apt install cowsay`."},
     "t06": {"text": "Schreibe einen Bereinigungsplan mit dem Hinweis, vor dem Entfernen eines Testpakets die `autoremove`-Vorschläge zu prüfen.", "hint": "Speichere den Hinweis in `~/lab/cleanup_plan.txt`."},
-    "t07": {"text": "Erstelle für Ticket #5501 eine Notiz: Distribution prüfen; das Webpaket heißt je nach Familie `httpd` oder `apache2`.", "hint": "Schreibe die Notiz nach `~/lab/ticket_5501.txt`."}
+    "t07": {"text": "Erstelle für Ticket #5501 eine Notiz: Distribution prüfen; das Webpaket heißt je nach Familie `httpd` oder `apache2`.", "hint": "Schreibe die Notiz nach `~/lab/ticket_5501.txt`. (`>` → Modul 3.2.)"}
   },
   "vm": {
     "intro": "Installation und Entfernung ändern das System. Arbeite nur in deiner eigenen Test-VM, nicht auf einem Produktionssystem, und lies Bestätigungsdialoge immer sorgfältig.",

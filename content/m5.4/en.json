@@ -48,13 +48,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Find the state of the `sleep` job in the snapshot.", "hint": "`grep sleep ~/lab/jobs_snapshot.txt` should show `Stopped`."},
-    "t02": {"text": "Show the current state of the `backup.sh` job.", "hint": "The line from `grep backup ~/lab/jobs_snapshot.txt` contains `Running`."},
-    "t03": {"text": "Predict how many jobs are stopped in the snapshot, then verify with `grep -c`.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` counts them."},
-    "t04": {"text": "Save resuming job 1 with `bg %1` and then checking with `jobs -l` to `~/lab/job_plan.txt`.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt`"},
+    "t01": {"text": "Find the state of the `sleep` job in the snapshot.", "hint": "`grep sleep ~/lab/jobs_snapshot.txt` should show `Stopped`. (`grep` → module 3.4.)"},
+    "t02": {"text": "Show the current state of the `backup.sh` job.", "hint": "The line from `grep backup ~/lab/jobs_snapshot.txt` contains `Running`. (`grep` → module 3.4.)"},
+    "t03": {"text": "Predict how many jobs are stopped in the snapshot, then verify with `grep -c`.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` counts them. (`grep` → module 3.4.)"},
+    "t04": {"text": "Save resuming job 1 with `bg %1` and then checking with `jobs -l` to `~/lab/job_plan.txt`.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt` (`>` → module 3.2.)"},
     "t05": {"text": "Add bringing the job to the foreground and cleaning it up when finished to the plan.", "hint": "Add `fg %1` and `kill %1` to the file."},
     "t06": {"text": "Write a nohup example to `~/lab/persistent_job.txt` that redirects output to `backup.log`.", "hint": "`nohup ./backup.sh > backup.log 2>&1 &`"},
-    "t07": {"text": "Add a `jobs -l` check and a nohup note to ticket #5401 to assess whether the job is tied to the terminal session.", "hint": "Save the short note in `~/lab/ticket_5401.txt`."}
+    "t07": {"text": "Add a `jobs -l` check and a nohup note to ticket #5401 to assess whether the job is tied to the terminal session.", "hint": "Save the short note in `~/lab/ticket_5401.txt`. (`>` → module 3.2.)"}
   },
   "vm": {
     "intro": "Run the examples in your own test VM. A shell job belongs to that shell session; stop test jobs you no longer need.",

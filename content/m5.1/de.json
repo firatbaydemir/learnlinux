@@ -238,7 +238,7 @@
   },
   "t07": {
    "text": "Zähle die Prozesse von alice: `grep alice ~/lab/ps_snapshot.txt | wc -l`.",
-   "hint": "`wc -l` zählt nach der Pipe die Zeilen."
+   "hint": "`wc -l` zählt nach der Pipe die Zeilen. (`wc` → Modul 2.6; `|` → Modul 3.2.)"
   },
   "t08": {
    "text": "Finde den Zombie in der Momentaufnahme mit `grep defunct ~/lab/ps_snapshot.txt`. Welche PID und welcher Benutzer?",
@@ -258,27 +258,27 @@
   },
   "t12": {
    "text": "Sortiere die Momentaufnahme nach CPU, höchste zuerst, und zeige zwei Zeilen: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 2`.",
-   "hint": "`-k3` = dritte Spalte, `-n` numerisch, `-r` umgekehrt."
+   "hint": "`-k3` = dritte Spalte, `-n` numerisch, `-r` umgekehrt. (`sort` → Modul 3.5.)"
   },
   "t13": {
    "text": "Mini-Projekt: Schreibe die PIDs aller root-Prozesse in `~/lab/root_pids.txt`. Filtere mit `grep ^root`, presse Leerzeichen mit `tr -s ' '`, wähle Spalte 2 mit `cut -d' ' -f2`, leite mit `>` um.",
-   "hint": "Eine Pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`."
+   "hint": "Eine Pipe: `grep ^root ~/lab/ps_snapshot.txt | tr -s ' ' | cut -d' ' -f2 > ~/lab/root_pids.txt`. (`grep` → Modul 3.4; `tr/cut` → Modul 3.5; `>` → Modul 3.2.)"
   },
   "t14": {
    "text": "Debug: In `~/lab/fix.txt` steht `kill -9 1701`. Das ist falsch, ein Zombie lässt sich nicht töten. Überschreibe die Datei mit dem besseren Befehl: Signal an den Elternprozess, z. B. `kill -s SIGCHLD 1500`.",
-   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. Die Eltern-PID ist 1500 (siehe t09)."
+   "hint": "`echo \"kill -s SIGCHLD 1500\" > ~/lab/fix.txt`. Die Eltern-PID ist 1500 (siehe t09). (`>` → Modul 3.2.)"
   },
   "t15": {
    "text": "Challenge: Finde mit `sort` den Prozess mit der höchsten CPU-Last in der Momentaufnahme. Schreibe den **höflichen** Stopp-Befehl dafür in `~/lab/decision.txt` (nicht ausführen).",
-   "hint": "Es ist PID 1620. Höflich heißt Signal 15: `echo \"kill -15 1620\" > ~/lab/decision.txt`."
+   "hint": "Es ist PID 1620. Höflich heißt Signal 15: `echo \"kill -15 1620\" > ~/lab/decision.txt`. (`>` → Modul 3.2.)"
   },
   "t16": {
    "text": "TICKET #5110 — Der Server ist langsam. Alices Job steht im Verdacht. Schreibe Benutzer, PID und Befehl des aktivsten Prozesses in `~/lab/report.txt`.",
-   "hint": "Nutze `sort` oder `grep` auf der Momentaufnahme; dann `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`."
+   "hint": "Nutze `sort` oder `grep` auf der Momentaufnahme; dann `echo \"alice 1620 python3 worker.py\" > ~/lab/report.txt`. (`sort/grep` → Modul 3.4/3.5; `>` → Modul 3.2.)"
   },
   "t17": {
    "text": "Speichere deine Shell-PID in einer Datei: `echo $$ > ~/lab/mypid.txt`.",
-   "hint": "`>` schreibt die Ausgabe von `echo` in die Datei."
+   "hint": "`>` schreibt die Ausgabe von `echo` in die Datei. (`>` → Modul 3.2.)"
   }
  },
  "vm": {

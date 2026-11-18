@@ -166,7 +166,7 @@
     },
     "t07": {
       "text": "Erstelle den Ordner `texts` und kopiere Namen, die mit `doc` beginnen und auf `.txt` enden, hinein. Kopiere `notes.md` nicht.",
-      "hint": "Führe erst `mkdir texts`, dann `cp doc*.txt texts` aus."
+      "hint": "Führe erst `mkdir texts`, dann `cp doc*.txt texts` aus. (`mkdir` steht in Modul 2.3, `cp` in Modul 2.4.)"
     },
     "t08": {
       "text": "Vorhersage: Gibt `echo '$HOME'` den Variablenwert oder den Text `$HOME` aus? Führe den Befehl aus und prüfe es.",
@@ -178,19 +178,19 @@
     },
     "t10": {
       "text": "Fehlersuche: Sprich den Namen `old report.txt` als ein Argument an und entferne diese Datei.",
-      "hint": "Setze den Namen mit Leerzeichen in Anführungszeichen: `rm \"old report.txt\"`."
+      "hint": "Setze den Namen mit Leerzeichen in Anführungszeichen: `rm \"old report.txt\"`. (`rm` steht in Modul 2.3.)"
     },
     "t11": {
       "text": "Mini-Projekt: Erstelle den Ordner `backup` und kopiere nur `.jpg`- und `.png`-Dateien hinein.",
-      "hint": "Verwende `mkdir backup` und danach `cp *.jpg *.png backup`."
+      "hint": "Verwende `mkdir backup` und danach `cp *.jpg *.png backup`. (`mkdir` steht in Modul 2.3, `cp` in Modul 2.4.)"
     },
     "t12": {
       "text": "Herausforderung: Erstelle mit geschweiften Klammern die Namen `log_1.txt`, `log_2.txt` und `log_3.txt`; entferne anschließend mit dem Muster `log_?` alle drei.",
-      "hint": "Führe zuerst `touch log_{1,2,3}.txt`, danach `rm log_?.txt` aus."
+      "hint": "Führe zuerst `touch log_{1,2,3}.txt`, danach `rm log_?.txt` aus. (`touch` und `rm` stehen in Modul 2.3.)"
     },
     "t13": {
       "text": "Ticket: Benenne `my file.txt` mit Leerzeichen in `my_file.txt` um. Achte darauf, dass der ursprüngliche Name ein einzelnes Argument bleibt.",
-      "hint": "Verwende `mv \"my file.txt\" my_file.txt`."
+      "hint": "Verwende `mv \"my file.txt\" my_file.txt`. (`mv` steht in Modul 2.4.)"
     }
   },
   "vm": {

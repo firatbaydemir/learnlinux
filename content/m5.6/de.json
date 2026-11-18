@@ -339,11 +339,11 @@
   },
   "t03": {
    "text": "Finde die Fehlerzeilen im allgemeinen Log mit `grep -i error /var/log/messages`.",
-   "hint": "`-i` ignoriert Groß-/Kleinschreibung, ERROR wird also auch gefunden."
+   "hint": "`-i` ignoriert Groß-/Kleinschreibung, ERROR wird also auch gefunden. (`grep` → Modul 3.4.)"
   },
   "t04": {
    "text": "Zähle die Zeilen mit `error` (ohne Beachtung der Schreibweise) mit `grep -ci error /var/log/messages`.",
-   "hint": "`-c` gibt die Anzahl statt der Zeilen aus."
+   "hint": "`-c` gibt die Anzahl statt der Zeilen aus. (`grep` → Modul 3.4.)"
   },
   "t05": {
    "text": "Lies das Anmelde-Log, das nur root lesen darf: `sudo cat /var/log/secure`.",
@@ -355,7 +355,7 @@
   },
   "t07": {
    "text": "`~/lab/failed_units.txt` ist ein gespeichertes `systemctl list-units --failed`. Schreibe nur die Unit-Namen in `~/lab/failed_names.txt`: `cut -d\" \" -f1 ~/lab/failed_units.txt | grep service > ~/lab/failed_names.txt`.",
-   "hint": "`cut -d\" \" -f1` nimmt die erste Spalte, `grep service` entfernt Kopf- und Summenzeile."
+   "hint": "`cut -d\" \" -f1` nimmt die erste Spalte, `grep service` entfernt Kopf- und Summenzeile. (`cut` → Modul 3.5.)"
   },
   "t08": {
    "text": "Schreibe den journalctl-Befehl für die letzten 50 Zeilen des sshd-Logs ohne Pager in `~/answer_journal.txt`, z. B. `echo 'journalctl -u sshd -n 50 --no-pager' > ~/answer_journal.txt`.",
@@ -367,7 +367,7 @@
   },
   "t10": {
    "text": "Vorhersage: Welche Meldungen sind die letzten zwei Zeilen von `/var/log/messages`? Rate zuerst, prüfe dann mit `tail -n 2 /var/log/messages`.",
-   "hint": "`tail -n 2` gibt die letzten zwei Zeilen aus; der neueste Eintrag steht unten."
+   "hint": "`tail -n 2` gibt die letzten zwei Zeilen aus; der neueste Eintrag steht unten. (`tail` → Modul 2.6.)"
   },
   "t11": {
    "text": "Vorhersage: Wie viele Zeilen von `~/lab/journal_sample.txt` enthalten das Wort `Failed` (Groß-/Kleinschreibung zählt, FAILURE zählt also nicht)? Rate zuerst, prüfe dann mit `grep -c Failed ~/lab/journal_sample.txt`.",
@@ -383,7 +383,7 @@
   },
   "t14": {
    "text": "Debug: `systemctl enable` würde bei `~/lab/broken2.service` meckern, weil der Abschnitt `[Install]` fehlt. Hänge `[Install]` und `WantedBy=multi-user.target` mit `printf` und `>>` an.",
-   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`."
+   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`. (`>>` → Modul 3.2.)"
   },
   "t15": {
    "text": "Mini-Projekt: Erstelle `~/lab/linux-lab-demo.service` mit `[Unit]` (Description), `[Service]` (`ExecStart=/usr/bin/sleep 3600`) und `[Install]` (`WantedBy=multi-user.target`). Schreibe dann die drei VM-Schritte (nach `/etc/systemd/system/` kopieren, `daemon-reload`, `enable --now linux-lab-demo.service`) zeilenweise in `~/lab/install_steps.txt`.",
@@ -391,7 +391,7 @@
   },
   "t16": {
    "text": "Challenge: Baue einen Vorfallbericht `~/lab/incident.txt`. Schreibe zuerst alle Fehlerzeilen von `/var/log/messages` (ohne Beachtung der Schreibweise) hinein, hänge dann den Inhalt von `/var/log/secure` an. Der Bericht braucht mindestens 4 Zeilen.",
-   "hint": "`grep -i error ... > file`, dann `sudo cat ... >> file` (die Umleitung macht deine eigene Shell, die Datei in deinem Home ist also in Ordnung)."
+   "hint": "`grep -i error ... > file`, dann `sudo cat ... >> file` (die Umleitung macht deine eigene Shell, die Datei in deinem Home ist also in Ordnung). (`grep` → Modul 3.4; `>/>>` → Modul 3.2.)"
   },
   "t17": {
    "text": "TICKET #5610 — Ein Kunde meldet, dass der Webserver nach einem Neustart nicht hochkommt. Schreibe die drei Befehle, die du auf einer RHEL-VM ausführen würdest, zeilenweise in `~/ticket_5610.txt`: Zustand anzeigen (`systemctl status httpd`), Log lesen (`journalctl -u httpd -n 50 --no-pager`) und aktivieren und starten (`sudo systemctl enable --now httpd`).",

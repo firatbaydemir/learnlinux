@@ -59,13 +59,13 @@
     "t04":{"text":"Finde im Baum `project` alle Namen mit der Endung `.conf`.","hint":"Verwende `find project -name \"*.conf\"`; setze das Muster in Anführungszeichen."},
     "t05":{"text":"Finde unter `project` nur reguläre `.txt`-Dateien.","hint":"Verwende `find project -type f -name \"*.txt\"`."},
     "t06":{"text":"Schätze, wie viele passende Zeilen `grep -c ERROR logs/app.log` meldet, und prüfe es anschließend.","hint":"Der Befehl gibt die Anzahl statt der Trefferzeilen aus."},
-    "t07":{"text":"Schätze, wie du mit einer Pipe nur `200`-Zeilen aus dem Zugriffslog filterst.","hint":"Versuche `cat logs/access.log | grep 200`."},
-    "t08":{"text":"Fehlersuche: Speichere die `ERROR`-Zeilen in `errors.txt` in deinem Home-Verzeichnis.","hint":"Leite stdout um: `grep ERROR logs/app.log > errors.txt`."},
+    "t07":{"text":"Schätze, wie du mit einer Pipe nur `200`-Zeilen aus dem Zugriffslog filterst.","hint":"Versuche `cat logs/access.log | grep 200`. (`cat` in Modul 2.6, `|` in Modul 3.2.)"},
+    "t08":{"text":"Fehlersuche: Speichere die `ERROR`-Zeilen in `errors.txt` in deinem Home-Verzeichnis.","hint":"Leite stdout um: `grep ERROR logs/app.log > errors.txt` (`>` in Modul 3.2)."},
     "t09":{"text":"Zeige Logzeilen, die `INFO` nicht enthalten.","hint":"`-v` wählt nicht passende Zeilen: `grep -v INFO logs/app.log`."},
     "t10":{"text":"Mini-Aufgabe: Suche in Projektdateien nach Zeilen mit `TODO`.","hint":"Durchsuche ein Verzeichnis rekursiv mit `grep -r TODO project`."},
     "t11":{"text":"Mini-Aufgabe: Finde unter `logs` reguläre Dateien mit der Endung `.log`.","hint":"Verwende `find logs -type f -name \"*.log\"`."},
     "t12":{"text":"Herausforderung: Suche unter `project` ohne Beachtung der Groß-/Kleinschreibung nach `todo` und zeige Zeilennummern.","hint":"Kombiniere Optionen mit `grep -rin todo project`."},
-    "t13":{"text":"Ticket: Speichere alle `.txt`-Pfade im Projekt in einem Bericht `text_files.txt`.","hint":"Verwende `find . -type f -name \"*.txt\" > text_files.txt`."}
+    "t13":{"text":"Ticket: Speichere alle `.txt`-Pfade im Projekt in einem Bericht `text_files.txt`.","hint":"Verwende `find . -type f -name \"*.txt\" > text_files.txt` (`>` in Modul 3.2)."}
   },
   "vm": {
     "intro":"Lies vorhandene Texte und Pfade auf deiner VM. Diese Befehle ändern keine Systemdateien; lege Berichte in deinem Home-Verzeichnis ab.",
@@ -73,7 +73,7 @@
       "v01":{"title":"Ein Log durchsuchen","text":"Suche ohne Beachtung der Groß-/Kleinschreibung nach `error` in einem Systemlog und füge eine Trefferzeile ein.","blocks":[{"cmd":"grep -i error /var/log/messages | head -n 3","expected":"error"}],"differs":["Falls dieses Log nicht vorhanden ist, wähle ein Log deiner Distribution oder erstelle `~/lab/app.log` mit Beispielzeilen."]},
       "v02":{"title":"Zeilennummern anzeigen","text":"Finde die `root`-Zeile in `/etc/passwd` mit Zeilennummer.","blocks":[{"cmd":"grep -n '^root:' /etc/passwd","expected":"1:root:"}],"differs":["Die Zeilennummer kann abweichen; die Ausgabe sollte `root` und davor eine Nummer enthalten."]},
       "v03":{"title":"Nach Dateinamen suchen","text":"Finde unter `/etc` die Datei mit dem Namen `hostname`.","blocks":[{"cmd":"find /etc -type f -name hostname","expected":"/etc/hostname"}],"differs":["Die Ausgabe sollte den vollständigen Pfad enthalten. `find` erhält Startverzeichnis und Name als getrennte Argumente."]},
-      "v04":{"title":"Ergebnisse sicher speichern","text":"Erstelle `lab` in deinem Home-Verzeichnis, lege dort einen Bericht mit `.txt`-Dateien an und prüfe ihn.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["Ist der Bericht leer, prüfe, ob `cd ~/lab` erfolgreich war und die Dateinamen stimmen. Durchsuche nicht das ganze System."]}
+      "v04":{"title":"Ergebnisse sicher speichern","text":"Erstelle `lab` in deinem Home-Verzeichnis, lege dort einen Bericht mit `.txt`-Dateien an und prüfe ihn.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["Ist der Bericht leer, prüfe, ob `cd ~/lab` erfolgreich war und die Dateinamen stimmen. Durchsuche nicht das ganze System. (`mkdir`/`touch` in Modul 2.3, `>` in Modul 3.2.)"]}
     }
   },
   "quiz": {

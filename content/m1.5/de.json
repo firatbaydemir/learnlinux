@@ -220,11 +220,11 @@
    "tip": "Für Dauerhaftigkeit füge dieselbe `export`-Zeile in `~/.bashrc` ein."
   },
   {
-   "id": "globbing",
+      "id": "globbing",
    "title": "Platzhalter (Globbing)",
    "body": [
     "Platzhalter werden von der **Shell** aufgelöst, nicht vom Befehl. `*` steht für beliebig viel (auch nichts), `?` für genau ein Zeichen, `[abc]` für eines der Zeichen in den Klammern. Bei `ls *.txt` wandelt die Shell das Muster zuerst in Dateinamen um und übergibt sie dann an `ls`.",
-    "Passt nichts, lässt die Shell das Muster unverändert. Teste das Muster vor Löschbefehlen mit `echo`: `echo *.log`."
+    "Passt nichts, lässt die Shell das Muster unverändert. Teste das Muster vor Löschbefehlen mit `echo`: `echo *.log`. Muster und Quoting werden ausführlich in Modul 3.3 behandelt."
    ],
    "commands": [
     {
@@ -331,7 +331,7 @@
   },
   "t04": {
    "text": "Exportiere die Variable `GREETING=hello` mit `export` und finde sie dann mit `grep` in der `env`-Ausgabe.",
-   "hint": "`export GREETING=hello`, danach `env | grep GREETING`."
+   "hint": "`export GREETING=hello`, danach `env | grep GREETING` (`|` leitet die Ausgabe an den nächsten Befehl weiter, `grep` sucht Zeilen; Module 3.2 und 3.4)."
   },
   "t05": {
    "text": "Liste die `.txt`-Dateien im Ordner `lab` mit einem Platzhalter auf: Führe `echo lab/*.txt` aus.",
@@ -339,11 +339,11 @@
   },
   "t06": {
    "text": "Lege mit Klammererweiterung `file1.txt`, `file2.txt` und `file3.txt` in `lab` mit einem Befehl an.",
-   "hint": "`touch ~/lab/file{1,2,3}.txt`."
+   "hint": "`touch ~/lab/file{1,2,3}.txt` (`touch` legt leere Dateien an; Modul 2.3)."
   },
   "t07": {
    "text": "Erstelle den Ordner `~/bin` und füge ihn zu `PATH` hinzu, ohne den alten Wert zu verlieren.",
-   "hint": "`mkdir ~/bin`, dann `export PATH=$PATH:~/bin`."
+   "hint": "`mkdir ~/bin` (legt einen Ordner an; Modul 2.3), dann `export PATH=$PATH:~/bin`."
   },
   "t08": {
    "text": "Vorhersage: Was gibt `echo '$HOME'` aus? Führe die Variante mit einfachen Anführungszeichen aus und prüfe.",
@@ -363,15 +363,15 @@
   },
   "t12": {
    "text": "Mini-Projekt: Erstelle den Ordner `~/projects`, lege darin `a.txt` und `b.txt` mit einem Befehl an und schreibe dann die Ausgabe von `$(whoami)` in `owner.txt`.",
-   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt`."
+   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` schreibt die Ausgabe in eine Datei; Modul 3.2)."
   },
   "t13": {
    "text": "Challenge: Schreibe genau `host: linux-lab user: student` in `~/info.txt`. Erzeuge die Werte mit `$(hostname)` und `$(whoami)`.",
-   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt`."
+   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt` (`>` schreibt die Ausgabe in eine Datei; Modul 3.2)."
   },
   "t14": {
    "text": "Ticket: Das Team möchte die Skripte in `~/tools` per Namen aufrufen. Füge den Ordner in dieser Sitzung zu `PATH` hinzu und hänge die Einstellung ans Ende von `~/.bashrc` an, damit sie dauerhaft gilt.",
-   "hint": "`export PATH=$PATH:~/tools`, dann dieselbe Zeile in einfachen Anführungszeichen mit `>>` an `~/.bashrc` anhängen."
+   "hint": "(`>>` hängt an eine Datei an; Modul 3.2) `export PATH=$PATH:~/tools`, dann dieselbe Zeile in einfachen Anführungszeichen mit `>>` an `~/.bashrc` anhängen."
   },
   "t15": {
    "text": "Gib mit `printf` die Zeile `Name: alice` aus; nutze `%s` und `\\n`.",

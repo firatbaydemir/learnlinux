@@ -90,7 +90,16 @@
      "example": "history"
     }
    ],
-   "tip": "Zweimal Tab zeigt alle möglichen Vervollständigungen. Probiere: `whoa` tippen, dann Tab."
+      "tip": "Zweimal Tab zeigt alle möglichen Vervollständigungen. Probiere: `whoa` tippen, dann Tab."
+  },
+  {
+   "id": "preview",
+   "title": "Zeichen, die dir später begegnen",
+   "body": [
+    "In diesem Kurs tauchen einige Befehle und Zeichen in Aufgaben schon vor ihrem eigenen Modul auf. Wisse vorerst nur, wofür sie stehen; die Details lernst du im passenden Modul.",
+    "`cd verz` wechselt das aktuelle Verzeichnis (Details: Modul 1.1). `>` schreibt die Ausgabe eines Befehls in eine Datei statt auf den Bildschirm, `>>` hängt ans Dateiende an (Modul 3.2). `cat datei` gibt den Inhalt einer Datei aus (Modul 2.6). `|` (Pipe) leitet die Ausgabe eines Befehls als Eingabe an den nächsten weiter (Modul 3.2). `&&` und `;` führen Befehle nacheinander aus (Modul 1.4). `sudo` führt einen Befehl mit Administratorrechten aus (Modul 4.3). `mkdir` und `touch` erzeugen Ordner und leere Dateien (Modul 2.3); `grep`, `head`, `tail`, `wc` filtern und zählen Text (Module 3.4–3.5)."
+   ],
+   "tip": "Lerne diese Liste nicht auswendig. Komm hierher zurück, wenn dich eine Aufgabe ratlos macht; mit denselben Zeichen arbeitest du später in ihrem Modul mit vollständigen Karten."
   }
  ],
  "tasks": {
@@ -148,7 +157,7 @@
   },
   "t14": {
    "text": "Herausforderung: Erstelle im Home-Verzeichnis mit `echo Hello > first.txt` eine Datei und lies sie mit `cat first.txt`.",
-   "hint": "Das > schreibt die Ausgabe in eine Datei. Wechsle zuerst mit `cd ~` ins Home-Verzeichnis."
+   "hint": "Das > schreibt die Ausgabe in eine Datei, `cd` wechselt das Verzeichnis, `cat` liest eine Datei (siehe „Zeichen, die dir später begegnen“). Wechsle zuerst mit `cd ~` ins Home-Verzeichnis."
   },
   "t15": {
    "text": "Vorhersagen: `cd ~/Documents`, dann `cd ..`, dann `pwd`. Sage vor dem Ausführen voraus, welchen Pfad du siehst, und prüfe es dann.",
@@ -160,11 +169,11 @@
   },
   "t17": {
    "text": "Mini-Projekt: Schreibe mit `whoami > hello.txt` deinen Benutzernamen in eine Datei und lies sie mit `cat hello.txt`.",
-   "hint": "`>` leitet die Ausgabe in eine Datei um. Zuerst `cd ~`."
+   "hint": "`>` leitet die Ausgabe in eine Datei um (siehe „Zeichen, die dir später begegnen“). Zuerst `cd ~`."
   },
   "t18": {
    "text": "TICKET #1001 — Der Support braucht Systeminfos: Schreibe im Home-Verzeichnis in `info.txt` zuerst die Kernel-Version (`uname -r`), dann den Rechnernamen (`hostname`). Die Datei muss 2 Zeilen haben.",
-   "hint": "Beim ersten `>`, beim zweiten `>>` (anhängen); sonst geht die erste Zeile verloren."
+   "hint": "Beim ersten `>`, beim zweiten `>>` (anhängen); sonst geht die erste Zeile verloren. Zu diesen Zeichen siehe „Zeichen, die dir später begegnen“."
   }
  },
  "quiz": {

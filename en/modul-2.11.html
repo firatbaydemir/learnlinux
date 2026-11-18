@@ -44,7 +44,7 @@
 </code></pre><div class="codebtns"><button type="button" class="try small" data-try="date" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="date">Copy</button></div></div></article>
 <article class="cmd"><h3><code>systemctl status cron</code></h3><dl><dt>What is it for?</dt><dd>Shows the cron service status on Debian/Ubuntu.</dd><dt>Where is it used?</dt><dd>When scheduled user jobs do not appear to run.</dd><dt>Why does it matter?</dt><dd>Jobs cannot start if the scheduler service is not running.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">systemctl</span> status cron</span>
 </code></pre><div class="codebtns"><button type="button" class="copy" data-copy="systemctl status cron">Copy</button></div></div></article>
-<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Use an absolute log path such as <code>&gt;&gt; /home/student/cron.log 2&gt;&amp;1</code>; <code>&gt;</code> overwrites the file each run, while <code>&gt;&gt;</code> appends.</p></aside>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>Use an absolute log path such as <code>&gt;&gt; /home/student/cron.log 2&gt;&amp;1</code>; <code>&gt;</code> overwrites the file each run, while <code>&gt;&gt;</code> appends (<code>&gt;</code>, <code>&gt;&gt;</code>, and <code>2&gt;&amp;1</code> are covered in module 3.2).</p></aside>
 </section>
 <section id="manage"><h2>Observe and manage jobs safely</h2>
 <p>A user crontab applies only to that user. System-wide cron directories and the root crontab are separate and privileged; do not change their files without authorization. The service is usually <code>cron</code> on Debian/Ubuntu and <code>crond</code> on RHEL-based systems.</p>

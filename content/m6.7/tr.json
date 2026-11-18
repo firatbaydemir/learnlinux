@@ -95,11 +95,11 @@
   }
  ],
  "tasks": {
-  "t01": {"text": "`~/bin` ve `~/units` klasörlerini tek komutla oluştur: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` birden çok yol alabilir."},
+  "t01": {"text": "`~/bin` ve `~/units` klasörlerini tek komutla oluştur: `mkdir -p ~/bin ~/units`.", "hint": "`mkdir -p` birden çok yol alabilir. (`mkdir` → modül 2.3.)"},
   "t02": {"text": "Cron örnek dosyasını oku: `cat ~/sample/crontab.txt`. Üç iş satırı var.", "hint": "Satırlar: dakika saat gün ay haftagünü komut."},
   "t03": {"text": "`~/bin/backup.sh` dosyasını `printf` ile yaz: ilk satır `#!/bin/bash`, ikinci satır `echo backup done`.", "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"},
-  "t04": {"text": "`~/bin/backup.sh` script'ini çalıştırılabilir yap (mod 755).", "hint": "`chmod 755 ~/bin/backup.sh` veya `chmod +x`."},
-  "t05": {"text": "`~/units/backup.service` yaz: `[Service]` bölümünde `Type=oneshot` ve `ExecStart=/home/student/bin/backup.sh` olsun.", "hint": "Satırları `\\n` ile ayırıp tek `printf` kullan; sonuna `> ~/units/backup.service` ekle."},
+  "t04": {"text": "`~/bin/backup.sh` script'ini çalıştırılabilir yap (mod 755).", "hint": "`chmod 755 ~/bin/backup.sh` veya `chmod +x`. (`chmod` → modül 4.4.)"},
+  "t05": {"text": "`~/units/backup.service` yaz: `[Service]` bölümünde `Type=oneshot` ve `ExecStart=/home/student/bin/backup.sh` olsun.", "hint": "Satırları `\\n` ile ayırıp tek `printf` kullan; sonuna `> ~/units/backup.service` ekle. (`>` → modül 3.2.)"},
   "t06": {"text": "`~/units/backup.timer` yaz: `[Timer]` altında `OnCalendar=*-*-* 02:30:00` ve `Persistent=true`, `[Install]` altında `WantedBy=timers.target`.", "hint": "Sim'de `*` için tek tırnak kullan; böylece kabuk genişletmez."},
   "t07": {"text": "Tahmin et: `~/sample/list-timers.txt` içinde `timer` geçen kaç satır var? Sonra `grep -c timer ~/sample/list-timers.txt` ile doğrula.", "hint": "Başlık satırında küçük harfli `timer` yok; iki timer satırı var."},
   "t08": {"text": "Tahmin et: `~/sample/analyze.txt` içindeki `Next elapse` satırı hangi zamanı gösterir? `grep 'Next elapse' ~/sample/analyze.txt` ile bak.", "hint": "İfade pazartesi 08:00'dı; sonraki pazartesiyi bul."},
@@ -108,7 +108,7 @@
   "t11": {"text": "Mini proje (kullanıcı timer'ı): `~/.config/systemd/user` klasörünü oluştur. `notes.service` içinde `ExecStart=/usr/bin/touch /home/student/notes.txt`, `notes.timer` içinde `OnCalendar=hourly` ve `WantedBy=timers.target` olsun.", "hint": "Üç komut: `mkdir -p`, bir `printf` service için, bir `printf` timer için."},
   "t12": {"text": "Mini proje (cron karşılaştırma): `~/units/backup.cron` dosyasına iki cron satırı yaz: `30 2 * * * /home/student/bin/backup.sh` ve `0 8 * * 1 /home/student/bin/report.sh`.", "hint": "İlk satır için `>`, ikincisi için `>>` kullan."},
   "t13": {"text": "Meydan okuma: `cleanup` işi için `~/units/cleanup.service` (`ExecStart=/home/student/bin/cleanup.sh`, `Type=oneshot`) ve `~/units/cleanup.timer` yaz. Timer: açılıştan 10 dakika sonra (`OnBootSec=10min`), sonra her saat (`OnUnitActiveSec=1h`), 5 dakikaya kadar rastgele gecikme (`RandomizedDelaySec=5min`), `WantedBy=timers.target`.", "hint": "Takvim değil, aralık tabanlı bir timer: `OnCalendar` kullanma."},
-  "t14": {"text": "Ticket: \"Gece yedeği birkaç gündür sessizce başarısız oluyor.\" `~/sample/journal.txt` içindeki yalnızca `Failed` satırlarını `~/units/failed.txt` dosyasına yaz.", "hint": "`grep Failed ... > ...`"},
+  "t14": {"text": "Ticket: \"Gece yedeği birkaç gündür sessizce başarısız oluyor.\" `~/sample/journal.txt` içindeki yalnızca `Failed` satırlarını `~/units/failed.txt` dosyasına yaz.", "hint": "`grep Failed ... > ...` (`grep` → modül 3.4; `>` → modül 3.2.)"},
   "t15": {"text": "Ticket: \"Haftalık rapor her pazartesi 08:00'de çalışmalı; makine kapalıysa açılınca yine çalışsın.\" `~/units/report.timer` yaz (`OnCalendar`, kaçanı telafi eden ayar, `WantedBy=timers.target`).", "hint": "Pazartesi 08:00 = `Mon *-*-* 08:00:00`; telafi = `Persistent=true`."},
   "t16": {"text": "`wc -l ~/sample/journal.txt` ile günlük örneğinin kaç satır olduğunu say.", "hint": "Çıktının başındaki sayıya bak."}
  },

@@ -48,13 +48,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Finde den Status des `sleep`-Jobs in der Momentaufnahme.", "hint": "In `grep sleep ~/lab/jobs_snapshot.txt` sollte `Stopped` stehen."},
-    "t02": {"text": "Zeige den aktuellen Status des Jobs `backup.sh`.", "hint": "Die Zeile von `grep backup ~/lab/jobs_snapshot.txt` enthält `Running`."},
-    "t03": {"text": "Schätze die Zahl angehaltener Jobs in der Momentaufnahme und prüfe sie mit `grep -c`.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` zählt sie."},
-    "t04": {"text": "Speichere in `~/lab/job_plan.txt` die Fortsetzung von Job 1 mit `bg %1` und anschließend die Kontrolle mit `jobs -l`.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt`"},
+    "t01": {"text": "Finde den Status des `sleep`-Jobs in der Momentaufnahme.", "hint": "In `grep sleep ~/lab/jobs_snapshot.txt` sollte `Stopped` stehen. (`grep` → Modul 3.4.)"},
+    "t02": {"text": "Zeige den aktuellen Status des Jobs `backup.sh`.", "hint": "Die Zeile von `grep backup ~/lab/jobs_snapshot.txt` enthält `Running`. (`grep` → Modul 3.4.)"},
+    "t03": {"text": "Schätze die Zahl angehaltener Jobs in der Momentaufnahme und prüfe sie mit `grep -c`.", "hint": "`grep -c Stopped ~/lab/jobs_snapshot.txt` zählt sie. (`grep` → Modul 3.4.)"},
+    "t04": {"text": "Speichere in `~/lab/job_plan.txt` die Fortsetzung von Job 1 mit `bg %1` und anschließend die Kontrolle mit `jobs -l`.", "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt` (`>` → Modul 3.2.)"},
     "t05": {"text": "Ergänze im Plan das Zurückholen in den Vordergrund und die Bereinigung nach Abschluss.", "hint": "Füge `fg %1` und `kill %1` in die Datei ein."},
     "t06": {"text": "Schreibe ein nohup-Beispiel nach `~/lab/persistent_job.txt`, das die Ausgabe nach `backup.log` umleitet.", "hint": "`nohup ./backup.sh > backup.log 2>&1 &`"},
-    "t07": {"text": "Ergänze Ticket #5401 um eine Prüfung mit `jobs -l` und einen Hinweis zu nohup, um die Sitzungsabhängigkeit zu beurteilen.", "hint": "Speichere die kurze Notiz in `~/lab/ticket_5401.txt`."}
+    "t07": {"text": "Ergänze Ticket #5401 um eine Prüfung mit `jobs -l` und einen Hinweis zu nohup, um die Sitzungsabhängigkeit zu beurteilen.", "hint": "Speichere die kurze Notiz in `~/lab/ticket_5401.txt`. (`>` → Modul 3.2.)"}
   },
   "vm": {
     "intro": "Führe die Beispiele in deiner Test-VM aus. Ein Shell-Job gehört zu dieser Shell-Sitzung; beende nicht mehr benötigte Testjobs.",

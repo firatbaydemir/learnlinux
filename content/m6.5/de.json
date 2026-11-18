@@ -236,11 +236,11 @@
   },
   "t02": {
    "text": "Schreibe dein erstes Skript mit `printf '#!/bin/bash\\necho \"Hello, Linux!\"\\n' > ~/bin/hello.sh`.",
-   "hint": "`\\n` ist ein Zeilenumbruch; die Datei hat zwei Zeilen. Prüfe mit `cat ~/bin/hello.sh`."
+   "hint": "`\\n` ist ein Zeilenumbruch; die Datei hat zwei Zeilen. Prüfe mit `cat ~/bin/hello.sh`. (`cat` → Modul 2.6.)"
   },
   "t03": {
    "text": "Mach das Skript mit `chmod +x ~/bin/hello.sh` ausführbar.",
-   "hint": "In `ls -l ~/bin/hello.sh` enthalten die Rechte jetzt `x`."
+   "hint": "In `ls -l ~/bin/hello.sh` enthalten die Rechte jetzt `x`. (`ls -l` → Modul 2.5.)"
   },
   "t04": {
    "text": "Starte das Skript über seinen Pfad: `~/bin/hello.sh`.",
@@ -248,7 +248,7 @@
   },
   "t05": {
    "text": "Schreibe `~/bin/vars.sh` mit den Zeilen `#!/bin/bash`, `NAME=student` und `echo \"Hello $NAME\"` (mit `printf`), mach es ausführbar und starte es.",
-   "hint": "Drei Befehle: `printf ... > ~/bin/vars.sh`, `chmod +x`, dann starten. Ausgabe: `Hello student`."
+   "hint": "Drei Befehle: `printf ... > ~/bin/vars.sh`, `chmod +x`, dann starten. Ausgabe: `Hello student`. (`chmod` → Modul 4.4.)"
   },
   "t06": {
    "text": "Vorhersage: Was geben `'$HOME'` und `\"$HOME\"` aus? Prüfe es dann mit `echo '$HOME' \"$HOME\"`.",
@@ -256,11 +256,11 @@
   },
   "t07": {
    "text": "Sage den Exit-Code einer Suche ohne Treffer voraus. Führe `grep carol ~/users.txt; echo $?` aus.",
-   "hint": "grep findet in dieser Datei nichts und antwortet mit einem Code ungleich null."
+   "hint": "grep findet in dieser Datei nichts und antwortet mit einem Code ungleich null. (`grep` → Modul 3.4.)"
   },
   "t08": {
    "text": "Schreibe `~/bin/check.sh` (Shebang, dann `if [ -f \"$1\" ]; then`, `echo \"exists\"`, `else`, `echo \"missing\"`, `fi`) und mach es ausführbar. Der Simulator kann `if` nicht ausführen; in der VM startest du es.",
-   "hint": "Ein `printf` mit `\\n` zwischen den Zeilen, dann `chmod +x`."
+   "hint": "Ein `printf` mit `\\n` zwischen den Zeilen, dann `chmod +x`. (`chmod` → Modul 4.4.)"
   },
   "t09": {
    "text": "Nutze `test` oder `[ ]` zweimal: Prüfe, ob `~/notes.txt` eine Datei ist (`-f`) und `~/Documents` ein Verzeichnis (`-d`). Hänge `&& echo ok` an, um das Ergebnis zu sehen.",

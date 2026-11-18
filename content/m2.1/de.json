@@ -189,11 +189,11 @@
   },
   "t12": {
    "text": "Mini-Projekt: Baue unter `~/mini-root` einen kleinen FHS-Baum. Lege mit einem `mkdir -p` die Ordner `etc`, `var/log` und `tmp` an, erstelle mit `touch` die Datei `etc/app.conf` und schreibe mit `echo started > ~/mini-root/var/log/app.log` eine Logzeile.",
-   "hint": "Klammern: `~/mini-root/{etc,var/log,tmp}`; in die Logdatei schreibst du per Umleitung `>`."
+   "hint": "Klammern: `~/mini-root/{etc,var/log,tmp}`; in die Logdatei schreibst du per Umleitung `>`. (`mkdir`/`touch` folgen in Modul 2.3, `>` in Modul 3.2.)"
   },
   "t13": {
    "text": "Challenge: Schreibe den Server-Ausweis in `~/idcard.txt`: Rechnername (`/etc/hostname`), Benutzer (`ls /home`) und Distributionsname (Zeile `PRETTY_NAME`). Nutze beim ersten `>`, bei den anderen `>>`.",
-   "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` hängt die Distributionszeile an."
+   "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` hängt die Distributionszeile an. (`>` schreibt, `>>` hängt an: Modul 3.2; `grep`: Modul 3.4.)"
   },
   "t14": {
    "text": "Challenge: Du kennst den Pfad von `sshd_config` nicht. Suche sie unter `/etc` nach Namen: `find /etc -name sshd_config`.",
@@ -201,7 +201,7 @@
   },
   "t15": {
    "text": "TICKET #2410 — \"Die Shop-Anwendung (`shopapp`) meldet Fehler, wir finden weder Installationsort noch Logs.\" Die Drittanbieter-Software liegt unter `/opt`. Finde die Zeile mit `ERROR` in ihrer Logdatei und speichere sie in `~/ticket-2410.txt`.",
-   "hint": "Erst `ls /opt`, dann `ls /opt/shopapp/logs`; danach `grep ERROR ... > ~/ticket-2410.txt`."
+   "hint": "Erst `ls /opt`, dann `ls /opt/shopapp/logs`; danach `grep ERROR ... > ~/ticket-2410.txt` (`grep` Modul 3.4, `>` Modul 3.2)."
   }
  },
  "vm": {

@@ -75,7 +75,7 @@
   "t10": {"text": "Inspect the link with `ls -l ~/link.txt`. What is after the arrow (`->`)?", "hint": "The line starts with `l`."},
   "t11": {"text": "What does `cat ~/link.txt` print? Predict first, then run it.", "hint": "The link reads its target."},
   "t12": {"text": "Debug: inside `~/projects/app`, `config.txt` is not found; the file is one level up. Read it with `cat` using a relative path with `../`.", "hint": "First `cd ~/projects/app`, then `cat ../config.txt`."},
-  "t13": {"text": "Mini project: create `~/lab/docs` and `~/lab/bin`, write a file with `echo hello linux > ~/lab/docs/readme.txt`, and create `~/lab/bin/readme-link` as a symbolic link to it.", "hint": "`mkdir -p`, `echo ... >` and `ln -s TARGET LINK`."},
+  "t13": {"text": "Mini project: create `~/lab/docs` and `~/lab/bin`, write a file with `echo hello linux > ~/lab/docs/readme.txt`, and create `~/lab/bin/readme-link` as a symbolic link to it.", "hint": "`mkdir -p`, `echo ... >` and `ln -s TARGET LINK`. (`mkdir` is covered in module 2.3; `>` writes output to a file, covered in module 3.2.)"},
   "t14": {"text": "Challenge: go into `~/lab/bin` and create the link `rel-link` with a **relative target** (`../docs/readme.txt`); then read it with `cat rel-link`.", "hint": "A relative target is resolved from the link's directory."},
   "t15": {"text": "Ticket: the application looks for its configuration at `~/app/current/config.txt`, but the real file is in `~/releases/v2/config.txt`. Create `~/app/current` as a symbolic link to `~/releases/v2` and verify with `cat ~/app/current/config.txt`.", "hint": "`mkdir -p ~/app`, then `ln -s ~/releases/v2 ~/app/current`."},
   "t16": {"text": "Run `ls -la ~` to see hidden files too.", "hint": "`-a` shows hidden files, `-l` the details."}

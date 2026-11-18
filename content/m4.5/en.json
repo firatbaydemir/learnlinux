@@ -237,7 +237,7 @@
   },
   "t16": {
    "text": "TICKET #4503 — A new folder `dropbox` is needed: group `devs`, new files belong to the group, members must not delete each other's files, outsiders cannot enter. Put a `README.txt` inside containing the text `uploads only`.",
-   "hint": "setgid + sticky = 3, then `770`: `3770`. `echo uploads only > dropbox/README.txt`."
+   "hint": "setgid + sticky = 3, then `770`: `3770`. `echo uploads only > dropbox/README.txt`. (`>` and `>>` → module 3.2.)"
   }
  },
  "vm": {
@@ -268,7 +268,7 @@
      }
     ],
     "differs": [
-     "The list depends on the distribution; seeing `passwd`, `mount` or `su` is enough.",
+     "The list depends on the distribution; seeing `passwd`, `mount` or `su` is enough. (`find` → module 3.4.)",
      "If `find` is slow, wait; `-xdev` scans only the main file system, so it is fast.",
      "If you see a path you do not recognise, remember it; in a real audit it would be investigated."
     ]

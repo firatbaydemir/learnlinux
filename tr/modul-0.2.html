@@ -38,7 +38,7 @@
 <aside class="callout warn" role="note"><strong>⚠️ Dikkat</strong><p>Sağlama toplamı uyuşmayan ISO ile, kurucu açılsa bile asla kurulum yapma.</p></aside>
 </section>
 <section id="create"><h2>VM oluştur ve kur</h2>
-<p>VirtualBox/UTM&#x27;de yeni VM oluştur, ISO&#x27;yu bağla; 2 CPU, 4 GB RAM ve 25 GB disk ver. Başlat ve kurucuyu izle: dili seç, diski seç (otomatik bölümleme yeterli), root parolası belirle, <strong>normal bir kullanıcı oluştur ve &quot;yönetici&quot; kutusunu işaretle</strong> (kullanıcıyı <code>wheel</code>/<code>sudo</code> grubuna ekler).</p>
+<p>VirtualBox/UTM&#x27;de yeni VM oluştur, ISO&#x27;yu bağla; 2 CPU, 4 GB RAM ve 25 GB disk ver. Başlat ve kurucuyu izle: dili seç, diski seç (otomatik bölümleme yeterli), root parolası belirle, <strong>normal bir kullanıcı oluştur ve &quot;yönetici&quot; kutusunu işaretle</strong> (kullanıcıyı <code>wheel</code>/<code>sudo</code> grubuna ekler). Böylece komutun başına <strong><code>sudo</code></strong> yazarak tek tek yönetici (root) yetkisiyle çalıştırabilirsin; ayrıntısı modül 4.3&#x27;te.</p>
 <p>Önce <strong>Minimal</strong> kurulumu seç; araçları sonra kendin eklersin. Yeniden başlatmadan sonra ISO&#x27;yu çıkar ve normal kullanıcınla giriş yap. <code>cat /etc/os-release</code> ile hangi sistemi kurduğunu gör.</p>
 <p><strong>WSL</strong>&#x27;de bu tek komuttur (yönetici PowerShell): <code>wsl --install -d Ubuntu-24.04</code>. Yeniden başlat ve istenince kullanıcı adını oluştur.</p>
 <aside class="callout tip" role="note"><strong>💡 İpucu</strong><p>Boşluksuz, kısa ve küçük harfli bir kullanıcı adı seç; çok yazacaksın.</p></aside>

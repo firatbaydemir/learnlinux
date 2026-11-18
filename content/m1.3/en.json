@@ -77,7 +77,7 @@
    "body": [
     "`find <start> <conditions>` walks a directory tree and prints what matches the conditions. The two most common conditions: `-name` (by name) and `-type` (`f` file, `d` directory).",
     "Put the wildcard **in quotes**: `find . -name \"*.txt\"`. Without quotes the shell expands the pattern itself first and the result is misleading. The start point `.` is the current directory, `~` is home.",
-    "You can count the result with `| wc -l` and save it with `> file`. `-maxdepth 1` limits the depth on a real system (the simulator ignores it)."
+    "You can count the result with `| wc -l` and save it with `> file` (`|` and `>` are covered in module 3.2, `wc` in modules 3.4–3.5; for now: `|` passes output to the next command, `wc -l` counts lines, `>` writes to a file). `-maxdepth 1` limits the depth on a real system (the simulator ignores it)."
    ],
    "commands": [
     {"cmd": "find", "what": "Searches the directory tree for files matching a condition.", "where": "When you forgot where a file is.", "why": "It scans the tree by name, type or size.", "example": "find . -name \"*.txt\""},
@@ -91,7 +91,7 @@
    "id": "history",
    "title": "history: past commands",
    "body": [
-    "`history` lists the commands you typed in this and earlier sessions with numbers. If it is long, take the last ten commands with `history | tail -n 10`.",
+    "`history` lists the commands you typed in this and earlier sessions with numbers. If it is long, take the last ten commands with `history | tail -n 10` (`|` and `tail` are covered in modules 3.2 and 3.4–3.5).",
     "In real Bash, **up arrow** brings back the previous command, **Ctrl+R** searches the history, `!!` re-runs the last command, `!42` re-runs command number 42. The simulator does not support `!!`; the arrow keys work.",
     "Commands that contain secrets (passwords) are written to the history; don't forget that."
    ],
@@ -126,14 +126,14 @@
   "t06": {"text": "Type `help` and see the list of known commands.", "hint": "Type it without arguments."},
   "t07": {"text": "Find all `.txt` files under the current directory with `find . -name \"*.txt\"`.", "hint": "Put the pattern in quotes."},
   "t08": {"text": "List the commands you have typed so far with `history`.", "hint": "A numbered list appears."},
-  "t09": {"text": "Show only the first three lines of the page with `man ls | head -n 3`.", "hint": "Pipe: |."},
+  "t09": {"text": "Show only the first three lines of the page with `man ls | head -n 3`.", "hint": "Pipe: | (passes output to the next command; see module 3.2)."},
   "t10": {"text": "Predict: what number does `nosuchcmd; echo $?` print? Then run it to verify.", "hint": "No such command → exit code 127."},
   "t11": {"text": "Predict: how many directories does `find ~ -type d | wc -l` count under home (including home)? Run it and verify.", "hint": "Desktop, Documents, Downloads and home itself."},
   "t12": {"text": "Debug: `man mkdirr` gives an error ('No manual entry'). Open the manual of the correct command with `man mkdir`.", "hint": "Typo: an extra r."},
-  "t13": {"text": "Mini: find where the `todo.txt` file is with `find` and save the path to the file `~/path.txt`.", "hint": "`find ~ -name todo.txt > ~/path.txt`; then check with `cat ~/path.txt`."},
-  "t14": {"text": "Challenge: In a single command, count the `.txt` files under home and write the number to `~/count.txt`.", "hint": "`find`, pipe, `wc -l` and redirection. The result is the file count; .txt files you created yourself are counted too."},
-  "t15": {"text": "TICKET #4410 — Support: 'Where is ls installed, and what kind of command is cd?' Save the path to `~/ls_path.txt` and the type of `cd` to `~/cd_type.txt`.", "hint": "`which ls > ...` and `type cd > ...`."},
-  "t16": {"text": "TICKET #4411 — The teacher wants to see what you tried: first run `which ls`, then save the history to `~/hist.txt`.", "hint": "`history > ~/hist.txt`."}
+  "t13": {"text": "Mini: find where the `todo.txt` file is with `find` and save the path to the file `~/path.txt`.", "hint": "`find ~ -name todo.txt > ~/path.txt`; then check with `cat ~/path.txt`. (`>` writes output to a file; see module 3.2.)"},
+  "t14": {"text": "Challenge: In a single command, count the `.txt` files under home and write the number to `~/count.txt`.", "hint": "`find`, pipe, `wc -l` (counts lines; modules 3.4–3.5) and redirection (`>`, module 3.2). The result is the file count; .txt files you created yourself are counted too."},
+  "t15": {"text": "TICKET #4410 — Support: 'Where is ls installed, and what kind of command is cd?' Save the path to `~/ls_path.txt` and the type of `cd` to `~/cd_type.txt`.", "hint": "`which ls > ...` and `type cd > ...`. (`>` writes output to a file; see module 3.2.)"},
+  "t16": {"text": "TICKET #4411 — The teacher wants to see what you tried: first run `which ls`, then save the history to `~/hist.txt`.", "hint": "`history > ~/hist.txt`. (`>` writes output to a file; see module 3.2.)"}
  },
  "vm": {
   "intro": "Run the following commands on your VM (Ubuntu, Rocky, Alma or WSL). There is no destructive command; still, remember to leave the pager (man) with `q`.",

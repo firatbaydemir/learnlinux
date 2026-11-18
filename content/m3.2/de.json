@@ -65,13 +65,13 @@
     "title": "Benutzer extrahieren und sortieren",
     "text": "Nimm das erste Feld von `/etc/passwd`, sortiere es und zeige die ersten fünf Namen.",
     "blocks": [{"cmd": "cut -d: -f1 /etc/passwd | sort | head -n 5", "expected": "_apt\nbackup\nbin\ndaemon\ngames"}],
-    "differs": ["Die Namen unterscheiden sich je nach Distribution; nur die alphabetische Reihenfolge zählt. Mit `| grep root` prüfst du, ob `root` existiert."]
+    "differs": ["Die Namen unterscheiden sich je nach Distribution; nur die alphabetische Reihenfolge zählt. Mit `| grep root` prüfst du, ob `root` existiert.", "`cut` wird in Modul 3.5 ausführlich erklärt; hier genügt es, `-d:` (Trennzeichen) und `-f1` (1. Feld) zu kennen."]
    },
    "v03": {
     "title": "Häufigkeitstabelle",
     "text": "Zähle, welche Login-Shells in `/etc/passwd` benutzt werden, und ordne sie.",
     "blocks": [{"cmd": "cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn", "expected": "     24 /usr/sbin/nologin\n      3 /bin/bash\n      1 /bin/sync"}],
-    "differs": ["Zahlen und Shells hängen von deinem System ab.", "Siehst du nur eine Zeile, prüfe, dass `sort` vor `uniq -c` steht."]
+    "differs": ["Zahlen und Shells hängen von deinem System ab.", "Siehst du nur eine Zeile, prüfe, dass `sort` vor `uniq -c` steht.", "`cut -d: -f7` holt das siebte Feld (Login-Shell); `cut` wird in Modul 3.5 erklärt."]
    },
    "v04": {
     "title": "Mit tee eine Kopie behalten",

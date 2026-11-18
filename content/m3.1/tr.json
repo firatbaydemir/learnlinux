@@ -49,11 +49,11 @@
   "t06": {"text": "`ls lab/missing.txt 2> errors.txt` ile hatayı `errors.txt` dosyasına al.", "hint": "Hata artık ekranda görünmez."},
   "t07": {"text": "`cat < lab/names.txt` ile dosyayı stdin olarak ver.", "hint": "`<` dosyadan girdi okutur."},
   "t08": {"text": "Tahmin et: `ls lab/missing.txt > result.txt` çalışınca hata ekranda görünür mü? `result.txt` dolu mu olur? Çalıştırıp doğrula.", "hint": "`>` yalnızca stdout'u yönlendirir; hata stderr'dedir."},
-  "t09": {"text": "Tahmin et: `cat lab/names.txt | wc -l` ne yazdırır? Çalıştırarak doğrula.", "hint": "`wc -l` satır sayar; dosyada kaç satır var?"},
+  "t09": {"text": "Tahmin et: `cat lab/names.txt | wc -l` ne yazdırır? Çalıştırarak doğrula.", "hint": "`wc -l` satır sayar; dosyada kaç satır var? (`|` çıktıyı sonraki komuta verir; modül 3.2. `wc`: modül 3.5.)"},
   "t10": {"text": "Hata ayıklama: `ls lab missing_dir > all.txt` hata mesajını ekrana yazıyor, `all.txt`'ye girmiyor. `all.txt` hem liste hem hatayı içersin.", "hint": "Komutun sonuna `2>&1` ekle."},
   "t11": {"text": "Mini proje: `build.log` oluştur. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. Dosyada 3 satır olmalı.", "hint": "İlk komut `>`, diğerleri `>>` ve `2>>` kullanır."},
   "t12": {"text": "Meydan okuma: `ls lab missing_dir` komutunun hatalarını `/dev/null`'a at, normal çıktıyı `found.txt` dosyasına kaydet.", "hint": "İki yönlendirme: `2>/dev/null` ve `> found.txt`."},
-  "t13": {"text": "Ticket: Denetçi `lab/names.txt` içindeki kullanıcı sayısını `~/count.txt` dosyasında istiyor (yalnızca sayı).", "hint": "`wc -l < file` dosya adı olmadan sayı verir; çıktıyı `>` ile kaydet."}
+  "t13": {"text": "Ticket: Denetçi `lab/names.txt` içindeki kullanıcı sayısını `~/count.txt` dosyasında istiyor (yalnızca sayı).", "hint": "`wc -l < file` dosya adı olmadan sayı verir; çıktıyı `>` ile kaydet. (`wc` satır sayar; modül 3.5.)"}
  },
  "vm": {
   "intro": "Bu komutlar VM'inde home dizininde çalışır ve yalnızca kendi oluşturduğun dosyaları yazar; yine de önemli bir dosya adı kullanma.",

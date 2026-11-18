@@ -228,15 +228,15 @@
   },
   "t05": {
    "text": "Geçidin adresini (yalnızca adres) `~/net/gateway.txt` dosyasına yaz.",
-   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; 3. alan geçittir."
+   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; 3. alan geçittir. (`grep` → modül 3.4; `cut` → modül 3.5; `>` → modül 3.2.)"
   },
   "t06": {
    "text": "Dinleyen (LISTEN) satırların sayısını `~/net/listen_count.txt` dosyasına yaz.",
-   "hint": "`grep LISTEN ... | wc -l > file`."
+   "hint": "`grep LISTEN ... | wc -l > file`. (`wc` → modül 2.6.)"
   },
   "t07": {
    "text": "Dışarıya açık dinleyenleri (LISTEN olup `127.0.0.1` olmayanlar) `~/net/exposed.txt` dosyasına yaz.",
-   "hint": "İki `grep`'i boruyla bağla; ikincisinde `-v 127.0.0.1` kullan."
+   "hint": "İki `grep`'i boruyla bağla; ikincisinde `-v 127.0.0.1` kullan. (`grep` → modül 3.4.)"
   },
   "t08": {
    "text": "Tahmin et: 8080 portunda hangi süreç dinliyor? Sonra `grep 8080 ~/net/ss.txt` ile doğrula.",
@@ -252,23 +252,23 @@
   },
   "t11": {
    "text": "Hata ayıklama: `~/net/resolv.conf` içindeki `nameserver` geçersiz. Dosyayı `nameserver 192.168.1.1` ve `nameserver 1.1.1.1` iki satırı olacak biçimde yeniden yaz.",
-   "hint": "`printf 'line1\\nline2\\n' > file` ile iki satır yazabilirsin; önce `cat` ile hatayı gör."
+   "hint": "`printf 'line1\\nline2\\n' > file` ile iki satır yazabilirsin; önce `cat` ile hatayı gör. (`cat` → modül 2.6.)"
   },
   "t12": {
    "text": "Hata ayıklama: `~/net/check_ports.sh` betiği çalışmıyor. Sebebini bul, düzelt ve betiği çalıştır.",
-   "hint": "`ls -l` ile izinlere bak; `chmod 755` sonra `~/net/check_ports.sh`."
+   "hint": "`ls -l` ile izinlere bak; `chmod 755` sonra `~/net/check_ports.sh`. (`chmod` → modül 4.4.)"
   },
   "t13": {
    "text": "Mini rapor: `~/net/report.txt` dosyasına sırayla host adını, geçidin adresini ve dinleyen servis sayısını (3 satır) yaz.",
-   "hint": "İlk komutta `>`, sonrakilerde `>>` kullan; host adı için `hostname`."
+   "hint": "İlk komutta `>`, sonrakilerde `>>` kullan; host adı için `hostname`. (`>/>>` → modül 3.2.)"
   },
   "t14": {
    "text": "Zor: `ss.txt` içindeki LISTEN satırlarından yalnızca port numaralarını, sayısal sıralı ve tekrarsız olarak `~/net/ports.txt` dosyasına yaz (her satırda bir port).",
-   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file`"
+   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file` (`tr/cut/sort/uniq` → modül 3.5.)"
   },
   "t15": {
    "text": "Zor: 8080/tcp portunu kalıcı açmak için firewalld planını `~/net/fw_plan.txt` dosyasına iki satır olarak yaz: önce `--permanent --add-port=8080/tcp` içeren komut, sonra `firewall-cmd --reload`. (Planı yazarsın, çalıştırmazsın.)",
-   "hint": "`echo 'komut' > file`, ikinci satır için `>>`. Tırnak kullan."
+   "hint": "`echo 'komut' > file`, ikinci satır için `>>`. Tırnak kullan. (`>/>>` → modül 3.2.)"
   },
   "t16": {
    "text": "Ticket: Kullanıcılar `intranet.lab` adına ulaşamıyor. İç sunucunun adresi `192.168.1.50`. `~/net/hosts` dosyasına bu eşlemeyi ekle (mevcut satırları silme).",
@@ -276,7 +276,7 @@
   },
   "t17": {
    "text": "Ticket: Güvenlik denetimi, PostgreSQL'in (port 5432) yalnızca yerel adreste dinlediğinin kanıtını istiyor. İlgili `ss.txt` satırını `~/net/audit.txt` dosyasına kaydet.",
-   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; satırda `127.0.0.1:5432` olmalı."
+   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; satırda `127.0.0.1:5432` olmalı. (`grep` → modül 3.4.)"
   }
  },
  "vm": {

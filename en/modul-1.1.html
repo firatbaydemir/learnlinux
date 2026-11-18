@@ -45,7 +45,7 @@
 </code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -a" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -a">Copy</button></div></div></article>
 <article class="cmd"><h3><code>ls -lh</code></h3><dl><dt>What is it for?</dt><dd>Detailed list; prints sizes as K/M/G.</dd><dt>Where is it used?</dt><dd>When looking at file sizes.</dd><dt>Why does it matter?</dt><dd>Easier than reading byte counts.</dd></dl><div class="code"><pre><code><span class="ln"><span class="tk">ls</span> <span class="tf">-lh</span> <span class="tp">~</span></span>
 </code></pre><div class="codebtns"><button type="button" class="try small" data-try="ls -lh ~" title="Click to paste into the terminal">▶ Try in simulator</button><button type="button" class="copy" data-copy="ls -lh ~">Copy</button></div></div></article>
-<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>If <code>ls</code> output is long in a directory with many files, use <code>ls -l | head</code> to see the first lines.</p></aside>
+<aside class="callout tip" role="note"><strong>💡 Tip</strong><p>If <code>ls</code> output is long in a directory with many files, use <code>ls -l | head</code> to see the first lines. (<code>|</code> feeds the first command&#x27;s output to the second and <code>head</code> shows the first 10 lines; details in modules 3.2 and 2.6.)</p></aside>
 </section>
 <section id="cd"><h2>Reach your target: cd</h2>
 <p><code>cd</code> (change directory) changes your working directory. On success it prints nothing; you see the result in the prompt or with <code>pwd</code>. If the directory does not exist, you get an error.</p>

@@ -151,7 +151,7 @@
   },
   "t09": {
    "text": "Vorhersage: Was zeigt `cat backup/draft.txt`? Führe es aus und prüfe.",
-   "hint": "Die Kopie hat denselben Inhalt wie das Original: `draft v1`."
+   "hint": "Die Kopie hat denselben Inhalt wie das Original: `draft v1`. (`cat` gibt den Dateiinhalt aus; Details in Modul 2.6.)"
   },
   "t10": {
    "text": "Vorhersage: Versuche, eine nicht vorhandene Datei zu verschieben: `mv ghost.txt backup`. Klappt es?",
@@ -187,7 +187,7 @@
   "tasks": {
    "v01": {
     "title": "Datei kopieren",
-    "text": "Erstelle eine Datei, kopiere sie und füge die Ausgabe von `ls -l` ein.",
+    "text": "Erstelle eine Datei, kopiere sie und füge die Ausgabe von `ls -l` ein. (`echo ... > Datei` schreibt Text in eine Datei, `mkdir` legt einen Ordner an; Details in Modul 3.2 und 2.3.)",
     "blocks": [
      {
       "cmd": "mkdir -p ~/vmlab && cd ~/vmlab\necho \"original content\" > original.txt\ncp original.txt copy.txt\nls -l",

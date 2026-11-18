@@ -339,11 +339,11 @@
   },
   "t03": {
    "text": "Genel logdaki hata satırlarını `grep -i error /var/log/messages` ile bul.",
-   "hint": "`-i` büyük/küçük harfi yok sayar, yani ERROR da bulunur."
+   "hint": "`-i` büyük/küçük harfi yok sayar, yani ERROR da bulunur. (`grep` → modül 3.4.)"
   },
   "t04": {
    "text": "`error` içeren satırları (harf duyarsız) `grep -ci error /var/log/messages` ile say.",
-   "hint": "`-c` satırlar yerine sayıyı yazdırır."
+   "hint": "`-c` satırlar yerine sayıyı yazdırır. (`grep` → modül 3.4.)"
   },
   "t05": {
    "text": "Yalnızca root'un okuyabildiği giriş logunu oku: `sudo cat /var/log/secure`.",
@@ -355,7 +355,7 @@
   },
   "t07": {
    "text": "`~/lab/failed_units.txt` kaydedilmiş bir `systemctl list-units --failed` çıktısıdır. Yalnızca unit adlarını `~/lab/failed_names.txt` dosyasına yaz: `cut -d\" \" -f1 ~/lab/failed_units.txt | grep service > ~/lab/failed_names.txt`.",
-   "hint": "`cut -d\" \" -f1` ilk sütunu alır, `grep service` başlığı ve özet satırını eler."
+   "hint": "`cut -d\" \" -f1` ilk sütunu alır, `grep service` başlığı ve özet satırını eler. (`cut` → modül 3.5.)"
   },
   "t08": {
    "text": "sshd logunun son 50 satırını sayfalayıcısız gösteren journalctl komutunu `~/answer_journal.txt` dosyasına yaz, örneğin `echo 'journalctl -u sshd -n 50 --no-pager' > ~/answer_journal.txt`.",
@@ -367,7 +367,7 @@
   },
   "t10": {
    "text": "Tahmin et: `/var/log/messages` dosyasının son iki satırı hangi mesajlar? Önce tahmin et, sonra `tail -n 2 /var/log/messages` ile kontrol et.",
-   "hint": "`tail -n 2` son iki satırı yazar; en yeni kayıt en altta olur."
+   "hint": "`tail -n 2` son iki satırı yazar; en yeni kayıt en altta olur. (`tail` → modül 2.6.)"
   },
   "t11": {
    "text": "Tahmin et: `~/lab/journal_sample.txt` içinde kaç satır `Failed` kelimesini içeriyor (büyük/küçük harf duyarlı, yani FAILURE sayılmaz)? Önce tahmin et, sonra `grep -c Failed ~/lab/journal_sample.txt` ile doğrula.",
@@ -383,7 +383,7 @@
   },
   "t14": {
    "text": "Debug: `~/lab/broken2.service` içinde `[Install]` bölümü olmadığı için `systemctl enable` şikayet eder. `printf` ve `>>` ile `[Install]` ve `WantedBy=multi-user.target` ekle.",
-   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`."
+   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`. (`>>` → modül 3.2.)"
   },
   "t15": {
    "text": "Mini proje: `~/lab/linux-lab-demo.service` dosyasını `[Unit]` (Description), `[Service]` (`ExecStart=/usr/bin/sleep 3600`) ve `[Install]` (`WantedBy=multi-user.target`) ile oluştur. Sonra üç VM adımını (`/etc/systemd/system/` içine kopyala, `daemon-reload`, `enable --now linux-lab-demo.service`) satır satır `~/lab/install_steps.txt` dosyasına yaz.",
@@ -391,7 +391,7 @@
   },
   "t16": {
    "text": "Challenge: `~/lab/incident.txt` adlı bir olay raporu oluştur. Önce `/var/log/messages` içindeki tüm hata satırlarını (harf duyarsız) içine yaz, sonra `/var/log/secure` içeriğini ekle. Rapor en az 4 satır olmalı.",
-   "hint": "`grep -i error ... > file`, sonra `sudo cat ... >> file` (yönlendirmeyi kendi kabuğun yapar, bu yüzden home içindeki dosya sorun olmaz)."
+   "hint": "`grep -i error ... > file`, sonra `sudo cat ... >> file` (yönlendirmeyi kendi kabuğun yapar, bu yüzden home içindeki dosya sorun olmaz). (`grep` → modül 3.4; `>/>>` → modül 3.2.)"
   },
   "t17": {
    "text": "TICKET #5610 — Bir müşteri, web sunucusunun yeniden başlatmadan sonra kalkmadığını bildiriyor. Bir RHEL VM'de çalıştıracağın üç komutu `~/ticket_5610.txt` dosyasına satır satır yaz: durumu göster (`systemctl status httpd`), logunu oku (`journalctl -u httpd -n 50 --no-pager`) ve etkinleştirip başlat (`sudo systemctl enable --now httpd`).",

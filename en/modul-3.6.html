@@ -186,7 +186,7 @@ ps aux | awk &#x27;NR&gt;1 {print $1}&#x27; | sort | uniq -c | sort -rn | head -
     120 root
      35 student
       4 www-data</pre>
-<details class="differs"><summary>My output looks different</summary><ul><li>The numbers and users of the last command depend on your system; what matters is the <code>count user</code> format on each line.</li><li>The order of <code>for (k in c)</code> is undefined, which is why we added <code>sort</code>.</li></ul></details>
+<details class="differs"><summary>My output looks different</summary><ul><li>The numbers and users of the last command depend on your system; what matters is the <code>count user</code> format on each line. (<code>ps</code> is covered in module 5.1.)</li><li>The order of <code>for (k in c)</code> is undefined, which is why we added <code>sort</code>.</li></ul></details>
 <label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
 </article>
 </section>

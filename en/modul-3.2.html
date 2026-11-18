@@ -61,7 +61,7 @@ backup
 bin
 daemon
 games</pre>
-<details class="differs"><summary>My output looks different</summary><ul><li>Names differ per distribution; only the alphabetical order matters. Use <code>| grep root</code> to check that <code>root</code> exists.</li></ul></details>
+<details class="differs"><summary>My output looks different</summary><ul><li>Names differ per distribution; only the alphabetical order matters. Use <code>| grep root</code> to check that <code>root</code> exists.</li><li><code>cut</code> is covered in detail in module 3.5; here it is enough to know <code>-d:</code> (delimiter) and <code>-f1</code> (1st field).</li></ul></details>
 <label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v03" data-expect="1"><header><h3>Frequency table</h3><span class="status" aria-hidden="true"></span></header><p>Count which login shells are used in <code>/etc/passwd</code> and rank them.</p>
@@ -69,7 +69,7 @@ games</pre>
 </code></pre><div class="codebtns"><button type="button" class="copy" data-copy="cut -d: -f7 /etc/passwd | sort | uniq -c | sort -rn">Copy</button></div></div><p class="lbl">Expected output example</p><pre class="out">     24 /usr/sbin/nologin
       3 /bin/bash
       1 /bin/sync</pre>
-<details class="differs"><summary>My output looks different</summary><ul><li>Counts and shells vary per system.</li><li>If you see only one line, check that <code>sort</code> comes before <code>uniq -c</code>.</li></ul></details>
+<details class="differs"><summary>My output looks different</summary><ul><li>Counts and shells vary per system.</li><li>If you see only one line, check that <code>sort</code> comes before <code>uniq -c</code>.</li><li><code>cut -d: -f7</code> takes the seventh field (login shell); <code>cut</code> is covered in module 3.5.</li></ul></details>
 <label class="lbl">Paste your output here</label><textarea rows="4" spellcheck="false"></textarea><p><button type="button" class="btn check">Check</button></p><p class="fb" aria-live="polite"></p>
 </article>
 <article class="vmt card" data-vm="v04" data-expect="0"><header><h3>Keep a copy with tee</h3><span class="status" aria-hidden="true"></span></header><p>Save a listing with <code>tee</code> while counting it; check the file. If it worked press &quot;Done&quot;.</p>

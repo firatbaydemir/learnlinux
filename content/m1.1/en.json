@@ -35,7 +35,7 @@
     {"cmd": "ls -a", "what": "Also shows hidden files whose names start with a dot.", "where": "When looking for configuration files.", "why": "Hidden files do not appear in normal `ls` output.", "example": "ls -a"},
     {"cmd": "ls -lh", "what": "Detailed list; prints sizes as K/M/G.", "where": "When looking at file sizes.", "why": "Easier than reading byte counts.", "example": "ls -lh ~"}
    ],
-   "tip": "If `ls` output is long in a directory with many files, use `ls -l | head` to see the first lines."
+   "tip": "If `ls` output is long in a directory with many files, use `ls -l | head` to see the first lines. (`|` feeds the first command's output to the second and `head` shows the first 10 lines; details in modules 3.2 and 2.6.)"
   },
   {
    "id": "cd",

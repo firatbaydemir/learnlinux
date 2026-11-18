@@ -241,7 +241,7 @@
     ],
     "differs": [
      "Bei deutscher Systemsprache kann die Meldung übersetzt sein („Keine Berechtigung“).",
-     "Entsteht der Ordner doch, arbeitest du als root; nimm einen normalen Benutzer und lösche ihn mit `sudo rmdir /etc/practice`."
+     "Entsteht der Ordner doch, arbeitest du als root; nimm einen normalen Benutzer und lösche ihn mit `sudo rmdir /etc/practice` (`sudo` führt mit Admin-Rechten aus; Details in Modul 4.3)."
     ]
    },
    "v03": {

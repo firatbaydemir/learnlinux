@@ -104,12 +104,12 @@
   "t08": {"text": "TAHMİN: `echo \"$HOME\" '$HOME'` ne basar? Tahmin et, sonra çalıştır.", "hint": "Çift tırnak genişletir, tek tırnak genişletmez."},
   "t09": {"text": "TAHMİN: `grep -q FATAL run.log || echo none` ne basar? Tahmin et, sonra çalıştır.", "hint": "`FATAL` yoksa `grep` 1 döner; `||` o zaman sağdaki komutu çalıştırır."},
   "t10": {"text": "HATA BUL: Biri `find . -name *.log` yazdı ve yalnızca `run.log` çıktı; `logs/` altındakiler yok. Komutu düzelt ve tam listeyi `all_logs.txt` dosyasına yaz.", "hint": "Önce `find . -name *.log` ile hatayı gör: kabuk `*.log`'u `run.log`'a genişletti. Deseni tırnakla."},
-  "t11": {"text": "HATA BUL: `./hello.sh` \"Permission denied\" veriyor. Düzelt ve çalıştır; sonuç `hello.out` dosyasına yazılmalı.", "hint": "`ls -l hello.sh` ile izne bak; `chmod +x hello.sh`."},
+  "t11": {"text": "HATA BUL: `./hello.sh` \"Permission denied\" veriyor. Düzelt ve çalıştır; sonuç `hello.out` dosyasına yazılmalı.", "hint": "`ls -l hello.sh` ile izne bak; `chmod +x hello.sh`. (`chmod` modül 4.4'te.)"},
   "t12": {"text": "MİNİ PROJE: `ERROR` satırlarını süzüp hem ekranda göster hem `errors.txt` dosyasına yaz (`tee`), sonra `wc -l errors.txt` çıktısını `summary.txt` dosyasına ekle (`>>`).", "hint": "`grep ERROR run.log | tee errors.txt`, sonra `wc -l errors.txt >> summary.txt`."},
   "t13": {"text": "ZORLUK: `project` altındaki tüm `.tmp` dosyalarını silmek için `find` ve `-exec rm {} \\;` kullan. (Simülatör `-exec`'i çalıştırmaz; komutun doğru yazımı kontrol edilir.)", "hint": "`find project -name \"*.tmp\" -exec rm {} \\;` ; `\\;` kaçışı önemli. Gerçek VM'de önce `-print` ile dene."},
   "t14": {"text": "ZORLUK: Tüm `.txt` dosyalarının satır sayısını güvenli yolla bul: `-print0` ile `xargs -0` ve `wc -l`. (`xargs` simülatörde yok; yazım kontrol edilir.)", "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."},
   "t15": {"text": "ZORLUK: `access.log` içinde en çok görünen IP'yi ve sayısını bul, yalnızca o tek satırı `top.txt` dosyasına yaz.", "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."},
-  "t16": {"text": "TICKET #3901 — Destek: \"Sabah toplantısı için `run.log` içindeki `ERROR` ve `WARN` satırlarını sıralı olarak `problems.txt` dosyasına yazan bir betiğe ihtiyacımız var, her gün çalıştıracağız.\" `check.sh` betiğini yaz (shebang + `grep -E ... | sort > problems.txt`), çalıştırılabilir yap ve çalıştır.", "hint": "`printf` veya `echo` ile tek tırnak içinde yaz, `chmod +x check.sh`, `./check.sh`."}
+  "t16": {"text": "TICKET #3901 — Destek: \"Sabah toplantısı için `run.log` içindeki `ERROR` ve `WARN` satırlarını sıralı olarak `problems.txt` dosyasına yazan bir betiğe ihtiyacımız var, her gün çalıştıracağız.\" `check.sh` betiğini yaz (shebang + `grep -E ... | sort > problems.txt`), çalıştırılabilir yap ve çalıştır.", "hint": "`printf` veya `echo` ile tek tırnak içinde yaz, `chmod +x check.sh`, `./check.sh`. (`chmod` modül 4.4'te.)"}
  },
  "vm": {
   "intro": "Aşağıdaki işlemleri kendi VM'inde (Ubuntu, Rocky veya Alma) yap. Her şeyi `~/adv` altında dene; gerçek verilerin olduğu yerde asla `-delete` veya `rm -r` kullanma.",
@@ -164,7 +164,7 @@
      {"cmd": "cd ~/adv\ncat > hello.sh <<'EOF'\n#!/bin/bash\nname=\"${1:-world}\"\necho \"Hello, $name\"\nEOF\n./hello.sh\nchmod +x hello.sh\n./hello.sh student\necho $?", "expected": "bash: ./hello.sh: Permission denied\nHello, student\n0"}
     ],
     "differs": [
-     "İlk `./hello.sh` çalışırsa dosya sistemin (ör. bazı WSL bağlamaları) `x` iznini zaten veriyor olabilir.",
+     "İlk `./hello.sh` çalışırsa dosya sistemin (ör. bazı WSL bağlamaları) `x` iznini zaten veriyor olabilir. (`chmod` modül 4.4'te.)",
      "`hello.sh: command not found` görürsen `./` önekini unutmuşsun; geçerli dizin `PATH`'te değildir."
     ]
    }

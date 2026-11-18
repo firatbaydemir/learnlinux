@@ -241,7 +241,7 @@
     ],
     "differs": [
      "Sistemin Türkçe/Almanca ise mesaj çevrilmiş olabilir.",
-     "Hata yerine klasör oluştuysa root olarak çalışıyorsun; normal kullanıcıyla dene ve klasörü `sudo rmdir /etc/practice` ile sil."
+     "Hata yerine klasör oluştuysa root olarak çalışıyorsun; normal kullanıcıyla dene ve klasörü `sudo rmdir /etc/practice` ile sil (`sudo` yönetici yetkisiyle çalıştırır; ayrıntısı modül 4.3'te)."
     ]
    },
    "v03": {

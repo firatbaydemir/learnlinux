@@ -91,22 +91,22 @@
  ],
  "tasks": {
   "t01": {"text": "Lies den dauerhaften SELinux-Modus mit `cat ~/lab/selinux_config`.", "hint": "Schau auf die Zeile `SELINUX=`."},
-  "t02": {"text": "Zähle die abgelehnten Einträge im Audit-Log mit `grep -c denied ~/lab/audit.log`.", "hint": "-c gibt die Zeilenzahl aus."},
+  "t02": {"text": "Zähle die abgelehnten Einträge im Audit-Log mit `grep -c denied ~/lab/audit.log`.", "hint": "-c gibt die Zeilenzahl aus. (`grep` → Modul 3.4.)"},
   "t03": {"text": "Liste die httpd-Booleans mit `grep httpd ~/lab/booleans.txt` auf.", "hint": "Die Datei hat die Form `name --> zustand`."},
   "t04": {"text": "Wechsle mit `cd ~/lab` ins Lab-Verzeichnis.", "hint": "Dann brauchst du in den nächsten Aufgaben keinen Pfad."},
-  "t05": {"text": "Das Label in `context.txt` hat die Form `user:role:type:level`. Gib das Feld **type** mit `cut -d: -f3 context.txt` aus.", "hint": "Trenner ist der Doppelpunkt, type ist Feld drei. Sei zuerst im Lab-Verzeichnis."},
-  "t06": {"text": "Schreibe nur die httpd-Einträge mit `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt` nach `httpd_denials.txt`.", "hint": "Einfache Anführungszeichen um ein Muster mit doppelten; > leitet die Ausgabe in eine Datei um."},
+  "t05": {"text": "Das Label in `context.txt` hat die Form `user:role:type:level`. Gib das Feld **type** mit `cut -d: -f3 context.txt` aus.", "hint": "Trenner ist der Doppelpunkt, type ist Feld drei. Sei zuerst im Lab-Verzeichnis. (`cut` → Modul 3.5.)"},
+  "t06": {"text": "Schreibe nur die httpd-Einträge mit `grep 'comm=\"httpd\"' audit.log > httpd_denials.txt` nach `httpd_denials.txt`.", "hint": "Einfache Anführungszeichen um ein Muster mit doppelten; > leitet die Ausgabe in eine Datei um. (`>` → Modul 3.2.)"},
   "t07": {"text": "Finde mit `grep complain aa_status.txt` die AppArmor-Zeile im complain-Modus.", "hint": "Erwartet wird eine Zeile mit 'complain mode'."},
   "t08": {"text": "Vorhersage: Wie viele Einträge in `audit.log` haben `permissive=1` (nicht blockiert)? Prüfe dann mit `grep -c permissive=1 audit.log`.", "hint": "Schau auf den permissive-Wert am Zeilenende."},
   "t09": {"text": "Vorhersage: Wie viele Booleans in `booleans.txt` sind aus (off)? Prüfe dann mit `grep -c ' off$' booleans.txt`.", "hint": "$ markiert das Zeilenende."},
   "t10": {"text": "Debuggen: `broken_config` enthält `SELINUX=disabled`. Schreibe die Datei so neu, dass `SELINUX=enforcing` und `SELINUXTYPE=targeted` drinstehen.", "hint": "`printf 'SELINUX=enforcing\\nSELINUXTYPE=targeted\\n' > broken_config`"},
   "t11": {"text": "Debuggen: `runbook.sh` nutzt `setenforce 0` und macht das Boolean nicht dauerhaft. Schreibe es mit der einen Zeile `setsebool -P httpd_can_network_connect on` neu.", "hint": "`echo '...' > runbook.sh` überschreibt den bisherigen Inhalt."},
   "t12": {"text": "Mini-Projekt: Schreibe ein Skript `fix_web.sh`. Zeile 1: `semanage fcontext -a -t httpd_sys_content_t \"/srv/web(/.*)?\"`, Zeile 2: `restorecon -Rv /srv/web`. Mach es dann mit `chmod 755` ausführbar.", "hint": "Nimm `>` für die erste und `>>` für die zweite Zeile."},
-  "t13": {"text": "Mini-Projekt: Führe `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` aus, um in `top_comm.txt` zu schreiben, wie oft jedes Programm abgelehnt wurde.", "hint": "Feld 10 ist `comm=...`; `uniq -c` braucht vorher `sort`."},
-  "t14": {"text": "Challenge: Schreibe die Zeilen aus `webfiles.txt`, die nicht den Web-Typ (`httpd_sys_content_t`) haben, nach `wrong_labels.txt`.", "hint": "`grep -v` wählt nicht passende Zeilen."},
+  "t13": {"text": "Mini-Projekt: Führe `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` aus, um in `top_comm.txt` zu schreiben, wie oft jedes Programm abgelehnt wurde.", "hint": "Feld 10 ist `comm=...`; `uniq -c` braucht vorher `sort`. (`sort/uniq` → Modul 3.5.)"},
+  "t14": {"text": "Challenge: Schreibe die Zeilen aus `webfiles.txt`, die nicht den Web-Typ (`httpd_sys_content_t`) haben, nach `wrong_labels.txt`.", "hint": "`grep -v` wählt nicht passende Zeilen. (`grep` → Modul 3.4.)"},
   "t15": {"text": "Challenge: Schreibe die Booleans aus `booleans.txt`, die an (on) sind, nach `booleans_on.txt`.", "hint": "Zeilen enden mit `on`: `' on$'`."},
   "t16": {"text": "Ticket: Die Website liefert 403. Nach Prüfung von `webfiles.txt` und `audit.log`: `about.html` hat das Label `user_home_t`. Schreibe eine einzeilige Notiz in `ticket.txt`: falscher Typ `user_home_t`, richtiger Typ `httpd_sys_content_t`, Lösung `restorecon`.", "hint": "`echo '...' > ticket.txt`; alle drei Begriffe aufnehmen."},
-  "t17": {"text": "Ticket: Die Web-App kann Port 8888 nicht erreichen; im Log stehen `name_connect` und `unreserved_port_t`. Schreibe diesen Befehl in `fix_port.sh`: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Schreibe den Befehl mit `echo` in einfachen Anführungszeichen und leite mit `>` um."}
+  "t17": {"text": "Ticket: Die Web-App kann Port 8888 nicht erreichen; im Log stehen `name_connect` und `unreserved_port_t`. Schreibe diesen Befehl in `fix_port.sh`: `semanage port -a -t http_port_t -p tcp 8888`.", "hint": "Schreibe den Befehl mit `echo` in einfachen Anführungszeichen und leite mit `>` um. (`>` → Modul 3.2.)"}
  },
  "vm": {
   "intro": "Mach diesen Teil auf einer Rocky/Alma-VM (dort ist SELinux dabei). Unter Ubuntu geh zu v06. Mach vor allem anderen einen **VM-Snapshot** (Modul 0.2). Arbeite in einem frischen Lab, nicht auf einem Live-Server.",

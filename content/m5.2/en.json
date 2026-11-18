@@ -234,35 +234,35 @@
   },
   "t10": {
    "text": "Predict: how many lines does `grep -c java ~/lab/ps_snapshot.txt` print? Think first, then run it.",
-   "hint": "-c counts matching lines."
+   "hint": "-c counts matching lines. (`grep` → module 3.4.)"
   },
   "t11": {
    "text": "Predict: what does `cut -d ' ' -f 1 ~/lab/loadavg.txt` print? Think first, then run it.",
-   "hint": "-d sets the separator, -f 1 is the first field."
+   "hint": "-d sets the separator, -f 1 is the first field. (`cut` → module 3.5.)"
   },
   "t12": {
    "text": "Find the top CPU consumers in the snapshot: `sort -k3 -nr ~/lab/ps_snapshot.txt | head -n 3`. Which process is first?",
-   "hint": "-k3 is the %CPU column, -n numeric, -r descending."
+   "hint": "-k3 is the %CPU column, -n numeric, -r descending. (`sort` → module 3.5.)"
   },
   "t13": {
    "text": "Mini: save the top 2 memory consumers of `~/lab/ps_snapshot.txt` into `~/lab/top_mem.txt`. Sort by column 4 with `sort -k4 -nr`, take two lines with `head -n 2` and redirect with `>`.",
-   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt`"
+   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt` (`sort/head` → module 3.5/3.2; `>` → module 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/monitor_cmds.txt` lists the wrong commands (`nprocs` does not exist and `free -m` is not human-readable). Rewrite the file with `printf` so it contains `cores: nproc`, `memory: free -h` and `disk: df -h`, one per line.",
-   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt`"
+   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt` (`>` → module 3.2.)"
   },
   "t15": {
    "text": "Mini: `~/lab/du_report.txt` has sizes in KB. Save the 3 biggest entries into `~/lab/biggest.txt` with `sort -nr`, `head -n 3` and `>`.",
-   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt`"
+   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt` (`sort/head` → module 3.5/3.2; `>` → module 3.2.)"
   },
   "t16": {
    "text": "Challenge: build `~/lab/report.txt` with three parts: the 1-minute load from `~/lab/loadavg.txt` (use `cut`), the `MemAvailable` line from `~/lab/meminfo.txt` (use `grep`, append with `>>`) and your verdict `overloaded` (use `echo`, append).",
-   "hint": "The first command uses `>`, the others `>>`, so nothing is overwritten."
+   "hint": "The first command uses `>`, the others `>>`, so nothing is overwritten. (`>/>>` → module 3.2.)"
   },
   "t17": {
    "text": "TICKET #5201 — The server linux-lab is very slow. In `~/lab/top_snapshot.txt` is the output of `top -b -n 1`. Find the process with the highest CPU use and write its name and its user into `~/lab/culprit.txt`.",
-   "hint": "Look at the first process line with `head -n 9 ~/lab/top_snapshot.txt`, then `echo \"name user\" > ~/lab/culprit.txt`."
+   "hint": "Look at the first process line with `head -n 9 ~/lab/top_snapshot.txt`, then `echo \"name user\" > ~/lab/culprit.txt`. (`>` → module 3.2.)"
   }
  },
  "quiz": {

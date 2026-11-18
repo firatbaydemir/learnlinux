@@ -189,11 +189,11 @@
   },
   "t12": {
    "text": "Mini project: build a small FHS tree under `~/mini-root`. With one `mkdir -p` create the folders `etc`, `var/log` and `tmp`, create the file `etc/app.conf` with `touch`, and write a log line with `echo started > ~/mini-root/var/log/app.log`.",
-   "hint": "Braces: `~/mini-root/{etc,var/log,tmp}`; you write into the log file with the redirect `>`."
+   "hint": "Braces: `~/mini-root/{etc,var/log,tmp}`; you write into the log file with the redirect `>`. (`mkdir`/`touch` are covered in module 2.3, `>` in module 3.2.)"
   },
   "t13": {
    "text": "Challenge: write the server's ID card into `~/idcard.txt`: machine name (`/etc/hostname`), users (`ls /home`) and distribution name (the `PRETTY_NAME` line). Use `>` for the first, `>>` for the others.",
-   "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` appends the distribution line."
+   "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` appends the distribution line. (`>` writes, `>>` appends: module 3.2; `grep`: module 3.4.)"
   },
   "t14": {
    "text": "Challenge: you do not know the path of `sshd_config`. Search for it by name under `/etc`: `find /etc -name sshd_config`.",
@@ -201,7 +201,7 @@
   },
   "t15": {
    "text": "TICKET #2410 — \"The shop application (`shopapp`) reports errors and we can find neither its install location nor its logs.\" The third-party software is under `/opt`. Find the `ERROR` line in its log file and save it to `~/ticket-2410.txt`.",
-   "hint": "First `ls /opt`, then `ls /opt/shopapp/logs`; then `grep ERROR ... > ~/ticket-2410.txt`."
+   "hint": "First `ls /opt`, then `ls /opt/shopapp/logs`; then `grep ERROR ... > ~/ticket-2410.txt` (`grep` module 3.4, `>` module 3.2)."
   }
  },
  "vm": {

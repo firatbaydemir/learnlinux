@@ -61,7 +61,7 @@
   }
  ],
  "tasks": {
-  "t01": {"text": "Teste dein sudo-Recht mit `sudo whoami`. Die Ausgabe muss `root` sein.", "hint": "`student` ist in der Gruppe wheel, deshalb funktioniert sudo."},
+  "t01": {"text": "Teste dein sudo-Recht mit `sudo whoami`. Die Ausgabe muss `root` sein.", "hint": "`student` ist in der Gruppe wheel, deshalb funktioniert sudo. (`sudo` → Modul 4.3.)"},
   "t02": {"text": "Zeige den Kontoeintrag von alice mit `grep alice /etc/passwd`.", "hint": "Feld 6 ist das Home-Verzeichnis."},
   "t03": {"text": "Liste mit `ls /home` auf, welche Benutzer ein Home-Verzeichnis haben.", "hint": "Jeder Benutzer hat einen Ordner."},
   "t04": {"text": "Lies die Passwort-Hashes mit `sudo cat /etc/shadow`. Die Datei ist nur für root.", "hint": "Setze `sudo` davor; Hashes beginnen mit `$6$...`."},
@@ -72,9 +72,9 @@
   "t09": {"text": "Vorhersage: Was macht `cat /etc/shadow` als normaler Benutzer? Führe es aus und prüfe.", "hint": "Erwartet wird Permission denied|Erişim engellendi|Zugriff verweigert."},
   "t10": {"text": "Vorhersage: Wie sehen die Rechte von alices Home-Verzeichnis aus? Erst raten, dann mit `sudo ls -ld /home/alice` prüfen.", "hint": "Ein privates Home: `drwx------` (700)."},
   "t11": {"text": "Vorhersage: Was liefert `id carol` für ein noch nicht angelegtes Konto? Führe es aus.", "hint": "Erwartet wird der Fehler `no such user`."},
-  "t12": {"text": "Fehlersuche: Das `userdel -r alice` in `~/offboard.sh` löscht das Home-Verzeichnis, das für die Prüfung erhalten bleiben muss. Schreibe das Skript so um, dass es `sudo userdel alice` ohne `-r` enthält.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Nutze einfache Anführungszeichen."},
-  "t13": {"text": "Mini-Projekt: Schreibe einen Plan mit drei Zeilen in `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` und `sudo usermod -aG devs carol`.", "hint": "Nutze `>` in der ersten Zeile und `>>` bei den übrigen."},
-  "t14": {"text": "Challenge: Das Skript `~/onboard.sh` soll `dave` mit `-m -s /bin/bash -G devs` anlegen und dann mit `chage -d 0 dave` beim ersten Login eine Passwortänderung erzwingen. Setze das Skript auf `chmod 750`.", "hint": "Zwei `echo`-Befehle und ein `chmod`; nutze `sudo`."},
+  "t12": {"text": "Fehlersuche: Das `userdel -r alice` in `~/offboard.sh` löscht das Home-Verzeichnis, das für die Prüfung erhalten bleiben muss. Schreibe das Skript so um, dass es `sudo userdel alice` ohne `-r` enthält.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Nutze einfache Anführungszeichen. (`>` und `>>` → Modul 3.2.)"},
+  "t13": {"text": "Mini-Projekt: Schreibe einen Plan mit drei Zeilen in `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` und `sudo usermod -aG devs carol`.", "hint": "Nutze `>` in der ersten Zeile und `>>` bei den übrigen. (`>` und `>>` → Modul 3.2.)"},
+  "t14": {"text": "Challenge: Das Skript `~/onboard.sh` soll `dave` mit `-m -s /bin/bash -G devs` anlegen und dann mit `chage -d 0 dave` beim ersten Login eine Passwortänderung erzwingen. Setze das Skript auf `chmod 750`.", "hint": "Zwei `echo`-Befehle und ein `chmod`; nutze `sudo`. (`chmod` → Modul 4.4.)"},
   "t15": {"text": "TICKET #4210: `eve` hat die Firma verlassen. Sperre zuerst das Konto und lösche es dann (Home-Verzeichnis bleibt erhalten). Schreibe die Befehle der Reihe nach in `~/offboard_eve.txt`.", "hint": "`sudo usermod -L eve` und `sudo userdel eve`; kein `-r`."},
   "t16": {"text": "TICKET #4211: `frank` wird Administrator auf dem Server (Rocky/Alma). Schreibe den Befehl in `~/frank.txt`.", "hint": "`sudo usermod -aG wheel frank`; das `-a` nicht vergessen."}
  },

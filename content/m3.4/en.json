@@ -59,13 +59,13 @@
     "t04":{"text":"Find names ending in `.conf` in the `project` tree.","hint":"Use `find project -name \"*.conf\"`; quote the pattern."},
     "t05":{"text":"Find only regular `.txt` files under `project`.","hint":"Use `find project -type f -name \"*.txt\"`."},
     "t06":{"text":"Predict how many matching lines `grep -c ERROR logs/app.log` reports, then verify.","hint":"The command prints the count, not the matching lines."},
-    "t07":{"text":"Predict how to filter only `200` lines from the access log. Use a pipe.","hint":"Try `cat logs/access.log | grep 200`."},
-    "t08":{"text":"Debug: save the `ERROR` lines to `errors.txt` in your home directory.","hint":"Redirect stdout with `grep ERROR logs/app.log > errors.txt`."},
+    "t07":{"text":"Predict how to filter only `200` lines from the access log. Use a pipe.","hint":"Try `cat logs/access.log | grep 200`. (`cat` is in module 2.6, `|` in module 3.2.)"},
+    "t08":{"text":"Debug: save the `ERROR` lines to `errors.txt` in your home directory.","hint":"Redirect stdout with `grep ERROR logs/app.log > errors.txt` (`>` is covered in module 3.2)."},
     "t09":{"text":"Show log lines that do not contain `INFO`.","hint":"`-v` selects non-matching lines: `grep -v INFO logs/app.log`."},
     "t10":{"text":"Mini task: search project files for lines containing `TODO`.","hint":"Search a directory recursively with `grep -r TODO project`."},
     "t11":{"text":"Mini task: find regular files ending in `.log` under `logs`.","hint":"Use `find logs -type f -name \"*.log\"`."},
     "t12":{"text":"Challenge: search `project` for `todo`, ignoring case and showing line numbers.","hint":"Combine options with `grep -rin todo project`."},
-    "t13":{"text":"Ticket: save all `.txt` file paths in the project to a `text_files.txt` report.","hint":"Use `find . -type f -name \"*.txt\" > text_files.txt`."}
+    "t13":{"text":"Ticket: save all `.txt` file paths in the project to a `text_files.txt` report.","hint":"Use `find . -type f -name \"*.txt\" > text_files.txt` (`>` is covered in module 3.2)."}
   },
   "vm": {
     "intro":"Read existing text and paths on your own VM. These commands do not change system files; use your home directory when creating a report.",
@@ -73,7 +73,7 @@
       "v01":{"title":"Search a log","text":"Search a system log for `error`, ignoring case, and paste one matching line.","blocks":[{"cmd":"grep -i error /var/log/messages | head -n 3","expected":"error"}],"differs":["If that log does not exist, choose a log on your distribution or create `~/lab/app.log` with sample lines."]},
       "v02":{"title":"Show line numbers","text":"Find the `root` line in `/etc/passwd` and include its line number.","blocks":[{"cmd":"grep -n '^root:' /etc/passwd","expected":"1:root:"}],"differs":["The line number may vary by system; the output should contain `root` with a number before it."]},
       "v03":{"title":"Search by filename","text":"Find the file named `hostname` under `/etc`.","blocks":[{"cmd":"find /etc -type f -name hostname","expected":"/etc/hostname"}],"differs":["The output should contain the full path. `find` takes the starting directory and name as separate arguments."]},
-      "v04":{"title":"Save results safely","text":"Create `lab` in your home directory, make a report listing `.txt` files there, and inspect the report.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["If the report is empty, check that `cd ~/lab` succeeded and the filenames are correct. Do not search the whole system."]}
+      "v04":{"title":"Save results safely","text":"Create `lab` in your home directory, make a report listing `.txt` files there, and inspect the report.","blocks":[{"cmd":"mkdir -p ~/lab && cd ~/lab && touch notes.txt readme.txt && find . -type f -name '*.txt' > files.txt && cat files.txt"}],"differs":["If the report is empty, check that `cd ~/lab` succeeded and the filenames are correct. Do not search the whole system. (`mkdir`/`touch` are in module 2.3, `>` in module 3.2.)"]}
     }
   },
   "quiz": {

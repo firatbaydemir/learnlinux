@@ -61,7 +61,7 @@
   }
  ],
  "tasks": {
-  "t01": {"text": "`sudo whoami` ile sudo yetkini dene. Çıktı `root` olmalı.", "hint": "`student` wheel grubunda olduğu için sudo çalışır."},
+  "t01": {"text": "`sudo whoami` ile sudo yetkini dene. Çıktı `root` olmalı.", "hint": "`student` wheel grubunda olduğu için sudo çalışır. (`sudo` → modül 4.3.)"},
   "t02": {"text": "`grep alice /etc/passwd` ile alice hesabının kaydını göster.", "hint": "6. alan home dizinidir."},
   "t03": {"text": "`ls /home` ile hangi kullanıcıların home dizini olduğunu listele.", "hint": "Her kullanıcı için bir klasör vardır."},
   "t04": {"text": "`sudo cat /etc/shadow` ile parola özetlerini oku. Dosya sadece root'a açıktır.", "hint": "Başına `sudo` koy; özetler `$6$...` ile başlar."},
@@ -72,9 +72,9 @@
   "t09": {"text": "Tahmin: normal kullanıcıyla `cat /etc/shadow` ne yapar? Çalıştır ve doğrula.", "hint": "Permission denied|Erişim engellendi|Zugriff verweigert beklenir."},
   "t10": {"text": "Tahmin: alice'in home dizininin izinleri nasıl görünür? Önce tahmin et, sonra `sudo ls -ld /home/alice` ile doğrula.", "hint": "Özel home dizini: `drwx------` (700)."},
   "t11": {"text": "Tahmin: henüz oluşturulmamış `carol` için `id carol` ne döner? Çalıştır.", "hint": "`no such user` hatası beklenir."},
-  "t12": {"text": "Hata ayıkla: `~/offboard.sh` içindeki `userdel -r alice` komutu, denetim için saklanması gereken home dizinini siler. Betiği `-r` olmadan `sudo userdel alice` içerecek şekilde yeniden yaz.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Tek tırnak kullan."},
-  "t13": {"text": "Mini proje: `~/new_user_plan.txt` dosyasına üç satırlık plan yaz: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` ve `sudo usermod -aG devs carol`.", "hint": "İlk satırda `>`, sonrakilerde `>>` kullan."},
-  "t14": {"text": "Meydan okuma: `~/onboard.sh` betiği şunları yapsın: `dave` hesabını `-m -s /bin/bash -G devs` ile aç, sonra `chage -d 0 dave` ile ilk girişte parola değiştirt. Betiği `chmod 750` yap.", "hint": "İki `echo` ve bir `chmod`; `sudo` kullan."},
+  "t12": {"text": "Hata ayıkla: `~/offboard.sh` içindeki `userdel -r alice` komutu, denetim için saklanması gereken home dizinini siler. Betiği `-r` olmadan `sudo userdel alice` içerecek şekilde yeniden yaz.", "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Tek tırnak kullan. (`>` ve `>>` → modül 3.2.)"},
+  "t13": {"text": "Mini proje: `~/new_user_plan.txt` dosyasına üç satırlık plan yaz: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` ve `sudo usermod -aG devs carol`.", "hint": "İlk satırda `>`, sonrakilerde `>>` kullan. (`>` ve `>>` → modül 3.2.)"},
+  "t14": {"text": "Meydan okuma: `~/onboard.sh` betiği şunları yapsın: `dave` hesabını `-m -s /bin/bash -G devs` ile aç, sonra `chage -d 0 dave` ile ilk girişte parola değiştirt. Betiği `chmod 750` yap.", "hint": "İki `echo` ve bir `chmod`; `sudo` kullan. (`chmod` → modül 4.4.)"},
   "t15": {"text": "TICKET #4210: `eve` şirketten ayrıldı. Önce hesabı kilitle, sonra (home dizinini koruyarak) sil. Komutları `~/offboard_eve.txt` dosyasına sırayla yaz.", "hint": "`sudo usermod -L eve` ve `sudo userdel eve`; `-r` kullanma."},
   "t16": {"text": "TICKET #4211: `frank` sunucuda yönetici olacak (Rocky/Alma). Komutu `~/frank.txt` dosyasına yaz.", "hint": "`sudo usermod -aG wheel frank`; `-a` unutma."}
  },

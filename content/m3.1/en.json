@@ -49,11 +49,11 @@
   "t06": {"text": "Put the error into `errors.txt` with `ls lab/missing.txt 2> errors.txt`.", "hint": "The error no longer shows on screen."},
   "t07": {"text": "Feed the file as stdin with `cat < lab/names.txt`.", "hint": "`<` reads input from a file."},
   "t08": {"text": "Predict: when `ls lab/missing.txt > result.txt` runs, does the error appear on screen? Is `result.txt` filled? Run it to verify.", "hint": "`>` redirects stdout only; the error is on stderr."},
-  "t09": {"text": "Predict: what does `cat lab/names.txt | wc -l` print? Run it to verify.", "hint": "`wc -l` counts lines; how many lines does the file have?"},
+  "t09": {"text": "Predict: what does `cat lab/names.txt | wc -l` print? Run it to verify.", "hint": "`wc -l` counts lines; how many lines does the file have? (`|` passes output to the next command; module 3.2. `wc`: module 3.5.)"},
   "t10": {"text": "Debug: `ls lab missing_dir > all.txt` prints the error on screen and it does not reach `all.txt`. Make `all.txt` contain both the listing and the error.", "hint": "Add `2>&1` at the end of the command."},
   "t11": {"text": "Mini project: build `build.log`. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. The file must have 3 lines.", "hint": "The first uses `>`, the others `>>` and `2>>`."},
   "t12": {"text": "Challenge: discard the errors of `ls lab missing_dir` into `/dev/null` and save the normal output to `found.txt`.", "hint": "Two redirections: `2>/dev/null` and `> found.txt`."},
-  "t13": {"text": "Ticket: the auditor wants the number of users in `lab/names.txt` in `~/count.txt` (number only).", "hint": "`wc -l < file` prints the count without a file name; save with `>`."}
+  "t13": {"text": "Ticket: the auditor wants the number of users in `lab/names.txt` in `~/count.txt` (number only).", "hint": "`wc -l < file` prints the count without a file name; save with `>`. (`wc` counts lines; module 3.5.)"}
  },
  "vm": {
   "intro": "These commands run in your VM's home directory and only write files you create yourself; still, do not reuse the name of an important file.",

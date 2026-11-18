@@ -92,7 +92,7 @@
       "title": "Umgebungsvariablen: env und $USER",
       "body": [
         "Die Shell speichert Informationen in **Umgebungsvariablen**. `$USER` enthält den Benutzernamen, `$HOME` das Home-Verzeichnis, `$SHELL` die Shell und `$HOSTNAME` den Rechnernamen. Den Wert verwendest du, indem du ein `$` voranstellst: `echo $USER`.",
-        "`env` listet alle Variablen als `NAME=Wert` auf. Um aus der langen Ausgabe eine einzelne herauszusuchen, kombinierst du es mit `grep` über `|` (Pipe): `env | grep USER`.",
+        "`env` listet alle Variablen als `NAME=Wert` auf. Um aus der langen Ausgabe eine einzelne herauszusuchen, kombinierst du es mit `grep` über `|` (Pipe): `env | grep USER`. (`|` und `grep` werden in Modul 3.2 und 3.4 behandelt.)",
         "In Skripten sind Variablen praktisch: `echo \"$USER@$(hostname)\"` verbindet Benutzer und Rechner. Die Ausgabe des Befehls in `$(...)` wird an dieser Stelle eingesetzt."
       ],
       "commands": [
@@ -120,11 +120,11 @@
     "t11": {"text": "Vorhersage: Ist der Benutzer `student` in der Gruppe `devs`? Prüfe danach mit `groups`.", "hint": "Sag zuerst deine Vermutung, führe dann den Befehl aus."},
     "t12": {"text": "Vorhersage: Was gibt `echo \"$USER@$(hostname)\"` aus? Prüfe es durch Ausführen.", "hint": "`$USER` und `$(hostname)` werden vor der Ausführung durch ihre Werte ersetzt."},
     "t13": {"text": "Die Datei `~/kernel.txt` enthält eine alte Kernel-Version. Korrigiere sie, sodass sie die echte Kernel-Version enthält.", "hint": "`uname -r > ~/kernel.txt` überschreibt den alten Inhalt. Prüfe danach mit `cat ~/kernel.txt`."},
-    "t14": {"text": "Erstelle `~/me.txt` mit der Ausgabe von `whoami`, `id` und `hostname` (in dieser Reihenfolge, 3 Zeilen).", "hint": "Nimm `>` für die erste und `>>` für die weiteren: `whoami > ~/me.txt`, `id >> ~/me.txt`."},
-    "t15": {"text": "Schreibe den lesbaren Namen der Distribution ohne das Präfix `PRETTY_NAME=` in `~/distro.txt`.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` nimmt, was nach dem `=` steht."},
-    "t16": {"text": "Schreibe nur die Hauptnummer (erste Zahl) der Kernel-Version in `~/major.txt`.", "hint": "Nimm die Ausgabe von `uname -r`, teile sie mit `cut -d. -f1` am Punkt und behalte das erste Feld."},
+    "t14": {"text": "Erstelle `~/me.txt` mit der Ausgabe von `whoami`, `id` und `hostname` (in dieser Reihenfolge, 3 Zeilen).", "hint": "Nimm `>` für die erste und `>>` für die weiteren: `whoami > ~/me.txt`, `id >> ~/me.txt`. (`>` schreibt die Ausgabe in eine Datei, `>>` hängt an; Details in Modul 3.2.)"},
+    "t15": {"text": "Schreibe den lesbaren Namen der Distribution ohne das Präfix `PRETTY_NAME=` in `~/distro.txt`.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` nimmt, was nach dem `=` steht. (`cut` kommt in Modul 3.5, `grep` und `|` in Modul 3.4 und 3.2.)"},
+    "t16": {"text": "Schreibe nur die Hauptnummer (erste Zahl) der Kernel-Version in `~/major.txt`.", "hint": "Nimm die Ausgabe von `uname -r`, teile sie mit `cut -d. -f1` am Punkt und behalte das erste Feld. (`cut` wird in Modul 3.5 behandelt.)"},
     "t17": {"text": "Ticket: Der Support braucht Systeminformationen. Schreibe Rechnername, Kernel-Version, Benutzername und die Ausgabe von `df -h` in dieser Reihenfolge in `~/sysinfo.txt`.", "hint": "Beginne mit `hostname > ~/sysinfo.txt`, hänge die anderen vier Ausgaben dann mit `>>` an."},
-    "t18": {"text": "Ticket: Der Administrator fragt, ob das Konto `student` in der Gruppe `wheel` ist. Speichere als Beleg nur die Ausgabe, die `wheel` enthält, in `~/admin_check.txt`.", "hint": "`id | grep wheel > ~/admin_check.txt`"}
+    "t18": {"text": "Ticket: Der Administrator fragt, ob das Konto `student` in der Gruppe `wheel` ist. Speichere als Beleg nur die Ausgabe, die `wheel` enthält, in `~/admin_check.txt`.", "hint": "`id | grep wheel > ~/admin_check.txt` (`|` reicht die Ausgabe an den nächsten Befehl weiter, `grep` filtert; Details in Modul 3.2 und 3.4.)"}
   },
   "vm": {
     "intro": "Alle Befehle in diesem Abschnitt sind nur lesend; du kannst sie bedenkenlos in deiner VM ausführen. Die Ausgaben können je nach Distribution abweichen; wichtig ist, dass du die Struktur erkennst.",
@@ -197,7 +197,7 @@
       },
       "v07": {
         "title": "Die Administratoridentität sehen",
-        "text": "Führe `whoami` mit `sudo` aus: Der Befehl läuft nun als root. Wird nach einem Passwort gefragt, gib das Passwort deines Kontos ein (es wird beim Tippen nicht angezeigt).",
+        "text": "Führe `whoami` mit `sudo` aus: Der Befehl läuft nun als root. Wird nach einem Passwort gefragt, gib das Passwort deines Kontos ein (es wird beim Tippen nicht angezeigt). `sudo` wird in Modul 4.3 behandelt.",
         "blocks": [
           {"cmd": "whoami\nsudo whoami\nwhoami", "expected": "student\nroot\nstudent"}
         ],

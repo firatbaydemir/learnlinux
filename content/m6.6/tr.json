@@ -258,7 +258,7 @@
   },
   "t02": {
    "text": "`~/lab/servers.txt` içinde kaç sunucu var? `wc -l` ile say; bir döngü kaç tur dönecek, tahmin et.",
-   "hint": "`wc -l ~/lab/servers.txt` satır sayısını verir."
+   "hint": "`wc -l ~/lab/servers.txt` satır sayısını verir. (`wc` → modül 2.6.)"
   },
   "t03": {
    "text": "`loop.sh` dosyasına `>>` ile (ezmeden) bir `for i in 1 2 3; do ... done` döngüsü ekle: `printf` ile üç satır yaz.",
@@ -266,7 +266,7 @@
   },
   "t04": {
    "text": "`loop.sh` dosyasını çalıştırılabilir yap (izin 755).",
-   "hint": "`chmod 755 ~/scripts/loop.sh` veya `chmod +x`; `ls -l` ile `-rwxr-xr-x` gör."
+   "hint": "`chmod 755 ~/scripts/loop.sh` veya `chmod +x`; `ls -l` ile `-rwxr-xr-x` gör. (`chmod` → modül 4.4.)"
   },
   "t05": {
    "text": "`~/scripts/readlines.sh` yaz: `while IFS= read -r host; do ... done < ~/lab/servers.txt` kalıbıyla her sunucuyu `echo` ile yazdırsın.",
@@ -274,7 +274,7 @@
   },
   "t06": {
    "text": "`F=\"my notes.txt\"` değişkenini tanımla ve `touch \"$F\"` ile tırnaklı dosyayı oluştur. Tırnaksız yazsaydın ne olurdu?",
-   "hint": "İki ayrı komut: önce atama, sonra `touch \"$F\"`. `ls` ile kontrol et."
+   "hint": "İki ayrı komut: önce atama, sonra `touch \"$F\"`. `ls` ile kontrol et. (`touch` → modül 2.3.)"
   },
   "t07": {
    "text": "`~/scripts/arr.sh` yaz: `hosts=(web01 web02 db01)` dizisini tanımlasın ve `for h in \"${hosts[@]}\"; do ... done` ile yazdırsın.",
@@ -282,7 +282,7 @@
   },
   "t08": {
    "text": "`./scripts/count.sh | wc -l` komutunu çalıştırmadan önce çıktıyı tahmin et: kaç satır yazar? Sonra çalıştırıp doğrula.",
-   "hint": "Script üç `echo` satırı içerir; `cat scripts/count.sh` ile bak."
+   "hint": "Script üç `echo` satırı içerir; `cat scripts/count.sh` ile bak. (`cat` → modül 2.6.)"
   },
   "t09": {
    "text": "`DIR=` ile boş değişken tanımla, sonra `echo \"rm -rf $DIR/\"` çalıştır. Hangi yolu silerdi? Tahmin et, sonra doğrula.",
@@ -290,7 +290,7 @@
   },
   "t10": {
    "text": "`~/scripts/hello.sh` çalışmıyor (`Permission denied`). Düzelt ve çalıştır.",
-   "hint": "`ls -l ~/scripts` izinlere bakar; `chmod +x` ekler; sonra `~/scripts/hello.sh`."
+   "hint": "`ls -l ~/scripts` izinlere bakar; `chmod +x` ekler; sonra `~/scripts/hello.sh`. (`chmod` → modül 4.4.)"
   },
   "t11": {
    "text": "`~/scripts/clean.sh` içindeki `rm -rf $DIR/*` satırı tehlikeli. Dosyayı yeniden yaz: `DIR=/home/student/tmpwork` kalsın, silme satırı `\"${DIR:?}/\"*` kullansın.",
@@ -310,7 +310,7 @@
   },
   "t15": {
    "text": "`~/lab/app.log` içinde hangi sunucular `ERROR` verdi? Benzersiz ve sıralı sunucu adlarını `~/lab/failed_hosts.txt` dosyasına yaz.",
-   "hint": "`grep ERROR`, sonra `cut -d' ' -f4`, `sort -u`; çıktıyı `>` ile dosyaya yönlendir."
+   "hint": "`grep ERROR`, sonra `cut -d' ' -f4`, `sort -u`; çıktıyı `>` ile dosyaya yönlendir. (`grep` → modül 3.4; `cut/sort` → modül 3.5; `>` → modül 3.2.)"
   },
   "t16": {
    "text": "Ticket: Gece temizlik script'i bir sunucuda beklenenden fazlasını sildi, çünkü değişken boştu. `~/scripts/cleanup.sh` yaz: `set -euo pipefail`, `DIR=/home/student/tmpwork`, çıkışta `trap`, silmede `\"${DIR:?}/\"*`; çalıştırılabilir olsun.",

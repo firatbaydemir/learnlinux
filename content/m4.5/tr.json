@@ -237,7 +237,7 @@
   },
   "t16": {
    "text": "TICKET #4503 — `dropbox` adında yeni bir klasör gerek: grubu `devs`, yeni dosyalar gruba ait, üyeler birbirinin dosyasını silemesin, diğerleri giremesin. İçine `README.txt` dosyası koy ve içinde `uploads only` yazsın.",
-   "hint": "setgid + sticky = 3, sonra `770`: `3770`. `echo uploads only > dropbox/README.txt`."
+   "hint": "setgid + sticky = 3, sonra `770`: `3770`. `echo uploads only > dropbox/README.txt`. (`>` ve `>>` → modül 3.2.)"
   }
  },
  "vm": {
@@ -268,7 +268,7 @@
      }
     ],
     "differs": [
-     "Liste dağıtıma göre farklıdır; `passwd`, `mount` veya `su` görmen yeterli.",
+     "Liste dağıtıma göre farklıdır; `passwd`, `mount` veya `su` görmen yeterli. (`find` → modül 3.4.)",
      "`find` yavaşsa bekle; `-xdev` yalnızca ana dosya sistemini tarar, bu yüzden hızlıdır.",
      "Tanımadığın bir yol görürsen aklında tut; gerçek denetimde bu incelenir."
     ]

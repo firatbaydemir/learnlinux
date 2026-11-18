@@ -50,13 +50,13 @@
     }
   ],
   "tasks": {
-    "t01": {"text": "Use `grep` to find user alice's processes in `~/lab/ps_snapshot.txt`.", "hint": "The file starts with a `USER` column; try `grep alice ~/lab/ps_snapshot.txt`."},
-    "t02": {"text": "Find the PID of the `python3` process in the snapshot.", "hint": "In the line from `grep python3 ~/lab/ps_snapshot.txt`, the second field is the PID."},
-    "t03": {"text": "Predict how many lines contain `python3`, then verify with `grep -c`.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` counts matching lines."},
-    "t04": {"text": "Save a graceful shutdown plan in `~/lab/term_plan.txt`: use `kill -TERM` for PID 2210.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt`"},
+    "t01": {"text": "Use `grep` to find user alice's processes in `~/lab/ps_snapshot.txt`.", "hint": "The file starts with a `USER` column; try `grep alice ~/lab/ps_snapshot.txt`. (`grep` → module 3.4.)"},
+    "t02": {"text": "Find the PID of the `python3` process in the snapshot.", "hint": "In the line from `grep python3 ~/lab/ps_snapshot.txt`, the second field is the PID. (`grep` → module 3.4.)"},
+    "t03": {"text": "Predict how many lines contain `python3`, then verify with `grep -c`.", "hint": "`grep -c python3 ~/lab/ps_snapshot.txt` counts matching lines. (`grep` → module 3.4.)"},
+    "t04": {"text": "Save a graceful shutdown plan in `~/lab/term_plan.txt`: use `kill -TERM` for PID 2210.", "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt` (`>` → module 3.2.)"},
     "t05": {"text": "Write an example in `~/lab/priority_plan.txt` that starts a backup with lower CPU priority.", "hint": "Use the form `nice -n 10 ./backup.sh`."},
     "t06": {"text": "Add PID verification and a wait after SIGTERM; mention SIGKILL only as a last resort.", "hint": "Save your plan to `~/lab/escalation_plan.txt`."},
-    "t07": {"text": "For ticket #5301, write a short note that PID 2210 is `python3` and SIGTERM should be tried first.", "hint": "Write the note to `~/lab/ticket_5301.txt`."}
+    "t07": {"text": "For ticket #5301, write a short note that PID 2210 is `python3` and SIGTERM should be tried first.", "hint": "Write the note to `~/lab/ticket_5301.txt`. (`>` → module 3.2.)"}
   },
   "vm": {
     "intro": "Run these commands only in your own test VM. Do not signal an arbitrary PID; verify the process name and PID.",

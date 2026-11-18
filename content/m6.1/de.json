@@ -228,15 +228,15 @@
   },
   "t05": {
    "text": "Schreibe nur die Gateway-Adresse in `~/net/gateway.txt`.",
-   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; Feld 3 ist das Gateway."
+   "hint": "`grep default ... | cut -d' ' -f3 > ~/net/gateway.txt`; Feld 3 ist das Gateway. (`grep` → Modul 3.4; `cut` → Modul 3.5; `>` → Modul 3.2.)"
   },
   "t06": {
    "text": "Schreibe die Anzahl der lauschenden (LISTEN) Zeilen in `~/net/listen_count.txt`.",
-   "hint": "Eine Pipeline wie `grep LISTEN ... | wc -l > file`."
+   "hint": "Eine Pipeline wie `grep LISTEN ... | wc -l > file`. (`wc` → Modul 2.6.)"
   },
   "t07": {
    "text": "Schreibe die nach außen offenen Listener (LISTEN-Zeilen ohne `127.0.0.1`) in `~/net/exposed.txt`.",
-   "hint": "Verbinde zwei `grep` per Pipe; im zweiten nutzt du `-v 127.0.0.1`."
+   "hint": "Verbinde zwei `grep` per Pipe; im zweiten nutzt du `-v 127.0.0.1`. (`grep` → Modul 3.4.)"
   },
   "t08": {
    "text": "Rate: Welcher Prozess lauscht auf Port 8080? Prüfe dann mit `grep 8080 ~/net/ss.txt`.",
@@ -252,23 +252,23 @@
   },
   "t11": {
    "text": "Debug: Der `nameserver` in `~/net/resolv.conf` ist ungültig. Schreibe die Datei neu, sodass sie zwei Zeilen hat: `nameserver 192.168.1.1` und `nameserver 1.1.1.1`.",
-   "hint": "`printf 'line1\\nline2\\n' > file` schreibt zwei Zeilen; sieh dir den Fehler zuerst mit `cat` an."
+   "hint": "`printf 'line1\\nline2\\n' > file` schreibt zwei Zeilen; sieh dir den Fehler zuerst mit `cat` an. (`cat` → Modul 2.6.)"
   },
   "t12": {
    "text": "Debug: Das Skript `~/net/check_ports.sh` läuft nicht. Finde die Ursache, behebe sie und führe das Skript aus.",
-   "hint": "Prüfe die Rechte mit `ls -l`; `chmod 755`, dann `~/net/check_ports.sh`."
+   "hint": "Prüfe die Rechte mit `ls -l`; `chmod 755`, dann `~/net/check_ports.sh`. (`chmod` → Modul 4.4.)"
   },
   "t13": {
    "text": "Mini-Bericht: Schreibe Hostnamen, Gateway-Adresse und Anzahl lauschender Dienste (3 Zeilen, in dieser Reihenfolge) in `~/net/report.txt`.",
-   "hint": "Nutze `>` im ersten Befehl und `>>` in den folgenden; `hostname` liefert den Hostnamen."
+   "hint": "Nutze `>` im ersten Befehl und `>>` in den folgenden; `hostname` liefert den Hostnamen. (`>/>>` → Modul 3.2.)"
   },
   "t14": {
    "text": "Schwer: Schreibe aus den LISTEN-Zeilen von `ss.txt` nur die Portnummern, numerisch sortiert und ohne Duplikate, in `~/net/ports.txt` (ein Port pro Zeile).",
-   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file`"
+   "hint": "`grep LISTEN | tr -s ' ' | cut -d' ' -f5 | cut -d: -f2 | sort -n | uniq > file` (`tr/cut/sort/uniq` → Modul 3.5.)"
   },
   "t15": {
    "text": "Schwer: Schreibe den firewalld-Plan zum dauerhaften Öffnen von 8080/tcp als zwei Zeilen in `~/net/fw_plan.txt`: zuerst den Befehl mit `--permanent --add-port=8080/tcp`, dann `firewall-cmd --reload`. (Du schreibst den Plan, du führst ihn nicht aus.)",
-   "hint": "`echo 'command' > file`, für die zweite Zeile `>>`. Nutze Anführungszeichen."
+   "hint": "`echo 'command' > file`, für die zweite Zeile `>>`. Nutze Anführungszeichen. (`>/>>` → Modul 3.2.)"
   },
   "t16": {
    "text": "Ticket: Nutzer erreichen den Namen `intranet.lab` nicht. Die Adresse des internen Servers ist `192.168.1.50`. Trage diese Zuordnung in `~/net/hosts` ein (vorhandene Zeilen nicht löschen).",
@@ -276,7 +276,7 @@
   },
   "t17": {
    "text": "Ticket: Ein Sicherheits-Audit verlangt den Nachweis, dass PostgreSQL (Port 5432) nur auf der lokalen Adresse lauscht. Speichere die passende Zeile aus `ss.txt` in `~/net/audit.txt`.",
-   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; die Zeile muss `127.0.0.1:5432` enthalten."
+   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; die Zeile muss `127.0.0.1:5432` enthalten. (`grep` → Modul 3.4.)"
   }
  },
  "vm": {

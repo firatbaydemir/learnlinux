@@ -92,8 +92,8 @@
       "title": "Ortam değişkenleri: env ve $USER",
       "body": [
         "Kabuk, bilgileri **ortam değişkenlerinde** saklar. `$USER` kullanıcı adını, `$HOME` ev dizinini, `$SHELL` kabuğunu, `$HOSTNAME` makine adını tutar. Başına `$` koyarak değerini kullanırsın: `echo $USER`.",
-        "`env` tüm değişkenleri `ADI=değer` biçiminde listeler. Uzun çıktıdan tek bir tanesini süzmek için `|` (boru) ile `grep` kullanırsın: `env | grep USER`.",
-        "Değişkenler betiklerde kullanışlıdır: `echo \"$USER@$(hostname)\"` hem kullanıcıyı hem makineyi birleştirir. `$(...)` içindeki komutun çıktısı oraya yerleşir."
+        "`env` tüm değişkenleri `ADI=değer` biçiminde listeler. Uzun çıktıdan tek bir tanesini süzmek için `|` (boru) ile `grep` kullanırsın: `env | grep USER`. (`|` ve `grep` ayrıntısı modül 3.2 ve 3.4'te.)",
+                "Değişkenler betiklerde kullanışlıdır: `echo \"$USER@$(hostname)\"` hem kullanıcıyı hem makineyi birleştirir. `$(...)` içindeki komutun çıktısı oraya yerleşir."
       ],
       "commands": [
         {"cmd": "env", "what": "Tüm ortam değişkenlerini listeler.", "where": "Bir ayarın nereden geldiğini araştırırken.", "why": "Hangi değerlerle çalıştığını görürsün.", "example": "env"},
@@ -120,11 +120,11 @@
     "t11": {"text": "Tahmin et: `student` kullanıcısı `devs` grubunda mı? Sonra `groups` ile doğrula.", "hint": "Önce tahminini söyle, sonra komutu çalıştır."},
     "t12": {"text": "Tahmin et: `echo \"$USER@$(hostname)\"` ne yazar? Çalıştırarak doğrula.", "hint": "`$USER` ve `$(hostname)` komut çalışmadan önce kendi değerleriyle değişir."},
     "t13": {"text": "`~/kernel.txt` dosyasında eski bir kernel sürümü yazıyor. Bu dosyayı gerçek kernel sürümüyle düzelt.", "hint": "`uname -r > ~/kernel.txt` eski içeriği ezer. Sonra `cat ~/kernel.txt` ile bak."},
-    "t14": {"text": "`~/me.txt` dosyası oluştur: sırayla `whoami`, `id` ve `hostname` çıktısı olsun (3 satır).", "hint": "İlkinde `>`, sonrakilerde `>>` kullan: `whoami > ~/me.txt`, `id >> ~/me.txt`."},
-    "t15": {"text": "Dağıtımın okunaklı adını `PRETTY_NAME=` öneki olmadan `~/distro.txt` dosyasına yaz.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` `=` işaretinden sonrasını alır."},
-    "t16": {"text": "Kernel sürümünün yalnızca ana numarasını (ilk sayı) `~/major.txt` dosyasına yaz.", "hint": "`uname -r` çıktısını `cut -d. -f1` ile nokta ile bölüp birinci alanı al."},
+    "t14": {"text": "`~/me.txt` dosyası oluştur: sırayla `whoami`, `id` ve `hostname` çıktısı olsun (3 satır).", "hint": "İlkinde `>`, sonrakilerde `>>` kullan: `whoami > ~/me.txt`, `id >> ~/me.txt`. (`>` çıktıyı dosyaya yazar, `>>` ekler; ayrıntısı modül 3.2'de.)"},
+    "t15": {"text": "Dağıtımın okunaklı adını `PRETTY_NAME=` öneki olmadan `~/distro.txt` dosyasına yaz.", "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` `=` işaretinden sonrasını alır. (`cut` modül 3.5'te, `grep` ve `|` modül 3.4 ve 3.2'de anlatılır.)"},
+    "t16": {"text": "Kernel sürümünün yalnızca ana numarasını (ilk sayı) `~/major.txt` dosyasına yaz.", "hint": "`uname -r` çıktısını `cut -d. -f1` ile nokta ile bölüp birinci alanı al. (`cut` ayrıntısı modül 3.5'te.)"},
     "t17": {"text": "Ticket: Destek ekibi sistem bilgisi istiyor. `~/sysinfo.txt` dosyasına sırayla makine adını, kernel sürümünü, kullanıcı adını ve `df -h` çıktısını yaz.", "hint": "`hostname > ~/sysinfo.txt` ile başla, sonra dört komutun çıktısını `>>` ile ekle."},
-    "t18": {"text": "Ticket: Yönetici, `student` hesabının `wheel` grubunda olup olmadığını soruyor. Kanıt olarak yalnızca `wheel` geçen çıktıyı `~/admin_check.txt` dosyasına kaydet.", "hint": "`id | grep wheel > ~/admin_check.txt`"}
+    "t18": {"text": "Ticket: Yönetici, `student` hesabının `wheel` grubunda olup olmadığını soruyor. Kanıt olarak yalnızca `wheel` geçen çıktıyı `~/admin_check.txt` dosyasına kaydet.", "hint": "`id | grep wheel > ~/admin_check.txt` (`|` çıktıyı sonraki komuta aktarır, `grep` süzer; ayrıntısı modül 3.2 ve 3.4'te.)"}
   },
   "vm": {
     "intro": "Bu bölümdeki komutların hepsi salt okunurdur; VM'inde güvenle çalıştırabilirsin. Çıktılar dağıtımına göre farklı olabilir; önemli olan yapıyı tanımandır.",
@@ -197,7 +197,7 @@
       },
       "v07": {
         "title": "Yönetici kimliğini gör",
-        "text": "`sudo` ile `whoami` çalıştır: komut artık root olarak çalışır. Şifre isterse hesabının şifresini yaz (yazarken ekranda görünmez).",
+        "text": "`sudo` ile `whoami` çalıştır: komut artık root olarak çalışır. Şifre isterse hesabının şifresini yaz (yazarken ekranda görünmez). `sudo` ayrıntısı modül 4.3'te anlatılır.",
         "blocks": [
           {"cmd": "whoami\nsudo whoami\nwhoami", "expected": "student\nroot\nstudent"}
         ],
