@@ -125,6 +125,22 @@
      "why": "Presents the mount table in a readable form.",
      "example": "findmnt /",
      "nosim": true
+    },
+    {
+     "cmd": "mdadm",
+     "what": "Combines several disks into a software RAID array and manages it.",
+     "where": "For RAID 1 (mirroring) or RAID 5; only on empty, redundant disks.",
+     "why": "So data survives a disk failure (redundancy) or for speed.",
+     "example": "sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc",
+     "nosim": true
+    },
+    {
+     "cmd": "quota",
+     "what": "Shows a user's disk quota and usage.",
+     "where": "When quotas (usrquota) are enabled on the filesystem; the admin sets limits with `edquota`.",
+     "why": "So one user cannot fill the whole disk.",
+     "example": "quota -u alice",
+     "nosim": true
     }
    ],
    "tip": "Back up `/etc/fstab` before editing. Afterward, use `sudo mount -a` to check the syntax instead of rebooting immediately; it can perform mounts."

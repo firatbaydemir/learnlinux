@@ -125,6 +125,22 @@
      "why": "mount tablosunu okunur biçimde gösterir.",
      "example": "findmnt /",
      "nosim": true
+    },
+    {
+     "cmd": "mdadm",
+     "what": "Birden fazla diski yazılım RAID dizisi olarak birleştirir ve yönetir.",
+     "where": "RAID 1 (yansıtma) veya RAID 5 gerektiğinde; yalnızca boş, yedekli diskler üzerinde.",
+     "why": "Disk arızasında verinin kaybolmaması (yedeklilik) veya hız için.",
+     "example": "sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc",
+     "nosim": true
+    },
+    {
+     "cmd": "quota",
+     "what": "Kullanıcının disk kotasını ve kullanımını gösterir.",
+     "where": "Dosya sisteminde kota (usrquota) etkinse; yönetici `edquota` ile sınır koyar.",
+     "why": "Bir kullanıcının diski doldurmasını önlemek için.",
+     "example": "quota -u alice",
+     "nosim": true
     }
    ],
    "tip": "`/etc/fstab` dosyasını düzenlemeden önce yedekle; değişiklikten sonra yeniden başlatmak yerine `sudo mount -a` ile sözdizimini denetle (bu komut bağlama yapabilir)."

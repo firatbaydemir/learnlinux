@@ -125,6 +125,22 @@
      "why": "Stellt die Mount-Tabelle übersichtlich dar.",
      "example": "findmnt /",
      "nosim": true
+    },
+    {
+     "cmd": "mdadm",
+     "what": "Fasst mehrere Platten zu einem Software-RAID zusammen und verwaltet es.",
+     "where": "Bei RAID 1 (Spiegelung) oder RAID 5; nur auf leeren, redundanten Platten.",
+     "why": "Damit bei einem Plattenausfall keine Daten verloren gehen (Redundanz) oder für mehr Tempo.",
+     "example": "sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc",
+     "nosim": true
+    },
+    {
+     "cmd": "quota",
+     "what": "Zeigt Plattenkontingent und Verbrauch eines Benutzers.",
+     "where": "Wenn Quotas (usrquota) im Dateisystem aktiv sind; der Admin setzt Grenzen mit `edquota`.",
+     "why": "Damit ein Benutzer nicht die ganze Platte füllt.",
+     "example": "quota -u alice",
+     "nosim": true
     }
    ],
    "tip": "Sichere `/etc/fstab` vor Änderungen. Prüfe danach mit `sudo mount -a` die Syntax, statt sofort neu zu starten; der Befehl kann Einhängungen ausführen."

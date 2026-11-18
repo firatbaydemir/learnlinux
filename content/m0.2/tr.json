@@ -163,6 +163,14 @@
   "t12": {
    "text": "Meydan okuma: NAT ile bridged ağ farkını bir cümleyle `~/net-note.txt` dosyasına yaz (`bridged` geçsin).",
    "hint": "NAT: VM ana makinenin arkasında; bridged: VM LAN'dan kendi IP'sini alır."
+  },
+  "t13": {
+   "text": "Kaydet: `hostname > ~/host.txt` ile makine adını bir dosyaya yaz.",
+   "hint": "Yönlendirme `>` kullan."
+  },
+  "t14": {
+   "text": "Adım adım: `whoami`, sonra `pwd` çalıştır; kim olduğunu ve nerede durduğunu doğrula.",
+   "hint": "İkisi de argümansız."
   }
  },
  "vm": {

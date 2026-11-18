@@ -423,3 +423,11 @@ h1{background:var(--grad);-webkit-background-clip:text;background-clip:text;-web
 .bar{background:var(--bd)}
 }
 @media print{h1,.brand span{background:none!important;-webkit-text-fill-color:currentColor!important}}
+
+/* === design v7: cyber blue-turquoise === */
+:root{--bg:#eefafb;--fg:#0b2530;--mut:#456572;--card:#fff;--bd:#c9e6ec;--ac:#0b7fb0;--acfg:#fff;--acs:#def3fa;--code:#e3f4f6;--tipc:#0d9488;--tips:#dcf7f3;--grad:linear-gradient(135deg,#0b7fb0,#06b6d4 50%,#14b8a6);--sh:0 1px 2px rgba(8,70,100,.06),0 8px 24px -8px rgba(8,90,120,.16);--sh2:0 2px 4px rgba(8,70,100,.07),0 18px 40px -12px rgba(6,182,212,.35)}
+:root[data-theme=dark]{--bg:#0f2d3d;--fg:#eafaff;--mut:#9fc6d4;--card:#16405a;--bd:#2a6580;--ac:#3fd8f0;--acfg:#032634;--acs:#1a4e66;--code:#1b4a63;--cbg:#0b2433;--tipc:#34e0c4;--tips:#144d57;--oks:#13524a;--warns:#4d4720;--dangs:#552a40;--sh:0 1px 2px rgba(2,20,32,.3),0 12px 32px -10px rgba(2,20,32,.5);--sh2:0 0 0 1px rgba(63,216,240,.35),0 0 24px -4px rgba(63,216,240,.35)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f2d3d;--fg:#eafaff;--mut:#9fc6d4;--card:#16405a;--bd:#2a6580;--ac:#3fd8f0;--acfg:#032634;--acs:#1a4e66;--code:#1b4a63;--cbg:#0b2433;--tipc:#34e0c4;--tips:#144d57;--oks:#13524a;--warns:#4d4720;--dangs:#552a40;--sh:0 1px 2px rgba(2,20,32,.3),0 12px 32px -10px rgba(2,20,32,.5);--sh2:0 0 0 1px rgba(63,216,240,.35),0 0 24px -4px rgba(63,216,240,.35)}}
+:root[data-theme=dark] body,:root:not([data-theme=light]) .page-module,:root:not([data-theme=light]) .page-index{background-image:linear-gradient(rgba(63,216,240,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(63,216,240,.045) 1px,transparent 1px),radial-gradient(ellipse at 10% -10%,rgba(63,216,240,.18),transparent 45%),radial-gradient(ellipse at 95% 105%,rgba(52,224,196,.14),transparent 42%);background-size:36px 36px,36px 36px,auto,auto}
+:root[data-theme=light] body,:root:not([data-theme=dark]) body{background-image:linear-gradient(rgba(11,127,176,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(11,127,176,.05) 1px,transparent 1px),radial-gradient(ellipse at 10% -10%,rgba(6,182,212,.14),transparent 45%);background-size:36px 36px,36px 36px,auto}
+:root[data-theme=dark] .mod:hover:not(.soon),:root[data-theme=dark] .task:hover,:root[data-theme=dark] .card:hover{border-color:var(--ac);box-shadow:var(--sh2)}

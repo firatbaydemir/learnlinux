@@ -163,6 +163,14 @@
   "t12": {
    "text": "Herausforderung: Beschreibe den Unterschied zwischen NAT und Bridged in einem Satz in `~/net-note.txt` (mit `bridged`).",
    "hint": "NAT: VM hinter dem Host; Bridged: VM erhält eine eigene IP im LAN."
+  },
+  "t13": {
+   "text": "Speichern: Schreibe den Rechnernamen mit `hostname > ~/host.txt` in eine Datei.",
+   "hint": "Nutze die Umleitung `>`."
+  },
+  "t14": {
+   "text": "Schritt für Schritt: Führe `whoami`, dann `pwd` aus; prüfe, wer du bist und wo du stehst.",
+   "hint": "Beide ohne Argumente."
   }
  },
  "vm": {

@@ -9,3 +9,13 @@ AUDIT.md
 plan-v2.md
 tmp_*.py
 tmp_*.css
+
+.continue/
+SCAN.md
+GAPS.md
+REPORT.md
+CONSISTENCY.md
+FACTS.md
+INVENTORY.json
+facts_raw.json
+tools/_*.py
