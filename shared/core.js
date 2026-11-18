@@ -20,7 +20,7 @@
   var tb = document.getElementById('themebtn');
   if (tb) tb.addEventListener('click', function () {
     var cur = document.documentElement.dataset.theme ||
-      (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      'dark';
     var nx = cur === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = nx;
     store.set('theme', nx);

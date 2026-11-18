@@ -12,7 +12,7 @@ LANGS = ["tr", "de", "en"]
 LANG_NAMES = {"tr": "Türkçe", "de": "Deutsch", "en": "English"}
 # UI keys needed by the browser runtime (lab.js / terminal-ui.js / core.js)
 RUNTIME_UI = ["correct", "wrong", "taskDone", "moduleDone", "tasksDone", "welcome", "sandboxNote",
-              "resetConfirm", "openTerminal", "closeTerminal", "continue", "startPath", "noResult", "soon", "overall"]
+              "resetConfirm", "retryBadge", "retryBtn", "retryNote", "openTerminal", "closeTerminal", "continue", "startPath", "noResult", "soon", "overall"]
 
 
 def load(p):
@@ -53,7 +53,7 @@ def head(lang, title, depth_shared="../shared"):
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>%s</title>\n'
             '<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;'
             'localStorage.setItem("tla3:lang","%s")}catch(e){}</script>\n'
-            '<meta name="theme-color" content="#172033">\n'
+            '<meta name="theme-color" content="#060a08">\n'
             '<link rel="manifest" href="../manifest.webmanifest">\n'
             '<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">\n'
             '<link rel="apple-touch-icon" href="../icons/icon-192.png">\n'
@@ -62,25 +62,78 @@ def head(lang, title, depth_shared="../shared"):
                 lang, esc(title), lang, depth_shared, depth_shared)
 
 
-LEVEL_EMOJI = {"0": "🌱", "1": "🐧", "2": "📁", "3": "📝", "4": "🔐", "5": "⚙️", "6": "🛠️"}
-KIND_EMOJI = {"warmup": "🔥", "guided": "🧭", "predict": "🔮", "debug": "🐞", "mini": "🧩", "challenge": "🏆", "ticket": "🎫"}
+
+_P = {
+    "sprout": '<path d="M12 21v-9"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6Z"/><path d="M12 14c0-3-2-5-6-5 0 3 2 5 6 5Z"/>',
+    "terminal": '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/>',
+    "folder": '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
+    "file": '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+    "lock": '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    "gear": '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+    "wrench": '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4Z"/>',
+    "book": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M4 19V5M9 7h6"/>',
+    "flame": '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-9Z"/>',
+    "compass": '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/>',
+    "eye": '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    "bug": '<rect x="8" y="8" width="8" height="12" rx="4"/><path d="M9 8a3 3 0 0 1 6 0M4 13h4M16 13h4M5 7l3 3M19 7l-3 3M5 20l3-3M19 20l-3-3"/>',
+    "puzzle": '<path d="M10 4a2 2 0 1 1 4 0v2h4v4h-2a2 2 0 1 0 0 4h2v6h-6v-2a2 2 0 1 0-4 0v2H4v-6h2a2 2 0 1 0 0-4H4V6h6Z"/>',
+    "trophy": '<path d="M8 4h8v6a4 4 0 0 1-8 0Z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3M12 14v4M8 21h8M10 18h4"/>',
+    "ticket": '<path d="M3 8a2 2 0 0 0 0 8v2h18v-2a2 2 0 0 1 0-8V6H3Z"/><path d="M14 6v12" stroke-dasharray="2 2"/>',
+    "bulb": '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3Z"/>',
+    "warn": '<path d="M12 3 2 20h20Z"/><path d="M12 10v5M12 17.5v.5"/>',
+    "danger": '<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+    "target": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    "monitor": '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+    "flask": '<path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7.5 15h9"/>',
+    "help": '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17v.5"/>',
+    "check": '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>',
+    "theme": '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/>',
+    "close": '<path d="M6 6l12 12M18 6 6 18"/>',
+    "play": '<path d="M7 5v14l12-7Z"/>',
+    "arrow-r": '<path d="M5 12h14m-6-6 6 6-6 6"/>',
+    "arrow-l": '<path d="M19 12H5m6-6-6 6 6 6"/>',
+}
+
+
+def icon(name, cls="ico"):
+    return '<svg class="%s" viewBox="0 0 24 24" aria-hidden="true" focusable="false">%s</svg>' % (cls, _P[name])
+
+
+def _ic(s):
+    return re.sub(r"@@([a-z-]+)@@", lambda m: icon(m.group(1)), s)
+
+
+def ih(name, text):
+    """icon + text for headings"""
+    return icon(name) + " " + text
+
+LEVEL_ICON = {"0": "sprout", "1": "terminal", "2": "folder", "3": "file", "4": "lock", "5": "gear", "6": "wrench"}
+KIND_ICON = {"warmup": "flame", "guided": "compass", "predict": "eye", "debug": "bug", "mini": "puzzle", "challenge": "trophy", "ticket": "ticket"}
 
 
 def topbar(lang, ui, page, extra=""):
-    return ('<header class="top"><a class="brand" href="index.html">' + linux_icon() + '<span>%s</span></a>'
-            '<div class="topr">%s%s<button type="button" class="ibtn" id="themebtn" title="%s" aria-label="%s">◐</button></div></header>\n'
+    return _ic('<header class="top"><a class="brand" href="index.html">' + linux_icon() + '<span>%s</span></a>'
+            '<div class="topr">%s%s<button type="button" class="ibtn" id="themebtn" title="%s" aria-label="%s">@@theme@@</button></div></header>\n'
             % (esc(ui["siteName"]), extra, lang_switch(lang, page), esc(ui["theme"]), esc(ui["theme"])))
 
 
 def linux_icon():
     return ('<svg class="tux-icon" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
-            '<path fill="#172033" d="M120 24c-40 0-72 32-72 72v47c0 39 32 70 72 70s72-31 72-70V96c0-40-32-72-72-72Z"/>'
-            '<ellipse cx="120" cy="111" rx="49" ry="39" fill="#fff"/>'
-            '<ellipse cx="120" cy="171" rx="43" ry="34" fill="#f3f6fb"/>'
-            '<ellipse cx="102" cy="104" rx="6" ry="9" fill="#172033"/>'
-            '<ellipse cx="138" cy="104" rx="6" ry="9" fill="#172033"/>'
-            '<path fill="#f2a900" d="m120 117 18 13-18 10-18-10 18-13Z"/>'
-            '<path fill="#f2a900" d="M67 194c12 2 24-1 35-8-4 18-19 29-37 25-8-2-10-12 2-17Zm106 0c-12 2-24-1-35-8 4 18 19 29 37 25 8-2 10-12-2-17Z"/>'
+                        '<ellipse cx="84" cy="220" rx="30" ry="11" fill="#f5a623" stroke="#b8730f" stroke-width="2"/>'
+            '<ellipse cx="156" cy="220" rx="30" ry="11" fill="#f5a623" stroke="#b8730f" stroke-width="2"/>'
+            '<ellipse cx="46" cy="150" rx="13" ry="40" transform="rotate(18 46 150)" fill="#23262e" stroke="#4a505e" stroke-width="2"/>'
+            '<ellipse cx="194" cy="150" rx="13" ry="40" transform="rotate(-18 194 150)" fill="#23262e" stroke="#4a505e" stroke-width="2"/>'
+            '<path fill="#23262e" stroke="#4a505e" stroke-width="3" stroke-linejoin="round" d="M120 18c-34 0-52 28-52 62 0 18-4 30-14 44-14 20-22 42-22 64 0 24 20 34 44 34h88c24 0 44-10 44-34 0-22-8-44-22-64-10-14-14-26-14-44 0-34-18-62-52-62Z"/>'
+            '<path fill="#f4f1e8" d="M120 92c-30 0-48 30-48 68 0 36 18 56 48 56s48-20 48-56c0-38-18-68-48-68Z"/>'
+            '<path fill="#ffffff" opacity=".14" d="M96 30c-14 8-22 22-24 40 6-14 16-24 30-30Z"/>'
+            '<path fill="#dcd6c6" d="M120 150c-26 0-44 14-48 36 8 22 24 30 48 30s40-8 48-30c-4-22-22-36-48-36Z" opacity=".55"/>'
+            '<ellipse cx="88" cy="84" rx="9" ry="6" fill="#ff8a7a" opacity=".35"/><ellipse cx="152" cy="84" rx="9" ry="6" fill="#ff8a7a" opacity=".35"/>'
+            '<ellipse cx="103" cy="62" rx="10" ry="12" fill="#fff"/><ellipse cx="137" cy="62" rx="10" ry="12" fill="#fff"/>'
+            '<ellipse cx="106" cy="64" rx="4.5" ry="6" fill="#111"/><ellipse cx="134" cy="64" rx="4.5" ry="6" fill="#111"/>'
+            '<circle cx="108" cy="61" r="1.8" fill="#fff"/><circle cx="136" cy="61" r="1.8" fill="#fff"/>'
+            '<path fill="#f5a623" stroke="#b8730f" stroke-width="2" stroke-linejoin="round" d="M94 80q26-14 52 0-4 14-26 16-22-2-26-16Z"/>'
+            '<path fill="#e8901a" stroke="#b8730f" stroke-width="2" stroke-linejoin="round" d="M101 94q19 8 38 0-6 16-19 16t-19-16Z"/>'
+
             '</svg>')
 
 
@@ -102,7 +155,7 @@ def build_index(lang, ui, mods_meta, built):
            '<main class="wrap index-wrap">\n',
            '<section class="hero"><div class="hero-copy"><p class="hero-kicker"><span></span>%s</p>'
            '<h1>%s</h1><p class="hero-description">%s</p><div class="heroact">'
-           '<a class="btn primary" id="continue" href="#">%s <span aria-hidden="true">→</span></a>'
+           '<a class="btn primary" id="continue" href="#">%s %s</a>'
            '<input type="search" id="search" placeholder="%s" aria-label="%s"></div>'
            '<div class="hero-progress"><div class="bar" aria-hidden="true"><i id="totalbar"></i></div>'
            '<p class="muted" id="totaltxt"></p></div></div>'
@@ -111,12 +164,12 @@ def build_index(lang, ui, mods_meta, built):
            '<div class="terminal-chrome"><i></i><i></i><i></i><span>terminal</span></div>'
            '<div class="terminal-lines"><p><span>~</span> uname -s</p><p class="terminal-output">Linux</p>'
            '<p><span>~</span> <b class="terminal-cursor"></b></p></div></div></div></section>\n'
-           % (esc(ui["heroKicker"]), esc(ui["heroTitle"]), esc(ui["heroText"]), esc(ui["startPath"]),
+           % (esc(ui["heroKicker"]), esc(ui["heroTitle"]), esc(ui["heroText"]), esc(ui["startPath"]), icon("arrow-r"),
               esc(ui["search"]), esc(ui["search"]), linux_icon())]
     out.append('<p id="noresult" class="muted" hidden>%s</p>\n' % esc(ui["noResult"]))
     for lv in sorted(levels, key=int):
         items = [m for m in mods_meta["modules"] if str(m["level"]) == lv]
-        out.append('<section class="level" data-level="%s"><h2><span class="lvl-ico" aria-hidden="true">%s</span>%s %s — %s</h2><ul class="mods">\n' % (lv, LEVEL_EMOJI.get(lv, "📘"), esc(ui["level"]), lv, esc(levels[lv][lang])))
+        out.append('<section class="level" data-level="%s"><h2><span class="lvl-ico">%s</span>%s %s — %s</h2><ul class="mods">\n' % (lv, icon(LEVEL_ICON.get(lv, "book")), esc(ui["level"]), lv, esc(levels[lv][lang])))
         for m in items:
             t = m["title"][lang]
             if m["id"] in built:
@@ -170,13 +223,13 @@ def code_block(text, ui, sim=False):
     lines = text.split("\n")
     body = "".join('<span class="ln">%s</span>\n' % hl(l) for l in lines)
     raw = "\n".join(re.sub(r"\s+#.*$", "", l) for l in lines)
-    simbtn = ('<button type="button" class="try small" data-try="%s" title="%s">▶ %s</button>' % (esc(text), esc(ui["tryHint"]), esc(ui["tryInSim"]))) if sim else ""
+    simbtn = _ic('<button type="button" class="try small" data-try="%s" title="%s">@@play@@ %s</button>' % (esc(text), esc(ui["tryHint"]), esc(ui["tryInSim"]))) if sim else ""
     return ('<div class="code"><pre><code>%s</code></pre><div class="codebtns">%s<button type="button" class="copy" data-copy="%s">%s</button></div></div>'
             % (body, simbtn, esc(raw), esc(ui["copy"])))
 
 
 def callout(kind, label, text):
-    icons = {"tip": "💡", "warn": "⚠️", "danger": "⛔"}
+    icons = {"tip": icon("bulb"), "warn": icon("warn"), "danger": icon("danger")}
     return '<aside class="callout %s" role="note"><strong>%s %s</strong><p>%s</p></aside>\n' % (kind, icons[kind], esc(label), md(text))
 
 
@@ -186,7 +239,7 @@ def build_module(lang, ui, mods_meta, mid, built):
     meta = next(m for m in mods_meta["modules"] if m["id"] == mid)
     page = mod_file(mid)
     title = "%s %s — %s" % (mid, tx["title"], ui["siteName"])
-    toggle = '<button type="button" class="btn" id="termbtn" aria-expanded="false">&gt;_ %s</button>' % esc(ui["terminalOptional"])
+    toggle = _ic('<button type="button" class="btn" id="termbtn" aria-expanded="false">@@terminal@@ %s</button>' % esc(ui["terminalOptional"]))
     toc = [(s["id"], s["title"]) for s in tx["sections"]]
     if mod.get("vm"):
         toc.append(("vm", ui["vmTitle"]))
@@ -203,8 +256,8 @@ def build_module(lang, ui, mods_meta, mid, built):
     o.append('<div class="module-hero" data-level="%s"><div class="hero-tux" aria-hidden="true">%s</div><p class="crumb"><a href="index.html">%s</a> <span aria-hidden="true">/</span> %s %s</p>\n'
              '<h1><span class="module-id">%s</span> %s</h1>\n<p class="lead">%s</p>\n<p class="muted" id="modtxt"></p></div>\n'
              % (meta["level"], linux_icon(), esc(ui["home"]), esc(ui["level"]), meta["level"], mid, esc(tx["title"]), md(tx["lead"])))
-    o.append('<section class="card" id="objectives"><h2>🎯 %s</h2><ul>%s</ul></section>\n'
-             % (esc(ui["objectives"]), "".join("<li>%s</li>" % md(x) for x in tx["objectives"])))
+    o.append('<section class="card" id="objectives"><h2>%s %s</h2><ul>%s</ul></section>\n'
+             % (icon("target"), esc(ui["objectives"]), "".join("<li>%s</li>" % md(x) for x in tx["objectives"])))
     for sec in tx["sections"]:
         o.append('<section id="%s"><h2>%s</h2>\n' % (esc(sec["id"]), esc(sec["title"])))
         for p in sec["body"]:
@@ -220,7 +273,7 @@ def build_module(lang, ui, mods_meta, mid, built):
         o.append("</section>\n")
     vm = mod.get("vm", [])
     if vm:
-        o.append('<section id="vm"><h2>🖥️ %s <span class="gcount" data-g="vm"></span></h2><p>%s</p><p>%s</p>\n' % (esc(ui["vmTitle"]), md(ui["vmIntro"]), md(tx["vm"]["intro"])))
+        o.append('<section id="vm"><h2>%s %s <span class="gcount" data-g="vm"></span></h2><p>%s</p><p>%s</p>\n' % (icon("monitor"), esc(ui["vmTitle"]), md(ui["vmIntro"]), md(tx["vm"]["intro"])))
         for v in vm:
             t = tx["vm"]["tasks"][v["id"]]
             o.append('<article class="vmt card" data-vm="%s" data-expect="%d"><header><h3>%s</h3><span class="status" aria-hidden="true"></span></header><p>%s</p>\n'
@@ -238,13 +291,15 @@ def build_module(lang, ui, mods_meta, mid, built):
             o.append("</article>\n")
         o.append("</section>\n")
     if mod["tasks"]:
-        o.append('<section id="lab"><h2>🧪 %s</h2><p>%s</p><p>%s</p><p><button type="button" class="btn" data-openterm>&gt;_ %s</button></p>\n'
-                 % (esc(ui["simTitle"]), md(ui["simIntro"]), md(ui["labIntro"]), esc(ui["openTerminal"])))
+        o.append('<section id="lab"><h2>%s %s</h2><p>%s</p><p>%s</p><p><button type="button" class="btn" data-openterm>%s %s</button></p>\n'
+                 % (icon("flask"), esc(ui["simTitle"]), md(ui["simIntro"]), md(ui["labIntro"]), icon("terminal"), esc(ui["openTerminal"])))
         for kind in KINDS:
             ts = [t for t in mod["tasks"] if t.get("kind", "guided") == kind]
             if not ts:
                 continue
-            o.append('<h3 class="kind k-%s">%s %s <span class="gcount" data-g="%s"></span></h3><ol class="tasks">\n' % (kind, KIND_EMOJI[kind], esc(ui["kind_" + kind]), kind))
+            o.append('<h3 class="kind k-%s">%s %s <span class="gcount" data-g="%s"></span></h3>%s<ol class="tasks">\n'
+                     % (kind, icon(KIND_ICON[kind]), esc(ui["kind_" + kind]), kind,
+                        ('<p class="predict-note">%s</p>' % md(ui["predictNote"])) if kind == "predict" else ""))
             for t in ts:
                 tt = tx["tasks"][t["id"]]
                 d = t.get("diff", 2)
@@ -256,29 +311,33 @@ def build_module(lang, ui, mods_meta, mid, built):
                             esc(ui["hint"]), md(tt["hint"]), esc(ui["solution"]), code_block("\n".join(t["solution"]), ui)))
             o.append("</ol>\n")
         o.append('<p><button type="button" class="btn" id="resetlab">%s</button></p></section>\n' % esc(ui["resetLab"]))
-    o.append('<section id="quiz"><h2>❓ %s</h2>\n' % esc(ui["quizTitle"]))
+    o.append('<section id="quiz"><h2>%s %s</h2>\n' % (icon("help"), esc(ui["quizTitle"])))
     for q in mod["quiz"]:
         qt = tx["quiz"][q["id"]]
         opts = "".join('<button type="button" class="opt" data-i="%d">%s</button>' % (i, md(x)) for i, x in enumerate(qt["options"]))
         o.append('<div class="q card" data-q="%s"><p><strong>%s</strong></p><div class="opts">%s</div><p class="explain" hidden>%s</p></div>\n'
                  % (q["id"], md(qt["q"]), opts, md(qt["explain"])))
+    o.append('<p class="retry-bar" hidden><span>%s</span> <button type="button" class="btn" id="retryq">%s</button></p>\n' % (esc(ui["retryNote"]), esc(ui["retryBtn"])))
     o.append("</section>\n")
-    o.append('<section id="summary" class="card"><h2>✅ %s</h2><ul>%s</ul></section>\n' % (esc(ui["summary"]), "".join("<li>%s</li>" % md(x) for x in tx["summary"])))
-    o.append('<section id="glossary"><h2>📖 %s</h2><dl class="gl">%s</dl></section>\n' % (esc(ui["glossary"]),
+    o.append('<section id="summary" class="card"><h2>%s %s</h2><ul>%s</ul></section>\n' % (icon("check"), esc(ui["summary"]), "".join("<li>%s</li>" % md(x) for x in tx["summary"])))
+    o.append('<section id="recall" class="card recall"><h2>%s %s</h2><p>%s</p><details><summary>%s</summary><ol>%s</ol></details></section>\n'
+             % (icon("bulb"), esc(ui["recallTitle"]), esc(ui["recallPrompt"]), esc(ui["recallShow"]),
+                "".join("<li>%s</li>" % md(x) for x in tx["summary"][:3])))
+    o.append('<section id="glossary"><h2>%s %s</h2><dl class="gl">%s</dl></section>\n' % (icon("book"), esc(ui["glossary"]),
              "".join("<dt>%s</dt><dd>%s</dd>" % (esc(g["term"]), md(g["meaning"])) for g in tx["glossary"])))
     order = [m["id"] for m in mods_meta["modules"]]
     i = order.index(mid)
     nav = []
     if i > 0 and order[i - 1] in built:
-        nav.append('<a class="btn" href="%s">← %s</a>' % (mod_file(order[i - 1]), esc(ui["prev"])))
+        nav.append('<a class="btn" href="%s">%s %s</a>' % (mod_file(order[i - 1]), icon("arrow-l"), esc(ui["prev"])))
     if i + 1 < len(order) and order[i + 1] in built:
-        nav.append('<a class="btn primary" href="%s">%s →</a>' % (mod_file(order[i + 1]), esc(ui["next"])))
+        nav.append('<a class="btn primary" href="%s">%s %s</a>' % (mod_file(order[i + 1]), esc(ui["next"]), icon("arrow-r")))
     o.append('<nav class="pn">%s</nav>\n</main>\n' % "".join(nav))
-    o.append('<aside class="term" id="term" aria-label="%s" hidden><div class="termhead"><span class="tdots" aria-hidden="true"><i></i><i></i><i></i></span><strong>%s</strong>'
-             '<button type="button" class="ibtn" id="termclose" aria-label="%s">✕</button></div>'
+    o.append(_ic('<aside class="term" id="term" aria-label="%s" hidden><div class="termhead"><span class="tdots" aria-hidden="true"><i></i><i></i><i></i></span><strong>%s</strong>'
+             '<button type="button" class="ibtn" id="termclose" aria-label="%s">@@close@@</button></div>'
              '<div class="termout" id="termout" role="log"></div>'
              '<div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="%s"></div></aside></div>\n'
-             % (esc(ui["terminal"]), esc(ui["terminalOptional"]), esc(ui["closeTerminal"]), esc(ui["terminal"])))
+             % (esc(ui["terminal"]), esc(ui["terminalOptional"]), esc(ui["closeTerminal"]), esc(ui["terminal"]))))
     cfg = {"lang": lang, "module": mid, "setup": mod.get("setup", {}),
            "tasks": [{"id": t["id"], "kind": t.get("kind", "guided"), "check": t["check"]} for t in mod["tasks"]],
            "vm": [{"id": v["id"], "expect": v["expect"]} for v in vm],
@@ -293,7 +352,7 @@ def build_module(lang, ui, mods_meta, mid, built):
 def build_root(ui_all):
     links = "".join('<a class="btn primary" href="%s/index.html" hreflang="%s" lang="%s">%s</a>' % (l, l, l, LANG_NAMES[l]) for l in LANGS)
     return ('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>Linux Academy — Choose your language</title><meta name="theme-color" content="#172033">'
+            '<title>Linux Academy — Choose your language</title><meta name="theme-color" content="#060a08">'
             '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg" type="image/svg+xml">'
             '<link rel="apple-touch-icon" href="icons/icon-192.png">'
             '<link rel="stylesheet" href="shared/app.css"><script defer src="shared/pwa.js"></script>'

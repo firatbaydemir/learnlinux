@@ -104,14 +104,29 @@
     var id = q.getAttribute('data-q'), ans = cfg.quiz[id], key = 'q:' + mid + ':' + id;
     var ex = q.querySelector('.explain');
     var opts = q.querySelectorAll('.opt');
+    var wkey = 'w:' + mid + ':' + id;
     if (store.get(key) === '1') { opts[ans].classList.add('right'); ex.hidden = false; }
+    else if (store.get(wkey) === '1') {
+      q.classList.add('retry');
+      var bd = document.createElement('span'); bd.className = 'retry-badge'; bd.textContent = ui.retryBadge;
+      q.insertBefore(bd, q.firstChild);
+      var rb = document.querySelector('.retry-bar'); if (rb) rb.hidden = false;
+    }
     opts.forEach(function (b) {
       b.addEventListener('click', function () {
         if (+b.getAttribute('data-i') === ans) {
           b.classList.add('right'); ex.hidden = false; store.set(key, '1');
-        } else { b.classList.add('wrong'); b.setAttribute('aria-label', ui.wrong); }
+        } else { b.classList.add('wrong'); b.setAttribute('aria-label', ui.wrong); store.set(wkey, '1'); }
       });
     });
+  });
+
+  var rq = document.getElementById('retryq');
+  if (rq) rq.addEventListener('click', function () {
+    document.querySelectorAll('.q.retry').forEach(function (q) {
+      var id = q.getAttribute('data-q'); store.del('w:' + mid + ':' + id); store.del('q:' + mid + ':' + id);
+    });
+    location.hash = '#quiz'; location.reload();
   });
 
   renderProgress();

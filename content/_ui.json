@@ -79,7 +79,14 @@
   "diff1": "Kolay",
   "diff2": "Orta",
   "diff3": "Zor",
-  "vmDone": "VM görevleri"
+  "vmDone": "VM görevleri",
+  "predictNote": "Önce sonucu aklında (veya kağıtta) tahmin et, sonra komutu çalıştır. Tahmin ile gerçek çıktı farkı en iyi öğrenme anıdır.",
+  "recallTitle": "Kapat ve hatırla",
+  "recallPrompt": "Sayfaya bakmadan bu modülden 3 şeyi say; sonra kontrol et.",
+  "recallShow": "Kontrol et",
+  "retryNote": "Daha önce yanlış cevapladığın sorular işaretlendi.",
+  "retryBadge": "Tekrar",
+  "retryBtn": "Yanlışları sıfırla ve yeniden çöz"
  },
  "de": {
   "siteName": "Linux-Grundlagen-Akademie",
@@ -161,7 +168,14 @@
   "diff1": "Leicht",
   "diff2": "Mittel",
   "diff3": "Schwer",
-  "vmDone": "VM-Aufgaben"
+  "vmDone": "VM-Aufgaben",
+  "predictNote": "Sage das Ergebnis zuerst voraus (im Kopf oder auf Papier), führe dann den Befehl aus. Der Unterschied zwischen Vorhersage und Ausgabe ist der beste Lernmoment.",
+  "recallTitle": "Schließen und erinnern",
+  "recallPrompt": "Nenne ohne Blick auf die Seite 3 Dinge aus diesem Modul; prüfe dann.",
+  "recallShow": "Prüfen",
+  "retryNote": "Früher falsch beantwortete Fragen sind markiert.",
+  "retryBadge": "Wiederholen",
+  "retryBtn": "Falsche zurücksetzen und neu lösen"
  },
  "en": {
   "siteName": "Linux Foundations Academy",
@@ -243,6 +257,13 @@
   "diff1": "Easy",
   "diff2": "Medium",
   "diff3": "Hard",
-  "vmDone": "VM tasks"
+  "vmDone": "VM tasks",
+  "predictNote": "First predict the result (in your head or on paper), then run the command. The gap between prediction and real output is the best learning moment.",
+  "recallTitle": "Close and recall",
+  "recallPrompt": "Without looking at the page, name 3 things from this module; then check.",
+  "recallShow": "Check",
+  "retryNote": "Questions you answered wrong before are marked.",
+  "retryBadge": "Retry",
+  "retryBtn": "Reset wrong answers and retry"
  }
 }
