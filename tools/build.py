@@ -62,8 +62,12 @@ def head(lang, title, depth_shared="../shared"):
                 lang, esc(title), lang, depth_shared, depth_shared)
 
 
+LEVEL_EMOJI = {"0": "🌱", "1": "🐧", "2": "📁", "3": "📝", "4": "🔐", "5": "⚙️", "6": "🛠️"}
+KIND_EMOJI = {"warmup": "🔥", "guided": "🧭", "predict": "🔮", "debug": "🐞", "mini": "🧩", "challenge": "🏆", "ticket": "🎫"}
+
+
 def topbar(lang, ui, page, extra=""):
-    return ('<header class="top"><a class="brand" href="index.html">%s</a>'
+    return ('<header class="top"><a class="brand" href="index.html">' + linux_icon() + '<span>%s</span></a>'
             '<div class="topr">%s%s<button type="button" class="ibtn" id="themebtn" title="%s" aria-label="%s">◐</button></div></header>\n'
             % (esc(ui["siteName"]), extra, lang_switch(lang, page), esc(ui["theme"]), esc(ui["theme"])))
 
@@ -112,7 +116,7 @@ def build_index(lang, ui, mods_meta, built):
     out.append('<p id="noresult" class="muted" hidden>%s</p>\n' % esc(ui["noResult"]))
     for lv in sorted(levels, key=int):
         items = [m for m in mods_meta["modules"] if str(m["level"]) == lv]
-        out.append('<section class="level"><h2>%s %s — %s</h2><ul class="mods">\n' % (esc(ui["level"]), lv, esc(levels[lv][lang])))
+        out.append('<section class="level" data-level="%s"><h2><span class="lvl-ico" aria-hidden="true">%s</span>%s %s — %s</h2><ul class="mods">\n' % (lv, LEVEL_EMOJI.get(lv, "📘"), esc(ui["level"]), lv, esc(levels[lv][lang])))
         for m in items:
             t = m["title"][lang]
             if m["id"] in built:
@@ -196,10 +200,10 @@ def build_module(lang, ui, mods_meta, mid, built):
          '<aside class="toc" aria-label="%s"><strong>%s</strong><ol>%s</ol></aside>\n' % (esc(ui["toc"]), esc(ui["toc"]), toclinks),
          '<main class="content" id="main">\n']
     o.append('<details class="tocm"><summary>%s</summary><ol>%s</ol></details>\n' % (esc(ui["toc"]), toclinks))
-    o.append('<div class="module-hero"><p class="crumb"><a href="index.html">%s</a> <span aria-hidden="true">/</span> %s %s</p>\n'
+    o.append('<div class="module-hero" data-level="%s"><div class="hero-tux" aria-hidden="true">%s</div><p class="crumb"><a href="index.html">%s</a> <span aria-hidden="true">/</span> %s %s</p>\n'
              '<h1><span class="module-id">%s</span> %s</h1>\n<p class="lead">%s</p>\n<p class="muted" id="modtxt"></p></div>\n'
-             % (esc(ui["home"]), esc(ui["level"]), meta["level"], mid, esc(tx["title"]), md(tx["lead"])))
-    o.append('<section class="card" id="objectives"><h2>%s</h2><ul>%s</ul></section>\n'
+             % (meta["level"], linux_icon(), esc(ui["home"]), esc(ui["level"]), meta["level"], mid, esc(tx["title"]), md(tx["lead"])))
+    o.append('<section class="card" id="objectives"><h2>🎯 %s</h2><ul>%s</ul></section>\n'
              % (esc(ui["objectives"]), "".join("<li>%s</li>" % md(x) for x in tx["objectives"])))
     for sec in tx["sections"]:
         o.append('<section id="%s"><h2>%s</h2>\n' % (esc(sec["id"]), esc(sec["title"])))
@@ -216,7 +220,7 @@ def build_module(lang, ui, mods_meta, mid, built):
         o.append("</section>\n")
     vm = mod.get("vm", [])
     if vm:
-        o.append('<section id="vm"><h2>%s <span class="gcount" data-g="vm"></span></h2><p>%s</p><p>%s</p>\n' % (esc(ui["vmTitle"]), md(ui["vmIntro"]), md(tx["vm"]["intro"])))
+        o.append('<section id="vm"><h2>🖥️ %s <span class="gcount" data-g="vm"></span></h2><p>%s</p><p>%s</p>\n' % (esc(ui["vmTitle"]), md(ui["vmIntro"]), md(tx["vm"]["intro"])))
         for v in vm:
             t = tx["vm"]["tasks"][v["id"]]
             o.append('<article class="vmt card" data-vm="%s" data-expect="%d"><header><h3>%s</h3><span class="status" aria-hidden="true"></span></header><p>%s</p>\n'
@@ -234,13 +238,13 @@ def build_module(lang, ui, mods_meta, mid, built):
             o.append("</article>\n")
         o.append("</section>\n")
     if mod["tasks"]:
-        o.append('<section id="lab"><h2>%s</h2><p>%s</p><p>%s</p><p><button type="button" class="btn" data-openterm>&gt;_ %s</button></p>\n'
+        o.append('<section id="lab"><h2>🧪 %s</h2><p>%s</p><p>%s</p><p><button type="button" class="btn" data-openterm>&gt;_ %s</button></p>\n'
                  % (esc(ui["simTitle"]), md(ui["simIntro"]), md(ui["labIntro"]), esc(ui["openTerminal"])))
         for kind in KINDS:
             ts = [t for t in mod["tasks"] if t.get("kind", "guided") == kind]
             if not ts:
                 continue
-            o.append('<h3 class="kind k-%s">%s <span class="gcount" data-g="%s"></span></h3><ol class="tasks">\n' % (kind, esc(ui["kind_" + kind]), kind))
+            o.append('<h3 class="kind k-%s">%s %s <span class="gcount" data-g="%s"></span></h3><ol class="tasks">\n' % (kind, KIND_EMOJI[kind], esc(ui["kind_" + kind]), kind))
             for t in ts:
                 tt = tx["tasks"][t["id"]]
                 d = t.get("diff", 2)
@@ -252,15 +256,15 @@ def build_module(lang, ui, mods_meta, mid, built):
                             esc(ui["hint"]), md(tt["hint"]), esc(ui["solution"]), code_block("\n".join(t["solution"]), ui)))
             o.append("</ol>\n")
         o.append('<p><button type="button" class="btn" id="resetlab">%s</button></p></section>\n' % esc(ui["resetLab"]))
-    o.append('<section id="quiz"><h2>%s</h2>\n' % esc(ui["quizTitle"]))
+    o.append('<section id="quiz"><h2>❓ %s</h2>\n' % esc(ui["quizTitle"]))
     for q in mod["quiz"]:
         qt = tx["quiz"][q["id"]]
         opts = "".join('<button type="button" class="opt" data-i="%d">%s</button>' % (i, md(x)) for i, x in enumerate(qt["options"]))
         o.append('<div class="q card" data-q="%s"><p><strong>%s</strong></p><div class="opts">%s</div><p class="explain" hidden>%s</p></div>\n'
                  % (q["id"], md(qt["q"]), opts, md(qt["explain"])))
     o.append("</section>\n")
-    o.append('<section id="summary" class="card"><h2>%s</h2><ul>%s</ul></section>\n' % (esc(ui["summary"]), "".join("<li>%s</li>" % md(x) for x in tx["summary"])))
-    o.append('<section id="glossary"><h2>%s</h2><dl class="gl">%s</dl></section>\n' % (esc(ui["glossary"]),
+    o.append('<section id="summary" class="card"><h2>✅ %s</h2><ul>%s</ul></section>\n' % (esc(ui["summary"]), "".join("<li>%s</li>" % md(x) for x in tx["summary"])))
+    o.append('<section id="glossary"><h2>📖 %s</h2><dl class="gl">%s</dl></section>\n' % (esc(ui["glossary"]),
              "".join("<dt>%s</dt><dd>%s</dd>" % (esc(g["term"]), md(g["meaning"])) for g in tx["glossary"])))
     order = [m["id"] for m in mods_meta["modules"]]
     i = order.index(mid)
@@ -270,7 +274,7 @@ def build_module(lang, ui, mods_meta, mid, built):
     if i + 1 < len(order) and order[i + 1] in built:
         nav.append('<a class="btn primary" href="%s">%s →</a>' % (mod_file(order[i + 1]), esc(ui["next"])))
     o.append('<nav class="pn">%s</nav>\n</main>\n' % "".join(nav))
-    o.append('<aside class="term" id="term" aria-label="%s" hidden><div class="termhead"><strong>%s</strong>'
+    o.append('<aside class="term" id="term" aria-label="%s" hidden><div class="termhead"><span class="tdots" aria-hidden="true"><i></i><i></i><i></i></span><strong>%s</strong>'
              '<button type="button" class="ibtn" id="termclose" aria-label="%s">✕</button></div>'
              '<div class="termout" id="termout" role="log"></div>'
              '<div class="termin"><span id="termprompt"></span><input id="terminput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="%s"></div></aside></div>\n'

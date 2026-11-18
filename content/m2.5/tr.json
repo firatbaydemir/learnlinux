@@ -35,6 +35,7 @@
    ],
    "tip": "`ls -lh` boyutu yuvarlar; tam bayt için `stat` veya `wc -c` kullan."
   },
+  {"id": "lscols", "title": "ls -l çıktısını sütun sütun okumak", "body": ["Örnek satır: `-rw-r--r-- 1 ayse dev 2048 Mar 5 10:12 notes.txt`. Sütunlar sırayla: tür ve izinler (`-` dosya, `d` dizin, `l` bağlantı; sonra sahip/grup/diğer için `rwx` üçlüleri), bağlantı sayısı, sahip (`ayse`), grup (`dev`), bayt cinsinden boyut (`2048`), değişiklik zamanı ve ad.", "İzin üçlüleri modül 4.x'te ayrıntılı işlenir; şimdilik `r` okuma, `w` yazma, `x` çalıştırma demektir. Dizinde `x`, içine girebilmek anlamına gelir."], "commands": [{"cmd": "ls -lt", "what": "Uzun listeyi en yeni değişiklik en üstte olacak şekilde sıralar.", "where": "Bir klasörde son değiştirilen dosyayı ararken.", "why": "Hangi dosyanın az önce değiştiğini tek bakışta gösterir.", "example": "ls -lt", "nosim": true}, {"cmd": "ls -lS", "what": "Uzun listeyi boyuta göre, en büyük üstte olacak şekilde sıralar.", "where": "Diski dolduran dosyayı ararken.", "why": "Büyük dosyalar listenin başında çıkar.", "example": "ls -lS", "nosim": true}], "tip": "`ls -lhS` boyutu okunur birimle (K, M) ve büyükten küçüğe verir.", "warn": "Boyut sütunu dizinler için dizin kaydının boyutudur, içindekilerin toplamı değil; toplam için `du` kullan."},
   {
    "id": "links",
    "title": "Sembolik linkler ve gerçek yol",

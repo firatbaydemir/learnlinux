@@ -35,6 +35,20 @@
    ],
    "tip": "The classic ranking: `sort | uniq -c | sort -rn`.",
    "warn": "`uniq` without `sort` leaves duplicates that are not next to each other."
+  },
+  {
+   "id": "pipeerr",
+   "title": "Error stream and pipelines",
+   "body": [
+    "A pipe only carries stdout. With `ls missing 2>&1 | wc -l` the error line is counted too; `2>&1` sends stderr to wherever stdout goes. Order matters: `2>&1` comes **before** the pipe.",
+    "`tee` normally overwrites the file; `tee -a` appends. In a long pipeline, saving an intermediate result with `tee` lets you inspect it when a stage looks wrong without rerunning everything."
+   ],
+   "commands": [
+    {"cmd": "2>&1 |", "what": "Feeds error messages into the pipe as well.", "where": "When filtering output and errors as one stream.", "why": "Errors do not vanish on screen; `grep`/`wc` see them too.", "example": "ls data missing 2>&1 | wc -l"},
+    {"cmd": "tee -a", "what": "Appends the stream to a file and passes it on.", "where": "When accumulating a record of a repeated job.", "why": "Older records are not erased.", "example": "grep ERROR logs/app.log | tee -a all_errors.txt | wc -l"},
+    {"cmd": "sort -u", "what": "Sorts and removes duplicates in one step.", "where": "When you want a unique value list and no counts.", "why": "Shorter than `sort | uniq`.", "example": "sort -u data/fruits.txt"}
+   ],
+   "tip": "When debugging: first `cmd 2>&1 | head`, then silence unwanted errors with `2>/dev/null`."
   }
  ],
  "tasks": {

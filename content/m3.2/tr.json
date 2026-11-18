@@ -35,6 +35,20 @@
    ],
    "tip": "Klasik sıralama: `sort | uniq -c | sort -rn`.",
    "warn": "`sort` olmadan `uniq`, yan yana olmayan tekrarları bırakır."
+  },
+  {
+   "id": "pipeerr",
+   "title": "Hata akışı ve pipeline",
+   "body": [
+    "Pipe yalnızca stdout'u taşır. `ls yok 2>&1 | wc -l` yazarsan hata satırı da sayılır; `2>&1` stderr'i stdout'un gittiği yere yönlendirir. Sıra önemlidir: `2>&1`, pipe'tan **önce** gelir.",
+    "`tee` normalde dosyayı üzerine yazar; `tee -a` sonuna ekler. Uzun bir pipeline'da ara sonucu `tee` ile saklarsan, bir aşama yanlış çıkınca baştan çalıştırmadan inceleyebilirsin."
+   ],
+   "commands": [
+    {"cmd": "2>&1 |", "what": "Hata mesajlarını da pipe'a sokar.", "where": "Hem çıktıyı hem hatayı tek akış olarak süzerken.", "why": "Hatalar ekranda kaybolmaz, `grep`/`wc` onları da görür.", "example": "ls data yok 2>&1 | wc -l"},
+    {"cmd": "tee -a", "what": "Akışı dosyanın sonuna ekler ve devam ettirir.", "where": "Tekrar çalışan bir işin kaydını biriktirirken.", "why": "Eski kayıt silinmez.", "example": "grep ERROR logs/app.log | tee -a all_errors.txt | wc -l"},
+    {"cmd": "sort -u", "what": "Sıralar ve tekrarları tek adımda kaldırır.", "where": "Tekil değer listesi isterken (sayıma gerek yoksa).", "why": "`sort | uniq`'ten kısadır.", "example": "sort -u data/fruits.txt"}
+   ],
+   "tip": "Hata ayıklarken: önce `cmd 2>&1 | head`, sonra gereksiz hataları `2>/dev/null` ile sustur."
   }
  ],
  "tasks": {

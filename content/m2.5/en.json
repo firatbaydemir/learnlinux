@@ -35,6 +35,7 @@
    ],
    "tip": "`ls -lh` rounds; for exact bytes use `stat` or `wc -c`."
   },
+  {"id": "lscols", "title": "Reading ls -l output column by column", "body": ["Sample line: `-rw-r--r-- 1 ayse dev 2048 Mar 5 10:12 notes.txt`. Columns in order: type and permissions (`-` file, `d` directory, `l` link; then `rwx` triplets for owner/group/others), link count, owner (`ayse`), group (`dev`), size in bytes (`2048`), modification time and name.", "The permission triplets are covered in detail in module 4.x; for now `r` means read, `w` write, `x` execute. On a directory, `x` means you may enter it."], "commands": [{"cmd": "ls -lt", "what": "Sorts the long listing by modification time, newest first.", "where": "When looking for the most recently changed file in a folder.", "why": "Shows at a glance what was just modified.", "example": "ls -lt", "nosim": true}, {"cmd": "ls -lS", "what": "Sorts the long listing by size, largest first.", "where": "When hunting the file that fills the disk.", "why": "Big files appear at the top.", "example": "ls -lS", "nosim": true}], "tip": "`ls -lhS` shows human-readable sizes (K, M), largest first.", "warn": "For directories the size column is the directory entry itself, not the total of its contents; use `du` for that."},
   {
    "id": "links",
    "title": "Symbolic links and the real path",

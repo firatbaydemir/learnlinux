@@ -79,7 +79,8 @@
    "tip": "Alışkanlık edin: önce `ls -R klasör`, sonra `rm -r klasör`.",
    "warn": "`rm -r` ile hangi klasörü sildiğini ENTER'a basmadan önce bir kez daha oku. Yanlış dizinde çalıştırmak tüm projeni yok eder.",
    "danger": "Gerçek sistemde `rm -rf /` veya `rm -rf ~` yazma. Geri dönüşü olmayan bir yok olmaya yol açar; bu kitapta yalnızca simülatörde reddedilir."
-  }
+  },
+  {"id": "safedelete", "title": "Güvenli silme: kontrol listesi", "body": ["Senaryo: `~/practice/logs` içindeki eski günlükleri temizleyeceksin. Adım 1 `ls logs` (içinde ne var?), adım 2 `rm -i logs/old.log` (her dosyayı onayla), adım 3 `ls logs` (gitti mi?). `rm -r` ancak bundan sonra gündeme gelir.", "`rm -i` her dosyadan önce sorar (`y` = evet). `rm -I` yalnızca üçten fazla dosya veya özyinelemeli silmede bir kez sorar: daha az gürültü, yine de güvenlik ağı."], "commands": [{"cmd": "rm -i", "what": "Her silmeden önce onay ister.", "where": "Önemli bir klasörde elle silerken.", "why": "Yazım hatası verilerini değil, yalnızca bir 'n' kaybettirir.", "example": "rm -i old.log"}, {"cmd": "rm -I", "what": "Üçten fazla dosya veya özyinelemeli silmeden önce bir kez sorar.", "where": "`rm -I *.tmp` gibi toplu silmelerde.", "why": "`-i`'den az soru sorar ama son uyarıyı korur.", "example": "rm -I *.tmp"}, {"cmd": "rmdir -p", "what": "Boş klasörü ve boş üst klasörlerini siler.", "where": "İç içe boş klasörleri toplarken.", "why": "Boş zinciri tek seferde temizler; ilk dolu klasörde durur.", "example": "rmdir -p a/b/c"}], "tip": "Önce aynı kalıbı `ls` ile çalıştır (`ls *.tmp`), sonra `ls` yerine `rm` yaz: tam olarak gördüğünü silersin.", "warn": "`rm *` gibi joker karakterler komut çalışmadan önce genişler. Fazladan bir boşluk (`rm * .tmp`) her şeyi siler."}
  ],
  "tasks": {
   "t01": {

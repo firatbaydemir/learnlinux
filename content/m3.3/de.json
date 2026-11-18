@@ -114,6 +114,39 @@
       "warn": "Verwende Platzhalter in Löschbefehlen niemals blind. Prüfe zuerst mit `pwd` und `ls` den Ordner und die Treffer; teste destruktive Befehle nur in einer sicheren Umgebung."
     },
     {
+      "id": "regex",
+      "title": "Regex-Grundlagen (BRE / ERE)",
+      "body": [
+        "Jokerzeichen sind für Dateinamen; ein **regulärer Ausdruck** (Regex) passt auf Textinhalt. `grep` nutzt standardmäßig BRE, `grep -E` ERE. Achtung: `*` bedeutet im Glob 'beliebig', im Regex 'null oder mehr des Vorherigen'.",
+        "Grundmuster: `^` Zeilenanfang, `$` Zeilenende, `.` beliebiges Zeichen, `*` null+ mal das Vorherige, `[abc]` Menge. ERE ergänzt `+` (ein+), `?` (null/ein), `|` (oder) und `()` (Gruppe); in BRE brauchst du dafür `\\+`, `\\?`, `\\|`.",
+        "Setze Muster in einfache Anführungszeichen, damit die Shell sie nicht auswertet: `grep -E 'a|b' datei`."
+      ],
+      "commands": [
+        {
+          "cmd": "grep '^img'",
+          "what": "Wählt Zeilen, die mit `img` beginnen.",
+          "where": "Zum Verankern am Zeilenanfang oder -ende.",
+          "why": "Schließt Teiltreffer aus.",
+          "example": "ls | grep '^img'"
+        },
+        {
+          "cmd": "grep -E",
+          "what": "Nutzt erweiterte Regex (ERE).",
+          "where": "Wenn du `|`, `+` oder `()` brauchst.",
+          "why": "Lesbare Muster ohne Escapes.",
+          "example": "ls | grep -E '^(img|doc)[0-9]+'"
+        },
+        {
+          "cmd": "grep '\\.txt$'",
+          "what": "Passt auf die Endung am Zeilenende.",
+          "where": "Soll der Punkt ein echter Punkt sein, nutze `\\.`.",
+          "why": "Ein bloßer `.` passt auf jedes Zeichen.",
+          "example": "ls | grep '\\.txt$'"
+        }
+      ],
+      "tip": "`sed -E` und `awk` nutzen dieselbe ERE-Mustersprache; du lernst sie in Modul 3.6 kennen."
+    },
+    {
       "id": "practice",
       "title": "Muster in Übungen anwenden",
       "body": [

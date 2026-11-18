@@ -86,11 +86,11 @@
     "title": "Durch den Verzeichnisbaum wandern",
     "text": "Liste die oberste Ebene und das Konfigurationsverzeichnis auf und füge die Ausgabe des ersten Befehls ein.",
     "blocks": [
-     {"cmd": "ls /\nls /etc | head -n 15", "expected": "afs  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+     {"cmd": "ls /\nls /etc | head -n 15", "expected": "bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
     ],
     "differs": [
      "Die genaue Liste variiert je nach Distribution, aber `etc`, `home`, `usr` und `var` müssen vorhanden sein.",
-     "`bin` erscheint auf modernen Systemen als Link auf `usr/bin`; prüfe mit `ls -ld /bin`."
+     "`bin` erscheint auf modernen Systemen als Link auf `usr/bin`; prüfe mit `ls -ld /bin`; auch `lib`, `lib64` und `sbin` können Links nach `usr/` sein. Zusätzliche Verzeichnisse wie `afs` sind unproblematisch."
     ]
    },
    "v03": {
@@ -112,7 +112,7 @@
     ],
     "differs": [
      "`which` gibt nur das vorhandene Werkzeug aus: `apt` auf Ubuntu, `dnf` auf Rocky/Alma.",
-     "Gibt `which` für beide nichts aus, probiere `command -v dnf` oder installiere zuerst `which`."
+     "Fehlt `which` (minimale Installationen), funktionieren die Shell-Builtins `command -v dnf` und `command -v apt` immer."
     ]
    }
   }

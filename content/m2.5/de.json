@@ -35,6 +35,7 @@
    ],
    "tip": "`ls -lh` boyutu yuvarlar; tam bayt için `stat` veya `wc -c` kullan."
   },
+  {"id": "lscols", "title": "Die Ausgabe von ls -l Spalte für Spalte lesen", "body": ["Beispielzeile: `-rw-r--r-- 1 ayse dev 2048 Mar 5 10:12 notes.txt`. Spalten der Reihe nach: Typ und Rechte (`-` Datei, `d` Verzeichnis, `l` Link; danach `rwx`-Dreiergruppen für Besitzer/Gruppe/Andere), Anzahl der Links, Besitzer (`ayse`), Gruppe (`dev`), Größe in Byte (`2048`), Änderungszeit und Name.", "Die Rechte-Dreiergruppen werden in Modul 4.x ausführlich behandelt; vorerst: `r` lesen, `w` schreiben, `x` ausführen. Bei einem Verzeichnis bedeutet `x`, dass man hineinwechseln darf."], "commands": [{"cmd": "ls -lt", "what": "Sortiert die lange Liste nach Änderungszeit, neueste zuerst.", "where": "Wenn du in einem Ordner die zuletzt geänderte Datei suchst.", "why": "Zeigt auf einen Blick, was gerade geändert wurde.", "example": "ls -lt", "nosim": true}, {"cmd": "ls -lS", "what": "Sortiert die lange Liste nach Größe, größte zuerst.", "where": "Wenn du die Datei suchst, die den Speicher füllt.", "why": "Große Dateien stehen ganz oben.", "example": "ls -lS", "nosim": true}], "tip": "`ls -lhS` zeigt Größen lesbar (K, M) und absteigend sortiert.", "warn": "Die Größe bei Verzeichnissen ist die des Verzeichniseintrags, nicht die Summe des Inhalts; dafür `du` verwenden."},
   {
    "id": "links",
    "title": "Sembolik linkler ve gerçek yol",

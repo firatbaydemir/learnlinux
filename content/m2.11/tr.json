@@ -16,7 +16,12 @@
     "t06":{"text":"Hatalı örnek satır dosyasını `~/schedule/wrong-entry.txt` silerek kaldır.","hint":"Yolu kontrol et, sonra `rm ~/schedule/wrong-entry.txt`."},
     "t07":{"text":"Mini proje: her gün saat 03.00'te çalışacak yedek satırını `~/schedule/backup-plan.txt` dosyasına yaz.","hint":"`0 3 * * * /usr/local/bin/backup` satırını kaydet."},
     "t08":{"text":"Meydan okuma: düzenleme ve doğrulama komutlarını içeren bir iş notu `~/schedule/job-notes.txt` dosyasına yaz.","hint":"`crontab -e` düzenler, `crontab -l` listeler."},
-    "t09":{"text":"Ticket: \"Cron işi komut dosyasını bulamıyor ve çıktısı kayboluyor.\" Destek notuna PATH'i tanımlama, mutlak yollar ve günlük yönlendirmesi önerilerini ekle.","hint":"Notta `PATH` ve `log` kelimelerini kullan."}
+    "t09":{"text":"Ticket: \"Cron işi komut dosyasını bulamıyor ve çıktısı kayboluyor.\" Destek notuna PATH'i tanımlama, mutlak yollar ve günlük yönlendirmesi önerilerini ekle.","hint":"Notta `PATH` ve `log` kelimelerini kullan."},
+    "t10":{"text":"Örnek zamanlamanın satır sayısını `wc -l ~/schedule/cron.sample` ile say.","hint":"Yorum satırı da sayılır."},
+    "t11":{"text":"Tahmin et: örneğin son satırı hangi iş? `tail -n 1 ~/schedule/cron.sample` ile doğrula.","hint":"`tail -n 1` son satırı gösterir."},
+    "t12":{"text":"İş betiğini `cat ~/schedule/backup.sh` ile oku. Hangi mesajı yazdırıyor?","hint":"`printf` satırı mesajı yazdırır."},
+    "t13":{"text":"Mini proje: zamanlamayı değiştirmeden önce `~/schedule/cron.backup` olarak yedekle.","hint":"`cp source target`"},
+    "t14":{"text":"Zorlu görev: `/usr/local/bin/report` komutunu her Pazartesi 06:30'da çalıştıran kaydı `~/schedule/weekly-plan.txt` dosyasına yaz.","hint":"Sıra: dakika saat gün ay haftanın-günü. Pazartesi = 1."}
   },
   "vm":{"intro":"Bu görevler mevcut zamanlayıcı durumunu okur; cron tablosuna iş eklemez veya silmez. Hizmet adı dağıtıma göre farklı olabilir.","tasks":{
     "v01":{"title":"Kullanıcı cron tablosu","text":"Mevcut kullanıcı crontab'ını listele. Henüz görev yoksa hata mesajı normaldir; görev eklemen gerekmez.","blocks":[{"cmd":"crontab -l","expected":"0 3 * * * /usr/local/bin/backup"}],"differs":["`no crontab for ...` mesajı, bu kullanıcı için kayıt olmadığı anlamına gelir; hata yapmak zorunda değilsin.","Yalnızca kendi kullanıcının tablosu okunur."]},

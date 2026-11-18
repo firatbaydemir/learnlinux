@@ -38,6 +38,20 @@
    ],
    "tip": "Güvenli alışkanlık: önce `>>` mi `>` mi gerektiğini düşün. Yanlış `>` mevcut dosyayı sessizce siler.",
    "warn": "`>` hedef dosyayı komut çalışmadan önce boşaltır. `sort file > file` yazmak dosyanın içeriğini kaybettirir."
+  },
+  {
+   "id": "streamsplit",
+   "title": "Akışları ayrı ayrı yönlendirme",
+   "body": [
+    "Bir komutun satırını soldan sağa oku: `ls data yok > out.txt 2> err.txt` -> `ls` çalışır; **1>** (`>`) normal çıktıyı `out.txt`'ye, **2>** hata mesajını `err.txt`'ye yazar. Ekranda hiçbir şey kalmaz.",
+    "Kural: `N>` yalnızca N numaralı kanalı yönlendirir; numara yazılmazsa `>` 1 demektir. Dosyalar sağdaki ilk dosya değil, her yönlendirme için ayrıdır."
+   ],
+   "commands": [
+    {"cmd": "1>", "what": "stdout'u açıkça yönlendirir (`>` ile aynı).", "where": "Çıktı ve hatayı okunaklı bir çift olarak ayrı dosyalara yazarken.", "why": "`1>` ve `2>` birlikte hangi kanalın nereye gittiğini açıkça gösterir.", "example": "ls data yok 1> out.txt 2> err.txt"},
+    {"cmd": "&>", "what": "stdout ve stderr'i birlikte tek dosyaya yazar (bash).", "where": "Tüm çıktıyı tek kayıtta toplarken.", "why": "`> file 2>&1`'in kısa yazımıdır.", "example": "ls data yok &> all.txt"},
+    {"cmd": "<<<", "what": "Bir metni komutun stdin'ine verir (here-string).", "where": "Dosya oluşturmadan komutu hızlı denerken.", "why": "Geçici dosya ve `echo |` gerekmez.", "example": "wc -w <<< \"one two three\""}
+   ],
+   "tip": "Karışırsan satırı kanal kanal oku: hangi numara, hangi dosya? Sırayı `2>&1`'de unutma: önce dosya, sonra 2>&1."
   }
  ],
  "tasks": {

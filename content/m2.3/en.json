@@ -79,7 +79,8 @@
    "tip": "Make it a habit: first `ls -R folder`, then `rm -r folder`.",
    "warn": "Before pressing ENTER, re-read which folder `rm -r` will delete. In the wrong directory it destroys your whole project.",
    "danger": "On a real system never type `rm -rf /` or `rm -rf ~`. It causes irreversible data loss; only the simulator refuses it here."
-  }
+  },
+  {"id": "safedelete", "title": "Safe deleting: a checklist", "body": ["Scenario: you want to clear old logs in `~/practice/logs`. Step 1 `ls logs` (what is in there?), step 2 `rm -i logs/old.log` (confirm each file), step 3 `ls logs` (is it gone?). Only then think about `rm -r`.", "`rm -i` asks before every file (`y` = yes). `rm -I` asks only once when deleting more than three files or recursively: less noisy, still a safety net."], "commands": [{"cmd": "rm -i", "what": "Asks for confirmation before each deletion.", "where": "When deleting by hand in an important folder.", "why": "A typo costs you one 'n', not your data.", "example": "rm -i old.log"}, {"cmd": "rm -I", "what": "Asks once before deleting more than three files or recursively.", "where": "For bulk deletions such as `rm -I *.tmp`.", "why": "Fewer prompts than `-i`, but still a last warning.", "example": "rm -I *.tmp"}, {"cmd": "rmdir -p", "what": "Removes an empty folder and its empty parents.", "where": "When tidying empty nested folders.", "why": "Cleans up a whole empty chain; stops at the first non-empty folder.", "example": "rmdir -p a/b/c"}], "tip": "Run the same pattern with `ls` first (`ls *.tmp`), then replace `ls` with `rm`: you delete exactly what you saw.", "warn": "Wildcards such as `rm *` expand before the command runs. A stray space (`rm * .tmp`) deletes everything."}
  ],
  "tasks": {
   "t01": {

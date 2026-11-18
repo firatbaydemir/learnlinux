@@ -20,7 +20,12 @@
     {"id":"t06","kind":"debug","diff":2,"check":{"absent":"~/transfer/old_copy.txt"},"solution":["rm ~/transfer/old_copy.txt"]},
     {"id":"t07","kind":"mini","diff":2,"check":[{"contains":["~/ops/connection-plan.txt","Host linux-lab"]},{"contains":["~/ops/connection-plan.txt","Port 22"]}],"solution":["cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt"]},
     {"id":"t08","kind":"challenge","diff":3,"check":[{"exists":"~/transfer/sync-copy.txt","type":"f"},{"contains":["~/transfer/sync-copy.txt","Status: ready"]}],"solution":["cp ~/transfer/report.txt ~/transfer/sync-copy.txt"]},
-    {"id":"t09","kind":"ticket","diff":3,"check":[{"contains":["~/ops/transfer-ticket.txt","scp"]},{"contains":["~/ops/transfer-ticket.txt","rsync"]}],"solution":["echo \"Use scp for a simple copy; use rsync for repeatable synchronization.\" > ~/ops/transfer-ticket.txt"]}
+    {"id":"t09","kind":"ticket","diff":3,"check":[{"contains":["~/ops/transfer-ticket.txt","scp"]},{"contains":["~/ops/transfer-ticket.txt","rsync"]}],"solution":["echo \"Use scp for a simple copy; use rsync for repeatable synchronization.\" > ~/ops/transfer-ticket.txt"]},
+    {"id":"t10","kind":"guided","diff":1,"check":{"out":"Host linux-lab","of":"^head -n 1 ~/ops/ssh-config\\.sample$"},"solution":["head -n 1 ~/ops/ssh-config.sample"]},
+    {"id":"t11","kind":"predict","diff":2,"check":{"out":"192\\.0\\.2\\.10","of":"^grep HostName ~/ops/ssh-config\\.sample$"},"solution":["grep HostName ~/ops/ssh-config.sample"]},
+    {"id":"t12","kind":"guided","diff":2,"check":{"exists":"~/transfer/incoming","type":"d"},"solution":["mkdir ~/transfer/incoming"]},
+    {"id":"t13","kind":"mini","diff":2,"check":[{"exists":"~/ops/manifest.bak","type":"f"},{"contains":["~/ops/manifest.bak","report\\.txt"]}],"solution":["cp ~/transfer/manifest.txt ~/ops/manifest.bak"]},
+    {"id":"t14","kind":"ticket","diff":3,"check":[{"contains":["~/ops/key-ticket.txt","ssh-keygen"]},{"contains":["~/ops/key-ticket.txt","private"]}],"solution":["echo \"Create keys with ssh-keygen and never share the private key.\" > ~/ops/key-ticket.txt"]}
   ],
   "vm": [
     {"id":"v01","expect":"OpenSSH"},

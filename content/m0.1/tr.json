@@ -86,11 +86,11 @@
     "title": "Dizin ağacında gez",
     "text": "En üst düzeyi ve yapılandırma dizinini listele, ilk komutun çıktısını yapıştır.",
     "blocks": [
-     {"cmd": "ls /\nls /etc | head -n 15", "expected": "afs  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+     {"cmd": "ls /\nls /etc | head -n 15", "expected": "bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
     ],
     "differs": [
      "Tam liste dağıtıma göre değişir, ama `etc`, `home`, `usr` ve `var` mutlaka bulunmalı.",
-     "Modern sistemlerde `bin`, `usr/bin`'e bir bağlantı olarak görünür; `ls -ld /bin` ile kontrol et."
+     "Modern sistemlerde `bin`, `usr/bin`'e bir bağlantı olarak görünür; `ls -ld /bin` ile kontrol et; `lib`, `lib64` ve `sbin` de aynı şekilde `usr/` altına bağlantı olabilir. Listede `afs` gibi ek dizinler görürsen sorun yok."
     ]
    },
    "v03": {
@@ -112,7 +112,7 @@
     ],
     "differs": [
      "`which` yalnızca var olan aracı yazdırır: Ubuntu'da `apt`, Rocky/Alma'da `dnf`.",
-     "`which` ikisi için de bir şey yazdırmazsa `command -v dnf` dene veya önce `which` kur."
+     "`which` bulunamazsa (minimal kurulumda yoktur) kabuk yerleşiği olan `command -v dnf` ve `command -v apt` her zaman çalışır."
     ]
    }
   }

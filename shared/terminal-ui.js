@@ -9,9 +9,11 @@
   try { scroll = JSON.parse(store.get(KEY) || '[]'); } catch (e) { scroll = []; }
 
   function line(text, cls, persist) {
-    var d = document.createElement('span');
+        var d = document.createElement('span');
     if (cls) d.className = cls;
-    d.textContent = text;
+    var pm = cls === 'p' && /^([^@\s]+)@([^:\s]+):(.*?)([$#] )([\s\S]*)$/.exec(text);
+    if (pm) fillPrompt(d, pm[1], pm[2], pm[3], pm[4], pm[5]);
+    else d.textContent = text;
     out.appendChild(d);
     if (persist !== false) {
       scroll.push([text, cls || '']);
@@ -25,7 +27,17 @@
     if (c === h) c = '~'; else if (c.indexOf(h + '/') === 0) c = '~' + c.slice(h.length);
     return shell.user.name + '@linux-lab:' + c + (shell.user.name === 'root' ? '# ' : '$ ');
   }
-  function refreshPrompt() { promptEl.textContent = promptText(); }
+  function mk(parent, cls, txt) { var s = document.createElement('span'); s.className = cls; s.textContent = txt; parent.appendChild(s); }
+  function fillPrompt(el, user, host, cwd, sym, rest) {
+    mk(el, 'pu' + (user === 'root' ? ' pr' : ''), user + '@' + host);
+    mk(el, 'pc', ':'); mk(el, 'pd', cwd); mk(el, 'pc', sym);
+    if (rest) mk(el, 'pt', rest);
+  }
+  function refreshPrompt() {
+    promptEl.textContent = '';
+    var m = /^([^@]+)@([^:]+):(.*?)([$#] )$/.exec(promptText());
+    if (m) fillPrompt(promptEl, m[1], m[2], m[3], m[4], ''); else promptEl.textContent = promptText();
+  }
   function clearAll() { out.textContent = ''; scroll = []; store.set(KEY, '[]'); }
 
   function exec(cmd) {
@@ -67,7 +79,7 @@
     } else if (e.key === 'Tab') {
       e.preventDefault();
       var r = shell.complete(input.value);
-      if (r.insert) input.value = input.value.slice(0, input.value.length - r.word.length) + r.insert;
+      if (r.insert) input.value = input.value + r.insert;
       else if (r.options && r.options.length > 1) { line(promptText() + input.value + '\n', 'p', false); line(r.options.join('  ') + '\n', 'n', false); }
     } else if (e.ctrlKey && e.key.toLowerCase() === 'l') {
       e.preventDefault(); clearAll();
@@ -92,7 +104,10 @@
     attach: function (sh, cb) {
       shell = sh; onRun = cb;
       scroll.forEach(function (s) { line(s[0], s[1], false); });
-      if (!scroll.length) line(ui.welcome + '\n\n', 'n', true);
+      if (!scroll.length) {
+        line('   .--.     \n  |o_o |    Linux Academy\n  |:_/ |    \n //   \\ \\\n(|     | )\n/\'\\_   _/`\\\n\\___)=(___/\n', 'tux', true);
+        line(ui.welcome + '\n\n', 'n', true);
+      }
       refreshPrompt();
       if (store.get('term') === '1') setOpen(true);
     },

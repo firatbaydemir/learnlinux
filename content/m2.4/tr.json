@@ -114,7 +114,8 @@
    "warn": "`cp a b` ve `mv a b` hedef `b` varsa **onsuz üzerine yazar**. Önce `ls b` ile bak veya `-i` / `-n` ekle.",
    "danger": "Yanlış hedef yazmak (örneğin `mv notes.txt /etc/hosts`) önemli bir sistem dosyasını silebilir. Sistem klasörlerinde denemeden önce VM snapshot'ı al; yetki yoksa komut zaten hata verir.",
    "tip": "Kalıcı olarak güvenli olmak için `alias cp='cp -i'` ve `alias mv='mv -i'` tanımlayabilirsin (kabuk ayar dosyasına eklenir)."
-  }
+  },
+  {"id": "preserve", "title": "Koruma ve güncelleme: -p, -u, rsync", "body": ["Senaryo: bir yedek klasörünü tazeliyorsun. Düz `cp` kopyaya yeni zaman damgası ve sahip verir; `cp -p` izin, sahip ve zamanı korur, böylece aslının ne zaman değiştiğini görebilirsin.", "`cp -u` ve `mv -u` yalnızca kaynak hedeften yeniyse veya hedef yoksa kopyalar/taşır. Sürekli eşitlediğin büyük klasörler için özel araç (`rsync`, bkz. modül 2.8) daha uygundur."], "commands": [{"cmd": "cp -p", "what": "Kopyalar; izin, sahip ve zaman damgalarını korur.", "where": "`notes.txt` yedeklenirken değişiklik zamanı korunmalıysa.", "why": "`-p` olmadan her kopya yepyeni görünür, geçmiş kaybolur.", "example": "cp -p notes.txt notes.bak"}, {"cmd": "cp -u", "what": "Yalnızca kaynak yeniyse veya hedef yoksa kopyalar.", "where": "`cp -u *.txt backup/` ile `~/backup` tazelenirken.", "why": "Değişmeyenleri atlar, daha yeni hedefi ezmez.", "example": "cp -u notes.txt backup/"}, {"cmd": "mv -u", "what": "Yalnızca kaynak yeniyse veya hedef yoksa taşır.", "where": "İki rapor klasörünü birleştirirken.", "why": "Yeni dosyanın eskisiyle değiştirilmesini önler.", "example": "mv -u report.txt archive/"}], "tip": "Bayrakları birleştir: `cp -pv a b` öznitelikleri korur ve yaptığını yazdırır.", "warn": "`-u` yalnızca zaman damgasına bakar, içeriğe değil. Saati yanlış bir dosya atlanabilir."}
  ],
  "tasks": {
   "t01": {

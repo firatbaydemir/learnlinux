@@ -38,6 +38,20 @@
    ],
    "tip": "Safe habit: decide first whether you need `>>` or `>`. A wrong `>` silently wipes an existing file.",
    "warn": "`>` empties the target file before the command runs. `sort file > file` destroys the file's content."
+  },
+  {
+   "id": "streamsplit",
+   "title": "Redirecting each stream separately",
+   "body": [
+    "Read a command line left to right: `ls data yok > out.txt 2> err.txt` -> `ls` runs; **1>** (`>`) writes normal output to `out.txt`, **2>** writes the error message to `err.txt`. Nothing is left on screen.",
+    "Rule: `N>` redirects only stream N; with no number, `>` means 1. Each redirection has its own file."
+   ],
+   "commands": [
+    {"cmd": "1>", "what": "Redirects stdout explicitly (same as `>`).", "where": "When writing output and errors as a readable pair.", "why": "`1>` and `2>` together show clearly which stream goes where.", "example": "ls data yok 1> out.txt 2> err.txt"},
+    {"cmd": "&>", "what": "Writes stdout and stderr together to one file (bash).", "where": "When everything should land in one log.", "why": "Short form of `> file 2>&1`.", "example": "ls data yok &> all.txt"},
+    {"cmd": "<<<", "what": "Feeds a string to the command's stdin (here-string).", "where": "Quick tests without creating a file.", "why": "No temp file or `echo |` needed.", "example": "wc -w <<< \"one two three\""}
+   ],
+   "tip": "If it gets confusing, read the line stream by stream: which number, which file? Mind the order with `2>&1`: file first, then 2>&1."
   }
  ],
  "tasks": {

@@ -86,11 +86,11 @@
     "title": "Walk the directory tree",
     "text": "List the top level and the configuration directory and paste the output of the first command.",
     "blocks": [
-     {"cmd": "ls /\nls /etc | head -n 15", "expected": "afs  bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
+     {"cmd": "ls /\nls /etc | head -n 15", "expected": "bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var"}
     ],
     "differs": [
      "The exact list varies by distribution, but `etc`, `home`, `usr` and `var` must be present.",
-     "`bin` appears as a link to `usr/bin` on modern systems; check with `ls -ld /bin`."
+     "`bin` appears as a link to `usr/bin` on modern systems; check with `ls -ld /bin`; `lib`, `lib64` and `sbin` may be links into `usr/` too. Extra directories such as `afs` are fine."
     ]
    },
    "v03": {
@@ -112,7 +112,7 @@
     ],
     "differs": [
      "`which` prints only the tool that exists: `apt` on Ubuntu, `dnf` on Rocky/Alma.",
-     "If `which` prints nothing for both, try `command -v dnf` or install `which` first."
+     "If `which` is missing (minimal installs lack it), the shell builtin `command -v dnf` and `command -v apt` always work."
     ]
    }
   }

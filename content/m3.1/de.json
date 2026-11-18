@@ -38,6 +38,20 @@
    ],
    "tip": "Gute Gewohnheit: Überlege zuerst, ob `>>` oder `>` nötig ist. Ein falsches `>` löscht eine vorhandene Datei stillschweigend.",
    "warn": "`>` leert die Zieldatei, bevor der Befehl läuft. `sort file > file` zerstört den Inhalt der Datei."
+  },
+  {
+   "id": "streamsplit",
+   "title": "Datenströme einzeln umleiten",
+   "body": [
+    "Lies eine Zeile von links nach rechts: `ls data yok > out.txt 2> err.txt` -> `ls` läuft; **1>** (`>`) schreibt die normale Ausgabe nach `out.txt`, **2>** die Fehlermeldung nach `err.txt`. Auf dem Bildschirm bleibt nichts.",
+    "Regel: `N>` leitet nur den Kanal N um; ohne Zahl bedeutet `>` 1. Jede Umleitung hat ihre eigene Datei."
+   ],
+   "commands": [
+    {"cmd": "1>", "what": "Leitet stdout ausdrücklich um (wie `>`).", "where": "Wenn du Ausgabe und Fehler lesbar als Paar schreibst.", "why": "`1>` und `2>` zeigen zusammen klar, welcher Kanal wohin geht.", "example": "ls data yok 1> out.txt 2> err.txt"},
+    {"cmd": "&>", "what": "Schreibt stdout und stderr zusammen in eine Datei (bash).", "where": "Wenn alles in einem Protokoll landen soll.", "why": "Kurzform von `> file 2>&1`.", "example": "ls data yok &> all.txt"},
+    {"cmd": "<<<", "what": "Gibt einen Text als stdin an den Befehl (Here-String).", "where": "Zum schnellen Testen ohne Datei.", "why": "Keine Temp-Datei und kein `echo |` nötig.", "example": "wc -w <<< \"one two three\""}
+   ],
+   "tip": "Wenn du dich verhedderst: Zeile Kanal für Kanal lesen – welche Nummer, welche Datei? Reihenfolge bei `2>&1` beachten: erst Datei, dann 2>&1."
   }
  ],
  "tasks": {

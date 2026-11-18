@@ -16,7 +16,12 @@
     "t06":{"text":"Entferne die Datei mit dem fehlerhaften Beispieleintrag `~/schedule/wrong-entry.txt`.","hint":"Prüfe den Pfad und führe dann `rm ~/schedule/wrong-entry.txt` aus."},
     "t07":{"text":"Mini-Projekt: Schreibe einen Backup-Eintrag für täglich 03:00 in `~/schedule/backup-plan.txt`.","hint":"Speichere die Zeile `0 3 * * * /usr/local/bin/backup`."},
     "t08":{"text":"Challenge: Schreibe eine Jobnotiz mit den Befehlen zum Bearbeiten und Prüfen nach `~/schedule/job-notes.txt`.","hint":"`crontab -e` bearbeitet, `crontab -l` listet auf."},
-    "t09":{"text":"Ticket: \"Cron findet das Skript nicht und die Ausgabe geht verloren.\" Empfiehl in der Supportnotiz, PATH festzulegen, absolute Pfade zu nutzen und Ausgaben zu protokollieren.","hint":"Verwende die Wörter `PATH` und `log` in der Notiz."}
+    "t09":{"text":"Ticket: \"Cron findet das Skript nicht und die Ausgabe geht verloren.\" Empfiehl in der Supportnotiz, PATH festzulegen, absolute Pfade zu nutzen und Ausgaben zu protokollieren.","hint":"Verwende die Wörter `PATH` und `log` in der Notiz."},
+    "t10":{"text":"Zähle die Zeilen des Beispiel-Zeitplans mit `wc -l ~/schedule/cron.sample`.","hint":"Die Kommentarzeile zählt mit."},
+    "t11":{"text":"Vorhersage: Welcher Job steht in der letzten Zeile des Beispiels? Prüfe mit `tail -n 1 ~/schedule/cron.sample`.","hint":"`tail -n 1` zeigt die letzte Zeile."},
+    "t12":{"text":"Lies das Job-Skript mit `cat ~/schedule/backup.sh`. Welche Meldung gibt es aus?","hint":"Die `printf`-Zeile gibt die Meldung aus."},
+    "t13":{"text":"Mini-Projekt: Sichere den Zeitplan vor einer Änderung als `~/schedule/cron.backup`.","hint":"`cp source target`"},
+    "t14":{"text":"Challenge: Schreibe einen Eintrag, der `/usr/local/bin/report` jeden Montag um 06:30 ausführt, nach `~/schedule/weekly-plan.txt`.","hint":"Reihenfolge: Minute Stunde Tag Monat Wochentag. Montag = 1."}
   },
   "vm":{"intro":"Diese Aufgaben lesen den aktuellen Scheduler-Status; sie fügen der Crontab keine Jobs hinzu und löschen keine. Der Dienstname kann je nach Distribution abweichen.","tasks":{
     "v01":{"title":"Benutzer-Crontab","text":"Liste die aktuelle Benutzer-Crontab auf. Gibt es noch keine Jobs, ist die Meldung normal; du musst keinen Job hinzufügen.","blocks":[{"cmd":"crontab -l","expected":"0 3 * * * /usr/local/bin/backup"}],"differs":["`no crontab for ...` bedeutet, dass es für diesen Benutzer keinen Eintrag gibt; das ist kein Fehler deinerseits.","Gelesen wird nur die Crontab des aktuellen Benutzers."]},

@@ -35,6 +35,20 @@
    ],
    "tip": "Das klassische Ranking: `sort | uniq -c | sort -rn`.",
    "warn": "`uniq` ohne `sort` lässt Duplikate stehen, die nicht nebeneinander liegen."
+  },
+  {
+   "id": "pipeerr",
+   "title": "Fehlerkanal und Pipelines",
+   "body": [
+    "Eine Pipe transportiert nur stdout. Bei `ls fehlt 2>&1 | wc -l` wird auch die Fehlerzeile gezählt; `2>&1` leitet stderr dorthin, wohin stdout geht. Die Reihenfolge zählt: `2>&1` steht **vor** der Pipe.",
+    "`tee` überschreibt die Datei normalerweise; `tee -a` hängt an. In einer langen Pipeline kannst du mit `tee` ein Zwischenergebnis sichern und prüfen, ohne alles neu auszuführen."
+   ],
+   "commands": [
+    {"cmd": "2>&1 |", "what": "Leitet auch Fehlermeldungen in die Pipe.", "where": "Wenn Ausgabe und Fehler als ein Strom gefiltert werden.", "why": "Fehler gehen nicht auf dem Bildschirm verloren; `grep`/`wc` sehen sie auch.", "example": "ls data fehlt 2>&1 | wc -l"},
+    {"cmd": "tee -a", "what": "Hängt den Strom an eine Datei an und reicht ihn weiter.", "where": "Wenn ein wiederholter Job protokolliert wird.", "why": "Ältere Einträge bleiben erhalten.", "example": "grep ERROR logs/app.log | tee -a all_errors.txt | wc -l"},
+    {"cmd": "sort -u", "what": "Sortiert und entfernt Duplikate in einem Schritt.", "where": "Wenn du eine Liste eindeutiger Werte ohne Zähler brauchst.", "why": "Kürzer als `sort | uniq`.", "example": "sort -u data/fruits.txt"}
+   ],
+   "tip": "Beim Debuggen: erst `cmd 2>&1 | head`, dann unerwünschte Fehler mit `2>/dev/null` ausblenden."
   }
  ],
  "tasks": {

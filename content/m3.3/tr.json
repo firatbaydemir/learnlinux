@@ -114,6 +114,39 @@
       "warn": "Jokeri silme komutunda körlemesine kullanma. Önce `pwd` ve `ls` ile dizini ve eşleşen adları doğrula; yıkıcı denemeleri yalnızca güvenli bir test ortamında yap."
     },
     {
+      "id": "regex",
+      "title": "Regex temelleri (BRE / ERE)",
+      "body": [
+        "Joker karakterler dosya adları içindir; **düzenli ifade** (regex) ise metin içeriğini eşleştirir. `grep` varsayılan olarak BRE, `grep -E` ERE kullanır. Dikkat: `*` globda 'her şey', regexte 'öncekinden sıfır veya daha fazla' demektir.",
+        "Temel desenler: `^` satır başı, `$` satır sonu, `.` herhangi bir karakter, `*` önceki sıfır+ kez, `[abc]` küme. ERE ek olarak `+` (bir+), `?` (sıfır/bir), `|` (veya) ve `()` (grup) sunar; BRE'de bunlar için `\\+`, `\\?`, `\\|` gerekir.",
+        "Desenleri kabuğun yorumlamaması için tek tırnak içine al: `grep -E 'a|b' dosya`."
+      ],
+      "commands": [
+        {
+          "cmd": "grep '^img'",
+          "what": "Satırı `img` ile başlayanları seçer.",
+          "where": "Satır başı/sonu sabitlemek için.",
+          "why": "Kısmi eşleşmeleri eler.",
+          "example": "ls | grep '^img'"
+        },
+        {
+          "cmd": "grep -E",
+          "what": "Genişletilmiş regex (ERE) kullanır.",
+          "where": "`|`, `+`, `()` gerektiğinde.",
+          "why": "Kaçış karakteri yazmadan okunur desen verir.",
+          "example": "ls | grep -E '^(img|doc)[0-9]+'"
+        },
+        {
+          "cmd": "grep '\\.txt$'",
+          "what": "Uzantıyı sonda eşleştirir.",
+          "where": "Nokta gerçek nokta olmalıysa `\\.` kullan.",
+          "why": "Çıplak `.` her karakterle eşleşir.",
+          "example": "ls | grep '\\.txt$'"
+        }
+      ],
+      "tip": "`sed -E` ve `awk` da aynı ERE desen dilini kullanır; modül 3.6'da göreceksin."
+    },
+    {
       "id": "practice",
       "title": "Desenleri uygulama görevlerine bağla",
       "body": [

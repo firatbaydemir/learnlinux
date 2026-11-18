@@ -16,7 +16,12 @@
     "t06":{"text":"Remove the file containing the incorrect sample entry: `~/schedule/wrong-entry.txt`.","hint":"Check the path, then run `rm ~/schedule/wrong-entry.txt`."},
     "t07":{"text":"Mini project: write a backup entry that runs daily at 03:00 to `~/schedule/backup-plan.txt`.","hint":"Save the line `0 3 * * * /usr/local/bin/backup`."},
     "t08":{"text":"Challenge: write a job note containing the commands to edit and inspect a schedule to `~/schedule/job-notes.txt`.","hint":"`crontab -e` edits; `crontab -l` lists."},
-    "t09":{"text":"Ticket: \"Cron cannot find the script and its output is lost.\" Recommend setting PATH, using absolute paths, and redirecting output to a log in the support note.","hint":"Use the words `PATH` and `log` in the note."}
+    "t09":{"text":"Ticket: \"Cron cannot find the script and its output is lost.\" Recommend setting PATH, using absolute paths, and redirecting output to a log in the support note.","hint":"Use the words `PATH` and `log` in the note."},
+    "t10":{"text":"Count the lines of the sample schedule with `wc -l ~/schedule/cron.sample`.","hint":"The comment line counts too."},
+    "t11":{"text":"Predict: which job is the last line of the sample? Verify with `tail -n 1 ~/schedule/cron.sample`.","hint":"`tail -n 1` shows the last line."},
+    "t12":{"text":"Read the job script with `cat ~/schedule/backup.sh`. What message does it print?","hint":"The `printf` line prints the message."},
+    "t13":{"text":"Mini project: back up the schedule as `~/schedule/cron.backup` before changing it.","hint":"`cp source target`"},
+    "t14":{"text":"Challenge: write an entry that runs `/usr/local/bin/report` every Monday at 06:30 to `~/schedule/weekly-plan.txt`.","hint":"Order: minute hour day month weekday. Monday = 1."}
   },
   "vm":{"intro":"These tasks inspect the current scheduler; they do not add or remove cron jobs. The service name may differ by distribution.","tasks":{
     "v01":{"title":"User crontab","text":"List the current user's crontab. If no jobs exist, the message is normal; you do not need to add a job.","blocks":[{"cmd":"crontab -l","expected":"0 3 * * * /usr/local/bin/backup"}],"differs":["A `no crontab for ...` message means this user has no entries; you have not done anything wrong.","Only the current user's table is read."]},

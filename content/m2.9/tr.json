@@ -16,7 +16,12 @@
     "t06":{"text":"Hatalı/geçici örnek kaydı kaldır: `~/disklab/fstab.tmp` dosyasını sil.","hint":"Tam yolu ve dosya adını kontrol ettikten sonra `rm ~/disklab/fstab.tmp`."},
     "t07":{"text":"Mini proje: `/data` için UUID ve `nofail` seçeneğini içeren bir bağlama planını `~/disklab/mount-plan.txt` dosyasına yaz.","hint":"Tek satırı `echo \"UUID=... /data ... nofail ...\" > ~/disklab/mount-plan.txt` ile kaydedebilirsin. (`>` çıktıyı dosyaya yönlendirir; ayrıntısı modül 3.2'de.)"},
     "t08":{"text":"Meydan okuma: örnek fstab dosyasının yedeğini `~/disklab/fstab.backup` adıyla oluştur.","hint":"`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"},
-    "t09":{"text":"Ticket: \"Yeni disk görünmüyor.\" Destek notuna önce `lsblk`, sonra `df -hT` ile kontrol edilmesini yaz.","hint":"Komutları bir metin satırına `echo` ile kaydet. (`>` ile dosyaya yazabilirsin; ayrıntısı modül 3.2'de.)"}
+    "t09":{"text":"Ticket: \"Yeni disk görünmüyor.\" Destek notuna önce `lsblk`, sonra `df -hT` ile kontrol edilmesini yaz.","hint":"Komutları bir metin satırına `echo` ile kaydet. (`>` ile dosyaya yazabilirsin; ayrıntısı modül 3.2'de.)"},
+    "t10":{"text":"`~/disklab/lsblk.txt` dosyasının yalnızca başlık satırını `head -n 1` ile göster. Hangi sütunlar var?","hint":"`head -n 1 ~/disklab/lsblk.txt`"},
+    "t11":{"text":"Tahmin et: `lsblk-f.txt` içindeki xfs dosya sisteminin UUID'si nedir? `grep xfs ~/disklab/lsblk-f.txt` ile doğrula.","hint":"`xfs` içeren satır UUID ve bağlama noktasını da gösterir."},
+    "t12":{"text":"İç içe bağlama noktası klasörü `~/disklab/mnt/data` yolunu tek komutla hazırla.","hint":"`mkdir -p` eksik üst klasörleri de oluşturur."},
+    "t13":{"text":"Mini proje: kök dosya sisteminin UUID ve türünü (`1111-2222`, `xfs`) `~/disklab/uuid-note.txt` dosyasına yaz.","hint":"İki değeri `echo ... > file` ile tek satıra yaz. (Ayrıntı: modül 3.2.)"},
+    "t14":{"text":"Zorlu görev: örnek fstab'ın kaç kayıt (satır) içerdiğini `wc -l ~/disklab/fstab.sample` ile say.","hint":"Her satır bir bağlama kaydıdır; `wc -l` satır sayar."}
   },
   "vm":{"intro":"Bu görevler disk bilgisini okur; bölüm tablosu veya dosya sistemi değiştirmez. Komutları kendi VM'inde çalıştır ve çıktındaki aygıt adlarını paylaşmadan önce gözden geçir.","tasks":{
     "v01":{"title":"Disk ve dosya sistemi ağacı","text":"Diskleri, bölümleri ve dosya sistemi türlerini listele. Sistem diskinin adını tahmin etmek yerine bağlama noktalarını kontrol et.","blocks":[{"cmd":"lsblk -f","expected":"NAME FSTYPE FSVER LABEL UUID FSAVAIL FSUSE% MOUNTPOINTS"}],"differs":["Sütunlar ve aygıt adları dağıtıma göre değişir; `sda`, `vda` veya `nvme0n1` görebilirsin.","Boş bir ek disk varsa FSTYPE ve MOUNTPOINTS sütunları boş olabilir."]},

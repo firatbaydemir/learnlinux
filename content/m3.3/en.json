@@ -114,6 +114,39 @@
       "warn": "Never use wildcards in delete commands blindly. First confirm the directory and matches with `pwd` and `ls`; test destructive commands only in a safe environment."
     },
     {
+      "id": "regex",
+      "title": "Regex basics (BRE / ERE)",
+      "body": [
+        "Globs are for file names; a **regular expression** (regex) matches text content. `grep` uses BRE by default and `grep -E` uses ERE. Careful: `*` means 'anything' in a glob but 'zero or more of the previous item' in a regex.",
+        "Core patterns: `^` start of line, `$` end of line, `.` any character, `*` zero or more of the previous, `[abc]` a set. ERE adds `+` (one or more), `?` (zero or one), `|` (or) and `()` (group); BRE needs `\\+`, `\\?`, `\\|` for these.",
+        "Put patterns in single quotes so the shell does not interpret them: `grep -E 'a|b' file`."
+      ],
+      "commands": [
+        {
+          "cmd": "grep '^img'",
+          "what": "Selects lines that start with `img`.",
+          "where": "When anchoring to the start or end of a line.",
+          "why": "Rules out partial matches.",
+          "example": "ls | grep '^img'"
+        },
+        {
+          "cmd": "grep -E",
+          "what": "Uses extended regex (ERE).",
+          "where": "When you need `|`, `+` or `()`.",
+          "why": "Gives readable patterns without escapes.",
+          "example": "ls | grep -E '^(img|doc)[0-9]+'"
+        },
+        {
+          "cmd": "grep '\\.txt$'",
+          "what": "Matches the extension at the end.",
+          "where": "Use `\\.` when the dot must be a real dot.",
+          "why": "A bare `.` matches any character.",
+          "example": "ls | grep '\\.txt$'"
+        }
+      ],
+      "tip": "`sed -E` and `awk` use the same ERE pattern language; you will meet them in module 3.6."
+    },
+    {
       "id": "practice",
       "title": "Apply patterns in practice tasks",
       "body": [
