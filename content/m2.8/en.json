@@ -171,7 +171,7 @@
   },
   "t13": {
    "text": "Challenge: from `~/reports/df_sample.txt` write only the 95% line to `~/alert.txt` and the number of such lines to `~/alert_count.txt`.",
-   "hint": "`grep` filters the line, `grep -c` counts; redirect both with `>`. (`grep` â†’ module 3.4, `>` â†’ 3.2.)"
+   "hint": "`grep` filters the line, `grep -c` counts; redirect both with `>`. (`grep` → module 3.4, `>` → 3.2.)"
   },
   "t14": {
    "text": "Ticket: \"The application throws 'No space left on device'.\" Find the full mount point in `~/reports/df_sample.txt` and write its name to `~/full_mount.txt`. Also delete the useless `~/logs/core.dump`.",
