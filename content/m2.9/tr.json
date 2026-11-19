@@ -172,7 +172,7 @@
   },
   "t04": {
    "text": "Bir bağlama noktası hazırlamak için `~/disklab/archive` dizinini oluştur.",
-   "hint": "`mkdir -p ~/disklab/archive`"
+   "hint": "Üst dizinler de yoksa `-p` bayrağı hepsini oluşturur."
   },
   "t05": {
    "text": "Tahmin et: örnek fstab'da `/data` için hangi UUID kullanılıyor? `grep data ~/disklab/fstab.sample` ile doğrula.",
@@ -196,7 +196,7 @@
   },
   "t10": {
    "text": "`~/disklab/lsblk.txt` dosyasının yalnızca başlık satırını `head -n 1` ile göster. Hangi sütunlar var?",
-   "hint": "`head -n 1 ~/disklab/lsblk.txt`"
+   "hint": "`-n 1` yalnızca ilk satırı verir; sütun adlarını oku."
   },
   "t11": {
    "text": "Tahmin et: `lsblk-f.txt` içindeki xfs dosya sisteminin UUID'si nedir? `grep xfs ~/disklab/lsblk-f.txt` ile doğrula.",

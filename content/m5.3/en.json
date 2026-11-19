@@ -94,11 +94,11 @@
  "tasks": {
   "t01": {
    "text": "Use `grep` to find user alice's processes in `~/lab/ps_snapshot.txt`.",
-   "hint": "The file starts with a `USER` column; try `grep alice ~/lab/ps_snapshot.txt`. (`grep` → module 3.4.)"
+   "hint": "The file starts with the `USER` column; search for lines containing the username. (`grep` → module 3.4.)"
   },
   "t02": {
    "text": "Find the PID of the `python3` process in the snapshot.",
-   "hint": "In the line from `grep python3 ~/lab/ps_snapshot.txt`, the second field is the PID. (`grep` → module 3.4.)"
+   "hint": "Search for the line with the process name; the second field is the PID. (`grep` → module 3.4.)"
   },
   "t03": {
    "text": "Predict how many lines contain `python3`, then verify with `grep -c`.",
@@ -130,7 +130,7 @@
   },
   "t10": {
    "text": "Find the PID of the `bash` process.",
-   "hint": "`grep bash ~/lab/ps_snapshot.txt`; the second field is the PID. (`grep` → module 3.4.)"
+   "hint": "Search for the line with the process name; the second field is the PID. (`grep` → module 3.4.)"
   },
   "t11": {
    "text": "Error prevention: write the step of checking matches with `pgrep -a` before `pkill` into `~/lab/pkill_check.txt`.",

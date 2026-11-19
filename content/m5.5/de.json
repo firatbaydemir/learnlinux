@@ -91,11 +91,11 @@
  "tasks": {
   "t01": {
    "text": "Finde in den Paketnotizen den übergeordneten Paketmanager für die RHEL-Familie.",
-   "hint": "Die Zeile von `grep RHEL ~/lab/package_notes.txt` enthält `dnf`. (`grep` → Modul 3.4.)"
+   "hint": "Suche in den Notizen die Familie; die Zeile nennt den Paketmanager. (`grep` → Modul 3.4.)"
   },
   "t02": {
    "text": "Finde den übergeordneten Paketmanager für Ubuntu/Debian.",
-   "hint": "Die Zeile von `grep Ubuntu ~/lab/package_notes.txt` enthält `apt`. (`grep` → Modul 3.4.)"
+   "hint": "Suche in den Notizen die Familie; die Zeile nennt den Paketmanager. (`grep` → Modul 3.4.)"
   },
   "t03": {
    "text": "Schätze, in wie vielen Zeilen `package` vorkommt, und prüfe es mit `grep -c`.",
@@ -127,7 +127,7 @@
   },
   "t10": {
    "text": "Zu welcher Distributionsfamilie gehört `dpkg`? Finde die Zeile.",
-   "hint": "Probiere `grep dpkg ~/lab/package_notes.txt`. (`grep` → Modul 3.4.)"
+   "hint": "Suche in den Notizen die Zeile mit `dpkg`; sie nennt die Familie. (`grep` → Modul 3.4.)"
   },
   "t11": {
    "text": "Schreibe ein Beispiel mit `apt search` und `dnf search` in `~/lab/search_plan.txt`.",

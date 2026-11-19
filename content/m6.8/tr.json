@@ -313,7 +313,7 @@
   },
   "t02": {
    "text": "`~/srv/company` içinde `shared`, `admin`, `web`, `backup` ve `scripts` olmak üzere beş alt dizini tek `mkdir` komutuyla oluştur.",
-   "hint": "Süslü parantez açılımı: `mkdir ~/srv/company/{shared,admin,web,backup,scripts}`."
+   "hint": "Süslü parantez açılımıyla beş adı tek yolda üret; ortak üst yol `~/srv/company`."
   },
   "t03": {
    "text": "Proje çalışması için sıkı bir umask ayarla: `umask 027`.",
@@ -321,7 +321,7 @@
   },
   "t04": {
    "text": "Ortak dizine `2770` modunu ver (setgid, sahip ve grup için rwx, diğerleri için hiçbir şey).",
-   "hint": "`chmod 2770 ~/srv/company/shared`. (`chmod` → modül 4.4.)"
+   "hint": "Dört haneli sayısal mod: baştaki `2` setgid, sonra sahip/grup/diğer. (`chmod` → modül 4.4.)"
   },
   "t05": {
    "text": "`web` dizinini herkes için okunabilir (`755`), `backup` dizinini özel (`700`) yap.",
@@ -337,7 +337,7 @@
   },
   "t08": {
    "text": "Tahmin et: `ls -ld ~/srv/company/shared` hangi izin dizesini gösterecek? Bir kenara yaz, sonra komutu çalıştır.",
-   "hint": "`s` grup `x`'inin yerini alır: `drwxrws---`."
+   "hint": "Dizinde setgid açık: grup üçlüsünde `x` yerine özel bir harf görünür. Önce `ls -ld` ile bak, sonra o üçlüyü oku."
   },
   "t09": {
    "text": "Tahmin et: `~/audit/group.txt` içinde `admins` grubunun üyeleri kimler? Doğrulamak için `grep admins ~/audit/group.txt | cut -d: -f4` çalıştır.",

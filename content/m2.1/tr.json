@@ -188,7 +188,7 @@
    "hint": "Loglar `/etc` altında değil, `/var` altındadır."
   },
   "t12": {
-   "text": "Mini proje: `~/mini-root` altında küçük bir FHS ağacı kur. Tek `mkdir -p` ile `etc`, `var/log` ve `tmp` dizinlerini, `touch` ile `etc/app.conf` dosyasını oluştur; `echo started > ~/mini-root/var/log/app.log` ile log satırı yaz.",
+   "text": "Mini proje: `~/mini-root` altında küçük bir FHS ağacı kur: `etc`, `var/log` ve `tmp` dizinlerini tek komutla oluştur, `etc/app.conf` dosyasını yarat ve `var/log/app.log` dosyasına `started` satırını yaz.",
    "hint": "Küme: `~/mini-root/{etc,var/log,tmp}`; log dosyasına yönlendirme `>` ile yazılır. (`mkdir`/`touch` modül 2.3'te, `>` modül 3.2'de ayrıntılı anlatılır.)"
   },
   "t13": {

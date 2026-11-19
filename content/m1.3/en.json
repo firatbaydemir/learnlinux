@@ -295,7 +295,7 @@
   },
   "t10": {
    "text": "Predict: what number does `nosuchcmd; echo $?` print? Then run it to verify.",
-   "hint": "No such command → exit code 127."
+   "hint": "If the shell cannot find the command it returns a special exit code; 0 is success, 1 and 2 are generic errors, this one is much larger."
   },
   "t11": {
    "text": "Predict: how many directories does `find ~ -type d | wc -l` count under home (including home)? Run it and verify.",
@@ -318,7 +318,7 @@
    "hint": "`which ls > ...` and `type cd > ...`. (`>` writes output to a file; see module 3.2.)"
   },
   "t16": {
-   "text": "TICKET #4411 — The teacher wants to see what you tried: first run `which ls`, then save the history to `~/hist.txt`.",
+   "text": "TICKET #4411 — The teacher wants to see what you tried: first show the path of the `ls` command, then save your command history to `~/hist.txt`.",
    "hint": "`history > ~/hist.txt`. (`>` writes output to a file; see module 3.2.)"
   }
  },

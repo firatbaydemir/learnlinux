@@ -172,7 +172,7 @@
   },
   "t04": {
    "text": "Erstelle das Verzeichnis `~/disklab/archive` als Einhängepunkt.",
-   "hint": "`mkdir -p ~/disklab/archive`"
+   "hint": "Fehlen auch übergeordnete Ordner, legt die Flag `-p` alle an."
   },
   "t05": {
    "text": "Vorhersage: Welche UUID gehört in der Beispiel-fstab zu `/data`? Prüfe mit `grep data ~/disklab/fstab.sample`.",
@@ -196,7 +196,7 @@
   },
   "t10": {
    "text": "Zeige nur die Kopfzeile von `~/disklab/lsblk.txt` mit `head -n 1`. Welche Spalten gibt es?",
-   "hint": "`head -n 1 ~/disklab/lsblk.txt`"
+   "hint": "`-n 1` liefert nur die erste Zeile; lies die Spaltennamen."
   },
   "t11": {
    "text": "Vorhersage: Welche UUID hat das xfs-Dateisystem in `lsblk-f.txt`? Prüfe mit `grep xfs ~/disklab/lsblk-f.txt`.",

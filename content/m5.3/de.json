@@ -94,11 +94,11 @@
  "tasks": {
   "t01": {
    "text": "Finde mit `grep` die Prozesse des Benutzers alice in `~/lab/ps_snapshot.txt`.",
-   "hint": "Die Datei beginnt mit der Spalte `USER`; probiere `grep alice ~/lab/ps_snapshot.txt`. (`grep` → Modul 3.4.)"
+   "hint": "Die Datei beginnt mit der Spalte `USER`; suche die Zeilen mit dem Benutzernamen. (`grep` → Modul 3.4.)"
   },
   "t02": {
    "text": "Finde die PID des `python3`-Prozesses in der Momentaufnahme.",
-   "hint": "In der Zeile von `grep python3 ~/lab/ps_snapshot.txt` ist das zweite Feld die PID. (`grep` → Modul 3.4.)"
+   "hint": "Suche die Zeile mit dem Prozessnamen; das zweite Feld ist die PID. (`grep` → Modul 3.4.)"
   },
   "t03": {
    "text": "Schätze: In wie vielen Zeilen steht `python3`? Prüfe danach mit `grep -c`.",
@@ -130,7 +130,7 @@
   },
   "t10": {
    "text": "Finde die PID des `bash`-Prozesses.",
-   "hint": "`grep bash ~/lab/ps_snapshot.txt`; das zweite Feld ist die PID. (`grep` → Modul 3.4.)"
+   "hint": "Suche die Zeile mit dem Prozessnamen; das zweite Feld ist die PID. (`grep` → Modul 3.4.)"
   },
   "t11": {
    "text": "Fehlervermeidung: Schreibe den Schritt, vor `pkill` mit `pgrep -a` die Treffer zu prüfen, in `~/lab/pkill_check.txt`.",

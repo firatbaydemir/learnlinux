@@ -137,11 +137,11 @@
   },
   "t04": {
    "text": "Model a one-file transfer: copy `report.txt` as `report.remote.txt`.",
-   "hint": "`cp ~/transfer/report.txt ~/transfer/report.remote.txt`"
+   "hint": "Give two paths, source and destination; both are in `~/transfer`."
   },
   "t05": {
    "text": "Predict: which key type does the sample host record use? Check with `grep linux-lab ~/.ssh/known_hosts.sample`.",
-   "hint": "The line contains `ssh-ed25519`. (`grep` searches text lines; details in module 3.4.)"
+   "hint": "The second field of the line is the key type; it starts with `ssh-` followed by the algorithm name. (`grep` searches text lines; details in module 3.4.)"
   },
   "t06": {
    "text": "Remove the old local copy `~/transfer/old_copy.txt`, not the source file.",
@@ -161,7 +161,7 @@
   },
   "t10": {
    "text": "Show the first line of `~/ops/ssh-config.sample` with `head -n 1`. Which host alias is defined?",
-   "hint": "`head -n 1 ~/ops/ssh-config.sample`"
+   "hint": "Use `-n 1` to get only the first line; look at the `Host` line."
   },
   "t11": {
    "text": "Predict: which address does `linux-lab` point to? Verify with `grep HostName ~/ops/ssh-config.sample`.",
@@ -169,7 +169,7 @@
   },
   "t12": {
    "text": "Create the receiving folder `~/transfer/incoming` for downloaded files.",
-   "hint": "`mkdir ~/transfer/incoming`"
+   "hint": "The target path is under `~/transfer`; the parent folder already exists."
   },
   "t13": {
    "text": "Mini project: keep a backup of the manifest as `~/ops/manifest.bak` before a transfer.",

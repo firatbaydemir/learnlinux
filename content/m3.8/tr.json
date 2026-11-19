@@ -244,7 +244,7 @@
   },
   "t05": {
    "text": "`restore` adlı klasörü oluştur, sonra arşivi oraya aç.",
-   "hint": "Önce `mkdir restore`; sonra `tar` ile `-x`, `-z`, `-f` ve hedef için `-C` (klasör var olmalı)."
+   "hint": "Önce klasörü oluştur; sonra `tar` ile `-x`, `-z`, `-f` ve hedef için `-C` kullan (klasör var olmalı)."
   },
   "t06": {
    "text": "`logs/app.log` dosyasını orijinalini koruyarak sıkıştır.",

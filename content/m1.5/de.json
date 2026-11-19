@@ -323,15 +323,15 @@
   },
   "t02": {
    "text": "Zeige die Befehlshistorie an.",
-   "hint": "Tippe `history`."
+   "hint": "Die Ausgabe ist eine nummerierte Liste; der älteste Befehl steht oben."
   },
   "t03": {
    "text": "Gib die Variable `HOME`, die dein Home-Verzeichnis enthält, mit `echo` aus.",
-   "hint": "Setze `$` vor die Variable: `echo $HOME`."
+   "hint": "Um den Wert einer Variablen zu lesen, setze `$` vor den Namen."
   },
   "t04": {
    "text": "Exportiere die Variable `GREETING=hello` mit `export` und finde sie dann mit `grep` in der `env`-Ausgabe.",
-   "hint": "`export GREETING=hello`, danach `env | grep GREETING` (`|` leitet die Ausgabe an den nächsten Befehl weiter, `grep` sucht Zeilen; Module 3.2 und 3.4)."
+   "hint": "Exportiere zuerst die Variable, leite dann die `env`-Ausgabe mit `|` an den Suchbefehl. (`|` und `grep` → Modul 3.2 und 3.4.)"
   },
   "t05": {
    "text": "Liste die `.txt`-Dateien im Ordner `lab` mit einem Platzhalter auf: Führe `echo lab/*.txt` aus.",
@@ -339,11 +339,11 @@
   },
   "t06": {
    "text": "Lege mit Klammererweiterung `file1.txt`, `file2.txt` und `file3.txt` in `lab` mit einem Befehl an.",
-   "hint": "`touch ~/lab/file{1,2,3}.txt` (`touch` legt leere Dateien an; Modul 2.3)."
+   "hint": "Die geschweifte Klammer `{1,2,3}` erzeugt für jeden Wert einen Namen. (`touch` → Modul 2.3.)"
   },
   "t07": {
    "text": "Erstelle den Ordner `~/bin` und füge ihn zu `PATH` hinzu, ohne den alten Wert zu verlieren.",
-   "hint": "`mkdir ~/bin` (legt einen Ordner an; Modul 2.3), dann `export PATH=$PATH:~/bin`."
+   "hint": "Zwei Schritte: Ordner anlegen, dann den alten `PATH` mit `$PATH:` behalten und den neuen Ordner anhängen. (`mkdir` → Modul 2.3.)"
   },
   "t08": {
    "text": "Vorhersage: Was gibt `echo '$HOME'` aus? Führe die Variante mit einfachen Anführungszeichen aus und prüfe.",
@@ -375,10 +375,10 @@
   },
   "t15": {
    "text": "Gib mit `printf` die Zeile `Name: alice` aus; nutze `%s` und `\\n`.",
-   "hint": "`printf \"Name: %s\\n\" alice`."
+   "hint": "Die Formatzeichenkette enthält den Platzhalter `%s` und den Zeilenumbruch `\\n`; der Wert folgt nach dem Format."
   },
   "t16": {
-   "text": "Liste eine nicht vorhandene Datei auf (`ls nofile`) und zeige danach den Exit-Code mit `echo $?` an.",
+   "text": "Versuche, eine nicht existierende Datei (`nofile`) aufzulisten, und zeige danach den Exit-Code dieses Befehls.",
    "hint": "Nach einem Fehler ist `$?` eine Zahl ungleich null."
   }
  },

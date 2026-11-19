@@ -244,7 +244,7 @@
   },
   "t05": {
    "text": "Create the `restore` directory, then extract the archive there.",
-   "hint": "`mkdir restore` first; then `tar` with `-x`, `-z`, `-f` and `-C` for the target (it must exist)."
+   "hint": "First create the folder; then `tar` with `-x`, `-z`, `-f` and `-C` for the target (the folder must exist)."
   },
   "t06": {
    "text": "Compress `logs/app.log` and keep the original.",

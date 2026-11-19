@@ -135,11 +135,11 @@
   },
   "t04": {
    "text": "Read the sample report `~/reports/df_sample.txt` with `cat` and find the Use% column.",
-   "hint": "`cat ~/reports/df_sample.txt`"
+   "hint": "Find the `Use%` column in the header line and read the value on each row."
   },
   "t05": {
    "text": "Save the output of `df -h` to `~/disk_report.txt` with `>`.",
-   "hint": "`df -h > ~/disk_report.txt`. A single `>` overwrites the file. (Details on `>` in module 3.2.)"
+   "hint": "A single `>` overwrites the file; the command gives readable sizes with `-h`. (`>` is covered in module 3.2.)"
   },
   "t06": {
    "text": "Append the output of `free -h` to the same file (`>>`).",

@@ -91,11 +91,11 @@
  "tasks": {
   "t01": {
    "text": "Anlık görüntüde `sleep` işinin durumunu bul.",
-   "hint": "`grep sleep ~/lab/jobs_snapshot.txt` satırında `Stopped` yazmalıdır. (`grep` → modül 3.4.)"
+   "hint": "Anlık görüntüde işin adını ara; satırda `Stopped` yazmalıdır. (`grep` → modül 3.4.)"
   },
   "t02": {
    "text": "`backup.sh` işinin mevcut durumunu görüntüle.",
-   "hint": "`grep backup ~/lab/jobs_snapshot.txt` satırında `Running` bulunur. (`grep` → modül 3.4.)"
+   "hint": "Anlık görüntüde betik adını ara; satırda `Running` bulunur. (`grep` → modül 3.4.)"
   },
   "t03": {
    "text": "Tahmin et: anlık görüntüde kaç iş duraklatılmış? `grep -c` ile doğrula.",
@@ -127,7 +127,7 @@
   },
   "t10": {
    "text": "`report` komutunun durumunu bul.",
-   "hint": "`grep report ~/lab/jobs_snapshot.txt` dene. (`grep` → modül 3.4.)"
+   "hint": "Anlık görüntü dosyasında komut adını ara; durum sütunu işin durumudur. (`grep` → modül 3.4.)"
   },
   "t11": {
    "text": "Oturum kapanınca işin SIGHUP almaması için `disown` notunu `~/lab/disown_note.txt` içine yaz.",

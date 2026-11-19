@@ -226,7 +226,7 @@
   },
   "t02": {
    "text": "List the contents of your home directory with `ls`.",
-   "hint": "`ls` without an argument looks at your current directory."
+   "hint": "Without an argument the command looks at your current directory."
   },
   "t03": {
    "text": "Enter the `Documents` folder with `cd Documents`.",
@@ -242,15 +242,15 @@
   },
   "t06": {
    "text": "Go to the `~/projects/website` directory using an absolute path.",
-   "hint": "`cd ~/projects/website`."
+   "hint": "An absolute path starts with `/` or `~`; `cd` needs the target directory."
   },
   "t07": {
    "text": "Enter the `css` subfolder using a relative path.",
-   "hint": "You are already inside `website`: `cd css`."
+   "hint": "You are already in `website`; a relative path does not start with `/`, just give the subfolder name."
   },
   "t08": {
    "text": "While inside `css`, use `..` to move to the sibling folder `images`.",
-   "hint": "First up, then down: `cd ../images`."
+   "hint": "First one level up (`..`), then down into `images`; combine both in one path."
   },
   "t09": {
    "text": "Return to the previous directory with `cd -`.",
@@ -258,7 +258,7 @@
   },
   "t10": {
    "text": "Return to your home directory with `cd` without an argument.",
-   "hint": "`cd` or `cd ~`."
+   "hint": "Without a target `cd` takes you home; writing `~` does the same."
   },
   "t11": {
    "text": "Predict: if you type `cd /usr/bin/../..` from a command in `/usr/bin`, where do you end up? Think first, then run the command and verify with `pwd`.",

@@ -240,7 +240,7 @@
    "hint": "`vault` klasörü `600`: x yok, içine girilemez. `chmod`."
   },
   "t14": {
-   "text": "Mini proje: `team` klasörü ve içinde `plan.txt` oluştur; klasör `770`, dosya `660` olsun; klasörün grubunu `sudo chgrp devs team` ile `devs` yap.",
+   "text": "Mini proje: `team` klasörü ve içinde `plan.txt` oluştur; klasör `770`, dosya `660` olsun; klasörün grubunu `devs` yap (yönetici yetkisiyle).",
    "hint": "Sıra: `mkdir`, `touch`, iki `chmod`, bir `chgrp`."
   },
   "t15": {

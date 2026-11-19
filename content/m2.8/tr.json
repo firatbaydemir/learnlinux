@@ -135,11 +135,11 @@
   },
   "t04": {
    "text": "Örnek rapor `~/reports/df_sample.txt` dosyasını `cat` ile oku ve Use% sütununu bul.",
-   "hint": "`cat ~/reports/df_sample.txt`"
+   "hint": "Başlık satırında `Use%` sütununu bul ve her satırdaki değeri oku."
   },
   "t05": {
    "text": "`df -h` çıktısını `>` ile `~/disk_report.txt` dosyasına kaydet.",
-   "hint": "`df -h > ~/disk_report.txt`. Tek `>` dosyanın üzerine yazar. (`>` ayrıntısı modül 3.2'de.)"
+   "hint": "Tek `>` dosyanın üzerine yazar; komut `-h` ile okunur boyut verir. (`>` ayrıntısı modül 3.2'de.)"
   },
   "t06": {
    "text": "`free -h` çıktısını aynı dosyanın sonuna ekle (`>>`).",

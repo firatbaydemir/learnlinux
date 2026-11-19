@@ -170,11 +170,11 @@
  "tasks": {
   "t01": {
    "text": "Führe `stat` auf `~/info/data.txt` aus und finde die Zeilen Size und Modify.",
-   "hint": "`stat ~/info/data.txt`"
+   "hint": "Suche in der Ausgabe die Zeilen `Size:` und `Modify:`."
   },
   "t02": {
    "text": "Liste den Ordner `~/info` im Langformat auf.",
-   "hint": "`ls -l ~/info`"
+   "hint": "Für das lange Format gibt es `-l`; Rechte, Besitzer und Größe werden angezeigt."
   },
   "t03": {
    "text": "Gib mit `basename` nur den Dateinamen des Pfads `~/info/data.txt` aus.",
@@ -186,7 +186,7 @@
   },
   "t05": {
    "text": "Liste den Inhalt von `~/info` mit lesbaren Größen auf.",
-   "hint": "`ls -lh ~/info`"
+   "hint": "Ergänze zum langen Format die Flag `-h` für lesbare Größen."
   },
   "t06": {
    "text": "Wie viele Bytes hat `data.txt`? Finde es mit `wc -c` heraus.",
@@ -194,11 +194,11 @@
   },
   "t07": {
    "text": "Finde mit `wc -l` die Zeilenzahl von `data.txt`.",
-   "hint": "`wc -l ~/info/data.txt`"
+   "hint": "Für die Zeilenzahl gibt es `-l`; gib den vollen Dateipfad an."
   },
   "t08": {
    "text": "Lege den symbolischen Link `~/info/link.txt` mit dem Ziel `data.txt` an.",
-   "hint": "`ln -s data.txt ~/info/link.txt`; das Ziel ist relativ zum Ordner des Links."
+   "hint": "Für symbolische Links dient `-s`; das Ziel ist relativ zum Ordner des Links."
   },
   "t09": {
    "text": "Vorhersage: Wie sieht der Link in der Ausgabe von `ls -l ~/info` aus? Führe es aus und prüfe.",
@@ -210,7 +210,7 @@
   },
   "t11": {
    "text": "Vorhersage: Mit welchem Buchstaben beginnt die Zeile von `ls -ld ~/info`? Führe es aus.",
-   "hint": "Ein Ordner beginnt mit `d`: `drwx...`."
+   "hint": "Das erste Zeichen einer `ls -l`-Zeile zeigt den Typ: `-` ist eine normale Datei. Welcher Buchstabe steht für einen Ordner?"
   },
   "t12": {
    "text": "Vorhersage: Was macht `stat` bei der nicht vorhandenen Datei `~/info/missing.txt`? Führe es aus.",
@@ -225,7 +225,7 @@
    "hint": "Schau mit `cat` hinein, benenne dann mit `mv` um. (`cat` in Modul 2.6, `mv` in Modul 2.4.)"
   },
   "t15": {
-   "text": "Mini-Projekt: Lege den Ordner `~/inventory` an, schreibe mit `echo version1 > ~/inventory/v1.txt` eine Datei, lege den Link `current` mit dem Ziel `v1.txt` an und prüfe mit `ls -l ~/inventory`.",
+   "text": "Mini-Projekt: Lege den Ordner `~/inventory` an, erstelle darin `v1.txt` mit dem Inhalt `version1`, setze einen Link `current` auf `v1.txt` und prüfe mit `ls -l`.",
    "hint": "Reihenfolge: `mkdir`, `echo >`, `ln -s v1.txt ~/inventory/current`, `ls -l`. (`>` leitet die Ausgabe in eine Datei um, Details in Modul 3.2; `mkdir` in Modul 2.3.)"
   },
   "t16": {

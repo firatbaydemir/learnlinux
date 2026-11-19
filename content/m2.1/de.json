@@ -188,7 +188,7 @@
    "hint": "Logs liegen nicht unter `/etc`, sondern unter `/var`."
   },
   "t12": {
-   "text": "Mini-Projekt: Baue unter `~/mini-root` einen kleinen FHS-Baum. Lege mit einem `mkdir -p` die Ordner `etc`, `var/log` und `tmp` an, erstelle mit `touch` die Datei `etc/app.conf` und schreibe mit `echo started > ~/mini-root/var/log/app.log` eine Logzeile.",
+   "text": "Mini-Projekt: Baue unter `~/mini-root` einen kleinen FHS-Baum: Lege `etc`, `var/log` und `tmp` mit einem einzigen Befehl an, erstelle `etc/app.conf` und schreibe die Zeile `started` in `var/log/app.log`.",
    "hint": "Klammern: `~/mini-root/{etc,var/log,tmp}`; in die Logdatei schreibst du per Umleitung `>`. (`mkdir`/`touch` folgen in Modul 2.3, `>` in Modul 3.2.)"
   },
   "t13": {

@@ -226,7 +226,7 @@
   },
   "t02": {
    "text": "Liste mit `ls` den Inhalt des Home-Verzeichnisses auf.",
-   "hint": "`ls` ohne Argument schaut ins aktuelle Verzeichnis."
+   "hint": "Ohne Argument sieht sich der Befehl das aktuelle Verzeichnis an."
   },
   "t03": {
    "text": "Wechsle mit `cd Documents` in den Ordner `Documents`.",
@@ -242,15 +242,15 @@
   },
   "t06": {
    "text": "Wechsle über den absoluten Pfad in das Verzeichnis `~/projects/website`.",
-   "hint": "`cd ~/projects/website`."
+   "hint": "Ein absoluter Pfad beginnt mit `/` oder `~`; `cd` braucht das Zielverzeichnis."
   },
   "t07": {
    "text": "Wechsle über den relativen Pfad in den Unterordner `css`.",
-   "hint": "Du bist schon in `website`: `cd css`."
+   "hint": "Du bist schon in `website`; ein relativer Pfad beginnt nicht mit `/`, gib nur den Unterordnernamen an."
   },
   "t08": {
    "text": "Wechsle aus `css` mithilfe von `..` in den Nachbarordner `images`.",
-   "hint": "Erst eins hoch, dann hinunter: `cd ../images`."
+   "hint": "Erst eine Ebene hoch (`..`), dann nach `images`; verbinde beides in einem Pfad."
   },
   "t09": {
    "text": "Kehre mit `cd -` ins vorherige Verzeichnis zurück.",
@@ -258,7 +258,7 @@
   },
   "t10": {
    "text": "Kehre mit `cd` ohne Argument ins Home-Verzeichnis zurück.",
-   "hint": "`cd` oder `cd ~`."
+   "hint": "Ohne Ziel bringt `cd` dich ins Home-Verzeichnis; `~` leistet dasselbe."
   },
   "t11": {
    "text": "Vorhersage: Du bist in `/usr/bin` und tippst `cd /usr/bin/../..`. Wo landest du? Überlege zuerst, führe dann den Befehl aus und prüfe mit `pwd`.",

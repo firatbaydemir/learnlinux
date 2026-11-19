@@ -323,15 +323,15 @@
   },
   "t02": {
    "text": "Komut geçmişini göster.",
-   "hint": "`history` yaz."
+   "hint": "Çıktı numaralı bir listedir; en eski komut en üsttedir."
   },
   "t03": {
    "text": "Ev dizinini gösteren `HOME` değişkenini `echo` ile yazdır.",
-   "hint": "Değişkenin başına `$` koy: `echo $HOME`."
+   "hint": "Değişken değerini okumak için adının başına `$` koy."
   },
   "t04": {
    "text": "`GREETING=hello` değişkenini `export` ile dışa aktar, sonra `env` çıktısında `grep` ile bul.",
-   "hint": "`export GREETING=hello` ardından `env | grep GREETING` (`|` çıktıyı sonraki komuta aktarır, `grep` satır arar; modül 3.2 ve 3.4)."
+   "hint": "Önce değişkeni dışa aktar, sonra `env` çıktısını `|` ile satır arayan komuta ver. (`|` ve `grep` → modül 3.2 ve 3.4.)"
   },
   "t05": {
    "text": "`lab` klasöründeki `.txt` dosyalarını joker karakterle listele: `echo lab/*.txt` komutunu çalıştır.",
@@ -339,11 +339,11 @@
   },
   "t06": {
    "text": "Süslü parantezle `lab` içinde `file1.txt`, `file2.txt` ve `file3.txt` dosyalarını tek komutta oluştur.",
-   "hint": "`touch ~/lab/file{1,2,3}.txt` (`touch` boş dosya oluşturur; modül 2.3)."
+   "hint": "Süslü parantez `{1,2,3}` her değer için bir ad üretir. (`touch` → modül 2.3.)"
   },
   "t07": {
    "text": "`~/bin` klasörünü oluştur ve eski değeri koruyarak `PATH`'e ekle.",
-   "hint": "`mkdir ~/bin` (klasör oluşturur; modül 2.3), sonra `export PATH=$PATH:~/bin`."
+   "hint": "İki adım: klasörü oluştur, sonra `PATH`'in eski değerini `$PATH:` ile koruyarak yeni klasörü sona ekle. (`mkdir` → modül 2.3.)"
   },
   "t08": {
    "text": "Tahmin et: `echo '$HOME'` ne yazdırır? Tek tırnaklı hâlini çalıştırıp doğrula.",
@@ -375,10 +375,10 @@
   },
   "t15": {
    "text": "`printf` ile `Name: alice` satırını yazdır; `%s` ve `\\n` kullan.",
-   "hint": "`printf \"Name: %s\\n\" alice`."
+   "hint": "Biçim dizesi `%s` yer tutucusu ve satır sonu `\\n` içerir; değer biçimden sonra gelir."
   },
   "t16": {
-   "text": "Var olmayan bir dosyayı listele (`ls nofile`), ardından çıkış kodunu `echo $?` ile göster.",
+   "text": "Var olmayan bir dosyayı (`nofile`) listelemeyi dene, ardından o komutun çıkış kodunu göster.",
    "hint": "Hata sonrası `$?` sıfırdan farklı bir sayı verir."
   }
  },

@@ -122,7 +122,7 @@
   },
   "t02": {
    "text": "Aufwärmen: Führe `id` aus und sieh Benutzer, UID und Gruppen (`wheel` heißt Administrator).",
-   "hint": "Einfach `id`."
+   "hint": "Suche in der Ausgabe die Felder `uid=`, `gid=` und `groups=`."
   },
   "t03": {
    "text": "Geführt: Führe `hostname` und dann `uname -r` aus — die ersten Fakten nach jeder Installation.",
@@ -130,7 +130,7 @@
   },
   "t04": {
    "text": "Vorhersagen: Was gibt `sudo whoami` aus? Überlege, dann führe es aus.",
-   "hint": "sudo führt den Befehl als root aus."
+   "hint": "`sudo` führt den Befehl mit den Rechten eines anderen Benutzers aus; `whoami` gibt dann genau diese Identität aus."
   },
   "t05": {
    "text": "Fehler finden: `cat /etc/os_release` schlägt fehl. Führe es aus, lies den Fehler, dann den richtigen Befehl.",

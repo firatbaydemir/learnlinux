@@ -167,7 +167,7 @@
    "hint": "Önce `cd`, sonra `cat ../config.txt`."
   },
   "t13": {
-   "text": "Mini proje: `~/lab/docs` ve `~/lab/bin` dizinlerini kur, `echo hello linux > ~/lab/docs/readme.txt` ile dosya yaz, `~/lab/bin/readme-link` adında ona sembolik link ver.",
+   "text": "Mini proje: `~/lab/docs` ve `~/lab/bin` dizinlerini kur, `~/lab/docs/readme.txt` dosyasına `hello linux` yaz ve `~/lab/bin/readme-link` adında ona sembolik link ver.",
    "hint": "`mkdir -p`, `echo ... >` ve `ln -s HEDEF LINK`. (`mkdir` modül 2.3'te, `>` çıktıyı dosyaya yazar, modül 3.2'de anlatılır.)"
   },
   "t14": {
@@ -175,7 +175,7 @@
    "hint": "Göreli hedef linkin bulunduğu dizinden hesaplanır."
   },
   "t15": {
-   "text": "Ticket: Uygulama yapılandırmayı `~/app/current/config.txt` yolunda arıyor, gerçek dosya `~/releases/v2/config.txt` içinde. `~/app/current` sembolik linkini `~/releases/v2` dizinine kur ve `cat ~/app/current/config.txt` ile doğrula.",
+   "text": "Ticket: Uygulama yapılandırmayı `~/app/current/config.txt` yolunda arıyor, gerçek dosya `~/releases/v2/config.txt` içinde. `~/app/current` yolunu `~/releases/v2` dizinine sembolik link yap ve dosyayı bu yoldan okuyarak doğrula.",
    "hint": "`mkdir -p`, sonra `ln -s ~/releases/v2 ~/app/current`."
   },
   "t16": {

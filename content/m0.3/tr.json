@@ -157,7 +157,7 @@
    "hint": "Kısayol: Ctrl+L"
   },
   "t14": {
-   "text": "Meydan okuma: ev dizininde `echo Hello > first.txt` ile bir dosya oluştur, sonra `cat first.txt` ile içeriğini oku.",
+   "text": "Meydan okuma: ev dizinine dön, içinde `Hello` yazan `first.txt` dosyasını yönlendirmeyle oluştur, sonra içeriğini oku.",
    "hint": "> işareti çıktıyı dosyaya yazar, `cd` dizin değiştirir, `cat` dosyayı okur (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd` ile ev dizinine dön."
   },
   "t15": {
@@ -169,7 +169,7 @@
    "hint": "Yanlış yazılan dosya adı `No such file` hatası verir; `ls` çıktısındaki adı kullan."
   },
   "t17": {
-   "text": "Mini proje: `whoami > hello.txt` ile kullanıcı adını bir dosyaya yaz, sonra `cat hello.txt` ile oku.",
+   "text": "Mini proje: kullanıcı adını yönlendirmeyle `hello.txt` dosyasına yaz, sonra dosyayı oku.",
    "hint": "`>` komutun çıktısını dosyaya yönlendirir (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd`."
   },
   "t18": {

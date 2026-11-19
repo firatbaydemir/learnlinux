@@ -181,7 +181,7 @@
   },
   "t10": {
    "text": "Predict: how do the permissions of alice's home directory look? Guess first, then verify with `sudo ls -ld /home/alice`.",
-   "hint": "A private home: `drwx------` (700)."
+   "hint": "In a private home only the owner may enter: write the letter form of 700 (type `d` first)."
   },
   "t11": {
    "text": "Predict: what does `id carol` return for an account that does not exist yet? Run it.",

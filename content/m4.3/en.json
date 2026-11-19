@@ -183,7 +183,7 @@
   },
   "t02": {
    "text": "Inspect your UID and group memberships with `id`.",
-   "hint": "Find the `uid=`, `gid=`, and `groups=` fields."
+   "hint": "Look for the `uid=`, `gid=` and `groups=` fields in the output."
   },
   "t03": {
    "text": "Run `sudo whoami` and verify that the command runs as root.",

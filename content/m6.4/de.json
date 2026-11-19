@@ -253,15 +253,15 @@
  "tasks": {
   "t01": {
    "text": "Lies die Beispielausgabe `~/lvm/vgs.txt` mit `cat`. Welche VG hat freien Platz?",
-   "hint": "`cat ~/lvm/vgs.txt` — schau auf die Spalte VFree. (`cat` → Modul 2.6.)"
+   "hint": "Sieh in die Spalte `VFree`; die VG mit einem Wert über null hat freien Platz. (`cat` → Modul 2.6.)"
   },
   "t02": {
    "text": "Zeige mit `grep` nur die `vg_data`-Volumes aus `~/lvm/lvs.txt`.",
-   "hint": "`grep vg_data ~/lvm/lvs.txt` (`grep` → Modul 3.4.)"
+   "hint": "Das Suchwort ist `vg_data`; der Dateipfad kommt ans Ende. (`grep` → Modul 3.4.)"
   },
   "t03": {
    "text": "Sichere vor dem Bearbeiten: kopiere `~/lvm/fstab.test` nach `~/lvm/fstab.bak`.",
-   "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak` (`cp` → Modul 2.4.)"
+   "hint": "Gib zwei Pfade an: erst die Quelle, dann den Namen der Sicherung. (`cp` → Modul 2.4.)"
   },
   "t04": {
    "text": "Erstelle `~/lvm/lab.sh`: erste Zeile `truncate -s 300M ~/lvm-lab/disk1.img`, zweite Zeile `sudo losetup -f --show ~/lvm-lab/disk1.img` (die zweite mit `>>` anhängen).",

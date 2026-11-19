@@ -264,7 +264,7 @@
   },
   "t09": {
    "text": "Nutze `test` oder `[ ]` zweimal: Prüfe, ob `~/notes.txt` eine Datei ist (`-f`) und `~/Documents` ein Verzeichnis (`-d`). Hänge `&& echo ok` an, um das Ergebnis zu sehen.",
-   "hint": "`test -f ~/notes.txt && echo file` und `[ -d ~/Documents ] && echo dir`."
+   "hint": "Dateitest `-f`, Ordnertest `-d`; `&&` führt den nächsten Befehl nur bei Erfolg aus. Nutze für die zweite Prüfung die eckige Klammer."
   },
   "t10": {
    "text": "Vorhersage: Ist `~/notes.txt` ausführbar? Führe `test -x ~/notes.txt; echo $?` aus und lies den Code.",
@@ -291,7 +291,7 @@
    "hint": "Teste mit `-z \"$1\"`; nutze `if ... then ... fi`."
   },
   "t16": {
-   "text": "Challenge: Erstelle `~/bin/probe.sh`, dessen einziger Befehl `test -f /home/student/missing.txt` ist. Mach es ausführbar, starte es und schreibe seinen Exit-Code mit `echo $? > ~/code.txt` in `~/code.txt`.",
+   "text": "Herausforderung: Erstelle `~/bin/probe.sh`, dessen einziger Befehl `test -f /home/student/missing.txt` ist. Mache es ausführbar, führe es aus und schreibe den Exit-Code in `~/code.txt`.",
    "hint": "Ein Skript liefert den Exit-Code seines letzten Befehls. Führe `echo $?` direkt nach dem Skript aus."
   },
   "t17": {

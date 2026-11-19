@@ -224,7 +224,7 @@
   },
   "t02": {
    "text": "Show only the listening (LISTEN) lines of `~/net/ss.txt`.",
-   "hint": "`grep LISTEN ~/net/ss.txt`"
+   "hint": "The search word is `LISTEN`; put the file path last. (`grep` → module 3.4.)"
   },
   "t03": {
    "text": "Read the local name mappings with `cat /etc/hosts`.",

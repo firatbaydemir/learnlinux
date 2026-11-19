@@ -157,7 +157,7 @@
    "hint": "Tastenkürzel: Strg+L"
   },
   "t14": {
-   "text": "Herausforderung: Erstelle im Home-Verzeichnis mit `echo Hello > first.txt` eine Datei und lies sie mit `cat first.txt`.",
+   "text": "Herausforderung: Wechsle ins Home-Verzeichnis, erstelle per Umleitung die Datei `first.txt` mit dem Inhalt `Hello` und lies sie dann.",
    "hint": "Das > schreibt die Ausgabe in eine Datei, `cd` wechselt das Verzeichnis, `cat` liest eine Datei (siehe „Zeichen, die dir später begegnen“). Wechsle zuerst mit `cd` ins Home-Verzeichnis."
   },
   "t15": {
@@ -169,7 +169,7 @@
    "hint": "Ein falscher Dateiname führt zu „No such file“; nutze den Namen aus der `ls`-Ausgabe."
   },
   "t17": {
-   "text": "Mini-Projekt: Schreibe mit `whoami > hello.txt` deinen Benutzernamen in eine Datei und lies sie mit `cat hello.txt`.",
+   "text": "Mini-Projekt: Schreibe den Benutzernamen per Umleitung in `hello.txt` und lies die Datei dann.",
    "hint": "`>` leitet die Ausgabe in eine Datei um (siehe „Zeichen, die dir später begegnen“). Zuerst `cd`."
   },
   "t18": {

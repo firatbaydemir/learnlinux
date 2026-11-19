@@ -91,11 +91,11 @@
  "tasks": {
   "t01": {
    "text": "Find the high-level package manager for the RHEL family in the package notes.",
-   "hint": "The line from `grep RHEL ~/lab/package_notes.txt` contains `dnf`. (`grep` → module 3.4.)"
+   "hint": "Search the notes for the family; the line names the package manager. (`grep` → module 3.4.)"
   },
   "t02": {
    "text": "Find the high-level package manager for Ubuntu/Debian.",
-   "hint": "The line from `grep Ubuntu ~/lab/package_notes.txt` contains `apt`. (`grep` → module 3.4.)"
+   "hint": "Search the notes for the family; the line names the package manager. (`grep` → module 3.4.)"
   },
   "t03": {
    "text": "Predict how many lines contain `package`, then verify with `grep -c`.",
@@ -127,7 +127,7 @@
   },
   "t10": {
    "text": "Which distribution family uses `dpkg`? Find the line.",
-   "hint": "Try `grep dpkg ~/lab/package_notes.txt`. (`grep` → module 3.4.)"
+   "hint": "Search the notes for the line with `dpkg`; it names the family. (`grep` → module 3.4.)"
   },
   "t11": {
    "text": "Write an example using `apt search` and `dnf search` into `~/lab/search_plan.txt`.",

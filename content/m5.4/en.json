@@ -91,11 +91,11 @@
  "tasks": {
   "t01": {
    "text": "Find the state of the `sleep` job in the snapshot.",
-   "hint": "`grep sleep ~/lab/jobs_snapshot.txt` should show `Stopped`. (`grep` → module 3.4.)"
+   "hint": "Search the snapshot for the job name; the line should say `Stopped`. (`grep` → module 3.4.)"
   },
   "t02": {
    "text": "Show the current state of the `backup.sh` job.",
-   "hint": "The line from `grep backup ~/lab/jobs_snapshot.txt` contains `Running`. (`grep` → module 3.4.)"
+   "hint": "Search the snapshot for the script name; the line contains `Running`. (`grep` → module 3.4.)"
   },
   "t03": {
    "text": "Predict how many jobs are stopped in the snapshot, then verify with `grep -c`.",
@@ -127,7 +127,7 @@
   },
   "t10": {
    "text": "Find the state of the `report` command.",
-   "hint": "Try `grep report ~/lab/jobs_snapshot.txt`. (`grep` → module 3.4.)"
+   "hint": "Search the snapshot for the command name; the status column is the job's state. (`grep` → module 3.4.)"
   },
   "t11": {
    "text": "Write a `disown` note so the job does not receive SIGHUP when the session ends into `~/lab/disown_note.txt`.",

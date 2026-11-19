@@ -224,7 +224,7 @@
   },
   "t02": {
    "text": "`~/net/ss.txt` dosyasında yalnızca dinleyen (LISTEN) satırları göster.",
-   "hint": "`grep LISTEN ~/net/ss.txt`"
+   "hint": "Aranacak sözcük `LISTEN`; dosya yolunu sona yaz. (`grep` → modül 3.4.)"
   },
   "t03": {
    "text": "Yerel isim eşlemelerini `cat /etc/hosts` ile oku.",

@@ -238,7 +238,7 @@
  "tasks": {
   "t01": {
    "text": "Terminalinin süreçlerini `ps` ile listele. Hangi iki süreci görüyorsun?",
-   "hint": "Sadece `ps`, seçenek yok. `bash` ve `ps` görürsün."
+   "hint": "Seçenek verme; tabloda `bash` ve `ps` satırlarını görürsün."
   },
   "t02": {
    "text": "Kabuğunun PID'sini `echo $$` ile yazdır.",

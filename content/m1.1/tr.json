@@ -226,7 +226,7 @@
   },
   "t02": {
    "text": "`ls` ile ev dizininin içeriğini listele.",
-   "hint": "Argümansız `ls` bulunduğun dizine bakar."
+   "hint": "Argüman vermezsen komut bulunduğun dizine bakar."
   },
   "t03": {
    "text": "`cd Documents` ile `Documents` klasörüne gir.",
@@ -242,15 +242,15 @@
   },
   "t06": {
    "text": "Mutlak yolla `~/projects/website` dizinine git.",
-   "hint": "`cd ~/projects/website`."
+   "hint": "Mutlak yol `/` veya `~` ile başlar; `cd` hedef dizini ister."
   },
   "t07": {
    "text": "Göreli yolla `css` alt klasörüne gir.",
-   "hint": "Zaten `website` içindesin: `cd css`."
+   "hint": "Zaten `website` içindesin; göreli yol `/` ile başlamaz, yalnızca alt klasör adını yaz."
   },
   "t08": {
    "text": "`css` içindeyken `..` kullanarak kardeş klasör `images` dizinine geç.",
-   "hint": "Önce bir yukarı, sonra aşağı: `cd ../images`."
+   "hint": "Önce bir yukarı (`..`), sonra `images` aşağı; ikisini tek yolda birleştir."
   },
   "t09": {
    "text": "`cd -` ile bir önceki dizine dön.",
@@ -258,7 +258,7 @@
   },
   "t10": {
    "text": "Argümansız `cd` ile ev dizinine dön.",
-   "hint": "`cd` veya `cd ~`."
+   "hint": "`cd` hedef verilmezse ev dizinine götürür; `~` yazmak da aynı işi görür."
   },
   "t11": {
    "text": "Tahmin et: `/usr/bin` içindeki bir komutla `cd /usr/bin/../..` yazarsan nereye varırsın? Önce düşün, sonra komutu çalıştır ve `pwd` ile doğrula.",

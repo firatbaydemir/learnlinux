@@ -388,7 +388,7 @@
   },
   "t12": {
    "text": "Vorhersage: Wem gehört `/var/log/secure` und wer darf sie lesen? Prüfe mit `ls -l /var/log/secure`.",
-   "hint": "Modus `-rw-------` heißt: nur der Besitzer (root) darf lesen und schreiben."
+   "hint": "Lies Besitzer und Rechte aus der ersten Spalte von `ls -l`. Eine Datei, die nur der Besitzer lesen und schreiben darf, hat die Rechte 600."
   },
   "t13": {
    "text": "Debug: `~/lab/broken1.service` würde nicht starten, weil der Schlüssel falsch geschrieben ist und der Befehl keinen vollen Pfad hat. Schreibe die Datei neu (zum Beispiel mit `printf` und `>`), sodass sie `ExecStart=/usr/bin/sleep 3600` enthält.",

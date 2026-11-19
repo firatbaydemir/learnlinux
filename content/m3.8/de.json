@@ -244,7 +244,7 @@
   },
   "t05": {
    "text": "Lege das Verzeichnis `restore` an und entpacke das Archiv dorthin.",
-   "hint": "Erst `mkdir restore`; dann `tar` mit `-x`, `-z`, `-f` und `-C` fürs Ziel (muss existieren)."
+   "hint": "Lege zuerst den Ordner an; danach `tar` mit `-x`, `-z`, `-f` und `-C` fürs Ziel (Ordner muss existieren)."
   },
   "t06": {
    "text": "Komprimiere `logs/app.log` und behalte das Original.",

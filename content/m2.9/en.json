@@ -172,7 +172,7 @@
   },
   "t04": {
    "text": "Create `~/disklab/archive` as a mount-point directory.",
-   "hint": "`mkdir -p ~/disklab/archive`"
+   "hint": "If parent folders are missing too, the `-p` flag creates them all."
   },
   "t05": {
    "text": "Predict: which UUID does the sample fstab use for `/data`? Verify with `grep data ~/disklab/fstab.sample`.",
@@ -196,7 +196,7 @@
   },
   "t10": {
    "text": "Show only the header line of `~/disklab/lsblk.txt` with `head -n 1`. Which columns are listed?",
-   "hint": "`head -n 1 ~/disklab/lsblk.txt`"
+   "hint": "`-n 1` gives only the first line; read the column names."
   },
   "t11": {
    "text": "Predict: which UUID does the xfs file system in `lsblk-f.txt` have? Verify with `grep xfs ~/disklab/lsblk-f.txt`.",

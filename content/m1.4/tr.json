@@ -201,7 +201,7 @@
    "hint": "`mkdir`, `cp`. (`cp` kopyalar, modül 2.4; `mkdir` modül 2.3.)"
   },
   "t10": {
-   "text": "Mini proje: (1) `ls /nonexistent` hatasını `errors.txt` dosyasına al, (2) `ls ~` çıktısını `files.txt` dosyasına yaz, (3) son komutun durumunu `echo $?` ile oku.",
+   "text": "Mini proje: (1) `ls /nonexistent` hatasını `errors.txt` dosyasına al, (2) `ls ~` çıktısını `files.txt` dosyasına yaz, (3) son komutun çıkış durumunu göster.",
    "hint": "Hata için `2>`, çıktı için `>` kullan. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
   },
   "t11": {

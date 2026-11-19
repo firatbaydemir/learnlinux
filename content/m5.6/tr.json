@@ -388,7 +388,7 @@
   },
   "t12": {
    "text": "Tahmin et: `/var/log/secure` dosyasının sahibi kim ve onu kimler okuyabilir? `ls -l /var/log/secure` ile kontrol et.",
-   "hint": "`-rw-------` modu yalnızca sahibin (root) okuyup yazabileceği anlamına gelir."
+   "hint": "Sahip ve izinleri `ls -l` çıktısının ilk sütunundan oku. Yalnızca sahibin okuyup yazabildiği bir dosya 600 iznine sahiptir."
   },
   "t13": {
    "text": "Debug: `~/lab/broken1.service` başlamaz, çünkü anahtar yanlış yazılmış ve komutta tam yol yok. Dosyayı (örneğin `printf` ve `>` ile) yeniden yaz; `ExecStart=/usr/bin/sleep 3600` içersin.",

@@ -129,11 +129,11 @@
   },
   "t07": {
    "text": "Vorhersage: Welche Architektur gibt `uname -m` auf diesem System aus? Führe es dann aus.",
-   "hint": "Die meisten PCs und VMs nutzen x86_64."
+   "hint": "`-m` steht für \"machine\" (Hardware); die Ausgabe ist der Name der Prozessorarchitektur."
   },
   "t08": {
    "text": "Vorhersage: Was enthält `cat /etc/hostname`? Führe es zur Kontrolle aus.",
-   "hint": "Der Standard-Hostname ist `linux-lab`."
+   "hint": "Diese Datei enthält den Namen des Rechners; schau auf den Teil nach dem `@` im Prompt."
   },
   "t09": {
    "text": "Vorhersage: Was gibt `echo $SHELL` aus? Führe es zur Kontrolle aus.",

@@ -295,7 +295,7 @@
  "tasks": {
   "t01": {
    "text": "Hangi kullanıcıyla çalıştığını `whoami` ile öğren.",
-   "hint": "Sadece `whoami` yaz ve Enter'a bas."
+   "hint": "Argüman gerekmez; Enter'a basınca yalnızca kullanıcı adın yazılır."
   },
   "t02": {
    "text": "Makinenin adını `hostname` ile öğren.",
@@ -311,7 +311,7 @@
   },
   "t05": {
    "text": "Üye olduğun grupları `groups` ile listele ve `id` çıktısıyla karşılaştır.",
-   "hint": "`groups` yalnızca adları yazar, numaraları yazmaz."
+   "hint": "`groups` yalnızca grup adlarını yazar, numaraları yazmaz; farkı `id` çıktısında ara."
   },
   "t06": {
    "text": "Dağıtım bilgisini `cat /etc/os-release` ile oku.",

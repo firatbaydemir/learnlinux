@@ -122,7 +122,7 @@
   },
   "t02": {
    "text": "Warm-up: run `id` and see your user, uid and groups (`wheel` means administrator).",
-   "hint": "Just `id`."
+   "hint": "Look for the `uid=`, `gid=` and `groups=` fields in the output."
   },
   "t03": {
    "text": "Guided: run `hostname` and then `uname -r` — the first facts to note after any installation.",
@@ -130,7 +130,7 @@
   },
   "t04": {
    "text": "Predict: what will `sudo whoami` print? Think, then run it.",
-   "hint": "sudo runs the command as root."
+   "hint": "`sudo` runs the command with another user's privileges; `whoami` then prints exactly that identity."
   },
   "t05": {
    "text": "Debug: `cat /etc/os_release` fails. Run it, read the error, then run the correct command.",

@@ -157,7 +157,7 @@
    "hint": "Shortcut: Ctrl+L"
   },
   "t14": {
-   "text": "Challenge: in your home directory create a file with `echo Hello > first.txt`, then read it with `cat first.txt`.",
+   "text": "Challenge: go back to your home directory, create `first.txt` containing `Hello` using redirection, then read it.",
    "hint": "The > writes output into a file, `cd` changes directory, `cat` reads a file (see \"Symbols you will see later\"). First return home with `cd`."
   },
   "t15": {
@@ -169,7 +169,7 @@
    "hint": "A misspelled file name gives 'No such file'; use the name from the `ls` output."
   },
   "t17": {
-   "text": "Mini project: write your user name into a file with `whoami > hello.txt`, then read it with `cat hello.txt`.",
+   "text": "Mini project: write your username into `hello.txt` using redirection, then read the file.",
    "hint": "`>` redirects output into a file (see \"Symbols you will see later\"). `cd` first."
   },
   "t18": {

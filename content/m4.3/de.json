@@ -183,7 +183,7 @@
   },
   "t02": {
    "text": "Prüfe deine UID und Gruppenmitgliedschaften mit `id`.",
-   "hint": "Suche die Felder `uid=`, `gid=` und `groups=`."
+   "hint": "Suche in der Ausgabe die Felder `uid=`, `gid=` und `groups=`."
   },
   "t03": {
    "text": "Führe `sudo whoami` aus und prüfe, ob der Befehl als root läuft.",

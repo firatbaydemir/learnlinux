@@ -310,7 +310,7 @@
    "hint": "`-d=` ayraç, `-f1` birinci alan: `=` işaretinden öncesi."
   },
   "t16": {
-   "text": "TICKET #3701 — Değişiklik incelemesi: `v2.txt` için `v2.bak` yedeğini al, `v1.txt` ile farkı `diff -u v1.txt v2.txt > review.patch` olarak kaydet ve `report.txt` dosyasına `review done` yaz.",
+   "text": "TICKET #3701 — Değişiklik incelemesi: `v2.txt` için `v2.bak` yedeğini al, `v1.txt` ile farkı birleşik (unified) biçimde `review.patch` dosyasına kaydet ve `report.txt` dosyasına `review done` yaz.",
    "hint": "Üç adım: `cp`, `diff -u ... > review.patch`, `echo review done > report.txt`."
   }
  },

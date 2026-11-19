@@ -238,7 +238,7 @@
  "tasks": {
   "t01": {
    "text": "Liste die Prozesse deines Terminals mit `ps` auf. Welche zwei siehst du?",
-   "hint": "Nur `ps`, ohne Optionen. Du siehst `bash` und `ps`."
+   "hint": "Keine Optionen; in der Tabelle siehst du die Zeilen `bash` und `ps`."
   },
   "t02": {
    "text": "Gib die PID deiner Shell mit `echo $$` aus.",

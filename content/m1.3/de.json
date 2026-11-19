@@ -295,7 +295,7 @@
   },
   "t10": {
    "text": "Vorhersage: Welche Zahl gibt `nosuchcmd; echo $?` aus? Führe es dann aus und prüfe.",
-   "hint": "Befehl fehlt → Exit-Code 127."
+   "hint": "Findet die Shell den Befehl nicht, gibt sie einen besonderen Exit-Code zurück; 0 ist Erfolg, 1 und 2 sind allgemeine Fehler, dieser Code ist deutlich größer."
   },
   "t11": {
    "text": "Vorhersage: Wie viele Verzeichnisse zählt `find ~ -type d | wc -l` unter Home (Home eingeschlossen)? Führe es aus und prüfe.",
@@ -318,7 +318,7 @@
    "hint": "`which ls > ...` und `type cd > ...`. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"
   },
   "t16": {
-   "text": "TICKET #4411 — Die Lehrkraft möchte sehen, was du ausprobiert hast: Führe zuerst `which ls` aus und speichere dann den Verlauf in der Datei `~/hist.txt`.",
+   "text": "TICKET #4411 — Die Lehrerin möchte sehen, was du versucht hast: Zeige zuerst den Pfad des Befehls `ls` und speichere dann den Verlauf in `~/hist.txt`.",
    "hint": "`history > ~/hist.txt`. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"
   }
  },

@@ -264,7 +264,7 @@
   },
   "t09": {
    "text": "`test` veya `[ ]` ile iki kontrol yap: `~/notes.txt` bir dosya mı (`-f`) ve `~/Documents` bir klasör mü (`-d`)? Sonucu görmek için `&& echo ok` ekle.",
-   "hint": "`test -f ~/notes.txt && echo file` ve `[ -d ~/Documents ] && echo dir`."
+   "hint": "Dosya testi `-f`, klasör testi `-d`; `&&` sonraki komutu yalnızca test başarılıysa çalıştırır. İkinci kontrol için köşeli parantez biçimini kullan."
   },
   "t10": {
    "text": "Tahmin et: `~/notes.txt` çalıştırılabilir mi? `test -x ~/notes.txt; echo $?` çalıştır ve kodu oku.",
@@ -291,7 +291,7 @@
    "hint": "`-z \"$1\"` ile test et; `if ... then ... fi` kullan."
   },
   "t16": {
-   "text": "Meydan okuma: tek komutu `test -f /home/student/missing.txt` olan `~/bin/probe.sh` oluştur. Çalıştırılabilir yap, çalıştır ve çıkış kodunu `echo $? > ~/code.txt` ile `~/code.txt` dosyasına yaz.",
+   "text": "Meydan okuma: tek komutu `test -f /home/student/missing.txt` olan `~/bin/probe.sh` oluştur. Çalıştırılabilir yap, çalıştır ve çıkış kodunu `~/code.txt` dosyasına yaz.",
    "hint": "Script, son komutunun çıkış kodunu döndürür. Script'ten hemen sonra `echo $?` çalıştır."
   },
   "t17": {

@@ -224,7 +224,7 @@
   },
   "t02": {
    "text": "Zeige nur die lauschenden (LISTEN) Zeilen von `~/net/ss.txt`.",
-   "hint": "`grep LISTEN ~/net/ss.txt`"
+   "hint": "Das Suchwort ist `LISTEN`; der Dateipfad kommt ans Ende. (`grep` → Modul 3.4.)"
   },
   "t03": {
    "text": "Lies die lokalen Namenszuordnungen mit `cat /etc/hosts`.",

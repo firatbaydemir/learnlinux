@@ -243,7 +243,7 @@
   },
   "t10": {
    "text": "Vorhersage: Welches Tier gibt `sed -n '3p' pets.txt` aus? Prüfe mit dem gleichwertigen `head -n 3 pets.txt | tail -n 1`.",
-   "hint": "Zeilen: cat, dog, bird, cat, fish. `head -n 3` nimmt die ersten drei, `tail -n 1` die letzte davon."
+   "hint": "`sed -n '3p'` gibt nur die 3. Zeile aus. Sieh dir die Datei zuerst mit `cat pets.txt` an und zähle bis zur dritten Zeile."
   },
   "t11": {
    "text": "Challenge: Wähle mit awk aus `access.log` nur die Zeilen mit Statuscode 404 (Bedingung: zweites Feld ist 404).",

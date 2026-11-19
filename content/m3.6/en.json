@@ -243,7 +243,7 @@
   },
   "t10": {
    "text": "Predict: which animal does `sed -n '3p' pets.txt` print? Verify with the equivalent `head -n 3 pets.txt | tail -n 1`.",
-   "hint": "Lines: cat, dog, bird, cat, fish. `head -n 3` takes the first three, `tail -n 1` the last of them."
+   "hint": "`sed -n '3p'` prints only line 3. First view the file with `cat pets.txt` and count to the third line."
   },
   "t11": {
    "text": "Challenge: use awk to select from `access.log` only the lines with status code 404 (condition: second field is 404).",

@@ -240,7 +240,7 @@
    "hint": "`vault` is `600`: no x, you cannot get in. `chmod`."
   },
   "t14": {
-   "text": "Mini project: create a `team` directory with `plan.txt` inside; directory `770`, file `660`; set the directory's group to `devs` with `sudo chgrp devs team`.",
+   "text": "Mini project: create a `team` folder with `plan.txt` inside; the folder should be `770`, the file `660`; set the folder's group to `devs` (with administrator rights).",
    "hint": "Order: `mkdir`, `touch`, two `chmod`, one `chgrp`."
   },
   "t15": {

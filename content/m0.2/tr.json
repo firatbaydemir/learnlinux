@@ -122,7 +122,7 @@
   },
   "t02": {
    "text": "Isınma: `id` çalıştır; kullanıcını, uid'ni ve gruplarını gör (`wheel` yönetici demektir).",
-   "hint": "Sadece `id`."
+   "hint": "Çıktıda `uid=`, `gid=` ve `groups=` alanlarını bul."
   },
   "t03": {
    "text": "Adım adım: `hostname`, sonra `uname -r` çalıştır — her kurulumdan sonra not edilecek ilk bilgiler.",
@@ -130,7 +130,7 @@
   },
   "t04": {
    "text": "Tahmin et: `sudo whoami` ne yazdırır? Düşün, sonra çalıştır.",
-   "hint": "sudo komutu root olarak çalıştırır."
+   "hint": "`sudo`, komutu başka bir kullanıcının yetkisiyle çalıştırır; `whoami` da o anki kimliği yazdırır."
   },
   "t05": {
    "text": "Hata ayıkla: `cat /etc/os_release` başarısız olur. Çalıştır, hatayı oku, sonra doğru komutu çalıştır.",

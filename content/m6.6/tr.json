@@ -254,11 +254,11 @@
  "tasks": {
   "t01": {
    "text": "`~/scripts/loop.sh` dosyasını `printf` ile oluştur; ilk satırı `#!/usr/bin/env bash` olsun (yönlendirme `>`).",
-   "hint": "`printf '#!/usr/bin/env bash\\n' > ~/scripts/loop.sh` — sonundaki `\\n` satır sonudur."
+   "hint": "Biçim dizesinin sonundaki `\\n` satır sonudur; çıktıyı `>` ile dosyaya yönlendir."
   },
   "t02": {
    "text": "`~/lab/servers.txt` içinde kaç sunucu var? `wc -l` ile say; bir döngü kaç tur dönecek, tahmin et.",
-   "hint": "`wc -l ~/lab/servers.txt` satır sayısını verir. (`wc` → modül 2.6.)"
+   "hint": "`-l` satır sayısını verir; döngü o kadar tur döner. (`wc` → modül 2.6.)"
   },
   "t03": {
    "text": "`loop.sh` dosyasına `>>` ile (ezmeden) bir `for i in 1 2 3; do ... done` döngüsü ekle: `printf` ile üç satır yaz.",
@@ -266,7 +266,7 @@
   },
   "t04": {
    "text": "`loop.sh` dosyasını çalıştırılabilir yap (izin 755).",
-   "hint": "`chmod 755 ~/scripts/loop.sh` veya `chmod +x`; `ls -l` ile `-rwxr-xr-x` gör. (`chmod` → modül 4.4.)"
+   "hint": "Sayısal mod 755 ya da sembolik `+x`; sonucu `ls -l` ile `-rwxr-xr-x` olarak gör. (`chmod` → modül 4.4.)"
   },
   "t05": {
    "text": "`~/scripts/readlines.sh` yaz: `while IFS= read -r host; do ... done < ~/lab/servers.txt` kalıbıyla her sunucuyu `echo` ile yazdırsın.",

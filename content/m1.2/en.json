@@ -295,7 +295,7 @@
  "tasks": {
   "t01": {
    "text": "Find out which user you are with `whoami`.",
-   "hint": "Just type `whoami` and press Enter."
+   "hint": "No argument needed; after Enter only your username is printed."
   },
   "t02": {
    "text": "Find out the machine's name with `hostname`.",
@@ -311,7 +311,7 @@
   },
   "t05": {
    "text": "List your groups with `groups` and compare with the `id` output.",
-   "hint": "`groups` prints names only, no numbers."
+   "hint": "`groups` prints only group names, not numbers; look for the difference in the `id` output."
   },
   "t06": {
    "text": "Read the distribution information with `cat /etc/os-release`.",

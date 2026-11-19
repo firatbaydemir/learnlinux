@@ -232,11 +232,11 @@
    "hint": "`chmod` fügt nur sticky hinzu."
   },
   "t10": {
-   "text": "Mini-Projekt: Setze die Gruppe von `proj` auf `devs`, vergib `2770` (Fremde ausgesperrt), führe `umask 002` aus und lege `proj/plan.txt` mit `touch` an.",
+   "text": "Mini-Projekt: Setze die Gruppe von `proj` auf `devs`, vergib `2770` mit setgid (Andere dürfen nicht hinein), setze umask auf `002` und erstelle `proj/plan.txt`.",
    "hint": "Reihenfolge: `chgrp`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
   },
   "t11": {
-   "text": "Mini-Projekt: Lege den Ordner `upload` an, setze `1777`, lege `a.txt` hinein und übergib die Datei mit `sudo chown alice:devs upload/a.txt` an alice. (In echt könnte bob sie nicht löschen.)",
+   "text": "Mini-Projekt: Lege den Ordner `upload` an, setze `1777` (Sticky-Bit), lege `a.txt` hinein und setze Besitzer `alice` und Gruppe `devs` der Datei. (In echt könnte bob sie nicht löschen.)",
    "hint": "Reihenfolge: `mkdir`, `chmod 1777`, `touch`, `sudo chown`."
   },
   "t12": {

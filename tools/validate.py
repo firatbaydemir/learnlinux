@@ -118,6 +118,12 @@ def check_content(meta, ui):
             for tid, v in x.get("tasks", {}).items():
                 if not v.get("text") or not v.get("hint"):
                     err("%s/%s.json: task %s needs text and hint" % (d.name, l, tid))
+                tk = next((t for t in mod["tasks"] if t["id"] == tid), None)
+                if tk and tk["kind"] in ("warmup", "guided") and v.get("hint"):
+                    sol = tk["solution"][0].replace("`", "").strip()
+                    if " " in sol and sol in v["hint"].replace("`", ""):
+                        err("%s/%s.json: task %s hint repeats the full solution command" % (d.name, l, tid))
+
             if mod.get("vm") and (not x.get("vm") or set(x["vm"].get("tasks", {})) != set(vids)):
                 err("%s/%s.json: vm tasks differ from module.json" % (d.name, l))
             for v in (x.get("vm") or {}).get("tasks", {}).values():

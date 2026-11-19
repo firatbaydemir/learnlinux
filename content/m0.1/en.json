@@ -129,11 +129,11 @@
   },
   "t07": {
    "text": "Predict: which architecture will `uname -m` print on this system? Then run it.",
-   "hint": "Most PCs and VMs use x86_64."
+   "hint": "`-m` stands for \"machine\" (hardware); the output is the name of the CPU architecture."
   },
   "t08": {
    "text": "Predict: what does `cat /etc/hostname` contain? Run it to check.",
-   "hint": "The default host name is `linux-lab`."
+   "hint": "This file holds the machine's name; look at the part after the `@` in your prompt."
   },
   "t09": {
    "text": "Predict: what does `echo $SHELL` print? Run it to check.",

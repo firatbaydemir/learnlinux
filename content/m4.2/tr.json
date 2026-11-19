@@ -181,7 +181,7 @@
   },
   "t10": {
    "text": "Tahmin: alice'in home dizininin izinleri nasıl görünür? Önce tahmin et, sonra `sudo ls -ld /home/alice` ile doğrula.",
-   "hint": "Özel home dizini: `drwx------` (700)."
+   "hint": "Özel bir home dizininde sahibinden başkası giremez: 700 izninin harf karşılığını yaz (başta dizin türü `d`)."
   },
   "t11": {
    "text": "Tahmin: henüz oluşturulmamış `carol` için `id carol` ne döner? Çalıştır.",

@@ -250,11 +250,11 @@
   },
   "t03": {
    "text": "Write `~/bin/backup.sh` with `printf`: first line `#!/bin/bash`, second line `echo backup done`.",
-   "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"
+   "hint": "Write the file with `printf`; `\\n` is the newline, redirect the output with `>`."
   },
   "t04": {
    "text": "Make `~/bin/backup.sh` executable (mode 755).",
-   "hint": "`chmod 755 ~/bin/backup.sh` or `chmod +x`. (`chmod` → module 4.4.)"
+   "hint": "Numeric mode 755 or symbolic `+x`. (`chmod` → module 4.4.)"
   },
   "t05": {
    "text": "Write `~/units/backup.service`: in `[Service]` put `Type=oneshot` and `ExecStart=/home/student/bin/backup.sh`.",

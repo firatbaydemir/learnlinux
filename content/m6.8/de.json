@@ -313,7 +313,7 @@
   },
   "t02": {
    "text": "Lege die fünf Unterverzeichnisse `shared`, `admin`, `web`, `backup` und `scripts` in `~/srv/company` mit einem einzigen `mkdir`-Befehl an.",
-   "hint": "Klammerexpansion: `mkdir ~/srv/company/{shared,admin,web,backup,scripts}`."
+   "hint": "Erzeuge die fünf Namen per Klammerexpansion in einem Pfad; der gemeinsame Oberpfad ist `~/srv/company`."
   },
   "t03": {
    "text": "Setze für die Projektarbeit eine strenge umask: `umask 027`.",
@@ -321,7 +321,7 @@
   },
   "t04": {
    "text": "Gib dem gemeinsamen Verzeichnis den Modus `2770` (setgid, rwx für Besitzer und Gruppe, nichts für andere).",
-   "hint": "`chmod 2770 ~/srv/company/shared`. (`chmod` → Modul 4.4.)"
+   "hint": "Vierstelliger numerischer Modus: die führende `2` ist setgid, dann Besitzer/Gruppe/Andere. (`chmod` → Modul 4.4.)"
   },
   "t05": {
    "text": "Mache `web` für alle lesbar (`755`) und `backup` privat (`700`).",
@@ -337,7 +337,7 @@
   },
   "t08": {
    "text": "Vorhersage: Welche Rechtezeichenkette zeigt `ls -ld ~/srv/company/shared`? Schreibe sie auf und führe dann den Befehl aus.",
-   "hint": "Das `s` ersetzt das `x` der Gruppe: `drwxrws---`."
+   "hint": "Im Ordner ist setgid gesetzt: im Gruppen-Tripel steht statt `x` ein besonderer Buchstabe. Schau erst mit `ls -ld` und lies dann dieses Tripel."
   },
   "t09": {
    "text": "Vorhersage: Welche Mitglieder hat die Gruppe `admins` in `~/audit/group.txt`? Bestätige mit `grep admins ~/audit/group.txt | cut -d: -f4`.",

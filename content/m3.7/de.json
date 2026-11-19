@@ -310,7 +310,7 @@
    "hint": "`-d=` ist das Trennzeichen, `-f1` das erste Feld: alles vor dem `=`."
   },
   "t16": {
-   "text": "TICKET #3701 — Änderungsprüfung: Sichere `v2.txt` als `v2.bak`, speichere den Unterschied zu `v1.txt` mit `diff -u v1.txt v2.txt > review.patch` und schreibe `review done` in `report.txt`.",
+   "text": "TICKET #3701 — Änderungsprüfung: Sichere `v2.txt` als `v2.bak`, speichere den Unterschied zu `v1.txt` im Unified-Format in `review.patch` und schreibe `review done` in `report.txt`.",
    "hint": "Drei Schritte: `cp`, `diff -u ... > review.patch`, `echo review done > report.txt`."
   }
  },

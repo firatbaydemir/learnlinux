@@ -94,11 +94,11 @@
  "tasks": {
   "t01": {
    "text": "`~/lab/ps_snapshot.txt` içinden alice kullanıcısının süreçlerini `grep` ile bul.",
-   "hint": "Dosya `USER` sütunuyla başlıyor; `grep alice ~/lab/ps_snapshot.txt` dene. (`grep` → modül 3.4.)"
+   "hint": "Dosya `USER` sütunuyla başlıyor; kullanıcı adını içeren satırları ara. (`grep` → modül 3.4.)"
   },
   "t02": {
    "text": "Anlık görüntüde `python3` sürecinin PID'sini bul.",
-   "hint": "`grep python3 ~/lab/ps_snapshot.txt` satırındaki ikinci alan PID'dir. (`grep` → modül 3.4.)"
+   "hint": "Süreç adını içeren satırı ara; ikinci alan PID'dir. (`grep` → modül 3.4.)"
   },
   "t03": {
    "text": "Tahmin et: dosyada `python3` kaç satırda geçiyor? Sonra `grep -c` ile doğrula.",
@@ -130,7 +130,7 @@
   },
   "t10": {
    "text": "`bash` sürecinin PID'sini bul.",
-   "hint": "`grep bash ~/lab/ps_snapshot.txt`; ikinci alan PID'dir. (`grep` → modül 3.4.)"
+   "hint": "Süreç adını içeren satırı ara; ikinci alan PID'dir. (`grep` → modül 3.4.)"
   },
   "t11": {
    "text": "Hata önleme: `pkill` öncesi `pgrep -a` ile eşleşmeyi doğrulama adımını `~/lab/pkill_check.txt` içine yaz.",

@@ -167,7 +167,7 @@
    "hint": "Erst `cd`, dann `cat ../config.txt`."
   },
   "t13": {
-   "text": "Mini-Projekt: Lege `~/lab/docs` und `~/lab/bin` an, schreibe mit `echo hello linux > ~/lab/docs/readme.txt` eine Datei und erstelle `~/lab/bin/readme-link` als symbolischen Link darauf.",
+   "text": "Mini-Projekt: Lege `~/lab/docs` und `~/lab/bin` an, schreibe `hello linux` in `~/lab/docs/readme.txt` und erstelle darauf einen symbolischen Link namens `~/lab/bin/readme-link`.",
    "hint": "`mkdir -p`, `echo ... >` und `ln -s ZIEL LINK`. (`mkdir` kommt in Modul 2.3, `>` schreibt die Ausgabe in eine Datei und kommt in Modul 3.2.)"
   },
   "t14": {
@@ -175,7 +175,7 @@
    "hint": "Ein relatives Ziel wird vom Verzeichnis des Links aus berechnet."
   },
   "t15": {
-   "text": "Ticket: Die Anwendung sucht die Konfiguration unter `~/app/current/config.txt`, die echte Datei liegt in `~/releases/v2/config.txt`. Lege `~/app/current` als symbolischen Link auf `~/releases/v2` an und prüfe mit `cat ~/app/current/config.txt`.",
+   "text": "Ticket: Die Anwendung sucht die Konfiguration unter `~/app/current/config.txt`, die echte Datei liegt in `~/releases/v2/config.txt`. Mache `~/app/current` zu einem symbolischen Link auf `~/releases/v2` und prüfe es, indem du die Datei über diesen Pfad liest.",
    "hint": "`mkdir -p`, dann `ln -s ~/releases/v2 ~/app/current`."
   },
   "t16": {

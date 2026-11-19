@@ -91,11 +91,11 @@
  "tasks": {
   "t01": {
    "text": "Finde den Status des `sleep`-Jobs in der Momentaufnahme.",
-   "hint": "In `grep sleep ~/lab/jobs_snapshot.txt` sollte `Stopped` stehen. (`grep` → Modul 3.4.)"
+   "hint": "Suche im Snapshot den Jobnamen; in der Zeile muss `Stopped` stehen. (`grep` → Modul 3.4.)"
   },
   "t02": {
    "text": "Zeige den aktuellen Status des Jobs `backup.sh`.",
-   "hint": "Die Zeile von `grep backup ~/lab/jobs_snapshot.txt` enthält `Running`. (`grep` → Modul 3.4.)"
+   "hint": "Suche im Snapshot den Skriptnamen; in der Zeile steht `Running`. (`grep` → Modul 3.4.)"
   },
   "t03": {
    "text": "Schätze die Zahl angehaltener Jobs in der Momentaufnahme und prüfe sie mit `grep -c`.",
@@ -127,7 +127,7 @@
   },
   "t10": {
    "text": "Finde den Status des Befehls `report`.",
-   "hint": "Probiere `grep report ~/lab/jobs_snapshot.txt`. (`grep` → Modul 3.4.)"
+   "hint": "Suche im Snapshot den Befehlsnamen; die Statusspalte zeigt den Jobstatus. (`grep` → Modul 3.4.)"
   },
   "t11": {
    "text": "Schreibe eine `disown`-Notiz, damit der Job beim Beenden der Sitzung kein SIGHUP erhält, in `~/lab/disown_note.txt`.",

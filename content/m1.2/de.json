@@ -295,7 +295,7 @@
  "tasks": {
   "t01": {
    "text": "Finde mit `whoami` heraus, welcher Benutzer du bist.",
-   "hint": "Tippe einfach `whoami` und drücke Enter."
+   "hint": "Kein Argument nötig; nach Enter erscheint nur dein Benutzername."
   },
   "t02": {
    "text": "Finde mit `hostname` den Namen des Rechners heraus.",
@@ -307,11 +307,11 @@
   },
   "t04": {
    "text": "Führe `id` aus, um UID, GID und alle Gruppen zu sehen.",
-   "hint": "Ist `uid=` 1000, bist du ein normaler Benutzer, bei 0 root."
+   "hint": "Ist `uid=` 1000, bist du normaler Benutzer, bei 0 root."
   },
   "t05": {
    "text": "Liste deine Gruppen mit `groups` auf und vergleiche mit der Ausgabe von `id`.",
-   "hint": "`groups` gibt nur Namen aus, keine Zahlen."
+   "hint": "`groups` zeigt nur Gruppennamen, keine Nummern; suche den Unterschied in der `id`-Ausgabe."
   },
   "t06": {
    "text": "Lies die Distributionsinformationen mit `cat /etc/os-release`.",

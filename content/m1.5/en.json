@@ -323,15 +323,15 @@
   },
   "t02": {
    "text": "Show the command history.",
-   "hint": "Type `history`."
+   "hint": "The output is a numbered list; the oldest command is at the top."
   },
   "t03": {
    "text": "Print the `HOME` variable, which holds your home directory, with `echo`.",
-   "hint": "Put `$` in front of the variable: `echo $HOME`."
+   "hint": "To read a variable's value, put `$` in front of its name."
   },
   "t04": {
    "text": "Export the variable `GREETING=hello` with `export`, then find it in the `env` output with `grep`.",
-   "hint": "`export GREETING=hello`, then `env | grep GREETING` (`|` passes output to the next command, `grep` searches lines; modules 3.2 and 3.4)."
+   "hint": "First export the variable, then pipe the `env` output with `|` into the line-searching command. (`|` and `grep` → modules 3.2 and 3.4.)"
   },
   "t05": {
    "text": "List the `.txt` files in the `lab` folder with a wildcard: run `echo lab/*.txt`.",
@@ -339,11 +339,11 @@
   },
   "t06": {
    "text": "With brace expansion, create `file1.txt`, `file2.txt` and `file3.txt` in `lab` with one command.",
-   "hint": "`touch ~/lab/file{1,2,3}.txt` (`touch` creates empty files; module 2.3)."
+   "hint": "The brace `{1,2,3}` generates one name per value. (`touch` → module 2.3.)"
   },
   "t07": {
    "text": "Create the folder `~/bin` and add it to `PATH` while keeping the old value.",
-   "hint": "`mkdir ~/bin` (creates a folder; module 2.3), then `export PATH=$PATH:~/bin`."
+   "hint": "Two steps: create the folder, then keep the old `PATH` with `$PATH:` and append the new folder. (`mkdir` → module 2.3.)"
   },
   "t08": {
    "text": "Predict: what does `echo '$HOME'` print? Run the single-quoted version to check.",
@@ -375,10 +375,10 @@
   },
   "t15": {
    "text": "Print the line `Name: alice` with `printf`; use `%s` and `\\n`.",
-   "hint": "`printf \"Name: %s\\n\" alice`."
+   "hint": "The format string contains the `%s` placeholder and the newline `\\n`; the value comes after the format."
   },
   "t16": {
-   "text": "List a file that doesn't exist (`ls nofile`), then show the exit code with `echo $?`.",
+   "text": "Try listing a file that does not exist (`nofile`), then show the exit code of that command.",
    "hint": "After an error `$?` is a non-zero number."
   }
  },

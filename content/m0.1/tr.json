@@ -129,11 +129,11 @@
   },
   "t07": {
    "text": "Tahmin et: `uname -m` bu sistemde hangi mimariyi yazdırır? Sonra çalıştır.",
-   "hint": "Çoğu PC ve VM x86_64 kullanır."
+   "hint": "`-m` \"machine\" (makine donanımı) demektir; çıktı işlemci mimarisinin adıdır."
   },
   "t08": {
    "text": "Tahmin et: `cat /etc/hostname` neyi içerir? Kontrol etmek için çalıştır.",
-   "hint": "Varsayılan ana bilgisayar adı `linux-lab`'dır."
+   "hint": "Bu dosya makinenin adını tutar; komut istemindeki `@` işaretinden sonraki parçaya bak."
   },
   "t09": {
    "text": "Tahmin et: `echo $SHELL` ne yazdırır? Kontrol etmek için çalıştır.",

@@ -253,15 +253,15 @@
  "tasks": {
   "t01": {
    "text": "`~/lvm/vgs.txt` örnek çıktısını `cat` ile oku. Hangi VG'nin boş yeri var?",
-   "hint": "`cat ~/lvm/vgs.txt` — VFree sütununa bak. (`cat` → modül 2.6.)"
+   "hint": "`VFree` sütununa bak; sıfırdan büyük olan VG boş yere sahiptir. (`cat` → modül 2.6.)"
   },
   "t02": {
    "text": "`~/lvm/lvs.txt` içinde yalnızca `vg_data` hacimlerini `grep` ile göster.",
-   "hint": "`grep vg_data ~/lvm/lvs.txt` (`grep` → modül 3.4.)"
+   "hint": "Aranacak sözcük `vg_data`; dosya yolunu sona yaz. (`grep` → modül 3.4.)"
   },
   "t03": {
    "text": "Düzenlemeden önce yedek al: `~/lvm/fstab.test` dosyasını `~/lvm/fstab.bak` olarak kopyala.",
-   "hint": "`cp ~/lvm/fstab.test ~/lvm/fstab.bak` (`cp` → modül 2.4.)"
+   "hint": "İki yol ver: önce kaynak, sonra yedek dosyanın adı. (`cp` → modül 2.4.)"
   },
   "t04": {
    "text": "`~/lvm/lab.sh` dosyasını oluştur: ilk satır `truncate -s 300M ~/lvm-lab/disk1.img`, ikinci satır `sudo losetup -f --show ~/lvm-lab/disk1.img` (ikincisini `>>` ile ekle).",

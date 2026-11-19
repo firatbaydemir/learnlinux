@@ -264,7 +264,7 @@
   },
   "t09": {
    "text": "Use `test` or `[ ]` twice: check that `~/notes.txt` is a file (`-f`) and that `~/Documents` is a directory (`-d`). Add `&& echo ok` to see the result.",
-   "hint": "`test -f ~/notes.txt && echo file` and `[ -d ~/Documents ] && echo dir`."
+   "hint": "File test `-f`, folder test `-d`; `&&` runs the next command only on success. Use the square-bracket form for the second check."
   },
   "t10": {
    "text": "Predict: is `~/notes.txt` executable? Run `test -x ~/notes.txt; echo $?` and read the code.",
@@ -291,7 +291,7 @@
    "hint": "Test with `-z \"$1\"`; use `if ... then ... fi`."
   },
   "t16": {
-   "text": "Challenge: create `~/bin/probe.sh` whose only command is `test -f /home/student/missing.txt`. Make it executable, run it and write its exit code with `echo $? > ~/code.txt` into `~/code.txt`.",
+   "text": "Challenge: create `~/bin/probe.sh` whose only command is `test -f /home/student/missing.txt`. Make it executable, run it, and write its exit code to `~/code.txt`.",
    "hint": "A script returns the exit code of its last command. Run `echo $?` right after the script."
   },
   "t17": {

@@ -137,11 +137,11 @@
   },
   "t04": {
    "text": "Simuliere eine Einzeldateiübertragung: Kopiere `report.txt` unter dem Namen `report.remote.txt`.",
-   "hint": "`cp ~/transfer/report.txt ~/transfer/report.remote.txt`"
+   "hint": "Gib zwei Pfade an, Quelle und Ziel; beide liegen in `~/transfer`."
   },
   "t05": {
    "text": "Vorhersage: Welche Schlüsselart verwendet der Beispiel-Hosteintrag? Prüfe mit `grep linux-lab ~/.ssh/known_hosts.sample`.",
-   "hint": "Die Zeile enthält `ssh-ed25519`. (`grep` sucht in Textzeilen; details Modul 3.4.)"
+   "hint": "Das zweite Feld der Zeile ist der Schlüsseltyp; er beginnt mit `ssh-` und endet mit dem Algorithmusnamen. (`grep` sucht in Textzeilen; Details in Modul 3.4.)"
   },
   "t06": {
    "text": "Entferne die alte lokale Kopie `~/transfer/old_copy.txt`, aber nicht die Quelldatei.",
@@ -161,7 +161,7 @@
   },
   "t10": {
    "text": "Zeige die erste Zeile von `~/ops/ssh-config.sample` mit `head -n 1`. Welcher Host-Alias ist definiert?",
-   "hint": "`head -n 1 ~/ops/ssh-config.sample`"
+   "hint": "Mit `-n 1` erhältst du nur die erste Zeile; achte auf die `Host`-Zeile."
   },
   "t11": {
    "text": "Vorhersage: Auf welche Adresse zeigt `linux-lab`? Prüfe mit `grep HostName ~/ops/ssh-config.sample`.",
@@ -169,7 +169,7 @@
   },
   "t12": {
    "text": "Erstelle den Empfangsordner `~/transfer/incoming` für heruntergeladene Dateien.",
-   "hint": "`mkdir ~/transfer/incoming`"
+   "hint": "Der Zielpfad liegt unter `~/transfer`; der übergeordnete Ordner existiert schon."
   },
   "t13": {
    "text": "Mini-Projekt: Sichere das Manifest vor der Übertragung als `~/ops/manifest.bak`.",

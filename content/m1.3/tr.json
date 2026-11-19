@@ -295,7 +295,7 @@
   },
   "t10": {
    "text": "Tahmin et: `nosuchcmd; echo $?` hangi sayıyı yazar? Sonra çalıştırıp doğrula.",
-   "hint": "Komut yok → çıkış kodu 127."
+   "hint": "Kabuk komutu bulamazsa özel bir çıkış kodu döndürür; 0 başarıdır, 1 ve 2 genel hatalardır, bu kod bunlardan çok daha büyüktür."
   },
   "t11": {
    "text": "Tahmin et: `find ~ -type d | wc -l` home altında kaç klasör sayar (home dahil)? Çalıştır ve doğrula.",
@@ -318,7 +318,7 @@
    "hint": "`which ls > ...` ve `type cd > ...`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
   },
   "t16": {
-   "text": "TICKET #4411 — Öğretmen ne denediğini görmek istiyor: önce `which ls` çalıştır, sonra geçmişi `~/hist.txt` dosyasına kaydet.",
+   "text": "TICKET #4411 — Öğretmen ne denediğini görmek istiyor: önce `ls` komutunun yolunu göster, sonra komut geçmişini `~/hist.txt` dosyasına kaydet.",
    "hint": "`history > ~/hist.txt`. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
   }
  },

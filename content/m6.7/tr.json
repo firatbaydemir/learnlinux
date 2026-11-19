@@ -250,11 +250,11 @@
   },
   "t03": {
    "text": "`~/bin/backup.sh` dosyasını `printf` ile yaz: ilk satır `#!/bin/bash`, ikinci satır `echo backup done`.",
-   "hint": "`printf '#!/bin/bash\\necho backup done\\n' > ~/bin/backup.sh`"
+   "hint": "Dosyayı `printf` ile yaz; `\\n` satır sonudur, çıktıyı `>` ile dosyaya yönlendir."
   },
   "t04": {
    "text": "`~/bin/backup.sh` script'ini çalıştırılabilir yap (mod 755).",
-   "hint": "`chmod 755 ~/bin/backup.sh` veya `chmod +x`. (`chmod` → modül 4.4.)"
+   "hint": "Sayısal mod 755 ya da sembolik `+x`. (`chmod` → modül 4.4.)"
   },
   "t05": {
    "text": "`~/units/backup.service` yaz: `[Service]` bölümünde `Type=oneshot` ve `ExecStart=/home/student/bin/backup.sh` olsun.",

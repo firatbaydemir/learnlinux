@@ -137,11 +137,11 @@
   },
   "t04": {
    "text": "Tek dosyalı aktarımı modelle: `report.txt` dosyasını `report.remote.txt` adıyla kopyala.",
-   "hint": "`cp ~/transfer/report.txt ~/transfer/report.remote.txt`"
+   "hint": "Kaynak ve hedef olmak üzere iki yol ver; ikisi de `~/transfer` içinde."
   },
   "t05": {
    "text": "Tahmin et: örnek host kaydı hangi anahtar türünü kullanıyor? `grep linux-lab ~/.ssh/known_hosts.sample` ile kontrol et.",
-   "hint": "Satırda `ssh-ed25519` görmelisin. (`grep` arama komutu; ayrıntısı modül 3.4'te.)"
+   "hint": "Satırın ikinci alanı anahtar türüdür; `ssh-` ile başlar ve algoritma adıyla devam eder. (`grep` arama komutu; ayrıntısı modül 3.4'te.)"
   },
   "t06": {
    "text": "Eski yerel kopyayı `~/transfer/old_copy.txt` kaldır; kaynağa dokunma.",
@@ -161,7 +161,7 @@
   },
   "t10": {
    "text": "`~/ops/ssh-config.sample` dosyasının ilk satırını `head -n 1` ile göster. Hangi host takma adı tanımlı?",
-   "hint": "`head -n 1 ~/ops/ssh-config.sample`"
+   "hint": "Dosyanın başından yalnızca ilk satırı almak için `-n 1` kullan; `Host` satırına bak."
   },
   "t11": {
    "text": "Tahmin et: `linux-lab` hangi adrese işaret ediyor? `grep HostName ~/ops/ssh-config.sample` ile doğrula.",
@@ -169,7 +169,7 @@
   },
   "t12": {
    "text": "İndirilen dosyalar için alıcı klasörü `~/transfer/incoming` oluştur.",
-   "hint": "`mkdir ~/transfer/incoming`"
+   "hint": "Hedef yol `~/transfer` altındadır; üst klasör zaten var."
   },
   "t13": {
    "text": "Mini proje: aktarımdan önce manifestin yedeğini `~/ops/manifest.bak` olarak sakla.",

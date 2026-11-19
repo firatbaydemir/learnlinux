@@ -310,7 +310,7 @@
    "hint": "`-d=` is the delimiter, `-f1` the first field: everything before the `=`."
   },
   "t16": {
-   "text": "TICKET #3701 — Change review: back up `v2.txt` as `v2.bak`, save the difference to `v1.txt` with `diff -u v1.txt v2.txt > review.patch`, and write `review done` into `report.txt`.",
+   "text": "TICKET #3701 — Change review: back up `v2.txt` as `v2.bak`, save the difference to `v1.txt` in unified format into `review.patch`, and write `review done` into `report.txt`.",
    "hint": "Three steps: `cp`, `diff -u ... > review.patch`, `echo review done > report.txt`."
   }
  },

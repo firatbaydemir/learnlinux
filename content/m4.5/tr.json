@@ -232,11 +232,11 @@
    "hint": "`chmod` yalnızca sticky ekler."
   },
   "t10": {
-   "text": "Mini proje: `proj` klasörünün grubunu `devs` yap, `2770` ver (başkaları giremesin), `umask 002` çalıştır ve `proj/plan.txt` dosyasını `touch` ile oluştur.",
+   "text": "Mini proje: `proj` klasörünün grubunu `devs` yap, setgid'li `2770` ver (başkaları giremesin), umask'i `002` yap ve `proj/plan.txt` dosyasını oluştur.",
    "hint": "Sıra: `chgrp`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
   },
   "t11": {
-   "text": "Mini proje: `upload` klasörünü oluştur, `1777` yap, içine `a.txt` koy ve dosyayı `sudo chown alice:devs upload/a.txt` ile alice'e ver. (Gerçekte bob bunu silemezdi.)",
+   "text": "Mini proje: `upload` klasörünü oluştur, sticky bitli `1777` yap, içine `a.txt` koy ve dosyanın sahibini `alice`, grubunu `devs` yap. (Gerçekte bob bunu silemezdi.)",
    "hint": "Sıra: `mkdir`, `chmod 1777`, `touch`, `sudo chown`."
   },
   "t12": {

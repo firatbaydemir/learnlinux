@@ -243,7 +243,7 @@
   },
   "t10": {
    "text": "Tahmin et: `sed -n '3p' pets.txt` hangi hayvanı yazdırır? Aynı sonucu veren `head -n 3 pets.txt | tail -n 1` ile doğrula.",
-   "hint": "Satırlar: cat, dog, bird, cat, fish. `head -n 3` ilk üçü alır, `tail -n 1` sonuncusunu."
+   "hint": "`sed -n '3p'` yalnızca 3. satırı yazdırır. Önce `cat pets.txt` ile dosyayı gör ve üçüncü satırı say."
   },
   "t11": {
    "text": "Challenge: `access.log` içinde yalnızca durum kodu 404 olan satırları awk ile seç (koşul: ikinci alan 404).",

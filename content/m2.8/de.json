@@ -135,11 +135,11 @@
   },
   "t04": {
    "text": "Lies den Beispielbericht `~/reports/df_sample.txt` mit `cat` und finde die Spalte Use%.",
-   "hint": "`cat ~/reports/df_sample.txt`"
+   "hint": "Finde in der Kopfzeile die Spalte `Use%` und lies den Wert jeder Zeile."
   },
   "t05": {
    "text": "Speichere die Ausgabe von `df -h` mit `>` in `~/disk_report.txt`.",
-   "hint": "`df -h > ~/disk_report.txt`. Ein einzelnes `>` überschreibt die Datei. (Details zu `>` in Modul 3.2.)"
+   "hint": "Ein einzelnes `>` überschreibt die Datei; der Befehl liefert mit `-h` lesbare Größen. (`>` Details in Modul 3.2.)"
   },
   "t06": {
    "text": "Hänge die Ausgabe von `free -h` an dieselbe Datei an (`>>`).",

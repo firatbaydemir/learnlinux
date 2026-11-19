@@ -388,7 +388,7 @@
   },
   "t12": {
    "text": "Predict: who owns `/var/log/secure` and who may read it? Check with `ls -l /var/log/secure`.",
-   "hint": "Mode `-rw-------` means only the owner (root) can read and write."
+   "hint": "Read owner and permissions from the first column of `ls -l`. A file only its owner may read and write has mode 600."
   },
   "t13": {
    "text": "Debug: `~/lab/broken1.service` would not start, because the key is misspelled and the command has no full path. Rewrite the file (for example with `printf` and `>`) so that it has `ExecStart=/usr/bin/sleep 3600`.",

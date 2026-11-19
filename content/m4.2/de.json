@@ -181,7 +181,7 @@
   },
   "t10": {
    "text": "Vorhersage: Wie sehen die Rechte von alices Home-Verzeichnis aus? Erst raten, dann mit `sudo ls -ld /home/alice` prüfen.",
-   "hint": "Ein privates Home: `drwx------` (700)."
+   "hint": "In einem privaten Home darf nur der Besitzer hinein: schreibe die Buchstabenform von 700 (vorn der Typ `d`)."
   },
   "t11": {
    "text": "Vorhersage: Was liefert `id carol` für ein noch nicht angelegtes Konto? Führe es aus.",

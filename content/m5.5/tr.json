@@ -91,11 +91,11 @@
  "tasks": {
   "t01": {
    "text": "Paket notlarında RHEL ailesi için kullanılan üst düzey paket yöneticisini bul.",
-   "hint": "`grep RHEL ~/lab/package_notes.txt` satırında `dnf` geçer. (`grep` → modül 3.4.)"
+   "hint": "Notlarda aileyi ara; bulduğun satırda paket yöneticisinin adı geçer. (`grep` → modül 3.4.)"
   },
   "t02": {
    "text": "Ubuntu/Debian ailesi için kullanılan üst düzey paket yöneticisini bul.",
-   "hint": "`grep Ubuntu ~/lab/package_notes.txt` satırında `apt` geçer. (`grep` → modül 3.4.)"
+   "hint": "Notlarda aileyi ara; bulduğun satırda paket yöneticisinin adı geçer. (`grep` → modül 3.4.)"
   },
   "t03": {
    "text": "Tahmin et: kaç satırda `package` kelimesi geçiyor? `grep -c` ile doğrula.",
@@ -127,7 +127,7 @@
   },
   "t10": {
    "text": "`dpkg` hangi dağıtım ailesine ait? Satırı bul.",
-   "hint": "`grep dpkg ~/lab/package_notes.txt` dene. (`grep` → modül 3.4.)"
+   "hint": "Notlarda `dpkg` geçen satırı ara; satır aileyi söyler. (`grep` → modül 3.4.)"
   },
   "t11": {
    "text": "Paket aramak için `apt search` ve `dnf search` örneğini `~/lab/search_plan.txt` içine yaz.",

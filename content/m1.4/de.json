@@ -201,7 +201,7 @@
    "hint": "`mkdir`, `cp`. (`cp` kopiert, Modul 2.4; `mkdir` Modul 2.3.)"
   },
   "t10": {
-   "text": "Mini-Projekt: (1) Schreibe den Fehler von `ls /nonexistent` in `errors.txt`, (2) schreibe die Ausgabe von `ls ~` in `files.txt`, (3) lies den Status des letzten Befehls mit `echo $?`.",
+   "text": "Mini-Projekt: (1) Leite die Fehlermeldung von `ls /nonexistent` nach `errors.txt` um, (2) schreibe die Ausgabe von `ls ~` nach `files.txt`, (3) zeige den Exit-Status des letzten Befehls.",
    "hint": "Nutze `2>` für den Fehler und `>` für die Ausgabe. (`>` schreibt die Ausgabe in eine Datei; Details in Modul 3.2.)"
   },
   "t11": {

@@ -313,7 +313,7 @@
   },
   "t02": {
    "text": "Create the five subdirectories `shared`, `admin`, `web`, `backup` and `scripts` inside `~/srv/company` with one `mkdir` command.",
-   "hint": "Brace expansion: `mkdir ~/srv/company/{shared,admin,web,backup,scripts}`."
+   "hint": "Generate the five names with brace expansion in one path; the shared parent is `~/srv/company`."
   },
   "t03": {
    "text": "Set a strict umask for the project work: `umask 027`.",
@@ -321,7 +321,7 @@
   },
   "t04": {
    "text": "Give the shared directory mode `2770` (setgid, rwx for owner and group, nothing for others).",
-   "hint": "`chmod 2770 ~/srv/company/shared`. (`chmod` → module 4.4.)"
+   "hint": "Four-digit numeric mode: the leading `2` is setgid, then owner/group/other. (`chmod` → module 4.4.)"
   },
   "t05": {
    "text": "Make `web` readable for everybody (`755`) and `backup` private (`700`).",
@@ -337,7 +337,7 @@
   },
   "t08": {
    "text": "Predict: which permission string will `ls -ld ~/srv/company/shared` show? Write it down, then run the command.",
-   "hint": "The `s` replaces the group `x`: `drwxrws---`."
+   "hint": "The directory has setgid set: the group triplet shows a special letter instead of `x`. Run `ls -ld` first, then read that triplet."
   },
   "t09": {
    "text": "Predict: which members does the group `admins` have in `~/audit/group.txt`? Run `grep admins ~/audit/group.txt | cut -d: -f4` to confirm.",
