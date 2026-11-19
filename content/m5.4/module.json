@@ -21,7 +21,7 @@
     {"id": "t09", "kind": "predict", "diff": 2, "check": {"out": "1", "of": "^grep -c Running \\S*jobs_snapshot\\.txt$"}, "solution": ["grep -c Running ~/lab/jobs_snapshot.txt"]},
     {"id": "t10", "kind": "guided", "diff": 2, "check": {"out": "Done", "of": "^grep report \\S*jobs_snapshot\\.txt$"}, "solution": ["grep report ~/lab/jobs_snapshot.txt"]},
     {"id": "t11", "kind": "debug", "diff": 2, "check": {"contains": ["~/lab/disown_note.txt", "disown"]}, "solution": ["echo 'disown -h %2 detaches a job from SIGHUP' > ~/lab/disown_note.txt"]},
-    {"id": "t12", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/stop_plan.txt", "Ctrl+Z"]}, {"contains": ["~/lab/stop_plan.txt", "bg"]}], "solution": ["echo 'Ctrl+Z stops the job; bg %1 resumes it in the background' > ~/lab/stop_plan.txt"]},
+    {"id": "t12", "kind": "mini", "diff": 2, "check": [{"contains": ["~/lab/stop_plan.txt", "Ctrl\\+Z"]}, {"contains": ["~/lab/stop_plan.txt", "bg"]}], "solution": ["echo 'Ctrl+Z stops the job; bg %1 resumes it in the background' > ~/lab/stop_plan.txt"]},
     {"id": "t13", "kind": "ticket", "diff": 3, "check": {"contains": ["~/lab/pitfalls_5401.txt", "kill %2"]}, "solution": ["echo 'Mistake: plain job number 2 is not %2; use kill %2 for job 2' > ~/lab/pitfalls_5401.txt"]}
   ],
   "vm": [
