@@ -367,7 +367,7 @@ def write_precache_manifest():
     urls = ["./", "index.html", "manifest.webmanifest", "service-worker.js"]
     urls.extend(sorted(p.relative_to(V3).as_posix() for lang in LANGS for p in (V3 / lang).glob("*.html")))
     urls.extend(sorted(p.relative_to(V3).as_posix() for folder in ("shared", "icons")
-                       for p in (V3 / folder).rglob("*") if p.is_file()))
+                       for p in (V3 / folder).rglob("*") if p.is_file() and "css" not in p.relative_to(V3).parts[:-1]))
     revision = hashlib.sha256()
     for url in urls:
         if url == "./":
@@ -380,7 +380,16 @@ def write_precache_manifest():
     (V3 / "precache-manifest.js").write_text(manifest, encoding="utf-8")
 
 
+CSS_PARTS = ["base", "components", "theme-dark", "theme-light"]
+
+
+def build_css():
+    parts = [(V3 / "shared" / "css" / (n + ".css")).read_text(encoding="utf-8") for n in CSS_PARTS]
+    (V3 / "shared" / "app.css").write_text("".join(parts), encoding="utf-8", newline="")
+
+
 def main():
+    build_css()
     mods_meta = load(CONTENT / "_modules.json")
     ui_all = load(CONTENT / "_ui.json")
     built = built_modules()
