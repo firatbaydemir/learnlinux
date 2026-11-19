@@ -134,6 +134,7 @@ input[type=search]:focus,textarea:focus{border-color:var(--ac);outline:0;box-sha
 .card h2{margin-top:0}
 .pn{display:flex;justify-content:space-between;gap:.8rem;margin-top:2.5rem}
 /* ---- Komut karti ---- */
+
 .cmd{margin:1.2rem 0;padding:1rem 1.2rem;border:1px solid var(--bd);border-radius:14px;background:var(--card)}
 .cmd h3 code{font-size:1.05rem;background:transparent;padding:0;color:var(--ac)}
 .cmd dl{display:grid;grid-template-columns:max-content 1fr;gap:.25rem .9rem;margin:.6rem 0}
@@ -212,8 +213,12 @@ textarea{width:100%;font-family:var(--mono);font-size:.88rem}
 .termin input:focus-visible{outline:0}
 body.term-open .content{padding-bottom:48vh}
 @media(min-width:1000px){
-body.term-open .layout{align-items:stretch}
-body.term-open .term{position:sticky;top:var(--top);left:auto;right:auto;bottom:auto;height:calc(100vh - var(--top));width:min(40vw,560px);flex:0 0 min(40vw,560px);border-top:0;border-left:2px solid var(--ac);box-shadow:none}
+.layout{max-width:none;margin:0;padding-left:0}
+.toc{border-left:0;border-radius:0 14px 14px 0}
+.layout>.content{margin:0 auto}
+body.term-open .layout{align-items:stretch;max-width:none;margin:0;padding-right:0;padding-bottom:0;gap:1.5rem}
+body.term-open .content{max-width:none}
+body.term-open .term{position:sticky;top:var(--top);left:auto;right:auto;bottom:auto;height:calc(100vh - var(--top));height:calc(100dvh - var(--top));width:min(42vw,640px);flex:0 0 min(42vw,640px);border-radius:0;border-top:0;border-left:2px solid var(--ac);box-shadow:none}
 body.term-open .content{padding-bottom:4rem}}
 
 /* ---- Duyarli ---- */
