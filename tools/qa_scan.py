@@ -116,7 +116,7 @@ for md in mods:
                     continue
                 if skip(p):
                     continue
-                if len(s) > 40 and s == o and not re.search(r'[A-Za-z]{4,}', re.sub(r'`[^`]*`', '', s)):
+                if len(s) > 40 and s == o and not (s.startswith('`') and s.rstrip().endswith('`') and not re.search(r'[A-Za-z]{4,}', re.sub(r'`[^`]*`', '', s))) and not re.fullmatch(r'`[^`]*`', s.strip()) and not re.match(r'`[^`]*`\s*(\(`[^`]*`\))?$', s.strip()):
                     same += 1
                     add('ERROR', 'cevrilmemis', f'{mid}/{lg}{p}: {s[:50]!r}')
                 if len(s) > 80:
