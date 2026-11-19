@@ -189,7 +189,7 @@
   },
   "t12": {
    "text": "Debug: the `userdel -r alice` in `~/offboard.sh` deletes the home directory that must be kept for the audit. Rewrite the script so it contains `sudo userdel alice` without `-r`.",
-   "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Use single quotes. (`>` and `>>` → module 3.2.)"
+   "hint": "`echo`. Use single quotes. (`>` and `>>` → module 3.2.)"
   },
   "t13": {
    "text": "Mini project: write a three-line plan into `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` and `sudo usermod -aG devs carol`.",
@@ -316,10 +316,10 @@
   "q1": {
    "q": "What does `sudo usermod -G devs alice` (without `-a`) do?",
    "options": [
-    "Adds alice to devs and keeps the others",
+    "Adds alice to devs and keeps all her other groups as they are",
     "Removes all of alice's supplementary groups and leaves only devs",
-    "Deletes the alice account",
-    "Locks alice"
+    "Permanently deletes the alice account and all her files",
+    "Locks the alice account so she cannot log in with a password"
    ],
    "explain": "-G replaces the supplementary group list; without `-a` (append) old groups such as wheel are lost."
   },
@@ -327,9 +327,9 @@
    "q": "What happens after `userdel alice` (without `-r`)?",
    "options": [
     "The home directory is deleted too",
-    "Nothing happens",
+    "Nothing happens, the account stays in place",
     "The account is deleted but the home directory stays",
-    "The account is only locked"
+    "The account is not deleted, only locked"
    ],
    "explain": "The records are removed; `/home/alice` and its files stay on disk. Deleting them needs `-r`."
   },
@@ -356,29 +356,29 @@
   "q5": {
    "q": "What does `-m` do in `useradd -m bob`?",
    "options": [
-    "Locks the user",
-    "Creates a mailbox",
+    "Locks the user so login is impossible",
+    "Creates a mailbox for the user",
     "Creates the home directory",
-    "Resets the password"
+    "Sets the password empty or resets it"
    ],
    "explain": "`-m` creates `/home/bob` and copies the contents of `/etc/skel`."
   },
   "q6": {
    "q": "What does `passwd -l alice` do?",
    "options": [
-    "Deletes the account",
+    "Fully deletes the account and home directory, irreversibly",
     "Locks the password; SSH key login may still work",
-    "Makes the password never expire",
-    "Kicks the user out of the session"
+    "Makes the password valid forever, it never expires again",
+    "Immediately kicks the user out of the session and closes the account"
    ],
    "explain": "It prefixes the shadow hash with `!`; to fully cut access use `usermod -e 1` or a `nologin` shell."
   },
   "q7": {
    "q": "What does `usermod -aG devs alice` do?",
    "options": [
-    "Replaces all of alice's groups with `devs`",
-    "Deletes alice",
-    "Deletes the `devs` group",
+    "Wipes all of alice's groups and replaces them with just `devs`",
+    "Completely deletes the alice account along with her files",
+    "Deletes the `devs` group and all its members from the system",
     "Adds alice to `devs` without touching her other groups"
    ],
    "explain": "`-a` with `-G` keeps existing supplementary groups; without `-a` the list is overwritten."
@@ -387,11 +387,21 @@
    "q": "What does `chage -d 0 alice` do?",
    "options": [
     "Forces a password change at next login",
-    "Locks the account",
-    "Deletes the password",
-    "Expires the account today"
+    "Locks the account at once, the user cannot log in at all",
+    "Deletes the password so login works without one",
+    "Expires the account today so login is no longer possible"
    ],
    "explain": "It sets the last-change date to 0 so the password counts as expired; a new one is required at login."
+  },
+  "q9": {
+   "q": "Why is `usermod -aG devs alice` safer than `usermod -G devs alice`?",
+   "options": [
+    "`-a` makes the command faster",
+    "`-G` alone creates the new group",
+    "`-a` keeps existing groups; `-G` alone replaces them with the given list",
+    "`-a` locks the user"
+   ],
+   "explain": "`-G` replaces the group list; alice's old groups (e.g. `wheel`) may be lost. `-a` (append) adds and keeps the old ones."
   }
  },
  "summary": [

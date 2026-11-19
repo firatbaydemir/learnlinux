@@ -174,32 +174,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Laboratuvar zaten karışık adlarla hazır. `ls *.jpg` çalıştır ve yalnızca `.jpg` dosyalarının listelendiğini gözlemle.",
-   "hint": "`*` sıfır veya daha fazla karakterle eşleşir; nokta ve `jpg` son eki desende aynen kalır."
+   "text": "Laboratuvar zaten karışık adlarla hazır. Yalnızca `.jpg` dosyalarını listele.",
+   "hint": "`ls` ile `*` joker karakterini kullan; sıfır veya daha fazla karakterle eşleşir, son ek desende aynen kalır."
   },
   "t02": {
-   "text": "`ls img?.jpg` komutuyla `img` sonrasında tek karakter bulunan `.jpg` adlarını listele.",
-   "hint": "`?` tam bir karakteri karşılar. Deseni tırnaksız yaz ki kabuk genişletsin."
+   "text": "`img` sonrasında tek karakter bulunan `.jpg` adlarını listele.",
+   "hint": "`ls` ile `?` kullan; tam bir karakteri karşılar. Deseni tırnaksız yaz ki kabuk genişletsin."
   },
   "t03": {
-   "text": "`ls doc*` komutuyla `doc` ile başlayan adları listele.",
-   "hint": "`*`, `doc` sonrasında sıfır veya daha fazla karaktere izin verir."
+   "text": "`doc` ile başlayan adları listele.",
+   "hint": "`ls` ile `*` kullan; `doc` sonrasında sıfır veya daha fazla karaktere izin verir."
   },
   "t04": {
    "text": "`echo *.txt` çalıştır. Kabuk, eşleşen adları `echo` komutuna nasıl iletiyor?",
    "hint": "Önce kabuk deseni eşleşen adlara genişletir; `echo` bu adları yazar."
   },
   "t05": {
-   "text": "`ls img[12].jpg` ile son eki `1` veya `2` olan görselleri listele.",
-   "hint": "Köşeli parantez içindeki her seçenek tek bir karakteri temsil eder."
+   "text": "Son eki `1` veya `2` olan `img` görsellerini listele.",
+   "hint": "`ls` ile köşeli parantez kullan; içindeki her seçenek tek bir karakteri temsil eder."
   },
   "t06": {
-   "text": "`ls *.{jpg,png}` ile `.jpg` ve `.png` dosyalarını tek komutta eşleştir.",
-   "hint": "Süslü parantezdeki `jpg` ve `png` seçenekleri ayrı desenler üretir."
+   "text": "`.jpg` ve `.png` dosyalarını tek komutta eşleştir.",
+   "hint": "`ls` ile süslü parantez kullan; içindeki seçenekler ayrı desenler üretir."
   },
   "t07": {
    "text": "`texts` klasörünü oluştur ve `doc` ile başlayan `.txt` dosyalarını içine kopyala. `notes.md` dosyasını kopyalama.",
-   "hint": "`mkdir texts` komutundan sonra `cp doc*.txt texts` çalıştır. (`mkdir` modül 2.3'te, `cp` modül 2.4'te anlatılır.)"
+   "hint": "Önce `mkdir`, sonra `cp`; kaynak olarak `doc` ile başlayan `.txt` desenini ver, hedef klasör son argüman olur. (`mkdir` modül 2.3'te, `cp` modül 2.4'te anlatılır.)"
   },
   "t08": {
    "text": "Tahmin et: `echo '$HOME'` değişkenin değerini mi, yoksa `$HOME` metnini mi yazar? Komutu çalıştırıp kontrol et.",
@@ -211,19 +211,19 @@
   },
   "t10": {
    "text": "Hata ayıklama: `old report.txt` adındaki dosyayı tek bir argüman olarak hedefleyip kaldır.",
-   "hint": "Boşluklu adı tırnakla: `rm \"old report.txt\"`. (`rm` modül 2.3'te anlatılır.)"
+   "hint": "Boşluklu adı tırnak içine al; yoksa kabuk iki ayrı argüman görür. (`rm` modül 2.3'te anlatılır.)"
   },
   "t11": {
    "text": "Mini proje: `backup` klasörünü oluştur ve yalnızca `.jpg` ile `.png` dosyalarını bu klasöre kopyala.",
-   "hint": "`mkdir backup` ardından `cp *.jpg *.png backup` kullan. (`mkdir` modül 2.3'te, `cp` modül 2.4'te anlatılır.)"
+   "hint": "Önce `mkdir`, sonra `cp`; iki deseni art arda yaz, hedef klasör en sonda olsun. (`mkdir` modül 2.3'te, `cp` modül 2.4'te anlatılır.)"
   },
   "t12": {
-   "text": "Meydan okuma: `log_1.txt`, `log_2.txt` ve `log_3.txt` adlarını süslü parantezle oluştur; ardından `log_?` deseniyle bu üç dosyayı kaldır.",
-   "hint": "Önce `touch log_{1,2,3}.txt`, sonra `rm log_?.txt` çalıştır. (`touch`, `rm` modül 2.3'te anlatılır.)"
+   "text": "Meydan okuma: `log_1.txt`, `log_2.txt` ve `log_3.txt` adlarını süslü parantezle oluştur; ardından `?` joker karakteriyle bu üç dosyayı kaldır.",
+   "hint": "Önce `touch` ile süslü parantezli liste, sonra `rm` ile tek karakteri karşılayan desen. (`touch`, `rm` modül 2.3'te anlatılır.)"
   },
   "t13": {
    "text": "Ticket: Boşluk içeren `my file.txt` adını `my_file.txt` olarak yeniden adlandır. Adın tek argüman olmasına dikkat et.",
-   "hint": "`mv \"my file.txt\" my_file.txt` komutunu kullan. (`mv` modül 2.4'te anlatılır.)"
+   "hint": "`mv` kullan; boşluklu eski adı tırnak içine al. (`mv` modül 2.4'te anlatılır.)"
   }
  },
  "vm": {
@@ -310,10 +310,10 @@
   "q3": {
    "q": "Bash'te `*.xyz` ile eşleşen ad yoksa `echo *.xyz` varsayılan olarak ne yapar?",
    "options": [
-    "Tüm dosyaları siler",
-    "Hiçbir şey yazmaz",
+    "Eşleşen tüm dosyaları sessizce siler",
+    "Hata vermeden hiçbir çıktı yazmaz",
     "Eşleşmeyen `*.xyz` desenini olduğu gibi yazar",
-    "Geçerli dizini değiştirir"
+    "Çalışma dizinini bir üst dizine değiştirir"
    ],
    "explain": "Bash'in varsayılan ayarında eşleşmeyen glob deseni genişletilmeden komuta aktarılır."
   },
@@ -340,10 +340,10 @@
   "q6": {
    "q": "Joker karakterleri (`*`, `?`) kim genişletir?",
    "options": [
-    "`ls` komutu",
-    "Çekirdek",
+    "Yalnızca `ls` komutunun kendisi, çalışırken",
+    "Çekirdek, dosya sistemine erişirken",
     "Kabuk (shell), komut çalışmadan önce",
-    "Dosya sistemi"
+    "Dosya sistemi, ad araması sırasında"
    ],
    "explain": "Genişletmeyi kabuk yapar; komut desen değil, genişletilmiş dosya adı listesini alır."
   },
@@ -351,21 +351,31 @@
    "q": "`echo \"$(whoami)\"` ile `echo '$(whoami)'` çıktıları nasıl farklıdır?",
    "options": [
     "Çift tırnak kullanıcı adını yazar, tek tırnak metni aynen yazar",
-    "İkisi de kullanıcı adını yazar",
-    "İkisi de metni aynen yazar",
-    "Çift tırnak hata verir"
+    "İkisi de kullanıcı adını yazar, fark yoktur",
+    "İkisi de metni aynen, olduğu gibi yazar",
+    "Çift tırnak kullanılınca komut hata verir"
    ],
    "explain": "Çift tırnak `$`, `$(...)` ve ters eğik çizgiyi çalıştırır; tek tırnak her şeyi düz metin yapar."
   },
   "q8": {
    "q": "`rm *.log` çalıştırmadan önce güvenli bir ön kontrol nedir?",
    "options": [
-    "`rm -f *.log`",
-    "`rm *.log &`",
-    "`touch *.log`",
+    "`rm -f *.log` ile zorla silmek",
+    "`rm *.log &` ile arka planda silmek",
+    "`touch *.log` ile dosyaları güncellemek",
     "Önce `ls *.log` ile eşleşenleri görmek"
    ],
    "explain": "Aynı deseni önce `ls` veya `echo` ile çalıştırarak neyin silineceğini görürsün."
+  },
+  "q9": {
+   "q": "`rm *.log` yazmadan önce neden `ls *.log` ile denemek akıllıca bir alışkanlıktır?",
+   "options": [
+    "`ls` dosyaları geçici olarak korur",
+    "Joker karakteri kabuk açar; `ls` rm'nin alacağı dosya listesini aynen gösterir",
+    "`rm` joker karakterleri anlamaz",
+    "`ls` yanlış dosyaları kendiliğinden eler"
+   ],
+   "explain": "`*.log` kabuk tarafından komut çalışmadan önce dosya adlarına genişletilir. Aynı deseni `ls` ile çalıştırmak, `rm`'nin neleri sileceğini önceden gösterir."
   }
  },
  "summary": [

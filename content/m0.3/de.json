@@ -158,7 +158,7 @@
   },
   "t14": {
    "text": "Herausforderung: Erstelle im Home-Verzeichnis mit `echo Hello > first.txt` eine Datei und lies sie mit `cat first.txt`.",
-   "hint": "Das > schreibt die Ausgabe in eine Datei, `cd` wechselt das Verzeichnis, `cat` liest eine Datei (siehe „Zeichen, die dir später begegnen“). Wechsle zuerst mit `cd ~` ins Home-Verzeichnis."
+   "hint": "Das > schreibt die Ausgabe in eine Datei, `cd` wechselt das Verzeichnis, `cat` liest eine Datei (siehe „Zeichen, die dir später begegnen“). Wechsle zuerst mit `cd` ins Home-Verzeichnis."
   },
   "t15": {
    "text": "Vorhersagen: `cd ~/Documents`, dann `cd ..`, dann `pwd`. Sage vor dem Ausführen voraus, welchen Pfad du siehst, und prüfe es dann.",
@@ -170,7 +170,7 @@
   },
   "t17": {
    "text": "Mini-Projekt: Schreibe mit `whoami > hello.txt` deinen Benutzernamen in eine Datei und lies sie mit `cat hello.txt`.",
-   "hint": "`>` leitet die Ausgabe in eine Datei um (siehe „Zeichen, die dir später begegnen“). Zuerst `cd ~`."
+   "hint": "`>` leitet die Ausgabe in eine Datei um (siehe „Zeichen, die dir später begegnen“). Zuerst `cd`."
   },
   "t18": {
    "text": "TICKET #1001 — Der Support braucht Systeminfos: Schreibe im Home-Verzeichnis in `info.txt` zuerst die Kernel-Version (`uname -r`), dann den Rechnernamen (`hostname`). Die Datei muss 2 Zeilen haben.",
@@ -257,6 +257,16 @@
     "Listet Benutzer auf"
    ],
    "explain": "`history` zeigt die nummerierte Befehlshistorie; mit `!N` führst du Befehl N erneut aus."
+  },
+  "q9": {
+   "q": "Warum spart die Tab-Vervollständigung nicht nur Zeit?",
+   "options": [
+    "Weil Tab den Befehl auch ausführt",
+    "Wenn sie ergänzt, existiert die Datei/der Befehl wirklich; Tippfehler fallen sofort auf",
+    "Weil Tab Dateien automatisch löscht",
+    "Weil Tab Rechte repariert"
+   ],
+   "explain": "Tab ergänzt nur existierende Namen; ohne Ergänzung liegt vermutlich ein Tippfehler oder falscher Ort vor."
   }
  },
  "summary": [

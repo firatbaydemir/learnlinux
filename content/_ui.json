@@ -86,7 +86,8 @@
   "recallShow": "Kontrol et",
   "retryNote": "Daha önce yanlış cevapladığın sorular işaretlendi.",
   "retryBadge": "Tekrar",
-  "retryBtn": "Yanlışları sıfırla ve yeniden çöz"
+  "retryBtn": "Yanlışları sıfırla ve yeniden çöz",
+  "more": "İleri okuma"
  },
  "de": {
   "siteName": "Linux-Grundlagen-Akademie",
@@ -175,7 +176,8 @@
   "recallShow": "Prüfen",
   "retryNote": "Früher falsch beantwortete Fragen sind markiert.",
   "retryBadge": "Wiederholen",
-  "retryBtn": "Falsche zurücksetzen und neu lösen"
+  "retryBtn": "Falsche zurücksetzen und neu lösen",
+  "more": "Zum Vertiefen"
  },
  "en": {
   "siteName": "Linux Foundations Academy",
@@ -264,6 +266,7 @@
   "recallShow": "Check",
   "retryNote": "Questions you answered wrong before are marked.",
   "retryBadge": "Retry",
-  "retryBtn": "Reset wrong answers and retry"
+  "retryBtn": "Reset wrong answers and retry",
+  "more": "Further reading"
  }
 }

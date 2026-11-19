@@ -49,7 +49,8 @@
      "where": "Wenn du fragst, wer das System wie stark nutzt.",
      "why": "Die häufigste Übersicht; kombiniere mit `grep` oder `sort`.",
      "example": "ps aux | head -n 10",
-     "nosim": true
+     "nosim": true,
+     "output": "USER   PID %CPU %MEM COMMAND\nroot     1  0.0  0.1 /usr/lib/systemd/systemd\nroot   812  0.0  0.0 /usr/sbin/sshd\nuser  2310  0.0  0.1 -bash"
     },
     {
      "cmd": "ps -ef",
@@ -57,7 +58,8 @@
      "where": "Wenn du wissen willst, wer der Elternprozess ist.",
      "why": "Zeigt Beziehungen; PPID 1 heißt, der Prozess hängt direkt unter init/systemd.",
      "example": "ps -ef | head -n 10",
-     "nosim": true
+     "nosim": true,
+     "output": "UID   PID  PPID C STIME TTY TIME     CMD\nroot    1     0 0 08:00 ?   00:00:02 /usr/lib/systemd/systemd\nroot  812     1 0 08:01 ?   00:00:00 /usr/sbin/sshd\nuser 2310   812 0 09:12 pts/0 00:00:00 -bash"
     },
     {
      "cmd": "ps -o",
@@ -92,7 +94,8 @@
      "where": "Um zu verstehen, wer wen gestartet hat.",
      "why": "Auf einen Blick: Alles hängt unter PID 1 (systemd).",
      "example": "pstree -p | head -n 15",
-     "nosim": true
+     "nosim": true,
+     "output": "systemd(1)─┬─sshd(812)───sshd(2301)───bash(2310)───pstree(2400)\n           └─cron(790)"
     },
     {
      "cmd": "ps -ef --forest",
@@ -108,7 +111,8 @@
      "where": "In Skripten, um zu prüfen, ob ein Dienst läuft.",
      "why": "Sauberer als `ps | grep`; `-x` passt auf den exakten Namen.",
      "example": "pgrep -l sshd",
-     "nosim": true
+     "nosim": true,
+     "output": "812 sshd"
     },
     {
      "cmd": "pgrep -a",
@@ -116,7 +120,8 @@
      "where": "Wenn mehrere Prozesse denselben Namen haben.",
      "why": "Du siehst die Argumente und wählst die richtige PID.",
      "example": "pgrep -a bash",
-     "nosim": true
+     "nosim": true,
+     "output": "2310 -bash"
     }
    ],
    "tip": "Paketinstallation: Rocky `sudo dnf install psmisc`, Ubuntu `sudo apt install psmisc`."
@@ -203,7 +208,8 @@
      "where": "Um die Load Average richtig zu lesen.",
      "why": "Load 2.0 ist bei 8 Kernen gut und bei 2 ausgelastet.",
      "example": "nproc",
-     "nosim": true
+     "nosim": true,
+     "output": "4"
     },
     {
      "cmd": "kill -15",
@@ -211,7 +217,8 @@
      "where": "Erste Wahl, um einen Prozess zu beenden.",
      "why": "Das Programm kann Daten sichern und aufräumen.",
      "example": "kill -15 4242",
-     "nosim": true
+     "nosim": true,
+     "output": "(keine Ausgabe / no output: the process just ends)"
     },
     {
      "cmd": "kill -9",
@@ -219,7 +226,8 @@
      "where": "Nur, wenn SIGTERM nicht gewirkt hat.",
      "why": "Letzter Ausweg; kein Aufräumen, Daten können verloren gehen.",
      "example": "kill -9 4242",
-     "nosim": true
+     "nosim": true,
+     "output": "(keine Ausgabe / no output: the process is killed immediately)"
     }
    ],
    "tip": "Reihenfolge beim Beenden: `kill -15`, ein paar Sekunden warten, mit `ps -p PID` prüfen, erst dann `kill -9`.",
@@ -452,6 +460,16 @@
     "Beide liefern identische Ausgabe"
    ],
    "explain": "`-ef` ist POSIX, `aux` BSD-Stil; Spalten unterscheiden sich (`-ef` hat PPID, `aux` %CPU/%MEM)."
+  },
+  "q9": {
+   "q": "Warum verschwindet ein Prozess mit `<defunct>` (Zombie) in der `ps`-Ausgabe nicht durch `kill -9`?",
+   "options": [
+    "`kill -9` funktioniert nur für root",
+    "Zombies haben einen besonderen Schutz gegen Signale",
+    "Der Prozess ist schon beendet; sein Eintrag bleibt, bis der Elternprozess den Exit-Status liest",
+    "`kill -9` beendet nur Hintergrundprozesse"
+   ],
+   "explain": "Ein Zombie ist kein laufender Prozess, sondern der Tabellenrest eines beendeten. Es gibt nichts mehr zu töten; die Lösung liegt beim Elternprozess (PPID): Er liest den Status per `wait`, oder PID 1 räumt auf, wenn er endet."
   }
  },
  "summary": [

@@ -149,7 +149,7 @@
   },
   "t07": {
    "text": "Mini project: copy the sample SSH configuration to `~/ops/connection-plan.txt` and verify the `Host linux-lab` and `Port 22` lines.",
-   "hint": "First run `cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt`, then read it with `cat`."
+   "hint": "First run `cp`, then read it with `cat`."
   },
   "t08": {
    "text": "Challenge: prepare a synchronized copy of the report at `~/transfer/sync-copy.txt`.",
@@ -307,6 +307,16 @@
     "Public key (into `~/.ssh/authorized_keys`)"
    ],
    "explain": "The public key is added to `authorized_keys` on the server (`ssh-copy-id`); the private key is never shared."
+  },
+  "q9": {
+   "q": "Why is an SSH key pair safer than a password?",
+   "options": [
+    "The key file is shorter",
+    "The private key never leaves your machine; there is no password to guess or intercept",
+    "With a key the connection is unencrypted",
+    "The server never verifies the key"
+   ],
+   "explain": "Only the public key lives on the server; the private key stays with you. Brute-forcing passwords becomes pointless. Never share the private key."
   }
  },
  "summary": [

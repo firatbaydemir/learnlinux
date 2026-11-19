@@ -137,7 +137,7 @@
    "hint": "Underscore vs hyphen; `ls /etc` helps."
   },
   "t06": {
-   "text": "Mini project: save the distribution name line into `~/vm-summary.txt` with `grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt`.",
+   "text": "Mini project: save the distribution name line into `~/vm-summary.txt` from `/etc/os-release`.",
    "hint": "`>` writes the output to a file."
   },
   "t07": {
@@ -371,6 +371,16 @@
     "They are encrypted"
    ],
    "explain": "Rolling back restores the VM to the snapshot state; later changes are lost."
+  },
+  "q9": {
+   "q": "Why is taking a VM snapshot before experimenting a good habit?",
+   "options": [
+    "If you break something you can return to a working state in one step",
+    "A snapshot makes the VM faster",
+    "Commands do not run without a snapshot",
+    "A snapshot protects your host machine"
+   ],
+   "explain": "A snapshot is the cheapest way to undo a failed experiment, so mistakes while learning are safe."
   }
  },
  "summary": [

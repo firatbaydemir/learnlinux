@@ -24,7 +24,8 @@
      "where": "To learn the machine's address or verify an interface is up.",
      "why": "First stop in network trouble; without an address nothing above it works.",
      "example": "ip a",
-     "nosim": true
+     "nosim": true,
+     "output": "1: lo: <LOOPBACK,UP> mtu 65536 state UNKNOWN\n    inet 127.0.0.1/8 scope host lo\n2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500 state UP\n    inet 192.168.1.42/24 brd 192.168.1.255 scope global eth0"
     },
     {
      "cmd": "ip -br a",
@@ -32,7 +33,8 @@
      "where": "For a quick look at which interface has which address.",
      "why": "Saves you from reading long output; it fits on the screen.",
      "example": "ip -br a",
-     "nosim": true
+     "nosim": true,
+     "output": "lo      UNKNOWN  127.0.0.1/8\neth0    UP       192.168.1.42/24"
     },
     {
      "cmd": "ip r",
@@ -40,7 +42,8 @@
      "where": "When investigating why you cannot reach outside networks.",
      "why": "Without a default route no packet leaves the local network.",
      "example": "ip r",
-     "nosim": true
+     "nosim": true,
+     "output": "default via 192.168.1.1 dev eth0\n192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.42"
     },
     {
      "cmd": "grep default",
@@ -69,7 +72,8 @@
      "where": "To answer \"is the service really listening, and on which address?\"",
      "why": "A service may look running yet listen on the wrong address, so connections fail.",
      "example": "sudo ss -tulpn",
-     "nosim": true
+     "nosim": true,
+     "output": "Netid State  Local Address:Port  Process\ntcp   LISTEN 0.0.0.0:22        users:((\"sshd\",pid=812,fd=3))\ntcp   LISTEN 127.0.0.1:8080    users:((\"python3\",pid=2310,fd=4))"
     },
     {
      "cmd": "ss -tln",
@@ -77,7 +81,8 @@
      "where": "For quick checks or in scripts.",
      "why": "Short and unprivileged; enough to see whether a port is open.",
      "example": "ss -tln | grep 8080",
-     "nosim": true
+     "nosim": true,
+     "output": "LISTEN 0 5 127.0.0.1:8080 0.0.0.0:*"
     },
     {
      "cmd": "curl -I",
@@ -85,7 +90,8 @@
      "where": "To test whether the service really answers over HTTP.",
      "why": "A port can be open while the application does not answer; a code like `200` or `301` shows it does.",
      "example": "curl -I http://127.0.0.1:8080",
-     "nosim": true
+     "nosim": true,
+     "output": "HTTP/1.0 200 OK\nServer: SimpleHTTP/0.6 Python/3.12\nContent-type: text/html"
     }
    ],
    "tip": "Filter `ss` output: `ss -tln | grep LISTEN | wc -l` counts how many TCP ports listen.",
@@ -121,7 +127,8 @@
      "where": "To test what applications will see.",
      "why": "It also honours `/etc/hosts`, so it is more accurate than tools that only query DNS.",
      "example": "getent hosts localhost",
-     "nosim": true
+     "nosim": true,
+     "output": "127.0.0.1       localhost"
     },
     {
      "cmd": "resolvectl status",
@@ -189,7 +196,8 @@
      "where": "To test gateway, outside IP and name separately.",
      "why": "Shows which layer is broken, one at a time.",
      "example": "ping -c 3 1.1.1.1",
-     "nosim": true
+     "nosim": true,
+     "output": "64 bytes from 1.1.1.1: icmp_seq=1 ttl=57 time=11.8 ms\n64 bytes from 1.1.1.1: icmp_seq=2 ttl=57 time=11.2 ms\n64 bytes from 1.1.1.1: icmp_seq=3 ttl=57 time=11.5 ms\n\n3 packets transmitted, 3 received, 0% packet loss"
     },
     {
      "cmd": "cut -d",
@@ -272,11 +280,11 @@
   },
   "t16": {
    "text": "Ticket: Users cannot reach the name `intranet.lab`. The internal server's address is `192.168.1.50`. Add this mapping to `~/net/hosts` (do not delete existing lines).",
-   "hint": "`echo '192.168.1.50 intranet.lab' >> ~/net/hosts`"
+   "hint": "`echo`"
   },
   "t17": {
    "text": "Ticket: A security audit wants proof that PostgreSQL (port 5432) listens only on the local address. Save the relevant `ss.txt` line into `~/net/audit.txt`.",
-   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; the line must contain `127.0.0.1:5432`. (`grep` → module 3.4.)"
+   "hint": "`grep`; the line must contain `127.0.0.1:5432`. (`grep` → module 3.4.)"
   }
  },
  "vm": {
@@ -393,7 +401,7 @@
    "q": "In which order is a name usually resolved?",
    "options": [
     "First `/etc/hosts`, then the DNS server in `resolv.conf`",
-    "First the DNS server, then `/etc/hosts`",
+    "The DNS server is asked first, then `/etc/hosts` is consulted",
     "Only the DNS server",
     "First the gateway, then `/etc/hosts`"
    ],
@@ -403,7 +411,7 @@
    "q": "What happens if you run `firewall-cmd --add-port=8080/tcp` without `--permanent`?",
    "options": [
     "The rule stays forever",
-    "The rule only applies after a reboot",
+    "The rule only takes effect after a restart, not immediately",
     "The command is rejected",
     "The rule applies immediately but is lost on reload or reboot"
    ],
@@ -422,8 +430,8 @@
   "q6": {
    "q": "What does `-p` in `ss -tulpn` add?",
    "options": [
-    "The protocol name",
-    "The port number",
+    "The protocol name (tcp/udp) and the version number",
+    "The port number and the number of connections on that port",
     "Packet counters",
     "The listening process (PID/name)"
    ],
@@ -442,12 +450,22 @@
   "q8": {
    "q": "What does `default via 10.0.0.1 dev eth0` in `ip route` mean?",
    "options": [
-    "eth0 is down",
-    "10.0.0.1 is the local address",
+    "The eth0 interface is down, so nothing can leave the machine",
+    "10.0.0.1 is this machine's own local address, no traffic leaves",
     "Unknown destinations go via gateway 10.0.0.1",
     "10.0.0.1 is the DNS server"
    ],
    "explain": "The `default` line is used when no other route matches."
+  },
+  "q9": {
+   "q": "Why do you check the interface/IP first, then routing, DNS, port and firewall when debugging a network problem?",
+   "options": [
+    "The order does not matter",
+    "The firewall is always the most common cause",
+    "Each layer depends on the one below; fixing an upper layer is pointless while a lower one is broken",
+    "The commands only work in this order"
+   ],
+   "explain": "Without an address routing is meaningless; without a route DNS is unreachable; without DNS you cannot connect by name. Working bottom-up catches the fault in its own layer."
   }
  },
  "summary": [

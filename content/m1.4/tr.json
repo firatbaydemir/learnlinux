@@ -194,11 +194,11 @@
   },
   "t08": {
    "text": "`cat locked.txt` 'Permission denied' veriyor. Nedenini anla, `chmod` ile düzelt ve dosyayı oku.",
-   "hint": "Kendine okuma izni ver: `chmod u+r locked.txt`. (`chmod` izinleri değiştirir, ayrıntısı modül 4.4'te; `cat` modül 2.6'da.)"
+   "hint": "Kendine okuma izni ver: `chmod`. (`chmod` izinleri değiştirir, ayrıntısı modül 4.4'te; `cat` modül 2.6'da.)"
   },
   "t09": {
    "text": "`cp notes.txt backup/` hata veriyor çünkü `backup` yok. Zincirle: klasörü oluştur ve dosyayı kopyala.",
-   "hint": "`mkdir backup && cp notes.txt backup/`. (`cp` kopyalar, modül 2.4; `mkdir` modül 2.3.)"
+   "hint": "`mkdir`, `cp`. (`cp` kopyalar, modül 2.4; `mkdir` modül 2.3.)"
   },
   "t10": {
    "text": "Mini proje: (1) `ls /nonexistent` hatasını `errors.txt` dosyasına al, (2) `ls ~` çıktısını `files.txt` dosyasına yaz, (3) son komutun durumunu `echo $?` ile oku.",
@@ -210,14 +210,14 @@
   },
   "t12": {
    "text": "Zorlu görev: `backup` klasörü yoksa oluştur; `notes.txt` dosyasını oraya kopyala; kopyalama başarılıysa `status.txt` içine `saved`, başarısızsa `failed` yaz.",
-   "hint": "`test -d backup || mkdir backup` ve `cp ... && echo saved > status.txt || echo failed > status.txt`. (`cp` modül 2.4, `>` modül 3.2.)"
+   "hint": "`test -d`, `mkdir` ve `cp ... && echo saved > status.txt || echo failed > status.txt`. (`cp` modül 2.4, `>` modül 3.2.)"
   },
   "t13": {
    "text": "Zorlu görev: `notes.txt` içinde `hello` geçiyor mu? Tek satırda sınayıp `found` veya `missing` yazdır; grep'in kendi çıktısını `/dev/null`'a at.",
-   "hint": "`grep hello notes.txt > /dev/null && echo found || echo missing`. (`grep` metin arar, modül 3.4.)"
+   "hint": "`grep`, `echo`. (`grep` metin arar, modül 3.4.)"
   },
   "t14": {
-   "text": "Ticket: Bir çalışan 'raporumu okuyamıyorum' diyor ve `cat Documents/raport.txt` komutunu denemiş. Doğru adı `ls Documents` ile bul, dosyayı `cat` ile oku ve çıkış durumunu `exit.txt` dosyasına yaz.",
+   "text": "Ticket: Bir çalışan 'raporumu okuyamıyorum' diyor ve `cat Documents/raport.txt` komutunu denemiş. Doğru adı `ls` ile bul, dosyayı `cat` ile oku ve çıkış durumunu `exit.txt` dosyasına yaz.",
    "hint": "Doğru ad `report.txt`. `cat Documents/report.txt; echo $? > exit.txt`."
   }
  },
@@ -312,7 +312,7 @@
    "options": [
     "Her zaman",
     "Yalnızca A başarısız olursa",
-    "Yalnızca A başarılı olursa (0)",
+    "Yalnızca A başarılıysa",
     "Hiçbir zaman"
    ],
    "explain": "`&&` 'VE' gibi davranır; B yalnızca A 0 ile biterse çalışır."
@@ -330,10 +330,10 @@
   "q4": {
    "q": "`ls /nonexistent 2>/dev/null; echo $?` ne yapar?",
    "options": [
-    "Hata mesajını gösterir, 0 yazar",
-    "Klasörü oluşturur",
-    "Hiçbir şey yazmaz",
-    "Hata mesajını gizler ama durum sıfırdan farklı kalır"
+    "Hata mesajını ekrana gösterir ve 0 yazar",
+    "Klasörü yine de oluşturur ve 0 döner",
+    "Hiçbir şey yazmaz, durumu da değiştirmez",
+    "Hatayı gizler, çıkış kodu değişmez"
    ],
    "explain": "`2>/dev/null` yalnızca mesajı atar; komut yine başarısızdır ve `$?` 0 olmaz."
   },
@@ -341,7 +341,7 @@
    "q": "`A || B` satırında B ne zaman çalışır?",
    "options": [
     "A başarılı olursa",
-    "A başarısız olursa",
+    "A başarısızsa",
     "Her zaman",
     "Hiçbir zaman"
    ],
@@ -350,9 +350,9 @@
   "q6": {
    "q": "`A ; B` ile `A && B` arasındaki fark nedir?",
    "options": [
-    "Fark yoktur",
+    "Fark yoktur, ikisi aynı davranır",
     "`;` yalnızca A başarısızsa B'yi çalıştırır",
-    "`;` A'nın sonucuna bakmadan B'yi çalıştırır",
+    "`;` A'ya bakmadan B'yi çalıştırır",
     "`&&` komutları paralel çalıştırır"
    ],
    "explain": "`;` komutları sırayla, sonuca bakmadan çalıştırır; `&&` B'yi yalnızca A başarılıysa çalıştırır."
@@ -360,22 +360,32 @@
   "q7": {
    "q": "Çıkış kodu 126 genellikle neyi gösterir?",
    "options": [
-    "Komut bulunamadı",
-    "Başarılı",
+    "Komut bulunamadı (PATH'te görünmüyor)",
+    "Komut başarıyla tamamlandı",
     "Sözdizimi hatası yok",
-    "Komut bulundu ama çalıştırılamadı (ör. izin yok)"
+    "Bulundu ama çalışmadı (ör. izin yok)"
    ],
    "explain": "126: bulundu ama çalıştırılamadı (çalıştırma izni yok vb.); 127: komut bulunamadı."
   },
   "q8": {
    "q": "`ls /yok 2>&1` komutunda `2>&1` ne yapar?",
    "options": [
-    "Hata çıktısını standart çıktıya yönlendirir",
-    "Çıktıyı siler",
-    "Dosyayı 2 kez listeler",
-    "Çıkış kodunu 1 yapar"
+    "Hatayı standart çıktıya yönlendirir",
+    "Tüm çıktıyı siler, hiçbir şey kalmaz",
+    "Dosyayı iki kez art arda listeler",
+    "Çıkış kodunu her zaman 1 yapar"
    ],
    "explain": "`2>&1` stderr (2) akışını stdout (1) ile aynı yere gönderir; böylece hatalar da boru/dosyaya akar."
+  },
+  "q9": {
+   "q": "`test -f dosya` hangi durumda çıkış kodu 0 (başarılı) döndürür?",
+   "options": [
+    "Dosya mevcut değilse",
+    "Dosya varsa ve normal dosyaysa",
+    "Dosya boşsa (sıfır bayt)",
+    "Dosya çalıştırılabilir izne sahipse"
+   ],
+   "explain": "`test -f` normal dosya varsa 0 döner. Ayrıca `true` her zaman 0, `false` her zaman 1 döndürür."
   }
  },
  "summary": [

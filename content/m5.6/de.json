@@ -24,7 +24,8 @@
      "where": "Erster Schritt bei jedem Dienstproblem.",
      "why": "Ein Befehl zeigt, ob er läuft, ob er enabled ist und was zuletzt gemeldet wurde.",
      "example": "systemctl status sshd --no-pager",
-     "nosim": true
+     "nosim": true,
+     "output": "● sshd.service - OpenSSH server daemon\n     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled)\n     Active: active (running) since Mon 2026-11-16 08:01:12 CET; 2h 3min ago\n   Main PID: 812 (sshd)"
     },
     {
      "cmd": "systemctl start / stop",
@@ -64,7 +65,8 @@
      "where": "In Skripten und für schnelle Prüfungen.",
      "why": "Kurze Antwort, leicht zu testen.",
      "example": "systemctl is-active sshd && systemctl is-enabled sshd",
-     "nosim": true
+     "nosim": true,
+     "output": "active\nenabled"
     },
     {
      "cmd": "systemctl list-units --failed",
@@ -72,7 +74,8 @@
      "where": "Nach dem Booten oder wenn mit dem System etwas nicht stimmt.",
      "why": "Schneller Überblick, was kaputt ist.",
      "example": "systemctl list-units --failed --no-pager",
-     "nosim": true
+     "nosim": true,
+     "output": "  UNIT          LOAD   ACTIVE SUB    DESCRIPTION\n● cups.service  loaded failed failed CUPS Scheduler\n\n1 loaded units listed."
     },
     {
      "cmd": "systemctl mask",
@@ -124,7 +127,8 @@
      "where": "Wenn du zeitgesteuerte Jobs von systemd suchst.",
      "why": "Timer ersetzen viele cron-Jobs.",
      "example": "systemctl list-timers --no-pager",
-     "nosim": true
+     "nosim": true,
+     "output": "NEXT                        LEFT     LAST                        PASSED  UNIT                ACTIVATES\nTue 2026-11-17 00:00:00 CET 9h left  Mon 2026-11-16 00:00:00 CET 14h ago logrotate.timer    logrotate.service"
     }
    ],
    "tip": "Ein Name, der in einer Familie üblich ist, kann in der anderen fehlen. Nutze die Tab-Vervollständigung: `systemctl status ssh<TAB>`."
@@ -169,7 +173,8 @@
      "where": "Wenn der Boot langsam ist.",
      "why": "Die langsamsten Units stehen oben.",
      "example": "systemd-analyze blame --no-pager | head -n 10",
-     "nosim": true
+     "nosim": true,
+     "output": "4.210s NetworkManager-wait-online.service\n1.532s firewalld.service\n0.987s chronyd.service"
     }
    ],
    "tip": "Typische Unit-Fehler: `ExecStart=sleep 3600` (relativer Pfad, nötig ist `/usr/bin/sleep`), ein Tippfehler im Schlüsselnamen, ein fehlendes `[Install]` (dann meldet `enable`, dass keine Installationskonfiguration existiert).",
@@ -180,9 +185,7 @@
    "title": "journalctl und das Kernel-Log",
    "body": [
     "systemd sammelt alle Meldungen im **Journal**. `journalctl` liest es. Kombiniere Filter: `-u` für eine Unit, `-b` für den aktuellen Boot, `-p err` für Priorität error und schlimmer, `--since` für die Zeit, `-n 50` für die letzten 50 Zeilen, `-f` zum Live-Verfolgen (Ende mit Strg+C).",
-    "`journalctl -xe` springt ans Ende mit zusätzlichen Erklärungen; das schlägt systemctl nach einem fehlgeschlagenen Start vor. In Skripten und beim Einfügen von Ausgaben nimm `--no-pager`.",
-    "Standardmäßig kann das Journal nur im Speicher liegen (`/run/log/journal`) und geht beim Neustart verloren. Für ein **persistentes Journal** lege `/var/log/journal` an (oder setze `Storage=persistent` in `/etc/systemd/journald.conf`) und starte journald neu. Unter Ubuntu ist es schon persistent; auf vielen RHEL-Systemen nicht.",
-    "`journalctl --disk-usage` zeigt, wie viel Platz das Journal belegt. `dmesg` gibt den Kernel-Ringpuffer aus (Hardware, Treiber, Festplattenfehler); auf manchen Systemen braucht es `sudo`."
+    "`journalctl -xe` springt ans Ende mit zusätzlichen Erklärungen; das schlägt systemctl nach einem fehlgeschlagenen Start vor. In Skripten und beim Einfügen von Ausgaben nimm `--no-pager`."
    ],
    "commands": [
     {
@@ -191,7 +194,8 @@
      "where": "Wenn ein Dienst nicht startet oder sich falsch verhält.",
      "why": "Nur die Meldungen dieses Dienstes, nicht des ganzen Systems.",
      "example": "journalctl -u sshd --no-pager",
-     "nosim": true
+     "nosim": true,
+     "output": "Nov 16 08:01:12 host systemd[1]: Starting OpenSSH server daemon...\nNov 16 08:01:12 host sshd[812]: Server listening on 0.0.0.0 port 22.\nNov 16 08:01:12 host systemd[1]: Started OpenSSH server daemon."
     },
     {
      "cmd": "journalctl -f",
@@ -215,7 +219,8 @@
      "where": "Für eine schnelle Liste echter Probleme.",
      "why": "Blendet Info- und Debug-Meldungen aus.",
      "example": "journalctl -p err -b --no-pager",
-     "nosim": true
+     "nosim": true,
+     "output": "Nov 16 08:00:41 host cupsd[790]: Unable to open listen socket for address ::1 port 631."
     },
     {
      "cmd": "journalctl --since",
@@ -247,7 +252,8 @@
      "where": "Wenn /var volllaufen will.",
      "why": "Nur lesend und sicher.",
      "example": "journalctl --disk-usage",
-     "nosim": true
+     "nosim": true,
+     "output": "Archived and active journals take up 96.0M in the file system."
     },
     {
      "cmd": "journalctl --vacuum-time",
@@ -267,7 +273,11 @@
     }
    ],
    "tip": "Kombiniere Filter: `journalctl -u sshd -p err --since \"1 hour ago\" --no-pager`.",
-   "warn": "`--vacuum-time` und `--vacuum-size` löschen Logs endgültig. Führe sie nicht auf einer VM aus, deren Logs du für eine Untersuchung noch brauchst."
+   "warn": "`--vacuum-time` und `--vacuum-size` löschen Logs endgültig. Führe sie nicht auf einer VM aus, deren Logs du für eine Untersuchung noch brauchst.",
+   "more": [
+    "Standardmäßig kann das Journal nur im Speicher liegen (`/run/log/journal`) und geht beim Neustart verloren. Für ein **persistentes Journal** lege `/var/log/journal` an (oder setze `Storage=persistent` in `/etc/systemd/journald.conf`) und starte journald neu. Unter Ubuntu ist es schon persistent; auf vielen RHEL-Systemen nicht.",
+    "`journalctl --disk-usage` zeigt, wie viel Platz das Journal belegt. `dmesg` gibt den Kernel-Ringpuffer aus (Hardware, Treiber, Festplattenfehler); auf manchen Systemen braucht es `sudo`."
+   ]
   },
   {
    "id": "classic",
@@ -275,7 +285,6 @@
    "body": [
     "Neben dem Journal gibt es Textlogs in `/var/log`, meist von **rsyslog** geschrieben. Die Namen unterscheiden sich: Unter RHEL/Rocky `/var/log/messages` (allgemein) und `/var/log/secure` (Anmeldung und sudo); unter Debian/Ubuntu `/var/log/syslog` und `/var/log/auth.log`. Diese Dateien darf nur root oder die Gruppe `adm` lesen, nimm also `sudo`.",
     "Typische Werkzeuge: `tail -f` verfolgt eine Datei, `grep -i error` durchsucht sie, in `less` blätterst du (`/wort` sucht, `q` beendet). Kombiniere sie: `sudo grep -i error /var/log/messages | tail -n 20`.",
-    "**logrotate** verhindert, dass Logs endlos wachsen: Es benennt alte Dateien um, komprimiert und löscht sie nach den Regeln in `/etc/logrotate.conf` und `/etc/logrotate.d/`. Eine Regel enthält den Logpfad und Optionen wie `weekly`, `rotate 4` (4 alte Kopien behalten), `compress`, `missingok`, `notifempty`. Es wird täglich von einem Timer oder cron gestartet.",
     "Der Simulator hat die Dateien einer RHEL-Maschine, hier kannst du das Lesen von Logs üben."
    ],
    "commands": [
@@ -284,7 +293,8 @@
      "what": "Listet die Logdateien und -ordner.",
      "where": "Um zu sehen, welche Logs es gibt.",
      "why": "Dateinamen unterscheiden sich je nach Distribution.",
-     "example": "ls /var/log"
+     "example": "ls /var/log",
+     "output": "audit  boot.log  btmp  chrony  cron  dnf.log  messages  secure  wtmp"
     },
     {
      "cmd": "sudo cat /var/log/secure",
@@ -325,7 +335,10 @@
     }
    ],
    "tip": "Fehler zählen: `grep -ci error /var/log/messages`. Um von einer langen Suche nur die letzten Zeilen zu sehen, hänge `| tail -n 5` an.",
-   "warn": "Lösche oder leere eine Logdatei nie mit `rm` oder `> file`, solange ein Dienst hineinschreibt; überlasse das logrotate. Wer Beweise löscht, macht auch die spätere Fehlersuche unmöglich."
+   "warn": "Lösche oder leere eine Logdatei nie mit `rm` oder `> file`, solange ein Dienst hineinschreibt; überlasse das logrotate. Wer Beweise löscht, macht auch die spätere Fehlersuche unmöglich.",
+   "more": [
+    "**logrotate** verhindert, dass Logs endlos wachsen: Es benennt alte Dateien um, komprimiert und löscht sie nach den Regeln in `/etc/logrotate.conf` und `/etc/logrotate.d/`. Eine Regel enthält den Logpfad und Optionen wie `weekly`, `rotate 4` (4 alte Kopien behalten), `compress`, `missingok`, `notifempty`. Es wird täglich von einem Timer oder cron gestartet."
+   ]
   }
  ],
  "tasks": {
@@ -383,7 +396,7 @@
   },
   "t14": {
    "text": "Debug: `systemctl enable` würde bei `~/lab/broken2.service` meckern, weil der Abschnitt `[Install]` fehlt. Hänge `[Install]` und `WantedBy=multi-user.target` mit `printf` und `>>` an.",
-   "hint": "`printf \"\\n[Install]\\nWantedBy=multi-user.target\\n\" >> ~/lab/broken2.service`. (`>>` → Modul 3.2.)"
+   "hint": "`printf`. (`>>` → Modul 3.2.)"
   },
   "t15": {
    "text": "Mini-Projekt: Erstelle `~/lab/linux-lab-demo.service` mit `[Unit]` (Description), `[Service]` (`ExecStart=/usr/bin/sleep 3600`) und `[Install]` (`WantedBy=multi-user.target`). Schreibe dann die drei VM-Schritte (nach `/etc/systemd/system/` kopieren, `daemon-reload`, `enable --now linux-lab-demo.service`) zeilenweise in `~/lab/install_steps.txt`.",
@@ -561,6 +574,16 @@
     "Lädt den Dienst neu"
    ],
    "explain": "`mask` verlinkt die Unit auf `/dev/null`; sie lässt sich weder manuell noch als Abhängigkeit starten."
+  },
+  "q9": {
+   "q": "Warum startet der Dienst nicht sofort, nachdem man `systemctl enable nginx` ausgeführt hat?",
+   "options": [
+    "`enable` löscht den Dienst",
+    "Der Dienst kann erst beim Herunterfahren starten",
+    "`enable` startet den Dienst, aber nur für Nicht-root-Benutzer",
+    "`enable` richtet nur den Start beim Booten ein; zum sofortigen Start braucht es `start` oder `enable --now`"
+   ],
+   "explain": "`start` führt den Dienst jetzt aus, `enable` setzt die Boot-Einstellung; beides ist unabhängig. `enable --now` erledigt beides; `is-active` und `is-enabled` zeigen den Zustand getrennt."
   }
  },
  "summary": [

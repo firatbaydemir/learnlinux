@@ -260,6 +260,16 @@
     "Hide error messages"
    ],
    "explain": "Check the same path/wildcard with `ls` first; `rm -rf` doesn't ask and can't be undone."
+  },
+  "q9": {
+   "q": "Why can a file deleted with `rm` not be restored from a trash bin?",
+   "options": [
+    "`rm` encrypts the file",
+    "The trash bin belongs only to root",
+    "`rm` makes a backup but hides it",
+    "The command line has no trash bin; `rm` removes the name directly, so check before deleting"
+   ],
+   "explain": "`rm` is not undoable; `rm -i` and a prior `ls` are good habits."
   }
  },
  "summary": [

@@ -22,7 +22,8 @@
      "where": "Beim Erkennen eines neuen Geräts oder Prüfen des Datenträgerstatus.",
      "why": "Zeigt die Beziehung zwischen Laufwerk, Partition und Einhängepunkt.",
      "example": "lsblk",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS\nsda      8:0    0   20G  0 disk\n└─sda1   8:1    0   20G  0 part /\nsdb      8:16   0    5G  0 disk"
     },
     {
      "cmd": "lsblk -f",
@@ -30,7 +31,8 @@
      "where": "Beim Zuordnen einer Partition zu einem fstab-Eintrag.",
      "why": "Zeigt UUIDs für eine dauerhafte Identifikation.",
      "example": "lsblk -f",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   FSTYPE FSVER LABEL UUID                                 MOUNTPOINTS\nsda\n└─sda1 ext4   1.0         3f2a9c1e-5b7d-4c1a-9e0f-1a2b3c4d5e6f /\nsdb"
     },
     {
      "cmd": "fdisk -l",
@@ -38,7 +40,8 @@
      "where": "Zum Prüfen der Partitionen, bevor ein interaktives Menü geöffnet wird.",
      "why": "Gibt einen Überblick über Kapazität und Partitionsgrenzen.",
      "example": "sudo fdisk -l",
-     "nosim": true
+     "nosim": true,
+     "output": "Disk /dev/sdb: 5 GiB, 5368709120 bytes, 10485760 sectors\nUnits: sectors of 1 * 512 = 512 bytes\nDisklabel type: gpt"
     },
     {
      "cmd": "blkid",
@@ -46,7 +49,8 @@
      "where": "Beim Prüfen der Kennung einer Partition.",
      "why": "UUIDs verringern die Abhängigkeit von Gerätenamen in fstab.",
      "example": "sudo blkid",
-     "nosim": true
+     "nosim": true,
+     "output": "/dev/sda1: UUID=\"3f2a9c1e-5b7d-4c1a-9e0f-1a2b3c4d5e6f\" TYPE=\"ext4\""
     }
    ],
    "tip": "Zuerst `lsblk -f`, danach bei Bedarf `sudo fdisk -l`. Ein Gerätename allein ist keine verlässliche Identifikation."
@@ -65,7 +69,8 @@
      "where": "Nur auf einer geprüften, leeren Partition mit Backup.",
      "why": "Das Dateisystem ermöglicht Linux, Dateien auf der Partition zu speichern.",
      "example": "sudo mkfs.ext4 /dev/sdb1",
-     "nosim": true
+     "nosim": true,
+     "output": "Creating filesystem with 1310720 4k blocks and 327680 inodes\nAllocating group tables: done\nWriting inode tables: done\nWriting superblocks and filesystem accounting information: done"
     },
     {
      "cmd": "mkfs.xfs",
@@ -92,7 +97,8 @@
      "where": "Beim Hinzufügen von Swap; vorher Datei anlegen und `chmod 600` setzen.",
      "why": "Damit der Kernel bei vollem RAM selten genutzte Seiten auslagern kann.",
      "example": "sudo mkswap /swapfile",
-     "nosim": true
+     "nosim": true,
+     "output": "Setting up swapspace version 1, size = 1024 MiB (1073737728 bytes)"
     },
     {
      "cmd": "swapon",
@@ -100,7 +106,8 @@
      "where": "Nach dem Anlegen zum Aktivieren oder um den Swap-Status zu sehen.",
      "why": "Dauerhaft nur mit Eintrag in `/etc/fstab`; `swapoff` deaktiviert.",
      "example": "swapon --show",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME      TYPE SIZE USED PRIO\n/swapfile file   1G   0B   -2"
     },
     {
      "cmd": "mount",
@@ -108,7 +115,8 @@
      "where": "Beim Prüfen vorhandener Einhängungen oder nach Freigabe durch die Administration.",
      "why": "Unter Linux erfolgt der Zugriff über das Verzeichnis.",
      "example": "findmnt /",
-     "nosim": true
+     "nosim": true,
+     "output": "TARGET SOURCE    FSTYPE OPTIONS\n/      /dev/sda1 ext4   rw,relatime"
     },
     {
      "cmd": "umount",
@@ -124,7 +132,8 @@
      "where": "Beim Prüfen, wo eine Partition eingehängt ist.",
      "why": "Stellt die Mount-Tabelle übersichtlich dar.",
      "example": "findmnt /",
-     "nosim": true
+     "nosim": true,
+     "output": "TARGET SOURCE    FSTYPE OPTIONS\n/      /dev/sda1 ext4   rw,relatime"
     },
     {
      "cmd": "mdadm",
@@ -132,7 +141,8 @@
      "where": "Bei RAID 1 (Spiegelung) oder RAID 5; nur auf leeren, redundanten Platten.",
      "why": "Damit bei einem Plattenausfall keine Daten verloren gehen (Redundanz) oder für mehr Tempo.",
      "example": "sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc",
-     "nosim": true
+     "nosim": true,
+     "output": "mdadm: array /dev/md0 started."
     },
     {
      "cmd": "quota",
@@ -140,7 +150,8 @@
      "where": "Wenn Quotas (usrquota) im Dateisystem aktiv sind; der Admin setzt Grenzen mit `edquota`.",
      "why": "Damit ein Benutzer nicht die ganze Platte füllt.",
      "example": "quota -u alice",
-     "nosim": true
+     "nosim": true,
+     "output": "Disk quotas for user alice (uid 1001):\n     Filesystem  blocks   quota   limit   grace\n      /dev/sdb1    1024    5000    6000"
     }
    ],
    "tip": "Sichere `/etc/fstab` vor Änderungen. Prüfe danach mit `sudo mount -a` die Syntax, statt sofort neu zu starten; der Befehl kann Einhängungen ausführen."
@@ -169,7 +180,7 @@
   },
   "t06": {
    "text": "Entferne den fehlerhaften bzw. temporären Beispieleintrag in `~/disklab/fstab.tmp`.",
-   "hint": "Prüfe Pfad und Namen, dann `rm ~/disklab/fstab.tmp`."
+   "hint": "Prüfe Pfad und Namen, dann `rm`."
   },
   "t07": {
    "text": "Mini-Projekt: Schreibe einen Einhängeplan für `/data` mit UUID und Option `nofail` in `~/disklab/mount-plan.txt`.",
@@ -177,7 +188,7 @@
   },
   "t08": {
    "text": "Challenge: Erstelle eine Sicherung der Beispieldatei unter `~/disklab/fstab.backup`.",
-   "hint": "`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"
+   "hint": "`cp`"
   },
   "t09": {
    "text": "Ticket: \"Das neue Laufwerk wird nicht angezeigt.\" Schreibe in die Supportnotiz, dass zuerst `lsblk` und danach `df -hT` geprüft werden.",
@@ -200,7 +211,7 @@
    "hint": "Beide Werte mit `echo ... > file` in eine Zeile schreiben. (Details in Modul 3.2.)"
   },
   "t14": {
-   "text": "Challenge: Zähle mit `wc -l ~/disklab/fstab.sample`, wie viele Einträge (Zeilen) die Beispiel-fstab hat.",
+   "text": "Challenge: Zähle in `~/disklab/fstab.sample`, wie viele Einträge (Zeilen) die Beispiel-fstab hat.",
    "hint": "Eine Zeile pro Mount-Eintrag; `wc -l` zählt Zeilen."
   }
  },
@@ -247,6 +258,20 @@
     "differs": [
      "Die Quelle kann `/dev/mapper/...` oder `/dev/nvme0n1p...` sein; die Beispielausgabe muss nicht exakt passen.",
      "Der Befehl ändert nichts am Laufwerk."
+    ]
+   },
+   "v04": {
+    "title": "Laufwerke und Partitionen auflisten",
+    "text": "Zeige mit `fdisk -l` die Partitionstabellen und mit `blkid` UUIDs und Dateisystemtypen (beide nur lesend).",
+    "blocks": [
+     {
+      "cmd": "sudo fdisk -l\nsudo blkid",
+      "expected": "Disk /dev/vda: 20 GiB\n/dev/vda2: UUID=\"...\" TYPE=\"xfs\""
+     }
+    ],
+    "differs": [
+     "Gerätenamen und Größen unterscheiden sich je nach System.",
+     "Bei `Permission denied` prüfe, ob du `sudo` verwendest."
     ]
    }
   }

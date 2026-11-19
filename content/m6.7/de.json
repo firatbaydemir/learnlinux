@@ -482,6 +482,16 @@
     "Keine"
    ],
    "explain": "`backup.timer` löst standardmäßig `backup.service` aus; mit `Unit=` änderbar."
+  },
+  "q9": {
+   "q": "Was ist ein Grund, einen systemd-Timer statt Cron zu bevorzugen?",
+   "options": [
+    "Ausgabe landet im Journal, `Persistent=true` holt verpasste Läufe nach, und der Plan ist mit `systemctl list-timers` sichtbar",
+    "Ein Timer braucht immer weniger Dateien als Cron",
+    "Cron funktioniert auf neuen Systemen gar nicht",
+    "Ein Timer kann ohne root nichts tun"
+   ],
+   "explain": "Da der Timer mit einer Service-Unit arbeitet, liegen die Logs im Journal, und Abhängigkeiten sowie Ressourcenlimits sind möglich. `Persistent=true` holt Läufe nach, die bei ausgeschaltetem Rechner ausfielen. Der Preis sind zwei Unit-Dateien."
   }
  },
  "summary": [

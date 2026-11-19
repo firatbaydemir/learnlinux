@@ -207,7 +207,7 @@
    "hint": "Satır sayısı için `-n` gerekir."
   },
   "t13": {
-   "text": "Mini proje: `grep ERROR logs/app.log > errors.txt` ile hataları `errors.txt` dosyasına yaz, sonra `wc -l errors.txt` ile say.",
+   "text": "Mini proje: `logs/app.log` içindeki ERROR satırlarını `errors.txt` dosyasına yaz, sonra satırlarını say.",
    "hint": "Üç ERROR satırı olmalı."
   },
   "t14": {
@@ -216,7 +216,7 @@
   },
   "t15": {
    "text": "Ticket: 'Sunucuda kaç hata var ve ilk iki hata hangisi?' İlk iki ERROR satırını `first_errors.txt` dosyasına kaydet ve toplam ERROR sayısını `grep -c` ile göster.",
-   "hint": "`grep ERROR logs/app.log | head -n 2 > first_errors.txt`, sonra `grep -c ERROR logs/app.log`."
+   "hint": "`grep`, `head -n`, sonra `grep -c ERROR logs/app.log`."
   }
  },
  "vm": {
@@ -376,6 +376,16 @@
     "ERROR kelimesinin konumunu"
    ],
    "explain": "`-c` eşleşen satırların sayısını yazar; satırları görmek için `-c`'siz `grep` kullan."
+  },
+  "q9": {
+   "q": "Çok büyük bir log dosyasını incelerken neden `cat` yerine `less` tercih edilir?",
+   "options": [
+    "`less` dosyayı daha hızlı siler",
+    "`less` içeriği sayfa sayfa gösterir; kaydırıp arayabilirsin, ekran taşmaz",
+    "`cat` yalnızca küçük dosyaları açabilir",
+    "`less` dosyayı otomatik sıkıştırır"
+   ],
+   "explain": "`cat` tüm içeriği tek seferde terminale döker; büyük dosyada başı kaybolur. `less` sayfalar, geri kaydırma ve `/` ile arama sunar ve dosyayı değiştirmez."
   }
  },
  "summary": [

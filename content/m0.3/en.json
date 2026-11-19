@@ -158,7 +158,7 @@
   },
   "t14": {
    "text": "Challenge: in your home directory create a file with `echo Hello > first.txt`, then read it with `cat first.txt`.",
-   "hint": "The > writes output into a file, `cd` changes directory, `cat` reads a file (see \"Symbols you will see later\"). First return home with `cd ~`."
+   "hint": "The > writes output into a file, `cd` changes directory, `cat` reads a file (see \"Symbols you will see later\"). First return home with `cd`."
   },
   "t15": {
    "text": "Predict: `cd ~/Documents`, then `cd ..`, then `pwd`. Predict which path you will see before running it, then check.",
@@ -170,7 +170,7 @@
   },
   "t17": {
    "text": "Mini project: write your user name into a file with `whoami > hello.txt`, then read it with `cat hello.txt`.",
-   "hint": "`>` redirects output into a file (see \"Symbols you will see later\"). `cd ~` first."
+   "hint": "`>` redirects output into a file (see \"Symbols you will see later\"). `cd` first."
   },
   "t18": {
    "text": "TICKET #1001 — Support needs system info: in your home directory write the kernel version (`uname -r`) and then the host name (`hostname`) into `info.txt`. The file must have 2 lines.",
@@ -257,6 +257,16 @@
     "Lists users"
    ],
    "explain": "`history` shows the numbered command history; `!N` re-runs command N."
+  },
+  "q9": {
+   "q": "Why does Tab completion do more than save time?",
+   "options": [
+    "Because Tab also runs the command",
+    "If it completes, the file/command really exists, so typos show up immediately",
+    "Because Tab deletes files automatically",
+    "Because Tab fixes permissions"
+   ],
+   "explain": "Tab only completes names that exist; if nothing completes, you probably have a typo or the wrong location."
   }
  },
  "summary": [

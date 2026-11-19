@@ -260,6 +260,16 @@
     "Hata mesajını gizlemek"
    ],
    "explain": "Silmeden önce `ls` ile aynı yolu/joker karakteri kontrol et; `rm -rf` onay sormaz ve geri alınamaz."
+  },
+  "q9": {
+   "q": "`rm` ile silinen dosya neden çöp kutusundan geri getirilemez?",
+   "options": [
+    "Çünkü `rm` dosyayı şifreler",
+    "Çünkü çöp kutusu yalnızca root'a aittir",
+    "Çünkü `rm` yedek alır ama gizler",
+    "Komut satırında çöp kutusu yoktur; `rm` adı doğrudan kaldırır, bu yüzden silmeden önce dikkat gerekir"
+   ],
+   "explain": "`rm` geri alınabilir bir adım değildir; önemli işlerde `rm -i` ve önce `ls` ile kontrol iyi alışkanlıktır."
   }
  },
  "summary": [

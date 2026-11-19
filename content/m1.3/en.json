@@ -307,7 +307,7 @@
   },
   "t13": {
    "text": "Mini: find where the `todo.txt` file is with `find` and save the path to the file `~/path.txt`.",
-   "hint": "`find ~ -name todo.txt > ~/path.txt`; then check with `cat ~/path.txt`. (`>` writes output to a file; see module 3.2.)"
+   "hint": "`find -name`; then check with `cat ~/path.txt`. (`>` writes output to a file; see module 3.2.)"
   },
   "t14": {
    "text": "Challenge: In a single command, count the `.txt` files under home and write the number to `~/count.txt`.",
@@ -516,6 +516,16 @@
     "--list-all"
    ],
    "explain": "`cmd --help` lists options quickly; use `man cmd` for details."
+  },
+  "q9": {
+   "q": "Why is `man -k` (apropos) useful when you do not know a command's name?",
+   "options": [
+    "It searches the keyword in the short descriptions of man pages",
+    "It downloads commands from the internet",
+    "It runs the command for you",
+    "It lists only commands that are not installed"
+   ],
+   "explain": "`man -k word` searches descriptions; use it when you know the goal but not the command."
   }
  },
  "summary": [

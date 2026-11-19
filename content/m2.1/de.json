@@ -196,7 +196,7 @@
    "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` hängt die Distributionszeile an. (`>` schreibt, `>>` hängt an: Modul 3.2; `grep`: Modul 3.4.)"
   },
   "t14": {
-   "text": "Challenge: Du kennst den Pfad von `sshd_config` nicht. Suche sie unter `/etc` nach Namen: `find /etc -name sshd_config`.",
+   "text": "Challenge: Du kennst den Pfad von `sshd_config` nicht. Suche sie unter `/etc` nach Namen.",
    "hint": "`-name` erwartet den Dateinamen; der Pfad liegt unter `/etc/ssh/`."
   },
   "t15": {
@@ -387,6 +387,16 @@
     "/boot"
    ],
    "explain": "`/tmp` ist für temporäre Dateien; keine wichtigen Daten dort ablegen. Konfiguration liegt in `/etc`, Programme in `/usr`."
+  },
+  "q9": {
+   "q": "Welche Befehle wechseln das Verzeichnis, geben Dateiinhalt aus und listen ein Verzeichnis (in dieser Reihenfolge)?",
+   "options": [
+    "`cd`, `cat`, `ls`",
+    "`ls`, `cd`, `cat`",
+    "`cat`, `ls`, `cd`",
+    "`pwd`, `cat`, `ls`"
+   ],
+   "explain": "`cd` wechselt das Verzeichnis, `cat` gibt Dateiinhalt aus, `ls` listet ein Verzeichnis; `pwd` zeigt nur den aktuellen Ort."
   }
  },
  "summary": [

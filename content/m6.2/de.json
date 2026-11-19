@@ -22,7 +22,8 @@
      "where": "Erste Prüfung, wenn ein Dienst spinnt.",
      "why": "Grenzt ein, ob SELinux beteiligt ist.",
      "example": "getenforce",
-     "nosim": true
+     "nosim": true,
+     "output": "Enforcing"
     },
     {
      "cmd": "sestatus",
@@ -30,7 +31,8 @@
      "where": "Für eine Gesamtübersicht.",
      "why": "Du siehst den Unterschied zwischen laufendem und dauerhaftem Modus.",
      "example": "sestatus",
-     "nosim": true
+     "nosim": true,
+     "output": "SELinux status:                 enabled\nCurrent mode:                   enforcing\nLoaded policy name:             targeted"
     },
     {
      "cmd": "setenforce 0",
@@ -66,7 +68,8 @@
      "where": "Wenn du nach einem Denial den Dateityp prüfst.",
      "why": "Du vergleichst erwarteten und tatsächlichen Typ.",
      "example": "ls -Z /var/www/html",
-     "nosim": true
+     "nosim": true,
+     "output": "unconfined_u:object_r:httpd_sys_content_t:s0 index.html"
     },
     {
      "cmd": "chcon -t",
@@ -118,7 +121,8 @@
      "where": "Zum Prüfen vor und nach einer Änderung.",
      "why": "Du siehst, dass die Änderung wirkt.",
      "example": "getsebool httpd_can_network_connect",
-     "nosim": true
+     "nosim": true,
+     "output": "httpd_can_network_connect --> off"
     },
     {
      "cmd": "setsebool -P",
@@ -196,7 +200,8 @@
      "where": "Für die Statusprüfung.",
      "why": "Du siehst, welche Programme eingeschränkt sind.",
      "example": "sudo aa-status",
-     "nosim": true
+     "nosim": true,
+     "output": "apparmor module is loaded.\n34 profiles are loaded.\n32 profiles are in enforce mode.\n2 profiles are in complain mode."
     },
     {
      "cmd": "aa-complain",
@@ -277,7 +282,7 @@
    "hint": "Nimm `>` für die erste und `>>` für die zweite Zeile."
   },
   "t13": {
-   "text": "Mini-Projekt: Führe `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` aus, um in `top_comm.txt` zu schreiben, wie oft jedes Programm abgelehnt wurde.",
+   "text": "Mini-Projekt: Werte `audit.log` aus und schreibe in `top_comm.txt` zu schreiben, wie oft jedes Programm abgelehnt wurde.",
    "hint": "Feld 10 ist `comm=...`; `uniq -c` braucht vorher `sort`. (`sort/uniq` → Modul 3.5.)"
   },
   "t14": {
@@ -390,20 +395,20 @@
   "q1": {
    "q": "Ein Dienst scheitert wegen SELinux. Was ist der beste erste Diagnoseschritt?",
    "options": [
-    "`SELINUX=disabled` schreiben und neu starten",
+    "`SELINUX=disabled` setzen und neu starten",
     "Den Modus mit `getenforce` ansehen, mit vorübergehendem `setenforce 0` testen, dann das Log lesen",
-    "Allen Dateien `chmod 777` geben",
-    "Den Dienst löschen"
+    "Allen Dateien `chmod 777` geben, damit es keine Probleme gibt",
+    "Den fehlerhaften Dienst löschen und neu installieren"
    ],
    "explain": "Bestimme zuerst Modus und ob SELinux die Ursache ist, per vorübergehendem permissive, dann finde den Grund im AVC-Log. Dauerhaftes Abschalten entfernt die Sicherheitsschicht."
   },
   "q2": {
    "q": "Das Label von `/srv/web` soll ein Relabel überleben. Welcher Weg ist richtig?",
    "options": [
-    "Nur `chcon -t httpd_sys_content_t`",
-    "`setsebool -P`",
+    "Nur das Label mit `chcon -t httpd_sys_content_t` ändern",
+    "Mit `setsebool -P` einen Boolean dauerhaft setzen",
     "`semanage fcontext -a ...` dann `restorecon -R`",
-    "`setenforce 1`"
+    "Mit `setenforce 1` in den Enforcing-Modus wechseln"
    ],
    "explain": "`chcon` ist nicht dauerhaft. `semanage fcontext` schreibt die Regel in die Policy, `restorecon` wendet sie auf die Dateien an."
   },
@@ -411,9 +416,9 @@
    "q": "Du hast `setsebool httpd_can_network_connect on` ausgeführt, nach dem Neustart war es weg. Warum?",
    "options": [
     "Es fehlte `-P`, die Einstellung lebte nur im laufenden System",
-    "Das Boolean war ein nicht existierender Schalter",
-    "SELinux war disabled",
-    "Das Audit-Log war voll"
+    "Der Boolean war ein nicht existierender Schalter",
+    "SELinux war bereits im Modus disabled",
+    "Das Audit-Log war voll, die Einstellung wurde nicht geschrieben"
    ],
    "explain": "`-P` macht die Einstellung dauerhaft. Ohne gilt die Änderung nur im laufenden System."
   },
@@ -440,10 +445,10 @@
   "q6": {
    "q": "Welcher Befehl setzt das Label einer Datei gemäß Standardrichtlinie zurück?",
    "options": [
-    "`restorecon -Rv /srv/web`",
-    "`chmod -R 755 /srv/web`",
-    "`setenforce 0`",
-    "`chcon -u root /srv/web`"
+    "Mit `restorecon -Rv /srv/web` die Labels zurücksetzen",
+    "Mit `chmod -R 755 /srv/web` die Rechte öffnen",
+    "SELinux mit `setenforce 0` abschalten und weitermachen",
+    "Mit `chcon -u root /srv/web` den Benutzer ändern"
    ],
    "explain": "`restorecon` stellt das Label gemäß Dateikontext-Richtlinie wieder her."
   },
@@ -460,12 +465,22 @@
   "q8": {
    "q": "Wo suchst du AVC-Denials?",
    "options": [
-    "`/etc/selinux/config`",
+    "Die Konfigurationsdatei `/etc/selinux/config`",
     "`/var/log/audit/audit.log` (`ausearch -m avc`)",
-    "`/proc/selinux`",
-    "`/etc/passwd`"
+    "Der virtuelle Eintrag `/proc/selinux`",
+    "Die Benutzerdatei `/etc/passwd`"
    ],
    "explain": "Verweigerte Zugriffe stehen im Audit-Subsystem als `type=AVC`."
+  },
+  "q9": {
+   "q": "Warum liest man bei SELinux-Problemen zuerst den AVC-Eintrag, statt mit `setenforce 0` abzuschalten?",
+   "options": [
+    "Der Eintrag zeigt, was wegen welches Labels blockiert wurde; Abschalten versteckt das Problem nur",
+    "`setenforce 0` funktioniert nur für Nicht-root-Benutzer",
+    "Ohne Lesen des AVC-Eintrags startet das System nicht",
+    "Abschalten ist immer die langsamere Lösung"
+   ],
+   "explain": "`setenforce 0` macht SELinux nur vorübergehend permissiv; die Ursache bleibt unbekannt. Die AVC-Ablehnung (`ausearch`, `audit.log`) zeigt Prozess, Label und blockierte Aktion; die richtige Lösung ist ein Label (`semanage`/`restorecon`) oder ein Boolean."
   }
  },
  "summary": [

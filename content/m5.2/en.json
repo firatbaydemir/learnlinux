@@ -30,7 +30,8 @@
      "where": "Together with uptime to judge the load.",
      "why": "Load 4.0 is fine on 8 cores but saturated on 2 cores.",
      "example": "nproc",
-     "nosim": true
+     "nosim": true,
+     "output": "4"
     },
     {
      "cmd": "lscpu",
@@ -46,7 +47,8 @@
      "where": "In scripts, or when uptime is not installed.",
      "why": "It is the source that uptime and top read from.",
      "example": "cat /proc/loadavg",
-     "nosim": true
+     "nosim": true,
+     "output": "0.42 0.35 0.30 1/312 2415"
     }
    ],
    "tip": "Quick check: if the first load value divided by `nproc` is above 1, the CPU is saturated."
@@ -73,7 +75,8 @@
      "where": "For scripts or when you need exact values like MemAvailable or SwapFree.",
      "why": "It is the source behind free.",
      "example": "grep MemAvailable /proc/meminfo",
-     "nosim": true
+     "nosim": true,
+     "output": "MemAvailable:    5821344 kB"
     },
     {
      "cmd": "vmstat 1 5",
@@ -108,7 +111,8 @@
      "where": "To measure a single folder such as your home or /var/log.",
      "why": "Answers 'how big is this?' with one line.",
      "example": "du -sh ~/Documents",
-     "nosim": true
+     "nosim": true,
+     "output": "1.2G    /home/user/Documents"
     },
     {
      "cmd": "du -h | sort -h",
@@ -153,7 +157,8 @@
      "where": "In scripts, tickets and when piping to head or grep.",
      "why": "You can save or filter the output, for example `top -b -n 1 | head -n 15`.",
      "example": "top -b -n 1 | head -n 15",
-     "nosim": true
+     "nosim": true,
+     "output": "top - 09:30:01 up 1:30,  1 user,  load average: 0.42, 0.35, 0.30\nTasks: 180 total,   1 running, 179 sleeping\n%Cpu(s):  2.0 us,  1.0 sy, 96.5 id\nMiB Mem :  7843.0 total,  5100.0 free,  1500.0 used"
     },
     {
      "cmd": "htop",
@@ -246,15 +251,15 @@
   },
   "t13": {
    "text": "Mini: save the top 2 memory consumers of `~/lab/ps_snapshot.txt` into `~/lab/top_mem.txt`. Sort by column 4 with `sort -k4 -nr`, take two lines with `head -n 2` and redirect with `>`.",
-   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt` (`sort/head` → module 3.5/3.2; `>` → module 3.2.)"
+   "hint": "`sort -nr`, `head -n` (`sort/head` → module 3.5/3.2; `>` → module 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/monitor_cmds.txt` lists the wrong commands (`nprocs` does not exist and `free -m` is not human-readable). Rewrite the file with `printf` so it contains `cores: nproc`, `memory: free -h` and `disk: df -h`, one per line.",
-   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt` (`>` → module 3.2.)"
+   "hint": "`printf` (`>` → module 3.2.)"
   },
   "t15": {
    "text": "Mini: `~/lab/du_report.txt` has sizes in KB. Save the 3 biggest entries into `~/lab/biggest.txt` with `sort -nr`, `head -n 3` and `>`.",
-   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt` (`sort/head` → module 3.5/3.2; `>` → module 3.2.)"
+   "hint": "`sort -nr`, `head -n` (`sort/head` → module 3.5/3.2; `>` → module 3.2.)"
   },
   "t16": {
    "text": "Challenge: build `~/lab/report.txt` with three parts: the 1-minute load from `~/lab/loadavg.txt` (use `cut`), the `MemAvailable` line from `~/lab/meminfo.txt` (use `grep`, append with `>>`) and your verdict `overloaded` (use `echo`, append).",
@@ -262,7 +267,7 @@
   },
   "t17": {
    "text": "TICKET #5201 — The server linux-lab is very slow. In `~/lab/top_snapshot.txt` is the output of `top -b -n 1`. Find the process with the highest CPU use and write its name and its user into `~/lab/culprit.txt`.",
-   "hint": "Look at the first process line with `head -n 9 ~/lab/top_snapshot.txt`, then `echo \"name user\" > ~/lab/culprit.txt`. (`>` → module 3.2.)"
+   "hint": "Look at the first process line with `head -n`, then `echo \"name user\" > ~/lab/culprit.txt`. (`>` → module 3.2.)"
   }
  },
  "quiz": {
@@ -279,19 +284,19 @@
   "q2": {
    "q": "A 4-core machine shows a 1-minute load of 8.0. What does that mean?",
    "options": [
-    "Everything is fine",
+    "All is well, the system runs comfortably",
     "The CPU is saturated: processes wait in line",
-    "The disk is full",
-    "The system has just started"
+    "Disk is full, writes are failing",
+    "System just booted, the value is temporary"
    ],
    "explain": "Load is read relative to the cores. Load 8 on 4 cores means twice as many runnable tasks as cores."
   },
   "q3": {
    "q": "How do you install htop on Rocky Linux?",
    "options": [
-    "sudo apt install htop",
-    "sudo dnf install htop directly, always works",
-    "sudo yum remove htop",
+    "`sudo apt install htop` is enough, it works on Rocky too",
+    "Just `sudo dnf install htop`; no extra repo needed, works everywhere",
+    "Remove the old one with `sudo yum remove htop` and retry",
     "sudo dnf install epel-release, then sudo dnf install htop"
    ],
    "explain": "On the RHEL family htop is in the EPEL repository, so enable EPEL first. apt is for Debian/Ubuntu."
@@ -300,9 +305,9 @@
    "q": "Which command lists the top memory consumers?",
    "options": [
     "ps aux --sort=-%mem | head",
-    "df -h",
-    "uptime",
-    "nproc"
+    "`df -h` (shows disk usage)",
+    "`uptime` (shows load averages)",
+    "`nproc` (prints the core count)"
    ],
    "explain": "ps with --sort=-%mem sorts by memory descending; head shows the first lines."
   },
@@ -319,9 +324,9 @@
   "q6": {
    "q": "Which command shows per-device disk I/O statistics?",
    "options": [
-    "`free`",
-    "`uptime`",
-    "`ps`",
+    "`free` (shows memory usage)",
+    "`uptime` (shows load averages)",
+    "`ps` (shows the process list)",
     "`iostat -x`"
    ],
    "explain": "`iostat` (sysstat package) shows throughput, wait time and utilisation per device."
@@ -330,9 +335,9 @@
    "q": "What is the most likely cause of a high `wa` value in `top`?",
    "options": [
     "Processes are waiting on disk I/O",
-    "CPU overheating",
-    "Memory is full",
-    "Network is down"
+    "The CPU is throttling because it overheated",
+    "Memory is completely full, swap is in use",
+    "The network link is down, no packets arrive"
    ],
    "explain": "`wa` = I/O wait: the CPU is idle waiting for I/O to complete."
   },
@@ -345,6 +350,16 @@
     "5, 15 and 60 minutes"
    ],
    "explain": "Load averages cover the last 1, 5 and 15 minutes."
+  },
+  "q9": {
+   "q": "Why is the same load average of `4.0` normal on an 8-core machine but a problem on a 2-core one?",
+   "options": [
+    "More cores automatically lower the load value",
+    "Load only shows RAM usage",
+    "Load average is not computed on 2-core machines",
+    "Load counts tasks running or waiting for a turn; it is read relative to the core count"
+   ],
+   "explain": "Load average is the mean of running and waiting tasks. On 8 cores, 4.0 is half full; on 2 cores tasks queue up. That is why it is read together with `nproc`."
   }
  },
  "summary": [

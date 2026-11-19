@@ -24,7 +24,8 @@
      "where": "Als allererste Prüfung auf einer Rocky/Alma-VM.",
      "why": "Ist der Daemon gestoppt, schlagen alle anderen firewall-cmd-Befehle fehl.",
      "example": "sudo firewall-cmd --state",
-     "nosim": true
+     "nosim": true,
+     "output": "running"
     },
     {
      "cmd": "firewall-cmd --get-default-zone",
@@ -32,7 +33,8 @@
      "where": "Bevor du eine Regel hinzufügst.",
      "why": "Regeln ohne `--zone` landen in der Standard-Zone.",
      "example": "sudo firewall-cmd --get-default-zone",
-     "nosim": true
+     "nosim": true,
+     "output": "public"
     },
     {
      "cmd": "firewall-cmd --get-active-zones",
@@ -40,7 +42,8 @@
      "where": "Wenn du wissen willst, welche Zone deinen Verkehr wirklich behandelt.",
      "why": "Die Standard-Zone kann sich von der aktiven Zone eines Interfaces unterscheiden.",
      "example": "sudo firewall-cmd --get-active-zones",
-     "nosim": true
+     "nosim": true,
+     "output": "public\n  interfaces: eth0"
     },
     {
      "cmd": "firewall-cmd --list-all",
@@ -48,7 +51,8 @@
      "where": "Vor und nach jeder Änderung.",
      "why": "Erst prüfen, ändern, erneut prüfen.",
      "example": "sudo firewall-cmd --list-all",
-     "nosim": true
+     "nosim": true,
+     "output": "public (active)\n  target: default\n  interfaces: eth0\n  services: cockpit dhcpv6-client ssh\n  ports:"
     }
    ],
    "tip": "`--list-all` zeigt den Runtime-Zustand. Mit `--permanent` siehst du, was auf Disk gespeichert ist."
@@ -68,7 +72,8 @@
      "where": "Für Tests, besonders über SSH.",
      "why": "Bei einem Fehler korrigiert sie sich selbst.",
      "example": "sudo firewall-cmd --add-service=http --timeout=60",
-     "nosim": true
+     "nosim": true,
+     "output": "success"
     },
     {
      "cmd": "firewall-cmd --permanent --add-service=http",
@@ -84,7 +89,8 @@
      "where": "Nach `--permanent`-Änderungen.",
      "why": "Aktiviert permanente Regeln; reine Runtime-Regeln gehen verloren.",
      "example": "sudo firewall-cmd --reload",
-     "nosim": true
+     "nosim": true,
+     "output": "success"
     },
     {
      "cmd": "firewall-cmd --runtime-to-permanent",
@@ -128,7 +134,8 @@
      "where": "Um eine Port-Änderung zu prüfen.",
      "why": "Bestätigt, dass die Regel in der Runtime aktiv ist.",
      "example": "sudo firewall-cmd --list-ports",
-     "nosim": true
+     "nosim": true,
+     "output": "8080/tcp"
     },
     {
      "cmd": "firewall-cmd --permanent --remove-port=8080/tcp",
@@ -206,7 +213,8 @@
      "where": "Nach jeder Änderung.",
      "why": "Prüfe, dass 22/tcp auf ALLOW steht.",
      "example": "sudo ufw status verbose",
-     "nosim": true
+     "nosim": true,
+     "output": "Status: active\nDefault: deny (incoming), allow (outgoing)\n\nTo                         Action      From\n--                         ------      ----\n22/tcp (OpenSSH)           ALLOW IN    Anywhere"
     },
     {
      "cmd": "ufw delete allow 80/tcp",
@@ -413,20 +421,20 @@
   "q1": {
    "q": "Was bewirkt `firewall-cmd --permanent --add-service=http` allein?",
    "options": [
-    "Es öffnet http sofort und dauerhaft",
+    "Öffnet http sofort und dauerhaft, auch nach einem Neustart",
     "Es schreibt die Regel auf Disk, aktiv erst nach `--reload`",
-    "Es öffnet http für 60 Sekunden",
-    "Es entfernt http aus der Runtime"
+    "Öffnet http nur vorübergehend für 60 Sekunden",
+    "Entfernt http sofort aus der Runtime-Konfiguration"
    ],
    "explain": "`--permanent` ändert nur die gespeicherte Konfiguration. Die laufende Firewall ändert sich nach `--reload`."
   },
   "q2": {
    "q": "Du bist per SSH mit einem neuen Ubuntu-Server verbunden. Was muss vor `ufw enable` kommen?",
    "options": [
-    "`ufw reset`",
-    "`ufw deny 22`",
+    "Mit `ufw reset` alle Regeln löschen",
+    "Port 22 mit `ufw deny 22` sperren",
     "`ufw allow OpenSSH`",
-    "`ufw delete 1`"
+    "Die erste Regel mit `ufw delete 1` löschen"
    ],
    "explain": "ufw blockiert standardmäßig eingehenden Verkehr. Ohne SSH-Regel sperrst du dich aus."
   },
@@ -454,19 +462,19 @@
    "q": "Was listet `firewall-cmd --get-active-zones`?",
    "options": [
     "Aktive Zonen mit Schnittstellen/Quellen",
-    "Alle definierten Zonen",
-    "Offene Ports",
-    "Verworfene Pakete"
+    "Alle definierten Zonen, auch ungenutzte",
+    "Alle derzeit in der Firewall offenen Ports",
+    "Die Liste der von der Firewall abgelehnten Pakete"
    ],
    "explain": "Nur Zonen mit mindestens einer Schnittstelle oder Quelle erscheinen."
   },
   "q6": {
    "q": "Wann wird die Regel nach `firewall-cmd --permanent --add-port=8080/tcp` aktiv?",
    "options": [
-    "Sofort",
-    "Nie",
+    "Sofort, ohne weiteren Befehl",
+    "Nie, die Regel bleibt nur im Speicher",
     "Nach `--reload` oder Neustart",
-    "Nur mit `ufw`"
+    "Nur auf Systemen mit `ufw` wirksam"
    ],
    "explain": "`--permanent` ändert nur die dauerhafte Konfiguration; für Runtime ist `--reload` nötig."
   },
@@ -483,12 +491,22 @@
   "q8": {
    "q": "Wie macht man eine Runtime-Regel dauerhaft?",
    "options": [
-    "`firewall-cmd --reload`",
-    "`systemctl enable firewalld`",
-    "`firewall-cmd --panic-on`",
+    "Die Regeln mit `firewall-cmd --reload` neu laden",
+    "Den Dienst mit `systemctl enable firewalld` aktivieren",
+    "Mit `firewall-cmd --panic-on` den Panikmodus einschalten",
     "`firewall-cmd --runtime-to-permanent`"
    ],
    "explain": "`--reload` lädt Runtime aus der dauerhaften Konfiguration (verwirft Temporäres); `--runtime-to-permanent` speichert."
+  },
+  "q9": {
+   "q": "Warum ist es sinnvoll, eine neue Firewall-Regel auf einem Remote-Server zuerst mit `--timeout` zu testen?",
+   "options": [
+    "`--timeout` macht die Regel dauerhaft",
+    "Ist die Regel falsch, verschwindet sie nach Ablauf selbst, und man sperrt sich nicht aus",
+    "Ohne `--timeout` wird die Regel nie angewendet",
+    "Timeout erhöht die Geschwindigkeit der Regel"
+   ],
+   "explain": "`--timeout=60` fügt die Regel nur zur Laufzeit hinzu und entfernt sie danach. Verliert man mit einer falschen Regel den Zugang, ist der alte Zustand schnell zurück; stimmt sie, macht man sie mit `--permanent` dauerhaft."
   }
  },
  "summary": [

@@ -48,8 +48,7 @@
    "title": "setuid: mit den Rechten des Besitzers ausführen",
    "body": [
     "Hat eine ausführbare Datei **setuid** (`4000`), läuft das Programm mit den Rechten des **Dateibesitzers**, nicht des Aufrufers. Das bekannteste Beispiel ist `/usr/bin/passwd`: Besitzer root, Anzeige `-rwsr-xr-x`. Ein normaler Benutzer kann sein eigenes Passwort ändern, weil das Programm mit root-Rechten `/etc/shadow` anpassen darf. `sudo` und `mount` funktionieren nach demselben Prinzip.",
-    "Diese Macht ist riskant. Ein kleiner Fehler in einem setuid-root-Programm (oder eine Shell, ein Editor, ein Interpreter mit setuid) gibt jedem root-Rechte. Deshalb musst du setuid-Dateien kennen und regelmäßig prüfen.",
-    "Zwei Hinweise: Der Linux-Kernel **ignoriert** setuid bei **Shell-Skripten** (`#!/bin/bash`); `chmod u+s` am Skript gibt keine root-Rechte, es täuscht nur. Außerdem wirkt setuid nicht auf Dateisystemen, die mit `nosuid` eingehängt sind (z. B. viele USB-Sticks oder eine eigene `/tmp`-Partition)."
+    "Diese Macht ist riskant. Ein kleiner Fehler in einem setuid-root-Programm (oder eine Shell, ein Editor, ein Interpreter mit setuid) gibt jedem root-Rechte. Deshalb musst du setuid-Dateien kennen und regelmäßig prüfen."
    ],
    "commands": [
     {
@@ -77,7 +76,10 @@
     }
    ],
    "tip": "Bekannte Namen wie `passwd`, `sudo`, `mount`, `su` sind normal. Eine unbekannte setuid-Datei oder eine unter `/home` oder `/tmp` solltest du untersuchen.",
-   "danger": "Mache auf einem echten System niemals `chmod u+s /bin/bash` (oder bei vim, python, find, cp). Das gibt jedem Benutzer eine root-Shell und ist ein klassischer Weg zur Rechteausweitung. Probiere es höchstens auf deiner isolierten Test-VM, nach einem Snapshot, und mache es danach rückgängig."
+   "danger": "Mache auf einem echten System niemals `chmod u+s /bin/bash` (oder bei vim, python, find, cp). Das gibt jedem Benutzer eine root-Shell und ist ein klassischer Weg zur Rechteausweitung. Probiere es höchstens auf deiner isolierten Test-VM, nach einem Snapshot, und mache es danach rückgängig.",
+   "more": [
+    "Zwei Hinweise: Der Linux-Kernel **ignoriert** setuid bei **Shell-Skripten** (`#!/bin/bash`); `chmod u+s` am Skript gibt keine root-Rechte, es täuscht nur. Außerdem wirkt setuid nicht auf Dateisystemen, die mit `nosuid` eingehängt sind (z. B. viele USB-Sticks oder eine eigene `/tmp`-Partition)."
+   ]
   },
   {
    "id": "setgid",
@@ -144,8 +146,7 @@
    "title": "Rezept: Team-Ordner und wie es weitergeht",
    "body": [
     "Ein echter Team-Ordner entsteht so: (1) Ordner anlegen, (2) Gruppe auf `devs` setzen, (3) `2775` setzen (wenn Fremde nicht lesen sollen: `2770`), (4) Mitglieder arbeiten mit `umask 002`. Weil root den Ordner anlegt, brauchst du `sudo`.",
-    "Soll es zusätzlich sticky sein, nutzt du `3775` / `3770`: Neue Dateien gehören der Gruppe, und Mitglieder können nicht gegenseitig löschen.",
-    "Die Methode hat Grenzen: Rechte neuer Dateien hängen an der umask, und du kannst keine Regeln pro Benutzer schreiben. Dafür gibt es **Default-ACLs** (`setfacl -d`), Thema späterer Module. Merke dir: Ein setgid-Ordner ist die Grundlage der Teamarbeit ohne ACLs."
+    "Soll es zusätzlich sticky sein, nutzt du `3775` / `3770`: Neue Dateien gehören der Gruppe, und Mitglieder können nicht gegenseitig löschen."
    ],
    "commands": [
     {
@@ -187,7 +188,10 @@
      "example": "chmod 2775 team"
     }
    ],
-   "warn": "Erst die Gruppe, dann die Rechte: Wer `2775` setzt, bevor die Gruppe `devs` ist, vererbt die falsche Gruppe. Am Ende solltest du mit `ls -ld` `drwxrwsr-x ... devs` sehen."
+   "warn": "Erst die Gruppe, dann die Rechte: Wer `2775` setzt, bevor die Gruppe `devs` ist, vererbt die falsche Gruppe. Am Ende solltest du mit `ls -ld` `drwxrwsr-x ... devs` sehen.",
+   "more": [
+    "Die Methode hat Grenzen: Rechte neuer Dateien hängen an der umask, und du kannst keine Regeln pro Benutzer schreiben. Dafür gibt es **Default-ACLs** (`setfacl -d`), Thema späterer Module. Merke dir: Ein setgid-Ordner ist die Grundlage der Teamarbeit ohne ACLs."
+   ]
   }
  ],
  "tasks": {
@@ -221,15 +225,15 @@
   },
   "t08": {
    "text": "Fehlersuche: Bei dem Shell-Skript `legacy/tool.sh` hat jemand setuid gelassen (4755). Der Kernel ignoriert es bei Skripten, aber es fällt bei der Prüfung auf. Setze es zurück auf den normalen Modus `755`.",
-   "hint": "Sieh mit `ls -l legacy/tool.sh` das `rws`, dann `chmod 755 legacy/tool.sh`."
+   "hint": "Sieh mit `ls -l legacy/tool.sh` das `rws`, dann `chmod`."
   },
   "t09": {
    "text": "Fehlersuche: Der Ordner `inbox` hat `777`, Benutzer löschen gegenseitig ihre Dateien. Korrigiere ihn auf `1777`, ohne die vorhandenen Rechte anzufassen.",
-   "hint": "`chmod +t inbox` fügt nur sticky hinzu."
+   "hint": "`chmod` fügt nur sticky hinzu."
   },
   "t10": {
    "text": "Mini-Projekt: Setze die Gruppe von `proj` auf `devs`, vergib `2770` (Fremde ausgesperrt), führe `umask 002` aus und lege `proj/plan.txt` mit `touch` an.",
-   "hint": "Reihenfolge: `sudo chgrp devs proj`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
+   "hint": "Reihenfolge: `chgrp`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
   },
   "t11": {
    "text": "Mini-Projekt: Lege den Ordner `upload` an, setze `1777`, lege `a.txt` hinein und übergib die Datei mit `sudo chown alice:devs upload/a.txt` an alice. (In echt könnte bob sie nicht löschen.)",
@@ -354,8 +358,8 @@
   "q2": {
    "q": "`/tmp` hat den Modus `1777`. Wozu dient die führende `1`?",
    "options": [
-    "Macht den Ordner schreibgeschützt",
-    "Gibt Dateien root-Rechte",
+    "Macht den Ordner für alle schreibgeschützt, nichts kann hinzugefügt werden",
+    "Gibt Dateien vorübergehend Root-Rechte und verhindert das Löschen",
     "Nur Dateibesitzer, Ordnerbesitzer oder root dürfen löschen",
     "Verschlüsselt Dateien automatisch"
    ],
@@ -376,7 +380,7 @@
    "options": [
     "`ls -l /etc/setuid`",
     "`chmod -R u+s /`",
-    "`find / -perm 4755 -name suid`",
+    "`find / -perm 4755 -name suid -type f 2>/dev/null`",
     "`find / -perm -4000 -type f 2>/dev/null`"
    ],
    "explain": "`-perm -4000` findet Dateien mit gesetztem setuid-Bit; `2>/dev/null` blendet Rechtefehler aus."
@@ -384,9 +388,9 @@
   "q5": {
    "q": "Was bewirkt `chmod u+s` bei einer ausführbaren Datei?",
    "options": [
-    "Macht sie schreibgeschützt",
+    "Macht die Datei schreibgeschützt, niemand kann sie ändern",
     "Sie läuft mit den Rechten des Besitzers statt des Aufrufers",
-    "Nur die Gruppe darf sie ausführen",
+    "Nur Benutzer in der Gruppe des Besitzers können die Datei ausführen",
     "Verhindert das Löschen"
    ],
    "explain": "Setuid-Bit: der Prozess läuft mit der effektiven UID des Besitzers; Beispiel `passwd`."
@@ -404,9 +408,9 @@
   "q7": {
    "q": "Was darf ein Benutzer in einem Verzeichnis mit Sticky-Bit löschen?",
    "options": [
-    "Dateien aller Benutzer",
+    "Die Dateien aller, weil der Ordner für alle offen ist",
     "Keine Datei",
-    "Nur Dateien der Verzeichnisgruppe",
+    "Nur die Dateien von Benutzern der Ordnergruppe",
     "Nur eigene Dateien (oder als Verzeichnisbesitzer/root)"
    ],
    "explain": "Das Sticky-Bit beschränkt Löschen/Umbenennen auf Dateibesitzer, Verzeichnisbesitzer und root."
@@ -420,6 +424,16 @@
     "An die Datei darf nur angehängt werden"
    ],
    "explain": "`chattr +i` verhindert Ändern/Löschen selbst für root; zum reinen Anhängen dient `a`."
+  },
+  "q9": {
+   "q": "Warum können Benutzer in `/tmp` die Dateien anderer nicht löschen, obwohl es für alle beschreibbar ist?",
+   "options": [
+    "Dateien werden automatisch verschlüsselt",
+    "`/tmp` ist nur für root zugänglich",
+    "Linux verhindert nie, dass man fremde Dateien berührt",
+    "Sticky Bit: im Verzeichnis darf nur der Dateibesitzer (oder root) löschen"
+   ],
+   "explain": "Das `w`-Recht am Verzeichnis umfasst auch das Löschen; das Sticky Bit (`1777`) schränkt Löschen und Umbenennen auf den Besitzer der Datei ein."
   }
  },
  "summary": [

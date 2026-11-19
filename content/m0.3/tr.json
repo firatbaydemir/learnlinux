@@ -158,7 +158,7 @@
   },
   "t14": {
    "text": "Meydan okuma: ev dizininde `echo Hello > first.txt` ile bir dosya oluştur, sonra `cat first.txt` ile içeriğini oku.",
-   "hint": "> işareti çıktıyı dosyaya yazar, `cd` dizin değiştirir, `cat` dosyayı okur (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd ~` ile ev dizinine dön."
+   "hint": "> işareti çıktıyı dosyaya yazar, `cd` dizin değiştirir, `cat` dosyayı okur (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd` ile ev dizinine dön."
   },
   "t15": {
    "text": "Tahmin et: `cd ~/Documents`, sonra `cd ..`, sonra `pwd`. Çalıştırmadan önce hangi yolu göreceğini tahmin et, sonra doğrula.",
@@ -170,7 +170,7 @@
   },
   "t17": {
    "text": "Mini proje: `whoami > hello.txt` ile kullanıcı adını bir dosyaya yaz, sonra `cat hello.txt` ile oku.",
-   "hint": "`>` komutun çıktısını dosyaya yönlendirir (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd ~`."
+   "hint": "`>` komutun çıktısını dosyaya yönlendirir (bkz. \"İleride sık göreceğin işaretler\"). Önce `cd`."
   },
   "t18": {
    "text": "TICKET #1001 — Destek ekibi sistem bilgisi istiyor: ev dizininde `info.txt` dosyasına önce çekirdek sürümünü (`uname -r`), sonra makine adını (`hostname`) yaz. Dosyada 2 satır olmalı.",
@@ -257,6 +257,16 @@
     "Kullanıcıları listeler"
    ],
    "explain": "`history` numaralı komut geçmişini gösterir; `!N` ile N. komutu yeniden çalıştırabilirsin."
+  },
+  "q9": {
+   "q": "Tab ile tamamlama neden yalnızca hız kazandırmaz?",
+   "options": [
+    "Çünkü Tab komutu da çalıştırır",
+    "Tamamlanıyorsa dosya/komut gerçekten vardır; yazım hatasını baştan yakalarsın",
+    "Çünkü Tab dosyaları otomatik siler",
+    "Çünkü Tab izinleri düzeltir"
+   ],
+   "explain": "Tab yalnızca var olan adları tamamlar; tamamlanmıyorsa yazım ya da konum hatası olabilir."
   }
  },
  "summary": [

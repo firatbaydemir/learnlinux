@@ -482,6 +482,16 @@
     "None"
    ],
    "explain": "`backup.timer` triggers `backup.service` by default; changeable with `Unit=`."
+  },
+  "q9": {
+   "q": "What is one reason to prefer a systemd timer over cron?",
+   "options": [
+    "Output goes to the journal, `Persistent=true` catches up missed runs, and the schedule shows in `systemctl list-timers`",
+    "A timer always needs fewer files than cron",
+    "Cron does not work on new systems at all",
+    "A timer cannot do anything without root"
+   ],
+   "explain": "Because the timer works with a service unit, logs are in the journal, and dependencies and resource limits are possible. `Persistent=true` makes up runs missed while the machine was off. The price is two unit files."
   }
  },
  "summary": [

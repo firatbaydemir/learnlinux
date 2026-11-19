@@ -192,11 +192,11 @@
   },
   "t11": {
    "text": "Debug: `report.txt` was left in the `wrong` folder by mistake. Move it to the `inbox` folder.",
-   "hint": "`mv wrong/report.txt inbox/`. Then check with `ls wrong inbox`."
+   "hint": "`mv`. Then check with `ls wrong inbox`."
   },
   "t12": {
    "text": "Mini project: create `archive/2026` with `mkdir -p`, then move `inbox/mail1.txt` there under the name `jan.txt`.",
-   "hint": "Two commands: `mkdir -p archive/2026`, then `mv inbox/mail1.txt archive/2026/jan.txt`."
+   "hint": "Two commands: `mkdir -p`, then `mv inbox/mail1.txt archive/2026/jan.txt`."
   },
   "t13": {
    "text": "Challenge: rename the `photos` folder to `pictures`, then copy the `pictures` folder with its contents into `~/Documents`.",
@@ -204,7 +204,7 @@
   },
   "t14": {
    "text": "TICKET #2410 — Accounting wants a backup of the `inbox` folder named `backup/inbox_2026`. The original `inbox` must stay in place and complete.",
-   "hint": "Folder copy: `cp -r inbox backup/inbox_2026`. The target does not exist, so it becomes the new name."
+   "hint": "Folder copy: `cp -r`. The target does not exist, so it becomes the new name."
   },
   "t15": {
    "text": "Copy with `-v` and see what happens: `cp -v tasks.txt tasks_v.txt`.",
@@ -369,6 +369,16 @@
     "Errors"
    ],
    "explain": "If the target is an existing directory, `mv` moves the file into it; the source no longer exists."
+  },
+  "q9": {
+   "q": "Why does `mv` move even a large folder instantly within the same filesystem?",
+   "options": [
+    "`mv` compresses the data first, so the job gets smaller",
+    "The data is not copied; only the directory entry (the name) changes",
+    "`mv` really only moves the first file of the folder",
+    "The files are copied in the background and the old ones deleted later"
+   ],
+   "explain": "Within one filesystem `mv` only changes the directory entry, which is why it is fast. Across different disks the data is copied and the original deleted."
   }
  },
  "summary": [

@@ -404,10 +404,10 @@
   "q1": {
    "q": "Was passiert bei `rm -rf $DIR/*`, wenn `DIR` leer ist, und welche Schreibweise schützt?",
    "options": [
-    "Nichts passiert; füge `rm -i` hinzu",
-    "Nur das Home-Verzeichnis wird gelöscht; nutze `sudo`",
+    "Nichts passiert; es genügt, einfach `rm -i` zu ergänzen",
+    "Nur das Home-Verzeichnis wird gelöscht; dafür nimmt man `sudo`",
     "Es wird `/*` zu löschen versucht; `\"${DIR:?}\"` schützt",
-    "Es gibt einen Fehler; `chmod 000` genügt"
+    "Der Befehl bricht mit Fehler ab; `chmod 000` schützt, mehr nötig ist nicht"
    ],
    "explain": "Die leere Variable verschwindet und der Befehl wird zu `rm -rf /*`. `${DIR:?}` stoppt das Skript bei leerem Wert."
   },
@@ -434,7 +434,7 @@
   "q4": {
    "q": "Wann läuft `trap cleanup EXIT`?",
    "options": [
-    "Wie auch immer das Skript endet (auch bei Fehlern); außer bei `kill -9`",
+    "Beim Beenden, auch bei Fehlern; außer `kill -9`",
     "Nur bei Ctrl+C",
     "Vor der ersten Zeile des Skripts",
     "Nur wenn `cleanup` 0 zurückgibt"
@@ -454,9 +454,9 @@
   "q6": {
    "q": "Wie gibt man üblicherweise einen Wert aus einer Funktion zurück?",
    "options": [
-    "`return \"text\"`",
-    "Mit `export`",
-    "`exit` beendet die Funktion",
+    "`return \"text\"` gibt den Text direkt zurück",
+    "Mit `export` die Variable nach außen geben",
+    "Mit `exit` die Funktion beenden",
     "Mit `echo` ausgeben und per `$(...)` erfassen"
    ],
    "explain": "`return` liefert nur einen Exit-Code 0–255; für Text nutzt man `echo` und Kommandosubstitution."
@@ -465,9 +465,9 @@
    "q": "Was ist der Unterschied zwischen `\"$@\"` und unquotiertem `$*`?",
    "options": [
     "`\"$@\"` erhält jedes Argument getrennt und unversehrt",
-    "Kein Unterschied",
+    "Kein Unterschied; beide liefern dasselbe",
     "`$*` erhält Leerzeichen",
-    "`\"$@\"` liefert nur das erste Argument"
+    "`\"$@\"` liefert nur das erste Argument und verwirft den Rest"
    ],
    "explain": "`\"$@\"` lässt Argumente mit Leerzeichen intakt; unquotiertes `$*` wird in Wörter zerlegt."
   },
@@ -480,6 +480,16 @@
     "Überspringt Leerzeilen"
    ],
    "explain": "`-r` behandelt Backslashes nicht als Escape; Zeilen bleiben unverändert."
+  },
+  "q9": {
+   "q": "Was macht `shellcheck skript.sh`?",
+   "options": [
+    "Führt das Skript aus und sichert vorher das System",
+    "Findet mögliche Fehler ohne Ausführung",
+    "Kompiliert das Skript zu Bytecode",
+    "Gibt dem Skript Ausführrechte (`chmod +x`)"
+   ],
+   "explain": "`shellcheck` ist ein statischer Analysator: Er warnt z. B. vor fehlenden Anführungszeichen, ohne das Skript auszuführen. `bash -n` prüft nur die Syntax."
   }
  },
  "summary": [

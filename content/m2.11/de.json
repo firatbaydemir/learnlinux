@@ -136,7 +136,7 @@
   },
   "t06": {
    "text": "Entferne die Datei mit dem fehlerhaften Beispieleintrag `~/schedule/wrong-entry.txt`.",
-   "hint": "Prüfe den Pfad und führe dann `rm ~/schedule/wrong-entry.txt` aus."
+   "hint": "Prüfe den Pfad und führe dann `rm` aus."
   },
   "t07": {
    "text": "Mini-Projekt: Schreibe einen Backup-Eintrag für täglich 03:00 in `~/schedule/backup-plan.txt`.",
@@ -222,10 +222,10 @@
   "q1": {
    "q": "In welcher Reihenfolge stehen die fünf Cron-Zeitfelder?",
    "options": [
-    "Stunde, Minute, Monat, Tag, Befehl",
-    "Minute, Monat, Stunde, Befehl, Tag",
+    "Stunde, Minute, Monat, Tag, Befehl in dieser Reihenfolge",
+    "Minute, Monat, Stunde, Befehl, Tag in dieser Reihenfolge",
     "Minute, Stunde, Monatstag, Monat, Wochentag",
-    "Tag, Stunde, Minute, Monat, Benutzer"
+    "Tag, Stunde, Minute, Monat, Benutzer in dieser Reihenfolge"
    ],
    "explain": "Die Reihenfolge in einer Benutzer-Crontab ist Minute, Stunde, Monatstag, Monat und Wochentag."
   },
@@ -242,19 +242,19 @@
   "q3": {
    "q": "Was ist ein guter erster Ansatz, wenn ein Cron-Job `date` nicht findet?",
    "options": [
-    "Jede Minute erneut versuchen",
+    "Den Job jede Minute erneut versuchen",
     "Absoluten Programmpfad oder ausdrücklich gesetzten PATH verwenden",
-    "`crontab -r` ausführen",
-    "Dateisystem formatieren"
+    "Alle Jobs mit `crontab -r` löschen",
+    "Das Dateisystem komplett neu formatieren"
    ],
    "explain": "Cron kann einen eingeschränkten PATH haben; verwende den absoluten Programmpfad oder setze PATH ausdrücklich."
   },
   "q4": {
    "q": "Wie entfernst du sicher einen einzelnen fehlerhaften Job?",
    "options": [
-    "Alles mit `crontab -r` löschen",
-    "`rm /etc/crontab`",
-    "Dienst stoppen und nie wieder starten",
+    "Mit `crontab -r` alle Jobs auf einmal löschen",
+    "Die Systemdatei `/etc/crontab` löschen",
+    "Den Cron-Dienst stoppen und so belassen",
     "Nur die betreffende Zeile in `crontab -e` entfernen"
    ],
    "explain": "In `crontab -e` nur eine Zeile zu entfernen, lässt andere Benutzerjobs bestehen."
@@ -292,12 +292,22 @@
   "q8": {
    "q": "Wie verhindert man, dass die Ausgabe eines Cron-Jobs verloren geht?",
    "options": [
-    "Gar nicht nötig; cron speichert sie",
-    "Den Job als root laufen lassen",
-    "`sleep` hinzufügen",
+    "Nichts nötig; cron speichert die Ausgabe selbst",
+    "Den Job als Benutzer root ausführen",
+    "Dem Befehl ein `sleep` voranstellen",
     "Ausgabe in eine Datei umleiten (`>> /tmp/job.log 2>&1`)"
    ],
    "explain": "Cron versucht, die Ausgabe per Mail zu senden; zum Protokollieren stdout und stderr mit `>> datei 2>&1` in eine Logdatei leiten."
+  },
+  "q9": {
+   "q": "Ein Befehl läuft von Hand, aber nicht in cron. Was ist die häufigste Ursache?",
+   "options": [
+    "Cron kann keine Befehle ausführen",
+    "Cron läuft mit minimaler Umgebung (kurzer PATH, anderes Verzeichnis); man braucht den vollen Pfad",
+    "Cron läuft nur nachts",
+    "Der Befehl wird in cron automatisch gelöscht"
+   ],
+   "explain": "Cron lädt kein Shell-Profil; der PATH ist sehr kurz. Deshalb schreibt man volle Pfade (`/usr/bin/date`) und leitet die Ausgabe in eine Datei um, um Fehler zu sehen."
   }
  },
  "summary": [

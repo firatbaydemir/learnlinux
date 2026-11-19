@@ -163,11 +163,11 @@
   },
   "t11": {
    "text": "Disk şişiyor. `ls -l ~/logs` ile bak; eski hata ayıklama logu `old_debug.log` gereksiz, onu sil ama `app.log` dosyasına dokunma.",
-   "hint": "`rm ~/logs/old_debug.log`. Silmeden önce ls ile doğru ismi kontrol et."
+   "hint": "`rm`. Silmeden önce ls ile doğru ismi kontrol et."
   },
   "t12": {
    "text": "Mini proje: `~/health.txt` raporu hazırla. İçinde sırayla `== disk ==` başlığı, `df -h` çıktısı, `== memory ==` başlığı ve `free -h` çıktısı olsun.",
-   "hint": "İlk satır `echo \"== disk ==\" > ~/health.txt`, sonrakiler `>>`. (`>` / `>>` ayrıntısı modül 3.2'de.)"
+   "hint": "İlk satır `echo`, sonrakiler `>>`. (`>` / `>>` ayrıntısı modül 3.2'de.)"
   },
   "t13": {
    "text": "Meydan okuma: `~/reports/df_sample.txt` içinden yalnızca %95 dolu satırı `~/alert.txt` dosyasına, bu satırların sayısını `~/alert_count.txt` dosyasına yaz.",
@@ -175,7 +175,7 @@
   },
   "t14": {
    "text": "Ticket: \"Uygulama 'No space left on device' hatası veriyor.\" `~/reports/df_sample.txt` içinden dolu bağlama noktasını bul ve adını `~/full_mount.txt` dosyasına yaz. Ayrıca gereksiz `~/logs/core.dump` dosyasını sil.",
-   "hint": "Dolu olan 95% satırıdır. Mount noktası `/var`: `echo /var > ~/full_mount.txt`. (`>` ayrıntısı modül 3.2'de.)"
+   "hint": "Dolu olan 95% satırıdır. Mount noktası `/var`: `echo`. (`>` ayrıntısı modül 3.2'de.)"
   }
  },
  "vm": {
@@ -334,6 +334,16 @@
     "Ağ kesilir"
    ],
    "explain": "Dolu dosya sistemine yeni veri yazılamaz; servisler ve loglar hata verebilir. `du` ile yer kaplayanı bul."
+  },
+  "q9": {
+   "q": "`df -h` bölümün dolu olduğunu gösteriyor ama `du` ile baktığında dosyalar daha az yer tutuyor görünüyor. Bu farkın makul bir nedeni hangisidir?",
+   "options": [
+    "df yanlış çalışır",
+    "Silinmiş ama bir süreç tarafından hâlâ açık tutulan dosyalar yer kaplamayı sürdürebilir",
+    "du gizli dosyaları sayamaz",
+    "Disk kendiliğinden büyür"
+   ],
+   "explain": "`df` dosya sistemi düzeyinde, `du` dizin içindeki görünen dosyalar düzeyinde ölçer. Silinen ama açık kalan dosyanın alanı süreç kapanana kadar boşalmaz."
   }
  },
  "summary": [

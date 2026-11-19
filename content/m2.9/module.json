@@ -232,6 +232,10 @@
   {
    "id": "v03",
    "expect": "SOURCE|/dev/|UUID"
+  },
+  {
+   "id": "v04",
+   "expect": "(Disk /dev|UUID|TYPE)"
   }
  ],
  "quiz": [

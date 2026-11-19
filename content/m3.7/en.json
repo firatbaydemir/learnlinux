@@ -23,6 +23,7 @@
      "where": "When comparing two versions of a configuration file.",
      "why": "You see what changed without reading the whole file.",
      "example": "diff v1.txt v2.txt",
+     "output": "1c1\n< port=80\n---\n> port=8080\n3a4\n> debug=on",
      "nosim": true
     },
     {
@@ -31,6 +32,7 @@
      "where": "When sharing changes, in code review, when creating patches.",
      "why": "Context lines make clear where the change is.",
      "example": "diff -u v1.txt v2.txt",
+     "output": "--- v1.txt\t2024-01-10 09:00:00.000000000 +0000\n+++ v2.txt\t2024-01-10 09:05:00.000000000 +0000\n@@ -1,3 +1,4 @@\n-port=80\n+port=8080\n host=linux-lab\n mode=prod\n+debug=on",
      "nosim": true
     },
     {
@@ -39,6 +41,7 @@
      "where": "When only 'same or not' matters; in scripts.",
      "why": "No long output, the exit code is still 0/1.",
      "example": "diff -q v1.txt v2.txt",
+     "output": "Files v1.txt and v2.txt differ",
      "nosim": true
     },
     {
@@ -75,6 +78,7 @@
      "where": "When comparing two project versions or a backup.",
      "why": "Missing, extra and changed files in one go.",
      "example": "diff -r dir_a dir_b",
+     "output": "diff -r dir_a/app.conf dir_b/app.conf\n1c1\n< level=1\n---\n> level=2\nOnly in dir_b: extra.txt\nOnly in dir_a: readme.txt",
      "nosim": true
     },
     {
@@ -83,6 +87,7 @@
      "where": "For backup verification, in large trees.",
      "why": "A short overview; look at single files in detail afterwards.",
      "example": "diff -rq dir_a dir_b",
+     "output": "Files dir_a/app.conf and dir_b/app.conf differ\nOnly in dir_b: extra.txt\nOnly in dir_a: readme.txt",
      "nosim": true
     },
     {
@@ -110,6 +115,7 @@
      "where": "For binary files and to verify copies.",
      "why": "Gives a definite answer even for non-text files.",
      "example": "cmp v1.txt v2.txt",
+     "output": "v1.txt v2.txt differ: byte 8, line 1",
      "nosim": true
     },
     {
@@ -154,6 +160,7 @@
      "where": "When comparing user, package or IP lists.",
      "why": "Separates common and unique lines in one command.",
      "example": "comm list_a.txt sorted_b.txt",
+     "output": "alice\n\t\tbob\n\t\tcarol\ndave\n\terin",
      "nosim": true
     },
     {
@@ -162,6 +169,7 @@
      "where": "When you need the intersection.",
      "why": "Hides columns 1 and 2, the common one remains.",
      "example": "comm -12 list_a.txt sorted_b.txt",
+     "output": "bob\ncarol",
      "nosim": true
     },
     {
@@ -170,6 +178,7 @@
      "where": "For the question 'I have it, you don't'.",
      "why": "Finds missing or surplus entries.",
      "example": "comm -23 list_a.txt sorted_b.txt",
+     "output": "alice\ndave",
      "nosim": true
     },
     {
@@ -212,6 +221,7 @@
      "where": "When working a received patch into your copy.",
      "why": "Applies only the difference instead of replacing the whole file.",
      "example": "patch work.txt < change.patch",
+     "output": "patching file work.txt",
      "nosim": true
     },
     {
@@ -220,6 +230,7 @@
      "where": "Before patching important files.",
      "why": "You spot mismatches without changing anything.",
      "example": "patch --dry-run work.txt < change.patch",
+     "output": "checking file work.txt",
      "nosim": true
     },
     {
@@ -228,6 +239,7 @@
      "where": "When an applied patch causes problems.",
      "why": "Restores the state before the patch.",
      "example": "patch -R work.txt < change.patch",
+     "output": "patching file work.txt",
      "nosim": true
     }
    ],
@@ -238,32 +250,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Compare `v1.txt` and `v2.txt` with `diff v1.txt v2.txt`.",
-   "hint": "The simulator has no diff; typing the command is enough. You will see the real output on your VM."
+   "text": "Compare `v1.txt` and `v2.txt` line by line.",
+   "hint": "The comparison command is `diff`; give the two file names in order. The simulator has no diff; just typing the command is enough, you will see the real output in your VM."
   },
   "t02": {
-   "text": "Compare the same files in unified format: `diff -u v1.txt v2.txt`.",
-   "hint": "`-u` means unified; the output contains `@@` hunks."
+   "text": "Compare the same two files in unified format.",
+   "hint": "Add the `-u` flag to `diff` for unified format; the output contains `@@` blocks."
   },
   "t03": {
-   "text": "Compare byte by byte with `cmp v1.txt v2.txt`.",
-   "hint": "cmp reports the byte and line number of the first difference."
+   "text": "Compare `v1.txt` and `v2.txt` byte by byte.",
+   "hint": "`cmp` takes two file names; it prints the byte and line number of the first difference."
   },
   "t04": {
-   "text": "Copy `v1.txt` with `cp v1.txt v1.bak` and verify they are identical with `diff -q v1.txt v1.bak`.",
-   "hint": "If identical, `diff -q` prints nothing and the exit code is 0."
+   "text": "Copy `v1.txt` as `v1.bak`, then verify with `diff` in quiet mode that the two files are identical.",
+   "hint": "First `cp`; then give `diff` the `-q` flag. If they are identical it prints nothing and the exit code is 0."
   },
   "t05": {
-   "text": "Compare the directories `dir_a` and `dir_b` with `diff -rq dir_a dir_b`.",
-   "hint": "`-r` recursive, `-q` short summary. `-r dir_a dir_b` is accepted too."
+   "text": "Compare the directories `dir_a` and `dir_b` recursively and show only the brief summary.",
+   "hint": "With `diff`, combine `-r` (recursive) and `-q` (brief); then the two directory names follow."
   },
   "t06": {
-   "text": "`list_b.txt` is not sorted. For `comm`, create a sorted copy with `sort list_b.txt > sorted_b.txt`.",
-   "hint": "The redirect `>` writes the sorted output into a new file."
+   "text": "`list_b.txt` is not sorted. For `comm`, create a sorted copy named `sorted_b.txt`.",
+   "hint": "`sort` prints the result to the screen; the `>` redirection sends it into a new file."
   },
   "t07": {
-   "text": "Use `comm -12 list_a.txt sorted_b.txt` to show the lines present in both lists.",
-   "hint": "`-12` hides columns 1 and 2; the common column remains."
+   "text": "Show the lines that both `list_a.txt` and `sorted_b.txt` have in common.",
+   "hint": "`comm` gives three columns (only 1st, only 2nd, common); hide the first two with `-1` and `-2`. Both files must be sorted."
   },
   "t08": {
    "text": "Predict, then run: `sort list_a.txt list_b.txt | uniq -d`. Which names appear?",
@@ -278,20 +290,20 @@
    "hint": "`grep -q` returns 0 if found, 1 if not; `v1.txt` contains no debug."
   },
   "t11": {
-   "text": "Debug: `win.txt` looks different on every line because it has Windows line endings (`\\r`). Create a clean copy with `tr -d '\\r' < win.txt > fixed.txt`.",
-   "hint": "`tr -d` deletes the given character; redirect input with `<`, output with `>`."
+   "text": "Debug: `win.txt` looks different on every line because it carries Windows line endings (`\\r`). Produce a clean copy as `fixed.txt`.",
+   "hint": "`tr -d` deletes the given character; redirect input with `<` and output with `>`."
   },
   "t12": {
-   "text": "Mini project: copy with `cp v1.txt work.txt`, create a patch with `diff -u v1.txt v2.txt > change.patch`, then apply it with `patch work.txt < change.patch`.",
-   "hint": "Three commands in order; diff and patch do not run in the simulator, try them on your VM."
+   "text": "Mini project: copy `v1.txt` as `work.txt`, write the difference between `v1.txt` and `v2.txt` in unified format to `change.patch`, then apply that patch to `work.txt`.",
+   "hint": "Order: `cp`, `diff -u` (redirect output with `>`), `patch` (patch file as input with `<`). diff and patch do not run in the simulator, try them in your VM."
   },
   "t13": {
-   "text": "Challenge: write only the names that are in `list_a.txt` (not in `list_b.txt`) to the file `only_a.txt`. Without `comm`; hint: pass `list_b.txt` twice.",
-   "hint": "`sort list_a.txt list_b.txt list_b.txt | uniq -u > only_a.txt`: names from b occur at least twice, names only in a occur once."
+   "text": "Challenge: write only the names that are in `list_a.txt` alone (not in `list_b.txt`) to `only_a.txt`. No `comm`; hint: give `list_b.txt` twice.",
+   "hint": "Give all three file names to `sort` together, keep the once-only lines with `uniq -u`, write with `>`. Names in b appear at least twice, those only in a appear once."
   },
   "t14": {
-   "text": "Copy with `cp v1.txt same.txt`, run `cmp -s v1.txt same.txt` and type `echo $?` right after.",
-   "hint": "In one line this also works: `cmp -s v1.txt same.txt ; echo $?`."
+   "text": "Copy `v1.txt` as `same.txt`, run `cmp` in quiet mode and print the exit code right after.",
+   "hint": "`cmp -s` prints nothing, it only leaves an exit code; read it with `$?`. In one line it also works with `;`."
   },
   "t15": {
    "text": "Predict, then run: `cut -d= -f1 v1.txt`. Which keys are listed?",
@@ -326,10 +338,10 @@
   "q3": {
    "q": "What does a line starting with `+` mean in unified diff output?",
    "options": [
-    "The line existed only in the old file",
-    "The line is a comment",
+    "The line existed only in the old file, not in the new one",
+    "The line is a comment and its content did not change",
     "The line is only in the new file (added)",
-    "The line was moved elsewhere"
+    "The line was moved to a different place in the file"
    ],
    "explain": "`-` was removed from the old file, `+` added to the new one; lines starting with a space are context."
   },
@@ -346,29 +358,29 @@
   "q5": {
    "q": "What does `cmp a b` report when the files differ?",
    "options": [
-    "All differences line by line",
-    "Only common lines",
+    "All differences between the two files line by line",
+    "Only the lines the two files have in common",
     "Byte and line position of the first difference",
-    "A ready-made patch"
+    "A ready-made merged patch file"
    ],
    "explain": "`cmp` compares byte by byte and reports the first difference; suited for binary files."
   },
   "q6": {
    "q": "What does `diff -r dir_a dir_b` do?",
    "options": [
-    "Only sorts file names",
+    "Only sorts the file names of both directories",
     "Compares both directory trees including subdirectories",
-    "Reverses the differences",
-    "Merges the directories"
+    "Reverses the differences between the two directories",
+    "Merges the contents of both directories into one"
    ],
    "explain": "`-r` (recursive) descends into subdirectories; files present on one side only show as `Only in ...`."
   },
   "q7": {
    "q": "What does `comm -12 a b` show (sorted input)?",
    "options": [
-    "Only lines from a",
-    "Only lines from b",
-    "All lines of both files",
+    "Only the lines from the first file (a)",
+    "Only the lines from the second file (b)",
+    "All lines of both files in a single list",
     "Lines common to both files"
    ],
    "explain": "`-1` and `-2` suppress the only-in-a and only-in-b columns, leaving common lines (column 3)."
@@ -376,12 +388,22 @@
   "q8": {
    "q": "What does `-p1` do in `patch -p1 < fix.diff`?",
    "options": [
-    "Strips the first directory component from paths in the patch",
-    "Reverses the patch",
-    "Makes a backup first",
-    "Applies only the first hunk"
+    "Strips the first directory component from the paths",
+    "Reverses a patch that was already applied",
+    "Makes a backup of the files before applying",
+    "Applies only the first hunk of the patch"
    ],
    "explain": "`-pN` strips the first N path components so prefixes like `a/src/x.c` fit the target tree."
+  },
+  "q9": {
+   "q": "Why is it a good habit to back up a config file before editing and compare with `diff` afterwards?",
+   "options": [
+    "`diff` automatically restores the file",
+    "With a backup the file cannot break",
+    "You see exactly what changed, and undoing an unwanted change gets easier",
+    "`diff` compresses the backup to save space"
+   ],
+   "explain": "`diff` shows the difference between two versions line by line. A backup plus the diff makes it easier to spot and revert a faulty change."
   }
  },
  "summary": [

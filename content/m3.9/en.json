@@ -227,28 +227,28 @@
  ],
  "tasks": {
   "t01": {
-   "text": "In the `lab` directory list all `.tmp` files with `find`: `find . -name \"*.tmp\"`.",
-   "hint": "Put the pattern in double quotes."
+   "text": "While in the `lab` directory, list all `.tmp` files with `find`.",
+   "hint": "`find` takes the start directory first, then the pattern with `-name`. Put the pattern in double quotes."
   },
   "t02": {
-   "text": "Count the `ERROR` lines in `run.log` and write the number to the file `count.txt`: `grep -c ERROR run.log > count.txt`.",
-   "hint": "`-c` gives the number of matching lines."
+   "text": "Count the `ERROR` lines in `run.log` and write the number to the file `count.txt`.",
+   "hint": "`grep` with `-c` gives the number of matching lines; redirect the result into the file with `>`."
   },
   "t03": {
-   "text": "Write `host: ` and the machine name into the file `who.txt`: `echo \"host: $(hostname)\" > who.txt`.",
-   "hint": "Inside double quotes `$(hostname)` is expanded."
+   "text": "Write `host: ` and the machine name into the file `who.txt`.",
+   "hint": "Use `echo` and command substitution `$(...)`; inside double quotes `$(hostname)` expands. Redirect the output with `>`."
   },
   "t04": {
-   "text": "Create the directory `backup`, then use a glob to copy all `.log` files from `logs` into it: `cp logs/*.log backup/`.",
-   "hint": "First `mkdir backup`; `cp` takes the target last."
+   "text": "Create the directory `backup`, then copy all `.log` files from `logs` there using a glob.",
+   "hint": "First `mkdir`; then `cp` takes the sources and the target directory last. Glob: `*.log`."
   },
   "t05": {
-   "text": "First write the error to `err.txt`: `ls missing.txt 2> err.txt`. Then write output AND error of `ls missing.txt notes.txt` together into `both.txt`.",
-   "hint": "`> both.txt 2>&1`; order: `>` first, then `2>&1`."
+   "text": "First write the error of `ls missing.txt` to the file `err.txt`. Then write the output AND error of `ls missing.txt notes.txt` together to `both.txt`.",
+   "hint": "The error stream is number 2: `2>`. To write both together, give the file with `>` first, then add `2>&1`; order matters."
   },
   "t06": {
-   "text": "With `printf` write the script `greet.sh` (shebang + `echo \"Hello $1\"`), make it executable with `chmod +x greet.sh` and run `./greet.sh alice > greet.out`.",
-   "hint": "`printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh`; use single quotes, otherwise `$1` is expanded immediately."
+   "text": "Write the script `greet.sh` with `printf` (shebang + `echo \"Hello $1\"`), make it executable with `chmod`, and write the output of `./greet.sh alice` to `greet.out`.",
+   "hint": "In `printf` use `\\n` for line ends; protect the text with single quotes, otherwise `$1` expands immediately. For the execute permission use `chmod +x`."
   },
   "t07": {
    "text": "PREDICT: Which level does `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr` show most often, and how many times? Guess first, then run it.",
@@ -267,24 +267,24 @@
    "hint": "First run `find . -name *.log` and see: the shell expanded `*.log` to `run.log`. Quote the pattern."
   },
   "t11": {
-   "text": "DEBUG: `./hello.sh` says \"Permission denied\". Fix it and run it; the result must end up in `hello.out`.",
-   "hint": "Check the permissions with `ls -l hello.sh`; then `chmod +x hello.sh`. (`chmod` is covered in module 4.4.)"
+   "text": "FIND THE BUG: `./hello.sh` says \"Permission denied\". Fix it and run it; the result must go to `hello.out`.",
+   "hint": "Check the permissions with `ls -l hello.sh`; the execute (`x`) permission is missing. (`chmod` is covered in module 4.4.)"
   },
   "t12": {
-   "text": "MINI PROJECT: Filter the `ERROR` lines, show them and save them to `errors.txt` at once (`tee`), then append the output of `wc -l errors.txt` to `summary.txt` with `>>`.",
-   "hint": "`grep ERROR run.log | tee errors.txt`, then `wc -l errors.txt >> summary.txt`."
+   "text": "MINI PROJECT: filter the `ERROR` lines, show them on screen and write them to `errors.txt` (`tee`); then append the line count of `errors.txt` to `summary.txt` (`>>`).",
+   "hint": "Order: `grep`, pipe, `tee`; then append the output of `wc -l` with `>>`."
   },
   "t13": {
-   "text": "CHALLENGE: Delete all `.tmp` files under `project` using `find` and `-exec rm {} \\;`. (The simulator does not run `-exec`; the correct syntax is checked.)",
-   "hint": "`find project -name \"*.tmp\" -exec rm {} \\;`; the `\\;` matters. On a real VM test with `-print` first."
+   "text": "CHALLENGE: delete all `.tmp` files under `project` using `find` and `-exec rm`. (The simulator does not run `-exec`; the correct spelling is checked.)",
+   "hint": "`-exec` takes the command with the `{}` placeholder and ends with `\\;`; the escape matters. In a real VM try `-print` first."
   },
   "t14": {
-   "text": "CHALLENGE: Get the line count of all `.txt` files the safe way: `-print0` with `xargs -0` and `wc -l`. (`xargs` is not in the simulator; the syntax is checked.)",
-   "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."
+   "text": "CHALLENGE: find the line count of all `.txt` files the safe way: `find` with `-print0`, `xargs -0` and `wc -l`. (`xargs` is not in the simulator; the spelling is checked.)",
+   "hint": "Output the `find` result NUL-separated with `-print0`, pipe it into `xargs -0`, which runs `wc -l`."
   },
   "t15": {
-   "text": "CHALLENGE: In `access.log` find the most frequent IP with its count and write only that single line to `top.txt`.",
-   "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."
+   "text": "CHALLENGE: find the most frequent IP in `access.log` with its count and write only that single line to `top.txt`.",
+   "hint": "Pattern: first field with `cut`, `sort`, `uniq -c`, `sort -nr`, `head -n 1`; write the result with `>`."
   },
   "t16": {
    "text": "TICKET #3901 — Support: \"For the morning meeting we need a script that writes the `ERROR` and `WARN` lines from `run.log` to `problems.txt`, sorted; we will run it daily.\" Write `check.sh` (shebang + `grep -E ... | sort > problems.txt`), make it executable and run it.",
@@ -370,19 +370,19 @@
    "q": "What is the difference between `find ... -exec rm {} \\;` and `find ... -exec rm {} +`?",
    "options": [
     "`\\;` applies only to directories, `+` only to files",
-    "`\\;` runs the command once per file, `+` collects the paths and passes them to a few calls",
-    "`+` never runs the command, it only lists",
-    "There is no difference, only a style"
+    "`\\;` once per file, `+` batched",
+    "`+` never runs the command, it only lists the matches",
+    "No difference, both are just a matter of style"
    ],
    "explain": "`\\;` starts one process per match; `+` collects arguments and gets by with far fewer processes."
   },
   "q2": {
    "q": "Why is `find . -name *.log` (unquoted) a problem?",
    "options": [
-    "`find` does not accept patterns",
-    "`-name` only works with capital letters",
-    "The shell expands `*.log` to names in the current directory before `find` starts",
-    "The command deletes the whole disk"
+    "`find` never accepts patterns under any condition",
+    "`-name` only works with uppercase names",
+    "The shell expands `*.log` in the current directory first",
+    "The command deletes every file on the disk"
    ],
    "explain": "The shell does the expanding. Quote the pattern as `\"*.log\"` so it reaches `find` unchanged."
   },
@@ -399,10 +399,10 @@
   "q4": {
    "q": "How do you safely pass `find` results to `rm` when file names contain spaces?",
    "options": [
-    "`find . | xargs rm`",
+    "`find . -type f | xargs rm -f`",
     "`rm $(find .)`",
     "`find . -name x | rm`",
-    "`find ... -print0 | xargs -0 rm`"
+    "`find . -print0 | xargs -0 rm`"
    ],
    "explain": "`-print0` and `xargs -0` separate names with NUL; names containing spaces or newlines are not split."
   },
@@ -411,7 +411,7 @@
    "options": [
     "Copies files in parallel",
     "Runs a command in the background",
-    "Passes standard input as arguments to a command",
+    "Turns input into arguments",
     "Writes output to a file"
    ],
    "explain": "`xargs` turns items read from stdin into a command's arguments; the basis of `find | xargs`."
@@ -429,22 +429,32 @@
   "q7": {
    "q": "What does `cmd1 && cmd2` mean?",
    "options": [
-    "cmd2 always runs",
-    "cmd2 runs if cmd1 fails",
-    "Both run at the same time",
-    "cmd2 runs only if cmd1 succeeded (exit code 0)"
+    "cmd2 always runs, the result is ignored",
+    "cmd2 runs only if cmd1 failed",
+    "Both run in parallel at once",
+    "cmd2 runs only if cmd1 succeeded"
    ],
    "explain": "`&&` chains on success; `||` runs on failure."
   },
   "q8": {
    "q": "What does `ls | tee liste.txt` do?",
    "options": [
-    "Shows the output and also saves it to `liste.txt`",
-    "Writes the output to the file only",
-    "Copies the file to the screen",
-    "Splits errors into a file"
+    "Writes output to the screen and to `liste.txt`",
+    "Writes output only to the file `liste.txt`",
+    "Copies the file `liste.txt` to the screen",
+    "Only splits the errors into a file"
    ],
    "explain": "`tee` forwards stdin to both stdout and a file; `-a` appends."
+  },
+  "q9": {
+   "q": "What must you do before you can run a script with `./script.sh`?",
+   "options": [
+    "Run `sh -n script.sh`",
+    "Grant permission: `chmod +x script.sh`",
+    "Run `cat script.sh`",
+    "Type the name without `.sh`"
+   ],
+   "explain": "`./script.sh` needs the x permission: `chmod +x`. Without it you can still run `sh script.sh`."
   }
  },
  "summary": [

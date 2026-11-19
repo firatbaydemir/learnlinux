@@ -476,6 +476,16 @@
     "It backs up the script"
    ],
    "explain": "The shebang tells the kernel the interpreter; execute permission still needs `chmod +x`."
+  },
+  "q9": {
+   "q": "Why do we usually write variables quoted as `\"$var\"` in scripts?",
+   "options": [
+    "Without quotes a variable never works",
+    "A value with spaces or wildcards stays in one piece; otherwise it is split into words",
+    "Quotes make the script faster",
+    "Quotes make the variable read-only"
+   ],
+   "explain": "Unquoted `$file` is split at spaces and characters like `*` expand; `rm $file` may delete unexpected things. `\"$file\"` keeps the value as a single argument."
   }
  },
  "summary": [

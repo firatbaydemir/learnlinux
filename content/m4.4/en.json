@@ -128,7 +128,7 @@
    "id": "owner",
    "title": "chown and chgrp: owner and group",
    "body": [
-    "Every file has an owner and a group. **Only root may change the owner** (`sudo chown`). A regular user may only set a file's group to a group they belong to; in the simulator we use `sudo chgrp` for that.",
+    "Every file has an owner and a group. **Only root may change the owner** (`sudo chown`). A regular user may only set a file's group to a group they belong to; on a real system `chgrp GROUP FILE` is enough. Simulator note: the simulator does not check membership and leaves every ownership change to root only; there we write `sudo chgrp`.",
     "`chown alice:devs report.txt` sets owner and group together. A typical team setup: group `devs`, mode `660` on files or `770` on directories; only `devs` members get access. Finer rules (per-user permissions) use ACLs (`getfacl`/`setfacl`); those come in later modules."
    ],
    "commands": [
@@ -154,7 +154,6 @@
    "title": "umask: default permissions",
    "body": [
     "New files **start** from `666`, new directories from `777`; `umask` removes bits using a **mask**: **new mode = base & ~umask**. This is not subtraction. Examples (file, base 666): umask `022` → `644`; `027` → `640`; `077` → `600`; `002` → `664`.",
-    "The difference shows when the umask has bits the base lacks: for `025`, `666 & ~025 = 642`, while subtraction would give `641` (wrong). For `001` the result is `666`, subtraction would give `665`. Because x is not in the base, files are never created executable.",
     "`umask` is **per process**: it applies only in that shell and the programs started from it. To make it permanent, put it in `~/.bashrc` (user) or `/etc/profile` (system)."
    ],
    "commands": [
@@ -181,7 +180,10 @@
      "example": "umask 027"
     }
    ],
-   "tip": "In shared project folders use `umask 002`: new files `664`, directories `775`."
+   "tip": "In shared project folders use `umask 002`: new files `664`, directories `775`.",
+   "more": [
+    "The difference shows when the umask has bits the base lacks: for `025`, `666 & ~025 = 642`, while subtraction would give `641` (wrong). For `001` the result is `666`, subtraction would give `665`. Because x is not in the base, files are never created executable."
+   ]
   }
  ],
  "tasks": {
@@ -231,11 +233,11 @@
   },
   "t12": {
    "text": "Debug: `locked/old.txt` cannot be deleted. Fix the problem and delete the file.",
-   "hint": "Look at the directory, not the file: `chmod u+w locked`, then `rm`."
+   "hint": "Look at the directory, not the file: `chmod`, then `rm`."
   },
   "t13": {
    "text": "Debug: `cat vault/data.txt` fails. Fix it and read the file.",
-   "hint": "`vault` is `600`: no x, you cannot get in. `chmod u+x vault`."
+   "hint": "`vault` is `600`: no x, you cannot get in. `chmod`."
   },
   "t14": {
    "text": "Mini project: create a `team` directory with `plan.txt` inside; directory `770`, file `660`; set the directory's group to `devs` with `sudo chgrp devs team`.",
@@ -243,7 +245,7 @@
   },
   "t15": {
    "text": "Challenge: everything in the `data` tree is `777`. Make directories `755` and files `644` (`data/a.txt`, `data/sub/b.txt`).",
-   "hint": "Use capital `X`: `chmod -R u=rwX,go=rX data`."
+   "hint": "Use capital `X`: `chmod -R`."
   },
   "t16": {
    "text": "TICKET #4401 — Alice will edit `report.txt`, group `devs` may write too, nobody else gets access. Set owner `alice`, group `devs`, mode `660`.",
@@ -410,6 +412,16 @@
     "700"
    ],
    "explain": "Directories start from 777, files from 666; subtracting mask 022 gives 755 and 644."
+  },
+  "q9": {
+   "q": "Why is it better to check permissions with `ls -l` on `Permission denied` than to just run `chmod 777`?",
+   "options": [
+    "You see the missing permission and grant only that; 777 opens everything to everyone",
+    "`chmod 777` does not work",
+    "`ls -l` fixes permissions automatically",
+    "777 only applies to root"
+   ],
+   "explain": "First find the cause (owner, group, missing bit). 777 hides the problem but grants everyone write and execute rights, creating a security hole."
   }
  },
  "summary": [

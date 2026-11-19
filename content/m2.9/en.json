@@ -22,7 +22,8 @@
      "where": "When identifying a new device or inspecting disk status.",
      "why": "Shows the relationship between disks, partitions, and mount points.",
      "example": "lsblk",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS\nsda      8:0    0   20G  0 disk\n└─sda1   8:1    0   20G  0 part /\nsdb      8:16   0    5G  0 disk"
     },
     {
      "cmd": "lsblk -f",
@@ -30,7 +31,8 @@
      "where": "When matching a partition to an fstab entry.",
      "why": "Shows identifiers such as UUIDs for persistent references.",
      "example": "lsblk -f",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   FSTYPE FSVER LABEL UUID                                 MOUNTPOINTS\nsda\n└─sda1 ext4   1.0         3f2a9c1e-5b7d-4c1a-9e0f-1a2b3c4d5e6f /\nsdb"
     },
     {
      "cmd": "fdisk -l",
@@ -38,7 +40,8 @@
      "where": "When inspecting a partition layout before opening an interactive menu.",
      "why": "Provides an overview of disk capacity and partition boundaries.",
      "example": "sudo fdisk -l",
-     "nosim": true
+     "nosim": true,
+     "output": "Disk /dev/sdb: 5 GiB, 5368709120 bytes, 10485760 sectors\nUnits: sectors of 1 * 512 = 512 bytes\nDisklabel type: gpt"
     },
     {
      "cmd": "blkid",
@@ -46,7 +49,8 @@
      "where": "When verifying a partition's identity.",
      "why": "UUIDs reduce dependence on device-name ordering in fstab.",
      "example": "sudo blkid",
-     "nosim": true
+     "nosim": true,
+     "output": "/dev/sda1: UUID=\"3f2a9c1e-5b7d-4c1a-9e0f-1a2b3c4d5e6f\" TYPE=\"ext4\""
     }
    ],
    "tip": "Start with `lsblk -f`, then use `sudo fdisk -l` if needed. A device name alone is not reliable identification."
@@ -65,7 +69,8 @@
      "where": "Only on a verified, empty partition with a backup.",
      "why": "Linux needs a file system to store files on the partition.",
      "example": "sudo mkfs.ext4 /dev/sdb1",
-     "nosim": true
+     "nosim": true,
+     "output": "Creating filesystem with 1310720 4k blocks and 327680 inodes\nAllocating group tables: done\nWriting inode tables: done\nWriting superblocks and filesystem accounting information: done"
     },
     {
      "cmd": "mkfs.xfs",
@@ -92,7 +97,8 @@
      "where": "When adding swap; first create the file and set `chmod 600`.",
      "why": "Lets the kernel move rarely used pages to disk when RAM is full.",
      "example": "sudo mkswap /swapfile",
-     "nosim": true
+     "nosim": true,
+     "output": "Setting up swapspace version 1, size = 1024 MiB (1073737728 bytes)"
     },
     {
      "cmd": "swapon",
@@ -100,7 +106,8 @@
      "where": "After creating swap to enable it, or to check swap status.",
      "why": "Persistence needs an `/etc/fstab` entry; `swapoff` disables it.",
      "example": "swapon --show",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME      TYPE SIZE USED PRIO\n/swapfile file   1G   0B   -2"
     },
     {
      "cmd": "mount",
@@ -108,7 +115,8 @@
      "where": "When inspecting current mounts or performing an approved mount operation.",
      "why": "Linux exposes disk contents through directories.",
      "example": "findmnt /",
-     "nosim": true
+     "nosim": true,
+     "output": "TARGET SOURCE    FSTYPE OPTIONS\n/      /dev/sda1 ext4   rw,relatime"
     },
     {
      "cmd": "umount",
@@ -124,7 +132,8 @@
      "where": "When verifying where a partition is mounted.",
      "why": "Presents the mount table in a readable form.",
      "example": "findmnt /",
-     "nosim": true
+     "nosim": true,
+     "output": "TARGET SOURCE    FSTYPE OPTIONS\n/      /dev/sda1 ext4   rw,relatime"
     },
     {
      "cmd": "mdadm",
@@ -132,7 +141,8 @@
      "where": "For RAID 1 (mirroring) or RAID 5; only on empty, redundant disks.",
      "why": "So data survives a disk failure (redundancy) or for speed.",
      "example": "sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc",
-     "nosim": true
+     "nosim": true,
+     "output": "mdadm: array /dev/md0 started."
     },
     {
      "cmd": "quota",
@@ -140,7 +150,8 @@
      "where": "When quotas (usrquota) are enabled on the filesystem; the admin sets limits with `edquota`.",
      "why": "So one user cannot fill the whole disk.",
      "example": "quota -u alice",
-     "nosim": true
+     "nosim": true,
+     "output": "Disk quotas for user alice (uid 1001):\n     Filesystem  blocks   quota   limit   grace\n      /dev/sdb1    1024    5000    6000"
     }
    ],
    "tip": "Back up `/etc/fstab` before editing. Afterward, use `sudo mount -a` to check the syntax instead of rebooting immediately; it can perform mounts."
@@ -169,7 +180,7 @@
   },
   "t06": {
    "text": "Remove the incorrect or temporary sample entry in `~/disklab/fstab.tmp`.",
-   "hint": "Check the path and name, then run `rm ~/disklab/fstab.tmp`."
+   "hint": "Check the path and name, then run `rm`."
   },
   "t07": {
    "text": "Mini project: write a mount plan for `/data` with a UUID and the `nofail` option to `~/disklab/mount-plan.txt`.",
@@ -177,7 +188,7 @@
   },
   "t08": {
    "text": "Challenge: make a backup of the sample fstab at `~/disklab/fstab.backup`.",
-   "hint": "`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"
+   "hint": "`cp`"
   },
   "t09": {
    "text": "Ticket: \"The new disk is not visible.\" Write in the support note that `lsblk` should be checked first, followed by `df -hT`.",
@@ -200,7 +211,7 @@
    "hint": "Write both values in one line with `echo ... > file`. (Details in module 3.2.)"
   },
   "t14": {
-   "text": "Challenge: count how many entries (lines) the sample fstab has with `wc -l ~/disklab/fstab.sample`.",
+   "text": "Challenge: count how many entries (lines) the sample fstab has in `~/disklab/fstab.sample`.",
    "hint": "One mount entry per line; `wc -l` counts lines."
   }
  },
@@ -247,6 +258,20 @@
     "differs": [
      "The source may be `/dev/mapper/...` or `/dev/nvme0n1p...`; the sample output need not match exactly.",
      "This command does not change the disk."
+    ]
+   },
+   "v04": {
+    "title": "List disks and partitions",
+    "text": "Show partition tables with `fdisk -l` and UUIDs and filesystem types with `blkid` (both read-only).",
+    "blocks": [
+     {
+      "cmd": "sudo fdisk -l\nsudo blkid",
+      "expected": "Disk /dev/vda: 20 GiB\n/dev/vda2: UUID=\"...\" TYPE=\"xfs\""
+     }
+    ],
+    "differs": [
+     "Device names and sizes differ per system.",
+     "If you get `Permission denied`, make sure you use `sudo`."
     ]
    }
   }

@@ -85,7 +85,7 @@
      "what": "Leitet auch Fehlermeldungen in die Pipe.",
      "where": "Wenn Ausgabe und Fehler als ein Strom gefiltert werden.",
      "why": "Fehler gehen nicht auf dem Bildschirm verloren; `grep`/`wc` sehen sie auch.",
-     "example": "ls data fehlt 2>&1 | wc -l"
+     "example": "ls data nofile 2>&1 | wc -l"
     },
     {
      "cmd": "tee -a",
@@ -107,32 +107,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Zähle die Zeilen von `logs/app.log` mit `cat logs/app.log | wc -l`.",
-   "hint": "Die Pipe übergibt den Dateiinhalt an `wc -l`."
+   "text": "Zähle die Zeilen von `logs/app.log`; lies die Datei mit `cat` und gib die Ausgabe per Pipe an den Zähler weiter.",
+   "hint": "Verbinde `cat` und `wc -l` mit `|`."
   },
   "t02": {
    "text": "Sortiere `data/fruits.txt` mit `sort` alphabetisch.",
    "hint": "Gleiche Zeilen stehen nebeneinander."
   },
   "t03": {
-   "text": "Zähle mit `ls -1 data | wc -l`, wie viele Einträge der Ordner `data` hat.",
-   "hint": "`-1` schreibt jeden Namen in eine eigene Zeile; `wc -l` zählt die Zeilen."
+   "text": "Zähle, wie viele Einträge der Ordner `data` hat.",
+   "hint": "`ls -1` schreibt jeden Namen in eine eigene Zeile; zähle die Ausgabe mit `wc -l`."
   },
   "t04": {
-   "text": "Zähle die ERROR-Zeilen des Logs mit `grep ERROR logs/app.log | wc -l`.",
-   "hint": "grep filtert, `wc -l` zählt."
+   "text": "Finde die Anzahl der ERROR-Zeilen im Log.",
+   "hint": "Erst mit `grep` filtern, dann mit `wc -l` zählen."
   },
   "t05": {
-   "text": "Entferne Duplikate mit `sort data/fruits.txt | uniq`.",
-   "hint": "Erst sortieren, damit Duplikate nebeneinander liegen."
+   "text": "Entferne die Duplikate aus `data/fruits.txt`.",
+   "hint": "Mit `sort` sortieren, dann `uniq`; Duplikate müssen nebeneinander liegen."
   },
   "t06": {
-   "text": "Zähle jede Frucht mit `sort data/fruits.txt | uniq -c`.",
-   "hint": "Die Zahl davor ist die Anzahl."
+   "text": "Zähle, wie oft jede Frucht in `data/fruits.txt` vorkommt.",
+   "hint": "`sort`, dann `uniq -c`; die Zahl davor ist die Anzahl."
   },
   "t07": {
-   "text": "Speichere alle ERROR-Zeilen mit `grep ERROR logs/app.log > errors.txt` in `errors.txt`.",
-   "hint": "Prüfe mit `cat errors.txt`."
+   "text": "Speichere alle ERROR-Zeilen in der Datei `errors.txt`.",
+   "hint": "Leite die `grep`-Ausgabe mit `>` um; prüfe mit `cat errors.txt`."
   },
   "t08": {
    "text": "Vorhersage: Ist die erste Zeile von `sort data/nums.txt | head -n 1` `2` oder `10`? Führe es aus und prüfe.",
@@ -144,11 +144,11 @@
   },
   "t10": {
    "text": "Fehlersuche: `uniq data/unsorted.txt` zeigt noch Duplikate. Schreibe die eindeutigen Zeilen (`a`, `b`) nach `~/unique.txt`.",
-   "hint": "`sort data/unsorted.txt | uniq > unique.txt`."
+   "hint": "Erst `sort`, dann `uniq`, das Ergebnis mit `>` in die Datei."
   },
   "t11": {
-   "text": "Mini-Projekt: Erzeuge den Bericht `report.txt` mit gezählten und gerankten ERROR-Zeilen: `grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt`.",
-   "hint": "Vier Stufen: filtern, sortieren, zählen, ordnen; dann umleiten."
+   "text": "Mini-Projekt: Erzeuge den Bericht `report.txt` mit den gezählten ERROR-Zeilen des Logs, die häufigsten zuerst.",
+   "hint": "Vier Stufen: mit `grep` filtern, `sort`, mit `uniq -c` zählen, mit `sort -rn` ordnen; dann mit `>` umleiten."
   },
   "t12": {
    "text": "Herausforderung: Speichere in einer einzigen Pipeline alle ERROR-Zeilen in `all_errors.txt` und gib auch ihre Anzahl aus (mit `tee`).",
@@ -223,7 +223,7 @@
    "q": "Was verbindet die Pipe `|`?",
    "options": [
     "stdout des linken Befehls mit stdin des rechten",
-    "Eine Datei mit einem Befehl",
+    "Den Inhalt einer Datei als Argument eines Befehls",
     "stderr mit stdout",
     "Zwei Dateien"
    ],
@@ -232,7 +232,7 @@
   "q2": {
    "q": "Warum nutzt man `sort` vor `uniq`?",
    "options": [
-    "`uniq` braucht eine Datei",
+    "`uniq` kann seine Eingabe nur aus einer benannten Datei lesen",
     "`sort` macht es schneller",
     "`uniq` funktioniert nur bei Zahlen",
     "`uniq` fasst nur aufeinanderfolgende Duplikate zusammen"
@@ -242,7 +242,7 @@
   "q3": {
    "q": "Was macht `tee out.txt` in einer Pipeline?",
    "options": [
-    "Löscht den Strom",
+    "Löscht den Strom still und gibt nichts weiter",
     "Schreibt den Strom in eine Datei und gibt ihn weiter",
     "Zeigt nur Fehler",
     "Sortiert den Strom"
@@ -284,7 +284,7 @@
    "options": [
     "`-a` hängt an, sonst wird überschrieben",
     "`-a` fängt auch Fehler ab",
-    "`-a` blendet die Ausgabe aus",
+    "`-a` blendet die Ausgabe aus und schreibt nur in die Datei",
     "Kein Unterschied"
    ],
    "explain": "`tee` überschreibt standardmäßig; `-a` (append) hängt an den bestehenden Inhalt an."
@@ -298,6 +298,16 @@
     "`-n` sortiert Zahlen nach ihrem numerischen Wert"
    ],
    "explain": "Einfaches `sort` sortiert als Text (`10` < `2`); `-n` sortiert numerisch (`2` < `10`)."
+  },
+  "q9": {
+   "q": "Bei `ls kein_ordner | wc -l` erscheint die Fehlermeldung trotzdem auf dem Bildschirm. Warum?",
+   "options": [
+    "Die Pipe stoppt den fehlerhaften Befehl automatisch",
+    "wc löscht die Fehlermeldung, weil es sie nicht zählen kann",
+    "Die Pipe leitet nur stdout weiter; stderr läuft auf den Bildschirm",
+    "Fehlermeldungen werden vor der Pipe in eine Datei geschrieben"
+   ],
+   "explain": "`|` verbindet nur Kanal 1 (stdout) mit der Eingabe des nächsten Befehls. stderr ist ein eigener Kanal und geht auf den Bildschirm, außer man verbindet ihn mit `2>&1`."
   }
  },
  "summary": [

@@ -206,40 +206,40 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Gib mit sed nur Zeile 2 von `pets.txt` aus: `sed -n '2p' pets.txt`.",
-   "hint": "`-n` schaltet die automatische Ausgabe ab, `2p` druckt nur Zeile 2. Der Simulator führt sed nicht aus ('not supported'); dein Befehl wird trotzdem erfasst."
+   "text": "Gib die 2. Zeile von `pets.txt` nur mit sed aus.",
+   "hint": "Bei `sed` schaltet `-n` die automatische Ausgabe aus; nach der Zeilennummer folgt der Befehl `p`. Der Simulator führt sed nicht aus ('not supported'); dein Befehl wird aber gespeichert."
   },
   "t02": {
    "text": "Gib mit awk nur die erste Spalte (die IP-Adressen) von `access.log` aus.",
-   "hint": "`awk '{print $1}' access.log` — das Programm gehört in einfache Anführungszeichen."
+   "hint": "Das `awk`-Programm steht in einfachen Anführungszeichen in geschweiften Klammern; das erste Feld heißt `$1`."
   },
   "t03": {
    "text": "Vorhersage: Welche Namen gibt `cut -d, -f1 employees.csv` aus (entspricht `awk -F, '{print $1}'`)? Erst überlegen, dann ausführen.",
    "hint": "Die erste Spalte ist die Kopfzeile `name` und vier Namen (anna, ben, cara, dan)."
   },
   "t04": {
-   "text": "Du änderst den Port in `server.conf`. Sichere zuerst mit `cp server.conf server.conf.bak`, dann `sed -i 's/8080/9090/' server.conf`.",
-   "hint": "Reihenfolge zählt: erst Backup, dann `-i`. Alternativ legt `sed -i.bak` das Backup selbst an; hier muss aber die Datei `server.conf.bak` existieren."
+   "text": "In `server.conf` änderst du den Port von 8080 auf 9090. Erstelle zuerst mit `cp` die Sicherung `server.conf.bak`, ändere dann mit `sed -i`.",
+   "hint": "Die Reihenfolge zählt: erst sichern, dann `-i`. Alternative: `sed -i.bak` sichert selbst; hier muss aber `server.conf.bak` existieren."
   },
   "t05": {
-   "text": "Gib `server.conf` ohne Kommentarzeilen (beginnend mit `#`) aus: `sed '/^#/d' server.conf`.",
-   "hint": "`^#` bedeutet # am Zeilenanfang, `d` entfernt die Zeile. Die Datei bleibt unverändert."
+   "text": "Gib `server.conf` ohne Kommentarzeilen (die mit `#` beginnen) aus; die Datei bleibt unverändert.",
+   "hint": "Der Löschbefehl von `sed` ist `d`; das Muster steht zwischen `/.../`. `^` steht für den Zeilenanfang. Die Datei bleibt unverändert."
   },
   "t06": {
-   "text": "Fehlerhafter Befehl: `sed 's/usr/local/bin/opt/bin/' paths.txt` schlägt fehl, weil das `/` im Pfad mit dem Trennzeichen kollidiert. Korrigiere: ersetze `/usr/local` durch `/opt` (Trennzeichen `|`).",
-   "hint": "`sed 's|/usr/local|/opt|' paths.txt`. Das erste Zeichen nach `s` ist das Trennzeichen; üblich sind `|`, `#` und `,`."
+   "text": "Fehlerhafter Befehl: `sed 's/usr/local/bin/opt/bin/' paths.txt` schlägt fehl, weil das `/` im Pfad mit dem Trenner kollidiert. Korrigiere: ersetze `/usr/local` durch `/opt` (nutze `|` als Trenner).",
+   "hint": "Das erste Zeichen nach `s` bestimmt den Trenner; üblich sind `|`, `#` und `,`. Das `/` im Pfad ist dann frei."
   },
   "t07": {
    "text": "Vorhersage: Wie oft kommt die Abteilung `it` in der Ausgabe von `cut -d, -f2 employees.csv | sort | uniq -c` vor? Danach ausführen.",
    "hint": "`uniq -c` setzt jeder verschiedenen Zeile die Anzahl voran. Die Kopfzeile `dept` zählt als eigene Zeile."
   },
   "t08": {
-   "text": "Mini-Projekt: Lege den Ordner `reports` an, kopiere `employees.csv` hinein und berechne in der Kopie das Durchschnittsgehalt mit awk (Kopfzeile überspringen): `awk -F, 'NR>1 {s+=$3; n++} END {print s/n}' reports/employees.csv`.",
-   "hint": "Schritte: `mkdir reports`, `cp employees.csv reports/`, dann awk. `NR>1` überspringt die Kopfzeile, `n` zählt die Zeilen."
+   "text": "Mini-Projekt: Lege den Ordner `reports` an, kopiere `employees.csv` hinein und berechne in der Kopie das Durchschnittsgehalt mit awk (Kopfzeile überspringen).",
+   "hint": "Schritte: Ordner anlegen, kopieren, dann `awk`. `NR>1` überspringt die Kopfzeile; halte Summe und Zeilenanzahl in Variablen und teile im `END`-Block. Das Gehalt ist Feld 3, Trenner `-F,`."
   },
   "t09": {
-   "text": "Mini-Projekt: Lege den Ordner `backup` an, kopiere `app.conf` nach `backup/app.conf` und ersetze dann in `app.conf` mit `sed -i` `mode=dev` durch `mode=prod`.",
-   "hint": "`mkdir backup`, `cp app.conf backup/app.conf`, `sed -i 's/mode=dev/mode=prod/' app.conf`. Das Backup VOR `-i` anlegen."
+   "text": "Mini-Projekt: Lege den Ordner `backup` an, kopiere `app.conf` als `backup/app.conf` und ändere dann in `app.conf` mit `sed -i` `mode=dev` in `mode=prod`.",
+   "hint": "Reihenfolge: `mkdir`, `cp`, dann `sed -i` mit `s/a/b/`. Sichere VOR dem `-i`."
   },
   "t10": {
    "text": "Vorhersage: Welches Tier gibt `sed -n '3p' pets.txt` aus? Prüfe mit dem gleichwertigen `head -n 3 pets.txt | tail -n 1`.",
@@ -247,27 +247,27 @@
   },
   "t11": {
    "text": "Challenge: Wähle mit awk aus `access.log` nur die Zeilen mit Statuscode 404 (Bedingung: zweites Feld ist 404).",
-   "hint": "`awk '$2 == 404' access.log` — das Muster allein genügt; ohne Aktion wird die Zeile ausgegeben."
+   "hint": "Die Bedingung allein reicht: ohne Aktionsblock gibt `awk` die passende Zeile aus. Das zweite Feld ist `$2`."
   },
   "t12": {
-   "text": "Challenge: Mache in `employees.csv` mit einem sed-Aufruf zwei Ersetzungen (mit zwei `-e`): `it` zu `IT`, `hr` zu `HR`. Nur ausgeben, Datei nicht ändern.",
-   "hint": "`sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv`."
+   "text": "Challenge: Mache in `employees.csv` mit einem einzigen sed-Aufruf zwei Änderungen (mit zwei `-e`): `it` zu `IT`, `hr` zu `HR`. Gib das Ergebnis aus, verändere die Datei nicht.",
+   "hint": "Jedes `-e` bekommt einen eigenen Ausdruck `s/a/b/`; hänge `g` an, um alle Treffer zu ersetzen. Kein `-i` verwenden."
   },
   "t13": {
-   "text": "Debuggen: Ein falsches `sed -i` hat `db.conf` zerstört (nur `host=` ist übrig). Das Backup `db.conf.bak` liegt noch da. Stelle die Datei aus dem Backup wieder her.",
-   "hint": "`cp db.conf.bak db.conf`. Prüfe mit `cat db.conf`: `host=localhost` und `port=5432`."
+   "text": "Fehlersuche: Durch ein falsches `sed -i` ist `db.conf` kaputt (nur `host=` ist übrig). Die Sicherung `db.conf.bak` ist noch da. Stelle die Datei aus der Sicherung wieder her.",
+   "hint": "Kopiere die Sicherung mit `cp` über die kaputte Datei (Quelle: Sicherung, Ziel: Originaldatei). Prüfe mit `cat db.conf`: `host=localhost` und `port=5432` müssen drin sein."
   },
   "t14": {
-   "text": "Ticket #3601 — 'Für den Live-Server brauchen wir eine saubere Konfiguration: Erstelle eine Kopie ohne Kommentarzeilen als `server.live`; das Original soll als `server.conf.orig` aufbewahrt werden.' (Im Simulator gibt es kein sed: erzeuge die Ausgabe ohne Kommentare mit `grep -v`; auf einem echten System macht `sed '/^#/d'` dasselbe.)",
-   "hint": "`cp server.conf server.conf.orig` und `grep -v '^#' server.conf > server.live`."
+   "text": "Ticket #3601 — 'Für den Live-Server brauchen wir eine saubere Konfiguration: eine Kopie ohne Kommentarzeilen als `server.live`; das Original soll als `server.conf.orig` aufbewahrt werden.' (Im Simulator gibt es kein sed: erzeuge die Ausgabe ohne Kommentare mit `grep`; auf einem echten System macht `sed` dasselbe.)",
+   "hint": "Zwei Aufgaben: Sichere das Original mit `cp` als `server.conf.orig`; filtere mit der Invert-Option von `grep` die Zeilen mit `#` am Anfang heraus und leite die Ausgabe mit `>` nach `server.live` um."
   },
   "t15": {
-   "text": "Ticket #3602 — 'Schreibe die Verteilung der Statuscodes aus access.log in die Datei `status_report.txt`.' (Pro Code eine Anzahl, z. B. `3 200`.)",
-   "hint": "Zweite Spalte holen, sortieren, zählen: `cut -d' ' -f2 access.log | sort | uniq -c > status_report.txt`. Ein awk-Array täte dasselbe."
+   "text": "Ticket #3602 — 'Schreibe die Verteilung der Statuscodes aus access.log in die Datei `status_report.txt`.' (Für jeden Code soll eine Anzahl dabeistehen, z. B. `3 200`.)",
+   "hint": "Pipeline: zweite Spalte extrahieren (`cut`, Trenner Leerzeichen), sortieren, Duplikate zählen (`uniq`), Ergebnis mit `>` in die Datei schreiben. Ein awk-Array würde dasselbe tun."
   },
   "t16": {
-   "text": "Ticket #3603 — 'Berechne die Gehaltssumme der IT-Abteilung.' Schreibe es mit awk: Trennzeichen `,`, Zeilen mit `it` im zweiten Feld, drittes Feld aufsummieren, mit `END` ausgeben.",
-   "hint": "`awk -F, '$2==\"it\" {s+=$3} END {print s}' employees.csv` (Ergebnis 11300)."
+   "text": "Ticket #3603 — 'Berechne die Gesamtsumme der Gehälter der IT-Abteilung.' Schreibe es mit awk: Trenner `,`, summiere das dritte Feld der Zeilen, deren zweites Feld `it` ist, und gib es mit `END` aus.",
+   "hint": "Bedingter Block: `$2==\"it\" {...}`; addiere zu einer Variablen und gib sie im `END`-Block aus. Erwartetes Ergebnis: 11300."
   }
  },
  "vm": {
@@ -426,6 +426,16 @@
     "Das erste Feld jeder Zeile"
    ],
    "explain": "`awk` teilt Zeilen standardmäßig an Leerraum in Felder; `$1` ist das erste, `$NF` das letzte."
+  },
+  "q9": {
+   "q": "Mit welchem Befehl zählst du, wie oft jede Zeile in einer Datei vorkommt?",
+   "options": [
+    "`uniq -c datei`",
+    "`cut -c datei | uniq`",
+    "`sort -u datei | wc`",
+    "`sort datei | uniq -c`"
+   ],
+   "explain": "`uniq` zählt nur aufeinanderfolgende Duplikate, deshalb ist vorher `sort` nötig. `cut` wählt Spalten/Felder aus."
   }
  },
  "summary": [

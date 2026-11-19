@@ -227,28 +227,28 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Liste im Verzeichnis `lab` alle `.tmp`-Dateien mit `find` auf: `find . -name \"*.tmp\"`.",
-   "hint": "Setze das Muster in doppelte Anführungszeichen."
+   "text": "Liste im Verzeichnis `lab` alle `.tmp`-Dateien mit `find` auf.",
+   "hint": "`find` nimmt zuerst das Startverzeichnis, dann mit `-name` das Muster. Setze das Muster in doppelte Anführungszeichen."
   },
   "t02": {
-   "text": "Zähle die `ERROR`-Zeilen in `run.log` und schreibe die Zahl in die Datei `count.txt`: `grep -c ERROR run.log > count.txt`.",
-   "hint": "`-c` liefert die Anzahl der passenden Zeilen."
+   "text": "Zähle die `ERROR`-Zeilen in `run.log` und schreibe die Zahl in die Datei `count.txt`.",
+   "hint": "`grep` mit `-c` liefert die Zahl der passenden Zeilen; leite das Ergebnis mit `>` in die Datei um."
   },
   "t03": {
-   "text": "Schreibe `host: ` und den Rechnernamen in die Datei `who.txt`: `echo \"host: $(hostname)\" > who.txt`.",
-   "hint": "In doppelten Quotes wird `$(hostname)` expandiert."
+   "text": "Schreibe `host: ` und den Rechnernamen in die Datei `who.txt`.",
+   "hint": "Nutze `echo` und die Befehlsersetzung `$(...)`; in doppelten Anführungszeichen wird `$(hostname)` ausgewertet. Leite die Ausgabe mit `>` um."
   },
   "t04": {
-   "text": "Lege das Verzeichnis `backup` an und kopiere dann mit Glob alle `.log`-Dateien aus `logs` dorthin: `cp logs/*.log backup/`.",
-   "hint": "Erst `mkdir backup`; bei `cp` steht das Ziel am Ende."
+   "text": "Erstelle das Verzeichnis `backup` und kopiere dann alle `.log`-Dateien aus `logs` per Glob dorthin.",
+   "hint": "Zuerst `mkdir`; dann nimmt `cp` die Quellen und am Ende das Zielverzeichnis. Glob: `*.log`."
   },
   "t05": {
-   "text": "Schreibe zuerst den Fehler in `err.txt`: `ls missing.txt 2> err.txt`. Schreibe dann Ausgabe UND Fehler von `ls missing.txt notes.txt` gemeinsam in `both.txt`.",
-   "hint": "`> both.txt 2>&1`; Reihenfolge: erst `>`, dann `2>&1`."
+   "text": "Schreibe zuerst die Fehlermeldung von `ls missing.txt` in die Datei `err.txt`. Schreibe dann Ausgabe UND Fehler von `ls missing.txt notes.txt` zusammen in `both.txt`.",
+   "hint": "Der Fehlerstrom hat die Nummer 2: `2>`. Für beides zusammen gib zuerst mit `>` die Datei an, dann `2>&1`; die Reihenfolge ist wichtig."
   },
   "t06": {
-   "text": "Schreibe mit `printf` das Skript `greet.sh` (Shebang + `echo \"Hello $1\"`), mache es mit `chmod +x greet.sh` ausführbar und starte es mit `./greet.sh alice > greet.out`.",
-   "hint": "`printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh`; Text in einfache Quotes, sonst wird `$1` sofort expandiert."
+   "text": "Schreibe mit `printf` das Skript `greet.sh` (Shebang + `echo \"Hello $1\"`), mache es mit `chmod` ausführbar und schreibe die Ausgabe von `./greet.sh alice` in `greet.out`.",
+   "hint": "Nutze in `printf` für Zeilenenden `\\n`; schütze den Text mit einfachen Anführungszeichen, sonst wird `$1` sofort ausgewertet. Für das Ausführungsrecht `chmod +x`."
   },
   "t07": {
    "text": "VORHERSAGE: Welche Stufe zeigt `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr` am häufigsten und wie oft? Erst raten, dann ausführen.",
@@ -267,24 +267,24 @@
    "hint": "Führe erst `find . -name *.log` aus: Die Shell hat `*.log` zu `run.log` expandiert. Setze das Muster in Quotes."
   },
   "t11": {
-   "text": "FEHLER SUCHEN: `./hello.sh` meldet „Permission denied“. Behebe das und starte es; das Ergebnis soll in `hello.out` stehen.",
-   "hint": "Prüfe mit `ls -l hello.sh` die Rechte; dann `chmod +x hello.sh`. (`chmod` in Modul 4.4.)"
+   "text": "FEHLERSUCHE: `./hello.sh` meldet \"Permission denied\". Korrigiere und führe aus; das Ergebnis soll in `hello.out` stehen.",
+   "hint": "Prüfe die Rechte mit `ls -l hello.sh`; es fehlt das Ausführungsrecht (`x`). (`chmod` kommt in Modul 4.4.)"
   },
   "t12": {
-   "text": "MINI-PROJEKT: Filtere die `ERROR`-Zeilen, zeige sie an und speichere sie zugleich in `errors.txt` (`tee`); hänge dann die Ausgabe von `wc -l errors.txt` mit `>>` an `summary.txt` an.",
-   "hint": "`grep ERROR run.log | tee errors.txt`, danach `wc -l errors.txt >> summary.txt`."
+   "text": "MINI-PROJEKT: Filtere die `ERROR`-Zeilen, zeige sie auf dem Bildschirm und schreibe sie in `errors.txt` (`tee`); hänge dann die Zeilenzahl von `errors.txt` an `summary.txt` an (`>>`).",
+   "hint": "Reihenfolge: `grep`, Pipe, `tee`; danach die Ausgabe von `wc -l` mit `>>` anhängen."
   },
   "t13": {
-   "text": "HERAUSFORDERUNG: Lösche alle `.tmp`-Dateien unter `project` mit `find` und `-exec rm {} \\;`. (Der Simulator führt `-exec` nicht aus; die korrekte Schreibweise wird geprüft.)",
-   "hint": "`find project -name \"*.tmp\" -exec rm {} \\;`; das `\\;` ist wichtig. Auf der echten VM erst mit `-print` testen."
+   "text": "CHALLENGE: Lösche alle `.tmp`-Dateien unter `project` mit `find` und `-exec rm`. (Der Simulator führt `-exec` nicht aus; geprüft wird die korrekte Schreibweise.)",
+   "hint": "`-exec` nimmt den Befehl mit dem Platzhalter `{}` und endet mit `\\;`; das Escapen ist wichtig. Teste in einer echten VM zuerst mit `-print`."
   },
   "t14": {
-   "text": "HERAUSFORDERUNG: Ermittle die Zeilenzahl aller `.txt`-Dateien auf dem sicheren Weg: `-print0` mit `xargs -0` und `wc -l`. (`xargs` gibt es im Simulator nicht; die Schreibweise wird geprüft.)",
-   "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."
+   "text": "CHALLENGE: Ermittle die Zeilenzahl aller `.txt`-Dateien auf sicherem Weg: `find` mit `-print0`, `xargs -0` und `wc -l`. (`xargs` gibt es im Simulator nicht; geprüft wird die Schreibweise.)",
+   "hint": "Gib die `find`-Ausgabe mit `-print0` NUL-getrennt aus, leite sie per Pipe an `xargs -0` weiter, das `wc -l` ausführt."
   },
   "t15": {
-   "text": "HERAUSFORDERUNG: Finde in `access.log` die häufigste IP samt Anzahl und schreibe nur diese eine Zeile in `top.txt`.",
-   "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."
+   "text": "CHALLENGE: Finde in `access.log` die häufigste IP samt Anzahl und schreibe nur diese eine Zeile in `top.txt`.",
+   "hint": "Muster: erstes Feld mit `cut`, `sort`, `uniq -c`, `sort -nr`, `head -n 1`; Ergebnis mit `>` schreiben."
   },
   "t16": {
    "text": "TICKET #3901 — Support: „Für das Morgenmeeting brauchen wir ein Skript, das die `ERROR`- und `WARN`-Zeilen aus `run.log` sortiert nach `problems.txt` schreibt; wir führen es täglich aus.“ Schreibe `check.sh` (Shebang + `grep -E ... | sort > problems.txt`), mache es ausführbar und starte es.",
@@ -370,19 +370,19 @@
    "q": "Was ist der Unterschied zwischen `find ... -exec rm {} \\;` und `find ... -exec rm {} +`?",
    "options": [
     "`\\;` gilt nur für Verzeichnisse, `+` nur für Dateien",
-    "`\\;` startet den Befehl je Datei einzeln, `+` sammelt die Pfade und übergibt sie an wenige Aufrufe",
-    "`+` führt den Befehl nie aus, es listet nur",
-    "Es gibt keinen Unterschied, nur eine Schreibweise"
+    "`\\;` pro Datei einzeln, `+` gebündelt",
+    "`+` führt den Befehl nie aus, sondern listet nur die Treffer",
+    "Kein Unterschied, beides ist nur Schreibstil"
    ],
    "explain": "`\\;` startet für jeden Treffer einen Prozess; `+` sammelt Argumente und kommt mit viel weniger Prozessen aus."
   },
   "q2": {
    "q": "Warum ist `find . -name *.log` (ohne Quotes) problematisch?",
    "options": [
-    "`find` akzeptiert keine Muster",
+    "`find` akzeptiert unter keinen Umständen Muster",
     "`-name` funktioniert nur mit Großbuchstaben",
-    "Die Shell expandiert `*.log` zu Namen im aktuellen Verzeichnis, bevor `find` startet",
-    "Der Befehl löscht die ganze Platte"
+    "Die Shell expandiert `*.log` zuerst im aktuellen Verzeichnis",
+    "Der Befehl löscht alle Dateien der Platte"
    ],
    "explain": "Die Shell expandiert. Das Muster muss als `\"*.log\"` in Quotes stehen, damit es unverändert bei `find` ankommt."
   },
@@ -399,10 +399,10 @@
   "q4": {
    "q": "Wie gibst du das Ergebnis von `find` bei Dateien mit Leerzeichen sicher an `rm` weiter?",
    "options": [
-    "`find . | xargs rm`",
+    "`find . -type f | xargs rm -f`",
     "`rm $(find .)`",
     "`find . -name x | rm`",
-    "`find ... -print0 | xargs -0 rm`"
+    "`find . -print0 | xargs -0 rm`"
    ],
    "explain": "`-print0` und `xargs -0` trennen Namen mit NUL; Namen mit Leerzeichen oder Zeilenumbrüchen werden nicht zerlegt."
   },
@@ -411,7 +411,7 @@
    "options": [
     "Kopiert Dateien parallel",
     "Startet Befehle im Hintergrund",
-    "Übergibt Standardeingabe als Argumente an einen Befehl",
+    "Macht die Eingabe zu Argumenten",
     "Schreibt die Ausgabe in eine Datei"
    ],
    "explain": "`xargs` macht aus Elementen von stdin Argumente eines Befehls; Grundlage von `find | xargs`."
@@ -429,22 +429,32 @@
   "q7": {
    "q": "Was bedeutet `cmd1 && cmd2`?",
    "options": [
-    "cmd2 läuft immer",
-    "cmd2 läuft, wenn cmd1 fehlschlägt",
-    "Beide laufen gleichzeitig",
-    "cmd2 läuft nur, wenn cmd1 erfolgreich war (Exit-Code 0)"
+    "cmd2 läuft immer, das Ergebnis zählt nicht",
+    "cmd2 läuft nur, wenn cmd1 fehlschlug",
+    "Beide laufen parallel zugleich",
+    "cmd2 läuft nur, wenn cmd1 erfolgreich war"
    ],
    "explain": "`&&` verkettet bei Erfolg; `||` führt bei Misserfolg aus."
   },
   "q8": {
    "q": "Was macht `ls | tee liste.txt`?",
    "options": [
-    "Zeigt die Ausgabe an und speichert sie in `liste.txt`",
-    "Schreibt die Ausgabe nur in die Datei",
-    "Kopiert die Datei auf den Bildschirm",
-    "Trennt Fehler in eine Datei"
+    "Schreibt die Ausgabe auf den Bildschirm und in `liste.txt`",
+    "Schreibt die Ausgabe nur in die Datei `liste.txt`",
+    "Kopiert die Datei `liste.txt` auf den Bildschirm",
+    "Trennt nur die Fehler in eine Datei ab"
    ],
    "explain": "`tee` leitet stdin an stdout und an eine Datei weiter; mit `-a` wird angehängt."
+  },
+  "q9": {
+   "q": "Was musst du tun, damit du ein Skript mit `./script.sh` starten kannst?",
+   "options": [
+    "`sh -n script.sh` ausführen",
+    "Recht geben: `chmod +x script.sh`",
+    "`cat script.sh` ausführen",
+    "Den Namen ohne `.sh` schreiben"
+   ],
+   "explain": "`./script.sh` benötigt das x-Recht: `chmod +x`. Ohne Recht geht auch `sh script.sh`."
   }
  },
  "summary": [

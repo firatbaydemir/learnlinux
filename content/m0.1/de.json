@@ -141,7 +141,7 @@
   },
   "t10": {
    "text": "Fehlersuche: `~/distro.txt` enthält fälschlich `ID=windows`. Überschreibe die Datei so, dass sie `ID=linux` enthält.",
-   "hint": "`echo ID=linux > ~/distro.txt` ersetzt den Inhalt; prüfe mit `cat`."
+   "hint": "`echo` ersetzt den Inhalt; prüfe mit `cat`."
   },
   "t11": {
    "text": "Mini-Projekt: Erstelle den Ordner `~/about_linux`. Speichere das Kernel-Release in `~/about_linux/kernel.txt` und den Inhalt von `/etc/os-release` in `~/about_linux/distro.txt`.",
@@ -297,6 +297,16 @@
     "Lizenzfrei, gemeinfrei"
    ],
    "explain": "Der Kernel ist unter GPLv2 frei: Quellcode einsehbar, änderbar und unter gleicher Lizenz weitergebbar."
+  },
+  "q9": {
+   "q": "Warum verhalten sich Ubuntu und Fedora unterschiedlich, obwohl sie denselben Linux-Kernel nutzen können?",
+   "options": [
+    "Weil ihre Kernel verschiedene Dateisysteme verwenden",
+    "Weil eines davon kein echtes Linux ist",
+    "Distribution = Kernel + Paketverwaltung, Werkzeuge und Standardeinstellungen; der Unterschied kommt daher",
+    "Weil Befehle nur in einer Distribution funktionieren"
+   ],
+   "explain": "Linux ist nur der Kernel; Paketierung, Werkzeuge und Einstellungen machen die Distribution aus."
   }
  },
  "summary": [

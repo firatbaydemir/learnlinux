@@ -22,7 +22,8 @@
      "where": "Yeni aygıtı bulmadan veya disk durumunu incelerken.",
      "why": "Disk ile bölüm ilişkisini ve bağlama noktalarını gösterir.",
      "example": "lsblk",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS\nsda      8:0    0   20G  0 disk\n└─sda1   8:1    0   20G  0 part /\nsdb      8:16   0    5G  0 disk"
     },
     {
      "cmd": "lsblk -f",
@@ -30,7 +31,8 @@
      "where": "Bir bölümü fstab kaydıyla eşleştirirken.",
      "why": "Kalıcı tanımlama için UUID gibi bilgileri görürsün.",
      "example": "lsblk -f",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   FSTYPE FSVER LABEL UUID                                 MOUNTPOINTS\nsda\n└─sda1 ext4   1.0         3f2a9c1e-5b7d-4c1a-9e0f-1a2b3c4d5e6f /\nsdb"
     },
     {
      "cmd": "fdisk -l",
@@ -38,7 +40,8 @@
      "where": "Bölüm düzenini incelerken; menüye girmeden önce.",
      "why": "Disk kapasitesi ve bölüm sınırlarına genel bakış verir.",
      "example": "sudo fdisk -l",
-     "nosim": true
+     "nosim": true,
+     "output": "Disk /dev/sdb: 5 GiB, 5368709120 bytes, 10485760 sectors\nUnits: sectors of 1 * 512 = 512 bytes\nDisklabel type: gpt"
     },
     {
      "cmd": "blkid",
@@ -46,7 +49,8 @@
      "where": "Bir bölümün kimliğini doğrularken.",
      "why": "fstab'da aygıt adına bağımlılığı azaltır.",
      "example": "sudo blkid",
-     "nosim": true
+     "nosim": true,
+     "output": "/dev/sda1: UUID=\"3f2a9c1e-5b7d-4c1a-9e0f-1a2b3c4d5e6f\" TYPE=\"ext4\""
     }
    ],
    "tip": "Önce `lsblk -f`, sonra gerekiyorsa `sudo fdisk -l`. Aygıt adını tek başına güvenilir kimlik sayma."
@@ -65,7 +69,8 @@
      "where": "Yalnızca doğru olduğu doğrulanmış, yedekli ve boş bir bölümde.",
      "why": "Linux'un bölümde dosya saklayabilmesi için dosya sistemi gerekir.",
      "example": "sudo mkfs.ext4 /dev/sdb1",
-     "nosim": true
+     "nosim": true,
+     "output": "Creating filesystem with 1310720 4k blocks and 327680 inodes\nAllocating group tables: done\nWriting inode tables: done\nWriting superblocks and filesystem accounting information: done"
     },
     {
      "cmd": "mkfs.xfs",
@@ -92,7 +97,8 @@
      "where": "Swap alanı eklerken; önce `dd`/`fallocate` ile dosya, `chmod 600` ile izin.",
      "why": "RAM dolduğunda çekirdeğin az kullanılan sayfaları diske atabilmesi için.",
      "example": "sudo mkswap /swapfile",
-     "nosim": true
+     "nosim": true,
+     "output": "Setting up swapspace version 1, size = 1024 MiB (1073737728 bytes)"
     },
     {
      "cmd": "swapon",
@@ -100,7 +106,8 @@
      "where": "Swap eklemeden sonra etkinleştirmek veya mevcut swap durumunu görmek için.",
      "why": "Kalıcı olması için `/etc/fstab` kaydı gerekir; `swapoff` alanı devreden çıkarır.",
      "example": "swapon --show",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME      TYPE SIZE USED PRIO\n/swapfile file   1G   0B   -2"
     },
     {
      "cmd": "mount",
@@ -108,7 +115,8 @@
      "where": "Mevcut bağları incelemek veya yönetici tarafından onaylanan bağlama işlemi için.",
      "why": "Linux disk içeriğine dizin ağacı üzerinden erişir.",
      "example": "findmnt /",
-     "nosim": true
+     "nosim": true,
+     "output": "TARGET SOURCE    FSTYPE OPTIONS\n/      /dev/sda1 ext4   rw,relatime"
     },
     {
      "cmd": "umount",
@@ -124,7 +132,8 @@
      "where": "Bir bölümün nereye bağlandığını doğrularken.",
      "why": "mount tablosunu okunur biçimde gösterir.",
      "example": "findmnt /",
-     "nosim": true
+     "nosim": true,
+     "output": "TARGET SOURCE    FSTYPE OPTIONS\n/      /dev/sda1 ext4   rw,relatime"
     },
     {
      "cmd": "mdadm",
@@ -132,7 +141,8 @@
      "where": "RAID 1 (yansıtma) veya RAID 5 gerektiğinde; yalnızca boş, yedekli diskler üzerinde.",
      "why": "Disk arızasında verinin kaybolmaması (yedeklilik) veya hız için.",
      "example": "sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc",
-     "nosim": true
+     "nosim": true,
+     "output": "mdadm: array /dev/md0 started."
     },
     {
      "cmd": "quota",
@@ -140,7 +150,8 @@
      "where": "Dosya sisteminde kota (usrquota) etkinse; yönetici `edquota` ile sınır koyar.",
      "why": "Bir kullanıcının diski doldurmasını önlemek için.",
      "example": "quota -u alice",
-     "nosim": true
+     "nosim": true,
+     "output": "Disk quotas for user alice (uid 1001):\n     Filesystem  blocks   quota   limit   grace\n      /dev/sdb1    1024    5000    6000"
     }
    ],
    "tip": "`/etc/fstab` dosyasını düzenlemeden önce yedekle; değişiklikten sonra yeniden başlatmak yerine `sudo mount -a` ile sözdizimini denetle (bu komut bağlama yapabilir)."
@@ -169,7 +180,7 @@
   },
   "t06": {
    "text": "Hatalı/geçici örnek kaydı kaldır: `~/disklab/fstab.tmp` dosyasını sil.",
-   "hint": "Tam yolu ve dosya adını kontrol ettikten sonra `rm ~/disklab/fstab.tmp`."
+   "hint": "Tam yolu ve dosya adını kontrol ettikten sonra `rm`."
   },
   "t07": {
    "text": "Mini proje: `/data` için UUID ve `nofail` seçeneğini içeren bir bağlama planını `~/disklab/mount-plan.txt` dosyasına yaz.",
@@ -177,7 +188,7 @@
   },
   "t08": {
    "text": "Meydan okuma: örnek fstab dosyasının yedeğini `~/disklab/fstab.backup` adıyla oluştur.",
-   "hint": "`cp ~/disklab/fstab.sample ~/disklab/fstab.backup`"
+   "hint": "`cp`"
   },
   "t09": {
    "text": "Ticket: \"Yeni disk görünmüyor.\" Destek notuna önce `lsblk`, sonra `df -hT` ile kontrol edilmesini yaz.",
@@ -200,7 +211,7 @@
    "hint": "İki değeri `echo ... > file` ile tek satıra yaz. (Ayrıntı: modül 3.2.)"
   },
   "t14": {
-   "text": "Zorlu görev: örnek fstab'ın kaç kayıt (satır) içerdiğini `wc -l ~/disklab/fstab.sample` ile say.",
+   "text": "Zorlu görev: örnek fstab'ın kaç kayıt (satır) içerdiğini `~/disklab/fstab.sample` dosyasından say.",
    "hint": "Her satır bir bağlama kaydıdır; `wc -l` satır sayar."
   }
  },
@@ -247,6 +258,20 @@
     "differs": [
      "Kaynak `/dev/mapper/...` veya `/dev/nvme0n1p...` olabilir; örnek çıktı birebir aynı olmak zorunda değil.",
      "Komut, disk üzerinde değişiklik yapmaz."
+    ]
+   },
+   "v04": {
+    "title": "Disk ve bölümleri listele",
+    "text": "`fdisk -l` ile bölüm tablolarını, `blkid` ile UUID ve dosya sistemi türlerini göster (ikisi de salt okunur).",
+    "blocks": [
+     {
+      "cmd": "sudo fdisk -l\nsudo blkid",
+      "expected": "Disk /dev/vda: 20 GiB\n/dev/vda2: UUID=\"...\" TYPE=\"xfs\""
+     }
+    ],
+    "differs": [
+     "Aygıt adları ve boyutlar sisteme göre değişir.",
+     "`Permission denied` alırsan `sudo` kullandığından emin ol."
     ]
    }
   }

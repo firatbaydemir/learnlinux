@@ -115,24 +115,24 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`logs/app.log` içindeki `ERROR` satırlarını `grep` ile göster.",
-   "hint": "Desen ve dosya adını ver: `grep ERROR logs/app.log`."
+   "text": "`logs/app.log` içindeki `ERROR` satırlarını göster.",
+   "hint": "`grep` önce deseni, sonra dosyayı alır."
   },
   "t02": {
-   "text": "`logs/app.log` içinde `warn` sözcüğünü harf duyarsız ara.",
-   "hint": "`grep -i warn logs/app.log` kullan."
+   "text": "`logs/app.log` içinde `warn` sözcüğünü büyük/küçük harf fark etmeden ara.",
+   "hint": "`grep` ile harf duyarsızlık bayrağı: `-i`."
   },
   "t03": {
-   "text": "Erişim kaydındaki `404` satırını satır numarasıyla bul.",
-   "hint": "`grep -n 404 logs/access.log`."
+   "text": "Erişim kaydındaki `404` satırlarını satır numaralarıyla bul.",
+   "hint": "`grep` ile satır numarası bayrağı: `-n`."
   },
   "t04": {
-   "text": "`project` ağacında `.conf` ile biten adları bul.",
-   "hint": "`find project -name \"*.conf\"`; deseni tırnakla."
+   "text": "`project` ağacında adı `.conf` ile biten her şeyi bul.",
+   "hint": "`find` önce dizini, sonra `-name` ölçütünü alır; deseni tırnakla."
   },
   "t05": {
    "text": "`project` içinde yalnızca normal `.txt` dosyalarını bul.",
-   "hint": "`find project -type f -name \"*.txt\"`."
+   "hint": "`find` ile `-type f` ve `-name` ölçütlerini birleştir."
   },
   "t06": {
    "text": "Tahmin et: `grep -c ERROR logs/app.log` kaç eşleşen satır verir? Sonra doğrula.",
@@ -144,27 +144,27 @@
   },
   "t08": {
    "text": "Hata ayıklama: `ERROR` satırlarını home dizinindeki `errors.txt` dosyasına kaydet.",
-   "hint": "`grep ERROR logs/app.log > errors.txt` ile stdout'u yönlendir (`>` modül 3.2'de)."
+   "hint": "Çıktıyı dosyaya yönlendir: `>` (modül 3.2)."
   },
   "t09": {
    "text": "`INFO` içermeyen log satırlarını göster.",
-   "hint": "`-v`, eşleşmeyen satırları seçer: `grep -v INFO logs/app.log`."
+   "hint": "`grep` ile eşleşmeyenleri seçen bayrak: `-v`."
   },
   "t10": {
    "text": "Mini görev: `project` dosyalarında `TODO` ifadesinin geçtiği satırları ara.",
-   "hint": "Dizin içinde özyinelemeli arama için `grep -r TODO project`."
+   "hint": "`grep` ile dizin içinde özyinelemeli arama bayrağı: `-r`."
   },
   "t11": {
    "text": "Mini görev: `logs` ağacında `.log` ile biten normal dosyaları bul.",
-   "hint": "`find logs -type f -name \"*.log\"`."
+   "hint": "`find` komutu; `-type` ve `-name` ölçütleri."
   },
   "t12": {
-   "text": "Meydan okuma: `project` içinde `todo` sözcüğünü harf duyarsız ve satır numaralı ara.",
-   "hint": "`grep -rin todo project` seçenekleri birleştirebilirsin."
+   "text": "Meydan okuma: `project` içinde `todo` sözcüğünü harf duyarsız, satır numaralı ve dizinleri tarayarak ara.",
+   "hint": "Üç bayrağı tek seçenek grubunda birleştirebilirsin: `-r`, `-i`, `-n`."
   },
   "t13": {
    "text": "Ticket: Projedeki tüm `.txt` yollarını `text_files.txt` adlı rapora kaydet.",
-   "hint": "`find . -type f -name \"*.txt\" > text_files.txt` (`>` modül 3.2'de)."
+   "hint": "`find` ile `-type f` ve `-name`, sonra `>` ile yönlendir (modül 3.2)."
   }
  },
  "vm": {
@@ -303,6 +303,16 @@
     "Kabuk deseni genişletmesin, `find` kendisi eşlesin diye"
    ],
    "explain": "Tırnaksız `*.txt`'yi kabuk geçerli dizindeki dosyalara genişletebilir; tırnak deseni `find`'a olduğu gibi iletir."
+  },
+  "q9": {
+   "q": "Dosya adını bilmiyorsun ama içinde `timeout` kelimesi geçtiğini biliyorsun. Hangi yaklaşım uygundur?",
+   "options": [
+    "`find` ile adı `timeout` olan dosyayı aramak",
+    "`ls` ile tüm dizini listeleyip gözle bakmak",
+    "`grep` yalnızca tek bir dosya içinde çalışır, bu yüzden olmaz",
+    "`grep -r` ile dizinde içeriği taramak; find ad ve özellik arar, içerik aramaz"
+   ],
+   "explain": "`grep` içeriğe bakar, `-r` ile dizin ağacını dolaşır. `find` dosyayı ad, tür, boyut gibi özelliklerle bulur; içeriği taramaz."
   }
  },
  "summary": [

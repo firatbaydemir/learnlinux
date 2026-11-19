@@ -213,7 +213,7 @@
   },
   "t10": {
    "text": "Hata ayıklama: vim, ev dizinindeki artık `.todo.txt.swp` takas dosyası için uyarı veriyor. Dosyayı kimse düzenlemiyor; takas dosyasını sil.",
-   "hint": "Gizli dosya: `rm .todo.txt.swp`; `ls -a` ile listelenir."
+   "hint": "Gizli dosya: `rm`; `ls -a` ile listelenir."
   },
   "t11": {
    "text": "Mini proje: `scripts` klasörünü oluştur, `scripts/hello.sh` dosyasına `#!/bin/bash` ve `echo hello` satırlarını yaz (`printf` ve `\\n` kullan), sonra modunu 755 yap.",
@@ -312,6 +312,16 @@
     "/kelime"
    ],
    "explain": "`/kelime` ileri arar, `n` sonraki eşleşmeye gider; `?kelime` geriye doğru arar."
+  },
+  "q9": {
+   "q": "vim'de dosyayı kaydetmeden önce neden `Esc` tuşuna basarsın?",
+   "options": [
+    "Esc dosyayı otomatik kaydeder",
+    "Komut yazabilmek için ekleme modundan normal moda dönmen gerekir",
+    "Esc vim'i kapatır",
+    "Esc yalnızca satırı siler"
+   ],
+   "explain": "vim modludur: ekleme modunda yazdıkların metne girer. `:w` gibi komutlar normal modda çalışır, bu yüzden önce Esc ile normal moda dönülür."
   }
  },
  "summary": [

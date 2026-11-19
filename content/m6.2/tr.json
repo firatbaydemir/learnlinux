@@ -22,7 +22,8 @@
      "where": "Bir servis sorununda ilk kontrolde.",
      "why": "Sorunun SELinux kaynaklı olup olmadığını daraltır.",
      "example": "getenforce",
-     "nosim": true
+     "nosim": true,
+     "output": "Enforcing"
     },
     {
      "cmd": "sestatus",
@@ -30,7 +31,8 @@
      "where": "Genel durum özeti gerektiğinde.",
      "why": "Çalışan mod ile kalıcı mod farkını görürsün.",
      "example": "sestatus",
-     "nosim": true
+     "nosim": true,
+     "output": "SELinux status:                 enabled\nCurrent mode:                   enforcing\nLoaded policy name:             targeted"
     },
     {
      "cmd": "setenforce 0",
@@ -66,7 +68,8 @@
      "where": "Erişim reddinde dosya tipine bakarken.",
      "why": "Beklenen tip ile gerçek tipi karşılaştırırsın.",
      "example": "ls -Z /var/www/html",
-     "nosim": true
+     "nosim": true,
+     "output": "unconfined_u:object_r:httpd_sys_content_t:s0 index.html"
     },
     {
      "cmd": "chcon -t",
@@ -118,7 +121,8 @@
      "where": "Değiştirmeden önce ve sonra doğrularken.",
      "why": "Değişikliğin uygulandığını görürsün.",
      "example": "getsebool httpd_can_network_connect",
-     "nosim": true
+     "nosim": true,
+     "output": "httpd_can_network_connect --> off"
     },
     {
      "cmd": "setsebool -P",
@@ -196,7 +200,8 @@
      "where": "Durum kontrolünde.",
      "why": "Hangi programın kısıtlı olduğunu görürsün.",
      "example": "sudo aa-status",
-     "nosim": true
+     "nosim": true,
+     "output": "apparmor module is loaded.\n34 profiles are loaded.\n32 profiles are in enforce mode.\n2 profiles are in complain mode."
     },
     {
      "cmd": "aa-complain",
@@ -277,7 +282,7 @@
    "hint": "İlk satır için `>`, ikinci için `>>` kullan."
   },
   "t13": {
-   "text": "Mini proje: `cut -d' ' -f10 audit.log | sort | uniq -c > top_comm.txt` ile hangi programın kaç kez reddedildiğini `top_comm.txt` dosyasına yaz.",
+   "text": "Mini proje: `audit.log` içinden hangi programın kaç kez reddedildiğini `top_comm.txt` dosyasına yaz.",
    "hint": "10. alan `comm=...`; `uniq -c` saymadan önce `sort` gerekir. (`sort/uniq` → modül 3.5.)"
   },
   "t14": {
@@ -390,20 +395,20 @@
   "q1": {
    "q": "Bir servis SELinux yüzünden çalışmıyor. En doğru ilk teşhis adımı hangisi?",
    "options": [
-    "`SELINUX=disabled` yazıp yeniden başlatmak",
+    "`SELINUX=disabled` yazıp yeniden başlatarak sorunu kökten çözmek",
     "`getenforce` ile modu görüp geçici `setenforce 0` ile test etmek, sonra logu okumak",
-    "Tüm dosyalara `chmod 777` vermek",
-    "Servisi silmek"
+    "Sorun çıkmasın diye tüm dosyalara `chmod 777` vermek",
+    "Hata veren servisi tamamen silip yeniden kurmak"
    ],
    "explain": "Önce modu ve sorunun SELinux olup olmadığını geçici permissive ile belirle, sonra AVC logundan nedeni bul. Kalıcı kapatmak güvenlik katmanını siler."
   },
   "q2": {
    "q": "`/srv/web` dizini için etiketi relabel sonrasında da korumak istiyorsun. Doğru yol hangisi?",
    "options": [
-    "Yalnızca `chcon -t httpd_sys_content_t`",
-    "`setsebool -P`",
+    "Yalnızca `chcon -t httpd_sys_content_t` ile etiketi değiştirmek",
+    "`setsebool -P` ile bir boolean'ı kalıcı açmak",
     "`semanage fcontext -a ...` sonra `restorecon -R`",
-    "`setenforce 1`"
+    "`setenforce 1` ile zorlayıcı moda geçmek"
    ],
    "explain": "`chcon` kalıcı değildir. `semanage fcontext` kuralı politikaya yazar, `restorecon` onu dosyalara uygular."
   },
@@ -411,9 +416,9 @@
    "q": "`setsebool httpd_can_network_connect on` yazdın, yeniden başlatınca ayar gitti. Neden?",
    "options": [
     "`-P` bayrağı yoktu, ayar sadece çalışan sistemde kaldı",
-    "Boolean var olmayan bir anahtardı",
-    "SELinux disabled idi",
-    "Audit log doldu"
+    "Boolean var olmayan bir anahtardı, bu yüzden değişmedi",
+    "SELinux zaten disabled modundaydı, ayar etkisizdi",
+    "Audit günlüğü doldu, yeni ayar yazılamadı"
    ],
    "explain": "`-P` ayarı kalıcı yapar. Onsuz değişiklik yalnızca çalışan sistemde geçerlidir."
   },
@@ -440,10 +445,10 @@
   "q6": {
    "q": "Hangi komut dosyanın etiketini varsayılan politikaya göre sıfırlar?",
    "options": [
-    "`restorecon -Rv /srv/web`",
-    "`chmod -R 755 /srv/web`",
-    "`setenforce 0`",
-    "`chcon -u root /srv/web`"
+    "`restorecon -Rv /srv/web` ile etiketleri varsayılana döndürmek",
+    "`chmod -R 755 /srv/web` ile izinleri açmak",
+    "`setenforce 0` ile SELinux'u kapatıp geçmek",
+    "`chcon -u root /srv/web` ile kullanıcıyı değiştirmek"
    ],
    "explain": "`restorecon` etiketi dosya bağlamı politikasına göre geri yükler."
   },
@@ -460,12 +465,22 @@
   "q8": {
    "q": "AVC reddi kayıtlarını nerede ararsın?",
    "options": [
-    "`/etc/selinux/config`",
+    "`/etc/selinux/config` yapılandırma dosyası",
     "`/var/log/audit/audit.log` (`ausearch -m avc`)",
-    "`/proc/selinux`",
-    "`/etc/passwd`"
+    "`/proc/selinux` sanal dosya sistemi girdisi",
+    "`/etc/passwd` kullanıcı hesabı dosyası"
    ],
    "explain": "Reddedilen erişimler audit alt sisteminde `type=AVC` olarak kaydedilir."
+  },
+  "q9": {
+   "q": "SELinux sorununda `setenforce 0` ile kapatmak yerine neden önce AVC kaydı okunur?",
+   "options": [
+    "Kayıt, neyin hangi etiket yüzünden engellendiğini gösterir; kapatmak sorunu çözmez, yalnızca gizler",
+    "`setenforce 0` yalnızca root dışı kullanıcılarda çalışır",
+    "AVC kaydı okunmazsa sistem açılmaz",
+    "Kapatmak her zaman daha yavaş bir çözümdür"
+   ],
+   "explain": "`setenforce 0` yalnızca denetimi geçici olarak izin verici yapar; neden bilinmez. AVC reddi (`ausearch`, `audit.log`) hangi süreç, hangi etiket ve hangi işlemin engellendiğini gösterir; doğru çözüm etiket (`semanage`/`restorecon`) ya da boolean'dır."
   }
  },
  "summary": [

@@ -85,7 +85,7 @@
      "what": "Hata mesajlarını da pipe'a sokar.",
      "where": "Hem çıktıyı hem hatayı tek akış olarak süzerken.",
      "why": "Hatalar ekranda kaybolmaz, `grep`/`wc` onları da görür.",
-     "example": "ls data yok 2>&1 | wc -l"
+     "example": "ls data nofile 2>&1 | wc -l"
     },
     {
      "cmd": "tee -a",
@@ -107,32 +107,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`cat logs/app.log | wc -l` ile `logs/app.log` satırlarını say.",
-   "hint": "Pipe dosya içeriğini `wc -l`'ye verir."
+   "text": "`logs/app.log` satırlarını say; dosyayı `cat` ile okuyup çıktısını sayan komuta boru ile ver.",
+   "hint": "`cat` ve `wc -l` komutlarını `|` ile bağla."
   },
   "t02": {
    "text": "`sort` ile `data/fruits.txt` dosyasını alfabetik sırala.",
    "hint": "Aynı satırlar yan yana görünür."
   },
   "t03": {
-   "text": "`ls -1 data | wc -l` ile `data` klasöründe kaç öğe olduğunu say.",
-   "hint": "`-1` her adı ayrı satıra yazar; `wc -l` satırları sayar."
+   "text": "`data` klasöründe kaç öğe olduğunu say.",
+   "hint": "`ls -1` her adı ayrı satıra yazar; çıktısını `wc -l` ile say."
   },
   "t04": {
-   "text": "`grep ERROR logs/app.log | wc -l` ile logdaki ERROR satırlarını say.",
-   "hint": "grep süzer, `wc -l` sayar."
+   "text": "Logdaki ERROR satırlarının sayısını bul.",
+   "hint": "Önce `grep` ile süz, sonra `wc -l` ile say."
   },
   "t05": {
-   "text": "`sort data/fruits.txt | uniq` ile tekrarları kaldır.",
-   "hint": "Önce sırala ki tekrarlar yan yana gelsin."
+   "text": "`data/fruits.txt` içindeki tekrarları kaldır.",
+   "hint": "`sort` ile sırala, sonra `uniq` kullan; tekrarlar yan yana olmalı."
   },
   "t06": {
-   "text": "`sort data/fruits.txt | uniq -c` ile her meyveyi say.",
-   "hint": "Öndeki sayı adettir."
+   "text": "`data/fruits.txt` içinde her meyvenin kaç kez geçtiğini say.",
+   "hint": "`sort` sonra `uniq -c`; öndeki sayı adettir."
   },
   "t07": {
-   "text": "`grep ERROR logs/app.log > errors.txt` ile tüm ERROR satırlarını `errors.txt` dosyasına kaydet.",
-   "hint": "`cat errors.txt` ile kontrol et."
+   "text": "Tüm ERROR satırlarını `errors.txt` dosyasına kaydet.",
+   "hint": "`grep` çıktısını `>` ile yönlendir; `cat errors.txt` ile kontrol et."
   },
   "t08": {
    "text": "Tahmin et: `sort data/nums.txt | head -n 1` ilk satırı `2` mi `10` mu verir? Çalıştırıp doğrula.",
@@ -144,11 +144,11 @@
   },
   "t10": {
    "text": "Hata ayıklama: `uniq data/unsorted.txt` hâlâ tekrarları gösteriyor. Tekil satırları (`a`, `b`) `~/unique.txt` dosyasına yaz.",
-   "hint": "`sort data/unsorted.txt | uniq > unique.txt`."
+   "hint": "Önce `sort`, sonra `uniq`, sonuç `>` ile dosyaya."
   },
   "t11": {
-   "text": "Mini proje: logdaki ERROR satırlarını sayıp sıralayan `report.txt` raporunu üret: `grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt`.",
-   "hint": "Dört aşama: süz, sırala, say, sırala; sonra yönlendir."
+   "text": "Mini proje: logdaki ERROR satırlarını sayıp en sıklardan başlayarak sıralayan `report.txt` raporunu üret.",
+   "hint": "Dört aşama: `grep` ile süz, `sort`, `uniq -c` ile say, `sort -rn` ile sırala; sonra `>` ile yönlendir."
   },
   "t12": {
    "text": "Meydan okuma: tek pipeline ile tüm ERROR satırlarını `all_errors.txt`'ye kaydet ve kaç tane olduğunu da yazdır (`tee` kullan).",
@@ -223,7 +223,7 @@
    "q": "Pipe `|` neyi bağlar?",
    "options": [
     "Soldaki komutun stdout'unu sağdaki komutun stdin'ine",
-    "Bir dosyayı bir komuta",
+    "Bir dosyanın içeriğini bir komutun argümanı olarak",
     "stderr'i stdout'a",
     "İki dosyayı"
    ],
@@ -232,7 +232,7 @@
   "q2": {
    "q": "`uniq`'ten önce neden `sort` kullanılır?",
    "options": [
-    "`uniq` dosya ister",
+    "`uniq` girdiyi yalnızca dosya adı olarak alabilir",
     "`sort` hızlandırır",
     "`uniq` yalnızca sayılarla çalışır",
     "`uniq` yalnızca ardışık tekrarları birleştirir"
@@ -242,7 +242,7 @@
   "q3": {
    "q": "Pipeline'da `tee out.txt` ne yapar?",
    "options": [
-    "Akışı siler",
+    "Akışı sessizce siler ve hiçbir şey iletmez",
     "Akışı dosyaya yazar ve devam ettirir",
     "Yalnızca hataları gösterir",
     "Akışı sıralar"
@@ -284,7 +284,7 @@
    "options": [
     "`-a` dosyaya ekler, yoksa üzerine yazar",
     "`-a` hataları da yakalar",
-    "`-a` çıktıyı ekrandan gizler",
+    "`-a` çıktıyı ekrandan gizleyip yalnızca dosyaya yazar",
     "Fark yoktur"
    ],
    "explain": "`tee` varsayılan olarak dosyanın üzerine yazar; `-a` (append) mevcut içeriğe ekler."
@@ -298,6 +298,16 @@
     "`-n` sayıları sayısal değerine göre sıralar"
    ],
    "explain": "Düz `sort` metin olarak sıralar (`10` < `2`); `-n` sayısal sıralar (`2` < `10`)."
+  },
+  "q9": {
+   "q": "`ls yok_dizin | wc -l` yazınca hata mesajı yine ekranda görünür. Neden?",
+   "options": [
+    "Pipe hata veren komutu otomatik durdurur",
+    "wc hata mesajını sayamadığı için siler",
+    "Pipe yalnızca stdout'u bir sonrakine taşır; stderr ekrana akar",
+    "Hata mesajları pipe'a girmeden önce dosyaya yazılır"
+   ],
+   "explain": "`|` sadece 1 numaralı kanalı (stdout) sonraki komutun girdisine bağlar. stderr ayrı kanaldır; `2>&1` ile birleştirilmedikçe ekrana gider."
   }
  },
  "summary": [

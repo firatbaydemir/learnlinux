@@ -196,7 +196,7 @@
    "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` dağıtım satırını ekler. (`>` yazar, `>>` ekler: modül 3.2; `grep`: modül 3.4.)"
   },
   "t14": {
-   "text": "Meydan okuma: `sshd_config` dosyasının yolunu bilmiyorsun. `/etc` altında adıyla ara: `find /etc -name sshd_config`.",
+   "text": "Meydan okuma: `sshd_config` dosyasının yolunu bilmiyorsun. `/etc` altında dosyayı adıyla ara.",
    "hint": "`-name` dosya adını bekler; yol `/etc/ssh/` altında çıkar."
   },
   "t15": {
@@ -387,6 +387,16 @@
     "/boot"
    ],
    "explain": "`/tmp` geçici dosyalar içindir; önemli veriyi orada tutma. Ayarlar `/etc`, programlar `/usr` altındadır."
+  },
+  "q9": {
+   "q": "Sırasıyla dizin değiştirmek, dosya içeriğini yazdırmak ve dizini listelemek için hangi komutlar kullanılır?",
+   "options": [
+    "`cd`, `cat`, `ls`",
+    "`ls`, `cd`, `cat`",
+    "`cat`, `ls`, `cd`",
+    "`pwd`, `cat`, `ls`"
+   ],
+   "explain": "`cd` dizin değiştirir, `cat` dosya içeriğini yazar, `ls` dizin içeriğini listeler; `pwd` yalnızca bulunduğun yeri gösterir."
   }
  },
  "summary": [

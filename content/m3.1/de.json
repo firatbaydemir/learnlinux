@@ -128,39 +128,39 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Schreibe Text auf den Bildschirm (stdout) mit `echo hello`.",
-   "hint": "Die Ausgabe erscheint direkt am Bildschirm."
+   "text": "Schreibe den Text `hello` auf den Bildschirm (stdout).",
+   "hint": "`echo` schreibt Text nach stdout. Die Ausgabe erscheint direkt am Bildschirm."
   },
   "t02": {
-   "text": "Gib den Dateiinhalt mit `cat lab/names.txt` nach stdout aus.",
-   "hint": "Du solltest drei Namen sehen."
+   "text": "Gib den Inhalt von `lab/names.txt` nach stdout aus.",
+   "hint": "`cat` gibt den Dateiinhalt aus. Du solltest drei Namen sehen."
   },
   "t03": {
    "text": "Liste den nicht vorhandenen Pfad `lab/missing.txt` mit `ls` und lies die Fehlermeldung.",
    "hint": "Diese Meldung kommt von stderr."
   },
   "t04": {
-   "text": "Schreibe den Text mit `echo hello > out.txt` in die Datei `out.txt`.",
-   "hint": "Du siehst keine Ausgabe; prüfe mit `cat out.txt`."
+   "text": "Schreibe den Text `hello` nicht auf den Bildschirm, sondern in die Datei `out.txt`.",
+   "hint": "Kombiniere `echo` mit der Umleitung `>`. Du siehst keine Ausgabe; prüfe mit `cat out.txt`."
   },
   "t05": {
-   "text": "Hänge mit `echo world >> out.txt` eine zweite Zeile an dieselbe Datei an.",
+   "text": "Hänge `world` als zweite Zeile an `out.txt` an, ohne die Datei zu überschreiben.",
    "hint": "`>>` hängt an, `>` überschreibt."
   },
   "t06": {
-   "text": "Leite den Fehler mit `ls lab/missing.txt 2> errors.txt` nach `errors.txt` um.",
-   "hint": "Der Fehler erscheint nicht mehr am Bildschirm."
+   "text": "Liste `lab/missing.txt` mit `ls`, aber leite die Fehlermeldung nach `errors.txt` um.",
+   "hint": "Der Fehler liegt auf stderr (Kanal 2): nutze `2>`. Der Fehler erscheint nicht mehr am Bildschirm."
   },
   "t07": {
-   "text": "Übergib die Datei mit `cat < lab/names.txt` als stdin.",
+   "text": "Übergib `lab/names.txt` nicht als Argument an `cat`, sondern als stdin.",
    "hint": "`<` liest die Eingabe aus einer Datei."
   },
   "t08": {
-   "text": "Vorhersage: Erscheint bei `ls lab/missing.txt > result.txt` der Fehler am Bildschirm? Ist `result.txt` gefüllt? Führe es aus und prüfe.",
+   "text": "Vorhersage: Wenn du die Ausgabe von `ls lab/missing.txt` mit `>` nach `result.txt` umleitest, erscheint der Fehler am Bildschirm? Ist `result.txt` gefüllt? Führe es aus und prüfe.",
    "hint": "`>` leitet nur stdout um; der Fehler liegt auf stderr."
   },
   "t09": {
-   "text": "Vorhersage: Was gibt `cat lab/names.txt | wc -l` aus? Führe es aus und prüfe.",
+   "text": "Vorhersage: Was gibt es aus, wenn du `lab/names.txt` mit `cat` liest und per `|` an `wc -l` übergibst? Führe es aus und prüfe.",
    "hint": "`wc -l` zählt Zeilen; wie viele Zeilen hat die Datei? (`|` gibt die Ausgabe an den nächsten Befehl weiter; Modul 3.2. `wc`: Modul 3.5.)"
   },
   "t10": {
@@ -168,7 +168,7 @@
    "hint": "Hänge `2>&1` ans Ende des Befehls."
   },
   "t11": {
-   "text": "Mini-Projekt: Baue `build.log`. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. Die Datei muss 3 Zeilen haben.",
+   "text": "Mini-Projekt: Baue `build.log`. 1) Schreibe `start` hinein 2) hänge die Liste von `lab` an 3) hänge den Fehler der Liste von `nothing` an. Die Datei muss 3 Zeilen haben.",
    "hint": "Der erste nutzt `>`, die anderen `>>` und `2>>`."
   },
   "t12": {
@@ -305,6 +305,16 @@
     "`cmd 2> /dev/null`"
    ],
    "explain": "`2> /dev/null` verwirft nur stderr; `> /dev/null` verwirft die normale Ausgabe. In `/dev/null` leitet man nicht per Pipe."
+  },
+  "q9": {
+   "q": "Wenn du `befehl > datei` schreibst, warum erscheinen Fehlermeldungen trotzdem auf dem Bildschirm?",
+   "options": [
+    "`>` fängt nur stdout (1) ab; Fehler laufen über stderr (2)",
+    "Fehler müssen immer auf den Bildschirm geschrieben werden",
+    "Weil die Schreibrechte für die Datei fehlen",
+    "`>` kopiert Fehler, hängt sie aber nicht an"
+   ],
+   "explain": "`>` leitet standardmäßig Kanal 1 (stdout) um. Fehler laufen über Kanal 2; um sie umzuleiten, braucht man `2>`."
   }
  },
  "summary": [

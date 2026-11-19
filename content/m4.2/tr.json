@@ -189,7 +189,7 @@
   },
   "t12": {
    "text": "Hata ayıkla: `~/offboard.sh` içindeki `userdel -r alice` komutu, denetim için saklanması gereken home dizinini siler. Betiği `-r` olmadan `sudo userdel alice` içerecek şekilde yeniden yaz.",
-   "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Tek tırnak kullan. (`>` ve `>>` → modül 3.2.)"
+   "hint": "`echo`. Tek tırnak kullan. (`>` ve `>>` → modül 3.2.)"
   },
   "t13": {
    "text": "Mini proje: `~/new_user_plan.txt` dosyasına üç satırlık plan yaz: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` ve `sudo usermod -aG devs carol`.",
@@ -316,20 +316,20 @@
   "q1": {
    "q": "`sudo usermod -G devs alice` (`-a` olmadan) ne yapar?",
    "options": [
-    "alice'i devs grubuna ekler, diğerlerini korur",
+    "alice'i devs grubuna ekler, diğer tüm gruplarını da aynen korur",
     "alice'in tüm ek gruplarını silip yalnızca devs bırakır",
-    "alice hesabını siler",
-    "alice'i kilitler"
+    "alice hesabını ve tüm dosyalarını kalıcı olarak siler",
+    "alice hesabını kilitler, parolayla giriş yapamaz hale gelir"
    ],
    "explain": "-G ek grup listesinin yerine geçer; `-a` (append) olmazsa wheel gibi eski gruplar da kaybolur."
   },
   "q2": {
    "q": "`userdel alice` (`-r` olmadan) sonrasında ne olur?",
    "options": [
-    "Home dizini de silinir",
-    "Hiçbir şey olmaz",
+    "Home dizini de birlikte silinir",
+    "Hiçbir şey olmaz, hesap yerinde durur",
     "Hesap silinir ama home dizini kalır",
-    "Hesap yalnızca kilitlenir"
+    "Hesap silinmez, yalnızca kilitlenir"
    ],
    "explain": "Kayıtlar silinir, `/home/alice` ve dosyaları diskte kalır. Silmek için `-r` gerekir."
   },
@@ -356,30 +356,30 @@
   "q5": {
    "q": "`useradd -m bob` içindeki `-m` ne yapar?",
    "options": [
-    "Kullanıcıyı kilitler",
-    "Posta kutusu açar",
+    "Kullanıcıyı kilitler, giriş yapamaz",
+    "Kullanıcıya posta kutusu açar",
     "Ev dizinini oluşturur",
-    "Parolayı sıfırlar"
+    "Parolayı boş ya da sıfır yapar"
    ],
    "explain": "`-m` `/home/bob` dizinini oluşturur ve `/etc/skel` içeriğini kopyalar."
   },
   "q6": {
    "q": "`passwd -l alice` ne yapar?",
    "options": [
-    "Hesabı siler",
+    "Hesabı ve home dizinini tamamen siler, geri alınamaz",
     "Parolayı kilitler; SSH anahtarıyla giriş yine mümkün olabilir",
-    "Parolayı süresiz yapar",
-    "Kullanıcıyı oturumdan atar"
+    "Parolayı süresiz geçerli yapar, bir daha hiç dolmaz ve sorulmaz",
+    "Kullanıcıyı açık oturumundan hemen atar ve hesabı kapatır"
    ],
    "explain": "Shadow'daki özetin başına `!` ekler; tam erişim kesmek için `usermod -e 1` veya kabuğu `nologin` yapmak gerekir."
   },
   "q7": {
    "q": "`usermod -aG devs alice` ne yapar?",
    "options": [
-    "alice'in tüm gruplarını `devs` ile değiştirir",
-    "alice'i siler",
-    "`devs` grubunu siler",
-    "alice'i mevcut gruplarına dokunmadan `devs`'e ekler"
+    "alice'in tüm gruplarını silip yalnızca `devs` ile değiştirir",
+    "alice hesabını dosyalarıyla birlikte tamamen siler",
+    "`devs` grubunu ve tüm üyelerini sistemden siler",
+    "alice'i diğer gruplarına dokunmadan `devs`'e ekler"
    ],
    "explain": "`-a` ile `-G` birlikte kullanılınca ek gruplar korunur; `-a` unutulursa liste ezilir."
   },
@@ -387,11 +387,21 @@
    "q": "`chage -d 0 alice` ne sağlar?",
    "options": [
     "Bir sonraki girişte parola değiştirmeyi zorunlu kılar",
-    "Hesabı kilitler",
-    "Parolayı siler",
-    "Hesabı bugün sona erdirir"
+    "Hesabı hemen kilitler, kullanıcı hiçbir şekilde giriş yapamaz",
+    "Parolayı siler, kullanıcı parolasız giriş yapabilir",
+    "Hesabı bugün sona erdirir, giriş bir daha mümkün olmaz"
    ],
    "explain": "Son parola değişim tarihini 0 yaparak parolayı süresi dolmuş sayar; ilk girişte yeni parola istenir."
+  },
+  "q9": {
+   "q": "Neden `usermod -G devs alice` yerine `usermod -aG devs alice` yazmak güvenlidir?",
+   "options": [
+    "`-a` komutu hızlandırır",
+    "`-G` tek başına yeni grubu oluşturur",
+    "`-a` mevcut grupları korur; `-G` tek başına onları siler ve yalnızca listeyi bırakır",
+    "`-a` kullanıcıyı kilitler"
+   ],
+   "explain": "`-G` grup listesini verilenle değiştirir; alice'in eski grupları (ör. `wheel`) kaybolabilir. `-a` (append) ekleme yapar, eskileri korur."
   }
  },
  "summary": [

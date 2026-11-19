@@ -501,10 +501,10 @@
   "q1": {
    "q": "On Rocky Linux nginx returns 403 for files in /srv/company/web although the mode is 755. What is the most likely cause?",
    "options": [
-    "nginx is not installed",
+    "The nginx package is not installed on the server at all",
     "The files carry the wrong SELinux label (not httpd_sys_content_t)",
-    "Port 80 is closed in the firewall",
-    "The group staff is missing"
+    "Port 80 may be closed in the firewall",
+    "The user was never added to the staff group"
    ],
    "explain": "A closed port gives a timeout, not a 403. A generic label under /srv blocks nginx; fix it with semanage fcontext and restorecon, not with setenforce 0."
   },
@@ -514,15 +514,15 @@
     "ufw enable first, then add rules",
     "Reboot the server and hope",
     "ufw allow OpenSSH first, then ufw enable",
-    "Disable SSH and use the console"
+    "Disable SSH and only work from the server console"
    ],
    "explain": "ufw rules are active at once. Without an allowed SSH rule, enabling the firewall cuts your session."
   },
   "q3": {
    "q": "Why does the shared directory get mode 2770 (setgid)?",
    "options": [
-    "New files inherit the group staff, so the team can work on each other's files",
-    "Everybody may read the files",
+    "New files inherit the group staff",
+    "Everybody may read and modify the files",
     "The files are encrypted",
     "Only root may write"
    ],
@@ -531,9 +531,9 @@
   "q4": {
    "q": "You created company-backup.service and company-backup.timer. What must you do so the nightly backup runs?",
    "options": [
-    "Reboot and do nothing else",
-    "chmod 777 on the unit files",
-    "Nothing, systemd finds them alone",
+    "Reboot the server; systemd finds the files by itself",
+    "Give the unit files chmod 777 and wait for systemd to read them",
+    "Do nothing; systemd finds new files by itself",
     "systemctl daemon-reload, then systemctl enable --now company-backup.timer"
    ],
    "explain": "systemd must re-read unit files (daemon-reload), and the timer unit has to be enabled and started; the service is started by the timer."
@@ -541,10 +541,10 @@
   "q5": {
    "q": "How do you set a persistent SELinux label for `/srv/company/web` on Rocky?",
    "options": [
-    "`chcon` is enough and permanent",
-    "`setenforce 0`",
+    "`chcon` is enough and also survives a relabel",
+    "Turn SELinux off permanently with `setenforce 0`",
     "`semanage fcontext` + `restorecon`",
-    "`chmod 755`"
+    "Give the directory `chmod 755` and leave the label as is"
    ],
    "explain": "`semanage fcontext` stores the rule in policy, `restorecon` applies it; `chcon` is lost on relabel."
   },
@@ -552,9 +552,9 @@
    "q": "What is the safest order to troubleshoot a service?",
    "options": [
     "Service status → ports (`ss`) → firewall → logs",
-    "Reboot the server first",
-    "Disable SELinux first",
-    "Delete all rules first"
+    "Reboot the server first and hope the problem goes away",
+    "Switch SELinux off first and see whether it was the cause",
+    "Delete all firewall rules first and start over"
    ],
    "explain": "Going layer by layer narrows the problem quickly; disabling security is not a fix."
   },
@@ -563,7 +563,7 @@
    "options": [
     "Relative paths",
     "Ignoring output",
-    "Trusting root's environment",
+    "Relying only on root's interactive shell environment",
     "Absolute paths and exit-code checks"
    ],
    "explain": "Scheduled jobs have a limited PATH and working directory; absolute paths and `set -euo pipefail` add reliability."
@@ -571,12 +571,22 @@
   "q8": {
    "q": "What is missing with `0770` instead of `2770` on a shared directory?",
    "options": [
-    "Group write permission",
+    "Grants the group write access but does not inherit the group",
     "New files inheriting the directory's group",
-    "Owner access",
-    "Others' access"
+    "Permanently restricting the file owner's access",
+    "Automatically blocking access for other users"
    ],
    "explain": "The setgid bit (2) makes new files inherit the directory's group; without it the team loses shared access."
+  },
+  "q9": {
+   "q": "Why does the checklist restart the service and verify from scratch before handover?",
+   "options": [
+    "A restart fixes all errors automatically",
+    "The checklist only makes the report look longer",
+    "Temporary runtime settings are lost on restart; persistent ones survive",
+    "Without a restart the service writes no logs"
+   ],
+   "explain": "`setenforce`, `--timeout` or rules added without `--permanent` vanish after a restart. Restarting and re-checking proves that the setting is truly persistent (permanent, enable, fcontext)."
   }
  },
  "summary": [

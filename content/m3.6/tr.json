@@ -206,40 +206,40 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`pets.txt` içindeki 2. satırı yalnızca sed ile yazdır: `sed -n '2p' pets.txt`.",
-   "hint": "`-n` otomatik yazdırmayı kapatır, `2p` yalnızca satır 2'yi yazdırır. Simülatör sed'i çalıştırmaz ('not supported'); yazdığın komut kaydedilir."
+   "text": "`pets.txt` içindeki 2. satırı yalnızca sed ile yazdır.",
+   "hint": "`sed`te `-n` otomatik yazdırmayı kapatır; satır numarasının ardına `p` komutu gelir. Simülatör sed'i çalıştırmaz ('not supported'); yazdığın komut kaydedilir."
   },
   "t02": {
    "text": "`access.log` dosyasının yalnızca ilk sütununu (IP adreslerini) awk ile yazdır.",
-   "hint": "`awk '{print $1}' access.log` — program tek tırnak içinde olmalı."
+   "hint": "`awk` programı tek tırnak içinde, süslü parantezle yazılır; ilk alan `$1` ile adlandırılır."
   },
   "t03": {
    "text": "Tahmin et: `awk -F, '{print $1}'` ile aynı işi yapan `cut -d, -f1 employees.csv` hangi isimleri yazar? Önce düşün, sonra çalıştır.",
    "hint": "İlk sütun `name` başlığı ve 4 isimdir (anna, ben, cara, dan)."
   },
   "t04": {
-   "text": "`server.conf` içinde portu değiştireceksin. Önce `cp server.conf server.conf.bak` ile yedek al, sonra `sed -i 's/8080/9090/' server.conf` yaz.",
+   "text": "`server.conf` içinde portu 8080'den 9090'a değiştireceksin. Önce `cp` ile `server.conf.bak` adında yedek al, sonra `sed -i` ile değiştir.",
    "hint": "Sıra önemli: önce yedek, sonra `-i`. Alternatif: `sed -i.bak` yedeği kendisi alır; ama bu görevde `server.conf.bak` dosyasının var olması şart."
   },
   "t05": {
-   "text": "`server.conf` içinden yorum satırlarını (`#` ile başlayanlar) ayıklayıp ekrana yazdır: `sed '/^#/d' server.conf`.",
-   "hint": "`^#` satır başındaki # demektir, `d` eşleşen satırı atar. Dosya değişmez."
+   "text": "`server.conf` içinden yorum satırlarını (`#` ile başlayanlar) ayıklayıp ekrana yazdır; dosya değişmesin.",
+   "hint": "`sed` ile silme komutu `d`dir; deseni `/.../` içine yaz. `^` satır başını belirtir. Dosya değişmez."
   },
   "t06": {
    "text": "Hatalı komut: `sed 's/usr/local/bin/opt/bin/' paths.txt` hata verir, çünkü yolun içindeki `/` ayraçla karışır. Düzelt: `/usr/local` ifadesini `/opt` ile değiştir (ayraç olarak `|` kullan).",
-   "hint": "`sed 's|/usr/local|/opt|' paths.txt`. Ayracı ilk karakter belirler; `|`, `#` ve `,` yaygındır."
+   "hint": "Ayracı `s` komutundan sonraki ilk karakter belirler; `|`, `#` ve `,` yaygındır. Yolun kendisindeki `/` artık serbesttir."
   },
   "t07": {
    "text": "Tahmin et: `cut -d, -f2 employees.csv | sort | uniq -c` çıktısında `it` departmanı kaç kez geçer? Sonra komutu çalıştır.",
    "hint": "`uniq -c` her farklı satırın önüne sayısını yazar. Başlık `dept` de bir satırdır."
   },
   "t08": {
-   "text": "Mini proje: `reports` klasörü aç, `employees.csv` dosyasını oraya kopyala ve kopyada ortalama maaşı awk ile hesapla (başlığı atla): `awk -F, 'NR>1 {s+=$3; n++} END {print s/n}' reports/employees.csv`.",
-   "hint": "Adımlar: `mkdir reports`, `cp employees.csv reports/`, sonra awk. `NR>1` başlığı atlar, `n` kaç satır olduğunu sayar."
+   "text": "Mini proje: `reports` klasörü aç, `employees.csv` dosyasını oraya kopyala ve kopyada ortalama maaşı awk ile hesapla (başlığı atla).",
+   "hint": "Adımlar: klasör aç, kopyala, sonra `awk`. `NR>1` başlığı atlar; toplamı ve satır sayısını değişkenlerde tutup `END` bloğunda böl. Maaş 3. alandır, ayraç `-F,`."
   },
   "t09": {
    "text": "Mini proje: `backup` klasörü aç, `app.conf` dosyasını `backup/app.conf` olarak kopyala, sonra `app.conf` içinde `mode=dev` ifadesini `sed -i` ile `mode=prod` yap.",
-   "hint": "`mkdir backup`, `cp app.conf backup/app.conf`, `sed -i 's/mode=dev/mode=prod/' app.conf`. Yedeği `-i`'den ÖNCE al."
+   "hint": "Sıra: `mkdir`, `cp`, sonra `sed -i` ile `s/a/b/` biçiminde değiştirme. Yedeği `-i`'den ÖNCE al."
   },
   "t10": {
    "text": "Tahmin et: `sed -n '3p' pets.txt` hangi hayvanı yazdırır? Aynı sonucu veren `head -n 3 pets.txt | tail -n 1` ile doğrula.",
@@ -247,27 +247,27 @@
   },
   "t11": {
    "text": "Challenge: `access.log` içinde yalnızca durum kodu 404 olan satırları awk ile seç (koşul: ikinci alan 404).",
-   "hint": "`awk '$2 == 404' access.log` — kalıp tek başına yeterlidir, eylem yazılmazsa satır yazdırılır."
+   "hint": "Koşul tek başına yeterlidir: eylem bloğu yazılmazsa `awk` eşleşen satırı yazdırır. İkinci alan `$2`dir."
   },
   "t12": {
    "text": "Challenge: `employees.csv` içinde tek sed çağrısıyla iki değişiklik yap (iki `-e` ile): `it` yerine `IT`, `hr` yerine `HR`. Sonucu ekrana yaz, dosyayı değiştirme.",
-   "hint": "`sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv`."
+   "hint": "Her `-e` kendi `s/a/b/` ifadesini alır; hepsini değiştirmek için sonuna `g` ekle. `-i` kullanma."
   },
   "t13": {
    "text": "Hata ayıkla: Yanlış bir `sed -i` yüzünden `db.conf` bozuldu (içinde yalnızca `host=` kaldı). Yedek `db.conf.bak` duruyor. Dosyayı yedekten geri yükle.",
-   "hint": "`cp db.conf.bak db.conf`. `cat db.conf` ile kontrol et: `host=localhost` ve `port=5432` olmalı."
+   "hint": "Yedeği bozuk dosyanın üzerine `cp` ile kopyala (kaynak yedek, hedef asıl dosya). `cat db.conf` ile kontrol et: `host=localhost` ve `port=5432` olmalı."
   },
   "t14": {
-   "text": "Ticket #3601 — 'Canlı sunucu için temiz yapılandırma gerekiyor: yorum satırsız bir kopya `server.live` olarak hazırla, orijinal `server.conf.orig` adıyla saklansın.' (Simülatörde sed yok: yorumsuz çıktıyı `grep -v` ile üret; gerçek sistemde `sed '/^#/d'` aynısını yapar.)",
-   "hint": "`cp server.conf server.conf.orig` ve `grep -v '^#' server.conf > server.live`."
+   "text": "Ticket #3601 — 'Canlı sunucu için temiz yapılandırma gerekiyor: yorum satırsız bir kopya `server.live` olarak hazırla, orijinal `server.conf.orig` adıyla saklansın.' (Simülatörde sed yok: yorumsuz çıktıyı `grep` ile üret; gerçek sistemde `sed` aynısını yapar.)",
+   "hint": "İki iş var: `cp` ile orijinali `server.conf.orig` olarak sakla; `grep`in ters eşleşme bayrağıyla `#` ile başlayanları ele ve çıktıyı `>` ile `server.live` dosyasına yönlendir."
   },
   "t15": {
    "text": "Ticket #3602 — 'access.log içindeki durum kodlarının dağılımını `status_report.txt` dosyasına yaz.' (Her kod için sayı olmalı; ör. `3 200`.)",
-   "hint": "İkinci sütunu al, sırala, say: `cut -d' ' -f2 access.log | sort | uniq -c > status_report.txt`. awk dizisi de aynısını yapardı."
+   "hint": "Boru hattı: ikinci sütunu çıkar (`cut`, ayraç boşluk), sırala, tekrarları say (`uniq`), sonucu `>` ile dosyaya yaz. awk dizisi de aynısını yapardı."
   },
   "t16": {
    "text": "Ticket #3603 — 'IT departmanının toplam maaş tutarını hesapla.' awk ile yaz: ayraç `,`, ikinci alan `it` olan satırların üçüncü alanını topla, `END` ile yazdır.",
-   "hint": "`awk -F, '$2==\"it\" {s+=$3} END {print s}' employees.csv` (sonuç 11300)."
+   "hint": "Koşullu blok: `$2==\"it\" {...}`; toplamı bir değişkene ekle, `END` bloğunda yazdır. Beklenen sonuç 11300."
   }
  },
  "vm": {
@@ -426,6 +426,16 @@
     "Her satırın ilk alanını"
    ],
    "explain": "`awk` satırları varsayılan olarak boşluklarla alanlara böler; `$1` ilk alandır, `$NF` sonuncudur."
+  },
+  "q9": {
+   "q": "Bir dosyadaki satırların kaçar kez geçtiğini saymak için doğru komut hangisidir?",
+   "options": [
+    "`uniq -c dosya`",
+    "`cut -c dosya | uniq`",
+    "`sort -u dosya | wc`",
+    "`sort dosya | uniq -c`"
+   ],
+   "explain": "`uniq` yalnızca ardışık yinelenenleri sayar; bu yüzden önce `sort` gerekir. `cut` ise sütun/alan seçer."
   }
  },
  "summary": [

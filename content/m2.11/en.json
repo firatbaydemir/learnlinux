@@ -136,7 +136,7 @@
   },
   "t06": {
    "text": "Remove the file containing the incorrect sample entry: `~/schedule/wrong-entry.txt`.",
-   "hint": "Check the path, then run `rm ~/schedule/wrong-entry.txt`."
+   "hint": "Check the path, then run `rm`."
   },
   "t07": {
    "text": "Mini project: write a backup entry that runs daily at 03:00 to `~/schedule/backup-plan.txt`.",
@@ -222,10 +222,10 @@
   "q1": {
    "q": "What is the order of the five cron time fields?",
    "options": [
-    "Hour, minute, month, day, command",
-    "Minute, month, hour, command, day",
+    "Hour, minute, month, day, command in that order",
+    "Minute, month, hour, command, day in that order",
     "Minute, hour, day of month, month, day of week",
-    "Day, hour, minute, month, user"
+    "Day, hour, minute, month, user in that order"
    ],
    "explain": "A user crontab uses minute, hour, day of month, month, and day of week."
   },
@@ -242,19 +242,19 @@
   "q3": {
    "q": "What is a good first approach if a cron job cannot find `date`?",
    "options": [
-    "Retry every minute",
+    "Retry the job every minute",
     "Use the absolute command path or set PATH explicitly",
-    "Run `crontab -r`",
-    "Format the file system"
+    "Delete all jobs with `crontab -r`",
+    "Reformat the whole file system from scratch"
    ],
    "explain": "Cron may have a limited PATH; use an absolute command path or set PATH explicitly."
   },
   "q4": {
    "q": "What is the safe way to remove one incorrect job?",
    "options": [
-    "Delete all jobs with `crontab -r`",
-    "Run `rm /etc/crontab`",
-    "Stop the service and leave it stopped",
+    "Delete all jobs at once with `crontab -r`",
+    "Delete the system file `/etc/crontab`",
+    "Stop the cron service and leave it that way",
     "Remove only that line in `crontab -e`"
    ],
    "explain": "Removing one line with `crontab -e` leaves the user's other jobs intact."
@@ -292,12 +292,22 @@
   "q8": {
    "q": "How do you avoid losing a cron job's output?",
    "options": [
-    "Nothing; cron stores it",
-    "Run the job as root",
-    "Add `sleep`",
+    "Nothing; cron saves the output by itself",
+    "Run the job as the root user",
+    "Add a `sleep` in front of the command",
     "Redirect output to a file (`>> /tmp/job.log 2>&1`)"
    ],
    "explain": "Cron tries to mail the output; to keep it, redirect stdout and stderr to a log file with `>> file 2>&1`."
+  },
+  "q9": {
+   "q": "A command works by hand but not in cron. What is the most common cause?",
+   "options": [
+    "Cron cannot run commands",
+    "Cron runs with a minimal environment (short PATH, different directory); you need the full path",
+    "Cron only runs at night",
+    "The command is auto-deleted in cron"
+   ],
+   "explain": "Cron does not load your shell profile and PATH is very short. So use full paths (`/usr/bin/date`) and redirect output to a file to see errors."
   }
  },
  "summary": [

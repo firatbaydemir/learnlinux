@@ -174,32 +174,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "The lab is already set up with mixed names. Run `ls *.jpg` and observe that only names ending in `.jpg` are listed.",
-   "hint": "`*` matches zero or more characters; the dot and `jpg` suffix stay fixed in the pattern."
+   "text": "The lab is already prepared with mixed names. List only the `.jpg` files.",
+   "hint": "Use `ls` with the `*` wildcard; it matches zero or more characters and the suffix stays unchanged in the pattern."
   },
   "t02": {
-   "text": "Use `ls img?.jpg` to list `.jpg` names with exactly one character after `img`.",
-   "hint": "`?` matches exactly one character. Leave the pattern unquoted so the shell expands it."
+   "text": "List the `.jpg` names that have exactly one character after `img`.",
+   "hint": "Use `ls` with `?`; it matches exactly one character. Write the pattern unquoted so the shell expands it."
   },
   "t03": {
-   "text": "Use `ls doc*` to list names that start with `doc`.",
-   "hint": "`*` allows zero or more characters after `doc`."
+   "text": "List the names that start with `doc`.",
+   "hint": "Use `ls` with `*`; it allows zero or more characters after `doc`."
   },
   "t04": {
    "text": "Run `echo *.txt`. How does the shell pass matching names to `echo`?",
    "hint": "The shell first expands the pattern to matching names; `echo` prints those names."
   },
   "t05": {
-   "text": "Use `ls img[12].jpg` to list images whose character after `img` is `1` or `2`.",
-   "hint": "Each option inside the brackets represents one character."
+   "text": "List the `img` images whose suffix is `1` or `2`.",
+   "hint": "Use `ls` with square brackets; each option inside stands for a single character."
   },
   "t06": {
-   "text": "Use `ls *.{jpg,png}` to match `.jpg` and `.png` names in one command.",
-   "hint": "The `jpg` and `png` brace options produce separate patterns."
+   "text": "Match the `.jpg` and `.png` files in one command.",
+   "hint": "Use `ls` with curly braces; the options inside produce separate patterns."
   },
   "t07": {
-   "text": "Create a `texts` directory and copy names that start with `doc` and end in `.txt` into it. Do not copy `notes.md`.",
-   "hint": "Run `mkdir texts`, then `cp doc*.txt texts`. (`mkdir` is covered in module 2.3, `cp` in module 2.4.)"
+   "text": "Create the `texts` folder and copy the `.txt` files starting with `doc` into it. Do not copy `notes.md`.",
+   "hint": "First `mkdir`, then `cp`; give the pattern for `.txt` files starting with `doc` as the source, the target folder is the last argument. (`mkdir` is covered in module 2.3, `cp` in module 2.4.)"
   },
   "t08": {
    "text": "Predict: does `echo '$HOME'` print the variable's value or the literal `$HOME` text? Run it to check.",
@@ -210,20 +210,20 @@
    "hint": "By default, Bash leaves an unmatched pattern unchanged."
   },
   "t10": {
-   "text": "Debug: target the name `old report.txt` as one argument and remove that file.",
-   "hint": "Quote the name containing a space: `rm \"old report.txt\"`. (`rm` is covered in module 2.3.)"
+   "text": "Debug: remove the file named `old report.txt` by targeting it as a single argument.",
+   "hint": "Put the name with the space in quotes; otherwise the shell sees two arguments. (`rm` is covered in module 2.3.)"
   },
   "t11": {
-   "text": "Mini project: create a `backup` directory and copy only `.jpg` and `.png` files into it.",
-   "hint": "Use `mkdir backup`, followed by `cp *.jpg *.png backup`. (`mkdir` is covered in module 2.3, `cp` in module 2.4.)"
+   "text": "Mini project: create the `backup` folder and copy only the `.jpg` and `.png` files into it.",
+   "hint": "First `mkdir`, then `cp`; write both patterns one after the other, with the target folder at the very end. (`mkdir` is covered in module 2.3, `cp` in module 2.4.)"
   },
   "t12": {
-   "text": "Challenge: create the names `log_1.txt`, `log_2.txt` and `log_3.txt` with brace expansion, then remove all three with the `log_?` pattern.",
-   "hint": "Run `touch log_{1,2,3}.txt` first, then `rm log_?.txt`. (`touch` and `rm` are covered in module 2.3.)"
+   "text": "Challenge: create `log_1.txt`, `log_2.txt` and `log_3.txt` with curly braces; then remove these three files with the `?` wildcard.",
+   "hint": "First `touch` with a brace list, then `rm` with a pattern matching exactly one character. (`touch` and `rm` are covered in module 2.3.)"
   },
   "t13": {
-   "text": "Ticket: Rename `my file.txt`, which contains a space, to `my_file.txt`. Make sure the original name stays one argument.",
-   "hint": "Use `mv \"my file.txt\" my_file.txt`. (`mv` is covered in module 2.4.)"
+   "text": "Ticket: rename `my file.txt`, which contains a space, to `my_file.txt`. Keep the name a single argument.",
+   "hint": "Use `mv`; put the old name with the space in quotes. (`mv` is covered in module 2.4.)"
   }
  },
  "vm": {
@@ -310,10 +310,10 @@
   "q3": {
    "q": "In Bash, what does `echo *.xyz` do by default when no names match `*.xyz`?",
    "options": [
-    "Deletes all files",
-    "Prints nothing",
+    "Silently deletes all matching files",
+    "Prints no output at all and gives no error",
     "Prints the unmatched `*.xyz` pattern unchanged",
-    "Changes the current directory"
+    "Changes the working directory to its parent"
    ],
    "explain": "By default, Bash passes an unmatched glob pattern to the command unchanged."
   },
@@ -340,10 +340,10 @@
   "q6": {
    "q": "Who expands wildcards (`*`, `?`)?",
    "options": [
-    "The `ls` command",
-    "The kernel",
+    "Only the `ls` command itself, while it runs",
+    "The kernel, when accessing the file system",
     "The shell, before the command runs",
-    "The file system"
+    "The file system, during the name lookup"
    ],
    "explain": "The shell expands them; the command receives the list of file names, not the pattern."
   },
@@ -351,21 +351,31 @@
    "q": "How do the outputs of `echo \"$(whoami)\"` and `echo '$(whoami)'` differ?",
    "options": [
     "Double quotes print the user name, single quotes print the text literally",
-    "Both print the user name",
-    "Both print the text literally",
-    "Double quotes give an error"
+    "Both print the user name, there is no difference",
+    "Both print the text exactly as written",
+    "With double quotes the command fails with an error"
    ],
    "explain": "Double quotes still evaluate `$`, `$(...)` and backslash; single quotes make everything literal."
   },
   "q8": {
    "q": "What is a safe pre-check before running `rm *.log`?",
    "options": [
-    "`rm -f *.log`",
-    "`rm *.log &`",
-    "`touch *.log`",
+    "Force-deleting with `rm -f *.log`",
+    "Deleting in the background with `rm *.log &`",
+    "Updating the files with `touch *.log`",
     "First view the matches with `ls *.log`"
    ],
    "explain": "Run the same pattern with `ls` or `echo` first to see what would be deleted."
+  },
+  "q9": {
+   "q": "Why is it a smart habit to try `ls *.log` before running `rm *.log`?",
+   "options": [
+    "`ls` temporarily protects the files",
+    "The shell expands the wildcard; `ls` shows exactly the list that rm would receive",
+    "`rm` does not understand wildcards",
+    "`ls` filters out wrong files by itself"
+   ],
+   "explain": "`*.log` is expanded into file names by the shell before the command runs. Running the same pattern with `ls` shows in advance what `rm` would delete."
   }
  },
  "summary": [

@@ -22,7 +22,8 @@
      "where": "Um zu sehen, welche Platten zu einem Pool gehören.",
      "why": "Die Spalte PFree zeigt den freien Platz auf dem PV.",
      "example": "sudo pvs",
-     "nosim": true
+     "nosim": true,
+     "output": "  PV         VG      Fmt  Attr PSize   PFree\n  /dev/loop0 vg_data lvm2 a--  296.00m 96.00m"
     },
     {
      "cmd": "vgs",
@@ -30,7 +31,8 @@
      "where": "Vor dem Erweitern, um zu prüfen, ob im Pool Platz ist.",
      "why": "Ist VFree 0, musst du zuerst mit vgextend ein PV hinzufügen.",
      "example": "sudo vgs",
-     "nosim": true
+     "nosim": true,
+     "output": "  VG      #PV #LV #SN Attr   VSize   VFree\n  vg_data   1   1   0 wz--n- 296.00m 96.00m"
     },
     {
      "cmd": "lvs",
@@ -38,7 +40,8 @@
      "where": "Welches Volume liegt in welcher VG und wie groß ist es?",
      "why": "Gibt einen schnellen Überblick.",
      "example": "sudo lvs",
-     "nosim": true
+     "nosim": true,
+     "output": "  LV     VG      Attr       LSize\n  lv_web vg_data -wi-ao---- 200.00m"
     },
     {
      "cmd": "lvdisplay",
@@ -54,7 +57,8 @@
      "where": "Vor jeder LVM-Aktion.",
      "why": "Du stellst sicher, dass du das richtige Gerät wählst.",
      "example": "lsblk -f",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   FSTYPE      FSVER LABEL UUID  MOUNTPOINTS\nloop0  LVM2_member LVM2 001\n└─vg_data-lv_web xfs  1 /mnt/web"
     }
    ],
    "tip": "**Erst lesen, dann schreiben**: pvs, vgs, lvs und lsblk -f ändern nichts; führe sie vor jedem ändernden Befehl aus."
@@ -89,7 +93,8 @@
      "where": "Um zu prüfen, welches Loop zu welcher Datei gehört.",
      "why": "Verhindert das Schreiben auf das falsche Gerät.",
      "example": "losetup -a",
-     "nosim": true
+     "nosim": true,
+     "output": "/dev/loop0: [64769]:131 (/home/user/lvm-lab/disk1.img)"
     },
     {
      "cmd": "losetup -d",
@@ -117,7 +122,8 @@
      "where": "Bevor du eine Platte in einen Pool aufnimmst.",
      "why": "Eine VG besteht nur aus PVs.",
      "example": "sudo pvcreate $LOOP1",
-     "nosim": true
+     "nosim": true,
+     "output": "  Physical volume \"/dev/loop0\" successfully created."
     },
     {
      "cmd": "vgcreate",
@@ -125,7 +131,8 @@
      "where": "Beim Aufbau des Pools.",
      "why": "Aus diesem Pool werden Volumes geschnitten.",
      "example": "sudo vgcreate vg_data $LOOP1",
-     "nosim": true
+     "nosim": true,
+     "output": "  Volume group \"vg_data\" successfully created"
     },
     {
      "cmd": "lvcreate",
@@ -133,7 +140,8 @@
      "where": "Wenn eine Anwendung ein eigenes Volume bekommt.",
      "why": "Mit -n gibst du den Namen, mit -L die Größe an.",
      "example": "sudo lvcreate -L 200M -n lv_web vg_data",
-     "nosim": true
+     "nosim": true,
+     "output": "  Logical volume \"lv_web\" created."
     },
     {
      "cmd": "mkfs.xfs",
@@ -168,7 +176,8 @@
      "where": "Beim Erweitern eines vollen Volumes im Betrieb.",
      "why": "Beseitigt das Risiko, den zweiten Schritt zu vergessen.",
      "example": "sudo lvextend -r -L +100M /dev/vg_data/lv_web",
-     "nosim": true
+     "nosim": true,
+     "output": "  Size of logical volume vg_data/lv_web changed from 200.00 MiB to 300.00 MiB.\n  Logical volume vg_data/lv_web successfully resized."
     },
     {
      "cmd": "xfs_growfs",
@@ -450,6 +459,16 @@
     "Einrichtung auf einem LV"
    ],
    "explain": "XFS kann nur wachsen; zum Verkleinern sichern, neu anlegen, wiederherstellen."
+  },
+  "q9": {
+   "q": "Warum macht LVM das Vergrößern von Speicher einfacher als direkte Partitionen?",
+   "options": [
+    "LVM macht Datenträger automatisch schneller",
+    "Partitionen können nie vergrößert werden",
+    "LVM sichert Daten automatisch",
+    "Freier Platz in der VG kann im Betrieb einem LV hinzugefügt werden; man ist nicht an Partitionsgrenzen gebunden"
+   ],
+   "explain": "Ein LV bezieht Platz aus dem VG-Pool. Gibt es freien Platz oder ein neues PV, wachsen LV und Dateisystem mit `lvextend -r` zusammen; die Partitionstabelle muss nicht neu geschrieben werden."
   }
  },
  "summary": [

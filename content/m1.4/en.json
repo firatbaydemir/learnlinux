@@ -194,11 +194,11 @@
   },
   "t08": {
    "text": "`cat locked.txt` gives 'Permission denied'. Understand why, fix it with `chmod` and read the file.",
-   "hint": "Give yourself read permission: `chmod u+r locked.txt`. (`chmod` changes permissions, covered in module 4.4; `cat` in module 2.6.)"
+   "hint": "Give yourself read permission: `chmod`. (`chmod` changes permissions, covered in module 4.4; `cat` in module 2.6.)"
   },
   "t09": {
    "text": "`cp notes.txt backup/` fails because `backup` does not exist. Chain it: create the folder and copy the file.",
-   "hint": "`mkdir backup && cp notes.txt backup/`. (`cp` copies, module 2.4; `mkdir` module 2.3.)"
+   "hint": "`mkdir`, `cp`. (`cp` copies, module 2.4; `mkdir` module 2.3.)"
   },
   "t10": {
    "text": "Mini project: (1) write the error of `ls /nonexistent` to `errors.txt`, (2) write the output of `ls ~` to `files.txt`, (3) read the last command's status with `echo $?`.",
@@ -210,14 +210,14 @@
   },
   "t12": {
    "text": "Challenge: create the `backup` folder if it is missing; copy `notes.txt` into it; if the copy succeeded write `saved` into `status.txt`, otherwise `failed`.",
-   "hint": "`test -d backup || mkdir backup` and `cp ... && echo saved > status.txt || echo failed > status.txt`. (`cp` module 2.4, `>` module 3.2.)"
+   "hint": "`test -d`, `mkdir` and `cp ... && echo saved > status.txt || echo failed > status.txt`. (`cp` module 2.4, `>` module 3.2.)"
   },
   "t13": {
    "text": "Challenge: does `notes.txt` contain `hello`? Test it in one line and print `found` or `missing`; discard grep's own output to `/dev/null`.",
-   "hint": "`grep hello notes.txt > /dev/null && echo found || echo missing`. (`grep` searches text, module 3.4.)"
+   "hint": "`grep`, `echo`. (`grep` searches text, module 3.4.)"
   },
   "t14": {
-   "text": "Ticket: A colleague says 'I cannot read my report' and tried `cat Documents/raport.txt`. Find the right name with `ls Documents`, read the file with `cat` and write the exit status to `exit.txt`.",
+   "text": "Ticket: A colleague says 'I cannot read my report' and tried `cat Documents/raport.txt`. Find the right name with `ls`, read the file with `cat` and write the exit status to `exit.txt`.",
    "hint": "The right name is `report.txt`. `cat Documents/report.txt; echo $? > exit.txt`."
   }
  },
@@ -312,7 +312,7 @@
    "options": [
     "Always",
     "Only if A fails",
-    "Only if A succeeds (0)",
+    "Only if A succeeded",
     "Never"
    ],
    "explain": "`&&` acts like AND; B runs only if A ends with 0."
@@ -331,9 +331,9 @@
    "q": "What does `ls /nonexistent 2>/dev/null; echo $?` do?",
    "options": [
     "Shows the error message and prints 0",
-    "Creates the folder",
-    "Prints nothing at all",
-    "Hides the error message but the status stays non-zero"
+    "Creates the folder anyway and returns 0",
+    "Prints nothing and does not change the status",
+    "Hides the error, the exit code stays"
    ],
    "explain": "`2>/dev/null` only discards the message; the command still failed and `$?` is not 0."
   },
@@ -350,32 +350,42 @@
   "q6": {
    "q": "What is the difference between `A ; B` and `A && B`?",
    "options": [
-    "No difference",
+    "No difference, both behave the same",
     "`;` runs B only if A fails",
-    "`;` runs B regardless of A's result",
-    "`&&` runs commands in parallel"
+    "`;` runs B without looking at A",
+    "`&&` runs the commands in parallel"
    ],
    "explain": "`;` runs commands in sequence regardless of result; `&&` runs B only if A succeeded."
   },
   "q7": {
    "q": "What does exit status 126 usually indicate?",
    "options": [
-    "Command not found",
-    "Success",
+    "Command not found (not visible in PATH)",
+    "Command finished successfully",
     "No syntax error",
-    "Command found but not executable (e.g. no permission)"
+    "Found but did not run (e.g. no permission)"
    ],
    "explain": "126: found but could not be executed (missing execute permission etc.); 127: command not found."
   },
   "q8": {
    "q": "What does `2>&1` do in `ls /nope 2>&1`?",
    "options": [
-    "Redirects error output to standard output",
-    "Deletes the output",
-    "Lists the file twice",
-    "Sets the exit status to 1"
+    "Redirects errors to standard output",
+    "Deletes all output, nothing is left",
+    "Lists the file twice in a row",
+    "Always sets the exit code to 1"
    ],
    "explain": "`2>&1` sends stderr (2) to wherever stdout (1) goes, so errors also flow into a pipe/file."
+  },
+  "q9": {
+   "q": "When does `test -f file` return exit status 0 (success)?",
+   "options": [
+    "If the file does not exist",
+    "If the file exists and is a regular file",
+    "If the file is empty (zero bytes)",
+    "If the file has execute permission"
+   ],
+   "explain": "`test -f` returns 0 if a regular file exists. Also, `true` always returns 0 and `false` always returns 1."
   }
  },
  "summary": [

@@ -149,7 +149,7 @@
   },
   "t07": {
    "text": "Mini proje: örnek SSH yapılandırmasını `~/ops/connection-plan.txt` adıyla kopyala ve `Host linux-lab` ile `Port 22` satırlarını doğrula.",
-   "hint": "Önce `cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt`, ardından `cat` ile oku."
+   "hint": "Önce `cp`, ardından `cat` ile oku."
   },
   "t08": {
    "text": "Meydan okuma: raporun eşitlenecek bir kopyasını `~/transfer/sync-copy.txt` adıyla hazırla.",
@@ -307,6 +307,16 @@
     "Genel anahtar (`~/.ssh/authorized_keys` içine)"
    ],
    "explain": "Genel anahtar sunucudaki `authorized_keys` dosyasına eklenir (`ssh-copy-id`); özel anahtar asla paylaşılmaz."
+  },
+  "q9": {
+   "q": "SSH'ta parola yerine anahtar çifti kullanmak neden daha güvenlidir?",
+   "options": [
+    "Anahtar dosyası daha kısadır",
+    "Özel anahtar makineden çıkmaz; ağda tahmin edilecek veya çalınacak bir parola dolaşmaz",
+    "Anahtarla bağlantı şifresiz olur",
+    "Sunucu anahtarı hiç doğrulamaz"
+   ],
+   "explain": "Sunucuda yalnızca genel anahtar durur; özel anahtar sende kalır. Kaba kuvvetle parola denemek anlamsızlaşır. Özel anahtarı paylaşma."
   }
  },
  "summary": [

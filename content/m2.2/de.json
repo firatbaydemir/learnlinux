@@ -164,7 +164,7 @@
   },
   "t12": {
    "text": "Debug: In `~/projects/app` wird `config.txt` nicht gefunden; die Datei liegt eine Ebene höher. Lies sie mit `cat` über den relativen Pfad mit `../`.",
-   "hint": "Erst `cd ~/projects/app`, dann `cat ../config.txt`."
+   "hint": "Erst `cd`, dann `cat ../config.txt`."
   },
   "t13": {
    "text": "Mini-Projekt: Lege `~/lab/docs` und `~/lab/bin` an, schreibe mit `echo hello linux > ~/lab/docs/readme.txt` eine Datei und erstelle `~/lab/bin/readme-link` als symbolischen Link darauf.",
@@ -176,7 +176,7 @@
   },
   "t15": {
    "text": "Ticket: Die Anwendung sucht die Konfiguration unter `~/app/current/config.txt`, die echte Datei liegt in `~/releases/v2/config.txt`. Lege `~/app/current` als symbolischen Link auf `~/releases/v2` an und prüfe mit `cat ~/app/current/config.txt`.",
-   "hint": "`mkdir -p ~/app`, dann `ln -s ~/releases/v2 ~/app/current`."
+   "hint": "`mkdir -p`, dann `ln -s ~/releases/v2 ~/app/current`."
   },
   "t16": {
    "text": "Führe `ls -la ~` aus, um auch versteckte Dateien zu sehen.",
@@ -324,6 +324,16 @@
     "/home"
    ],
    "explain": "Jedes `..` geht eine Ebene hoch: `/var/log` → `/var` → `/`."
+  },
+  "q9": {
+   "q": "Warum bestimmt die Dateiendung unter Linux den Typ nicht, und warum ist `file` verlässlich?",
+   "options": [
+    "Weil Endungen verboten sind",
+    "Der Typ ergibt sich aus dem Inhalt; `file` prüft den Inhalt (Magic Bytes), nicht die Endung",
+    "Weil `file` den Namen ändert",
+    "Weil nur `.txt`-Dateien lesbar sind"
+   ],
+   "explain": "Die Endung ist nur ein Name; `file` liest die Signatur am Dateianfang und nennt den echten Typ."
   }
  },
  "summary": [

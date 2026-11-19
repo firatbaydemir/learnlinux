@@ -141,7 +141,7 @@
   },
   "t10": {
    "text": "Debug: `~/distro.txt` wrongly says `ID=windows`. Overwrite the file so that it contains `ID=linux`.",
-   "hint": "`echo ID=linux > ~/distro.txt` replaces the content; check with `cat`."
+   "hint": "`echo` replaces the content; check with `cat`."
   },
   "t11": {
    "text": "Mini project: create the folder `~/about_linux`. Save the kernel release in `~/about_linux/kernel.txt` and the contents of `/etc/os-release` in `~/about_linux/distro.txt`.",
@@ -297,6 +297,16 @@
     "No license, public domain"
    ],
    "explain": "The kernel is free under GPLv2: source is viewable, modifiable and redistributed under the same license."
+  },
+  "q9": {
+   "q": "Why can Ubuntu and Fedora behave differently even though they can use the same Linux kernel?",
+   "options": [
+    "Their kernels use different file systems",
+    "One of them is not real Linux",
+    "A distribution = kernel + package manager, tools and default settings; the difference comes from those",
+    "Commands only work on one distribution"
+   ],
+   "explain": "Linux is only the kernel; packaging, tools and settings make up the distribution."
   }
  },
  "summary": [

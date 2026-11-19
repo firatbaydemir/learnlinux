@@ -30,7 +30,8 @@
      "where": "Zusammen mit uptime, um die Last zu bewerten.",
      "why": "Last 4.0 ist bei 8 Kernen in Ordnung, bei 2 Kernen gesättigt.",
      "example": "nproc",
-     "nosim": true
+     "nosim": true,
+     "output": "4"
     },
     {
      "cmd": "lscpu",
@@ -46,7 +47,8 @@
      "where": "In Skripten oder wenn uptime nicht installiert ist.",
      "why": "Das ist die Quelle, aus der uptime und top lesen.",
      "example": "cat /proc/loadavg",
-     "nosim": true
+     "nosim": true,
+     "output": "0.42 0.35 0.30 1/312 2415"
     }
    ],
    "tip": "Schnelltest: Teile den ersten Lastwert durch `nproc`; liegt das Ergebnis über 1, ist die CPU gesättigt."
@@ -73,7 +75,8 @@
      "where": "Für Skripte oder wenn du genaue Werte wie MemAvailable oder SwapFree brauchst.",
      "why": "Das ist die Quelle hinter free.",
      "example": "grep MemAvailable /proc/meminfo",
-     "nosim": true
+     "nosim": true,
+     "output": "MemAvailable:    5821344 kB"
     },
     {
      "cmd": "vmstat 1 5",
@@ -108,7 +111,8 @@
      "where": "Um einen einzelnen Ordner wie dein Home oder /var/log zu messen.",
      "why": "Beantwortet 'Wie groß ist das?' in einer Zeile.",
      "example": "du -sh ~/Documents",
-     "nosim": true
+     "nosim": true,
+     "output": "1.2G    /home/user/Documents"
     },
     {
      "cmd": "du -h | sort -h",
@@ -153,7 +157,8 @@
      "where": "In Skripten, Tickets und beim Weiterleiten an head oder grep.",
      "why": "Du kannst die Ausgabe speichern oder filtern, zum Beispiel `top -b -n 1 | head -n 15`.",
      "example": "top -b -n 1 | head -n 15",
-     "nosim": true
+     "nosim": true,
+     "output": "top - 09:30:01 up 1:30,  1 user,  load average: 0.42, 0.35, 0.30\nTasks: 180 total,   1 running, 179 sleeping\n%Cpu(s):  2.0 us,  1.0 sy, 96.5 id\nMiB Mem :  7843.0 total,  5100.0 free,  1500.0 used"
     },
     {
      "cmd": "htop",
@@ -246,15 +251,15 @@
   },
   "t13": {
    "text": "Mini: Speichere die 2 größten Speicherverbraucher aus `~/lab/ps_snapshot.txt` in `~/lab/top_mem.txt`. Sortiere mit `sort -k4 -nr` nach Spalte 4, nimm mit `head -n 2` zwei Zeilen und leite mit `>` um.",
-   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt` (`sort/head` → Modul 3.5/3.2; `>` → Modul 3.2.)"
+   "hint": "`sort -nr`, `head -n` (`sort/head` → Modul 3.5/3.2; `>` → Modul 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/monitor_cmds.txt` listet falsche Befehle (`nprocs` gibt es nicht und `free -m` ist nicht lesbar). Schreibe die Datei mit `printf` neu, sodass sie je Zeile `cores: nproc`, `memory: free -h` und `disk: df -h` enthält.",
-   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt` (`>` → Modul 3.2.)"
+   "hint": "`printf` (`>` → Modul 3.2.)"
   },
   "t15": {
    "text": "Mini: `~/lab/du_report.txt` enthält Größen in KB. Speichere die 3 größten Einträge mit `sort -nr`, `head -n 3` und `>` in `~/lab/biggest.txt`.",
-   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt` (`sort/head` → Modul 3.5/3.2; `>` → Modul 3.2.)"
+   "hint": "`sort -nr`, `head -n` (`sort/head` → Modul 3.5/3.2; `>` → Modul 3.2.)"
   },
   "t16": {
    "text": "Challenge: Baue `~/lab/report.txt` aus drei Teilen: der 1-Minuten-Last aus `~/lab/loadavg.txt` (nutze `cut`), der Zeile `MemAvailable` aus `~/lab/meminfo.txt` (nutze `grep`, mit `>>` anhängen) und deinem Urteil `overloaded` (nutze `echo`, anhängen).",
@@ -262,7 +267,7 @@
   },
   "t17": {
    "text": "TICKET #5201 — Der Server linux-lab ist sehr langsam. In `~/lab/top_snapshot.txt` liegt die Ausgabe von `top -b -n 1`. Finde den Prozess mit der höchsten CPU-Last und schreibe seinen Namen und seinen Benutzer in `~/lab/culprit.txt`.",
-   "hint": "Sieh dir mit `head -n 9 ~/lab/top_snapshot.txt` die erste Prozesszeile an, dann `echo \"name user\" > ~/lab/culprit.txt`. (`>` → Modul 3.2.)"
+   "hint": "Sieh dir mit `head -n` die erste Prozesszeile an, dann `echo \"name user\" > ~/lab/culprit.txt`. (`>` → Modul 3.2.)"
   }
  },
  "quiz": {
@@ -279,19 +284,19 @@
   "q2": {
    "q": "Eine 4-Kern-Maschine zeigt 1-Minuten-Last 8.0. Was heißt das?",
    "options": [
-    "Alles in Ordnung",
+    "Alles in Ordnung, das System läuft entspannt",
     "Die CPU ist gesättigt: Prozesse warten in der Schlange",
-    "Die Platte ist voll",
-    "Das System ist gerade gestartet"
+    "Platte voll, Schreibvorgänge schlagen fehl",
+    "System gerade gestartet, der Wert ist vorübergehend"
    ],
    "explain": "Last wird relativ zu den Kernen gelesen. Last 8 auf 4 Kernen heißt doppelt so viele lauffähige Tasks wie Kerne."
   },
   "q3": {
    "q": "Wie installierst du htop auf Rocky Linux?",
    "options": [
-    "sudo apt install htop",
-    "direkt sudo dnf install htop, geht immer",
-    "sudo yum remove htop",
+    "`sudo apt install htop` genügt, auch unter Rocky",
+    "Direkt `sudo dnf install htop`; kein zusätzliches Repo nötig, läuft überall",
+    "Mit `sudo yum remove htop` das alte löschen und neu versuchen",
     "sudo dnf install epel-release, dann sudo dnf install htop"
    ],
    "explain": "In der RHEL-Familie liegt htop im Repository EPEL, aktiviere also zuerst EPEL. apt ist für Debian/Ubuntu."
@@ -300,9 +305,9 @@
    "q": "Welcher Befehl listet die größten Speicherverbraucher?",
    "options": [
     "ps aux --sort=-%mem | head",
-    "df -h",
-    "uptime",
-    "nproc"
+    "`df -h` (zeigt die Plattenbelegung)",
+    "`uptime` (zeigt die Lastdurchschnitte)",
+    "`nproc` (gibt die Kernzahl aus)"
    ],
    "explain": "ps mit --sort=-%mem sortiert absteigend nach Speicher; head zeigt die ersten Zeilen."
   },
@@ -319,9 +324,9 @@
   "q6": {
    "q": "Welcher Befehl zeigt E/A-Statistiken pro Gerät?",
    "options": [
-    "`free`",
-    "`uptime`",
-    "`ps`",
+    "`free` (zeigt die Speichernutzung)",
+    "`uptime` (zeigt die Lastdurchschnitte)",
+    "`ps` (zeigt die Prozessliste)",
     "`iostat -x`"
    ],
    "explain": "`iostat` (Paket sysstat) zeigt Durchsatz, Wartezeit und Auslastung je Gerät."
@@ -330,9 +335,9 @@
    "q": "Was ist die wahrscheinlichste Ursache für hohes `wa` in `top`?",
    "options": [
     "Prozesse warten auf Festplatten-E/A",
-    "CPU überhitzt",
-    "Speicher voll",
-    "Netzwerk getrennt"
+    "Die CPU drosselt wegen Überhitzung",
+    "Der Speicher ist voll, Swap ist aktiv",
+    "Die Netzverbindung ist weg, keine Pakete kommen an"
    ],
    "explain": "`wa` = I/O wait: die CPU ist untätig und wartet auf E/A."
   },
@@ -345,6 +350,16 @@
     "5, 15 und 60 Minuten"
    ],
    "explain": "Die Load-Averages gelten für 1, 5 und 15 Minuten."
+  },
+  "q9": {
+   "q": "Warum ist derselbe Load Average von `4.0` auf einer 8-Kern-Maschine normal, auf einer 2-Kern-Maschine aber problematisch?",
+   "options": [
+    "Mit mehr Kernen sinkt der Load automatisch",
+    "Load zeigt nur die RAM-Nutzung",
+    "Bei 2 Kernen wird der Load Average nicht berechnet",
+    "Load ist die Zahl der Aufgaben, die laufen oder warten; man liest ihn im Verhältnis zur Kernzahl"
+   ],
+   "explain": "Der Load Average ist der Durchschnitt aus laufenden und wartenden Aufgaben. Bei 8 Kernen ist 4.0 halb ausgelastet, bei 2 Kernen warten Aufgaben in der Schlange; deshalb wertet man ihn zusammen mit `nproc`."
   }
  },
  "summary": [

@@ -482,6 +482,16 @@
     "Hiçbirini"
    ],
    "explain": "`backup.timer` varsayılan olarak `backup.service`'i tetikler; `Unit=` ile değiştirilebilir."
+  },
+  "q9": {
+   "q": "Cron yerine systemd timer tercih etmek için bir neden nedir?",
+   "options": [
+    "Çıktı journal'a yazılır, `Persistent=true` ile kaçırılan çalışma sonradan yapılır ve zamanlama `systemctl list-timers` ile görülür",
+    "Timer, cron'dan her zaman daha az dosya gerektirir",
+    "Cron yeni sistemlerde hiç çalışmaz",
+    "Timer root olmadan hiçbir şey yapamaz"
+   ],
+   "explain": "Timer, service birimiyle çalıştığı için loglar journal'dadır, bağımlılık ve kaynak sınırı tanımlanabilir. `Persistent=true` makine kapalıyken kaçan çalışmayı açılışta telafi eder. Bunun bedeli iki birim dosyasıdır."
   }
  },
  "summary": [

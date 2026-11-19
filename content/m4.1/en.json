@@ -197,7 +197,7 @@
   },
   "t13": {
    "text": "Mini project: write the names of accounts whose shell ends in `/bin/bash` in `/etc/passwd` into `~/shell_users.txt`.",
-   "hint": "`grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt`; `$` means end of line. (`grep`, `cut` → module 3.4/3.5; `>` → 3.2.)"
+   "hint": "`grep`, `cut`; `$` means end of line. (`grep`, `cut` → module 3.4/3.5; `>` → 3.2.)"
   },
   "t14": {
    "text": "Challenge: put your user name (`whoami`) and then the `id` output into `~/me.txt`. It must show `student`, `uid=1000` and `wheel`.",
@@ -209,7 +209,7 @@
   },
   "t16": {
    "text": "TICKET #4107: The auditor wants the UID and groups of `alice`. Save the information in `~/alice_info.txt`.",
-   "hint": "`id alice > ~/alice_info.txt`; the output must contain `uid=1001` and `devs`. (`>` and `>>` → module 3.2.)"
+   "hint": "`id`; the output must contain `uid=1001` and `devs`. (`>` and `>>` → module 3.2.)"
   }
  },
  "vm": {
@@ -336,8 +336,8 @@
    "q": "Why do scripts prefer `getent passwd`?",
    "options": [
     "It also finds LDAP/SSSD users besides the local file",
-    "It is always faster",
-    "It needs no permissions and shows passwords",
+    "It is always faster, because it never touches the network",
+    "It works only for root and never lists any users",
     "It only works as root"
    ],
    "explain": "getent queries all sources through NSS, so it returns users from the central directory too."
@@ -347,18 +347,18 @@
    "options": [
     "The UID",
     "The names of all groups the user belongs to",
-    "Recent logins",
-    "Logged-in users"
+    "The user's most recent login records",
+    "All users currently logged in to the system"
    ],
    "explain": "`-G` prints all groups, `-n` prints names instead of numbers."
   },
   "q6": {
    "q": "What does `w` show in addition to `who`?",
    "options": [
-    "Password hashes",
-    "Failed logins",
+    "The users' password hashes",
+    "Records of failed login attempts",
     "The command each session is running and load info",
-    "Group memberships"
+    "The full list of users' group memberships"
    ],
    "explain": "`w` also reports each session's current command, idle time and load average."
   },
@@ -375,12 +375,22 @@
   "q8": {
    "q": "What does a `!` at the start of the password field in `/etc/shadow` mean?",
    "options": [
-    "Password expired",
-    "Account deleted",
-    "Password is empty",
+    "Password expired, a new one will be required",
+    "Account has been fully deleted from the system",
+    "Password field is empty, login works without one",
     "Password login is locked"
    ],
    "explain": "`!` (or `*`) means there is no valid hash, so password login is impossible."
+  },
+  "q9": {
+   "q": "Why is the shell of service accounts (e.g. `daemon`) set to `/sbin/nologin`?",
+   "options": [
+    "So the service runs faster",
+    "No interactive login is possible with the account; even if taken over, no shell opens",
+    "To stop the service from reading files",
+    "To hide the password hash"
+   ],
+   "explain": "Service accounts exist to run processes, not for people. The `nologin` shell refuses interactive sessions and shrinks the attack surface; the service itself keeps running normally."
   }
  },
  "summary": [

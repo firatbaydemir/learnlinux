@@ -192,11 +192,11 @@
   },
   "t11": {
    "text": "Hata ayıklama: `report.txt` yanlışlıkla `wrong` klasöründe kalmış. Onu `inbox` klasörüne taşı.",
-   "hint": "`mv wrong/report.txt inbox/`. Sonra `ls wrong inbox` ile kontrol et."
+   "hint": "`mv`. Sonra `ls wrong inbox` ile kontrol et."
   },
   "t12": {
    "text": "Mini proje: `archive/2026` klasörünü `mkdir -p` ile oluştur, sonra `inbox/mail1.txt` dosyasını oraya `jan.txt` adıyla taşı.",
-   "hint": "İki komut: `mkdir -p archive/2026`, sonra `mv inbox/mail1.txt archive/2026/jan.txt`."
+   "hint": "İki komut: `mkdir -p`, sonra `mv inbox/mail1.txt archive/2026/jan.txt`."
   },
   "t13": {
    "text": "Meydan okuma: `photos` klasörünü `pictures` olarak yeniden adlandır, sonra `pictures` klasörünü içindekilerle `~/Documents` içine kopyala.",
@@ -204,7 +204,7 @@
   },
   "t14": {
    "text": "TICKET #2410 — Muhasebe, `inbox` klasörünün yedeğini `backup/inbox_2026` adıyla istiyor. Orijinal `inbox` yerinde ve eksiksiz kalmalı.",
-   "hint": "Klasör kopyası: `cp -r inbox backup/inbox_2026`. Hedef yok olduğu için yeni ad olur."
+   "hint": "Klasör kopyası: `cp -r`. Hedef yok olduğu için yeni ad olur."
   },
   "t15": {
    "text": "`-v` ile kopyala ve ne yaptığını gör: `cp -v tasks.txt tasks_v.txt`.",
@@ -369,6 +369,16 @@
     "Hata verir"
    ],
    "explain": "Hedef var olan bir dizinse `mv` dosyayı içine taşır; kaynak artık eski yerde değildir."
+  },
+  "q9": {
+   "q": "Aynı dosya sisteminde `mv` büyük bir klasörü bile neden anında taşır?",
+   "options": [
+    "`mv` önce veriyi sıkıştırır, bu yüzden iş küçülür",
+    "Veri kopyalanmaz; yalnızca dosyanın kayıtlı yeri (adı) değişir",
+    "`mv` yalnızca klasörün ilk dosyasını gerçekten taşır",
+    "Dosyalar arka planda kopyalanır ve eskisi sonradan silinir"
+   ],
+   "explain": "Aynı dosya sistemi içinde `mv` yalnızca dizin kaydını değiştirir; bu yüzden hızlıdır. Farklı disklere taşırken ise veri kopyalanıp eskisi silinir."
   }
  },
  "summary": [

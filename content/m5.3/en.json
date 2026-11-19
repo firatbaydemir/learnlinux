@@ -106,7 +106,7 @@
   },
   "t04": {
    "text": "Save a graceful shutdown plan in `~/lab/term_plan.txt`: use `kill -TERM` for PID 2210.",
-   "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt` (`>` → module 3.2.)"
+   "hint": "`echo -TERM` (`>` → module 3.2.)"
   },
   "t05": {
    "text": "Write an example in `~/lab/priority_plan.txt` that starts a backup with lower CPU priority.",
@@ -272,6 +272,16 @@
     "`renice -n 5 -p PID`"
    ],
    "explain": "`renice` changes a running process's priority; `nice` is for launching new ones."
+  },
+  "q9": {
+   "q": "Why do you try `kill -TERM` first and `kill -KILL` only if the process does not respond?",
+   "options": [
+    "TERM lets the process clean up and save; KILL cannot be caught and cuts the work short",
+    "KILL is slower than TERM, so it comes last",
+    "TERM is only for root, KILL for everyone",
+    "There is no difference between them"
+   ],
+   "explain": "SIGTERM can be caught by the process and turned into a clean shutdown. SIGKILL is enforced by the kernel; the process cannot react, so unsaved data may be lost. That is why it is the last resort."
   }
  },
  "summary": [

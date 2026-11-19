@@ -404,10 +404,10 @@
   "q1": {
    "q": "What happens with `rm -rf $DIR/*` when `DIR` is empty, and which notation protects?",
    "options": [
-    "Nothing happens; add `rm -i`",
-    "Only the home directory is deleted; use `sudo`",
+    "Nothing happens; simply adding `rm -i` is enough",
+    "Only the home directory is deleted; you use `sudo` for that",
     "It tries to delete `/*`; `\"${DIR:?}\"` protects",
-    "It errors out; `chmod 000` is enough"
+    "It fails with an error; `chmod 000` protects, nothing more is needed"
    ],
    "explain": "The empty variable disappears and the command becomes `rm -rf /*`. `${DIR:?}` stops the script on an empty value."
   },
@@ -434,7 +434,7 @@
   "q4": {
    "q": "When does `trap cleanup EXIT` run?",
    "options": [
-    "However the script ends (including errors); except after `kill -9`",
+    "On exit, errors included; except `kill -9`",
     "Only on Ctrl+C",
     "Before the first line of the script",
     "Only if `cleanup` returns 0"
@@ -454,9 +454,9 @@
   "q6": {
    "q": "What is the usual way to return a value from a function?",
    "options": [
-    "`return \"text\"`",
-    "With `export`",
-    "`exit` ends the function",
+    "`return \"text\"` to return the text directly",
+    "Exporting a variable with `export`",
+    "Ending the function with `exit`",
     "Print with `echo` and capture with `$(...)`"
    ],
    "explain": "`return` only gives an exit code 0–255; for text use `echo` and command substitution."
@@ -465,9 +465,9 @@
    "q": "What is the difference between `\"$@\"` and unquoted `$*`?",
    "options": [
     "`\"$@\"` keeps each argument separate and intact",
-    "No difference",
+    "No difference; both give the same result",
     "`$*` preserves spaces",
-    "`\"$@\"` yields only the first argument"
+    "`\"$@\"` yields only the first argument and drops the rest"
    ],
    "explain": "`\"$@\"` keeps arguments with spaces whole; unquoted `$*` is word-split."
   },
@@ -480,6 +480,16 @@
     "Skips blank lines"
    ],
    "explain": "`-r` does not treat backslash as an escape; lines are read as they are."
+  },
+  "q9": {
+   "q": "What does `shellcheck script.sh` do?",
+   "options": [
+    "Runs the script and backs up the system first",
+    "Finds likely bugs without running",
+    "Compiles the script to bytecode",
+    "Gives the script run permission (`chmod +x`)"
+   ],
+   "explain": "`shellcheck` is a static analyzer: it warns about issues such as missing quotes without running the script. `bash -n` only checks syntax."
   }
  },
  "summary": [

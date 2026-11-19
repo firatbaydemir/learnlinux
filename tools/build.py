@@ -51,8 +51,8 @@ def lang_switch(lang, page):
 def head(lang, title, depth_shared="../shared"):
     return ('<!doctype html>\n<html lang="%s">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>%s</title>\n'
-            '<script>try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;'
-            'localStorage.setItem("tla3:lang","%s")}catch(e){}</script>\n'
+            '<script>document.documentElement.dataset.theme="light";try{var t=localStorage.getItem("tla3:theme");if(t)document.documentElement.dataset.theme=t;'
+                          'localStorage.setItem("tla3:lang","%s")}catch(e){}</script>\n'
             '<meta name="theme-color" content="#060a08">\n'
             '<link rel="manifest" href="../manifest.webmanifest">\n'
             '<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">\n'
@@ -262,11 +262,15 @@ def build_module(lang, ui, mods_meta, mid, built):
         o.append('<section id="%s"><h2>%s</h2>\n' % (esc(sec["id"]), esc(sec["title"])))
         for p in sec["body"]:
             o.append("<p>%s</p>\n" % md(p))
+        if sec.get("more"):
+            o.append('<details class="more"><summary>%s</summary>%s</details>\n' % (esc(ui["more"]), "".join("<p>%s</p>" % md(p) for p in sec["more"])))
         for c in sec.get("commands", []):
             o.append('<article class="cmd"><h3><code>%s</code></h3><dl>'
                      '<dt>%s</dt><dd>%s</dd><dt>%s</dt><dd>%s</dd><dt>%s</dt><dd>%s</dd></dl>%s</article>\n'
                      % (esc(c["cmd"]), esc(ui["what"]), md(c["what"]), esc(ui["where"]), md(c["where"]),
-                        esc(ui["why"]), md(c["why"]), code_block(c["example"], ui, sim=not c.get("nosim"))))
+                                                esc(ui["why"]), md(c["why"]), code_block(c["example"], ui, sim=not c.get("nosim"))
+                        + (('<p class="lbl">%s</p><pre class="out">%s</pre>' % (esc(ui["expected"]), esc(c["output"]))) if c.get("output") else "")))
+
         for k in ("tip", "warn", "danger"):
             if sec.get(k):
                 o.append(callout(k, ui[k], sec[k]))
@@ -351,7 +355,7 @@ def build_module(lang, ui, mods_meta, mid, built):
 
 def build_root(ui_all):
     links = "".join('<a class="btn primary" href="%s/index.html" hreflang="%s" lang="%s">%s</a>' % (l, l, l, LANG_NAMES[l]) for l in LANGS)
-    return ('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    return ('<!doctype html>\n<html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             '<title>Linux Academy — Choose your language</title><meta name="theme-color" content="#060a08">'
             '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg" type="image/svg+xml">'
             '<link rel="apple-touch-icon" href="icons/icon-192.png">'

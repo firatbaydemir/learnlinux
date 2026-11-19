@@ -103,7 +103,7 @@
   },
   "t04": {
    "text": "Speichere in `~/lab/job_plan.txt` die Fortsetzung von Job 1 mit `bg %1` und anschließend die Kontrolle mit `jobs -l`.",
-   "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt` (`>` → Modul 3.2.)"
+   "hint": "`echo`, `jobs` (`>` → Modul 3.2.)"
   },
   "t05": {
    "text": "Ergänze im Plan das Zurückholen in den Vordergrund und die Bereinigung nach Abschluss.",
@@ -269,6 +269,16 @@
     "Ja, mit `jobs -a`"
    ],
    "explain": "Jobkontrolle ist shellspezifisch; für andere Terminals nutzt man PID-basierte Werkzeuge wie `kill`."
+  },
+  "q9": {
+   "q": "Warum solltest du einen mit `Ctrl+Z` angehaltenen Job mit `jobs -l` im Auge behalten?",
+   "options": [
+    "`Ctrl+Z` löscht den Job, `jobs` holt ihn zurück",
+    "Ein angehaltener Job läuft automatisch weiter",
+    "Der Job ist nicht beendet, nur pausiert; vergessen hält er weiter Speicher und Ressourcen",
+    "`jobs -l` beschleunigt den Job im Hintergrund"
+   ],
+   "explain": "`Ctrl+Z` sendet SIGTSTP und pausiert den Job; der Prozess lebt weiter und hält Ressourcen. `jobs -l` listet ihn auf; danach setzt du ihn mit `bg`/`fg` fort oder beendest ihn mit `kill`."
   }
  },
  "summary": [

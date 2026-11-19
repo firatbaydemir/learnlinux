@@ -404,10 +404,10 @@
   "q1": {
    "q": "`rm -rf $DIR/*` satırında `DIR` boşsa ne olur ve hangi yazım korur?",
    "options": [
-    "Hiçbir şey olmaz; `rm -i` ekle",
-    "Yalnızca ev dizini silinir; `sudo` kullan",
+    "Hiçbir şey olmaz; yalnızca `rm -i` eklemek yeterli olur",
+    "Yalnızca ev dizini silinir; bunun için `sudo` kullanılır",
     "`/*` silinmeye çalışılır; `\"${DIR:?}\"` yazmak korur",
-    "Hata verir; `chmod 000` yeterlidir"
+    "Komut hata verir; `chmod 000` ile korunulur, başka önlem gerekmez"
    ],
    "explain": "Boş değişken yok olur ve komut `rm -rf /*` olur. `${DIR:?}` boş değerde script'i durdurur."
   },
@@ -434,7 +434,7 @@
   "q4": {
    "q": "`trap cleanup EXIT` ne zaman çalışır?",
    "options": [
-    "Script nasıl biterse bitsin (hata dahil); `kill -9` hariç",
+    "Çıkışta, hata dahil; `kill -9` hariç",
     "Yalnızca Ctrl+C ile",
     "Script'in ilk satırından önce",
     "Yalnızca `cleanup` 0 döndürürse"
@@ -454,9 +454,9 @@
   "q6": {
    "q": "Fonksiyondan değer döndürmenin yaygın yolu hangisidir?",
    "options": [
-    "`return \"metin\"`",
-    "`export` ile",
-    "`exit` ile fonksiyon biter",
+    "`return \"metin\"` ile metni doğrudan döndürmek",
+    "`export` ile değişkeni dışarı aktarmak",
+    "`exit` ile fonksiyonu bitirmek",
     "`echo` ile yazıp `$(...)` ile yakalamak"
    ],
    "explain": "`return` yalnızca 0–255 çıkış kodu verir; metin için `echo` ve komut ikamesi kullanılır."
@@ -465,9 +465,9 @@
    "q": "Döngüde `\"$@\"` ile `$*` (tırnaksız) arasındaki fark nedir?",
    "options": [
     "`\"$@\"` her argümanı ayrı ve bozulmadan korur",
-    "Fark yoktur",
+    "Fark yoktur; ikisi de aynı sonucu verir",
     "`$*` boşlukları korur",
-    "`\"$@\"` yalnızca ilk argümanı verir"
+    "`\"$@\"` yalnızca ilk argümanı verir, geri kalanını atar"
    ],
    "explain": "`\"$@\"` boşluk içeren argümanları tek parça bırakır; tırnaksız `$*` kelimelere böler."
   },
@@ -480,6 +480,16 @@
     "Boş satırları atlar"
    ],
    "explain": "`-r` ters eğik çizgiyi kaçış olarak işlemez; satırlar olduğu gibi okunur."
+  },
+  "q9": {
+   "q": "`shellcheck betik.sh` ne yapar?",
+   "options": [
+    "Betiği çalıştırır ve sistemi önceden yedekler",
+    "Çalıştırmadan olası hataları bulur",
+    "Betiği bayt koduna derler",
+    "Betiğe çalışma izni (`chmod +x`) verir"
+   ],
+   "explain": "`shellcheck` bir statik analiz aracıdır: betiği çalıştırmadan tırnak eksiği gibi hataları uyarır. `bash -n` yalnızca sözdizimine bakar."
   }
  },
  "summary": [

@@ -307,7 +307,7 @@
   },
   "t13": {
    "text": "Mini: Finde mit `find` heraus, wo die Datei `todo.txt` liegt, und speichere den Pfad in der Datei `~/path.txt`.",
-   "hint": "`find ~ -name todo.txt > ~/path.txt`; sieh danach mit `cat ~/path.txt` nach. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"
+   "hint": "`find -name`; sieh danach mit `cat ~/path.txt` nach. (`>` schreibt die Ausgabe in eine Datei; siehe Modul 3.2.)"
   },
   "t14": {
    "text": "Challenge: Ermittle die Anzahl der `.txt`-Dateien unter Home in einem einzigen Befehl und schreibe sie in die Datei `~/count.txt`.",
@@ -516,6 +516,16 @@
     "--list-all"
    ],
    "explain": "`befehl --help` listet die Optionen schnell auf; Details in `man befehl`."
+  },
+  "q9": {
+   "q": "Warum hilft `man -k` (apropos), wenn du den Befehlsnamen nicht kennst?",
+   "options": [
+    "Es sucht das Stichwort in den Kurzbeschreibungen der man-Seiten",
+    "Es lädt Befehle aus dem Internet",
+    "Es führt den Befehl für dich aus",
+    "Es listet nur nicht installierte Befehle"
+   ],
+   "explain": "`man -k wort` durchsucht Beschreibungen; ideal, wenn du das Ziel kennst, aber nicht den Befehl."
   }
  },
  "summary": [

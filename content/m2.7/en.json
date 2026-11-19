@@ -213,7 +213,7 @@
   },
   "t10": {
    "text": "Debug: vim keeps warning about a leftover swap file `.todo.txt.swp` in your home folder. Nobody is editing the file; delete the swap file.",
-   "hint": "Hidden file: `rm .todo.txt.swp`; list it with `ls -a`."
+   "hint": "Hidden file: `rm`; list it with `ls -a`."
   },
   "t11": {
    "text": "Mini project: create the folder `scripts`, write `scripts/hello.sh` containing the lines `#!/bin/bash` and `echo hello` (use `printf` with `\\n`), then make it mode 755.",
@@ -312,6 +312,16 @@
     "/word"
    ],
    "explain": "`/word` searches forward, `n` jumps to the next match; `?word` searches backward."
+  },
+  "q9": {
+   "q": "Why do you press `Esc` in vim before saving the file?",
+   "options": [
+    "Esc saves the file automatically",
+    "To enter commands you must leave insert mode and return to normal mode",
+    "Esc quits vim",
+    "Esc only deletes the line"
+   ],
+   "explain": "vim is modal: in insert mode everything you type goes into the text. Commands like `:w` work in normal mode, so you press Esc first."
   }
  },
  "summary": [

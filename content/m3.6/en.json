@@ -2,7 +2,7 @@
  "title": "sed and awk",
  "lead": "Use sed to replace, delete and select text line by line; use awk to split lines into fields (columns), calculate and summarize log files.",
  "objectives": [
-  "You use sed with `s/old/new/`, the `g` flag, `-n` + `p`, addresses/ranges and `d`.",
+  "You use sed with `s/a/b/`, the `g` flag, `-n` + `p`, addresses/ranges and `d`.",
   "You know that `sed -i` changes a file permanently and make a backup first (`-i.bak`).",
   "You select fields with awk (`$1`, `$NF`, `-F`), write conditions and compute sums and averages with `BEGIN`/`END`.",
   "You count values in log files with awk arrays and combine awk in pipelines with `cut`, `sort`, `uniq`."
@@ -18,14 +18,14 @@
    ],
    "commands": [
     {
-     "cmd": "sed 's/old/new/'",
+     "cmd": "sed 's/a/b/'",
      "what": "Replaces the first match on each line.",
      "where": "For a quick text fix.",
      "why": "You see the result without touching the file.",
      "example": "sed 's/cat/hamster/' pets.txt"
     },
     {
-     "cmd": "sed 's/old/new/g'",
+     "cmd": "sed 's/a/b/g'",
      "what": "Replaces all matches on the line.",
      "where": "When a word must change everywhere.",
      "why": "Without `g` the second match on a line stays.",
@@ -206,68 +206,68 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Print only line 2 of `pets.txt` with sed: `sed -n '2p' pets.txt`.",
-   "hint": "`-n` turns off automatic printing, `2p` prints only line 2. The simulator does not run sed ('not supported'); your command is still recorded."
+   "text": "Print only line 2 of `pets.txt` using sed.",
+   "hint": "In `sed`, `-n` turns off automatic printing; the line number is followed by the `p` command. The simulator does not run sed ('not supported'); your command is still recorded."
   },
   "t02": {
-   "text": "Print only the first column (the IP addresses) of `access.log` with awk.",
-   "hint": "`awk '{print $1}' access.log` — the program belongs in single quotes."
+   "text": "Use awk to print only the first column (the IP addresses) of `access.log`.",
+   "hint": "An `awk` program goes in single quotes inside curly braces; the first field is called `$1`."
   },
   "t03": {
    "text": "Predict: which names does `cut -d, -f1 employees.csv` print (same as `awk -F, '{print $1}'`)? Think first, then run it.",
    "hint": "The first column is the `name` header and four names (anna, ben, cara, dan)."
   },
   "t04": {
-   "text": "You are changing the port in `server.conf`. First back it up with `cp server.conf server.conf.bak`, then run `sed -i 's/8080/9090/' server.conf`.",
-   "hint": "Order matters: backup first, then `-i`. Alternatively `sed -i.bak` makes the backup itself; but here the file `server.conf.bak` must exist."
+   "text": "In `server.conf` you will change the port from 8080 to 9090. First make a backup named `server.conf.bak` with `cp`, then change it with `sed -i`.",
+   "hint": "Order matters: backup first, then `-i`. Alternative: `sed -i.bak` makes the backup itself; but this task requires the file `server.conf.bak` to exist."
   },
   "t05": {
-   "text": "Print `server.conf` without comment lines (those starting with `#`): `sed '/^#/d' server.conf`.",
-   "hint": "`^#` means # at line start, `d` removes the line. The file stays unchanged."
+   "text": "Print `server.conf` without its comment lines (those starting with `#`); the file must stay unchanged.",
+   "hint": "The delete command of `sed` is `d`; put the pattern between `/.../`. `^` means start of line. The file does not change."
   },
   "t06": {
-   "text": "Broken command: `sed 's/usr/local/bin/opt/bin/' paths.txt` fails because the `/` in the path collides with the delimiter. Fix it: replace `/usr/local` with `/opt` (use `|` as delimiter).",
-   "hint": "`sed 's|/usr/local|/opt|' paths.txt`. The first character after `s` is the delimiter; `|`, `#` and `,` are common."
+   "text": "Broken command: `sed 's/usr/local/bin/opt/bin/' paths.txt` fails because the `/` inside the path clashes with the delimiter. Fix it: replace `/usr/local` with `/opt` (use `|` as the delimiter).",
+   "hint": "The first character after `s` sets the delimiter; `|`, `#` and `,` are common. The `/` in the path is then free."
   },
   "t07": {
    "text": "Predict: how often does the department `it` appear in the output of `cut -d, -f2 employees.csv | sort | uniq -c`? Then run the command.",
    "hint": "`uniq -c` prefixes each distinct line with its count. The `dept` header is a line too."
   },
   "t08": {
-   "text": "Mini project: create the folder `reports`, copy `employees.csv` into it and compute the average salary in the copy with awk (skip the header): `awk -F, 'NR>1 {s+=$3; n++} END {print s/n}' reports/employees.csv`.",
-   "hint": "Steps: `mkdir reports`, `cp employees.csv reports/`, then awk. `NR>1` skips the header, `n` counts the rows."
+   "text": "Mini project: create a `reports` folder, copy `employees.csv` into it and compute the average salary in the copy with awk (skip the header).",
+   "hint": "Steps: create folder, copy, then `awk`. `NR>1` skips the header; keep the sum and the row count in variables and divide in the `END` block. Salary is field 3, separator `-F,`."
   },
   "t09": {
-   "text": "Mini project: create the folder `backup`, copy `app.conf` to `backup/app.conf`, then change `mode=dev` to `mode=prod` in `app.conf` with `sed -i`.",
-   "hint": "`mkdir backup`, `cp app.conf backup/app.conf`, `sed -i 's/mode=dev/mode=prod/' app.conf`. Make the backup BEFORE `-i`."
+   "text": "Mini project: create a `backup` folder, copy `app.conf` as `backup/app.conf`, then change `mode=dev` to `mode=prod` in `app.conf` with `sed -i`.",
+   "hint": "Order: `mkdir`, `cp`, then `sed -i` with `s/a/b/`. Make the backup BEFORE `-i`."
   },
   "t10": {
    "text": "Predict: which animal does `sed -n '3p' pets.txt` print? Verify with the equivalent `head -n 3 pets.txt | tail -n 1`.",
    "hint": "Lines: cat, dog, bird, cat, fish. `head -n 3` takes the first three, `tail -n 1` the last of them."
   },
   "t11": {
-   "text": "Challenge: with awk select only the lines of `access.log` whose status code is 404 (condition: second field is 404).",
-   "hint": "`awk '$2 == 404' access.log` — the pattern alone is enough; without an action the line is printed."
+   "text": "Challenge: use awk to select from `access.log` only the lines with status code 404 (condition: second field is 404).",
+   "hint": "The condition alone is enough: with no action block `awk` prints the matching line. The second field is `$2`."
   },
   "t12": {
-   "text": "Challenge: in one sed call make two replacements in `employees.csv` (with two `-e`): `it` to `IT`, `hr` to `HR`. Just print, do not change the file.",
-   "hint": "`sed -e 's/it/IT/g' -e 's/hr/HR/g' employees.csv`."
+   "text": "Challenge: make two changes in `employees.csv` with a single sed call (using two `-e`): `it` to `IT`, `hr` to `HR`. Print the result, do not modify the file.",
+   "hint": "Each `-e` takes its own `s/a/b/` expression; add `g` at the end to replace all matches. Do not use `-i`."
   },
   "t13": {
-   "text": "Debug: a wrong `sed -i` broke `db.conf` (only `host=` is left). The backup `db.conf.bak` is still there. Restore the file from the backup.",
-   "hint": "`cp db.conf.bak db.conf`. Check with `cat db.conf`: it should show `host=localhost` and `port=5432`."
+   "text": "Debug: a wrong `sed -i` broke `db.conf` (only `host=` is left). The backup `db.conf.bak` still exists. Restore the file from the backup.",
+   "hint": "Copy the backup over the broken file with `cp` (source: backup, target: original file). Check with `cat db.conf`: it must contain `host=localhost` and `port=5432`."
   },
   "t14": {
-   "text": "Ticket #3601 — 'The live server needs a clean configuration: prepare a copy without comment lines as `server.live`, and keep the original as `server.conf.orig`.' (The simulator has no sed: produce the output without comments using `grep -v`; on a real system `sed '/^#/d'` does the same.)",
-   "hint": "`cp server.conf server.conf.orig` and `grep -v '^#' server.conf > server.live`."
+   "text": "Ticket #3601 — 'We need a clean configuration for the live server: prepare a copy without comment lines as `server.live`, and keep the original as `server.conf.orig`.' (No sed in the simulator: produce the comment-free output with `grep`; on a real system `sed` does the same.)",
+   "hint": "Two jobs: keep the original with `cp` as `server.conf.orig`; use the invert option of `grep` to drop lines starting with `#` and redirect the output with `>` into `server.live`."
   },
   "t15": {
-   "text": "Ticket #3602 — 'Write the distribution of status codes in access.log to the file `status_report.txt`.' (One count per code, e.g. `3 200`.)",
-   "hint": "Take the second column, sort, count: `cut -d' ' -f2 access.log | sort | uniq -c > status_report.txt`. An awk array would do the same."
+   "text": "Ticket #3602 — 'Write the distribution of status codes in access.log to `status_report.txt`.' (Each code needs a count, e.g. `3 200`.)",
+   "hint": "Pipeline: extract the second column (`cut`, space delimiter), sort, count duplicates (`uniq`), write the result to the file with `>`. An awk array would do the same."
   },
   "t16": {
-   "text": "Ticket #3603 — 'Calculate the total salary of the IT department.' Write it with awk: separator `,`, rows whose second field is `it`, sum the third field, print with `END`.",
-   "hint": "`awk -F, '$2==\"it\" {s+=$3} END {print s}' employees.csv` (result 11300)."
+   "text": "Ticket #3603 — 'Compute the total salary of the IT department.' Write it with awk: separator `,`, sum the third field of rows whose second field is `it`, print with `END`.",
+   "hint": "Conditional block: `$2==\"it\" {...}`; add to a variable and print it in the `END` block. Expected result: 11300."
   }
  },
  "vm": {
@@ -426,10 +426,20 @@
     "The first field of each line"
    ],
    "explain": "`awk` splits lines into fields on whitespace by default; `$1` is the first, `$NF` the last."
+  },
+  "q9": {
+   "q": "Which command counts how many times each line occurs in a file?",
+   "options": [
+    "`uniq -c file`",
+    "`cut -c file | uniq`",
+    "`sort -u file | wc`",
+    "`sort file | uniq -c`"
+   ],
+   "explain": "`uniq` only counts adjacent duplicates, so `sort` must come first. `cut` selects columns/fields."
   }
  },
  "summary": [
-  "`sed 's/old/new/g'` substitutes; `-n` + `p` selects, `d` deletes. Without `-i` the file never changes.",
+  "`sed 's/a/b/g'` substitutes; `-n` + `p` selects, `d` deletes. Without `-i` the file never changes.",
   "`sed -i` is permanent: use `-i.bak` for a backup. On macOS you need `-i ''`.",
   "awk splits lines into fields: `$1`, `$NF`, `-F,`; calculate with `NR`, `NF`, `BEGIN`, `END`.",
   "With the associative array `c[$2]++` you count values in logs; sort the output with `sort`.",

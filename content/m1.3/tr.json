@@ -307,7 +307,7 @@
   },
   "t13": {
    "text": "Mini: `todo.txt` dosyasının nerede olduğunu `find` ile bul ve yolu `~/path.txt` dosyasına kaydet.",
-   "hint": "`find ~ -name todo.txt > ~/path.txt`; sonra `cat ~/path.txt` ile bak. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
+   "hint": "`find -name`; sonra `cat ~/path.txt` ile bak. (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
   },
   "t14": {
    "text": "Challenge: Home altındaki `.txt` dosyalarının sayısını tek komutta bulup `~/count.txt` dosyasına yaz.",
@@ -516,6 +516,16 @@
     "--list-all"
    ],
    "explain": "`komut --help` seçenekleri hızlıca listeler; ayrıntı için `man komut`."
+  },
+  "q9": {
+   "q": "Komutun adını bilmiyorsan `man -k` (apropos) neden işe yarar?",
+   "options": [
+    "Anahtar kelimeyi man sayfalarının kısa açıklamalarında arar",
+    "Komutları internetten indirir",
+    "Komutu senin yerine çalıştırır",
+    "Yalnızca kurulu olmayan komutları listeler"
+   ],
+   "explain": "`man -k kelime` açıklamalarda arama yapar; ne yapmak istediğini bilip komut adını bilmediğinde çözümdür."
   }
  },
  "summary": [

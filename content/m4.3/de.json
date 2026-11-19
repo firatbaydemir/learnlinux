@@ -211,7 +211,7 @@
   },
   "t09": {
    "text": "Fehlersuche: `~/sudoers.bad` enthält eine gefährliche Regel, die allen alle Befehle ohne Passwort erlaubt. Ersetze die Datei durch dieses eng begrenzte Beispiel: `student ALL=(root) /usr/bin/systemctl restart nginx`. Dies ist nur ein Entwurf; kopiere ihn nicht in die echte sudoers-Datei.",
-   "hint": "Nutze `echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad`. (`>` und `>>` → Modul 3.2.)"
+   "hint": "Nutze `echo`. (`>` und `>>` → Modul 3.2.)"
   },
   "t10": {
    "text": "Mini-Projekt: Schreibe diese Befehle der Reihe nach in `~/admin_runbook.txt`: Rechte anzeigen, nginx-Status prüfen und Passwort-Cache leeren: `sudo -l`, `sudo systemctl status nginx`, `sudo -k`.",
@@ -313,8 +313,8 @@
   "q1": {
    "q": "Was ist der Hauptunterschied zwischen `sudo COMMAND` und `su -`?",
    "options": [
-    "Beide benötigen immer das root-Passwort",
-    "`sudo` führt einen erlaubten Befehl aus; `su -` öffnet die Login-Sitzung des Zielkontos",
+    "Beide tun dasselbe; nur die Reihenfolge der Passwortabfrage unterscheidet sich",
+    "`sudo` führt einen erlaubten Befehl aus; `su -` öffnet eine Login-Sitzung",
     "`su -` liest nur Dateien",
     "`sudo` macht den Benutzer dauerhaft zu root"
    ],
@@ -323,7 +323,7 @@
   "q2": {
    "q": "Warum verwendet man `visudo`, um die sudo-Richtliniendatei zu bearbeiten?",
    "options": [
-    "Es verschlüsselt die Datei",
+    "Es verschlüsselt die Datei, damit nur root die Regeln lesen kann",
     "Es erstellt das root-Konto",
     "Es prüft die Syntax und verringert das Risiko, eine fehlerhafte Regel zu speichern",
     "Es fügt alle Benutzer der sudo-Gruppe hinzu"
@@ -334,19 +334,19 @@
    "q": "Welche sudo-Regel entspricht dem Prinzip der geringsten Rechte?",
    "options": [
     "Einem Benutzer nur den exakt benötigten Befehl erlauben",
-    "Allen `NOPASSWD: ALL` geben",
-    "Das root-Passwort mit dem Team teilen",
-    "Jeden Befehl dauerhaft in einer root-Shell ausführen"
+    "Allen `NOPASSWD: ALL` geben und die Passwortabfrage ganz abschaffen",
+    "Das root-Passwort mit dem ganzen Team teilen, damit alle es nutzen",
+    "Jeden Befehl dauerhaft in einer ständig offenen root-Shell ausführen"
    ],
    "explain": "Begrenze den Zugriff auf den richtigen Benutzer und den erforderlichen Befehl; vermeide weit gefasste `ALL`-Regeln."
   },
   "q4": {
    "q": "Wenn `su -` das root-Passwort unter Ubuntu ablehnt, was ist eine wahrscheinliche Erklärung?",
    "options": [
-    "Linux hat kein root-Konto",
-    "sudo ist immer deaktiviert",
-    "Das Terminal unterstützt keine root-Sitzungen",
-    "Das root-Konto kann für die Passwort-Anmeldung gesperrt sein; ein berechtigter Benutzer sollte `sudo` nutzen"
+    "Linux hat nie ein root-Konto, es gibt nur sudo",
+    "sudo ist immer deaktiviert, deshalb ist kein Wechsel zu root möglich",
+    "Das Terminal unterstützt unter keinen Umständen root-Sitzungen, sudo auch nicht",
+    "Das root-Konto kann für Passwort-Anmeldung gesperrt sein; `sudo` nutzen"
    ],
    "explain": "Bei Ubuntu-Installationen ist das root-Konto häufig gesperrt; ein berechtigter Benutzer nutzt sudo für die Administration."
   },
@@ -363,19 +363,19 @@
   "q6": {
    "q": "Was gewährt die Regel `alice ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx`?",
    "options": [
-    "Volle Root-Rechte für alice",
-    "Dass alice sudo nicht nutzen darf",
+    "Volle Root-Rechte für alice bei jedem Befehl",
+    "Dass alice sudo für keinen Befehl nutzen darf",
     "Dass alice nur diesen Befehl ohne Passwort ausführt",
-    "nginx-Rechte für alle Benutzer"
+    "nginx-Rechte für alle Benutzer des Systems"
    ],
    "explain": "Der Befehl ist per vollem Pfad begrenzt; das entspricht dem Least-Privilege-Prinzip."
   },
   "q7": {
    "q": "Worin unterscheiden sich `su alice` und `su - alice`?",
    "options": [
-    "Kein Unterschied",
-    "Das zweite macht root",
-    "Das erste fragt kein Passwort",
+    "Kein Unterschied; beide laden dieselbe Umgebung und denselben PATH",
+    "Das zweite macht root, das erste bleibt normaler Benutzer",
+    "Das erste fragt kein Passwort, das zweite immer",
     "Das zweite lädt die Login-Umgebung von alice (HOME, PATH)"
    ],
    "explain": "`-` startet eine Login-Shell; Umgebung und Arbeitsverzeichnis folgen dem Zielbenutzer."
@@ -383,12 +383,22 @@
   "q8": {
    "q": "Was ist der Vorteil von Dateien in `/etc/sudoers.d/`?",
    "options": [
-    "Modulare Regeln ohne die Hauptdatei anzufassen; trotzdem mit `visudo -f` bearbeiten",
-    "Keine Syntaxprüfung nötig",
+    "Modulare Regeln ohne die Hauptdatei anzufassen",
+    "Keine Syntaxprüfung nötig, fehlerhafte Regeln sind unproblematisch",
     "Regeln gelten nur für root",
     "Dateirechte sind egal"
    ],
    "explain": "Regeln lassen sich getrennt verwalten, doch eine fehlerhafte Datei kann sudo lahmlegen; mit `visudo -f` prüfen, Modus 0440."
+  },
+  "q9": {
+   "q": "Warum ist in sudo-Regeln ein vollständiger Befehlspfad (z. B. `/usr/bin/systemctl restart nginx`) besser als `ALL`?",
+   "options": [
+    "Der Befehl läuft schneller",
+    "Der Benutzer darf nur die nötige Aufgabe ausführen; bei Missbrauch bleibt der Schaden begrenzt",
+    "`sudo` fragt nicht mehr nach dem Passwort",
+    "Die Regeldatei wird kürzer"
+   ],
+   "explain": "Prinzip der minimalen Rechte: Selbst bei Übernahme oder Fehlbedienung lässt sich nur ein einziger Befehl ausführen, nicht das ganze System."
   }
  },
  "summary": [

@@ -115,24 +115,24 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Zeige mit `grep` die `ERROR`-Zeilen aus `logs/app.log`.",
-   "hint": "Muster und Datei angeben: `grep ERROR logs/app.log`."
+   "text": "Zeige die `ERROR`-Zeilen in `logs/app.log`.",
+   "hint": "`grep` erwartet zuerst das Muster, dann die Datei."
   },
   "t02": {
-   "text": "Suche in `logs/app.log` ohne Beachtung der Groß-/Kleinschreibung nach `warn`.",
-   "hint": "Verwende `grep -i warn logs/app.log`."
+   "text": "Suche das Wort `warn` in `logs/app.log` ohne Beachtung der Groß-/Kleinschreibung.",
+   "hint": "`grep` mit der Option für Groß-/Kleinschreibung ignorieren: `-i`."
   },
   "t03": {
-   "text": "Finde die `404`-Zeile im Zugriffslog und gib ihre Zeilennummer mit aus.",
-   "hint": "Verwende `grep -n 404 logs/access.log`."
+   "text": "Finde die `404`-Zeilen im Zugriffslog mit Zeilennummern.",
+   "hint": "`grep` mit der Option für Zeilennummern: `-n`."
   },
   "t04": {
-   "text": "Finde im Baum `project` alle Namen mit der Endung `.conf`.",
-   "hint": "Verwende `find project -name \"*.conf\"`; setze das Muster in Anführungszeichen."
+   "text": "Finde im Baum `project` alles, dessen Name auf `.conf` endet.",
+   "hint": "`find` erwartet zuerst den Ordner, dann das Kriterium `-name`; setze das Muster in Anführungszeichen."
   },
   "t05": {
-   "text": "Finde unter `project` nur reguläre `.txt`-Dateien.",
-   "hint": "Verwende `find project -type f -name \"*.txt\"`."
+   "text": "Finde in `project` nur reguläre `.txt`-Dateien.",
+   "hint": "Kombiniere bei `find` die Kriterien `-type f` und `-name`."
   },
   "t06": {
    "text": "Schätze, wie viele passende Zeilen `grep -c ERROR logs/app.log` meldet, und prüfe es anschließend.",
@@ -143,28 +143,28 @@
    "hint": "Versuche `cat logs/access.log | grep 200`. (`cat` in Modul 2.6, `|` in Modul 3.2.)"
   },
   "t08": {
-   "text": "Fehlersuche: Speichere die `ERROR`-Zeilen in `errors.txt` in deinem Home-Verzeichnis.",
-   "hint": "Leite stdout um: `grep ERROR logs/app.log > errors.txt` (`>` in Modul 3.2)."
+   "text": "Fehlersuche: Speichere die `ERROR`-Zeilen in der Datei `errors.txt` im Home-Verzeichnis.",
+   "hint": "Leite die Ausgabe in eine Datei um: `>` (Modul 3.2)."
   },
   "t09": {
-   "text": "Zeige Logzeilen, die `INFO` nicht enthalten.",
-   "hint": "`-v` wählt nicht passende Zeilen: `grep -v INFO logs/app.log`."
+   "text": "Zeige die Logzeilen, die `INFO` nicht enthalten.",
+   "hint": "`grep` mit der Option, die nicht passende Zeilen auswählt: `-v`."
   },
   "t10": {
-   "text": "Mini-Aufgabe: Suche in Projektdateien nach Zeilen mit `TODO`.",
-   "hint": "Durchsuche ein Verzeichnis rekursiv mit `grep -r TODO project`."
+   "text": "Mini-Aufgabe: Suche in den Dateien von `project` nach Zeilen mit `TODO`.",
+   "hint": "`grep` mit der Option für rekursive Suche in Ordnern: `-r`."
   },
   "t11": {
-   "text": "Mini-Aufgabe: Finde unter `logs` reguläre Dateien mit der Endung `.log`.",
-   "hint": "Verwende `find logs -type f -name \"*.log\"`."
+   "text": "Mini-Aufgabe: Finde im Baum `logs` reguläre Dateien, die auf `.log` enden.",
+   "hint": "`find` mit den Kriterien `-type` und `-name`."
   },
   "t12": {
-   "text": "Herausforderung: Suche unter `project` ohne Beachtung der Groß-/Kleinschreibung nach `todo` und zeige Zeilennummern.",
-   "hint": "Kombiniere Optionen mit `grep -rin todo project`."
+   "text": "Herausforderung: Suche in `project` rekursiv nach `todo`, ohne Groß-/Kleinschreibung und mit Zeilennummern.",
+   "hint": "Du kannst drei Optionen in einer Gruppe kombinieren: `-r`, `-i`, `-n`."
   },
   "t13": {
-   "text": "Ticket: Speichere alle `.txt`-Pfade im Projekt in einem Bericht `text_files.txt`.",
-   "hint": "Verwende `find . -type f -name \"*.txt\" > text_files.txt` (`>` in Modul 3.2)."
+   "text": "Ticket: Speichere alle `.txt`-Pfade des Projekts im Bericht `text_files.txt`.",
+   "hint": "`find` mit `-type f` und `-name`, dann Umleitung mit `>` (Modul 3.2)."
   }
  },
  "vm": {
@@ -303,6 +303,16 @@
     "Damit die Shell das Muster nicht expandiert und `find` es selbst auswertet"
    ],
    "explain": "Ohne Anführungszeichen kann die Shell `*.txt` im aktuellen Verzeichnis expandieren; Anführungszeichen reichen das Muster unverändert an `find` weiter."
+  },
+  "q9": {
+   "q": "Du kennst den Dateinamen nicht, weißt aber, dass das Wort `timeout` darin vorkommt. Welcher Ansatz passt?",
+   "options": [
+    "Mit `find` nach einer Datei namens `timeout` suchen",
+    "Mit `ls` alles auflisten und per Auge suchen",
+    "`grep` arbeitet nur in einer einzelnen Datei, also geht es nicht",
+    "Mit `grep -r` den Inhalt im Verzeichnis durchsuchen; find sucht nach Name und Eigenschaften, nicht nach Inhalt"
+   ],
+   "explain": "`grep` durchsucht Inhalte, mit `-r` den ganzen Verzeichnisbaum. `find` findet Dateien nach Name, Typ, Größe usw., nicht nach Inhalt."
   }
  },
  "summary": [

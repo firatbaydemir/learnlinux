@@ -115,24 +115,24 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Show the `ERROR` lines in `logs/app.log` with `grep`.",
-   "hint": "Pass the pattern and file: `grep ERROR logs/app.log`."
+   "text": "Show the `ERROR` lines in `logs/app.log`.",
+   "hint": "`grep` takes the pattern first, then the file."
   },
   "t02": {
-   "text": "Search `logs/app.log` for `warn`, ignoring letter case.",
-   "hint": "Use `grep -i warn logs/app.log`."
+   "text": "Search `logs/app.log` for the word `warn`, ignoring upper/lower case.",
+   "hint": "`grep` with the case-insensitive flag: `-i`."
   },
   "t03": {
-   "text": "Find the `404` line in the access log and include its line number.",
-   "hint": "Use `grep -n 404 logs/access.log`."
+   "text": "Find the `404` lines in the access log with line numbers.",
+   "hint": "`grep` with the line-number flag: `-n`."
   },
   "t04": {
-   "text": "Find names ending in `.conf` in the `project` tree.",
-   "hint": "Use `find project -name \"*.conf\"`; quote the pattern."
+   "text": "Find everything in the `project` tree whose name ends in `.conf`.",
+   "hint": "`find` takes the directory first, then the `-name` test; quote the pattern."
   },
   "t05": {
-   "text": "Find only regular `.txt` files under `project`.",
-   "hint": "Use `find project -type f -name \"*.txt\"`."
+   "text": "Find only regular `.txt` files in `project`.",
+   "hint": "Combine the `-type f` and `-name` tests of `find`."
   },
   "t06": {
    "text": "Predict how many matching lines `grep -c ERROR logs/app.log` reports, then verify.",
@@ -143,28 +143,28 @@
    "hint": "Try `cat logs/access.log | grep 200`. (`cat` is in module 2.6, `|` in module 3.2.)"
   },
   "t08": {
-   "text": "Debug: save the `ERROR` lines to `errors.txt` in your home directory.",
-   "hint": "Redirect stdout with `grep ERROR logs/app.log > errors.txt` (`>` is covered in module 3.2)."
+   "text": "Debug: save the `ERROR` lines to `errors.txt` in the home directory.",
+   "hint": "Redirect the output to a file: `>` (module 3.2)."
   },
   "t09": {
-   "text": "Show log lines that do not contain `INFO`.",
-   "hint": "`-v` selects non-matching lines: `grep -v INFO logs/app.log`."
+   "text": "Show the log lines that do not contain `INFO`.",
+   "hint": "`grep` with the flag that selects non-matching lines: `-v`."
   },
   "t10": {
-   "text": "Mini task: search project files for lines containing `TODO`.",
-   "hint": "Search a directory recursively with `grep -r TODO project`."
+   "text": "Mini task: search the files in `project` for lines containing `TODO`.",
+   "hint": "`grep` with the flag for recursive search in directories: `-r`."
   },
   "t11": {
-   "text": "Mini task: find regular files ending in `.log` under `logs`.",
-   "hint": "Use `find logs -type f -name \"*.log\"`."
+   "text": "Mini task: find regular files ending in `.log` in the `logs` tree.",
+   "hint": "`find` with the `-type` and `-name` tests."
   },
   "t12": {
-   "text": "Challenge: search `project` for `todo`, ignoring case and showing line numbers.",
-   "hint": "Combine options with `grep -rin todo project`."
+   "text": "Challenge: search `project` recursively for `todo`, case-insensitive, with line numbers.",
+   "hint": "You can combine three flags in one group: `-r`, `-i`, `-n`."
   },
   "t13": {
-   "text": "Ticket: save all `.txt` file paths in the project to a `text_files.txt` report.",
-   "hint": "Use `find . -type f -name \"*.txt\" > text_files.txt` (`>` is covered in module 3.2)."
+   "text": "Ticket: save all `.txt` paths in the project to a report named `text_files.txt`.",
+   "hint": "`find` with `-type f` and `-name`, then redirect with `>` (module 3.2)."
   }
  },
  "vm": {
@@ -303,6 +303,16 @@
     "So the shell does not expand the pattern and `find` matches it itself"
    ],
    "explain": "Unquoted, the shell may expand `*.txt` against the current directory; quotes pass the pattern to `find` unchanged."
+  },
+  "q9": {
+   "q": "You do not know the file name but you know the word `timeout` appears inside it. Which approach fits?",
+   "options": [
+    "Use `find` to look for a file named `timeout`",
+    "List everything with `ls` and look by eye",
+    "`grep` only works on a single file, so it cannot be done",
+    "Use `grep -r` to scan content in the directory; find searches by name and attributes, not content"
+   ],
+   "explain": "`grep` searches content, and `-r` walks the directory tree. `find` locates files by name, type, size and so on, not by content."
   }
  },
  "summary": [

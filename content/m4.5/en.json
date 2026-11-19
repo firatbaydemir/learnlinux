@@ -48,8 +48,7 @@
    "title": "setuid: run with the owner's privileges",
    "body": [
     "When an executable file has **setuid** (`4000`), the program runs with the privileges of the **file owner**, not the person who starts it. The best-known example is `/usr/bin/passwd`: owned by root, shown as `-rwsr-xr-x`. An ordinary user can change their own password because the program, running as root, may update `/etc/shadow`. `sudo` and `mount` work on the same principle.",
-    "This power is risky. A small bug in a setuid-root program (or a setuid shell, editor or interpreter) hands root to everyone. That is why you must know your setuid files and audit them regularly.",
-    "Two notes: the Linux kernel **ignores** setuid on **shell scripts** (`#!/bin/bash`); `chmod u+s` on a script does not grant root, it only misleads. Also, setuid does nothing on file systems mounted with `nosuid` (e.g. many USB sticks, or a separate `/tmp` partition)."
+    "This power is risky. A small bug in a setuid-root program (or a setuid shell, editor or interpreter) hands root to everyone. That is why you must know your setuid files and audit them regularly."
    ],
    "commands": [
     {
@@ -77,7 +76,10 @@
     }
    ],
    "tip": "Familiar names like `passwd`, `sudo`, `mount`, `su` are normal. An unknown setuid file, or one under `/home` or `/tmp`, needs investigation.",
-   "danger": "Never run `chmod u+s /bin/bash` (or on vim, python, find, cp) on a real system. It gives every user a root shell and is a classic privilege escalation. At most try it on your isolated test VM, after a snapshot, and undo it afterwards."
+   "danger": "Never run `chmod u+s /bin/bash` (or on vim, python, find, cp) on a real system. It gives every user a root shell and is a classic privilege escalation. At most try it on your isolated test VM, after a snapshot, and undo it afterwards.",
+   "more": [
+    "Two notes: the Linux kernel **ignores** setuid on **shell scripts** (`#!/bin/bash`); `chmod u+s` on a script does not grant root, it only misleads. Also, setuid does nothing on file systems mounted with `nosuid` (e.g. many USB sticks, or a separate `/tmp` partition)."
+   ]
   },
   {
    "id": "setgid",
@@ -144,8 +146,7 @@
    "title": "Recipe: team folder and what comes next",
    "body": [
     "A real team folder is built like this: (1) create the folder, (2) set its group to `devs`, (3) set `2775` (`2770` if outsiders must not read), (4) members work with `umask 002`. Because root creates the folder, you need `sudo`.",
-    "If you also want sticky, use `3775` / `3770`: new files belong to the group, and members cannot delete each other's files.",
-    "The method has limits: permissions of new files depend on the umask, and you cannot write per-user rules. That is what **default ACLs** (`setfacl -d`) are for, a topic of later modules. For now remember that a setgid folder is the foundation of teamwork without ACLs."
+    "If you also want sticky, use `3775` / `3770`: new files belong to the group, and members cannot delete each other's files."
    ],
    "commands": [
     {
@@ -187,7 +188,10 @@
      "example": "chmod 2775 team"
     }
    ],
-   "warn": "Group first, then mode: setting `2775` before the group is `devs` makes the wrong group inherited. At the end `ls -ld` should show `drwxrwsr-x ... devs`."
+   "warn": "Group first, then mode: setting `2775` before the group is `devs` makes the wrong group inherited. At the end `ls -ld` should show `drwxrwsr-x ... devs`.",
+   "more": [
+    "The method has limits: permissions of new files depend on the umask, and you cannot write per-user rules. That is what **default ACLs** (`setfacl -d`) are for, a topic of later modules. For now remember that a setgid folder is the foundation of teamwork without ACLs."
+   ]
   }
  ],
  "tasks": {
@@ -221,15 +225,15 @@
   },
   "t08": {
    "text": "Debug: someone left setuid (4755) on the shell script `legacy/tool.sh`. The kernel ignores it on scripts, but it fails an audit. Return it to the normal mode `755`.",
-   "hint": "See `rws` with `ls -l legacy/tool.sh`, then `chmod 755 legacy/tool.sh`."
+   "hint": "See `rws` with `ls -l legacy/tool.sh`, then `chmod`."
   },
   "t09": {
    "text": "Debug: the folder `inbox` is `777` and users delete each other's files. Fix it to `1777` without touching the existing permissions.",
-   "hint": "`chmod +t inbox` adds only sticky."
+   "hint": "`chmod` adds only sticky."
   },
   "t10": {
    "text": "Mini project: set the group of `proj` to `devs`, apply `2770` (outsiders locked out), run `umask 002` and create `proj/plan.txt` with `touch`.",
-   "hint": "Order: `sudo chgrp devs proj`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
+   "hint": "Order: `chgrp`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
   },
   "t11": {
    "text": "Mini project: create the folder `upload`, set `1777`, put `a.txt` inside and give the file to alice with `sudo chown alice:devs upload/a.txt`. (In reality bob could not delete it.)",
@@ -354,8 +358,8 @@
   "q2": {
    "q": "`/tmp` has mode `1777`. What is the leading `1` for?",
    "options": [
-    "Makes the folder read-only",
-    "Gives files root privileges",
+    "Makes the folder read-only for everyone, no files can be added",
+    "Temporarily gives files root privileges and prevents deletion",
     "Only the file owner, directory owner or root may delete",
     "Encrypts files automatically"
    ],
@@ -376,7 +380,7 @@
    "options": [
     "`ls -l /etc/setuid`",
     "`chmod -R u+s /`",
-    "`find / -perm 4755 -name suid`",
+    "`find / -perm 4755 -name suid -type f 2>/dev/null`",
     "`find / -perm -4000 -type f 2>/dev/null`"
    ],
    "explain": "`-perm -4000` finds files with the setuid bit set; `2>/dev/null` hides permission errors."
@@ -384,9 +388,9 @@
   "q5": {
    "q": "What does `chmod u+s` do on an executable?",
    "options": [
-    "Makes it read-only",
+    "Makes the file read-only, nobody can modify it",
     "It runs as the file owner rather than the caller",
-    "Only the group can run it",
+    "Only users in the owner's group can run the file",
     "Prevents deletion"
    ],
    "explain": "Setuid bit: the process runs with the owner's effective UID; `passwd` is an example."
@@ -404,9 +408,9 @@
   "q7": {
    "q": "What may a user delete in a directory with the sticky bit?",
    "options": [
-    "Everyone's files",
+    "Everyone's files, because the folder is open to all",
     "No files",
-    "Only files of the directory's group",
+    "Only the files of users in the folder's group",
     "Only their own files (or as directory owner/root)"
    ],
    "explain": "The sticky bit limits deletion/renaming to the file owner, directory owner and root."
@@ -420,6 +424,16 @@
     "File is append-only"
    ],
    "explain": "`chattr +i` blocks modification/deletion even for root; append-only is `a`."
+  },
+  "q9": {
+   "q": "Why can users not delete each other's files in `/tmp` even though it is world-writable?",
+   "options": [
+    "Files are encrypted automatically",
+    "`/tmp` is only open to root",
+    "Linux never prevents touching other people's files",
+    "Sticky bit: only the file owner (or root) may delete in the directory"
+   ],
+   "explain": "The `w` permission on a directory includes deleting; the sticky bit (`1777`) limits delete and rename to the file's owner."
   }
  },
  "summary": [

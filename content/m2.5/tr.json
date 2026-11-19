@@ -234,7 +234,7 @@
   },
   "t17": {
    "text": "Ticket #2520: Denetim ekibi `~/info/data.txt` dosyasının bayt boyutunu `~/size.txt` içinde istiyor. Çıktıyı dosyaya yönlendirerek hazırla.",
-   "hint": "`wc -c ~/info/data.txt > ~/size.txt` (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
+   "hint": "`wc -c` (`>` çıktıyı dosyaya yazar; ayrıntısı modül 3.2'de.)"
   }
  },
  "vm": {
@@ -389,6 +389,16 @@
     "Dizin; mavi"
    ],
    "explain": "Link hedefi silinirse link kalır ama boşa işaret eder: kırık link. `cat` \"No such file\" hatası verir."
+  },
+  "q9": {
+   "q": "`ls -l`de sembolik linkin boyutu neden hedef dosyanın boyutuyla aynı değil, yalnızca birkaç bayttır?",
+   "options": [
+    "Link, hedefin sıkıştırılmış kopyasıdır",
+    "Link yalnızca hedefin yolunu (adını) tutan küçük bir kayıttır; içerik hedefte durur",
+    "`ls -l` linklerin boyutunu yanlış gösterir",
+    "Link, dosyanın ilk satırını saklar"
+   ],
+   "explain": "Sembolik link veri taşımaz, yalnızca hedef yolunu saklar; boyutu o yolun uzunluğu kadardır. Bu yüzden hedef silinirse link kırık kalır."
   }
  },
  "summary": [

@@ -106,7 +106,7 @@
   },
   "t04": {
    "text": "Speichere einen sicheren Beendigungsplan in `~/lab/term_plan.txt`: Verwende `kill -TERM` für PID 2210.",
-   "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt` (`>` → Modul 3.2.)"
+   "hint": "`echo -TERM` (`>` → Modul 3.2.)"
   },
   "t05": {
    "text": "Schreibe ein Beispiel in `~/lab/priority_plan.txt`, das eine Sicherung mit niedrigerer CPU-Priorität startet.",
@@ -272,6 +272,16 @@
     "`renice -n 5 -p PID`"
    ],
    "explain": "`renice` ändert die Priorität eines laufenden Prozesses; `nice` startet neue."
+  },
+  "q9": {
+   "q": "Warum versucht man beim Beenden eines Prozesses erst `kill -TERM` und nur bei fehlender Reaktion `kill -KILL`?",
+   "options": [
+    "TERM gibt dem Prozess Zeit zum Aufräumen und Speichern; KILL ist nicht abfangbar und bricht hart ab",
+    "KILL ist langsamer als TERM und kommt deshalb zuletzt",
+    "TERM ist nur für root, KILL für alle",
+    "Zwischen beiden gibt es keinen Unterschied"
+   ],
+   "explain": "SIGTERM kann vom Prozess abgefangen und in ein sauberes Beenden umgesetzt werden. SIGKILL wird vom Kernel durchgesetzt; der Prozess kann nicht reagieren, ungespeicherte Daten können verloren gehen. Daher nur als letzter Ausweg."
   }
  },
  "summary": [

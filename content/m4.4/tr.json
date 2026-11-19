@@ -154,7 +154,6 @@
    "title": "umask: varsayılan izinler",
    "body": [
     "Yeni dosya `666` ile, yeni klasör `777` ile **başlar**; `umask` bu izinlerden bit **maskeleyerek** düşürür: **yeni izin = taban & ~umask**. Bu çıkarma değildir. Örnekler (dosya, taban 666): umask `022` → `644`; `027` → `640`; `077` → `600`; `002` → `664`.",
-    "Fark ancak umask'ta taban dışı bitler olunca görünür: `025` için `666 & ~025 = 642`, çıkarma `641` derdi (yanlış). `001` için sonuç `666`, çıkarma `665` verirdi. Dosyada x biti tabanda olmadığı için dosyalar asla çalıştırılabilir doğmaz.",
     "`umask` **sürece özeldir**: yalnızca o kabukta ve ondan başlayan programlarda geçerlidir. Kalıcı yapmak için `~/.bashrc` (kullanıcı) veya `/etc/profile` (sistem) içine yazılır."
    ],
    "commands": [
@@ -181,7 +180,10 @@
      "example": "umask 027"
     }
    ],
-   "tip": "Ortak proje klasörlerinde `umask 002` kullan: yeni dosyalar `664`, klasörler `775` olur."
+   "tip": "Ortak proje klasörlerinde `umask 002` kullan: yeni dosyalar `664`, klasörler `775` olur.",
+   "more": [
+    "Fark ancak umask'ta taban dışı bitler olunca görünür: `025` için `666 & ~025 = 642`, çıkarma `641` derdi (yanlış). `001` için sonuç `666`, çıkarma `665` verirdi. Dosyada x biti tabanda olmadığı için dosyalar asla çalıştırılabilir doğmaz."
+   ]
   }
  ],
  "tasks": {
@@ -231,11 +233,11 @@
   },
   "t12": {
    "text": "Hata ayıkla: `locked/old.txt` silinemiyor. Sorunu düzeltip dosyayı sil.",
-   "hint": "Dosyaya değil klasöre bak: `chmod u+w locked`, sonra `rm`."
+   "hint": "Dosyaya değil klasöre bak: `chmod`, sonra `rm`."
   },
   "t13": {
    "text": "Hata ayıkla: `cat vault/data.txt` başarısız oluyor. Düzeltip dosyayı oku.",
-   "hint": "`vault` klasörü `600`: x yok, içine girilemez. `chmod u+x vault`."
+   "hint": "`vault` klasörü `600`: x yok, içine girilemez. `chmod`."
   },
   "t14": {
    "text": "Mini proje: `team` klasörü ve içinde `plan.txt` oluştur; klasör `770`, dosya `660` olsun; klasörün grubunu `sudo chgrp devs team` ile `devs` yap.",
@@ -243,14 +245,14 @@
   },
   "t15": {
    "text": "Meydan okuma: `data` ağacındaki her şey `777`. Klasörleri `755`, dosyaları `644` yap (`data/a.txt`, `data/sub/b.txt`).",
-   "hint": "Büyük `X` kullan: `chmod -R u=rwX,go=rX data`."
+   "hint": "Büyük `X` kullan: `chmod -R`."
   },
   "t16": {
    "text": "TICKET #4401 — Alice `report.txt` dosyasını düzenleyecek, `devs` grubu da yazabilecek, başkaları erişmeyecek. Sahibi `alice`, grubu `devs`, modu `660` yap.",
    "hint": "Önce `chmod 660`, sonra `sudo chown alice:devs`; sahip değişince artık sen chmod yapamazsın."
   },
   "t17": {
-   "text": "TICKET #4402 — `shared` klasöründe ekip yeni dosyalar açıyor ve grup yazamıyor. `umask 002` ayarla ve `touch shared/log.txt` ile `664` dosya oluştur.",
+   "text": "TICKET #4402 — `shared` klasöründe ekip yeni dosyalar açıyor ve grup yazamıyor. umask değerini grubun yazmasına izin verecek şekilde ayarla ve `touch shared/log.txt` ile `664` dosya oluştur.",
    "hint": "666 & ~002 = 664."
   }
  },
@@ -410,6 +412,16 @@
     "700"
    ],
    "explain": "Dizinler 777'den, dosyalar 666'dan başlar; maske 022 çıkarılınca dizin 755, dosya 644 olur."
+  },
+  "q9": {
+   "q": "Bir betik `Permission denied` verince neden önce `ls -l` ile izinlere bakmak, doğrudan `chmod 777` demekten iyidir?",
+   "options": [
+    "Eksik olan izni görüp yalnızca onu verirsin; 777 herkese tam yetki açar",
+    "`chmod 777` komutu çalışmaz",
+    "`ls -l` izinleri otomatik düzeltir",
+    "777 yalnızca root için geçerlidir"
+   ],
+   "explain": "Önce sorunun kaynağını (sahip, grup, eksik bit) bulmak gerekir. 777 sorunu örter ama herkese yazma ve çalıştırma yetkisi vererek güvenlik açığı yaratır."
   }
  },
  "summary": [

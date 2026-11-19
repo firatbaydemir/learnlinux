@@ -137,7 +137,7 @@
    "hint": "Unterstrich statt Bindestrich; `ls /etc` hilft."
   },
   "t06": {
-   "text": "Mini-Projekt: Speichere die Zeile mit dem Distributionsnamen mit `grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt` in `~/vm-summary.txt`.",
+   "text": "Mini-Projekt: Speichere die Zeile mit dem Distributionsnamen aus `/etc/os-release` heraus und in `~/vm-summary.txt`.",
    "hint": "`>` schreibt die Ausgabe in eine Datei."
   },
   "t07": {
@@ -371,6 +371,16 @@
     "Sie werden verschlüsselt"
    ],
    "explain": "Die Wiederherstellung bringt die VM in den Zustand des Snapshots; spätere Änderungen gehen verloren."
+  },
+  "q9": {
+   "q": "Warum ist es sinnvoll, vor Experimenten einen Snapshot der VM anzulegen?",
+   "options": [
+    "Wenn etwas kaputtgeht, kannst du mit einem Schritt zum funktionierenden Zustand zurück",
+    "Ein Snapshot macht die VM schneller",
+    "Ohne Snapshot laufen Befehle nicht",
+    "Ein Snapshot schützt deinen Hauptrechner"
+   ],
+   "explain": "Ein Snapshot ist der billigste Weg, ein missglücktes Experiment rückgängig zu machen."
   }
  },
  "summary": [

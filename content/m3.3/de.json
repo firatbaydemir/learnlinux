@@ -174,32 +174,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Das Labor enthält bereits verschiedene Namen. Führe `ls *.jpg` aus und beobachte, dass nur Namen mit der Endung `.jpg` aufgelistet werden.",
-   "hint": "`*` passt auf null oder mehr Zeichen; der Punkt und die Endung `jpg` bleiben im Muster fest."
+   "text": "Das Labor ist schon mit gemischten Namen vorbereitet. Liste nur die `.jpg`-Dateien auf.",
+   "hint": "Nutze `ls` mit dem Platzhalter `*`; er steht für null oder mehr Zeichen, die Endung bleibt im Muster unverändert."
   },
   "t02": {
-   "text": "Liste mit `ls img?.jpg` Namen mit genau einem Zeichen nach `img` und der Endung `.jpg` auf.",
-   "hint": "`?` steht für genau ein Zeichen. Schreibe das Muster ohne Anführungszeichen, damit die Shell es erweitert."
+   "text": "Liste die `.jpg`-Namen auf, bei denen nach `img` genau ein Zeichen steht.",
+   "hint": "Nutze `ls` mit `?`; es steht für genau ein Zeichen. Schreibe das Muster ohne Anführungszeichen, damit die Shell es expandiert."
   },
   "t03": {
-   "text": "Liste mit `ls doc*` Namen auf, die mit `doc` beginnen.",
-   "hint": "`*` erlaubt nach `doc` null oder mehr Zeichen."
+   "text": "Liste die Namen auf, die mit `doc` beginnen.",
+   "hint": "Nutze `ls` mit `*`; nach `doc` sind null oder mehr Zeichen erlaubt."
   },
   "t04": {
    "text": "Führe `echo *.txt` aus. Wie übergibt die Shell die passenden Namen an `echo`?",
    "hint": "Zuerst erweitert die Shell das Muster zu den passenden Namen; `echo` gibt sie aus."
   },
   "t05": {
-   "text": "Liste mit `ls img[12].jpg` Bilder auf, deren Endung nach `img` eine `1` oder `2` enthält.",
-   "hint": "Jede Option in den eckigen Klammern steht für genau ein Zeichen."
+   "text": "Liste die `img`-Bilder auf, deren Endung `1` oder `2` ist.",
+   "hint": "Nutze `ls` mit eckigen Klammern; jede Option darin steht für ein einzelnes Zeichen."
   },
   "t06": {
-   "text": "Passe mit `ls *.{jpg,png}` `.jpg`- und `.png`-Namen in einem Befehl an.",
-   "hint": "Die Optionen `jpg` und `png` in den geschweiften Klammern erzeugen einzelne Muster."
+   "text": "Erfasse die `.jpg`- und `.png`-Dateien in einem einzigen Befehl.",
+   "hint": "Nutze `ls` mit geschweiften Klammern; die Optionen darin erzeugen getrennte Muster."
   },
   "t07": {
-   "text": "Erstelle den Ordner `texts` und kopiere Namen, die mit `doc` beginnen und auf `.txt` enden, hinein. Kopiere `notes.md` nicht.",
-   "hint": "Führe erst `mkdir texts`, dann `cp doc*.txt texts` aus. (`mkdir` steht in Modul 2.3, `cp` in Modul 2.4.)"
+   "text": "Erstelle den Ordner `texts` und kopiere die `.txt`-Dateien, die mit `doc` beginnen, hinein. Kopiere `notes.md` nicht.",
+   "hint": "Erst `mkdir`, dann `cp`; gib als Quelle das Muster für `.txt`-Dateien mit `doc` am Anfang an, der Zielordner ist das letzte Argument. (`mkdir` wird in Modul 2.3, `cp` in Modul 2.4 behandelt.)"
   },
   "t08": {
    "text": "Vorhersage: Gibt `echo '$HOME'` den Variablenwert oder den Text `$HOME` aus? Führe den Befehl aus und prüfe es.",
@@ -210,20 +210,20 @@
    "hint": "In Bash bleibt ein nicht passendes Muster standardmäßig unverändert."
   },
   "t10": {
-   "text": "Fehlersuche: Sprich den Namen `old report.txt` als ein Argument an und entferne diese Datei.",
-   "hint": "Setze den Namen mit Leerzeichen in Anführungszeichen: `rm \"old report.txt\"`. (`rm` steht in Modul 2.3.)"
+   "text": "Fehlersuche: Entferne die Datei `old report.txt`, indem du sie als ein einziges Argument ansprichst.",
+   "hint": "Setze den Namen mit Leerzeichen in Anführungszeichen; sonst sieht die Shell zwei Argumente. (`rm` wird in Modul 2.3 behandelt.)"
   },
   "t11": {
-   "text": "Mini-Projekt: Erstelle den Ordner `backup` und kopiere nur `.jpg`- und `.png`-Dateien hinein.",
-   "hint": "Verwende `mkdir backup` und danach `cp *.jpg *.png backup`. (`mkdir` steht in Modul 2.3, `cp` in Modul 2.4.)"
+   "text": "Mini-Projekt: Erstelle den Ordner `backup` und kopiere nur die `.jpg`- und `.png`-Dateien hinein.",
+   "hint": "Erst `mkdir`, dann `cp`; schreibe beide Muster hintereinander, der Zielordner steht ganz am Ende. (`mkdir` wird in Modul 2.3, `cp` in Modul 2.4 behandelt.)"
   },
   "t12": {
-   "text": "Herausforderung: Erstelle mit geschweiften Klammern die Namen `log_1.txt`, `log_2.txt` und `log_3.txt`; entferne anschließend mit dem Muster `log_?` alle drei.",
-   "hint": "Führe zuerst `touch log_{1,2,3}.txt`, danach `rm log_?.txt` aus. (`touch` und `rm` stehen in Modul 2.3.)"
+   "text": "Herausforderung: Erstelle `log_1.txt`, `log_2.txt` und `log_3.txt` mit geschweiften Klammern; entferne diese drei Dateien anschließend mit dem Platzhalter `?`.",
+   "hint": "Erst `touch` mit einer Liste in geschweiften Klammern, dann `rm` mit einem Muster für genau ein Zeichen. (`touch` und `rm` werden in Modul 2.3 behandelt.)"
   },
   "t13": {
-   "text": "Ticket: Benenne `my file.txt` mit Leerzeichen in `my_file.txt` um. Achte darauf, dass der ursprüngliche Name ein einzelnes Argument bleibt.",
-   "hint": "Verwende `mv \"my file.txt\" my_file.txt`. (`mv` steht in Modul 2.4.)"
+   "text": "Ticket: Benenne `my file.txt` mit Leerzeichen in `my_file.txt` um. Achte darauf, dass der Name ein einziges Argument bleibt.",
+   "hint": "Nutze `mv`; setze den alten Namen mit Leerzeichen in Anführungszeichen. (`mv` wird in Modul 2.4 behandelt.)"
   }
  },
  "vm": {
@@ -310,10 +310,10 @@
   "q3": {
    "q": "Was macht `echo *.xyz` in Bash standardmäßig, wenn kein Name zu `*.xyz` passt?",
    "options": [
-    "Es löscht alle Dateien",
-    "Es gibt nichts aus",
+    "Löscht alle passenden Dateien stillschweigend",
+    "Gibt keinerlei Ausgabe ohne Fehlermeldung aus",
     "Es gibt das nicht passende Muster `*.xyz` unverändert aus",
-    "Es wechselt den aktuellen Ordner"
+    "Wechselt in das übergeordnete Verzeichnis"
    ],
    "explain": "In der Standardeinstellung von Bash wird ein nicht passendes Glob-Muster unverändert an den Befehl übergeben."
   },
@@ -340,10 +340,10 @@
   "q6": {
    "q": "Wer expandiert Platzhalter (`*`, `?`)?",
    "options": [
-    "Der Befehl `ls`",
-    "Der Kernel",
+    "Nur der Befehl `ls` selbst, während er läuft",
+    "Der Kernel, beim Zugriff auf das Dateisystem",
     "Die Shell, bevor der Befehl startet",
-    "Das Dateisystem"
+    "Das Dateisystem, bei der Namenssuche"
    ],
    "explain": "Die Shell expandiert; der Befehl erhält nicht das Muster, sondern die Liste der Dateinamen."
   },
@@ -351,21 +351,31 @@
    "q": "Wie unterscheiden sich `echo \"$(whoami)\"` und `echo '$(whoami)'`?",
    "options": [
     "Doppelte Anführungszeichen geben den Benutzernamen aus, einfache den Text wörtlich",
-    "Beide geben den Benutzernamen aus",
-    "Beide geben den Text wörtlich aus",
-    "Doppelte Anführungszeichen erzeugen einen Fehler"
+    "Beide geben den Benutzernamen aus, kein Unterschied",
+    "Beide geben den Text unverändert wieder aus",
+    "Mit doppelten Anführungszeichen gibt es einen Fehler"
    ],
    "explain": "In doppelten Anführungszeichen werden `$`, `$(...)` und Backslash ausgewertet; einfache machen alles zu Text."
   },
   "q8": {
    "q": "Was ist eine sichere Vorabprüfung vor `rm *.log`?",
    "options": [
-    "`rm -f *.log`",
-    "`rm *.log &`",
-    "`touch *.log`",
+    "Mit `rm -f *.log` erzwungen löschen",
+    "Mit `rm *.log &` im Hintergrund löschen",
+    "Dateien mit `touch *.log` aktualisieren",
     "Erst mit `ls *.log` die Treffer ansehen"
    ],
    "explain": "Führe dasselbe Muster zuerst mit `ls` oder `echo` aus, um zu sehen, was gelöscht würde."
+  },
+  "q9": {
+   "q": "Warum ist es klug, vor `rm *.log` erst `ls *.log` zu testen?",
+   "options": [
+    "`ls` schützt die Dateien vorübergehend",
+    "Die Shell expandiert den Platzhalter; `ls` zeigt genau die Liste, die rm bekäme",
+    "`rm` versteht keine Platzhalter",
+    "`ls` sortiert falsche Dateien von selbst aus"
+   ],
+   "explain": "`*.log` wird von der Shell vor dem Start des Befehls zu Dateinamen expandiert. Dasselbe Muster mit `ls` zeigt vorab, was `rm` löschen würde."
   }
  },
  "summary": [

@@ -128,39 +128,39 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Write text to the screen (stdout) with `echo hello`.",
-   "hint": "The output appears directly on screen."
+   "text": "Write the text `hello` to the screen (stdout).",
+   "hint": "`echo` writes text to stdout. The output appears directly on screen."
   },
   "t02": {
-   "text": "Print the file's content to stdout with `cat lab/names.txt`.",
-   "hint": "You should see three names."
+   "text": "Print the content of `lab/names.txt` to stdout.",
+   "hint": "`cat` prints file content. You should see three names."
   },
   "t03": {
    "text": "List the missing path `lab/missing.txt` with `ls` and read the error message.",
    "hint": "That message comes from stderr."
   },
   "t04": {
-   "text": "Write the text to the file `out.txt` with `echo hello > out.txt`.",
-   "hint": "You see no output; check with `cat out.txt`."
+   "text": "Write the text `hello` to the file `out.txt` instead of the screen.",
+   "hint": "Combine `echo` with the `>` redirection. You see no output; check with `cat out.txt`."
   },
   "t05": {
-   "text": "Append a second line to the same file with `echo world >> out.txt`.",
+   "text": "Append `world` as a second line to `out.txt` without overwriting the file.",
    "hint": "`>>` appends, `>` overwrites."
   },
   "t06": {
-   "text": "Put the error into `errors.txt` with `ls lab/missing.txt 2> errors.txt`.",
-   "hint": "The error no longer shows on screen."
+   "text": "List `lab/missing.txt` with `ls`, but send the error message to `errors.txt`.",
+   "hint": "The error is on stderr (channel 2): use `2>`. The error no longer shows on screen."
   },
   "t07": {
-   "text": "Feed the file as stdin with `cat < lab/names.txt`.",
+   "text": "Give `lab/names.txt` to `cat` as stdin, not as an argument.",
    "hint": "`<` reads input from a file."
   },
   "t08": {
-   "text": "Predict: when `ls lab/missing.txt > result.txt` runs, does the error appear on screen? Is `result.txt` filled? Run it to verify.",
+   "text": "Predict: if you redirect the output of `ls lab/missing.txt` to `result.txt` with `>`, does the error appear on screen? Is `result.txt` filled? Run it to verify.",
    "hint": "`>` redirects stdout only; the error is on stderr."
   },
   "t09": {
-   "text": "Predict: what does `cat lab/names.txt | wc -l` print? Run it to verify.",
+   "text": "Predict: what is printed if you read `lab/names.txt` with `cat` and pipe it with `|` into `wc -l`? Run it to verify.",
    "hint": "`wc -l` counts lines; how many lines does the file have? (`|` passes output to the next command; module 3.2. `wc`: module 3.5.)"
   },
   "t10": {
@@ -168,7 +168,7 @@
    "hint": "Add `2>&1` at the end of the command."
   },
   "t11": {
-   "text": "Mini project: build `build.log`. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. The file must have 3 lines.",
+   "text": "Mini project: build `build.log`. 1) write `start` into it 2) append the listing of `lab` 3) append the error of listing `nothing`. The file must have 3 lines.",
    "hint": "The first uses `>`, the others `>>` and `2>>`."
   },
   "t12": {
@@ -305,6 +305,16 @@
     "`cmd 2> /dev/null`"
    ],
    "explain": "`2> /dev/null` discards only stderr; `> /dev/null` discards normal output. You cannot pipe into `/dev/null`."
+  },
+  "q9": {
+   "q": "When you write `command > file`, why do error messages still appear on screen?",
+   "options": [
+    "`>` only captures stdout (1); errors flow through stderr (2)",
+    "Errors must always be printed to the screen",
+    "Because there is no write permission on the file",
+    "`>` copies errors but does not store them"
+   ],
+   "explain": "`>` redirects channel 1 (stdout) by default. Errors travel on channel 2; you need `2>` to redirect them."
   }
  },
  "summary": [

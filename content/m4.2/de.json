@@ -189,7 +189,7 @@
   },
   "t12": {
    "text": "Fehlersuche: Das `userdel -r alice` in `~/offboard.sh` löscht das Home-Verzeichnis, das für die Prüfung erhalten bleiben muss. Schreibe das Skript so um, dass es `sudo userdel alice` ohne `-r` enthält.",
-   "hint": "`echo 'sudo userdel alice' > ~/offboard.sh`. Nutze einfache Anführungszeichen. (`>` und `>>` → Modul 3.2.)"
+   "hint": "`echo`. Nutze einfache Anführungszeichen. (`>` und `>>` → Modul 3.2.)"
   },
   "t13": {
    "text": "Mini-Projekt: Schreibe einen Plan mit drei Zeilen in `~/new_user_plan.txt`: `sudo useradd -m -s /bin/bash carol`, `sudo passwd carol` und `sudo usermod -aG devs carol`.",
@@ -316,20 +316,20 @@
   "q1": {
    "q": "Was bewirkt `sudo usermod -G devs alice` (ohne `-a`)?",
    "options": [
-    "Fügt alice zu devs hinzu und behält die anderen",
+    "Fügt alice zur Gruppe devs hinzu und behält alle anderen Gruppen bei",
     "Entfernt alle zusätzlichen Gruppen von alice und lässt nur devs übrig",
-    "Löscht das Konto alice",
-    "Sperrt alice"
+    "Löscht das Konto alice und alle ihre Dateien endgültig",
+    "Sperrt das Konto alice, Anmeldung mit Passwort unmöglich"
    ],
    "explain": "-G ersetzt die Liste der zusätzlichen Gruppen; ohne `-a` (append) gehen alte Gruppen wie wheel verloren."
   },
   "q2": {
    "q": "Was passiert nach `userdel alice` (ohne `-r`)?",
    "options": [
-    "Das Home-Verzeichnis wird auch gelöscht",
-    "Nichts passiert",
+    "Das Home-Verzeichnis wird mit gelöscht",
+    "Nichts passiert, das Konto bleibt bestehen",
     "Das Konto wird gelöscht, das Home-Verzeichnis bleibt",
-    "Das Konto wird nur gesperrt"
+    "Das Konto wird nicht gelöscht, nur gesperrt"
    ],
    "explain": "Die Einträge werden entfernt; `/home/alice` und die Dateien bleiben auf der Platte. Zum Löschen braucht es `-r`."
   },
@@ -356,29 +356,29 @@
   "q5": {
    "q": "Was bewirkt `-m` in `useradd -m bob`?",
    "options": [
-    "Sperrt den Benutzer",
-    "Legt ein Postfach an",
+    "Sperrt den Benutzer, Anmeldung unmöglich",
+    "Legt dem Benutzer ein Postfach an",
     "Erstellt das Home-Verzeichnis",
-    "Setzt das Passwort zurück"
+    "Setzt das Passwort leer oder zurück"
    ],
    "explain": "`-m` legt `/home/bob` an und kopiert den Inhalt von `/etc/skel`."
   },
   "q6": {
    "q": "Was bewirkt `passwd -l alice`?",
    "options": [
-    "Löscht das Konto",
+    "Löscht Konto und Home-Verzeichnis vollständig, nicht umkehrbar",
     "Sperrt das Passwort; SSH-Key-Login kann weiter möglich sein",
-    "Macht das Passwort unbegrenzt gültig",
-    "Wirft den Benutzer aus der Sitzung"
+    "Macht das Passwort unbegrenzt gültig, es läuft nie wieder ab",
+    "Wirft den Benutzer sofort aus der Sitzung und schließt das Konto"
    ],
    "explain": "Setzt `!` vor den Hash in shadow; für vollständige Sperre `usermod -e 1` oder Shell `nologin`."
   },
   "q7": {
    "q": "Was macht `usermod -aG devs alice`?",
    "options": [
-    "Ersetzt alle Gruppen von alice durch `devs`",
-    "Löscht alice",
-    "Löscht die Gruppe `devs`",
+    "Löscht alle Gruppen von alice und ersetzt sie nur durch `devs`",
+    "Löscht das Konto alice samt Dateien vollständig",
+    "Löscht die Gruppe `devs` und alle Mitglieder vom System",
     "Fügt alice zu `devs` hinzu, ohne andere Gruppen anzutasten"
    ],
    "explain": "`-a` mit `-G` behält die übrigen Gruppen; ohne `-a` wird die Liste überschrieben."
@@ -387,11 +387,21 @@
    "q": "Was bewirkt `chage -d 0 alice`?",
    "options": [
     "Erzwingt Passwortwechsel bei der nächsten Anmeldung",
-    "Sperrt das Konto",
-    "Löscht das Passwort",
-    "Lässt das Konto heute enden"
+    "Sperrt das Konto sofort, Anmeldung auf keine Weise möglich",
+    "Löscht das Passwort, Anmeldung ohne Passwort möglich",
+    "Beendet das Konto heute, danach ist keine Anmeldung mehr möglich"
    ],
    "explain": "Setzt das letzte Änderungsdatum auf 0, das Passwort gilt als abgelaufen; beim Login wird ein neues verlangt."
+  },
+  "q9": {
+   "q": "Warum ist `usermod -aG devs alice` sicherer als `usermod -G devs alice`?",
+   "options": [
+    "`-a` macht den Befehl schneller",
+    "`-G` allein legt die neue Gruppe an",
+    "`-a` behält vorhandene Gruppen; `-G` allein ersetzt sie durch die angegebene Liste",
+    "`-a` sperrt den Benutzer"
+   ],
+   "explain": "`-G` ersetzt die Gruppenliste; alte Gruppen von alice (z. B. `wheel`) können verloren gehen. `-a` (append) fügt hinzu und behält die alten."
   }
  },
  "summary": [

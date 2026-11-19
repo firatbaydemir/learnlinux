@@ -126,27 +126,27 @@
  "tasks": {
   "t01": {
    "text": "Sortiere die Zeilen in `data/fruits.txt` alphabetisch.",
-   "hint": "Verwende `sort data/fruits.txt`."
+   "hint": "`sort` nimmt den Dateinamen als Argument."
   },
   "t02": {
    "text": "Gib dieselbe Obstliste in umgekehrter Reihenfolge aus.",
-   "hint": "Verwende `sort -r data/fruits.txt`."
+   "hint": "Nutze bei `sort` die Option für umgekehrte Reihenfolge."
   },
   "t03": {
    "text": "Sortiere die Zahlen in `data/numbers.txt` numerisch.",
-   "hint": "Verwende `sort -n data/numbers.txt`."
+   "hint": "Füge bei `sort` die Option für numerische Sortierung hinzu; sonst steht \"10\" vor \"2\"."
   },
   "t04": {
    "text": "Entferne doppelte Obstzeilen; sortiere vorher.",
-   "hint": "Verwende `sort data/fruits.txt | uniq`."
+   "hint": "Leite die `sort`-Ausgabe per Pipe an `uniq`; `uniq` entfernt nur aufeinanderfolgende Duplikate."
   },
   "t05": {
    "text": "Zähle, wie oft jede Obstsorte vorkommt.",
-   "hint": "Verwende `sort data/fruits.txt | uniq -c`."
+   "hint": "Leite die sortierte Ausgabe an `uniq`; die Zähl-Option schreibt die Anzahl vor jede Zeile."
   },
   "t06": {
    "text": "Extrahiere nur die Mitarbeiternamen, also die erste CSV-Spalte.",
-   "hint": "Das Trennzeichen ist ein Komma: `cut -d, -f1 data/employees.csv`."
+   "hint": "Nutze `cut` mit den Optionen für Trennzeichen und Feldnummer; das Trennzeichen ist ein Komma."
   },
   "t07": {
    "text": "Schätze die Häufigkeit jeder Abteilung in der Mitarbeiter-CSV. Die Überschrift im zweiten Feld bleibt enthalten.",
@@ -162,7 +162,7 @@
   },
   "t10": {
    "text": "Mini-Aufgabe: Wandle `hello` mit `tr` in Großbuchstaben um.",
-   "hint": "Verwende `echo hello | tr 'a-z' 'A-Z'`."
+   "hint": "Leite die `echo`-Ausgabe per Pipe an `tr`; zwei Argumente: Kleinbuchstaben-Bereich, Großbuchstaben-Bereich."
   },
   "t11": {
    "text": "Mini-Aufgabe: Schreibe die eindeutigen Abteilungsnamen aus der Mitarbeiter-CSV in `reports/departments.txt`.",
@@ -247,8 +247,8 @@
   "q2": {
    "q": "Warum wird `uniq` meist nach `sort` verwendet?",
    "options": [
-    "`uniq` liest nur CSV",
-    "`sort` erstellt eine Sicherung",
+    "`uniq` kann nur Dateien im CSV-Format lesen",
+    "`sort` legt vor der Verarbeitung eine Sicherung an",
     "`uniq` wandelt den gesamten Text in Großbuchstaben um",
     "`uniq` fasst nur aufeinanderfolgende Duplikate zusammen"
    ],
@@ -258,19 +258,19 @@
    "q": "Was wählt `cut -d, -f2 file.csv` aus?",
    "options": [
     "Das zweite kommagetrennte Feld",
-    "Die zweite Zeile",
-    "Das zweite Zeichen",
-    "Die Dateigröße"
+    "Die gesamte zweite Zeile der Datei",
+    "Das zweite Zeichen jeder Zeile",
+    "Die Dateigröße in Bytes"
    ],
    "explain": "`-d,` setzt das Komma als Trennzeichen und `-f2` wählt das zweite Feld."
   },
   "q4": {
    "q": "Was macht `tr 'a-z' 'A-Z'`?",
    "options": [
-    "Sortiert Zeilen rückwärts",
-    "Zählt Duplikate",
-    "Wandelt ASCII-Kleinbuchstaben in Großbuchstaben um",
-    "Extrahiert die zweite Spalte"
+    "Sortiert die Zeilen in umgekehrter Reihenfolge",
+    "Zählt wiederholte Zeilen und zeigt sie an",
+    "Wandelt Kleinbuchstaben in Großbuchstaben um",
+    "Extrahiert aus jeder Zeile die zweite Spalte"
    ],
    "explain": "`tr` wandelt Zeichensätze um; dieses Beispiel wandelt ASCII-Kleinbuchstaben in Großbuchstaben um."
   },
@@ -297,10 +297,10 @@
   "q7": {
    "q": "Was gibt `cut -d: -f1 /etc/passwd` aus?",
    "options": [
-    "Das letzte Feld jeder Zeile",
-    "Das erste Zeichen jeder Zeile",
-    "Die Zeilenanzahl",
-    "Das erste durch Doppelpunkt getrennte Feld (Benutzername)"
+    "Das letzte Feld jeder Zeile (die Shell)",
+    "Nur das erste Zeichen jeder Zeile",
+    "Die Gesamtzahl der Zeilen in der Datei",
+    "Das erste Doppelpunkt-Feld (Benutzername)"
    ],
    "explain": "`-d:` setzt den Trenner auf `:`, `-f1` wählt das erste Feld; in `/etc/passwd` ist das der Benutzername."
   },
@@ -313,6 +313,16 @@
     "`cut | tr`"
    ],
    "explain": "`sort` gruppiert Gleiches, `uniq -c` zählt, `sort -nr` ordnet absteigend nach Zahl."
+  },
+  "q9": {
+   "q": "Warum braucht die Kette `sort | uniq -c | sort -nr` ein zweites `sort`?",
+   "options": [
+    "`uniq -c` fügt Zahlen hinzu, sortiert aber nicht; für die Reihenfolge nach Zahl braucht es `-nr`",
+    "`uniq -c` verfälscht die Ausgabe, das zweite sort repariert sie",
+    "Das zweite sort löscht doppelte Zeilen",
+    "Die Kette meldet ohne zweites sort einen Fehler"
+   ],
+   "explain": "`uniq -c` setzt die Anzahl vor jede Zeile, sortiert aber nicht nach Anzahl. `sort -nr` bringt den häufigsten Eintrag nach oben."
   }
  },
  "summary": [

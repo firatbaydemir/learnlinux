@@ -211,7 +211,7 @@
   },
   "t09": {
    "text": "Hata ayıkla: `~/sudoers.bad` dosyasında herkese tüm komutlar için parolasız yetki veren tehlikeli kural var. Dosyayı şu dar kapsamlı örnekle değiştir: `student ALL=(root) /usr/bin/systemctl restart nginx`. Bu yalnızca taslaktır; gerçek sudoers dosyasına kopyalama.",
-   "hint": "`echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad` kullan. (`>` ve `>>` → modül 3.2.)"
+   "hint": "`echo` kullan. (`>` ve `>>` → modül 3.2.)"
   },
   "t10": {
    "text": "Mini proje: `~/admin_runbook.txt` dosyasına sırasıyla yetkileri listeleme, nginx durumunu kontrol etme ve parola önbelleğini temizleme komutlarını yaz: `sudo -l`, `sudo systemctl status nginx`, `sudo -k`.",
@@ -313,8 +313,8 @@
   "q1": {
    "q": "`sudo COMMAND` ile `su -` arasındaki temel fark nedir?",
    "options": [
-    "İkisi de her zaman root parolası ister",
-    "`sudo` izinli tek komutu çalıştırır; `su -` hedef hesabın login oturumunu açar",
+    "İkisi de aynı işi yapar; yalnızca parola sorma sırası farklıdır",
+    "`sudo` izinli tek komutu çalıştırır; `su -` login oturumu açar",
     "`su -` yalnızca dosya okur",
     "`sudo` kullanıcıyı kalıcı olarak root yapar"
    ],
@@ -323,7 +323,7 @@
   "q2": {
    "q": "Sudo kural dosyasını değiştirmek için neden `visudo` kullanılır?",
    "options": [
-    "Dosyayı şifreler",
+    "Dosyayı şifreler; böylece yalnızca root kuralları okuyabilir",
     "Root hesabı oluşturur",
     "Sözdizimini denetleyip bozuk kuralın kaydedilme riskini azaltır",
     "Tüm kullanıcıları sudo grubuna ekler"
@@ -334,19 +334,19 @@
    "q": "En az yetki ilkesine uygun sudo kuralı hangisidir?",
    "options": [
     "Belirli kullanıcıya yalnızca gereken tam komutu vermek",
-    "Herkese `NOPASSWD: ALL` vermek",
-    "Root parolasını tüm ekibe göndermek",
-    "Her komutu sürekli root kabuğunda çalıştırmak"
+    "Herkese `NOPASSWD: ALL` vererek parola sormayı tamamen kaldırmak",
+    "Root parolasını tüm ekiple paylaşıp herkesin kullanmasına izin vermek",
+    "Her komutu sürekli açık tutulan bir root kabuğunda çalıştırmak"
    ],
    "explain": "Yetkiyi doğru kullanıcıya ve gereken tek komuta sınırla; geniş `ALL` kurallarından kaçın."
   },
   "q4": {
    "q": "Ubuntu'da `su -` root parolasını kabul etmiyorsa en olası açıklama nedir?",
    "options": [
-    "Linux'ta root hesabı yoktur",
-    "sudo her zaman devre dışıdır",
-    "Terminal root oturumlarını desteklemez",
-    "Root hesabı parola ile girişe kapalı olabilir; izinli kullanıcı `sudo` kullanmalıdır"
+    "Linux'ta root hesabı hiçbir zaman bulunmaz, yalnızca sudo vardır",
+    "sudo her zaman devre dışıdır, bu yüzden root'a geçilemez",
+    "Terminal root oturumlarını hiçbir koşulda desteklemez, sudo da çalışmaz",
+    "Root hesabı parola girişine kapalı olabilir; `sudo` kullanılmalıdır"
    ],
    "explain": "Ubuntu kurulumlarında root hesabı çoğu zaman kilitlidir; yönetim için sudo yetkili kullanıcı kullanılır."
   },
@@ -363,19 +363,19 @@
   "q6": {
    "q": "`alice ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx` kuralı ne verir?",
    "options": [
-    "alice'e tam root yetkisi",
-    "alice'in sudo'yu hiç kullanamamasını",
+    "alice'e her komut için tam root yetkisi verilmesini",
+    "alice'in sudo'yu hiçbir komut için kullanamamasını",
     "alice'in yalnızca bu komutu parolasız çalıştırmasını",
-    "Tüm kullanıcılara nginx yetkisi"
+    "Sistemdeki tüm kullanıcılara nginx üzerinde yetki verilmesini"
    ],
    "explain": "Komut tam yolla sınırlandığı için en az yetki ilkesine uyar."
   },
   "q7": {
    "q": "`su alice` ile `su - alice` arasındaki fark nedir?",
    "options": [
-    "Fark yoktur",
-    "İkincisi root olur",
-    "İlki parola sormaz",
+    "Fark yoktur; ikisi de aynı ortamı ve aynı PATH'i yükler",
+    "İkincisi root olur, ilki normal kullanıcı olarak kalır",
+    "İlki parola sormaz, ikincisi her zaman parola ister",
     "İkincisi alice'in login ortamını (HOME, PATH) yükler"
    ],
    "explain": "`-` login kabuğu başlatır; ortam değişkenleri ve çalışma dizini hedef kullanıcıya göre ayarlanır."
@@ -383,12 +383,22 @@
   "q8": {
    "q": "`/etc/sudoers.d/` altına dosya koymanın yararı nedir?",
    "options": [
-    "Ana dosyaya dokunmadan modüler kural eklenir; yine de `visudo -f` ile düzenlenmeli",
-    "Sözdizimi denetimi gerekmez",
+    "Ana dosyaya dokunmadan modüler kural eklenir",
+    "Sözdizimi denetimi gerekmez, hatalı kural da sorun çıkarmaz",
     "Kurallar yalnızca root için geçerli olur",
     "Dosya izinleri önemsizdir"
    ],
    "explain": "Dosyalar ayrı yönetilir ama hatalı bir dosya sudo'yu bozabilir; `visudo -f` ile denetle, izin 0440 olsun."
+  },
+  "q9": {
+   "q": "Sudo kurallarında `ALL` yerine tam komut yolu (ör. `/usr/bin/systemctl restart nginx`) yazmak neden daha iyidir?",
+   "options": [
+    "Komut daha hızlı çalışır",
+    "Kullanıcı yalnızca ihtiyacı olan işi yapabilir; ele geçirilirse zarar sınırlı kalır",
+    "`sudo` parola sormayı bırakır",
+    "Kural dosyası daha kısa olur"
+   ],
+   "explain": "En az yetki ilkesi: hesap ele geçirilse veya yanlış kullanılsa bile yalnızca tek bir komut çalıştırılabilir, tüm sisteme erişilemez."
   }
  },
  "summary": [

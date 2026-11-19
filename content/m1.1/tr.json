@@ -274,7 +274,7 @@
   },
   "t14": {
    "text": "Mini proje: `~/projects/website/css` dizinine git, içeriğini listele, sonra iki üst dizine çıkarak `~/projects` içinde bitir.",
-   "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."
+   "hint": "`cd`, `ls -l`, `cd ../..`."
   },
   "t15": {
    "text": "Zor görev: Gizli dosyalar dahil, hem `~/Documents` hem de `~/projects/website` içeriğini tek bir `ls` komutuyla listele.",
@@ -282,7 +282,7 @@
   },
   "t16": {
    "text": "TICKET #1101 — Bir meslektaşın `website` projesindeki `images` klasörünün tam yolunu istiyor. Klasöre git, `pwd` ile yolu göster, sonra ev dizinine dön.",
-   "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."
+   "hint": "`cd`, `pwd`, `cd`."
   }
  },
  "vm": {
@@ -439,6 +439,16 @@
     "Boş dosyalar"
    ],
    "explain": "Her dizinde `.` kendisini, `..` üst dizini gösterir; `ls -a` ile görünürler."
+  },
+  "q9": {
+   "q": "`/etc` içinde değilken `ls passwd` hata verir ama `ls /etc/passwd` çalışır. Neden?",
+   "options": [
+    "Çünkü `ls` yalnızca /etc'de çalışır",
+    "Çünkü `passwd` gizli dosyadır",
+    "Çünkü `/` işareti izinleri açar",
+    "Göreli yol bulunduğun dizinden aranır; mutlak yol `/`'den başladığı için her yerde çalışır"
+   ],
+   "explain": "Göreli yol bulunduğun yere bağlıdır, mutlak yol `/` kökünden başlar ve konumdan bağımsızdır."
   }
  },
  "summary": [

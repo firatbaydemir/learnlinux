@@ -164,7 +164,7 @@
   },
   "t12": {
    "text": "Debug: inside `~/projects/app`, `config.txt` is not found; the file is one level up. Read it with `cat` using a relative path with `../`.",
-   "hint": "First `cd ~/projects/app`, then `cat ../config.txt`."
+   "hint": "First `cd`, then `cat ../config.txt`."
   },
   "t13": {
    "text": "Mini project: create `~/lab/docs` and `~/lab/bin`, write a file with `echo hello linux > ~/lab/docs/readme.txt`, and create `~/lab/bin/readme-link` as a symbolic link to it.",
@@ -176,7 +176,7 @@
   },
   "t15": {
    "text": "Ticket: the application looks for its configuration at `~/app/current/config.txt`, but the real file is in `~/releases/v2/config.txt`. Create `~/app/current` as a symbolic link to `~/releases/v2` and verify with `cat ~/app/current/config.txt`.",
-   "hint": "`mkdir -p ~/app`, then `ln -s ~/releases/v2 ~/app/current`."
+   "hint": "`mkdir -p`, then `ln -s ~/releases/v2 ~/app/current`."
   },
   "t16": {
    "text": "Run `ls -la ~` to see hidden files too.",
@@ -324,6 +324,16 @@
     "/home"
    ],
    "explain": "Each `..` goes up one level: `/var/log` → `/var` → `/`."
+  },
+  "q9": {
+   "q": "Why does a file extension not determine the type on Linux, and why is `file` reliable?",
+   "options": [
+    "Because extensions are forbidden",
+    "The type comes from the content; `file` inspects content (magic bytes), not the extension",
+    "Because `file` renames the file",
+    "Because only `.txt` files are readable"
+   ],
+   "explain": "An extension is just a name; `file` reads the signature at the start of the file to report the real type."
   }
  },
  "summary": [

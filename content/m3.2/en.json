@@ -85,7 +85,7 @@
      "what": "Feeds error messages into the pipe as well.",
      "where": "When filtering output and errors as one stream.",
      "why": "Errors do not vanish on screen; `grep`/`wc` see them too.",
-     "example": "ls data missing 2>&1 | wc -l"
+     "example": "ls data nofile 2>&1 | wc -l"
     },
     {
      "cmd": "tee -a",
@@ -107,32 +107,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Count the lines of `logs/app.log` with `cat logs/app.log | wc -l`.",
-   "hint": "The pipe feeds the file content to `wc -l`."
+   "text": "Count the lines of `logs/app.log`; read the file with `cat` and pipe its output to the counter.",
+   "hint": "Join `cat` and `wc -l` with `|`."
   },
   "t02": {
    "text": "Sort `data/fruits.txt` alphabetically with `sort`.",
    "hint": "Equal lines appear next to each other."
   },
   "t03": {
-   "text": "Count how many entries the `data` folder has with `ls -1 data | wc -l`.",
-   "hint": "`-1` writes each name on its own line; `wc -l` counts the lines."
+   "text": "Count how many entries the `data` folder has.",
+   "hint": "`ls -1` writes each name on its own line; count its output with `wc -l`."
   },
   "t04": {
-   "text": "Count the ERROR lines of `logs/app.log` with `grep ERROR logs/app.log | wc -l`.",
-   "hint": "grep filters, `wc -l` counts."
+   "text": "Find the number of ERROR lines in the log.",
+   "hint": "Filter with `grep` first, then count with `wc -l`."
   },
   "t05": {
-   "text": "Remove duplicates from `data/fruits.txt` with `sort data/fruits.txt | uniq`.",
-   "hint": "Sort first so duplicates are adjacent."
+   "text": "Remove the duplicates from `data/fruits.txt`.",
+   "hint": "Use `sort`, then `uniq`; duplicates must be adjacent."
   },
   "t06": {
-   "text": "Count each fruit with `sort data/fruits.txt | uniq -c`.",
-   "hint": "The number in front is the count."
+   "text": "Count how often each fruit appears in `data/fruits.txt`.",
+   "hint": "`sort`, then `uniq -c`; the number in front is the count."
   },
   "t07": {
-   "text": "Save all ERROR lines of the log to `errors.txt` with `grep ERROR logs/app.log > errors.txt`.",
-   "hint": "Check with `cat errors.txt`."
+   "text": "Save all ERROR lines to the file `errors.txt`.",
+   "hint": "Redirect the `grep` output with `>`; check with `cat errors.txt`."
   },
   "t08": {
    "text": "Predict: what is the first line of `sort data/nums.txt | head -n 1`? `2` or `10`? Run it to verify.",
@@ -144,11 +144,11 @@
   },
   "t10": {
    "text": "Debug: `uniq data/unsorted.txt` still shows duplicates. Write the unique lines (`a`, `b`) to `~/unique.txt`.",
-   "hint": "`sort data/unsorted.txt | uniq > unique.txt`."
+   "hint": "First `sort`, then `uniq`, the result into the file with `>`."
   },
   "t11": {
-   "text": "Mini project: build the report `report.txt` with the ERROR lines of the log counted and ranked: `grep ERROR logs/app.log | sort | uniq -c | sort -rn > report.txt`.",
-   "hint": "Four stages: filter, sort, count, rank; then redirect."
+   "text": "Mini project: build the report `report.txt` with the ERROR lines of the log counted, most frequent first.",
+   "hint": "Four stages: filter with `grep`, `sort`, count with `uniq -c`, rank with `sort -rn`; then redirect with `>`."
   },
   "t12": {
    "text": "Challenge: in a single pipeline save all ERROR lines to `all_errors.txt` and also print how many there are (use `tee`).",
@@ -223,7 +223,7 @@
    "q": "What does the pipe `|` connect?",
    "options": [
     "stdout of the left command to stdin of the right command",
-    "A file to a command",
+    "The contents of a file as an argument of a command",
     "stderr to stdout",
     "Two files"
    ],
@@ -232,7 +232,7 @@
   "q2": {
    "q": "Why is `sort` used before `uniq`?",
    "options": [
-    "`uniq` needs a file",
+    "`uniq` can only read its input from a named file",
     "`sort` makes it faster",
     "`uniq` only works on numbers",
     "`uniq` only collapses adjacent duplicates"
@@ -242,7 +242,7 @@
   "q3": {
    "q": "What does `tee out.txt` do in a pipeline?",
    "options": [
-    "Deletes the stream",
+    "Silently deletes the stream and passes nothing on",
     "Writes the stream to a file and passes it on",
     "Only shows errors",
     "Sorts the stream"
@@ -284,7 +284,7 @@
    "options": [
     "`-a` appends, otherwise it overwrites",
     "`-a` also captures errors",
-    "`-a` hides output from the screen",
+    "`-a` hides the output on screen and only writes to the file",
     "No difference"
    ],
    "explain": "`tee` overwrites by default; `-a` (append) adds to the existing content."
@@ -298,6 +298,16 @@
     "`-n` sorts numbers by numeric value"
    ],
    "explain": "Plain `sort` sorts as text (`10` < `2`); `-n` sorts numerically (`2` < `10`)."
+  },
+  "q9": {
+   "q": "With `ls no_such_dir | wc -l` the error message still shows on screen. Why?",
+   "options": [
+    "The pipe automatically stops the failing command",
+    "wc deletes the error message because it cannot count it",
+    "The pipe only carries stdout onward; stderr goes to the screen",
+    "Error messages are written to a file before the pipe"
+   ],
+   "explain": "`|` connects only channel 1 (stdout) to the next command's input. stderr is a separate channel and goes to the screen unless merged with `2>&1`."
   }
  },
  "summary": [

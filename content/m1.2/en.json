@@ -46,7 +46,8 @@
      "where": "In scripts, to test whether you are root (0 = root).",
      "why": "A single number is easy to compare in a script.",
      "example": "id -u",
-     "nosim": true
+     "nosim": true,
+     "output": "1000"
     }
    ],
    "tip": "`whoami` gives a name, `id` gives the numbers the system really uses. When in doubt, run `id`."
@@ -65,7 +66,8 @@
      "where": "To check whether a driver (e.g. `kvm`, `e1000`) is loaded.",
      "why": "A module is a part of the kernel loaded at runtime.",
      "example": "lsmod | head -n 5",
-     "nosim": true
+     "nosim": true,
+     "output": "Module                  Size  Used by\ndummy                  16384  0\next4                  983040  1"
     },
     {
      "cmd": "modprobe",
@@ -81,7 +83,8 @@
      "where": "To view settings such as IP forwarding or `vm.swappiness`; `sysctl -a` lists all.",
      "why": "`sysctl -w` is temporary; persist it in `/etc/sysctl.d/*.conf`.",
      "example": "sysctl net.ipv4.ip_forward",
-     "nosim": true
+     "nosim": true,
+     "output": "net.ipv4.ip_forward = 0"
     },
     {
      "cmd": "hostname",
@@ -117,7 +120,8 @@
      "where": "When you want to connect to your VM via SSH.",
      "why": "The shortest way to find the address.",
      "example": "hostname -I",
-     "nosim": true
+     "nosim": true,
+     "output": "192.168.1.42"
     }
    ],
    "tip": "The `student@linux-lab` part of the prompt is user@machine; `whoami` and `hostname` give the same information."
@@ -175,7 +179,8 @@
      "where": "When adding a date to file names (`backup-2026-11-12`).",
      "why": "A consistent format that sorts alphabetically.",
      "example": "date +%F",
-     "nosim": true
+     "nosim": true,
+     "output": "2026-11-16"
     },
     {
      "cmd": "uptime",
@@ -190,7 +195,8 @@
      "where": "To report the duration briefly.",
      "why": "Gives only the duration, without load figures.",
      "example": "uptime -p",
-     "nosim": true
+     "nosim": true,
+     "output": "up 2 hours, 3 minutes"
     }
    ],
    "tip": "Compare the load average with the core count: on 4 cores, 4.0 means fully busy."
@@ -279,7 +285,8 @@
      "where": "In a script when you need only the value.",
      "why": "No `grep` needed, the output is just the value.",
      "example": "printenv USER",
-     "nosim": true
+     "nosim": true,
+     "output": "user"
     }
    ],
    "tip": "Variable names are case-sensitive: `$USER` works, `$user` is empty."
@@ -336,15 +343,15 @@
   },
   "t13": {
    "text": "The file `~/kernel.txt` contains an old kernel version. Fix it so it holds the real kernel version.",
-   "hint": "`uname -r > ~/kernel.txt` overwrites the old content. Then check with `cat ~/kernel.txt`."
+   "hint": "`uname -r` overwrites the old content. Then check with `cat ~/kernel.txt`."
   },
   "t14": {
    "text": "Create `~/me.txt` containing, in order, the output of `whoami`, `id` and `hostname` (3 lines).",
-   "hint": "Use `>` for the first and `>>` for the others: `whoami > ~/me.txt`, `id >> ~/me.txt`. (`>` writes output to a file, `>>` appends; details in module 3.2.)"
+   "hint": "Use `>` for the first and `>>` for the others: `whoami`, `id >> ~/me.txt`. (`>` writes output to a file, `>>` appends; details in module 3.2.)"
   },
   "t15": {
    "text": "Write the readable distribution name, without the `PRETTY_NAME=` prefix, into `~/distro.txt`.",
-   "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` takes what follows the `=` sign. (`cut` is covered in module 3.5, `grep` and `|` in modules 3.4 and 3.2.)"
+   "hint": "`grep`, `cut`: `cut` takes what follows the `=` sign. (`cut` is covered in module 3.5, `grep` and `|` in modules 3.4 and 3.2.)"
   },
   "t16": {
    "text": "Write only the major number (first number) of the kernel version into `~/major.txt`.",
@@ -352,11 +359,11 @@
   },
   "t17": {
    "text": "Ticket: Support wants system information. Write the machine name, kernel version, user name and the `df -h` output, in that order, into `~/sysinfo.txt`.",
-   "hint": "Start with `hostname > ~/sysinfo.txt`, then append the other four outputs with `>>`."
+   "hint": "Start with `hostname`, then append the other four outputs with `>>`."
   },
   "t18": {
    "text": "Ticket: The administrator asks whether the account `student` is in the `wheel` group. As evidence, save only the output containing `wheel` into `~/admin_check.txt`.",
-   "hint": "`id | grep wheel > ~/admin_check.txt` (`|` passes output to the next command, `grep` filters; details in modules 3.2 and 3.4.)"
+   "hint": "`id`, `grep` (`|` passes output to the next command, `grep` filters; details in modules 3.2 and 3.4.)"
   }
  },
  "vm": {
@@ -542,6 +549,16 @@
     "pwd"
    ],
    "explain": "`hostname` prints the machine name; `whoami`/`id` show the user, `pwd` the directory."
+  },
+  "q9": {
+   "q": "Which command lists all environment variables?",
+   "options": [
+    "`id`",
+    "`env`",
+    "`uname -a`",
+    "`whoami`"
+   ],
+   "explain": "`env` prints environment variables as `NAME=value`; filter them with `grep`."
   }
  },
  "summary": [

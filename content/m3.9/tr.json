@@ -227,28 +227,28 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`lab` dizinindeyken tüm `.tmp` dosyalarını `find` ile listele: `find . -name \"*.tmp\"`.",
-   "hint": "Deseni çift tırnak içine al."
+   "text": "`lab` dizinindeyken tüm `.tmp` dosyalarını `find` ile listele.",
+   "hint": "`find` önce başlangıç dizinini, sonra `-name` ile deseni alır. Deseni çift tırnak içine al."
   },
   "t02": {
-   "text": "`run.log` içindeki `ERROR` satırlarını say ve sayıyı `count.txt` dosyasına yaz: `grep -c ERROR run.log > count.txt`.",
-   "hint": "`-c` eşleşen satır sayısını verir."
+   "text": "`run.log` içindeki `ERROR` satırlarını say ve sayıyı `count.txt` dosyasına yaz.",
+   "hint": "`grep` ile `-c` eşleşen satır sayısını verir; sonucu `>` ile dosyaya yönlendir."
   },
   "t03": {
-   "text": "`who.txt` dosyasına `host: ` ve makine adını yaz: `echo \"host: $(hostname)\" > who.txt`.",
-   "hint": "Çift tırnak içinde `$(hostname)` genişler."
+   "text": "`who.txt` dosyasına `host: ` ve makine adını yaz.",
+   "hint": "`echo` ve komut yerine koyma `$(...)` kullan; çift tırnak içinde `$(hostname)` genişler. Çıktıyı `>` ile yönlendir."
   },
   "t04": {
-   "text": "`backup` dizinini oluştur, sonra `logs` içindeki tüm `.log` dosyalarını glob ile oraya kopyala: `cp logs/*.log backup/`.",
-   "hint": "Önce `mkdir backup`; sonra `cp` hedef dizini sonda alır."
+   "text": "`backup` dizinini oluştur, sonra `logs` içindeki tüm `.log` dosyalarını glob ile oraya kopyala.",
+   "hint": "Önce `mkdir`; sonra `cp` kaynakları ve hedef dizini sonda alır. Glob: `*.log`."
   },
   "t05": {
-   "text": "Önce hatayı `err.txt` dosyasına yaz: `ls missing.txt 2> err.txt`. Sonra `ls missing.txt notes.txt` çıktısını VE hatasını birlikte `both.txt` dosyasına yaz.",
-   "hint": "`> both.txt 2>&1`; sıra: önce `>`, sonra `2>&1`."
+   "text": "Önce `ls missing.txt` komutunun hatasını `err.txt` dosyasına yaz. Sonra `ls missing.txt notes.txt` çıktısını VE hatasını birlikte `both.txt` dosyasına yaz.",
+   "hint": "Hata akışı 2 numaralıdır: `2>`. İkisini birden yazmak için önce `>` ile dosyayı ver, sonra `2>&1` ekle; sıra önemli."
   },
   "t06": {
-   "text": "`printf` ile `greet.sh` betiğini yaz (shebang + `echo \"Hello $1\"`), `chmod +x greet.sh` ile çalıştırılabilir yap, `./greet.sh alice > greet.out` ile çalıştır.",
-   "hint": "`printf '#!/bin/bash\\necho \"Hello $1\"\\n' > greet.sh`; metni tek tırnakla koru, yoksa `$1` hemen genişler."
+   "text": "`printf` ile `greet.sh` betiğini yaz (shebang + `echo \"Hello $1\"`), `chmod` ile çalıştırılabilir yap, `./greet.sh alice` çıktısını `greet.out` dosyasına yaz.",
+   "hint": "Satır sonları için `printf` metninde `\\n` kullan; metni tek tırnakla koru, yoksa `$1` hemen genişler. Çalıştırma izni için `chmod +x`."
   },
   "t07": {
    "text": "TAHMİN: `cut -d' ' -f2 run.log | sort | uniq -c | sort -nr` en çok hangi seviyeyi ve kaç kez gösterir? Önce tahmin et, sonra çalıştır.",
@@ -268,23 +268,23 @@
   },
   "t11": {
    "text": "HATA BUL: `./hello.sh` \"Permission denied\" veriyor. Düzelt ve çalıştır; sonuç `hello.out` dosyasına yazılmalı.",
-   "hint": "`ls -l hello.sh` ile izne bak; `chmod +x hello.sh`. (`chmod` modül 4.4'te.)"
+   "hint": "`ls -l hello.sh` ile izne bak; eksik olan çalıştırma (`x`) izni. (`chmod` modül 4.4'te.)"
   },
   "t12": {
-   "text": "MİNİ PROJE: `ERROR` satırlarını süzüp hem ekranda göster hem `errors.txt` dosyasına yaz (`tee`), sonra `wc -l errors.txt` çıktısını `summary.txt` dosyasına ekle (`>>`).",
-   "hint": "`grep ERROR run.log | tee errors.txt`, sonra `wc -l errors.txt >> summary.txt`."
+   "text": "MİNİ PROJE: `ERROR` satırlarını süzüp hem ekranda göster hem `errors.txt` dosyasına yaz (`tee`), sonra `errors.txt` satır sayısını `summary.txt` dosyasına ekle (`>>`).",
+   "hint": "Sıra: `grep`, boru, `tee`; sonra `wc -l` çıktısını `>>` ile ekle."
   },
   "t13": {
-   "text": "ZORLUK: `project` altındaki tüm `.tmp` dosyalarını silmek için `find` ve `-exec rm {} \\;` kullan. (Simülatör `-exec`'i çalıştırmaz; komutun doğru yazımı kontrol edilir.)",
-   "hint": "`find project -name \"*.tmp\" -exec rm {} \\;` ; `\\;` kaçışı önemli. Gerçek VM'de önce `-print` ile dene."
+   "text": "ZORLUK: `project` altındaki tüm `.tmp` dosyalarını silmek için `find` ve `-exec rm` kullan. (Simülatör `-exec`'i çalıştırmaz; komutun doğru yazımı kontrol edilir.)",
+   "hint": "`-exec` komutu `{}` yer tutucusuyla alır ve `\\;` ile biter; kaçış önemli. Gerçek VM'de önce `-print` ile dene."
   },
   "t14": {
-   "text": "ZORLUK: Tüm `.txt` dosyalarının satır sayısını güvenli yolla bul: `-print0` ile `xargs -0` ve `wc -l`. (`xargs` simülatörde yok; yazım kontrol edilir.)",
-   "hint": "`find . -name \"*.txt\" -print0 | xargs -0 wc -l`."
+   "text": "ZORLUK: Tüm `.txt` dosyalarının satır sayısını güvenli yolla bul: `find` ile `-print0`, `xargs -0` ve `wc -l`. (`xargs` simülatörde yok; yazım kontrol edilir.)",
+   "hint": "`find` çıktısını `-print0` ile NUL ayraçlı ver, boruyla `xargs -0`a aktar, o da `wc -l` çalıştırsın."
   },
   "t15": {
    "text": "ZORLUK: `access.log` içinde en çok görünen IP'yi ve sayısını bul, yalnızca o tek satırı `top.txt` dosyasına yaz.",
-   "hint": "`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 1 > top.txt`."
+   "hint": "Kalıp: ilk alanı `cut` ile al, `sort`, `uniq -c`, `sort -nr`, `head -n 1`; sonucu `>` ile yaz."
   },
   "t16": {
    "text": "TICKET #3901 — Destek: \"Sabah toplantısı için `run.log` içindeki `ERROR` ve `WARN` satırlarını sıralı olarak `problems.txt` dosyasına yazan bir betiğe ihtiyacımız var, her gün çalıştıracağız.\" `check.sh` betiğini yaz (shebang + `grep -E ... | sort > problems.txt`), çalıştırılabilir yap ve çalıştır.",
@@ -370,19 +370,19 @@
    "q": "`find ... -exec rm {} \\;` ile `find ... -exec rm {} +` arasındaki fark nedir?",
    "options": [
     "`\\;` yalnızca dizinlere, `+` yalnızca dosyalara uygulanır",
-    "`\\;` her dosya için ayrı komut çalıştırır, `+` yolları toplayıp birkaç komuta verir",
-    "`+` komutu hiç çalıştırmaz, sadece listeler",
-    "Fark yoktur, yalnızca yazım tarzıdır"
+    "`\\;` dosya başına bir kez, `+` toplu çalıştırır",
+    "`+` komutu hiç çalıştırmaz, yalnızca eşleşenleri listeler",
+    "Fark yoktur, ikisi de yalnızca yazım tarzı farkıdır"
    ],
    "explain": "`\\;` her eşleşme için bir süreç başlatır; `+` argümanları toplar ve çok daha az süreçle çalışır."
   },
   "q2": {
    "q": "`find . -name *.log` (tırnaksız) neden sorunludur?",
    "options": [
-    "`find` desen kabul etmez",
-    "`-name` yalnızca büyük harfle çalışır",
-    "Kabuk `*.log`'u `find` çalışmadan önce bulunduğun dizindeki adlara genişletir",
-    "Komut tüm diski siler"
+    "`find` hiçbir koşulda desen kabul etmez",
+    "`-name` yalnızca büyük harfli adlarla çalışır",
+    "Kabuk `*.log`'u önce bulunduğun dizindeki adlara genişletir",
+    "Komut diskteki tüm dosyaları siler"
    ],
    "explain": "Genişletmeyi kabuk yapar. Desen `\"*.log\"` biçiminde tırnaklanmalı ki `find`'a olduğu gibi ulaşsın."
   },
@@ -399,20 +399,20 @@
   "q4": {
    "q": "Adında boşluk olan dosyalarla `find` sonucunu güvenle `rm`'ye vermek için hangisi doğrudur?",
    "options": [
-    "`find . | xargs rm`",
+    "`find . -type f | xargs rm -f`",
     "`rm $(find .)`",
     "`find . -name x | rm`",
-    "`find ... -print0 | xargs -0 rm`"
+    "`find . -print0 | xargs -0 rm`"
    ],
    "explain": "`-print0` ve `xargs -0` adları NUL ile ayırır; boşluk veya satır sonu içeren adlar bölünmez."
   },
   "q5": {
    "q": "`xargs` ne yapar?",
    "options": [
-    "Dosyaları paralel kopyalar",
+    "Dosyaları paralel olarak kopyalar",
     "Komutu arka planda çalıştırır",
-    "Standart girdiyi başka komuta argüman olarak verir",
-    "Çıktıyı dosyaya yazar"
+    "Girdiyi komuta argüman yapar",
+    "Çıktıyı bir dosyaya yazar"
    ],
    "explain": "`xargs` stdin'den okuduğu öğeleri bir komutun argümanlarına dönüştürür; `find | xargs` kalıbının temelidir."
   },
@@ -429,22 +429,32 @@
   "q7": {
    "q": "`cmd1 && cmd2` ne anlama gelir?",
    "options": [
-    "cmd2 her zaman çalışır",
-    "cmd2, cmd1 başarısızsa çalışır",
-    "İkisi aynı anda çalışır",
-    "cmd2 yalnızca cmd1 başarılıysa (çıkış kodu 0) çalışır"
+    "cmd2 her durumda çalışır, sonuca bakılmaz",
+    "cmd2 yalnızca cmd1 başarısızsa çalışır",
+    "İkisi paralel, aynı anda çalışır",
+    "cmd2 yalnızca cmd1 başarılıysa çalışır"
    ],
    "explain": "`&&` başarıya bağlı zincirler; `||` ise başarısızlıkta çalıştırır."
   },
   "q8": {
    "q": "`ls | tee liste.txt` ne yapar?",
    "options": [
-    "Çıktıyı hem ekrana yazar hem `liste.txt`'ye kaydeder",
-    "Çıktıyı yalnızca dosyaya yazar",
-    "Dosyayı ekrana kopyalar",
-    "Hataları dosyaya ayırır"
+    "Çıktıyı hem ekrana hem `liste.txt`'ye yazar",
+    "Çıktıyı yalnızca `liste.txt` dosyasına yazar",
+    "`liste.txt` dosyasını ekrana kopyalar",
+    "Yalnızca hataları dosyaya ayırır"
    ],
    "explain": "`tee` standart girdiyi hem stdout'a hem dosyaya iletir; `-a` ile dosyaya ekleme yapılır."
+  },
+  "q9": {
+   "q": "`./script.sh` ile çalıştırabilmek için betiğe önce ne yapmalısın?",
+   "options": [
+    "`sh -n script.sh` çalıştır",
+    "İzin ver: `chmod +x script.sh`",
+    "`cat script.sh` çalıştır",
+    "Adı `.sh` olmadan yaz"
+   ],
+   "explain": "`./script.sh` doğrudan çalıştırma için x izni ister: `chmod +x`. İzin vermeden `sh script.sh` ile de çalıştırabilirsin."
   }
  },
  "summary": [

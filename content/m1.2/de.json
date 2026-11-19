@@ -46,7 +46,8 @@
      "where": "In Skripten, um zu prüfen, ob du root bist (0 = root).",
      "why": "Eine einzelne Zahl lässt sich im Skript leicht vergleichen.",
      "example": "id -u",
-     "nosim": true
+     "nosim": true,
+     "output": "1000"
     }
    ],
    "tip": "`whoami` liefert einen Namen, `id` die Zahlen, die das System wirklich benutzt. Im Zweifel führe `id` aus."
@@ -65,7 +66,8 @@
      "where": "Um zu prüfen, ob ein Treiber (z. B. `kvm`, `e1000`) geladen ist.",
      "why": "Ein Modul ist ein zur Laufzeit ladbarer Teil des Kernels.",
      "example": "lsmod | head -n 5",
-     "nosim": true
+     "nosim": true,
+     "output": "Module                  Size  Used by\ndummy                  16384  0\next4                  983040  1"
     },
     {
      "cmd": "modprobe",
@@ -81,7 +83,8 @@
      "where": "Um Einstellungen wie IP-Forwarding oder `vm.swappiness` zu sehen; `sysctl -a` listet alle.",
      "why": "`sysctl -w` ist temporär; dauerhaft in `/etc/sysctl.d/*.conf` eintragen.",
      "example": "sysctl net.ipv4.ip_forward",
-     "nosim": true
+     "nosim": true,
+     "output": "net.ipv4.ip_forward = 0"
     },
     {
      "cmd": "hostname",
@@ -117,7 +120,8 @@
      "where": "Wenn du dich per SSH mit deiner VM verbinden willst.",
      "why": "Der kürzeste Weg, die Adresse zu finden.",
      "example": "hostname -I",
-     "nosim": true
+     "nosim": true,
+     "output": "192.168.1.42"
     }
    ],
    "tip": "Der Teil `student@linux-lab` im Prompt ist Benutzer@Rechner; `whoami` und `hostname` liefern dieselbe Information."
@@ -175,7 +179,8 @@
      "where": "Beim Anhängen eines Datums an Dateinamen (`backup-2026-11-12`).",
      "why": "Ein einheitliches Format, das alphabetisch sortiert.",
      "example": "date +%F",
-     "nosim": true
+     "nosim": true,
+     "output": "2026-11-16"
     },
     {
      "cmd": "uptime",
@@ -190,7 +195,8 @@
      "where": "Um die Dauer kurz zu berichten.",
      "why": "Liefert nur die Dauer, ohne Lastwerte.",
      "example": "uptime -p",
-     "nosim": true
+     "nosim": true,
+     "output": "up 2 hours, 3 minutes"
     }
    ],
    "tip": "Vergleiche die Load Average mit der Kernzahl: Bei 4 Kernen bedeutet 4.0 volle Auslastung."
@@ -279,7 +285,8 @@
      "where": "Im Skript, wenn du nur den Wert brauchst.",
      "why": "Kein `grep` nötig, die Ausgabe ist nur der Wert.",
      "example": "printenv USER",
-     "nosim": true
+     "nosim": true,
+     "output": "user"
     }
    ],
    "tip": "Variablennamen unterscheiden Groß- und Kleinschreibung: `$USER` funktioniert, `$user` ist leer."
@@ -336,15 +343,15 @@
   },
   "t13": {
    "text": "Die Datei `~/kernel.txt` enthält eine alte Kernel-Version. Korrigiere sie, sodass sie die echte Kernel-Version enthält.",
-   "hint": "`uname -r > ~/kernel.txt` überschreibt den alten Inhalt. Prüfe danach mit `cat ~/kernel.txt`."
+   "hint": "`uname -r` überschreibt den alten Inhalt. Prüfe danach mit `cat ~/kernel.txt`."
   },
   "t14": {
    "text": "Erstelle `~/me.txt` mit der Ausgabe von `whoami`, `id` und `hostname` (in dieser Reihenfolge, 3 Zeilen).",
-   "hint": "Nimm `>` für die erste und `>>` für die weiteren: `whoami > ~/me.txt`, `id >> ~/me.txt`. (`>` schreibt die Ausgabe in eine Datei, `>>` hängt an; Details in Modul 3.2.)"
+   "hint": "Nimm `>` für die erste und `>>` für die weiteren: `whoami`, `id >> ~/me.txt`. (`>` schreibt die Ausgabe in eine Datei, `>>` hängt an; Details in Modul 3.2.)"
   },
   "t15": {
    "text": "Schreibe den lesbaren Namen der Distribution ohne das Präfix `PRETTY_NAME=` in `~/distro.txt`.",
-   "hint": "`grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt`: `cut` nimmt, was nach dem `=` steht. (`cut` kommt in Modul 3.5, `grep` und `|` in Modul 3.4 und 3.2.)"
+   "hint": "`grep`, `cut`: `cut` nimmt, was nach dem `=` steht. (`cut` kommt in Modul 3.5, `grep` und `|` in Modul 3.4 und 3.2.)"
   },
   "t16": {
    "text": "Schreibe nur die Hauptnummer (erste Zahl) der Kernel-Version in `~/major.txt`.",
@@ -352,11 +359,11 @@
   },
   "t17": {
    "text": "Ticket: Der Support braucht Systeminformationen. Schreibe Rechnername, Kernel-Version, Benutzername und die Ausgabe von `df -h` in dieser Reihenfolge in `~/sysinfo.txt`.",
-   "hint": "Beginne mit `hostname > ~/sysinfo.txt`, hänge die anderen vier Ausgaben dann mit `>>` an."
+   "hint": "Beginne mit `hostname`, hänge die anderen vier Ausgaben dann mit `>>` an."
   },
   "t18": {
    "text": "Ticket: Der Administrator fragt, ob das Konto `student` in der Gruppe `wheel` ist. Speichere als Beleg nur die Ausgabe, die `wheel` enthält, in `~/admin_check.txt`.",
-   "hint": "`id | grep wheel > ~/admin_check.txt` (`|` reicht die Ausgabe an den nächsten Befehl weiter, `grep` filtert; Details in Modul 3.2 und 3.4.)"
+   "hint": "`id`, `grep` (`|` reicht die Ausgabe an den nächsten Befehl weiter, `grep` filtert; Details in Modul 3.2 und 3.4.)"
   }
  },
  "vm": {
@@ -542,6 +549,16 @@
     "pwd"
    ],
    "explain": "`hostname` gibt den Rechnernamen aus; `whoami`/`id` zeigen den Benutzer, `pwd` das Verzeichnis."
+  },
+  "q9": {
+   "q": "Mit welchem Befehl listest du alle Umgebungsvariablen auf?",
+   "options": [
+    "`id`",
+    "`env`",
+    "`uname -a`",
+    "`whoami`"
+   ],
+   "explain": "`env` listet Umgebungsvariablen als `NAME=Wert` auf; mit `grep` kannst du filtern."
   }
  },
  "summary": [

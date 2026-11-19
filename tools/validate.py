@@ -137,7 +137,7 @@ def check_content(meta, ui):
                     err("%s/%s.json: quiz %s answer out of range" % (d.name, l, q["id"]))
                 if qq and len(qq["options"]) != len(tx["tr"]["quiz"][q["id"]]["options"]):
                     err("%s/%s.json: quiz %s option count differs" % (d.name, l, q["id"]))
-            shape = [(s["id"], len(s.get("commands", []))) for s in x.get("sections", [])]
+            shape = [(s["id"], len(s.get("commands", [])), tuple(bool(c.get("output")) for c in s.get("commands", []))) for s in x.get("sections", [])]
             if secs is None:
                 secs = shape
             elif shape != secs:

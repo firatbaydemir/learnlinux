@@ -174,7 +174,8 @@
   {"id": "q5", "answer": 1},
   {"id": "q6", "answer": 3},
   {"id": "q7", "answer": 0},
-  {"id": "q8", "answer": 2}
+  {"id": "q8", "answer": 2},
+  {"id": "q9", "answer": 3}
  ],
  "vm": [
   {"id": "v01", "expect": "load average|load averages"},

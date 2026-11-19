@@ -359,19 +359,19 @@
   },
   "t11": {
    "text": "Hata ayıklama: ev dizininde `my notes.txt` adlı bir dosya var; `cat my notes.txt` hata verir. Dosyanın içeriğini doğru yazımla göster.",
-   "hint": "Adı tırnağa al: `cat \"my notes.txt\"`."
+   "hint": "Adı tırnağa al: `cat`."
   },
   "t12": {
    "text": "Mini proje: `~/projects` klasörünü oluştur, içine `a.txt` ve `b.txt` dosyalarını tek komutla aç, sonra `owner.txt` dosyasına `$(whoami)` çıktısını yaz.",
-   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` çıktıyı dosyaya yazar; modül 3.2)."
+   "hint": "`mkdir`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` çıktıyı dosyaya yazar; modül 3.2)."
   },
   "t13": {
    "text": "Zor görev: `~/info.txt` dosyasına tam olarak `host: linux-lab user: student` yaz. Değerleri `$(hostname)` ve `$(whoami)` ile üret.",
-   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt` (`>` çıktıyı dosyaya yazar; modül 3.2)."
+   "hint": "`echo` (`>` çıktıyı dosyaya yazar; modül 3.2)."
   },
   "t14": {
    "text": "Ticket: Ekip `~/tools` klasöründeki betikleri adıyla çağırmak istiyor. Klasörü bu oturumda `PATH`'e ekle ve ayarı kalıcı olması için `~/.bashrc` dosyasının sonuna yaz.",
-   "hint": "(`>>` dosyanın sonuna ekler; modül 3.2) `export PATH=$PATH:~/tools`, sonra aynı satırı tek tırnakla `>>` ile `~/.bashrc`'ye ekle."
+   "hint": "(`>>` dosyanın sonuna ekler; modül 3.2) `export`, sonra aynı satırı tek tırnakla `>>` ile `~/.bashrc`'ye ekle."
   },
   "t15": {
    "text": "`printf` ile `Name: alice` satırını yazdır; `%s` ve `\\n` kullan.",
@@ -553,6 +553,16 @@
     "ln ll ls -l"
    ],
    "explain": "`alias ad='komut'` kısayol tanımlar; kalıcı olması için `~/.bashrc` dosyasına yazılır. `export` değişken içindir."
+  },
+  "q9": {
+   "q": "Geçerli dizindeki `script.sh` neden `script.sh` yazınca değil `./script.sh` yazınca çalışır?",
+   "options": [
+    "Çünkü `./` dosyaya çalıştırma izni verir",
+    "Çünkü nokta dosyayı gizli yapar",
+    "Kabuk komutları yalnızca `PATH` içindeki dizinlerde arar; geçerli dizin orada değildir",
+    "Çünkü `script.sh` bir kabuk yerleşik komutudur"
+   ],
+   "explain": "`./` yolu açıkça verir; aksi hâlde kabuk yalnızca `PATH` dizinlerine bakar. İzin için `chmod +x` ayrıca gerekir."
   }
  },
  "summary": [

@@ -476,6 +476,16 @@
     "Betiği yedekler"
    ],
    "explain": "Shebang çekirdeğe yorumlayıcıyı söyler; çalıştırma izni için yine `chmod +x` gerekir."
+  },
+  "q9": {
+   "q": "Script içinde değişkenleri neden çoğunlukla `\"$var\"` biçiminde tırnaklı yazarız?",
+   "options": [
+    "Tırnak olmadan değişken hiç çalışmaz",
+    "Boşluk ya da joker karakter içeren değer tek parça kalır; yoksa kelimelere bölünür",
+    "Tırnak betiği daha hızlı çalıştırır",
+    "Tırnak değişkeni salt okunur yapar"
+   ],
+   "explain": "Tırnaksız `$dosya` değeri boşluklardan bölünür ve `*` gibi karakterler genişler; `rm $dosya` beklenmedik şeyleri silebilir. `\"$dosya\"` değeri tek argüman olarak korur."
   }
  },
  "summary": [

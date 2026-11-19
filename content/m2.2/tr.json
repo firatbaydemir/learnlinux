@@ -164,7 +164,7 @@
   },
   "t12": {
    "text": "Debug: `~/projects/app` içindeyken `config.txt` bulunamıyor; dosya bir üst dizinde. Göreli yol `../` kullanarak `cat` ile oku.",
-   "hint": "Önce `cd ~/projects/app`, sonra `cat ../config.txt`."
+   "hint": "Önce `cd`, sonra `cat ../config.txt`."
   },
   "t13": {
    "text": "Mini proje: `~/lab/docs` ve `~/lab/bin` dizinlerini kur, `echo hello linux > ~/lab/docs/readme.txt` ile dosya yaz, `~/lab/bin/readme-link` adında ona sembolik link ver.",
@@ -176,7 +176,7 @@
   },
   "t15": {
    "text": "Ticket: Uygulama yapılandırmayı `~/app/current/config.txt` yolunda arıyor, gerçek dosya `~/releases/v2/config.txt` içinde. `~/app/current` sembolik linkini `~/releases/v2` dizinine kur ve `cat ~/app/current/config.txt` ile doğrula.",
-   "hint": "`mkdir -p ~/app`, sonra `ln -s ~/releases/v2 ~/app/current`."
+   "hint": "`mkdir -p`, sonra `ln -s ~/releases/v2 ~/app/current`."
   },
   "t16": {
    "text": "Gizli dosyaları da görmek için `ls -la ~` çalıştır.",
@@ -324,6 +324,16 @@
     "/home"
    ],
    "explain": "Her `..` bir üst dizine çıkar: `/var/log` → `/var` → `/`."
+  },
+  "q9": {
+   "q": "Linux'ta dosya uzantısı türü neden belirlemez ve `file` komutu neden güvenilirdir?",
+   "options": [
+    "Çünkü uzantılar yasaktır",
+    "Tür içerikten anlaşılır; `file` uzantıya değil içeriğe (magic bytes) bakar",
+    "Çünkü `file` ismi değiştirir",
+    "Çünkü yalnızca `.txt` dosyaları okunabilir"
+   ],
+   "explain": "Uzantı yalnızca bir isimdir; `file` içeriğin başındaki imzaya bakarak gerçek türü söyler."
   }
  },
  "summary": [

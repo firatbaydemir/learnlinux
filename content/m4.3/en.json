@@ -211,7 +211,7 @@
   },
   "t09": {
    "text": "Debug: `~/sudoers.bad` contains a dangerous rule granting everyone every command without a password. Replace the file with this narrowly scoped example: `student ALL=(root) /usr/bin/systemctl restart nginx`. This is only a draft; do not copy it into the real sudoers file.",
-   "hint": "Use `echo 'student ALL=(root) /usr/bin/systemctl restart nginx' > ~/sudoers.bad`. (`>` and `>>` → module 3.2.)"
+   "hint": "Use `echo`. (`>` and `>>` → module 3.2.)"
   },
   "t10": {
    "text": "Mini project: write these commands in order to `~/admin_runbook.txt`: list permissions, check nginx status, and clear the password cache: `sudo -l`, `sudo systemctl status nginx`, `sudo -k`.",
@@ -313,8 +313,8 @@
   "q1": {
    "q": "What is the main difference between `sudo COMMAND` and `su -`?",
    "options": [
-    "Both always require the root password",
-    "`sudo` runs one permitted command; `su -` opens the target account's login session",
+    "They do the same; only the order of the password prompts differs",
+    "`sudo` runs one permitted command; `su -` opens a login session",
     "`su -` only reads files",
     "`sudo` permanently turns the user into root"
    ],
@@ -323,7 +323,7 @@
   "q2": {
    "q": "Why use `visudo` to edit the sudo policy file?",
    "options": [
-    "It encrypts the file",
+    "It encrypts the file so that only root can read the rules",
     "It creates the root account",
     "It checks syntax and reduces the chance of saving a broken rule",
     "It adds all users to the sudo group"
@@ -334,19 +334,19 @@
    "q": "Which sudo rule follows least privilege?",
    "options": [
     "Grant one user only the exact command they need",
-    "Give everyone `NOPASSWD: ALL`",
-    "Share the root password with the team",
-    "Run every command in a permanent root shell"
+    "Give everyone `NOPASSWD: ALL` and drop the password prompt entirely",
+    "Share the root password with the whole team so everyone can use it",
+    "Run every command in a root shell that is kept open permanently"
    ],
    "explain": "Limit access to the right user and required command; avoid broad `ALL` rules."
   },
   "q4": {
    "q": "If `su -` rejects the root password on Ubuntu, what is a likely explanation?",
    "options": [
-    "Linux has no root account",
-    "sudo is always disabled",
-    "The terminal does not support root sessions",
-    "The root account may be locked for password login; an authorized user should use `sudo`"
+    "Linux never has a root account, only sudo exists",
+    "sudo is always disabled, so switching to root is impossible",
+    "The terminal never supports root sessions under any circumstances, nor does sudo",
+    "The root account may be locked for password login; use `sudo`"
    ],
    "explain": "Ubuntu installations often lock the root account; an authorized user uses sudo for administration."
   },
@@ -363,19 +363,19 @@
   "q6": {
    "q": "What does `alice ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx` grant?",
    "options": [
-    "Full root rights to alice",
-    "That alice cannot use sudo",
+    "Full root rights for alice on every command",
+    "That alice cannot use sudo for any command",
     "That alice may run only this command without a password",
-    "nginx rights to all users"
+    "nginx rights for all users on the system"
    ],
    "explain": "The command is limited by full path, which follows least privilege."
   },
   "q7": {
    "q": "What is the difference between `su alice` and `su - alice`?",
    "options": [
-    "None",
-    "The second becomes root",
-    "The first asks no password",
+    "None; both load the same environment and the same PATH",
+    "The second becomes root, the first stays a normal user",
+    "The first asks no password, the second always does",
     "The second loads alice's login environment (HOME, PATH)"
    ],
    "explain": "`-` starts a login shell; environment and working directory follow the target user."
@@ -383,12 +383,22 @@
   "q8": {
    "q": "What is the benefit of files under `/etc/sudoers.d/`?",
    "options": [
-    "Modular rules without touching the main file; still edit with `visudo -f`",
-    "No syntax check needed",
+    "Modular rules without touching the main file",
+    "No syntax check needed; broken rules do no harm",
     "Rules apply only to root",
     "File permissions don't matter"
    ],
    "explain": "Rules are managed separately, but a bad file can break sudo; check with `visudo -f`, mode 0440."
+  },
+  "q9": {
+   "q": "Why is a full command path (e.g. `/usr/bin/systemctl restart nginx`) in a sudo rule better than `ALL`?",
+   "options": [
+    "The command runs faster",
+    "The user can only do the job they need; damage stays limited if misused",
+    "`sudo` stops asking for a password",
+    "The rule file gets shorter"
+   ],
+   "explain": "Least privilege: even if the account is compromised or misused, only one command can run, not the whole system."
   }
  },
  "summary": [

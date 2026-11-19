@@ -40,6 +40,7 @@
      "where": "Eski, sıkıştırılmış logları okurken veya `grep` ile aramak için.",
      "why": "Diskte yer ve zaman harcamadan içeriğe bakarsın.",
      "example": "zcat logs/app.log.gz | head",
+     "output": "start\nrunning\nstop",
      "nosim": true
     }
    ],
@@ -69,6 +70,7 @@
      "where": "Açmadan önce içeriği görmek için.",
      "why": "Tar bomb ve üzerine yazma sürprizlerini önler.",
      "example": "tar -tf backups/project.tar.gz",
+     "output": "project/\nproject/src/\nproject/src/main.c\nproject/src/util.c\nproject/docs/\nproject/docs/readme.txt\nproject/notes.txt",
      "nosim": true
     },
     {
@@ -201,6 +203,7 @@
      "where": "Yedeği kopyaladıktan veya geri yüklemeden önce.",
      "why": "Bozuk yedeği kriz anında değil, hemen öğrenirsin.",
      "example": "sha256sum -c backups/SHA256SUMS",
+     "output": "backups/project.tar.gz: OK",
      "nosim": true
     },
     {
@@ -224,28 +227,28 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`lab` klasöründesin. `ls -R project` ile arşivlenecek proje ağacına bak.",
-   "hint": "-R büyük harf; alt klasörleri de listeler."
+   "text": "`lab` klasöründesin. Arşivlenecek proje ağacını alt klasörleriyle birlikte listele.",
+   "hint": "`ls` komutu; alt klasörler için büyük harf `-R`."
   },
   "t02": {
-   "text": "Yedekler için `backups` klasörünü oluştur: `mkdir backups`.",
-   "hint": "Klasörü `lab` içinde aç."
+   "text": "Yedekler için `backups` adlı bir klasör oluştur.",
+   "hint": "`mkdir`; klasörü `lab` içinde aç."
   },
   "t03": {
    "text": "`project` klasörünü gzip ile `backups/project.tar.gz` arşivine paketle (`tar -czf ...`). Simülatör `tar` çalıştırmaz; komutun doğruluğu denetlenir.",
    "hint": "Sıra: `tar -czf <archive> <source>`; `f` harfinden sonra arşiv adı gelir."
   },
   "t04": {
-   "text": "Arşivi açmadan içeriğini listele: `tar -tzf backups/project.tar.gz`.",
-   "hint": "`t` = list. `-tf` de kabul edilir."
+   "text": "`backups/project.tar.gz` arşivinin içeriğini açmadan listele.",
+   "hint": "`tar` ile `-t` (list), `-z` ve `-f`; `-tf` de kabul edilir."
   },
   "t05": {
-   "text": "`restore` klasörünü oluştur, sonra arşivi `-C` ile oraya aç: `tar -xzf backups/project.tar.gz -C restore`.",
-   "hint": "`mkdir restore` önce; `-C` hedef klasör var olmalı."
+   "text": "`restore` adlı klasörü oluştur, sonra arşivi oraya aç.",
+   "hint": "Önce `mkdir restore`; sonra `tar` ile `-x`, `-z`, `-f` ve hedef için `-C` (klasör var olmalı)."
   },
   "t06": {
-   "text": "`logs/app.log` dosyasını orijinalini koruyarak sıkıştır: `gzip -k logs/app.log`.",
-   "hint": "`-k` = keep. Olmazsa orijinal silinir."
+   "text": "`logs/app.log` dosyasını orijinalini koruyarak sıkıştır.",
+   "hint": "`gzip` ve `-k` (keep). Olmazsa orijinal silinir."
   },
   "t07": {
    "text": "Arşivden yalnızca `project/notes.txt` dosyasını `restore` içine aç.",
@@ -269,19 +272,19 @@
   },
   "t12": {
    "text": "Hata ayıkla: bir tar bomb `lab` dizinine `bomb1.txt`, `bomb2.txt`, `bomb3.txt` dosyalarını döktü. `cleanup` adlı klasör oluştur ve üçünü oraya taşı.",
-   "hint": "`mkdir cleanup`, sonra `mv bomb1.txt bomb2.txt bomb3.txt cleanup/`."
+   "hint": "`mkdir` ile klasörü aç, sonra `mv` birden fazla kaynağı ve son argüman olarak hedef klasörü alır."
   },
   "t13": {
-   "text": "Mini proje: `staging` klasörü aç, `project` ağacını `cp -r` ile içine kopyala, `ls -R staging` ile doğrula, sonra `staging` klasörünü `staging.tar.gz` olarak paketle.",
-   "hint": "Adımlar: `mkdir staging`, `cp -r project staging/`, `ls -R staging`, `tar -czf staging.tar.gz staging`."
+   "text": "Mini proje: `staging` klasörü aç, `project` ağacını içine özyinelemeli kopyala, `ls -R` ile doğrula, sonra `staging` klasörünü `staging.tar.gz` olarak paketle.",
+   "hint": "Adımlar: `mkdir`, `cp -r`, `ls -R`, `tar -czf` (önce arşiv adı, sonra paketlenecek klasör)."
   },
   "t14": {
-   "text": "Meydan okuma: `project` klasörünü özyinelemeli olarak `backups/project.zip` dosyasına ekle (`zip -r`), `unzip -l` ile listele, sonra `sha256sum` ile toplamını üret. Üçü de bu sırayla çalıştırılmalı.",
-   "hint": "`zip -r backups/project.zip project`, `unzip -l backups/project.zip`, `sha256sum backups/project.zip`."
+   "text": "Meydan okuma: `project` klasörünü özyinelemeli olarak `backups/project.zip` dosyasına ekle, `unzip -l` ile listele, sonra `sha256sum` ile toplamını üret. Üçü de bu sırayla çalıştırılmalı.",
+   "hint": "`zip -r` arşiv adını önce, eklenecek klasörü sonra alır; `unzip -l` ve `sha256sum` aynı zip dosyasını okur."
   },
   "t15": {
    "text": "TICKET #3801 — Denetçiler logların sıkıştırılmış kopyasını istiyor, ama `logs` klasöründeki orijinaller yerinde kalmalı. `audit` klasörü aç, `logs/*.log` dosyalarını oraya kopyala, kopyaları `gzip` ile sıkıştır.",
-   "hint": "`mkdir audit`, `cp logs/*.log audit/`, `gzip audit/*.log`; `gzip` yalnızca kopyaları siler."
+   "hint": "Adımlar: `mkdir`, `cp` (joker `*.log`), `gzip` yalnızca `audit` içindekilere uygulanmalı; `gzip` kopyaları siler, orijinaller kalır."
   },
   "t16": {
    "text": "Tahmin et: `ls -1 project/src | wc -l` ne yazar? Çalıştırarak doğrula.",
@@ -384,9 +387,9 @@
   "q2": {
    "q": "`gzip notes.txt` komutundan sonra ne olur?",
    "options": [
-    "`notes.txt` ve `notes.txt.gz` ikisi de kalır",
-    "Bir `.zip` dosyası oluşur",
-    "`notes.txt.gz` silinir",
+    "`notes.txt` ve `notes.txt.gz` ikisi de yan yana kalır",
+    "Aynı adla bir `.zip` dosyası oluşur",
+    "`notes.txt.gz` silinir, yalnız özgün dosya kalır",
     "`notes.txt` silinir, yerine `notes.txt.gz` gelir"
    ],
    "explain": "gzip orijinali sıkıştırılmış dosyayla değiştirir. Orijinali korumak için `gzip -k` kullanılır."
@@ -395,29 +398,29 @@
    "q": "Arşivi açmadan önce neden `tar -tf` ile listelenir?",
    "options": [
     "Tar bomb ve üzerine yazılacak dosyaları önceden görmek için",
-    "Açma işlemi daha hızlı olsun diye",
-    "`tar -x` listelemeden çalışmadığı için",
-    "Arşivi sıkıştırmak için"
+    "Açma işlemi daha hızlı bitsin diye, çünkü liste önbellek oluşturur",
+    "`tar -x` önce listeleme yapılmadan hiç çalışmadığı için",
+    "Arşivi yeniden sıkıştırıp boyutunu küçültmek için"
    ],
    "explain": "Üst klasör yoksa dosyalar bulunduğun dizine dağılır; mevcut dosyaların üzerine de yazılabilir."
   },
   "q4": {
    "q": "`tar -xzf backup.tar.gz -C restore` komutundaki `-C restore` ne yapar?",
    "options": [
-    "Arşivi `restore` adıyla sıkıştırır",
-    "`restore` adlı dosyaları hariç tutar",
+    "Arşivi `restore` adıyla yeniden sıkıştırıp kaydeder",
+    "`restore` adlı dosyaları arşivden hariç tutar, gerisini açar",
     "Açmadan önce `restore` klasörüne geçer, dosyaları oraya açar",
-    "Arşivin sağlama toplamını denetler"
+    "Arşivin sağlama toplamını denetler, hiçbir şey açmaz"
    ],
    "explain": "`-C` (change directory) hedef klasörü belirler; klasör önceden var olmalıdır."
   },
   "q5": {
    "q": "`tar -czf out.tar.gz dir` içinde `c`, `z`, `f` ne anlama gelir?",
    "options": [
-    "çıkar, zip, filtre",
+    "çıkar, zip ile sıkıştır, filtre uygula",
     "oluştur, gzip ile sıkıştır, dosya adı",
-    "kontrol et, sıfırla, zorla",
-    "kopyala, zip, format"
+    "kontrol et, sıfırla, zorla uygula",
+    "kopyala, zip ile sıkıştır, biçimlendir"
    ],
    "explain": "`c` create, `z` gzip, `f` ardından arşiv dosya adı gelir."
   },
@@ -445,11 +448,21 @@
    "q": "`zip -r out.zip dir` içindeki `-r` neden gerekir?",
    "options": [
     "Dizinin içeriğini alt dizinlerle ekler",
-    "Arşivi şifreler",
-    "Özgün dosyaları siler",
-    "Sıkıştırmayı artırır"
+    "Arşivi bir parolayla şifreler",
+    "Arşivlenen özgün dosyaları diskten siler",
+    "Sıkıştırma oranını artırıp dosyayı küçültür"
    ],
    "explain": "`-r` olmadan zip yalnızca dizinin kendisini ekler, içindekileri değil."
+  },
+  "q9": {
+   "q": "Zaten sıkıştırılmış `.jpg` veya `.zip` dosyalarını tekrar `gzip` ile sıkıştırmak neden pek yer kazandırmaz?",
+   "options": [
+    "`gzip` yalnızca metin dosyalarını açabilir",
+    "Sıkıştırılmış veride tekrar eden örüntü kalmaz; yeni kazanç çok azdır",
+    "`gzip` bu dosyaları siler",
+    "İkinci sıkıştırma dosyayı otomatik büyütür"
+   ],
+   "explain": "Sıkıştırma tekrar eden örüntüleri kısaltır. Zaten sıkıştırılmış veri rastgeleye yakındır, bu yüzden ikinci tur neredeyse hiçbir şey kazandırmaz."
   }
  },
  "summary": [

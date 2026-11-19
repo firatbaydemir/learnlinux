@@ -239,19 +239,19 @@
   "q3": {
    "q": "What does `apt update` do?",
    "options": [
-    "Upgrades the kernel",
+    "Upgrades the kernel to a newer version",
     "Refreshes package repository lists",
-    "Removes all packages",
-    "Reboots the system"
+    "Removes every installed package from the system",
+    "Reboots the system immediately"
    ],
    "explain": "apt update refreshes local repository indexes; use apt upgrade to upgrade installed packages."
   },
   "q4": {
    "q": "What should you do at an installation confirmation prompt?",
    "options": [
-    "Always confirm",
-    "Ignore critical packages",
-    "Press Enter without reading the output",
+    "Always confirm without reading anything",
+    "Ignore critical packages and carry on",
+    "Press Enter right away without seeing the output",
     "Review packages to be added or removed"
    ],
    "explain": "Dependency resolution can change other packages; review the list before proceeding."
@@ -270,18 +270,18 @@
    "q": "Which command finds the RPM package that owns a file?",
    "options": [
     "`rpm -qf /path/file`",
-    "`rpm -ql file`",
-    "`dnf clean file`",
-    "`rpm -e file`"
+    "`rpm -ql file` (lists a package's files)",
+    "`dnf clean file` (clears the cache)",
+    "`rpm -e file` (removes a package)"
    ],
    "explain": "`rpm -qf` maps file to package, `rpm -ql` lists a package's files."
   },
   "q7": {
    "q": "What is the difference between `apt remove` and `apt purge`?",
    "options": [
-    "None",
-    "`purge` removes only dependencies",
-    "`remove` also deletes user data",
+    "There is no difference between them",
+    "`purge` only deletes leftover unneeded dependencies",
+    "`remove` also deletes user data and settings",
     "`purge` also removes configuration files"
    ],
    "explain": "`remove` keeps config in `/etc`; `purge` deletes it too."
@@ -289,12 +289,22 @@
   "q8": {
    "q": "What does `dpkg -i package.deb` NOT do?",
    "options": [
-    "Install the package",
+    "Installs the package on the system",
     "Download missing dependencies itself",
-    "Record the package in the database",
-    "Unpack package files"
+    "Records the package in the dpkg database",
+    "Unpacks the package files into system directories"
    ],
    "explain": "`dpkg` uses no repositories and does not resolve dependencies; `apt install ./package.deb` does."
+  },
+  "q9": {
+   "q": "Why do the packages themselves not get upgraded when you run `apt update` on the Debian family?",
+   "options": [
+    "The command errors out and does nothing",
+    "It only refreshes the package lists (repository info); upgrading needs a separate `apt upgrade`",
+    "Updates are only applied after a reboot",
+    "`apt update` only affects packages that are not installed"
+   ],
+   "explain": "`apt update` downloads the current package information from the repositories. Upgrading installed packages is a separate step (`apt upgrade`); refresh the lists first, then upgrade."
   }
  },
  "summary": [

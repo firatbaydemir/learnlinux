@@ -163,11 +163,11 @@
   },
   "t11": {
    "text": "Die Platte fÃ¼llt sich. Sieh mit `ls -l ~/logs` nach; das alte Debug-Log `old_debug.log` ist unnÃ¶tig, lÃ¶sche es, aber fasse `app.log` nicht an.",
-   "hint": "`rm ~/logs/old_debug.log`. PrÃ¼fe den genauen Namen vor dem LÃ¶schen mit ls."
+   "hint": "`rm`. PrÃ¼fe den genauen Namen vor dem LÃ¶schen mit ls."
   },
   "t12": {
    "text": "Mini-Projekt: Erstelle den Bericht `~/health.txt`. Er soll der Reihe nach die Ãœberschrift `== disk ==`, die Ausgabe von `df -h`, die Ãœberschrift `== memory ==` und die Ausgabe von `free -h` enthalten.",
-   "hint": "Erste Zeile `echo \"== disk ==\" > ~/health.txt`, der Rest mit `>>`. (`>` / `>>` im Detail in Modul 3.2.)"
+   "hint": "Erste Zeile `echo`, der Rest mit `>>`. (`>` / `>>` im Detail in Modul 3.2.)"
   },
   "t13": {
    "text": "Challenge: Schreibe aus `~/reports/df_sample.txt` nur die 95%-Zeile nach `~/alert.txt` und die Anzahl solcher Zeilen nach `~/alert_count.txt`.",
@@ -175,7 +175,7 @@
   },
   "t14": {
    "text": "Ticket: \"Die Anwendung meldet 'No space left on device'.\" Finde den vollen EinhÃ¤ngepunkt in `~/reports/df_sample.txt` und schreibe seinen Namen in `~/full_mount.txt`. LÃ¶sche auÃŸerdem die unnÃ¶tige `~/logs/core.dump`.",
-   "hint": "Die volle ist die 95%-Zeile. Der EinhÃ¤ngepunkt ist `/var`: `echo /var > ~/full_mount.txt`. (`>` im Detail in Modul 3.2.)"
+   "hint": "Die volle ist die 95%-Zeile. Der EinhÃ¤ngepunkt ist `/var`: `echo`. (`>` im Detail in Modul 3.2.)"
   }
  },
  "vm": {
@@ -334,6 +334,16 @@
     "Das Netz fällt aus"
    ],
    "explain": "In ein volles Dateisystem lässt sich nichts mehr schreiben; Dienste und Logs können fehlschlagen. Mit `du` den Platzfresser finden."
+  },
+  "q9": {
+   "q": "`df -h` zeigt die Partition als voll an, aber `du` zählt weniger belegten Platz. Was ist ein plausibler Grund?",
+   "options": [
+    "df funktioniert falsch",
+    "Gelöschte, aber von einem Prozess noch geöffnete Dateien belegen weiter Platz",
+    "du kann versteckte Dateien nicht zählen",
+    "Die Platte wächst von selbst"
+   ],
+   "explain": "`df` misst auf Dateisystem-Ebene, `du` die sichtbaren Dateien. Der Platz einer gelöschten, noch offenen Datei wird erst frei, wenn der Prozess endet."
   }
  },
  "summary": [

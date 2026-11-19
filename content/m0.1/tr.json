@@ -141,7 +141,7 @@
   },
   "t10": {
    "text": "Hata ayıkla: `~/distro.txt` yanlışlıkla `ID=windows` diyor. Dosyanın içeriği `ID=linux` olacak şekilde üzerine yaz.",
-   "hint": "`echo ID=linux > ~/distro.txt` içeriği değiştirir; `cat` ile kontrol et."
+   "hint": "`echo` içeriği değiştirir; `cat` ile kontrol et."
   },
   "t11": {
    "text": "Mini proje: `~/about_linux` klasörünü oluştur. Çekirdek sürümünü `~/about_linux/kernel.txt` dosyasına, `/etc/os-release` içeriğini `~/about_linux/distro.txt` dosyasına kaydet.",
@@ -297,6 +297,16 @@
     "Lisanssız, kamu malı"
    ],
    "explain": "Çekirdek GPLv2 ile özgürdür: kaynak kodu görülebilir, değiştirilebilir ve aynı lisansla dağıtılır."
+  },
+  "q9": {
+   "q": "Ubuntu ve Fedora aynı Linux çekirdeğini kullanabildiği hâlde neden farklı davranır?",
+   "options": [
+    "Çünkü çekirdekleri farklı dosya sistemi kullanır",
+    "Çünkü biri gerçek Linux değildir",
+    "Dağıtım = çekirdek + paket yöneticisi, araçlar ve varsayılan ayarlar; fark bunlardan gelir",
+    "Çünkü komutlar yalnızca bir dağıtımda çalışır"
+   ],
+   "explain": "Linux yalnızca çekirdektir; dağıtımı paketleme, araçlar ve ayarlar farklılaştırır."
   }
  },
  "summary": [

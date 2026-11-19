@@ -48,8 +48,7 @@
    "title": "setuid: sahibin yetkisiyle çalıştır",
    "body": [
     "Çalıştırılabilir bir dosyada **setuid** (`4000`) varsa, program onu başlatan kişinin değil **dosya sahibinin** yetkisiyle çalışır. En bilinen örnek `/usr/bin/passwd`: sahibi root'tur, `-rwsr-xr-x` görünür. Sıradan kullanıcı kendi parolasını değiştirebilir, çünkü program root yetkisiyle `/etc/shadow` dosyasını güncelleyebilir. `sudo` ve `mount` da aynı mantıkla çalışır.",
-    "Bu güç risklidir. Root'a ait bir setuid programdaki küçük bir hata (veya setuid'li bir kabuk/editör/yorumlayıcı) herkese root yetkisi verir. Bu yüzden setuid dosyalarını bilmek ve düzenli denetlemek gerekir.",
-    "İki not: Linux çekirdeği **kabuk betiklerinde** (`#!/bin/bash`) setuid'i yok sayar; betiğe `chmod u+s` yazmak root yetkisi vermez, sadece yanıltır. Ayrıca `nosuid` seçeneğiyle bağlanan dosya sistemlerinde (ör. çoğu USB, `/tmp` bölümü) setuid hiç çalışmaz."
+    "Bu güç risklidir. Root'a ait bir setuid programdaki küçük bir hata (veya setuid'li bir kabuk/editör/yorumlayıcı) herkese root yetkisi verir. Bu yüzden setuid dosyalarını bilmek ve düzenli denetlemek gerekir."
    ],
    "commands": [
     {
@@ -77,7 +76,10 @@
     }
    ],
    "tip": "Listede `passwd`, `sudo`, `mount`, `su` gibi tanıdık adlar normaldir. Tanımadığın veya `/home`, `/tmp` altındaki bir setuid dosya inceleme gerektirir.",
-   "danger": "Gerçek sistemde asla `chmod u+s /bin/bash` (veya vim, python, find, cp gibi bir program) yapma. Bu, her kullanıcıya root kabuğu verir ve klasik bir yetki yükseltme yöntemidir. Yalnızca kendi izole deneme VM'inde, snapshot aldıktan sonra ve işin bitince geri alarak dene."
+   "danger": "Gerçek sistemde asla `chmod u+s /bin/bash` (veya vim, python, find, cp gibi bir program) yapma. Bu, her kullanıcıya root kabuğu verir ve klasik bir yetki yükseltme yöntemidir. Yalnızca kendi izole deneme VM'inde, snapshot aldıktan sonra ve işin bitince geri alarak dene.",
+   "more": [
+    "İki not: Linux çekirdeği **kabuk betiklerinde** (`#!/bin/bash`) setuid'i yok sayar; betiğe `chmod u+s` yazmak root yetkisi vermez, sadece yanıltır. Ayrıca `nosuid` seçeneğiyle bağlanan dosya sistemlerinde (ör. çoğu USB, `/tmp` bölümü) setuid hiç çalışmaz."
+   ]
   },
   {
    "id": "setgid",
@@ -144,8 +146,7 @@
    "title": "Tarif: takım klasörü ve sonraki adım",
    "body": [
     "Gerçek bir takım klasörü şu adımlarla kurulur: (1) klasörü oluştur, (2) grubunu `devs` yap, (3) `2775` (başkaları okumasın istiyorsan `2770`) ver, (4) üyeler `umask 002` ile çalışsın. Klasörü root oluşturduğu için `sudo` gerekir.",
-    "Hem setgid hem sticky isteyen klasörler için `3775` / `3770` kullanılır: yeni dosyalar gruba aittir ve üyeler birbirinin dosyasını silemez.",
-    "Yine de bu yöntemin sınırı var: yeni dosya izinleri umask'a bağlıdır ve kullanıcı başına farklı kural yazamazsın. Bunun için **varsayılan ACL**'ler vardır (`setfacl -d`); sonraki modüllerin konusu. Şimdilik bil ki setgid klasörü ACL'siz takım çalışmasının temelidir."
+    "Hem setgid hem sticky isteyen klasörler için `3775` / `3770` kullanılır: yeni dosyalar gruba aittir ve üyeler birbirinin dosyasını silemez."
    ],
    "commands": [
     {
@@ -187,7 +188,10 @@
      "example": "chmod 2775 team"
     }
    ],
-   "warn": "Önce grup, sonra izin: grubu `devs` yapmadan `2775` vermek yanlış grubu miras bıraktırır. Sonunda `ls -ld` ile `drwxrwsr-x ... devs` görmelisin."
+   "warn": "Önce grup, sonra izin: grubu `devs` yapmadan `2775` vermek yanlış grubu miras bıraktırır. Sonunda `ls -ld` ile `drwxrwsr-x ... devs` görmelisin.",
+   "more": [
+    "Yine de bu yöntemin sınırı var: yeni dosya izinleri umask'a bağlıdır ve kullanıcı başına farklı kural yazamazsın. Bunun için **varsayılan ACL**'ler vardır (`setfacl -d`); sonraki modüllerin konusu. Şimdilik bil ki setgid klasörü ACL'siz takım çalışmasının temelidir."
+   ]
   }
  ],
  "tasks": {
@@ -221,15 +225,15 @@
   },
   "t08": {
    "text": "Hata ayıkla: `legacy/tool.sh` kabuk betiğinde biri setuid bırakmış (4755). Betikte çekirdek bunu yok sayar ama denetimde sorun çıkarır. Normal `755` moduna döndür.",
-   "hint": "`ls -l legacy/tool.sh` ile `rws` gör, sonra `chmod 755 legacy/tool.sh`."
+   "hint": "`ls -l legacy/tool.sh` ile `rws` gör, sonra `chmod`."
   },
   "t09": {
    "text": "Hata ayıkla: `inbox` klasörü `777`, kullanıcılar birbirinin dosyasını siliyor. Klasörü `1777` yapacak şekilde düzelt (mevcut izinlere dokunmadan).",
-   "hint": "`chmod +t inbox` yalnızca sticky ekler."
+   "hint": "`chmod` yalnızca sticky ekler."
   },
   "t10": {
    "text": "Mini proje: `proj` klasörünün grubunu `devs` yap, `2770` ver (başkaları giremesin), `umask 002` çalıştır ve `proj/plan.txt` dosyasını `touch` ile oluştur.",
-   "hint": "Sıra: `sudo chgrp devs proj`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
+   "hint": "Sıra: `chgrp`, `chmod 2770 proj`, `umask 002`, `touch proj/plan.txt`."
   },
   "t11": {
    "text": "Mini proje: `upload` klasörünü oluştur, `1777` yap, içine `a.txt` koy ve dosyayı `sudo chown alice:devs upload/a.txt` ile alice'e ver. (Gerçekte bob bunu silemezdi.)",
@@ -354,8 +358,8 @@
   "q2": {
    "q": "`/tmp` klasörü `1777` modunda. Baştaki `1` ne işe yarar?",
    "options": [
-    "Klasörü salt okunur yapar",
-    "Dosyalara root yetkisi verir",
+    "Klasörü herkes için salt okunur yapar, dosya eklenemez",
+    "Dosyalara geçici olarak root yetkisi verir ve silmeyi engeller",
     "Yalnızca dosya sahibi, klasör sahibi veya root silebilir",
     "Dosyaları otomatik şifreler"
    ],
@@ -376,7 +380,7 @@
    "options": [
     "`ls -l /etc/setuid`",
     "`chmod -R u+s /`",
-    "`find / -perm 4755 -name suid`",
+    "`find / -perm 4755 -name suid -type f 2>/dev/null`",
     "`find / -perm -4000 -type f 2>/dev/null`"
    ],
    "explain": "`-perm -4000` setuid biti açık olanları bulur; `2>/dev/null` yetki hatalarını gizler."
@@ -384,9 +388,9 @@
   "q5": {
    "q": "`chmod u+s` bir çalıştırılabilir dosyada ne sağlar?",
    "options": [
-    "Dosyayı salt okunur yapar",
+    "Dosyayı salt okunur yapar, kimse değiştiremez",
     "Dosya, çalıştıran değil sahibi olarak çalışır",
-    "Dosyayı yalnızca grup çalıştırabilir",
+    "Dosyayı yalnızca sahibin grubundaki kullanıcılar çalıştırabilir",
     "Dosyanın silinmesini engeller"
    ],
    "explain": "Setuid bit: süreç dosya sahibinin etkin UID'siyle çalışır; `passwd` buna örnektir."
@@ -404,9 +408,9 @@
   "q7": {
    "q": "Sticky bit'li klasörde bir kullanıcı neyi silebilir?",
    "options": [
-    "Herkesin dosyasını",
+    "Klasördeki herkesin dosyasını, çünkü klasör herkese açıktır",
     "Hiçbir dosyayı",
-    "Yalnızca klasörün grubunun dosyalarını",
+    "Yalnızca klasörün grubuna ait kullanıcıların dosyalarını",
     "Yalnızca kendi dosyalarını (veya sahibi/root ise)"
    ],
    "explain": "Sticky bit, silme/yeniden adlandırmayı dosya sahibi, klasör sahibi ve root ile sınırlar."
@@ -420,6 +424,16 @@
     "Dosya yalnızca eklenebilir"
    ],
    "explain": "`chattr +i` root dahi olsa değiştirme/silmeyi engeller; yalnızca ekleme için `a` kullanılır."
+  },
+  "q9": {
+   "q": "`/tmp` herkese yazılabilir olduğu halde kullanıcılar neden birbirinin dosyasını silemez?",
+   "options": [
+    "Dosyalar otomatik şifrelenir",
+    "`/tmp` yalnızca root'a açıktır",
+    "Linux başkasının dosyasına dokunmayı hiçbir zaman engellemez",
+    "Sticky bit: klasörde yalnızca dosyanın sahibi (veya root) silebilir"
+   ],
+   "explain": "Klasörde `w` izni silmeyi de kapsar; sticky bit (`1777`) bunu daraltır ve silme/yeniden adlandırmayı dosya sahibiyle sınırlar."
   }
  },
  "summary": [

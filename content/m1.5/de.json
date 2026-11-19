@@ -359,19 +359,19 @@
   },
   "t11": {
    "text": "Debugging: In deinem Home-Ordner liegt eine Datei `my notes.txt`, und `cat my notes.txt` scheitert. Zeige den Inhalt mit der richtigen Schreibweise an.",
-   "hint": "Setze den Namen in Anführungszeichen: `cat \"my notes.txt\"`."
+   "hint": "Setze den Namen in Anführungszeichen: `cat`."
   },
   "t12": {
    "text": "Mini-Projekt: Erstelle den Ordner `~/projects`, lege darin `a.txt` und `b.txt` mit einem Befehl an und schreibe dann die Ausgabe von `$(whoami)` in `owner.txt`.",
-   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` schreibt die Ausgabe in eine Datei; Modul 3.2)."
+   "hint": "`mkdir`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` schreibt die Ausgabe in eine Datei; Modul 3.2)."
   },
   "t13": {
    "text": "Challenge: Schreibe genau `host: linux-lab user: student` in `~/info.txt`. Erzeuge die Werte mit `$(hostname)` und `$(whoami)`.",
-   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt` (`>` schreibt die Ausgabe in eine Datei; Modul 3.2)."
+   "hint": "`echo` (`>` schreibt die Ausgabe in eine Datei; Modul 3.2)."
   },
   "t14": {
    "text": "Ticket: Das Team möchte die Skripte in `~/tools` per Namen aufrufen. Füge den Ordner in dieser Sitzung zu `PATH` hinzu und hänge die Einstellung ans Ende von `~/.bashrc` an, damit sie dauerhaft gilt.",
-   "hint": "(`>>` hängt an eine Datei an; Modul 3.2) `export PATH=$PATH:~/tools`, dann dieselbe Zeile in einfachen Anführungszeichen mit `>>` an `~/.bashrc` anhängen."
+   "hint": "(`>>` hängt an eine Datei an; Modul 3.2) `export`, dann dieselbe Zeile in einfachen Anführungszeichen mit `>>` an `~/.bashrc` anhängen."
   },
   "t15": {
    "text": "Gib mit `printf` die Zeile `Name: alice` aus; nutze `%s` und `\\n`.",
@@ -553,6 +553,16 @@
     "ln ll ls -l"
    ],
    "explain": "`alias name='befehl'` definiert eine Kurzform; dauerhaft per Eintrag in `~/.bashrc`. `export` ist für Variablen."
+  },
+  "q9": {
+   "q": "Warum läuft `script.sh` im aktuellen Verzeichnis mit `./script.sh`, aber nicht mit `script.sh`?",
+   "options": [
+    "Weil `./` der Datei Ausführrechte gibt",
+    "Weil der Punkt die Datei versteckt",
+    "Die Shell sucht Befehle nur in den `PATH`-Verzeichnissen; das aktuelle Verzeichnis gehört nicht dazu",
+    "Weil `script.sh` ein Shell-Builtin ist"
+   ],
+   "explain": "`./` gibt den Pfad ausdrücklich an; sonst sieht die Shell nur in `PATH` nach. Das Recht dafür kommt separat via `chmod +x`."
   }
  },
  "summary": [

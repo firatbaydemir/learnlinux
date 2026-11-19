@@ -137,7 +137,7 @@
    "hint": "Alt çizgi ile tire farkı; `ls /etc` yardımcı olur."
   },
   "t06": {
-   "text": "Mini proje: dağıtım adı satırını `grep PRETTY_NAME /etc/os-release > ~/vm-summary.txt` ile `~/vm-summary.txt` dosyasına kaydet.",
+   "text": "Mini proje: dağıtım adı satırını `/etc/os-release` içinden `PRETTY_NAME` satırını süz ve `~/vm-summary.txt` dosyasına kaydet.",
    "hint": "`>` çıktıyı dosyaya yazar."
   },
   "t07": {
@@ -371,6 +371,16 @@
     "Şifrelenir"
    ],
    "explain": "Geri dönmek VM'i snapshot anındaki duruma getirir; sonraki değişiklikler kaybolur."
+  },
+  "q9": {
+   "q": "Denemelere başlamadan önce VM'in anlık görüntüsünü (snapshot) almak neden iyi bir alışkanlıktır?",
+   "options": [
+    "Bozarsan tek adımda eski çalışır duruma dönebilirsin",
+    "Snapshot VM'i hızlandırır",
+    "Snapshot olmadan komutlar çalışmaz",
+    "Snapshot ana bilgisayarını korur"
+   ],
+   "explain": "Snapshot, bozulan bir denemeyi geri almanın en ucuz yoludur; öğrenirken hata yapmak serbest olur."
   }
  },
  "summary": [

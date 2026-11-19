@@ -359,19 +359,19 @@
   },
   "t11": {
    "text": "Debug: your home folder contains a file called `my notes.txt`, and `cat my notes.txt` fails. Show the file's content with the correct syntax.",
-   "hint": "Quote the name: `cat \"my notes.txt\"`."
+   "hint": "Quote the name: `cat`."
   },
   "t12": {
    "text": "Mini project: create the folder `~/projects`, create `a.txt` and `b.txt` in it with one command, then write the output of `$(whoami)` into `owner.txt`.",
-   "hint": "`mkdir ~/projects`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` writes output to a file; module 3.2)."
+   "hint": "`mkdir`, `touch ~/projects/{a,b}.txt`, `echo \"$(whoami)\" > ~/projects/owner.txt` (`>` writes output to a file; module 3.2)."
   },
   "t13": {
    "text": "Challenge: write exactly `host: linux-lab user: student` into `~/info.txt`. Produce the values with `$(hostname)` and `$(whoami)`.",
-   "hint": "`echo \"host: $(hostname) user: $(whoami)\" > ~/info.txt` (`>` writes output to a file; module 3.2)."
+   "hint": "`echo` (`>` writes output to a file; module 3.2)."
   },
   "t14": {
    "text": "Ticket: The team wants to call the scripts in `~/tools` by name. Add the folder to `PATH` in this session and append the setting to the end of `~/.bashrc` so it is permanent.",
-   "hint": "(`>>` appends to a file; module 3.2) `export PATH=$PATH:~/tools`, then append the same line with single quotes and `>>` to `~/.bashrc`."
+   "hint": "(`>>` appends to a file; module 3.2) `export`, then append the same line with single quotes and `>>` to `~/.bashrc`."
   },
   "t15": {
    "text": "Print the line `Name: alice` with `printf`; use `%s` and `\\n`.",
@@ -553,6 +553,16 @@
     "ln ll ls -l"
    ],
    "explain": "`alias name='cmd'` defines a shortcut; make it permanent in `~/.bashrc`. `export` is for variables."
+  },
+  "q9": {
+   "q": "Why does `script.sh` in the current directory run as `./script.sh` but not as `script.sh`?",
+   "options": [
+    "`./` grants the file execute permission",
+    "The dot makes the file hidden",
+    "The shell only searches directories listed in `PATH`; the current directory is not one of them",
+    "`script.sh` is a shell builtin"
+   ],
+   "explain": "`./` gives the path explicitly; otherwise the shell only checks `PATH`. Execute permission still needs `chmod +x`."
   }
  },
  "summary": [

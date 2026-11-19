@@ -260,6 +260,16 @@
     "Fehlermeldungen unterdrücken"
    ],
    "explain": "Prüfe Pfad/Wildcard vorher mit `ls`; `rm -rf` fragt nicht nach und ist nicht rückgängig zu machen."
+  },
+  "q9": {
+   "q": "Warum lässt sich eine mit `rm` gelöschte Datei nicht aus dem Papierkorb zurückholen?",
+   "options": [
+    "Weil `rm` die Datei verschlüsselt",
+    "Weil der Papierkorb nur root gehört",
+    "Weil `rm` ein Backup anlegt, aber versteckt",
+    "Auf der Kommandozeile gibt es keinen Papierkorb; `rm` entfernt den Namen direkt, daher vorher prüfen"
+   ],
+   "explain": "`rm` ist nicht umkehrbar; `rm -i` und vorheriges `ls` sind gute Gewohnheiten."
   }
  },
  "summary": [

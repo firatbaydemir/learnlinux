@@ -207,7 +207,7 @@
    "hint": "Für die Zeilenzahl braucht es `-n`."
   },
   "t13": {
-   "text": "Mini-Projekt: Schreibe mit `grep ERROR logs/app.log > errors.txt` alle Fehler in `errors.txt` und zähle sie dann mit `wc -l errors.txt`.",
+   "text": "Mini-Projekt: Schreibe die ERROR-Zeilen aus `logs/app.log` in `errors.txt` und zähle sie dann.",
    "hint": "Es sollten drei ERROR-Zeilen sein."
   },
   "t14": {
@@ -216,7 +216,7 @@
   },
   "t15": {
    "text": "Ticket: 'Wie viele Fehler gibt es auf dem Server, und welche sind die ersten beiden?' Speichere die ersten zwei ERROR-Zeilen in `first_errors.txt` und zeige die Gesamtzahl der ERROR-Zeilen mit `grep -c`.",
-   "hint": "`grep ERROR logs/app.log | head -n 2 > first_errors.txt`, dann `grep -c ERROR logs/app.log`."
+   "hint": "`grep`, `head -n`, dann `grep -c ERROR logs/app.log`."
   }
  },
  "vm": {
@@ -376,6 +376,16 @@
     "Die Position des Wortes ERROR"
    ],
    "explain": "`-c` gibt die Anzahl passender Zeilen aus; die Zeilen selbst sieht man mit `grep` ohne `-c`."
+  },
+  "q9": {
+   "q": "Warum nimmt man bei einer sehr großen Logdatei lieber `less` statt `cat`?",
+   "options": [
+    "`less` löscht die Datei schneller",
+    "`less` zeigt den Inhalt seitenweise; man kann scrollen und suchen, nichts läuft über den Bildschirm",
+    "`cat` kann nur kleine Dateien öffnen",
+    "`less` komprimiert die Datei automatisch"
+   ],
+   "explain": "`cat` gibt alles auf einmal aus; bei großen Dateien geht der Anfang verloren. `less` blättert, scrollt zurück, sucht mit `/` und ändert die Datei nicht."
   }
  },
  "summary": [

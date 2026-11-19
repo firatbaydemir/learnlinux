@@ -207,7 +207,7 @@
    "hint": "The line count needs `-n`."
   },
   "t13": {
-   "text": "Mini project: write all errors to `errors.txt` with `grep ERROR logs/app.log > errors.txt`, then count them with `wc -l errors.txt`.",
+   "text": "Mini project: write the ERROR lines from `logs/app.log` to `errors.txt`, then count them.",
    "hint": "There should be three ERROR lines."
   },
   "t14": {
@@ -216,7 +216,7 @@
   },
   "t15": {
    "text": "Ticket: 'How many errors are on the server, and which are the first two?' Save the first two ERROR lines in `first_errors.txt` and show the total number of ERROR lines with `grep -c`.",
-   "hint": "`grep ERROR logs/app.log | head -n 2 > first_errors.txt`, then `grep -c ERROR logs/app.log`."
+   "hint": "`grep`, `head -n`, then `grep -c ERROR logs/app.log`."
   }
  },
  "vm": {
@@ -376,6 +376,16 @@
     "The position of the word ERROR"
    ],
    "explain": "`-c` prints the count of matching lines; to see the lines use `grep` without `-c`."
+  },
+  "q9": {
+   "q": "Why prefer `less` over `cat` for a very large log file?",
+   "options": [
+    "`less` deletes the file faster",
+    "`less` shows content page by page; you can scroll and search, and nothing floods the screen",
+    "`cat` can only open small files",
+    "`less` compresses the file automatically"
+   ],
+   "explain": "`cat` dumps everything at once, so the start scrolls away on big files. `less` pages, scrolls back, searches with `/` and does not modify the file."
   }
  },
  "summary": [

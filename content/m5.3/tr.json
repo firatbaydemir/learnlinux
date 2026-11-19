@@ -106,7 +106,7 @@
   },
   "t04": {
    "text": "Güvenli kapatma planını `~/lab/term_plan.txt` dosyasına kaydet: PID 2210 için `kill -TERM` kullan.",
-   "hint": "`echo 'kill -TERM 2210' > ~/lab/term_plan.txt` (`>` → modül 3.2.)"
+   "hint": "`echo -TERM` (`>` → modül 3.2.)"
   },
   "t05": {
    "text": "Yedekleme komutunu daha düşük CPU önceliğiyle başlatma örneğini `~/lab/priority_plan.txt` içine yaz.",
@@ -272,6 +272,16 @@
     "`renice -n 5 -p PID`"
    ],
    "explain": "`renice` çalışan sürecin önceliğini değiştirir; `nice` yeni süreç başlatırken kullanılır."
+  },
+  "q9": {
+   "q": "Bir süreci durdururken neden önce `kill -TERM`, yanıt vermezse `kill -KILL` denenir?",
+   "options": [
+    "TERM sürece temizlik ve kaydetme şansı verir; KILL yakalanamaz ve işi yarıda keser",
+    "KILL, TERM'den yavaş olduğu için sona bırakılır",
+    "TERM yalnızca root'a, KILL herkese açıktır",
+    "İkisi arasında hiçbir fark yoktur"
+   ],
+   "explain": "SIGTERM süreç tarafından yakalanıp düzgün kapanışa çevrilebilir. SIGKILL'i çekirdek uygular; süreç yakalayamaz, dolayısıyla kaydedilmemiş veri kaybolabilir. Bu yüzden son çare olarak kalır."
   }
  },
  "summary": [

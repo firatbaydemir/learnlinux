@@ -22,7 +22,8 @@
      "where": "To see which disks belong to a pool.",
      "why": "The PFree column shows free space on the PV.",
      "example": "sudo pvs",
-     "nosim": true
+     "nosim": true,
+     "output": "  PV         VG      Fmt  Attr PSize   PFree\n  /dev/loop0 vg_data lvm2 a--  296.00m 96.00m"
     },
     {
      "cmd": "vgs",
@@ -30,7 +31,8 @@
      "where": "Before extending, to check the pool has room.",
      "why": "If VFree is 0 you must add a PV with vgextend first.",
      "example": "sudo vgs",
-     "nosim": true
+     "nosim": true,
+     "output": "  VG      #PV #LV #SN Attr   VSize   VFree\n  vg_data   1   1   0 wz--n- 296.00m 96.00m"
     },
     {
      "cmd": "lvs",
@@ -38,7 +40,8 @@
      "where": "Which volume is in which VG and how big?",
      "why": "Gives a quick overview.",
      "example": "sudo lvs",
-     "nosim": true
+     "nosim": true,
+     "output": "  LV     VG      Attr       LSize\n  lv_web vg_data -wi-ao---- 200.00m"
     },
     {
      "cmd": "lvdisplay",
@@ -54,7 +57,8 @@
      "where": "Before every LVM operation.",
      "why": "Makes sure you pick the right device.",
      "example": "lsblk -f",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   FSTYPE      FSVER LABEL UUID  MOUNTPOINTS\nloop0  LVM2_member LVM2 001\n└─vg_data-lv_web xfs  1 /mnt/web"
     }
    ],
    "tip": "**Read first, write second**: pvs, vgs, lvs and lsblk -f change nothing; run them before every command that does."
@@ -89,7 +93,8 @@
      "where": "To confirm which loop belongs to which file.",
      "why": "Prevents writing to the wrong device.",
      "example": "losetup -a",
-     "nosim": true
+     "nosim": true,
+     "output": "/dev/loop0: [64769]:131 (/home/user/lvm-lab/disk1.img)"
     },
     {
      "cmd": "losetup -d",
@@ -117,7 +122,8 @@
      "where": "Before adding a disk to a pool.",
      "why": "A VG is built only from PVs.",
      "example": "sudo pvcreate $LOOP1",
-     "nosim": true
+     "nosim": true,
+     "output": "  Physical volume \"/dev/loop0\" successfully created."
     },
     {
      "cmd": "vgcreate",
@@ -125,7 +131,8 @@
      "where": "When building the pool.",
      "why": "Volumes are cut from this pool.",
      "example": "sudo vgcreate vg_data $LOOP1",
-     "nosim": true
+     "nosim": true,
+     "output": "  Volume group \"vg_data\" successfully created"
     },
     {
      "cmd": "lvcreate",
@@ -133,7 +140,8 @@
      "where": "When giving an application its own volume.",
      "why": "-n sets the name, -L the size.",
      "example": "sudo lvcreate -L 200M -n lv_web vg_data",
-     "nosim": true
+     "nosim": true,
+     "output": "  Logical volume \"lv_web\" created."
     },
     {
      "cmd": "mkfs.xfs",
@@ -168,7 +176,8 @@
      "where": "When extending a full volume online.",
      "why": "Removes the risk of forgetting the second step.",
      "example": "sudo lvextend -r -L +100M /dev/vg_data/lv_web",
-     "nosim": true
+     "nosim": true,
+     "output": "  Size of logical volume vg_data/lv_web changed from 200.00 MiB to 300.00 MiB.\n  Logical volume vg_data/lv_web successfully resized."
     },
     {
      "cmd": "xfs_growfs",
@@ -450,6 +459,16 @@
     "Installing on an LV"
    ],
    "explain": "XFS can only grow; to shrink, back up, recreate, restore."
+  },
+  "q9": {
+   "q": "Why does LVM make growing storage easier than plain partitions?",
+   "options": [
+    "LVM automatically makes disks faster",
+    "Partitions can never be grown",
+    "LVM backs up data automatically",
+    "Free space in the VG can be added to an LV while running; you are not tied to partition boundaries"
+   ],
+   "explain": "An LV draws space from the VG pool. With free space or a new PV, `lvextend -r` grows the LV and filesystem together; no need to rewrite the partition table."
   }
  },
  "summary": [

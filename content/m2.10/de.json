@@ -149,7 +149,7 @@
   },
   "t07": {
    "text": "Mini-Projekt: Kopiere die Beispiel-SSH-Konfiguration nach `~/ops/connection-plan.txt` und prüfe die Zeilen `Host linux-lab` und `Port 22`.",
-   "hint": "Kopiere zuerst mit `cp ~/ops/ssh-config.sample ~/ops/connection-plan.txt`, dann lies die Datei mit `cat`."
+   "hint": "Kopiere zuerst mit `cp`, dann lies die Datei mit `cat`."
   },
   "t08": {
    "text": "Challenge: Erstelle eine abzugleichende Kopie des Berichts unter `~/transfer/sync-copy.txt`.",
@@ -307,6 +307,16 @@
     "Öffentlicher Schlüssel (in `~/.ssh/authorized_keys`)"
    ],
    "explain": "Der öffentliche Schlüssel kommt in `authorized_keys` auf dem Server (`ssh-copy-id`); der private wird nie geteilt."
+  },
+  "q9": {
+   "q": "Warum ist ein SSH-Schlüsselpaar sicherer als ein Passwort?",
+   "options": [
+    "Die Schlüsseldatei ist kürzer",
+    "Der private Schlüssel verlässt den Rechner nie; es gibt kein Passwort, das erraten oder abgefangen werden kann",
+    "Mit Schlüssel ist die Verbindung unverschlüsselt",
+    "Der Server prüft den Schlüssel nie"
+   ],
+   "explain": "Auf dem Server liegt nur der öffentliche Schlüssel; der private bleibt bei dir. Passwort-Raten per Brute Force läuft ins Leere. Den privaten Schlüssel nie teilen."
   }
  },
  "summary": [

@@ -40,6 +40,7 @@
      "where": "When reading old compressed logs or searching them with `grep`.",
      "why": "No disk space or extra time spent on unpacking.",
      "example": "zcat logs/app.log.gz | head",
+     "output": "start\nrunning\nstop",
      "nosim": true
     }
    ],
@@ -69,6 +70,7 @@
      "where": "Before extracting, to see the content.",
      "why": "Prevents tar bombs and overwrite surprises.",
      "example": "tar -tf backups/project.tar.gz",
+     "output": "project/\nproject/src/\nproject/src/main.c\nproject/src/util.c\nproject/docs/\nproject/docs/readme.txt\nproject/notes.txt",
      "nosim": true
     },
     {
@@ -201,6 +203,7 @@
      "where": "After copying a backup or before restoring it.",
      "why": "You find a broken backup right away, not in a crisis.",
      "example": "sha256sum -c backups/SHA256SUMS",
+     "output": "backups/project.tar.gz: OK",
      "nosim": true
     },
     {
@@ -224,28 +227,28 @@
  ],
  "tasks": {
   "t01": {
-   "text": "You are in the `lab` directory. Look at the project tree to archive with `ls -R project`.",
-   "hint": "-R is uppercase; it lists subdirectories too."
+   "text": "You are in the `lab` directory. List the project tree to archive, including subdirectories.",
+   "hint": "`ls`; for subdirectories use uppercase `-R`."
   },
   "t02": {
-   "text": "Create the `backups` directory for the backups: `mkdir backups`.",
-   "hint": "Create it inside `lab`."
+   "text": "Create a directory named `backups` for the backups.",
+   "hint": "`mkdir`; create it inside `lab`."
   },
   "t03": {
    "text": "Bundle `project` with gzip into the archive `backups/project.tar.gz` (`tar -czf ...`). The simulator does not run `tar`; the command's correctness is checked.",
    "hint": "Order: `tar -czf <archive> <source>`; the archive name follows `f`."
   },
   "t04": {
-   "text": "List the archive's content without extracting: `tar -tzf backups/project.tar.gz`.",
-   "hint": "`t` = list. `-tf` is accepted too."
+   "text": "List the content of the archive `backups/project.tar.gz` without extracting.",
+   "hint": "`tar` with `-t` (list), `-z` and `-f`; `-tf` is accepted too."
   },
   "t05": {
-   "text": "Create the `restore` directory, then extract the archive there with `-C`: `tar -xzf backups/project.tar.gz -C restore`.",
-   "hint": "`mkdir restore` first; the `-C` target must exist."
+   "text": "Create the `restore` directory, then extract the archive there.",
+   "hint": "`mkdir restore` first; then `tar` with `-x`, `-z`, `-f` and `-C` for the target (it must exist)."
   },
   "t06": {
-   "text": "Compress `logs/app.log` and keep the original: `gzip -k logs/app.log`.",
-   "hint": "`-k` = keep. Without it the original is deleted."
+   "text": "Compress `logs/app.log` and keep the original.",
+   "hint": "`gzip` with `-k` (keep). Without it the original is deleted."
   },
   "t07": {
    "text": "Extract only `project/notes.txt` from the archive into `restore`.",
@@ -269,19 +272,19 @@
   },
   "t12": {
    "text": "Debug: a tar bomb dumped `bomb1.txt`, `bomb2.txt`, `bomb3.txt` into `lab`. Create a directory `cleanup` and move all three there.",
-   "hint": "`mkdir cleanup`, then `mv bomb1.txt bomb2.txt bomb3.txt cleanup/`."
+   "hint": "Create the directory with `mkdir`; `mv` takes several sources and the target directory as the last argument."
   },
   "t13": {
-   "text": "Mini project: create `staging`, copy the `project` tree into it with `cp -r`, check with `ls -R staging`, then bundle `staging` as `staging.tar.gz`.",
-   "hint": "Steps: `mkdir staging`, `cp -r project staging/`, `ls -R staging`, `tar -czf staging.tar.gz staging`."
+   "text": "Mini project: create `staging`, copy the `project` tree into it recursively, check with `ls -R`, then bundle `staging` as `staging.tar.gz`.",
+   "hint": "Steps: `mkdir`, `cp -r`, `ls -R`, `tar -czf` (archive name first, then the directory to pack)."
   },
   "t14": {
-   "text": "Challenge: add `project` recursively to `backups/project.zip` (`zip -r`), list it with `unzip -l`, then create its sum with `sha256sum`. All three in this order.",
-   "hint": "`zip -r backups/project.zip project`, `unzip -l backups/project.zip`, `sha256sum backups/project.zip`."
+   "text": "Challenge: add `project` recursively to `backups/project.zip`, list it with `unzip -l`, then create its sum with `sha256sum`. All three in this order.",
+   "hint": "`zip -r` takes the archive name first, then the directory; `unzip -l` and `sha256sum` read the same zip file."
   },
   "t15": {
    "text": "TICKET #3801 — The auditors want compressed copies of the logs, but the originals in `logs` must stay. Create `audit`, copy `logs/*.log` into it and compress the copies with `gzip`.",
-   "hint": "`mkdir audit`, `cp logs/*.log audit/`, `gzip audit/*.log`; `gzip` only deletes the copies."
+   "hint": "Steps: `mkdir`, `cp` (wildcard `*.log`), `gzip` only on the files inside `audit`; `gzip` deletes the copies, not the originals."
   },
   "t16": {
    "text": "Predict: what does `ls -1 project/src | wc -l` print? Run it to verify.",
@@ -384,9 +387,9 @@
   "q2": {
    "q": "What happens after `gzip notes.txt`?",
    "options": [
-    "Both `notes.txt` and `notes.txt.gz` remain",
-    "A `.zip` file is created",
-    "`notes.txt.gz` is deleted",
+    "Both `notes.txt` and `notes.txt.gz` remain side by side",
+    "A `.zip` file with the same name is created",
+    "`notes.txt.gz` is deleted, only the original stays",
     "`notes.txt` is deleted and replaced by `notes.txt.gz`"
    ],
    "explain": "gzip replaces the original with the compressed file. Use `gzip -k` to keep it."
@@ -395,29 +398,29 @@
    "q": "Why do you list an archive with `tar -tf` before extracting?",
    "options": [
     "To see tar bombs and files that would be overwritten beforehand",
-    "To make extraction faster",
-    "Because `tar -x` does not work without listing",
-    "To compress the archive"
+    "So extraction finishes faster, since the listing builds a cache",
+    "Because `tar -x` does not run at all without listing first",
+    "To recompress the archive and make it smaller"
    ],
    "explain": "Without a top-level directory the files scatter into the current directory, and existing files can be overwritten."
   },
   "q4": {
    "q": "What does `-C restore` do in `tar -xzf backup.tar.gz -C restore`?",
    "options": [
-    "Compresses the archive under the name `restore`",
-    "Excludes files named `restore`",
+    "Recompresses the archive and saves it as `restore`",
+    "Excludes files named `restore` and extracts the rest",
     "Changes into `restore` before extracting and extracts there",
-    "Checks the archive's checksum"
+    "Checks the archive's checksum without extracting anything"
    ],
    "explain": "`-C` (change directory) sets the target directory; it must exist beforehand."
   },
   "q5": {
    "q": "What do `c`, `z`, `f` mean in `tar -czf out.tar.gz dir`?",
    "options": [
-    "extract, zip, filter",
+    "extract, zip compression, apply a filter",
     "create, gzip compression, file name",
-    "check, zero, force",
-    "copy, zip, format"
+    "check, reset, force it",
+    "copy, zip compression, format"
    ],
    "explain": "`c` is create, `z` is gzip, `f` introduces the archive file name."
   },
@@ -445,11 +448,21 @@
    "q": "Why is `-r` needed in `zip -r out.zip dir`?",
    "options": [
     "Adds the directory contents including subdirectories",
-    "Encrypts the archive",
-    "Deletes the original files",
-    "Increases compression"
+    "Encrypts the archive with a password",
+    "Deletes the archived original files from disk",
+    "Increases the compression ratio and shrinks the file"
    ],
    "explain": "Without `-r` zip adds only the directory entry itself, not its contents."
+  },
+  "q9": {
+   "q": "Why does re-compressing already compressed `.jpg` or `.zip` files with `gzip` save almost no space?",
+   "options": [
+    "`gzip` can only open text files",
+    "Compressed data has few repeating patterns left; the extra gain is tiny",
+    "`gzip` deletes these files",
+    "A second compression automatically enlarges the file"
+   ],
+   "explain": "Compression shortens repeating patterns. Already compressed data looks nearly random, so a second pass gains almost nothing."
   }
  },
  "summary": [

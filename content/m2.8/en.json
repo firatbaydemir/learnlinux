@@ -163,11 +163,11 @@
   },
   "t11": {
    "text": "The disk is bloating. Look with `ls -l ~/logs`; the old debug log `old_debug.log` is useless, delete it but do not touch `app.log`.",
-   "hint": "`rm ~/logs/old_debug.log`. Check the exact name with ls before deleting."
+   "hint": "`rm`. Check the exact name with ls before deleting."
   },
   "t12": {
    "text": "Mini project: build the report `~/health.txt`. It should contain, in order, the heading `== disk ==`, the `df -h` output, the heading `== memory ==` and the `free -h` output.",
-   "hint": "First line `echo \"== disk ==\" > ~/health.txt`, the rest with `>>`. (Details on `>` / `>>` in module 3.2.)"
+   "hint": "First line `echo`, the rest with `>>`. (Details on `>` / `>>` in module 3.2.)"
   },
   "t13": {
    "text": "Challenge: from `~/reports/df_sample.txt` write only the 95% line to `~/alert.txt` and the number of such lines to `~/alert_count.txt`.",
@@ -175,7 +175,7 @@
   },
   "t14": {
    "text": "Ticket: \"The application throws 'No space left on device'.\" Find the full mount point in `~/reports/df_sample.txt` and write its name to `~/full_mount.txt`. Also delete the useless `~/logs/core.dump`.",
-   "hint": "The full one is the 95% line. The mount point is `/var`: `echo /var > ~/full_mount.txt`. (Details on `>` in module 3.2.)"
+   "hint": "The full one is the 95% line. The mount point is `/var`: `echo`. (Details on `>` in module 3.2.)"
   }
  },
  "vm": {
@@ -334,6 +334,16 @@
     "The network goes down"
    ],
    "explain": "A full filesystem cannot take new data; services and logs may fail. Use `du` to find what takes space."
+  },
+  "q9": {
+   "q": "`df -h` shows the partition as full, but `du` counts less used space. What is a plausible reason?",
+   "options": [
+    "df is broken",
+    "Deleted files still held open by a process keep using space",
+    "du cannot count hidden files",
+    "The disk grows by itself"
+   ],
+   "explain": "`df` measures at filesystem level, `du` the visible files. The space of a deleted but still-open file is only freed when the process ends."
   }
  },
  "summary": [

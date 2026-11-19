@@ -23,6 +23,7 @@
      "where": "Yapılandırma dosyasının iki sürümünü karşılaştırırken.",
      "why": "Neyin değiştiğini tüm dosyayı okumadan görürsün.",
      "example": "diff v1.txt v2.txt",
+     "output": "1c1\n< port=80\n---\n> port=8080\n3a4\n> debug=on",
      "nosim": true
     },
     {
@@ -31,6 +32,7 @@
      "where": "Değişikliği paylaşırken, kod incelemede, yama üretirken.",
      "why": "Bağlam satırları sayesinde değişikliğin nerede olduğu net olur.",
      "example": "diff -u v1.txt v2.txt",
+     "output": "--- v1.txt\t2024-01-10 09:00:00.000000000 +0000\n+++ v2.txt\t2024-01-10 09:05:00.000000000 +0000\n@@ -1,3 +1,4 @@\n-port=80\n+port=8080\n host=linux-lab\n mode=prod\n+debug=on",
      "nosim": true
     },
     {
@@ -39,6 +41,7 @@
      "where": "Aynı mı değil mi sorusu yeterliyken; betiklerde.",
      "why": "Uzun fark çıktısı üretmez, çıkış kodu yine 0/1 olur.",
      "example": "diff -q v1.txt v2.txt",
+     "output": "Files v1.txt and v2.txt differ",
      "nosim": true
     },
     {
@@ -75,6 +78,7 @@
      "where": "Proje klasörünün iki sürümünü veya yedeği kıyaslarken.",
      "why": "Eksik, fazla ve değişmiş dosyaları tek seferde görürsün.",
      "example": "diff -r dir_a dir_b",
+     "output": "diff -r dir_a/app.conf dir_b/app.conf\n1c1\n< level=1\n---\n> level=2\nOnly in dir_b: extra.txt\nOnly in dir_a: readme.txt",
      "nosim": true
     },
     {
@@ -83,6 +87,7 @@
      "where": "Yedek doğrularken, büyük ağaçlarda.",
      "why": "Kısa özet verir; ayrıntıya sonra tek dosya için bakarsın.",
      "example": "diff -rq dir_a dir_b",
+     "output": "Files dir_a/app.conf and dir_b/app.conf differ\nOnly in dir_b: extra.txt\nOnly in dir_a: readme.txt",
      "nosim": true
     },
     {
@@ -110,6 +115,7 @@
      "where": "İkili dosyalarda ve kopya doğrulamada.",
      "why": "Metin olmayan dosyalarda da kesin sonuç verir.",
      "example": "cmp v1.txt v2.txt",
+     "output": "v1.txt v2.txt differ: byte 8, line 1",
      "nosim": true
     },
     {
@@ -154,6 +160,7 @@
      "where": "Kullanıcı, paket veya IP listelerini kıyaslarken.",
      "why": "Ortak ve tekil satırları tek komutta ayırır.",
      "example": "comm list_a.txt sorted_b.txt",
+     "output": "alice\n\t\tbob\n\t\tcarol\ndave\n\terin",
      "nosim": true
     },
     {
@@ -162,6 +169,7 @@
      "where": "Kesişim gerektiğinde.",
      "why": "1. ve 2. sütunları gizler, ortak olan kalır.",
      "example": "comm -12 list_a.txt sorted_b.txt",
+     "output": "bob\ncarol",
      "nosim": true
     },
     {
@@ -170,6 +178,7 @@
      "where": "'Bende var, sende yok' sorgusunda.",
      "why": "Eksik veya fazla kayıtları bulur.",
      "example": "comm -23 list_a.txt sorted_b.txt",
+     "output": "alice\ndave",
      "nosim": true
     },
     {
@@ -212,6 +221,7 @@
      "where": "Aldığın yamayı kopyana işlerken.",
      "why": "Dosyanın tamamını değiştirmeden yalnızca farkı uygular.",
      "example": "patch work.txt < change.patch",
+     "output": "patching file work.txt",
      "nosim": true
     },
     {
@@ -220,6 +230,7 @@
      "where": "Önemli bir dosyada yama uygulamadan önce.",
      "why": "Uyumsuzluğu değişiklik yapmadan yakalarsın.",
      "example": "patch --dry-run work.txt < change.patch",
+     "output": "checking file work.txt",
      "nosim": true
     },
     {
@@ -228,6 +239,7 @@
      "where": "Uygulanan yama sorun çıkardığında.",
      "why": "Dosyayı yama öncesi hâline getirir.",
      "example": "patch -R work.txt < change.patch",
+     "output": "patching file work.txt",
      "nosim": true
     }
    ],
@@ -238,32 +250,32 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`v1.txt` ve `v2.txt` dosyalarını `diff v1.txt v2.txt` ile karşılaştır.",
-   "hint": "Simülatörde diff yoktur; komutu yazman yeterli, gerçek çıktıyı VM'inde göreceksin."
+   "text": "`v1.txt` ve `v2.txt` dosyalarını satır satır karşılaştır.",
+   "hint": "Karşılaştırma komutu `diff`tir; iki dosya adını sırayla ver. Simülatörde diff yoktur; komutu yazman yeterli, gerçek çıktıyı VM'inde göreceksin."
   },
   "t02": {
-   "text": "Aynı iki dosyayı unified biçimde karşılaştır: `diff -u v1.txt v2.txt`.",
-   "hint": "`-u` unified demektir; çıktıda `@@` blokları olur."
+   "text": "Aynı iki dosyayı unified (birleşik) biçimde karşılaştır.",
+   "hint": "`diff`e unified biçimi isteyen `-u` bayrağını ekle; çıktıda `@@` blokları olur."
   },
   "t03": {
-   "text": "`cmp v1.txt v2.txt` ile bayt bayt karşılaştır.",
-   "hint": "cmp ilk farkın bayt ve satır numarasını yazar."
+   "text": "`v1.txt` ve `v2.txt` dosyalarını bayt bayt karşılaştır.",
+   "hint": "`cmp` iki dosya adı alır; ilk farkın bayt ve satır numarasını yazar."
   },
   "t04": {
-   "text": "`v1.txt` dosyasını `cp v1.txt v1.bak` ile kopyala, sonra `diff -q v1.txt v1.bak` ile aynı olduklarını doğrula.",
-   "hint": "Aynıysa `diff -q` hiçbir şey yazmaz ve çıkış kodu 0'dır."
+   "text": "`v1.txt` dosyasını `v1.bak` adıyla kopyala, sonra iki dosyanın aynı olduğunu `diff` ile sessiz modda doğrula.",
+   "hint": "Önce `cp`; sonra `diff`e `-q` bayrağını ver. Aynıysa hiçbir şey yazmaz ve çıkış kodu 0'dır."
   },
   "t05": {
-   "text": "`dir_a` ve `dir_b` dizinlerini `diff -rq dir_a dir_b` ile karşılaştır.",
-   "hint": "`-r` özyinelemeli, `-q` kısa özet. `-r dir_a dir_b` de kabul edilir."
+   "text": "`dir_a` ve `dir_b` dizinlerini özyinelemeli karşılaştır ve yalnızca kısa özeti göster.",
+   "hint": "`diff` ile `-r` (özyinelemeli) ve `-q` (kısa özet) bayrakları birleştirilir; ardından iki dizin adı gelir."
   },
   "t06": {
-   "text": "`list_b.txt` sıralı değil. `comm` için `sort list_b.txt > sorted_b.txt` ile sıralı kopyasını oluştur.",
-   "hint": "Yönlendirme `>` sıralı çıktıyı yeni dosyaya yazar."
+   "text": "`list_b.txt` sıralı değil. `comm` için sıralı kopyasını `sorted_b.txt` adıyla oluştur.",
+   "hint": "`sort` sonucu ekrana yazar; `>` yönlendirmesi çıktıyı yeni dosyaya aktarır."
   },
   "t07": {
-   "text": "`comm -12 list_a.txt sorted_b.txt` ile iki listede ortak olan satırları iste.",
-   "hint": "`-12` birinci ve ikinci sütunu gizler; ortak sütun kalır."
+   "text": "`list_a.txt` ile `sorted_b.txt` dosyalarında ortak olan satırları göster.",
+   "hint": "`comm` üç sütun verir (yalnız 1., yalnız 2., ortak); `-1` ve `-2` ile ilk iki sütunu gizle. İki dosya da sıralı olmalı."
   },
   "t08": {
    "text": "Tahmin et, sonra çalıştır: `sort list_a.txt list_b.txt | uniq -d`. Hangi isimler çıkar?",
@@ -278,20 +290,20 @@
    "hint": "`grep -q` bulursa 0, bulamazsa 1 verir; `v1.txt` içinde debug yok."
   },
   "t11": {
-   "text": "Hata ayıkla: `win.txt` her satırda farklı görünüyor çünkü Windows satır sonu (`\\r`) taşıyor. `tr -d '\\r' < win.txt > fixed.txt` ile temiz kopya üret.",
+   "text": "Hata ayıkla: `win.txt` her satırda farklı görünüyor çünkü Windows satır sonu (`\\r`) taşıyor. Temiz kopyayı `fixed.txt` olarak üret.",
    "hint": "`tr -d` verilen karakteri siler; girdi `<`, çıktı `>` ile yönlendirilir."
   },
   "t12": {
-   "text": "Mini proje: `cp v1.txt work.txt` ile kopya yap, `diff -u v1.txt v2.txt > change.patch` ile yama üret, sonra `patch work.txt < change.patch` ile uygula.",
-   "hint": "Üç komut sırayla yazılmalı; diff ve patch simülatörde çalışmaz, VM'inde dene."
+   "text": "Mini proje: `v1.txt` dosyasını `work.txt` olarak kopyala, `v1.txt` ile `v2.txt` farkını unified biçimde `change.patch` dosyasına yaz, sonra bu yamayı `work.txt` üzerine uygula.",
+   "hint": "Sıra: `cp`, `diff -u` (çıktıyı `>` ile yönlendir), `patch` (yama dosyası `<` ile girdi olur). diff ve patch simülatörde çalışmaz, VM'inde dene."
   },
   "t13": {
    "text": "Meydan okuma: yalnızca `list_a.txt` içinde olan isimleri (`list_b.txt`'de olmayanları) `only_a.txt` dosyasına yaz. `comm` kullanma; ipucu: `list_b.txt`'yi iki kez ver.",
-   "hint": "`sort list_a.txt list_b.txt list_b.txt | uniq -u > only_a.txt`: b'dekiler en az iki kez geçer, a'ya özgüler bir kez."
+   "hint": "Üç dosya adını birlikte `sort`a ver, `uniq -u` ile bir kez geçenleri al, `>` ile yaz. b'dekiler en az iki kez geçer, a'ya özgüler bir kez."
   },
   "t14": {
-   "text": "`cp v1.txt same.txt` ile kopya yap, `cmp -s v1.txt same.txt` çalıştır ve hemen ardından `echo $?` yaz.",
-   "hint": "Tek satırda `cmp -s v1.txt same.txt ; echo $?` da olur."
+   "text": "`v1.txt` dosyasını `same.txt` olarak kopyala, `cmp`yi sessiz modda çalıştır ve hemen ardından çıkış kodunu yazdır.",
+   "hint": "`cmp -s` çıktı vermez, yalnız çıkış kodu bırakır; çıkış kodu `$?` ile okunur. Tek satırda `;` ile de yazılabilir."
   },
   "t15": {
    "text": "Tahmin et, sonra çalıştır: `cut -d= -f1 v1.txt`. Hangi anahtarlar listelenir?",
@@ -326,10 +338,10 @@
   "q3": {
    "q": "Unified diff çıktısında `+` ile başlayan satır ne anlama gelir?",
    "options": [
-    "Satır yalnızca eski dosyada vardı",
-    "Satır bir yorumdur",
+    "Satır yalnızca eski dosyada vardı, yenisinde yok",
+    "Satır bir yorum satırıdır, içeriği değişmemiştir",
     "Satır yalnızca yeni dosyada var (eklendi)",
-    "Satır başka yere taşındı"
+    "Satır dosyada başka bir yere taşınmıştır"
    ],
    "explain": "`-` eski dosyadan silinen, `+` yeni dosyaya eklenen satırdır; boşlukla başlayanlar bağlamdır."
   },
@@ -346,29 +358,29 @@
   "q5": {
    "q": "`cmp a b` dosyalar farklıysa ne bildirir?",
    "options": [
-    "Tüm farkları satır satır",
-    "Yalnızca ortak satırları",
+    "İki dosyanın tüm farklarını satır satır",
+    "Yalnızca iki dosyanın ortak satırlarını",
     "İlk farkın bayt ve satır konumunu",
-    "Birleştirilmiş yamayı"
+    "Hazır birleştirilmiş bir yama dosyasını"
    ],
    "explain": "`cmp` bayt bayt karşılaştırır ve ilk farkı bildirip durur; ikili dosyalar için uygundur."
   },
   "q6": {
    "q": "`diff -r dir_a dir_b` ne yapar?",
    "options": [
-    "Yalnızca dosya adlarını sıralar",
+    "Yalnızca iki dizindeki dosya adlarını sıralar",
     "İki dizin ağacını alt dizinler dahil karşılaştırır",
-    "Farkları tersine çevirir",
-    "Dizinleri birleştirir"
+    "İki dizin arasındaki farkları tersine çevirir",
+    "İki dizinin içeriğini tek dizinde birleştirir"
    ],
    "explain": "`-r` (recursive) alt dizinlere de iner; yalnızca birinde olan dosyalar `Only in ...` ile görünür."
   },
   "q7": {
    "q": "`comm -12 a b` ne gösterir (girdiler sıralı)?",
    "options": [
-    "Yalnızca a'daki satırları",
-    "Yalnızca b'deki satırları",
-    "İki dosyanın tüm satırlarını",
+    "Yalnızca birinci dosyadaki (a) satırları",
+    "Yalnızca ikinci dosyadaki (b) satırları",
+    "İki dosyadaki tüm satırları tek listede",
     "Her iki dosyada ortak olan satırları"
    ],
    "explain": "`-1` ve `-2` yalnızca-a ve yalnızca-b sütunlarını gizler; geriye ortak satırlar (3. sütun) kalır."
@@ -376,12 +388,22 @@
   "q8": {
    "q": "`patch -p1 < fix.diff` içindeki `-p1` ne yapar?",
    "options": [
-    "Yamadaki dosya yollarının ilk dizin bileşenini atar",
-    "Yamayı geri alır",
-    "Önce yedek alır",
-    "Yalnızca 1. parçayı uygular"
+    "Yamadaki yolların ilk dizin bileşenini atar",
+    "Daha önce uygulanmış yamayı geri alır",
+    "Uygulamadan önce dosyaların yedeğini alır",
+    "Yamanın yalnızca ilk parçasını (hunk) uygular"
    ],
    "explain": "`-pN` yoldaki ilk N bileşeni siler; `a/src/x.c` gibi önekleri hedef ağaca uydurur."
+  },
+  "q9": {
+   "q": "Bir yapılandırma dosyasını değiştirmeden önce yedeğini alıp sonra `diff` ile karşılaştırmak neden iyi bir alışkanlıktır?",
+   "options": [
+    "`diff` dosyayı otomatik eski haline getirir",
+    "Yedek varsa dosya bozulmaz",
+    "Tam olarak neyin değiştiğini görürsün; istenmeyen değişikliği geri almak kolaylaşır",
+    "`diff` yedeği sıkıştırarak yer kazandırır"
+   ],
+   "explain": "`diff` iki sürüm arasındaki farkı satır satır gösterir. Yedek ve fark listesi, hatalı bir değişikliği bulmayı ve geri almayı kolaylaştırır."
   }
  },
  "summary": [

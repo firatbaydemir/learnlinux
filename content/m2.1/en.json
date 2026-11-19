@@ -196,7 +196,7 @@
    "hint": "`grep PRETTY_NAME /etc/os-release >> ~/idcard.txt` appends the distribution line. (`>` writes, `>>` appends: module 3.2; `grep`: module 3.4.)"
   },
   "t14": {
-   "text": "Challenge: you do not know the path of `sshd_config`. Search for it by name under `/etc`: `find /etc -name sshd_config`.",
+   "text": "Challenge: you do not know the path of `sshd_config`. Search for it by name under `/etc`.",
    "hint": "`-name` expects the file name; the path turns out to be under `/etc/ssh/`."
   },
   "t15": {
@@ -387,6 +387,16 @@
     "/boot"
    ],
    "explain": "`/tmp` is for temporary files; don't keep important data there. Config lives in `/etc`, programs in `/usr`."
+  },
+  "q9": {
+   "q": "Which commands change directory, print file contents and list a directory (in that order)?",
+   "options": [
+    "`cd`, `cat`, `ls`",
+    "`ls`, `cd`, `cat`",
+    "`cat`, `ls`, `cd`",
+    "`pwd`, `cat`, `ls`"
+   ],
+   "explain": "`cd` changes directory, `cat` prints file contents, `ls` lists a directory; `pwd` only shows where you are."
   }
  },
  "summary": [

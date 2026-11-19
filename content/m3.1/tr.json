@@ -128,39 +128,39 @@
  ],
  "tasks": {
   "t01": {
-   "text": "`echo hello` ile ekrana (stdout) bir metin yaz.",
-   "hint": "Çıktı doğrudan ekranda görünür."
+   "text": "Ekrana (stdout) `hello` metnini yazdır.",
+   "hint": "Metni stdout'a `echo` yazar. Çıktı doğrudan ekranda görünür."
   },
   "t02": {
-   "text": "`cat lab/names.txt` ile dosyanın içeriğini stdout'a yazdır.",
-   "hint": "Üç isim görmelisin."
+   "text": "`lab/names.txt` dosyasının içeriğini stdout'a yazdır.",
+   "hint": "Dosya içeriğini `cat` yazdırır. Üç isim görmelisin."
   },
   "t03": {
    "text": "Olmayan `lab/missing.txt` yolunu `ls` ile listele ve hata mesajını oku.",
    "hint": "Bu mesaj stderr'dendir."
   },
   "t04": {
-   "text": "`echo hello > out.txt` ile metni `out.txt` dosyasına yaz.",
-   "hint": "Ekranda çıktı görmezsin; `cat out.txt` ile kontrol et."
+   "text": "`hello` metnini ekrana değil, `out.txt` dosyasına yaz.",
+   "hint": "`echo` ile `>` yönlendirmesini birleştir. Ekranda çıktı görmezsin; `cat out.txt` ile kontrol et."
   },
   "t05": {
-   "text": "`echo world >> out.txt` ile aynı dosyaya ikinci bir satır ekle.",
+   "text": "`out.txt` dosyasını ezmeden ikinci satır olarak `world` ekle.",
    "hint": "`>>` ekler, `>` ezer."
   },
   "t06": {
-   "text": "`ls lab/missing.txt 2> errors.txt` ile hatayı `errors.txt` dosyasına al.",
-   "hint": "Hata artık ekranda görünmez."
+   "text": "`lab/missing.txt` yolunu `ls` ile listele, ama hata mesajını `errors.txt` dosyasına al.",
+   "hint": "Hata stderr'dir (kanal 2): `2>` kullan. Hata artık ekranda görünmez."
   },
   "t07": {
-   "text": "`cat < lab/names.txt` ile dosyayı stdin olarak ver.",
+   "text": "`lab/names.txt` dosyasını `cat`'e argüman olarak değil, stdin olarak ver.",
    "hint": "`<` dosyadan girdi okutur."
   },
   "t08": {
-   "text": "Tahmin et: `ls lab/missing.txt > result.txt` çalışınca hata ekranda görünür mü? `result.txt` dolu mu olur? Çalıştırıp doğrula.",
+   "text": "Tahmin et: `ls lab/missing.txt` çıktısını `>` ile `result.txt` dosyasına yönlendirirsen hata ekranda görünür mü? `result.txt` dolu mu olur? Çalıştırıp doğrula.",
    "hint": "`>` yalnızca stdout'u yönlendirir; hata stderr'dedir."
   },
   "t09": {
-   "text": "Tahmin et: `cat lab/names.txt | wc -l` ne yazdırır? Çalıştırarak doğrula.",
+   "text": "Tahmin et: `lab/names.txt` içeriğini `cat` ile okuyup `|` ile `wc -l`'ye verirsen ne yazdırır? Çalıştırarak doğrula.",
    "hint": "`wc -l` satır sayar; dosyada kaç satır var? (`|` çıktıyı sonraki komuta verir; modül 3.2. `wc`: modül 3.5.)"
   },
   "t10": {
@@ -168,7 +168,7 @@
    "hint": "Komutun sonuna `2>&1` ekle."
   },
   "t11": {
-   "text": "Mini proje: `build.log` oluştur. 1) `echo start > build.log` 2) `ls lab >> build.log` 3) `ls nothing 2>> build.log`. Dosyada 3 satır olmalı.",
+   "text": "Mini proje: `build.log` oluştur. 1) İçine `start` yaz 2) `lab` listesini ekle 3) `nothing` listesinin hatasını ekle. Dosyada 3 satır olmalı.",
    "hint": "İlk komut `>`, diğerleri `>>` ve `2>>` kullanır."
   },
   "t12": {
@@ -305,6 +305,16 @@
     "`cmd 2> /dev/null`"
    ],
    "explain": "`2> /dev/null` yalnızca stderr'i atar; `> /dev/null` normal çıktıyı atar. `/dev/null`'a boru kurulmaz."
+  },
+  "q9": {
+   "q": "`komut > dosya` yazdığında hata mesajları neden yine ekranda görünür?",
+   "options": [
+    "`>` yalnızca stdout'u (1) yakalar; hatalar stderr (2) kanalından akar",
+    "Hatalar her zaman ekrana yazılmak zorundadır",
+    "Dosyaya yazma izni olmadığı için",
+    "`>` hataları kopyalar ama dosyaya eklemez"
+   ],
+   "explain": "`>` varsayılan olarak 1 numaralı kanalı (stdout) yönlendirir. Hatalar 2 numaralı kanaldan gider; onları almak için `2>` gerekir."
   }
  },
  "summary": [

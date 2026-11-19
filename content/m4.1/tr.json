@@ -197,7 +197,7 @@
   },
   "t13": {
    "text": "Mini proje: `/etc/passwd` içinde kabuğu `/bin/bash` ile biten hesapların adlarını `~/shell_users.txt` dosyasına yaz.",
-   "hint": "`grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt`; `$` satır sonunu temsil eder. (`grep`, `cut` → modül 3.4/3.5; `>` → 3.2.)"
+   "hint": "`grep`, `cut`; `$` satır sonunu temsil eder. (`grep`, `cut` → modül 3.4/3.5; `>` → 3.2.)"
   },
   "t14": {
    "text": "Meydan okuma: `~/me.txt` dosyasına önce kullanıcı adını (`whoami`), ardından `id` çıktısını ekle. Dosyada `student`, `uid=1000` ve `wheel` görünmeli.",
@@ -209,7 +209,7 @@
   },
   "t16": {
    "text": "TICKET #4107: Denetçi `alice` hesabının UID'sini ve gruplarını istiyor. Bilgiyi `~/alice_info.txt` dosyasına kaydet.",
-   "hint": "`id alice > ~/alice_info.txt`; çıktıda `uid=1001` ve `devs` olmalı. (`>` ve `>>` → modül 3.2.)"
+   "hint": "`id`; çıktıda `uid=1001` ve `devs` olmalı. (`>` ve `>>` → modül 3.2.)"
   }
  },
  "vm": {
@@ -336,8 +336,8 @@
    "q": "Betiklerde neden `getent passwd` tercih edilir?",
    "options": [
     "Yerel dosyanın yanında LDAP/SSSD kullanıcılarını da bulur",
-    "Her zaman daha hızlıdır",
-    "Parolaları gösterir",
+    "Her zaman daha hızlıdır, çünkü ağa hiç gitmez",
+    "Yalnızca root için çalışır, kullanıcıları hiç listelemez",
     "Hiçbir izin gerektirmez ve parola gösterir"
    ],
    "explain": "getent, NSS üzerinden tüm kaynakları sorgular; merkezi dizindeki kullanıcıları da döndürür."
@@ -347,18 +347,18 @@
    "options": [
     "UID değerini",
     "Kullanıcının üyesi olduğu grupların adlarını",
-    "Son girişleri",
-    "Oturum açmış kullanıcıları"
+    "Kullanıcının en son oturum açma kayıtlarını",
+    "Şu an sistemde oturum açmış tüm kullanıcıları"
    ],
    "explain": "`-G` tüm grupları, `-n` sayı yerine adları yazar."
   },
   "q6": {
    "q": "`w` komutu `who`'ya ek olarak ne gösterir?",
    "options": [
-    "Parola özetlerini",
-    "Başarısız girişleri",
+    "Kullanıcıların parola özetlerini (hash)",
+    "Başarısız giriş denemelerinin kayıtlarını",
     "Oturumların o an çalıştırdığı komutu ve yük bilgisini",
-    "Grup üyeliklerini"
+    "Kullanıcıların grup üyeliklerinin tam listesini"
    ],
    "explain": "`w` her oturumun çalıştırdığı komutu, boşta kalma süresini ve load average'ı da verir."
   },
@@ -375,12 +375,22 @@
   "q8": {
    "q": "`/etc/shadow`'da parola alanı `!` ile başlıyorsa ne anlama gelir?",
    "options": [
-    "Parola süresi dolmuş",
-    "Hesap silinmiş",
-    "Parola boş",
+    "Parolanın süresi dolmuş, yenisi istenecek",
+    "Hesap sistemden tamamen silinmiş",
+    "Parola alanı boş, parolasız girilebilir",
     "Parola ile giriş kilitli"
    ],
    "explain": "`!` (veya `*`) geçerli bir parola özeti olmadığını gösterir; parola ile giriş yapılamaz."
+  },
+  "q9": {
+   "q": "Servis hesaplarının (ör. `daemon`) kabuğu neden `/sbin/nologin` yapılır?",
+   "options": [
+    "Servisin hızlı çalışması için",
+    "Hesapla etkileşimli giriş yapılamaz; ele geçirilse bile kabuk açılamaz",
+    "Servisin dosya okumasını engellemek için",
+    "Parola özetini gizlemek için"
+   ],
+   "explain": "Servis hesapları süreçleri çalıştırmak içindir, insan girişi için değil. `nologin` kabuğu etkileşimli oturumu reddeder ve saldırı yüzeyini küçültür; servis yine kendi işini yapar."
   }
  },
  "summary": [

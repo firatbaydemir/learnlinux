@@ -213,7 +213,7 @@
   },
   "t10": {
    "text": "Debug: vim warnt wegen einer übrig gebliebenen Swap-Datei `.todo.txt.swp` im Home-Verzeichnis. Niemand bearbeitet die Datei; lösche die Swap-Datei.",
-   "hint": "Versteckte Datei: `rm .todo.txt.swp`; mit `ls -a` sichtbar."
+   "hint": "Versteckte Datei: `rm`; mit `ls -a` sichtbar."
   },
   "t11": {
    "text": "Mini-Projekt: Lege den Ordner `scripts` an, schreibe in `scripts/hello.sh` die Zeilen `#!/bin/bash` und `echo hello` (mit `printf` und `\\n`) und setze den Modus 755.",
@@ -312,6 +312,16 @@
     "/wort"
    ],
    "explain": "`/wort` sucht vorwärts, `n` springt zum nächsten Treffer; `?wort` sucht rückwärts."
+  },
+  "q9": {
+   "q": "Warum drückt man in vim `Esc`, bevor man die Datei speichert?",
+   "options": [
+    "Esc speichert die Datei automatisch",
+    "Um Befehle einzugeben, muss man vom Einfügemodus in den Normalmodus zurück",
+    "Esc beendet vim",
+    "Esc löscht nur die Zeile"
+   ],
+   "explain": "vim ist modal: Im Einfügemodus landet jede Eingabe im Text. Befehle wie `:w` funktionieren im Normalmodus, daher zuerst Esc."
   }
  },
  "summary": [

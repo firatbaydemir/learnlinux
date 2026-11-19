@@ -501,10 +501,10 @@
   "q1": {
    "q": "Rocky Linux'ta mod 755 olmasına rağmen nginx /srv/company/web içindeki dosyalar için 403 veriyor. En olası neden nedir?",
    "options": [
-    "nginx kurulu değil",
+    "nginx paketi sunucuda hiç kurulu değil, bu yüzden hata var",
     "Dosyalar yanlış SELinux etiketi taşıyor (httpd_sys_content_t değil)",
-    "80 portu güvenlik duvarında kapalı",
-    "staff grubu eksik"
+    "80 numaralı port güvenlik duvarında kapalı kalmış olabilir",
+    "Çalıştıran kullanıcı staff grubuna hiç eklenmemiş"
    ],
    "explain": "Kapalı port 403 değil zaman aşımı verir. /srv altındaki genel etiket nginx'i engeller; setenforce 0 ile değil semanage fcontext ve restorecon ile düzelt."
   },
@@ -514,15 +514,15 @@
     "Önce ufw enable, sonra kural ekle",
     "Sunucuyu yeniden başlat ve umut et",
     "Önce ufw allow OpenSSH, sonra ufw enable",
-    "SSH'i kapat ve konsolu kullan"
+    "SSH'i kapatıp yalnızca sunucu konsolundan çalışmak"
    ],
    "explain": "ufw kuralları hemen etkin olur. İzinli bir SSH kuralı olmadan güvenlik duvarını açmak oturumunu keser."
   },
   "q3": {
    "q": "Ortak dizine neden 2770 modu (setgid) verilir?",
    "options": [
-    "Yeni dosyalar staff grubunu devralır, ekip birbirinin dosyalarında çalışabilir",
-    "Herkes dosyaları okuyabilir",
+    "Yeni dosyalar staff grubunu devralır",
+    "Herkes dosyaları okuyabilir ve değiştirebilir",
     "Dosyalar şifrelenir",
     "Yalnızca root yazabilir"
    ],
@@ -531,9 +531,9 @@
   "q4": {
    "q": "company-backup.service ve company-backup.timer dosyalarını oluşturdun. Gece yedeğinin çalışması için ne yapmalısın?",
    "options": [
-    "Yeniden başlat, başka bir şey yapma",
-    "Birim dosyalarına chmod 777",
-    "Hiçbir şey, systemd kendiliğinden bulur",
+    "Sunucuyu yeniden başlat; systemd dosyaları kendiliğinden bulur",
+    "Birim dosyalarına chmod 777 verip systemd'nin okumasını beklemek",
+    "Hiçbir şey yapmamak; systemd yeni dosyaları kendiliğinden bulur",
     "systemctl daemon-reload, sonra systemctl enable --now company-backup.timer"
    ],
    "explain": "systemd birim dosyalarını yeniden okumalı (daemon-reload) ve zamanlayıcı birimi etkinleştirilip başlatılmalı; servisi zamanlayıcı başlatır."
@@ -541,10 +541,10 @@
   "q5": {
    "q": "Rocky'de `/srv/company/web` için kalıcı SELinux etiketi nasıl verilir?",
    "options": [
-    "`chcon` yeterlidir ve kalıcıdır",
-    "`setenforce 0`",
+    "`chcon` yeterlidir ve yeniden etiketlemeden sonra da kalıcıdır",
+    "`setenforce 0` ile SELinux'u kalıcı olarak kapatmak",
     "`semanage fcontext` + `restorecon`",
-    "`chmod 755`"
+    "Dizine `chmod 755` verip etiketi olduğu gibi bırakmak"
    ],
    "explain": "`semanage fcontext` kuralı politikaya yazar, `restorecon` uygular; `chcon` yeniden etiketlemede kaybolur."
   },
@@ -552,9 +552,9 @@
    "q": "Hizmeti taşırken en güvenli denetim sırası hangisidir?",
    "options": [
     "Hizmet durumu → portlar (`ss`) → güvenlik duvarı → günlükler",
-    "Önce sunucuyu yeniden başlat",
-    "Önce SELinux'u kapat",
-    "Önce tüm kuralları sil"
+    "Önce sunucuyu yeniden başlatıp sorunun kendiliğinden geçmesini beklemek",
+    "Önce SELinux'u kapatıp sorunun onunla ilgili olup olmadığına bakmak",
+    "Önce tüm güvenlik duvarı kurallarını silip baştan başlamak"
    ],
    "explain": "Katman katman ilerlemek sorunu hızla daraltır; güvenlik mekanizmalarını kapatmak çözüm değildir."
   },
@@ -563,7 +563,7 @@
    "options": [
     "Göreli yollar kullanmak",
     "Çıktıyı yok saymak",
-    "Yalnızca root'un ortamına güvenmek",
+    "Yalnızca root'un etkileşimli kabuk ortamına güvenmek",
     "Mutlak yollar ve çıkış kodu denetimi"
    ],
    "explain": "Zamanlanmış görevlerde PATH ve çalışma dizini sınırlıdır; mutlak yol ve `set -euo pipefail` güvenilirlik sağlar."
@@ -571,12 +571,22 @@
   "q8": {
    "q": "Paylaşılan dizin için `2770` yerine `0770` kullanılırsa ne eksik kalır?",
    "options": [
-    "Grup yazma izni",
+    "Grup üyelerine yazma izni verir, dizin grubunu devralmayı sağlamaz",
     "Yeni dosyaların dizin grubunu devralması",
-    "Sahibin erişimi",
-    "Diğerlerinin erişimi"
+    "Dosya sahibinin erişimini kalıcı olarak kısıtlaması",
+    "Diğer kullanıcıların erişimini otomatik olarak kapatması"
    ],
    "explain": "Setgid biti (2) yeni dosyaların grubunu dizinin grubu yapar; yoksa ekip ortak erişimi kaybeder."
+  },
+  "q9": {
+   "q": "Teslimden önce neden kontrol listesi servisi yeniden başlatıp baştan doğrular?",
+   "options": [
+    "Yeniden başlatma tüm hataları otomatik düzeltir",
+    "Kontrol listesi yalnızca raporun uzun görünmesi içindir",
+    "Çalışırken yapılan geçici (runtime) ayarlar yeniden başlatınca kaybolur; kalıcı olanlar ayakta kalır",
+    "Servis yeniden başlatılmazsa log yazmaz"
+   ],
+   "explain": "`setenforce`, `--timeout` ya da `--permanent` olmadan eklenen kurallar yeniden başlatınca gider. Yeniden başlatıp doğrulamak, ayarın gerçekten kalıcı (permanent, enable, fcontext) olduğunu kanıtlar."
   }
  },
  "summary": [

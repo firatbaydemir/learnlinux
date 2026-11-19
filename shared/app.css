@@ -355,3 +355,8 @@ input[type=search],textarea{font-size:16px}
 :root[data-theme=light] .code,:root[data-theme=light] pre.out,:root[data-theme=light] .terminal-card{background:#06101f;border-color:#12263f}
 :root[data-theme=light] .hero-glow{background:radial-gradient(circle,rgba(15,184,255,.45),rgba(12,142,235,.15) 55%,transparent 70%)}
 @media(max-width:700px){:root[data-theme=light] .hero,:root[data-theme=light] .module-hero,:root[data-theme=light] .chooser{border-radius:22px}:root[data-theme=light] .card,:root[data-theme=light] .cmd{border-radius:18px}}
+  :root[data-theme=light] .card h2,:root[data-theme=light] .card h3,:root[data-theme=light] .card>header h3{color:#000d20;font-weight:700}
+  :root[data-theme=light] .cmd h3 code{color:#00203f;font-weight:800;font-size:1.2rem}
+  :root[data-theme=light] .cmd dt{background:rgba(12,142,235,.07);color:#5b86ad;font-weight:600}
+  :root[data-theme=light] .cmd h3 code{color:#02050a}
+  :root[data-theme=light] .cmd h3 code{color:#0b52a0}

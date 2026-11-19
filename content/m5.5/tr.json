@@ -239,19 +239,19 @@
   "q3": {
    "q": "`apt update` ne yapar?",
    "options": [
-    "Çekirdeği yükseltir",
+    "Çekirdeği yeni sürüme yükseltir",
     "Paket depo listelerini yeniler",
-    "Tüm paketleri kaldırır",
-    "Sistemi yeniden başlatır"
+    "Kurulu tüm paketleri sistemden kaldırır",
+    "Sistemi hemen yeniden başlatır"
    ],
    "explain": "apt update yerel depo indekslerini yeniler; kurulu paketleri yükseltmek için apt upgrade gerekir."
   },
   "q4": {
    "q": "Kurulum onay ekranında ne yapmalısın?",
    "options": [
-    "Her zaman onaylamalısın",
-    "Kritik paketleri yok saymalısın",
-    "Çıktıyı görmeden Enter'a basmalısın",
+    "Hiç okumadan her zaman onaylamalısın",
+    "Kritik paketleri yok sayıp devam etmelisin",
+    "Çıktıyı görmeden doğrudan Enter'a basmalısın",
     "Eklenip kaldırılacak paketleri incelemelisin"
    ],
    "explain": "Bağımlılık çözümü başka paketleri de değiştirebilir; işlemden önce listeyi gözden geçir."
@@ -270,18 +270,18 @@
    "q": "Bir dosyanın hangi RPM paketine ait olduğunu hangi komut bulur?",
    "options": [
     "`rpm -qf /yol/dosya`",
-    "`rpm -ql dosya`",
-    "`dnf clean dosya`",
-    "`rpm -e dosya`"
+    "`rpm -ql dosya` (paketin dosyalarını listeler)",
+    "`dnf clean dosya` (önbelleği temizler)",
+    "`rpm -e dosya` (paketi kaldırır)"
    ],
    "explain": "`rpm -qf` dosyadan pakete, `rpm -ql` paketten dosya listesine gider."
   },
   "q7": {
    "q": "`apt remove` ile `apt purge` arasındaki fark nedir?",
    "options": [
-    "Fark yoktur",
-    "`purge` yalnızca bağımlılıkları siler",
-    "`remove` kullanıcı verisini de siler",
+    "Aralarında hiçbir fark yoktur",
+    "`purge` yalnızca artık gereksiz bağımlılıkları siler",
+    "`remove` kullanıcı verisini ve ayarları da siler",
     "`purge` yapılandırma dosyalarını da siler"
    ],
    "explain": "`remove` paketi kaldırır ama `/etc` yapılandırmasını bırakır; `purge` onu da siler."
@@ -289,12 +289,22 @@
   "q8": {
    "q": "`dpkg -i paket.deb` neyi yapmaz?",
    "options": [
-    "Paketi kurar",
+    "Paketi sisteme kurma işlemini yapar",
     "Eksik bağımlılıkları kendiliğinden indirir",
-    "Paketi veritabanına işler",
-    "Paket dosyalarını açar"
+    "Paketi dpkg veritabanına kaydeder",
+    "Paket dosyalarını sistem dizinlerine açar"
    ],
    "explain": "`dpkg` depo kullanmaz; bağımlılıkları çözmez. `apt install ./paket.deb` bunu yapar."
+  },
+  "q9": {
+   "q": "Debian ailesinde `apt update` çalıştırınca paketlerin kendisi neden yükselmez?",
+   "options": [
+    "Komut hata verir ve hiçbir şey yapmaz",
+    "Yalnızca paket listelerini (depo bilgisini) yeniler; yükseltmek için ayrı `apt upgrade` gerekir",
+    "Güncellemeler yalnızca yeniden başlatınca uygulanır",
+    "`apt update` yalnızca kurulu olmayan paketleri etkiler"
+   ],
+   "explain": "`apt update` depolardaki güncel paket bilgisini indirir. Kurulu paketleri yükseltmek ayrı bir adımdır (`apt upgrade`); önce liste yenilenir, sonra yükseltme yapılır."
   }
  },
  "summary": [

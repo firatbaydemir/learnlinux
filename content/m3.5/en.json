@@ -126,27 +126,27 @@
  "tasks": {
   "t01": {
    "text": "Sort the lines in `data/fruits.txt` alphabetically.",
-   "hint": "Use `sort data/fruits.txt`."
+   "hint": "`sort` takes the file name as its argument."
   },
   "t02": {
    "text": "Show the same fruit list in reverse order.",
-   "hint": "Use `sort -r data/fruits.txt`."
+   "hint": "Use the reverse option of `sort`."
   },
   "t03": {
    "text": "Sort the numbers in `data/numbers.txt` numerically.",
-   "hint": "Use `sort -n data/numbers.txt`."
+   "hint": "Add the numeric-sort option to `sort`; otherwise \"10\" comes before \"2\"."
   },
   "t04": {
    "text": "Remove duplicate fruit lines; remember to sort first.",
-   "hint": "Use `sort data/fruits.txt | uniq`."
+   "hint": "Pipe the `sort` output into `uniq`; `uniq` only removes adjacent duplicates."
   },
   "t05": {
    "text": "Count how many times each fruit occurs.",
-   "hint": "Use `sort data/fruits.txt | uniq -c`."
+   "hint": "Pipe the sorted output into `uniq`; its count option prefixes each line with the number."
   },
   "t06": {
    "text": "Extract only employee names, the first column of the CSV.",
-   "hint": "The delimiter is a comma: `cut -d, -f1 data/employees.csv`."
+   "hint": "Use `cut` with the delimiter and field-number options; the delimiter is a comma."
   },
   "t07": {
    "text": "Predict the frequency of each department in the employee CSV. The header in the second field is included.",
@@ -162,7 +162,7 @@
   },
   "t10": {
    "text": "Mini task: convert `hello` to uppercase with `tr`.",
-   "hint": "Use `echo hello | tr 'a-z' 'A-Z'`."
+   "hint": "Pipe the `echo` output into `tr`; two arguments: lowercase range, uppercase range."
   },
   "t11": {
    "text": "Mini task: write the unique department names from the employee CSV to `reports/departments.txt`.",
@@ -247,9 +247,9 @@
   "q2": {
    "q": "Why is `uniq` usually used after `sort`?",
    "options": [
-    "`uniq` reads only CSV",
-    "`sort` makes a backup",
-    "`uniq` converts all text to uppercase",
+    "`uniq` can only read files in CSV format",
+    "`sort` makes a backup of the file before processing",
+    "`uniq` converts all of the text to uppercase",
     "`uniq` collapses only adjacent duplicates"
    ],
    "explain": "Sorting brings identical values next to each other so `uniq` can collapse them."
@@ -258,19 +258,19 @@
    "q": "What does `cut -d, -f2 file.csv` select?",
    "options": [
     "The second comma-delimited field",
-    "The second line",
-    "The second character",
-    "The file size"
+    "The whole second line of the file",
+    "The second character of each line",
+    "The file size in bytes"
    ],
    "explain": "`-d,` sets the delimiter to a comma and `-f2` selects the second field."
   },
   "q4": {
    "q": "What does `tr 'a-z' 'A-Z'` do?",
    "options": [
-    "Sorts lines in reverse",
-    "Counts duplicates",
-    "Converts lowercase ASCII letters to uppercase",
-    "Extracts the second column"
+    "Sorts the lines in reverse order",
+    "Counts and shows repeated lines",
+    "Converts lowercase letters to uppercase",
+    "Extracts the second column from each line"
    ],
    "explain": "`tr` transforms character sets; this example converts ASCII lowercase letters to uppercase."
   },
@@ -297,10 +297,10 @@
   "q7": {
    "q": "What does `cut -d: -f1 /etc/passwd` print?",
    "options": [
-    "The last field of each line",
-    "The first character of each line",
-    "The line count",
-    "The first colon-separated field (user name)"
+    "The last field of each line (the shell)",
+    "Only the first character of each line",
+    "The total number of lines in the file",
+    "The first colon field (user name)"
    ],
    "explain": "`-d:` sets the delimiter to `:`, `-f1` picks the first field; in `/etc/passwd` that is the user name."
   },
@@ -313,6 +313,16 @@
     "`cut | tr`"
    ],
    "explain": "`sort` groups equal lines, `uniq -c` counts them, `sort -nr` orders by count, highest first."
+  },
+  "q9": {
+   "q": "Why does the chain `sort | uniq -c | sort -nr` need a second `sort`?",
+   "options": [
+    "`uniq -c` adds counts but does not order by them; `-nr` is needed to rank by count",
+    "`uniq -c` garbles the output and the second sort repairs it",
+    "The second sort removes duplicate lines",
+    "The chain errors out without the second sort"
+   ],
+   "explain": "`uniq -c` prefixes each line with its count but does not sort by it. `sort -nr` puts the most frequent entry on top."
   }
  },
  "summary": [

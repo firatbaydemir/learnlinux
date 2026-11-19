@@ -197,7 +197,7 @@
   },
   "t13": {
    "text": "Mini-Projekt: Schreibe die Namen der Konten, deren Shell in `/etc/passwd` auf `/bin/bash` endet, in `~/shell_users.txt`.",
-   "hint": "`grep '/bin/bash$' /etc/passwd | cut -d: -f1 > ~/shell_users.txt`; `$` steht für das Zeilenende. (`grep`, `cut` → Modul 3.4/3.5; `>` → 3.2.)"
+   "hint": "`grep`, `cut`; `$` steht für das Zeilenende. (`grep`, `cut` → Modul 3.4/3.5; `>` → 3.2.)"
   },
   "t14": {
    "text": "Challenge: Schreibe deinen Benutzernamen (`whoami`) und danach die `id`-Ausgabe in `~/me.txt`. Sichtbar sein müssen `student`, `uid=1000` und `wheel`.",
@@ -209,7 +209,7 @@
   },
   "t16": {
    "text": "TICKET #4107: Der Prüfer möchte UID und Gruppen von `alice`. Speichere die Information in `~/alice_info.txt`.",
-   "hint": "`id alice > ~/alice_info.txt`; die Ausgabe muss `uid=1001` und `devs` enthalten. (`>` und `>>` → Modul 3.2.)"
+   "hint": "`id`; die Ausgabe muss `uid=1001` und `devs` enthalten. (`>` und `>>` → Modul 3.2.)"
   }
  },
  "vm": {
@@ -336,8 +336,8 @@
    "q": "Warum bevorzugen Skripte `getent passwd`?",
    "options": [
     "Es findet neben der lokalen Datei auch LDAP/SSSD-Benutzer",
-    "Es ist immer schneller",
-    "Es braucht keine Rechte und zeigt Passwörter",
+    "Es ist immer schneller, weil es nie das Netz nutzt",
+    "Es funktioniert nur für root und listet keine Benutzer",
     "Es funktioniert nur als root"
    ],
    "explain": "getent fragt über NSS alle Quellen ab und liefert so auch Benutzer aus dem zentralen Verzeichnis."
@@ -347,18 +347,18 @@
    "options": [
     "Die UID",
     "Die Namen aller Gruppen des Benutzers",
-    "Letzte Anmeldungen",
-    "Angemeldete Benutzer"
+    "Die letzten Anmeldeeinträge des Benutzers",
+    "Alle aktuell am System angemeldeten Benutzer"
    ],
    "explain": "`-G` gibt alle Gruppen aus, `-n` Namen statt Zahlen."
   },
   "q6": {
    "q": "Was zeigt `w` zusätzlich zu `who`?",
    "options": [
-    "Passwort-Hashes",
-    "Fehlgeschlagene Anmeldungen",
+    "Die Passwort-Hashes der Benutzer",
+    "Die Einträge fehlgeschlagener Anmeldungen",
     "Den aktuell ausgeführten Befehl und die Last",
-    "Gruppenmitgliedschaften"
+    "Die vollständige Liste der Gruppenmitgliedschaften"
    ],
    "explain": "`w` zeigt auch den Befehl jeder Sitzung, Leerlaufzeit und Load Average."
   },
@@ -375,12 +375,22 @@
   "q8": {
    "q": "Was bedeutet es, wenn das Passwortfeld in `/etc/shadow` mit `!` beginnt?",
    "options": [
-    "Passwort abgelaufen",
-    "Konto gelöscht",
-    "Passwort leer",
+    "Passwort abgelaufen, ein neues wird verlangt",
+    "Konto vollständig vom System gelöscht",
+    "Passwortfeld leer, Anmeldung ohne Passwort möglich",
     "Anmeldung per Passwort gesperrt"
    ],
    "explain": "`!` (oder `*`) heißt: kein gültiger Hash, Passwort-Anmeldung ist nicht möglich."
+  },
+  "q9": {
+   "q": "Warum wird die Shell von Dienstkonten (z. B. `daemon`) auf `/sbin/nologin` gesetzt?",
+   "options": [
+    "Damit der Dienst schneller läuft",
+    "Mit dem Konto ist keine interaktive Anmeldung möglich; selbst bei Übernahme öffnet sich keine Shell",
+    "Um das Lesen von Dateien durch den Dienst zu verhindern",
+    "Um den Passwort-Hash zu verbergen"
+   ],
+   "explain": "Dienstkonten sind für Prozesse gedacht, nicht für Menschen. Die Shell `nologin` verweigert interaktive Sitzungen und verkleinert die Angriffsfläche; der Dienst selbst läuft normal weiter."
   }
  },
  "summary": [

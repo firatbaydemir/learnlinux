@@ -192,11 +192,11 @@
   },
   "t11": {
    "text": "Fehlersuche: `report.txt` liegt versehentlich im Ordner `wrong`. Verschiebe sie in den Ordner `inbox`.",
-   "hint": "`mv wrong/report.txt inbox/`. Danach mit `ls wrong inbox` prüfen."
+   "hint": "`mv`. Danach mit `ls wrong inbox` prüfen."
   },
   "t12": {
    "text": "Mini-Projekt: Erstelle `archive/2026` mit `mkdir -p` und verschiebe dann `inbox/mail1.txt` dorthin unter dem Namen `jan.txt`.",
-   "hint": "Zwei Befehle: `mkdir -p archive/2026`, dann `mv inbox/mail1.txt archive/2026/jan.txt`."
+   "hint": "Zwei Befehle: `mkdir -p`, dann `mv inbox/mail1.txt archive/2026/jan.txt`."
   },
   "t13": {
    "text": "Herausforderung: Benenne den Ordner `photos` in `pictures` um und kopiere den Ordner `pictures` samt Inhalt nach `~/Documents`.",
@@ -204,7 +204,7 @@
   },
   "t14": {
    "text": "TICKET #2410 — Die Buchhaltung möchte ein Backup des Ordners `inbox` unter dem Namen `backup/inbox_2026`. Das Original `inbox` muss unverändert und vollständig bleiben.",
-   "hint": "Ordnerkopie: `cp -r inbox backup/inbox_2026`. Das Ziel existiert nicht, daher wird es der neue Name."
+   "hint": "Ordnerkopie: `cp -r`. Das Ziel existiert nicht, daher wird es der neue Name."
   },
   "t15": {
    "text": "Kopiere mit `-v` und sieh, was passiert: `cp -v tasks.txt tasks_v.txt`.",
@@ -369,6 +369,16 @@
     "Gibt einen Fehler aus"
    ],
    "explain": "Ist das Ziel ein vorhandenes Verzeichnis, verschiebt `mv` die Datei hinein; die Quelle existiert danach nicht mehr."
+  },
+  "q9": {
+   "q": "Warum verschiebt `mv` im selben Dateisystem sogar einen großen Ordner sofort?",
+   "options": [
+    "`mv` komprimiert die Daten zuerst, sodass sie kleiner werden",
+    "Die Daten werden nicht kopiert; nur der Verzeichniseintrag (Name) ändert sich",
+    "`mv` verschiebt tatsächlich nur die erste Datei des Ordners",
+    "Die Dateien werden im Hintergrund kopiert und danach gelöscht"
+   ],
+   "explain": "Im selben Dateisystem ändert `mv` nur den Verzeichniseintrag; deshalb ist es schnell. Zwischen verschiedenen Datenträgern werden die Daten kopiert und das Original gelöscht."
   }
  },
  "summary": [

@@ -194,11 +194,11 @@
   },
   "t08": {
    "text": "`cat locked.txt` meldet „Permission denied“. Finde den Grund, behebe ihn mit `chmod` und lies die Datei.",
-   "hint": "Gib dir selbst Leserecht: `chmod u+r locked.txt`. (`chmod` ändert Rechte, Details in Modul 4.4; `cat` in Modul 2.6.)"
+   "hint": "Gib dir selbst Leserecht: `chmod`. (`chmod` ändert Rechte, Details in Modul 4.4; `cat` in Modul 2.6.)"
   },
   "t09": {
    "text": "`cp notes.txt backup/` schlägt fehl, weil `backup` nicht existiert. Verkette: Ordner anlegen und Datei kopieren.",
-   "hint": "`mkdir backup && cp notes.txt backup/`. (`cp` kopiert, Modul 2.4; `mkdir` Modul 2.3.)"
+   "hint": "`mkdir`, `cp`. (`cp` kopiert, Modul 2.4; `mkdir` Modul 2.3.)"
   },
   "t10": {
    "text": "Mini-Projekt: (1) Schreibe den Fehler von `ls /nonexistent` in `errors.txt`, (2) schreibe die Ausgabe von `ls ~` in `files.txt`, (3) lies den Status des letzten Befehls mit `echo $?`.",
@@ -210,14 +210,14 @@
   },
   "t12": {
    "text": "Herausforderung: Lege den Ordner `backup` an, falls er fehlt; kopiere `notes.txt` hinein; war das Kopieren erfolgreich, schreibe `saved` in `status.txt`, sonst `failed`.",
-   "hint": "`test -d backup || mkdir backup` und `cp ... && echo saved > status.txt || echo failed > status.txt`. (`cp` Modul 2.4, `>` Modul 3.2.)"
+   "hint": "`test -d`, `mkdir` und `cp ... && echo saved > status.txt || echo failed > status.txt`. (`cp` Modul 2.4, `>` Modul 3.2.)"
   },
   "t13": {
    "text": "Herausforderung: Enthält `notes.txt` das Wort `hello`? Prüfe es in einer Zeile und gib `found` oder `missing` aus; wirf die eigene Ausgabe von grep nach `/dev/null`.",
-   "hint": "`grep hello notes.txt > /dev/null && echo found || echo missing`. (`grep` sucht Text, Modul 3.4.)"
+   "hint": "`grep`, `echo`. (`grep` sucht Text, Modul 3.4.)"
   },
   "t14": {
-   "text": "Ticket: Ein Kollege sagt „Ich kann meinen Bericht nicht lesen“ und hat `cat Documents/raport.txt` versucht. Finde den richtigen Namen mit `ls Documents`, lies die Datei mit `cat` und schreibe den Exit-Status in `exit.txt`.",
+   "text": "Ticket: Ein Kollege sagt „Ich kann meinen Bericht nicht lesen“ und hat `cat Documents/raport.txt` versucht. Finde den richtigen Namen mit `ls`, lies die Datei mit `cat` und schreibe den Exit-Status in `exit.txt`.",
    "hint": "Der richtige Name ist `report.txt`. `cat Documents/report.txt; echo $? > exit.txt`."
   }
  },
@@ -312,7 +312,7 @@
    "options": [
     "Immer",
     "Nur wenn A fehlschlägt",
-    "Nur wenn A erfolgreich ist (0)",
+    "Nur wenn A erfolgreich war",
     "Nie"
    ],
    "explain": "`&&` verhält sich wie UND; B läuft nur, wenn A mit 0 endet."
@@ -330,10 +330,10 @@
   "q4": {
    "q": "Was bewirkt `ls /nonexistent 2>/dev/null; echo $?`?",
    "options": [
-    "Zeigt die Fehlermeldung und gibt 0 aus",
-    "Legt den Ordner an",
-    "Gibt überhaupt nichts aus",
-    "Versteckt die Fehlermeldung, aber der Status bleibt ungleich 0"
+    "Zeigt die Fehlermeldung an und gibt 0 aus",
+    "Legt den Ordner trotzdem an und liefert 0",
+    "Gibt nichts aus und ändert auch den Status nicht",
+    "Blendet den Fehler aus, der Exit-Code bleibt"
    ],
    "explain": "`2>/dev/null` verwirft nur die Meldung; der Befehl ist trotzdem fehlgeschlagen und `$?` ist nicht 0."
   },
@@ -350,9 +350,9 @@
   "q6": {
    "q": "Was ist der Unterschied zwischen `A ; B` und `A && B`?",
    "options": [
-    "Kein Unterschied",
+    "Kein Unterschied, beide verhalten sich gleich",
     "`;` startet B nur, wenn A fehlschlägt",
-    "`;` startet B unabhängig vom Ergebnis von A",
+    "`;` führt B aus, ohne auf A zu achten",
     "`&&` führt Befehle parallel aus"
    ],
    "explain": "`;` führt nacheinander aus, ohne das Ergebnis zu prüfen; `&&` startet B nur nach Erfolg von A."
@@ -360,22 +360,32 @@
   "q7": {
    "q": "Worauf deutet Exit-Status 126 meist hin?",
    "options": [
-    "Befehl nicht gefunden",
-    "Erfolg",
+    "Befehl nicht gefunden (nicht im PATH)",
+    "Befehl erfolgreich beendet",
     "Kein Syntaxfehler",
-    "Befehl gefunden, aber nicht ausführbar (z. B. keine Berechtigung)"
+    "Gefunden, lief aber nicht (z. B. Recht fehlt)"
    ],
    "explain": "126: gefunden, aber nicht ausführbar (fehlendes x-Recht o. Ä.); 127: Befehl nicht gefunden."
   },
   "q8": {
    "q": "Was bewirkt `2>&1` in `ls /nix 2>&1`?",
    "options": [
-    "Leitet die Fehlerausgabe auf die Standardausgabe um",
-    "Löscht die Ausgabe",
-    "Listet die Datei zweimal",
-    "Setzt den Exit-Status auf 1"
+    "Leitet Fehler auf die Standardausgabe um",
+    "Löscht die gesamte Ausgabe, nichts bleibt",
+    "Listet die Datei zweimal hintereinander",
+    "Setzt den Exit-Code immer auf 1"
    ],
    "explain": "`2>&1` schickt stderr (2) dorthin, wohin stdout (1) geht; so landen auch Fehler in Pipe/Datei."
+  },
+  "q9": {
+   "q": "Wann gibt `test -f datei` den Exit-Status 0 (Erfolg) zurück?",
+   "options": [
+    "Wenn die Datei nicht existiert",
+    "Wenn die Datei existiert und regulär ist",
+    "Wenn die Datei leer ist (null Byte)",
+    "Wenn die Datei Ausführrecht hat"
+   ],
+   "explain": "`test -f` liefert 0, wenn eine normale Datei existiert. `true` liefert immer 0, `false` immer 1."
   }
  },
  "summary": [

@@ -136,7 +136,7 @@
   },
   "t06": {
    "text": "Hatalı örnek satır dosyasını `~/schedule/wrong-entry.txt` silerek kaldır.",
-   "hint": "Yolu kontrol et, sonra `rm ~/schedule/wrong-entry.txt`."
+   "hint": "Yolu kontrol et, sonra `rm`."
   },
   "t07": {
    "text": "Mini proje: her gün saat 03.00'te çalışacak yedek satırını `~/schedule/backup-plan.txt` dosyasına yaz.",
@@ -222,10 +222,10 @@
   "q1": {
    "q": "Cron satırındaki ilk beş alan hangi sıradadır?",
    "options": [
-    "Saat, dakika, ay, gün, komut",
-    "Dakika, ay, saat, komut, gün",
+    "Saat, dakika, ay, gün, komut sırasıyla",
+    "Dakika, ay, saat, komut, gün sırasıyla",
     "Dakika, saat, ayın günü, ay, haftanın günü",
-    "Gün, saat, dakika, ay, kullanıcı"
+    "Gün, saat, dakika, ay, kullanıcı sırasıyla"
    ],
    "explain": "Kullanıcı crontab'ında sıralama dakika, saat, ayın günü, ay ve haftanın günüdür."
   },
@@ -242,19 +242,19 @@
   "q3": {
    "q": "Cron işinde `date` bulunamıyorsa ilk neyi denemek uygundur?",
    "options": [
-    "Her dakika tekrar dene",
+    "Görevi her dakika yeniden denemek",
     "Mutlak komut yolu veya açık bir PATH kullan",
-    "`crontab -r` çalıştır",
-    "Dosya sistemini biçimlendir"
+    "Tüm görevleri `crontab -r` ile silmek",
+    "Dosya sistemini baştan biçimlendirmek"
    ],
    "explain": "Cron'un PATH'i sınırlı olabilir; mutlak komut yolu veya açık PATH kullan."
   },
   "q4": {
    "q": "Tek bir hatalı işi silmenin güvenli yolu hangisidir?",
    "options": [
-    "`crontab -r` ile tümünü sil",
-    "`rm /etc/crontab`",
-    "Servisi durdurup bırak",
+    "`crontab -r` ile tüm görevleri birden silmek",
+    "Sistem dosyası `/etc/crontab`'ı silmek",
+    "Cron servisini durdurup öylece bırakmak",
     "`crontab -e` içinde yalnızca ilgili satırı sil"
    ],
    "explain": "`crontab -e` içinde tek satırı kaldırmak diğer kullanıcı görevlerini korur."
@@ -292,12 +292,22 @@
   "q8": {
    "q": "Cron görevinin çıktısını kaybetmemek için ne yapılır?",
    "options": [
-    "Hiçbir şey; cron kaydeder",
-    "Görevi root yapmak",
-    "`sleep` eklemek",
+    "Hiçbir şey yapılmaz; cron çıktıyı kendisi kaydeder",
+    "Görevi root kullanıcısı olarak çalıştırmak",
+    "Komuta başa bir `sleep` eklemek",
     "Çıktıyı bir dosyaya yönlendirmek (`>> /tmp/job.log 2>&1`)"
    ],
    "explain": "Cron çıktıyı e-postaya yollamaya çalışır; kayıt için `>> dosya 2>&1` ile hem stdout hem stderr'i bir log dosyasına yönlendir."
+  },
+  "q9": {
+   "q": "Elle çalışan bir komut cron içinde çalışmıyorsa en sık neden nedir?",
+   "options": [
+    "Cron komutları hiç çalıştıramaz",
+    "Cron asgari bir ortamla (kısa PATH, farklı dizin) çalışır; tam yol vermek gerekir",
+    "Cron yalnızca geceleri çalışır",
+    "Komut cron'da otomatik silinir"
+   ],
+   "explain": "Cron kabuk profilini yüklemez; PATH çok kısadır. Bu yüzden komutlar tam yolla (`/usr/bin/date`) yazılır ve çıktı bir dosyaya yönlendirilerek hata izlenir."
   }
  },
  "summary": [

@@ -274,7 +274,7 @@
   },
   "t14": {
    "text": "Mini-Projekt: Wechsle nach `~/projects/website/css`, liste den Inhalt auf und gehe dann zwei Ebenen nach oben, sodass du in `~/projects` landest.",
-   "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."
+   "hint": "`cd`, `ls -l`, `cd ../..`."
   },
   "t15": {
    "text": "Schwierige Aufgabe: Liste mit einem einzigen `ls`-Befehl den Inhalt von `~/Documents` und `~/projects/website` auf, einschließlich versteckter Dateien.",
@@ -282,7 +282,7 @@
   },
   "t16": {
    "text": "TICKET #1101 — Ein Kollege braucht den vollständigen Pfad des Ordners `images` im Projekt `website`. Wechsle in den Ordner, zeige den Pfad mit `pwd` an und kehre dann ins Home-Verzeichnis zurück.",
-   "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."
+   "hint": "`cd`, `pwd`, `cd`."
   }
  },
  "vm": {
@@ -439,6 +439,16 @@
     "Leere Dateien"
    ],
    "explain": "In jedem Verzeichnis steht `.` für es selbst und `..` für das übergeordnete; mit `ls -a` sichtbar."
+  },
+  "q9": {
+   "q": "Außerhalb von `/etc` schlägt `ls passwd` fehl, `ls /etc/passwd` funktioniert. Warum?",
+   "options": [
+    "Weil `ls` nur in /etc funktioniert",
+    "Weil `passwd` eine versteckte Datei ist",
+    "Weil das `/` Rechte freischaltet",
+    "Ein relativer Pfad wird vom aktuellen Verzeichnis aus gesucht; ein absoluter beginnt bei `/` und gilt überall"
+   ],
+   "explain": "Relative Pfade hängen vom Standort ab, absolute beginnen bei `/` und sind standortunabhängig."
   }
  },
  "summary": [

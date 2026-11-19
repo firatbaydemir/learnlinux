@@ -40,6 +40,7 @@
      "where": "Beim Lesen alter, komprimierter Logs oder zum Suchen mit `grep`.",
      "why": "Kein Platz- und Zeitaufwand für das Entpacken.",
      "example": "zcat logs/app.log.gz | head",
+     "output": "start\nrunning\nstop",
      "nosim": true
     }
    ],
@@ -69,6 +70,7 @@
      "where": "Vor dem Entpacken, um den Inhalt zu sehen.",
      "why": "Verhindert Tar-Bombs und Überschreib-Überraschungen.",
      "example": "tar -tf backups/project.tar.gz",
+     "output": "project/\nproject/src/\nproject/src/main.c\nproject/src/util.c\nproject/docs/\nproject/docs/readme.txt\nproject/notes.txt",
      "nosim": true
     },
     {
@@ -201,6 +203,7 @@
      "where": "Nach dem Kopieren oder vor dem Wiederherstellen eines Backups.",
      "why": "Ein defektes Backup entdeckst du sofort, nicht erst im Ernstfall.",
      "example": "sha256sum -c backups/SHA256SUMS",
+     "output": "backups/project.tar.gz: OK",
      "nosim": true
     },
     {
@@ -224,28 +227,28 @@
  ],
  "tasks": {
   "t01": {
-   "text": "Du bist im Verzeichnis `lab`. Sieh dir mit `ls -R project` den zu archivierenden Projektbaum an.",
-   "hint": "-R groß; listet auch Unterverzeichnisse."
+   "text": "Du bist im Verzeichnis `lab`. Liste den zu archivierenden Projektbaum samt Unterverzeichnissen auf.",
+   "hint": "`ls`; für Unterverzeichnisse ein großes `-R`."
   },
   "t02": {
-   "text": "Lege das Verzeichnis `backups` für die Backups an: `mkdir backups`.",
-   "hint": "Lege es in `lab` an."
+   "text": "Lege ein Verzeichnis `backups` für die Backups an.",
+   "hint": "`mkdir`; lege es in `lab` an."
   },
   "t03": {
    "text": "Bündle `project` mit gzip in das Archiv `backups/project.tar.gz` (`tar -czf ...`). Der Simulator führt `tar` nicht aus; geprüft wird die Korrektheit des Befehls.",
    "hint": "Reihenfolge: `tar -czf <archive> <source>`; nach `f` folgt der Archivname."
   },
   "t04": {
-   "text": "Liste den Inhalt des Archivs auf, ohne zu entpacken: `tar -tzf backups/project.tar.gz`.",
-   "hint": "`t` = list. `-tf` wird auch akzeptiert."
+   "text": "Liste den Inhalt des Archivs `backups/project.tar.gz` auf, ohne zu entpacken.",
+   "hint": "`tar` mit `-t` (list), `-z` und `-f`; `-tf` wird auch akzeptiert."
   },
   "t05": {
-   "text": "Lege das Verzeichnis `restore` an und entpacke das Archiv mit `-C` dorthin: `tar -xzf backups/project.tar.gz -C restore`.",
-   "hint": "Erst `mkdir restore`; das `-C`-Ziel muss existieren."
+   "text": "Lege das Verzeichnis `restore` an und entpacke das Archiv dorthin.",
+   "hint": "Erst `mkdir restore`; dann `tar` mit `-x`, `-z`, `-f` und `-C` fürs Ziel (muss existieren)."
   },
   "t06": {
-   "text": "Komprimiere `logs/app.log` und behalte das Original: `gzip -k logs/app.log`.",
-   "hint": "`-k` = keep. Ohne wird das Original gelöscht."
+   "text": "Komprimiere `logs/app.log` und behalte das Original.",
+   "hint": "`gzip` mit `-k` (keep). Ohne wird das Original gelöscht."
   },
   "t07": {
    "text": "Entpacke aus dem Archiv nur `project/notes.txt` nach `restore`.",
@@ -269,19 +272,19 @@
   },
   "t12": {
    "text": "Fehlersuche: Eine Tar-Bomb hat die Dateien `bomb1.txt`, `bomb2.txt`, `bomb3.txt` in `lab` abgeladen. Lege das Verzeichnis `cleanup` an und verschiebe alle drei dorthin.",
-   "hint": "`mkdir cleanup`, dann `mv bomb1.txt bomb2.txt bomb3.txt cleanup/`."
+   "hint": "Lege das Verzeichnis mit `mkdir` an; `mv` nimmt mehrere Quellen und als letztes Argument das Zielverzeichnis."
   },
   "t13": {
-   "text": "Mini-Projekt: Lege `staging` an, kopiere den Baum `project` mit `cp -r` hinein, prüfe mit `ls -R staging` und bündle `staging` als `staging.tar.gz`.",
-   "hint": "Schritte: `mkdir staging`, `cp -r project staging/`, `ls -R staging`, `tar -czf staging.tar.gz staging`."
+   "text": "Mini-Projekt: Lege `staging` an, kopiere den Baum `project` rekursiv hinein, prüfe mit `ls -R` und bündle `staging` als `staging.tar.gz`.",
+   "hint": "Schritte: `mkdir`, `cp -r`, `ls -R`, `tar -czf` (erst der Archivname, dann das zu packende Verzeichnis)."
   },
   "t14": {
-   "text": "Herausforderung: Füge `project` rekursiv in `backups/project.zip` ein (`zip -r`), liste mit `unzip -l` und erzeuge mit `sha256sum` die Summe. Alle drei in dieser Reihenfolge.",
-   "hint": "`zip -r backups/project.zip project`, `unzip -l backups/project.zip`, `sha256sum backups/project.zip`."
+   "text": "Herausforderung: Füge `project` rekursiv in `backups/project.zip` ein, liste mit `unzip -l` und erzeuge mit `sha256sum` die Summe. Alle drei in dieser Reihenfolge.",
+   "hint": "`zip -r` nimmt zuerst den Archivnamen, dann das Verzeichnis; `unzip -l` und `sha256sum` lesen dieselbe zip-Datei."
   },
   "t15": {
    "text": "TICKET #3801 — Die Prüfer wollen komprimierte Kopien der Logs, die Originale in `logs` müssen aber bleiben. Lege `audit` an, kopiere `logs/*.log` hinein und komprimiere die Kopien mit `gzip`.",
-   "hint": "`mkdir audit`, `cp logs/*.log audit/`, `gzip audit/*.log`; `gzip` löscht nur die Kopien."
+   "hint": "Schritte: `mkdir`, `cp` (Platzhalter `*.log`), `gzip` nur auf die Dateien in `audit`; `gzip` löscht die Kopien, nicht die Originale."
   },
   "t16": {
    "text": "Vorhersage: Was gibt `ls -1 project/src | wc -l` aus? Zur Prüfung ausführen.",
@@ -384,9 +387,9 @@
   "q2": {
    "q": "Was passiert nach `gzip notes.txt`?",
    "options": [
-    "`notes.txt` und `notes.txt.gz` bleiben beide",
-    "Es entsteht eine `.zip`-Datei",
-    "`notes.txt.gz` wird gelöscht",
+    "`notes.txt` und `notes.txt.gz` bleiben beide nebeneinander",
+    "Es entsteht eine `.zip`-Datei mit gleichem Namen",
+    "`notes.txt.gz` wird gelöscht, nur das Original bleibt",
     "`notes.txt` wird gelöscht und durch `notes.txt.gz` ersetzt"
    ],
    "explain": "gzip ersetzt das Original durch die komprimierte Datei. Zum Behalten nutzt du `gzip -k`."
@@ -395,29 +398,29 @@
    "q": "Warum listet man ein Archiv vor dem Entpacken mit `tar -tf` auf?",
    "options": [
     "Um Tar-Bombs und zu überschreibende Dateien vorher zu sehen",
-    "Damit das Entpacken schneller geht",
-    "Weil `tar -x` ohne Auflisten nicht funktioniert",
-    "Um das Archiv zu komprimieren"
+    "Damit das Entpacken schneller fertig wird, da die Liste einen Cache anlegt",
+    "Weil `tar -x` ohne vorheriges Auflisten gar nicht läuft",
+    "Um das Archiv neu zu komprimieren und kleiner zu machen"
    ],
    "explain": "Ohne oberstes Verzeichnis verteilen sich die Dateien im aktuellen Verzeichnis; vorhandene Dateien können überschrieben werden."
   },
   "q4": {
    "q": "Was bewirkt `-C restore` in `tar -xzf backup.tar.gz -C restore`?",
    "options": [
-    "Komprimiert das Archiv unter dem Namen `restore`",
-    "Schließt Dateien namens `restore` aus",
+    "Komprimiert das Archiv neu und speichert es als `restore`",
+    "Schließt Dateien namens `restore` aus, entpackt den Rest",
     "Wechselt vor dem Entpacken in `restore` und entpackt dorthin",
-    "Prüft die Prüfsumme des Archivs"
+    "Prüft die Prüfsumme des Archivs, entpackt aber nichts"
    ],
    "explain": "`-C` (change directory) legt das Zielverzeichnis fest; es muss vorher existieren."
   },
   "q5": {
    "q": "Was bedeuten `c`, `z`, `f` in `tar -czf out.tar.gz dir`?",
    "options": [
-    "extract, zip, filter",
+    "extrahieren, zip-Kompression, Filter",
     "create, gzip-Kompression, Dateiname",
-    "check, zero, force",
-    "copy, zip, format"
+    "prüfen, zurücksetzen, erzwingen",
+    "kopieren, zip-Kompression, formatieren"
    ],
    "explain": "`c` create, `z` gzip, `f` leitet den Archivdateinamen ein."
   },
@@ -445,11 +448,21 @@
    "q": "Wozu braucht man `-r` in `zip -r out.zip dir`?",
    "options": [
     "Nimmt den Verzeichnisinhalt samt Unterverzeichnissen auf",
-    "Verschlüsselt das Archiv",
-    "Löscht die Originaldateien",
-    "Erhöht die Kompression"
+    "Verschlüsselt das Archiv mit einem Passwort",
+    "Löscht die archivierten Originaldateien von der Platte",
+    "Erhöht die Kompressionsrate und verkleinert die Datei"
    ],
    "explain": "Ohne `-r` fügt zip nur den Verzeichniseintrag hinzu, nicht den Inhalt."
+  },
+  "q9": {
+   "q": "Warum bringt es kaum Platzersparnis, bereits komprimierte `.jpg`- oder `.zip`-Dateien erneut mit `gzip` zu packen?",
+   "options": [
+    "`gzip` kann nur Textdateien öffnen",
+    "In komprimierten Daten gibt es kaum noch Wiederholungen; der Gewinn ist minimal",
+    "`gzip` löscht solche Dateien",
+    "Die zweite Kompression macht die Datei automatisch größer"
+   ],
+   "explain": "Kompression verkürzt Wiederholungsmuster. Bereits komprimierte Daten wirken fast zufällig, deshalb bringt eine zweite Runde fast nichts."
   }
  },
  "summary": [

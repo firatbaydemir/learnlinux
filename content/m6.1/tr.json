@@ -24,7 +24,8 @@
      "where": "Makinenin adresini öğrenmek veya arayüzün ayakta olduğunu doğrulamak için.",
      "why": "Ağ sorununda ilk bakılacak yer; adres yoksa üst katmanların hiçbiri çalışmaz.",
      "example": "ip a",
-     "nosim": true
+     "nosim": true,
+     "output": "1: lo: <LOOPBACK,UP> mtu 65536 state UNKNOWN\n    inet 127.0.0.1/8 scope host lo\n2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500 state UP\n    inet 192.168.1.42/24 brd 192.168.1.255 scope global eth0"
     },
     {
      "cmd": "ip -br a",
@@ -32,7 +33,8 @@
      "where": "Hızlıca \"hangi arayüz hangi adreste\" bakarken.",
      "why": "Uzun çıktıyı okumaktan kurtarır, ekrana sığar.",
      "example": "ip -br a",
-     "nosim": true
+     "nosim": true,
+     "output": "lo      UNKNOWN  127.0.0.1/8\neth0    UP       192.168.1.42/24"
     },
     {
      "cmd": "ip r",
@@ -40,7 +42,8 @@
      "where": "Dış ağa neden çıkamadığını araştırırken.",
      "why": "Varsayılan rota yoksa yerel ağın dışına hiçbir paket gidemez.",
      "example": "ip r",
-     "nosim": true
+     "nosim": true,
+     "output": "default via 192.168.1.1 dev eth0\n192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.42"
     },
     {
      "cmd": "grep default",
@@ -69,7 +72,8 @@
      "where": "\"Servis gerçekten dinliyor mu, hangi adreste?\" sorusunu yanıtlarken.",
      "why": "Bir servis çalışıyor görünse de yanlış adreste dinliyorsa bağlantı kurulamaz.",
      "example": "sudo ss -tulpn",
-     "nosim": true
+     "nosim": true,
+     "output": "Netid State  Local Address:Port  Process\ntcp   LISTEN 0.0.0.0:22        users:((\"sshd\",pid=812,fd=3))\ntcp   LISTEN 127.0.0.1:8080    users:((\"python3\",pid=2310,fd=4))"
     },
     {
      "cmd": "ss -tln",
@@ -77,7 +81,8 @@
      "where": "Hızlı kontrol veya betiklerde.",
      "why": "Kısa ve yetkisiz çalışır; bir portun açık olup olmadığını görmeye yeter.",
      "example": "ss -tln | grep 8080",
-     "nosim": true
+     "nosim": true,
+     "output": "LISTEN 0 5 127.0.0.1:8080 0.0.0.0:*"
     },
     {
      "cmd": "curl -I",
@@ -85,7 +90,8 @@
      "where": "Servisin gerçekten HTTP yanıtı verip vermediğini sınarken.",
      "why": "Port açık olsa da uygulama yanıt vermeyebilir; `200` veya `301` gibi kod bunu gösterir.",
      "example": "curl -I http://127.0.0.1:8080",
-     "nosim": true
+     "nosim": true,
+     "output": "HTTP/1.0 200 OK\nServer: SimpleHTTP/0.6 Python/3.12\nContent-type: text/html"
     }
    ],
    "tip": "`ss` çıktısını süz: `ss -tln | grep LISTEN | wc -l` kaç TCP portunun dinlediğini sayar.",
@@ -121,7 +127,8 @@
      "where": "Uygulamaların göreceği sonucu test ederken.",
      "why": "`/etc/hosts` dosyasını da hesaba katar; yalnızca DNS'e bakan araçlardan daha doğrudur.",
      "example": "getent hosts localhost",
-     "nosim": true
+     "nosim": true,
+     "output": "127.0.0.1       localhost"
     },
     {
      "cmd": "resolvectl status",
@@ -189,7 +196,8 @@
      "where": "Geçidin, dış IP'nin ve ismin ayrı ayrı erişilebilir olduğunu denerken.",
      "why": "Hangi katmanın koptuğunu tek tek gösterir.",
      "example": "ping -c 3 1.1.1.1",
-     "nosim": true
+     "nosim": true,
+     "output": "64 bytes from 1.1.1.1: icmp_seq=1 ttl=57 time=11.8 ms\n64 bytes from 1.1.1.1: icmp_seq=2 ttl=57 time=11.2 ms\n64 bytes from 1.1.1.1: icmp_seq=3 ttl=57 time=11.5 ms\n\n3 packets transmitted, 3 received, 0% packet loss"
     },
     {
      "cmd": "cut -d",
@@ -272,11 +280,11 @@
   },
   "t16": {
    "text": "Ticket: Kullanıcılar `intranet.lab` adına ulaşamıyor. İç sunucunun adresi `192.168.1.50`. `~/net/hosts` dosyasına bu eşlemeyi ekle (mevcut satırları silme).",
-   "hint": "`echo '192.168.1.50 intranet.lab' >> ~/net/hosts`"
+   "hint": "`echo`"
   },
   "t17": {
    "text": "Ticket: Güvenlik denetimi, PostgreSQL'in (port 5432) yalnızca yerel adreste dinlediğinin kanıtını istiyor. İlgili `ss.txt` satırını `~/net/audit.txt` dosyasına kaydet.",
-   "hint": "`grep 5432 ~/net/ss.txt > ~/net/audit.txt`; satırda `127.0.0.1:5432` olmalı. (`grep` → modül 3.4.)"
+   "hint": "`grep`; satırda `127.0.0.1:5432` olmalı. (`grep` → modül 3.4.)"
   }
  },
  "vm": {
@@ -393,7 +401,7 @@
    "q": "Bir isim çözülürken genellikle hangi sıra izlenir?",
    "options": [
     "Önce `/etc/hosts`, sonra `resolv.conf` içindeki DNS sunucusu",
-    "Önce DNS sunucusu, sonra `/etc/hosts`",
+    "Önce DNS sunucusu sorulur, ardından `/etc/hosts` dosyasına bakılır",
     "Yalnızca DNS sunucusu",
     "Önce geçit, sonra `/etc/hosts`"
    ],
@@ -403,9 +411,9 @@
    "q": "`firewall-cmd --add-port=8080/tcp` komutunu `--permanent` olmadan çalıştırırsan ne olur?",
    "options": [
     "Kural sonsuza kadar kalır",
-    "Kural yalnızca yeniden başlatmadan sonra geçerli olur",
+    "Kural yalnızca yeniden başlatmadan sonra devreye girer, hemen değil",
     "Komut reddedilir",
-    "Kural hemen geçerli olur ama reload veya yeniden başlatmada kaybolur"
+    "Hemen geçerli olur, reload/yeniden başlatmada kaybolur"
    ],
    "explain": "Varsayılan runtime yapılandırmasıdır: hemen etkilidir, kalıcı değildir. Kalıcı yapmak için `--permanent` ve `--reload` gerekir."
   },
@@ -422,8 +430,8 @@
   "q6": {
    "q": "`ss -tulpn` içindeki `-p` seçeneği ne ekler?",
    "options": [
-    "Protokol adını",
-    "Port numarasını",
+    "Protokol adını (tcp/udp) ve sürüm numarasını",
+    "Port numarasını ve o porttaki bağlantı sayısını",
     "Paket sayacını",
     "Dinleyen süreci (PID/ad)"
    ],
@@ -442,12 +450,22 @@
   "q8": {
    "q": "`ip route` çıktısında `default via 10.0.0.1 dev eth0` ne anlama gelir?",
    "options": [
-    "eth0 arayüzü kapalıdır",
-    "10.0.0.1 yerel adrestir",
+    "eth0 arayüzü kapalıdır, bu yüzden hiçbir yere çıkılamaz",
+    "10.0.0.1 bu makinenin kendi yerel adresidir, ağa çıkılmaz",
     "Bilinmeyen hedefler 10.0.0.1 geçidine gider",
     "DNS sunucusu 10.0.0.1'dir"
    ],
    "explain": "`default` satırı başka hiçbir yol eşleşmediğinde kullanılan geçittir."
+  },
+  "q9": {
+   "q": "Ağ sorununda neden önce arayüz/IP, sonra yönlendirme, DNS, port ve güvenlik duvarı sırasıyla bakılır?",
+   "options": [
+    "Sıranın hiçbir önemi yoktur",
+    "Güvenlik duvarı her zaman en sık arızadır",
+    "Her katman bir altındakine dayanır; alttaki bozukken üsttekini düzeltmek boşuna olur",
+    "Komutlar yalnızca bu sırayla çalışır"
+   ],
+   "explain": "Adres yoksa yönlendirme anlamsızdır; yönlendirme yoksa DNS'e ulaşılamaz; DNS çalışmıyorsa isimle bağlanılamaz. Aşağıdan yukarı gitmek, sorunu bulunduğu katmanda yakalar."
   }
  },
  "summary": [

@@ -103,7 +103,7 @@
   },
   "t04": {
    "text": "Save resuming job 1 with `bg %1` and then checking with `jobs -l` to `~/lab/job_plan.txt`.",
-   "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt` (`>` → module 3.2.)"
+   "hint": "`echo`, `jobs` (`>` → module 3.2.)"
   },
   "t05": {
    "text": "Add bringing the job to the foreground and cleaning it up when finished to the plan.",
@@ -269,6 +269,16 @@
     "Yes, with `jobs -a`"
    ],
    "explain": "Job control is per shell; for other terminals use PID-based tools such as `kill`."
+  },
+  "q9": {
+   "q": "Why should you track a job stopped with `Ctrl+Z` using `jobs -l`?",
+   "options": [
+    "`Ctrl+Z` deletes the job and `jobs` brings it back",
+    "A stopped job continues automatically",
+    "The job is not finished, only paused; if forgotten it keeps holding memory and resources",
+    "`jobs -l` speeds the job up in the background"
+   ],
+   "explain": "`Ctrl+Z` sends SIGTSTP and pauses the job; the process stays alive and holds resources. `jobs -l` lists it; then you resume it with `bg`/`fg` or end it with `kill`."
   }
  },
  "summary": [

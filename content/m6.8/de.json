@@ -501,10 +501,10 @@
   "q1": {
    "q": "Auf Rocky Linux liefert nginx 403 für Dateien in /srv/company/web, obwohl der Modus 755 ist. Was ist die wahrscheinlichste Ursache?",
    "options": [
-    "nginx ist nicht installiert",
+    "Das nginx-Paket ist auf dem Server gar nicht installiert",
     "Die Dateien haben das falsche SELinux-Label (nicht httpd_sys_content_t)",
-    "Port 80 ist in der Firewall geschlossen",
-    "Die Gruppe staff fehlt"
+    "Port 80 ist in der Firewall möglicherweise geschlossen",
+    "Der ausführende Benutzer wurde nie zur Gruppe staff hinzugefügt"
    ],
    "explain": "Ein geschlossener Port ergibt einen Timeout, kein 403. Ein allgemeines Label unter /srv blockiert nginx; behebe es mit semanage fcontext und restorecon, nicht mit setenforce 0."
   },
@@ -514,15 +514,15 @@
     "Zuerst ufw enable, dann Regeln hinzufügen",
     "Server neu starten und hoffen",
     "Zuerst ufw allow OpenSSH, dann ufw enable",
-    "SSH abschalten und die Konsole nutzen"
+    "SSH abschalten und nur noch die Server-Konsole nutzen"
    ],
    "explain": "ufw-Regeln gelten sofort. Ohne erlaubte SSH-Regel trennt das Einschalten der Firewall deine Sitzung."
   },
   "q3": {
    "q": "Warum bekommt das gemeinsame Verzeichnis den Modus 2770 (setgid)?",
    "options": [
-    "Neue Dateien erben die Gruppe staff, sodass das Team an den Dateien der anderen arbeiten kann",
-    "Alle dürfen die Dateien lesen",
+    "Neue Dateien erben die Gruppe staff",
+    "Alle dürfen die Dateien lesen und verändern",
     "Die Dateien werden verschlüsselt",
     "Nur root darf schreiben"
    ],
@@ -531,9 +531,9 @@
   "q4": {
    "q": "Du hast company-backup.service und company-backup.timer angelegt. Was musst du tun, damit das nächtliche Backup läuft?",
    "options": [
-    "Neu starten und sonst nichts tun",
-    "chmod 777 auf die Unit-Dateien",
-    "Nichts, systemd findet sie von allein",
+    "Den Server neu starten; systemd findet die Dateien von allein",
+    "Den Unit-Dateien chmod 777 geben und auf systemd warten",
+    "Nichts tun; systemd findet neue Dateien von selbst",
     "systemctl daemon-reload, dann systemctl enable --now company-backup.timer"
    ],
    "explain": "systemd muss die Unit-Dateien neu einlesen (daemon-reload), und die Timer-Unit muss aktiviert und gestartet werden; den Service startet der Timer."
@@ -541,10 +541,10 @@
   "q5": {
    "q": "Wie setzt man auf Rocky dauerhaft das SELinux-Label für `/srv/company/web`?",
    "options": [
-    "`chcon` genügt und ist dauerhaft",
-    "`setenforce 0`",
+    "`chcon` genügt und bleibt auch nach einem Relabel erhalten",
+    "SELinux mit `setenforce 0` dauerhaft abschalten",
     "`semanage fcontext` + `restorecon`",
-    "`chmod 755`"
+    "Dem Verzeichnis `chmod 755` geben, Label unverändert lassen"
    ],
    "explain": "`semanage fcontext` trägt die Regel in die Richtlinie ein, `restorecon` wendet sie an; `chcon` geht bei Relabel verloren."
   },
@@ -552,9 +552,9 @@
    "q": "Welche Prüfreihenfolge ist bei Dienstproblemen am sichersten?",
    "options": [
     "Dienststatus → Ports (`ss`) → Firewall → Logs",
-    "Erst den Server neu starten",
-    "Erst SELinux abschalten",
-    "Erst alle Regeln löschen"
+    "Erst den Server neu starten und hoffen, dass das Problem verschwindet",
+    "Zuerst SELinux abschalten und sehen, ob es daran lag",
+    "Zuerst alle Firewall-Regeln löschen und neu anfangen"
    ],
    "explain": "Schichtweises Vorgehen grenzt das Problem schnell ein; Sicherheitsmechanismen abzuschalten ist keine Lösung."
   },
@@ -563,7 +563,7 @@
    "options": [
     "Relative Pfade",
     "Ausgabe ignorieren",
-    "Nur auf root-Umgebung vertrauen",
+    "Sich nur auf die interaktive root-Umgebung verlassen",
     "Absolute Pfade und Exit-Code-Prüfung"
    ],
    "explain": "In geplanten Jobs sind PATH und Arbeitsverzeichnis begrenzt; absolute Pfade und `set -euo pipefail` schaffen Zuverlässigkeit."
@@ -571,12 +571,22 @@
   "q8": {
    "q": "Was fehlt bei `0770` statt `2770` für ein Gruppenverzeichnis?",
    "options": [
-    "Gruppen-Schreibrecht",
+    "Gibt der Gruppe Schreibrecht, vererbt aber die Gruppe nicht",
     "Neue Dateien erben die Verzeichnisgruppe nicht",
-    "Zugriff des Besitzers",
-    "Zugriff der anderen"
+    "Dauerhafte Einschränkung des Zugriffs des Dateibesitzers",
+    "Automatisches Sperren des Zugriffs anderer Benutzer"
    ],
    "explain": "Das Setgid-Bit (2) lässt neue Dateien die Gruppe des Verzeichnisses erben; ohne verliert das Team den gemeinsamen Zugriff."
+  },
+  "q9": {
+   "q": "Warum startet die Checkliste vor der Abgabe den Dienst neu und prüft von vorn?",
+   "options": [
+    "Ein Neustart behebt automatisch alle Fehler",
+    "Die Checkliste soll nur den Bericht länger wirken lassen",
+    "Laufzeit-Einstellungen gehen beim Neustart verloren; dauerhafte bleiben bestehen",
+    "Ohne Neustart schreibt der Dienst keine Logs"
+   ],
+   "explain": "`setenforce`, `--timeout` oder Regeln ohne `--permanent` verschwinden nach einem Neustart. Neustart und erneute Prüfung beweisen, dass die Einstellung wirklich dauerhaft ist (permanent, enable, fcontext)."
   }
  },
  "summary": [

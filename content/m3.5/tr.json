@@ -126,27 +126,27 @@
  "tasks": {
   "t01": {
    "text": "`data/fruits.txt` satırlarını alfabetik sırala.",
-   "hint": "`sort data/fruits.txt`."
+   "hint": "`sort` komutu dosya adını argüman olarak alır."
   },
   "t02": {
    "text": "Aynı meyve listesini ters sırada göster.",
-   "hint": "`sort -r data/fruits.txt`."
+   "hint": "`sort` komutunun ters sıralama bayrağını kullan."
   },
   "t03": {
    "text": "`data/numbers.txt` içindeki sayıları sayısal olarak sırala.",
-   "hint": "`sort -n data/numbers.txt`."
+   "hint": "`sort` ile sayısal sıralama bayrağını ekle; yoksa \"10\" \"2\"den önce gelir."
   },
   "t04": {
    "text": "Meyve listesindeki tekrarları kaldır; önce sıralamayı unutma.",
-   "hint": "`sort data/fruits.txt | uniq`."
+   "hint": "`sort` çıktısını boru ile `uniq`e ver; `uniq` yalnızca ardışık tekrarları siler."
   },
   "t05": {
    "text": "Her meyvenin kaç kez geçtiğini say.",
-   "hint": "`sort data/fruits.txt | uniq -c`."
+   "hint": "Sıralı çıktıyı `uniq`e ver; sayma bayrağı her satırın önüne sayıyı yazar."
   },
   "t06": {
    "text": "CSV dosyasından yalnızca çalışan adlarını, yani ilk sütunu çıkar.",
-   "hint": "Ayraç virgül olduğu için `cut -d, -f1 data/employees.csv` kullan."
+   "hint": "`cut` ile ayraç ve alan numarası bayraklarını kullan; ayraç virgüldür."
   },
   "t07": {
    "text": "Tahmin et: çalışan CSV'sindeki bölüm adlarının sıklığı nedir? İlk alan olan başlık da çıktıda kalır.",
@@ -162,7 +162,7 @@
   },
   "t10": {
    "text": "Mini görev: `hello` metnini `tr` ile büyük harfe çevir.",
-   "hint": "`echo hello | tr 'a-z' 'A-Z'`."
+   "hint": "`echo` çıktısını boru ile `tr`ye ver; iki argüman: küçük harf aralığı, büyük harf aralığı."
   },
   "t11": {
    "text": "Mini görev: `reports/departments.txt` dosyasına çalışanların benzersiz bölüm adlarını yaz.",
@@ -247,9 +247,9 @@
   "q2": {
    "q": "`uniq` neden genellikle `sort` sonrasında kullanılır?",
    "options": [
-    "`uniq` yalnız CSV okur",
-    "`sort` dosyayı yedekler",
-    "`uniq` tüm metni büyük harfe çevirir",
+    "`uniq` yalnızca CSV biçimindeki dosyaları okuyabilir",
+    "`sort` işlem öncesinde dosyanın yedeğini alır",
+    "`uniq` tüm metni büyük harfe çevirir ve yazar",
     "`uniq` yalnızca ardışık tekrarları birleştirir"
    ],
    "explain": "Sıralama aynı değerleri yan yana getirir; böylece `uniq` hepsini birleştirebilir."
@@ -257,20 +257,20 @@
   "q3": {
    "q": "`cut -d, -f2 file.csv` neyi seçer?",
    "options": [
-    "Virgülle ayrılan ikinci alanı",
-    "İkinci satırı",
-    "İkinci karakteri",
-    "Dosyanın boyutunu"
+    "Virgülle ayrılmış ikinci alanı",
+    "Dosyadaki ikinci satırın tamamını",
+    "Her satırdaki ikinci karakteri",
+    "Dosyanın bayt cinsinden boyutunu"
    ],
    "explain": "`-d,` virgülü ayraç yapar, `-f2` ikinci alanı seçer."
   },
   "q4": {
    "q": "`tr 'a-z' 'A-Z'` ne yapar?",
    "options": [
-    "Satırları ters sıralar",
-    "Tekrarları sayar",
-    "Küçük ASCII harflerini büyük harflere dönüştürür",
-    "İkinci sütunu çıkarır"
+    "Satırları ters sırada sıralar",
+    "Tekrar eden satırları sayar ve gösterir",
+    "Küçük harfleri büyük harfe çevirir",
+    "Her satırdan ikinci sütunu çıkarır"
    ],
    "explain": "`tr` karakter kümelerini dönüştürür; bu örnek ASCII küçük harflerini büyütür."
   },
@@ -297,10 +297,10 @@
   "q7": {
    "q": "`cut -d: -f1 /etc/passwd` ne yazar?",
    "options": [
-    "Her satırın son alanını",
-    "Her satırın ilk karakterini",
-    "Satır sayısını",
-    "İki nokta ile ayrılmış ilk alanı (kullanıcı adı)"
+    "Her satırdaki son alanı (kabuk)",
+    "Her satırın ilk karakterini yalnızca",
+    "Dosyadaki toplam satır sayısını",
+    "İlk iki nokta üst üste alanı (kullanıcı adı)"
    ],
    "explain": "`-d:` ayırıcıyı `:` yapar, `-f1` birinci alanı seçer; `/etc/passwd`'de bu kullanıcı adıdır."
   },
@@ -313,6 +313,16 @@
     "`cut | tr`"
    ],
    "explain": "`sort` eşitleri bir araya getirir, `uniq -c` sayar, `sort -nr` sayıya göre büyükten küçüğe dizer."
+  },
+  "q9": {
+   "q": "`sort | uniq -c | sort -nr` zincirinde ikinci `sort` neden gerekir?",
+   "options": [
+    "`uniq -c` sayıları ekler ama sıralamaz; sayıya göre dizmek için `-nr` gerekir",
+    "`uniq -c` çıktıyı bozar, ikinci sort onu onarır",
+    "İkinci sort tekrarlayan satırları siler",
+    "Zincir ikinci sort olmadan hata verir"
+   ],
+   "explain": "`uniq -c` her satırın önüne tekrar sayısını koyar, ama çıktıyı sayıya göre sıralamaz. `sort -nr` en sık geçeni en üste getirir."
   }
  },
  "summary": [

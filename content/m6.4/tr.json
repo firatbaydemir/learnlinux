@@ -22,7 +22,8 @@
      "where": "Hangi disklerin havuza ait olduğunu görmek için.",
      "why": "PFree sütunu PV'de boş yeri gösterir.",
      "example": "sudo pvs",
-     "nosim": true
+     "nosim": true,
+     "output": "  PV         VG      Fmt  Attr PSize   PFree\n  /dev/loop0 vg_data lvm2 a--  296.00m 96.00m"
     },
     {
      "cmd": "vgs",
@@ -30,7 +31,8 @@
      "where": "Genişletmeden önce havuzda yer var mı diye bakarken.",
      "why": "VFree 0 ise önce vgextend ile PV eklemen gerekir.",
      "example": "sudo vgs",
-     "nosim": true
+     "nosim": true,
+     "output": "  VG      #PV #LV #SN Attr   VSize   VFree\n  vg_data   1   1   0 wz--n- 296.00m 96.00m"
     },
     {
      "cmd": "lvs",
@@ -38,7 +40,8 @@
      "where": "Hangi hacim hangi VG'de, ne kadar büyük?",
      "why": "Hızlı genel bakış verir.",
      "example": "sudo lvs",
-     "nosim": true
+     "nosim": true,
+     "output": "  LV     VG      Attr       LSize\n  lv_web vg_data -wi-ao---- 200.00m"
     },
     {
      "cmd": "lvdisplay",
@@ -54,7 +57,8 @@
      "where": "Her LVM işleminden önce.",
      "why": "Doğru aygıtı seçtiğinden emin olursun.",
      "example": "lsblk -f",
-     "nosim": true
+     "nosim": true,
+     "output": "NAME   FSTYPE      FSVER LABEL UUID  MOUNTPOINTS\nloop0  LVM2_member LVM2 001\n└─vg_data-lv_web xfs  1 /mnt/web"
     }
    ],
    "tip": "Önce **oku, sonra yaz**: pvs, vgs, lvs ve lsblk -f hiçbir şeyi değiştirmez; değiştiren komutlardan önce hep bunları çalıştır."
@@ -89,7 +93,8 @@
      "where": "Hangi loop'un hangi dosyaya ait olduğunu doğrularken.",
      "why": "Yanlış aygıta yazmanı önler.",
      "example": "losetup -a",
-     "nosim": true
+     "nosim": true,
+     "output": "/dev/loop0: [64769]:131 (/home/user/lvm-lab/disk1.img)"
     },
     {
      "cmd": "losetup -d",
@@ -117,7 +122,8 @@
      "where": "Havuza disk eklemeden önce.",
      "why": "VG yalnızca PV'lerden kurulur.",
      "example": "sudo pvcreate $LOOP1",
-     "nosim": true
+     "nosim": true,
+     "output": "  Physical volume \"/dev/loop0\" successfully created."
     },
     {
      "cmd": "vgcreate",
@@ -125,7 +131,8 @@
      "where": "Havuzu kurarken.",
      "why": "Hacimler bu havuzdan kesilir.",
      "example": "sudo vgcreate vg_data $LOOP1",
-     "nosim": true
+     "nosim": true,
+     "output": "  Volume group \"vg_data\" successfully created"
     },
     {
      "cmd": "lvcreate",
@@ -133,7 +140,8 @@
      "where": "Uygulamaya ayrı hacim verirken.",
      "why": "-n ile ad, -L ile boyut verirsin.",
      "example": "sudo lvcreate -L 200M -n lv_web vg_data",
-     "nosim": true
+     "nosim": true,
+     "output": "  Logical volume \"lv_web\" created."
     },
     {
      "cmd": "mkfs.xfs",
@@ -168,7 +176,8 @@
      "where": "Dolan bir hacmi çevrimiçi genişletirken.",
      "why": "İkinci adımı unutma riskini ortadan kaldırır.",
      "example": "sudo lvextend -r -L +100M /dev/vg_data/lv_web",
-     "nosim": true
+     "nosim": true,
+     "output": "  Size of logical volume vg_data/lv_web changed from 200.00 MiB to 300.00 MiB.\n  Logical volume vg_data/lv_web successfully resized."
     },
     {
      "cmd": "xfs_growfs",
@@ -450,6 +459,16 @@
     "LV üzerine kurulum"
    ],
    "explain": "XFS yalnızca büyütülebilir; küçültmek için yedekle, yeniden oluştur, geri yükle gerekir."
+  },
+  "q9": {
+   "q": "LVM, doğrudan bölüm (partition) kullanmaya göre neden disk büyütmeyi kolaylaştırır?",
+   "options": [
+    "LVM diskleri otomatik olarak daha hızlı yapar",
+    "Bölümler hiçbir zaman büyütülemez",
+    "LVM veriyi otomatik olarak yedekler",
+    "VG'deki boş alan, çalışırken LV'ye eklenebilir; bölüm sınırlarına bağlı kalınmaz"
+   ],
+   "explain": "LV, VG havuzundan alan alır. VG'de boş alan ya da yeni bir PV varsa `lvextend -r` ile LV ve dosya sistemi birlikte büyür; bölüm tablosunu yeniden yazmak gerekmez."
   }
  },
  "summary": [

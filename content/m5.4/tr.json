@@ -103,7 +103,7 @@
   },
   "t04": {
    "text": "Duraklatılmış 1 numaralı işi sürdürmek için `bg %1` komutunu ve ardından `jobs -l` kontrolünü `~/lab/job_plan.txt` içine kaydet.",
-   "hint": "`echo 'bg %1; jobs -l' > ~/lab/job_plan.txt` (`>` → modül 3.2.)"
+   "hint": "`echo`, `jobs` (`>` → modül 3.2.)"
   },
   "t05": {
    "text": "Planın sonuna işi ön plana alma ve iş bitince temizleme adımlarını ekle.",
@@ -269,6 +269,16 @@
     "Evet, `jobs -a` ile"
    ],
    "explain": "İş kontrolü kabuğa özeldir; başka terminaldeki süreç için `kill` gibi PID tabanlı araçlar gerekir."
+  },
+  "q9": {
+   "q": "`Ctrl+Z` ile durdurduğun işi neden `jobs -l` ile takip etmelisin?",
+   "options": [
+    "`Ctrl+Z` işi siler, `jobs` geri getirir",
+    "Durdurulan iş otomatik olarak devam eder",
+    "İş bitmemiştir, yalnızca duraklamıştır; unutulursa bellek ve kaynak tutmaya devam eder",
+    "`jobs -l` işi arka planda hızlandırır"
+   ],
+   "explain": "`Ctrl+Z` SIGTSTP gönderir ve işi duraklatır; süreç yaşar ve kaynak tutar. `jobs -l` onu listeler; sonra `bg`/`fg` ile devam ettirir ya da `kill` ile sonlandırırsın."
   }
  },
  "summary": [

@@ -476,6 +476,16 @@
     "Sichert das Skript"
    ],
    "explain": "Der Shebang nennt dem Kernel den Interpreter; das Ausführungsrecht braucht weiterhin `chmod +x`."
+  },
+  "q9": {
+   "q": "Warum schreibt man Variablen in Skripten meist in Anführungszeichen, also `\"$var\"`?",
+   "options": [
+    "Ohne Anführungszeichen funktioniert eine Variable nie",
+    "Werte mit Leerzeichen oder Platzhaltern bleiben ein Stück; sonst werden sie in Wörter zerlegt",
+    "Anführungszeichen machen das Skript schneller",
+    "Anführungszeichen machen die Variable schreibgeschützt"
+   ],
+   "explain": "Ohne Anführungszeichen wird `$datei` an Leerzeichen getrennt und Zeichen wie `*` werden expandiert; `rm $datei` kann Unerwartetes löschen. `\"$datei\"` bewahrt den Wert als ein Argument."
   }
  },
  "summary": [

@@ -239,19 +239,19 @@
   "q3": {
    "q": "Was bewirkt `apt update`?",
    "options": [
-    "Es aktualisiert den Kernel",
+    "Aktualisiert den Kernel auf eine neue Version",
     "Es aktualisiert die Paketlisten",
-    "Es entfernt alle Pakete",
-    "Es startet das System neu"
+    "Entfernt alle installierten Pakete vom System",
+    "Startet das System sofort neu"
    ],
    "explain": "apt update erneuert lokale Repository-Indizes; für Paketupgrades brauchst du apt upgrade."
   },
   "q4": {
    "q": "Was solltest du im Bestätigungsdialog einer Installation tun?",
    "options": [
-    "Immer bestätigen",
-    "Kritische Pakete ignorieren",
-    "Enter drücken, ohne die Ausgabe anzusehen",
+    "Immer bestätigen, ohne etwas zu lesen",
+    "Kritische Pakete ignorieren und einfach weitermachen",
+    "Direkt Enter drücken, ohne die Ausgabe zu sehen",
     "Pakete prüfen, die hinzugefügt oder entfernt werden"
    ],
    "explain": "Die Abhängigkeitsauflösung kann weitere Pakete ändern; prüfe die Liste vor der Ausführung."
@@ -270,18 +270,18 @@
    "q": "Welcher Befehl findet das RPM-Paket, zu dem eine Datei gehört?",
    "options": [
     "`rpm -qf /pfad/datei`",
-    "`rpm -ql datei`",
-    "`dnf clean datei`",
-    "`rpm -e datei`"
+    "`rpm -ql dosya` (listet die Dateien eines Pakets)",
+    "`dnf clean dosya` (leert den Cache)",
+    "`rpm -e dosya` (entfernt ein Paket)"
    ],
    "explain": "`rpm -qf` geht von Datei zu Paket, `rpm -ql` von Paket zur Dateiliste."
   },
   "q7": {
    "q": "Was unterscheidet `apt remove` von `apt purge`?",
    "options": [
-    "Kein Unterschied",
-    "`purge` löscht nur Abhängigkeiten",
-    "`remove` löscht auch Benutzerdaten",
+    "Zwischen beiden gibt es keinen Unterschied",
+    "`purge` löscht nur überflüssige Abhängigkeiten",
+    "`remove` löscht auch Benutzerdaten und Einstellungen",
     "`purge` entfernt auch Konfigurationsdateien"
    ],
    "explain": "`remove` lässt die Konfiguration in `/etc`; `purge` löscht sie ebenfalls."
@@ -289,12 +289,22 @@
   "q8": {
    "q": "Was tut `dpkg -i paket.deb` nicht?",
    "options": [
-    "Das Paket installieren",
+    "Installiert das Paket auf dem System",
     "Fehlende Abhängigkeiten selbst herunterladen",
-    "Das Paket in die Datenbank eintragen",
-    "Paketdateien entpacken"
+    "Trägt das Paket in die dpkg-Datenbank ein",
+    "Entpackt die Paketdateien in Systemverzeichnisse"
    ],
    "explain": "`dpkg` nutzt keine Repos und löst keine Abhängigkeiten; `apt install ./paket.deb` tut das."
+  },
+  "q9": {
+   "q": "Warum werden die Pakete selbst nicht aktualisiert, wenn man in der Debian-Familie `apt update` ausführt?",
+   "options": [
+    "Der Befehl meldet einen Fehler und tut nichts",
+    "Er aktualisiert nur die Paketlisten (Repository-Infos); fürs Upgrade braucht es `apt upgrade`",
+    "Updates werden erst nach einem Neustart angewendet",
+    "`apt update` betrifft nur nicht installierte Pakete"
+   ],
+   "explain": "`apt update` lädt die aktuellen Paketinformationen der Repositories. Das Upgrade installierter Pakete ist ein eigener Schritt (`apt upgrade`); erst Listen erneuern, dann aktualisieren."
   }
  },
  "summary": [

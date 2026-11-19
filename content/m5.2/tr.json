@@ -30,7 +30,8 @@
      "where": "Yükü değerlendirmek için uptime ile birlikte.",
      "why": "8 çekirdekte 4.0 yük normaldir, 2 çekirdekte doygunluktur.",
      "example": "nproc",
-     "nosim": true
+     "nosim": true,
+     "output": "4"
     },
     {
      "cmd": "lscpu",
@@ -46,7 +47,8 @@
      "where": "Betiklerde veya uptime kurulu değilse.",
      "why": "uptime ve top'un okuduğu kaynak budur.",
      "example": "cat /proc/loadavg",
-     "nosim": true
+     "nosim": true,
+     "output": "0.42 0.35 0.30 1/312 2415"
     }
    ],
    "tip": "Hızlı kontrol: ilk yük değerini `nproc` değerine böl; 1'in üstündeyse CPU doygundur."
@@ -73,7 +75,8 @@
      "where": "Betikler için veya MemAvailable, SwapFree gibi kesin değerler gerektiğinde.",
      "why": "free'nin arkasındaki kaynak budur.",
      "example": "grep MemAvailable /proc/meminfo",
-     "nosim": true
+     "nosim": true,
+     "output": "MemAvailable:    5821344 kB"
     },
     {
      "cmd": "vmstat 1 5",
@@ -108,7 +111,8 @@
      "where": "Ev dizinin veya /var/log gibi tek bir klasörü ölçmek için.",
      "why": "'Bu ne kadar yer tutuyor?' sorusunu tek satırda yanıtlar.",
      "example": "du -sh ~/Documents",
-     "nosim": true
+     "nosim": true,
+     "output": "1.2G    /home/user/Documents"
     },
     {
      "cmd": "du -h | sort -h",
@@ -153,7 +157,8 @@
      "where": "Betiklerde, ticket'larda ve head veya grep'e pipe ederken.",
      "why": "Çıktıyı kaydedebilir veya süzebilirsin, örneğin `top -b -n 1 | head -n 15`.",
      "example": "top -b -n 1 | head -n 15",
-     "nosim": true
+     "nosim": true,
+     "output": "top - 09:30:01 up 1:30,  1 user,  load average: 0.42, 0.35, 0.30\nTasks: 180 total,   1 running, 179 sleeping\n%Cpu(s):  2.0 us,  1.0 sy, 96.5 id\nMiB Mem :  7843.0 total,  5100.0 free,  1500.0 used"
     },
     {
      "cmd": "htop",
@@ -246,15 +251,15 @@
   },
   "t13": {
    "text": "Mini: `~/lab/ps_snapshot.txt` içindeki en çok bellek tüketen 2 süreci `~/lab/top_mem.txt` dosyasına kaydet. `sort -k4 -nr` ile 4. sütuna göre sırala, `head -n 2` ile iki satır al ve `>` ile yönlendir.",
-   "hint": "`sort -k4 -nr ~/lab/ps_snapshot.txt | head -n 2 > ~/lab/top_mem.txt` (`sort/head` → modül 3.5/3.2; `>` → modül 3.2.)"
+   "hint": "`sort -nr`, `head -n` (`sort/head` → modül 3.5/3.2; `>` → modül 3.2.)"
   },
   "t14": {
    "text": "Debug: `~/lab/monitor_cmds.txt` yanlış komutlar listeliyor (`nprocs` diye komut yok ve `free -m` okunabilir değil). Dosyayı `printf` ile yeniden yaz: her satırda bir tane olmak üzere `cores: nproc`, `memory: free -h` ve `disk: df -h` içersin.",
-   "hint": "`printf 'cores: nproc\\nmemory: free -h\\ndisk: df -h\\n' > ~/lab/monitor_cmds.txt` (`>` → modül 3.2.)"
+   "hint": "`printf` (`>` → modül 3.2.)"
   },
   "t15": {
    "text": "Mini: `~/lab/du_report.txt` boyutları KB olarak içerir. En büyük 3 kaydı `sort -nr`, `head -n 3` ve `>` ile `~/lab/biggest.txt` dosyasına kaydet.",
-   "hint": "`sort -nr ~/lab/du_report.txt | head -n 3 > ~/lab/biggest.txt` (`sort/head` → modül 3.5/3.2; `>` → modül 3.2.)"
+   "hint": "`sort -nr`, `head -n` (`sort/head` → modül 3.5/3.2; `>` → modül 3.2.)"
   },
   "t16": {
    "text": "Challenge: `~/lab/report.txt` dosyasını üç parçadan kur: `~/lab/loadavg.txt` içindeki 1 dakikalık yük (`cut` kullan), `~/lab/meminfo.txt` içindeki `MemAvailable` satırı (`grep` kullan, `>>` ile ekle) ve kararın `overloaded` (`echo` kullan, ekle).",
@@ -262,7 +267,7 @@
   },
   "t17": {
    "text": "TICKET #5201 — linux-lab sunucusu çok yavaş. `~/lab/top_snapshot.txt` içinde `top -b -n 1` çıktısı var. En yüksek CPU kullanan süreci bul ve adını ile kullanıcısını `~/lab/culprit.txt` dosyasına yaz.",
-   "hint": "`head -n 9 ~/lab/top_snapshot.txt` ile ilk süreç satırına bak, sonra `echo \"name user\" > ~/lab/culprit.txt`. (`>` → modül 3.2.)"
+   "hint": "`head -n` ile ilk süreç satırına bak, sonra `echo \"name user\" > ~/lab/culprit.txt`. (`>` → modül 3.2.)"
   }
  },
  "quiz": {
@@ -279,19 +284,19 @@
   "q2": {
    "q": "4 çekirdekli bir makinede 1 dakikalık yük 8.0. Bu ne demektir?",
    "options": [
-    "Her şey yolunda",
+    "Her şey yolunda, sistem rahat çalışıyor",
     "CPU doygun: süreçler sırada bekliyor",
-    "Disk dolu",
-    "Sistem yeni açıldı"
+    "Disk dolu, yazma işlemleri başarısız",
+    "Sistem yeni açıldı, değer geçici"
    ],
    "explain": "Yük çekirdek sayısına göre okunur. 4 çekirdekte yük 8, çekirdeğin iki katı çalışmaya hazır görev demektir."
   },
   "q3": {
    "q": "Rocky Linux'ta htop nasıl kurulur?",
    "options": [
-    "sudo apt install htop",
-    "doğrudan sudo dnf install htop, her zaman çalışır",
-    "sudo yum remove htop",
+    "`sudo apt install htop` yeterlidir, Rocky'de de çalışır",
+    "Doğrudan `sudo dnf install htop`; ek depo gerekmez, her ortamda çalışır",
+    "`sudo yum remove htop` ile eskisini silip yeniden denemek",
     "sudo dnf install epel-release, sonra sudo dnf install htop"
    ],
    "explain": "RHEL ailesinde htop EPEL deposundadır, önce EPEL'i etkinleştir. apt Debian/Ubuntu içindir."
@@ -300,9 +305,9 @@
    "q": "En çok bellek tüketenleri hangi komut listeler?",
    "options": [
     "ps aux --sort=-%mem | head",
-    "df -h",
-    "uptime",
-    "nproc"
+    "`df -h` (disk doluluğunu gösterir)",
+    "`uptime` (yük ortalamasını gösterir)",
+    "`nproc` (çekirdek sayısını verir)"
    ],
    "explain": "ps ile --sort=-%mem belleğe göre azalan sıralar; head ilk satırları gösterir."
   },
@@ -319,9 +324,9 @@
   "q6": {
    "q": "Hangi komut disk G/Ç istatistiklerini aygıt bazında gösterir?",
    "options": [
-    "`free`",
-    "`uptime`",
-    "`ps`",
+    "`free` (bellek kullanımını gösterir)",
+    "`uptime` (yük ortalamasını gösterir)",
+    "`ps` (süreç listesini gösterir)",
     "`iostat -x`"
    ],
    "explain": "`iostat` (sysstat paketi) aygıt başına verimi, bekleme süresini ve kullanımı gösterir."
@@ -330,9 +335,9 @@
    "q": "`top` içinde `wa` değeri yüksekse en olası neden nedir?",
    "options": [
     "Süreçler disk/G/Ç beklemesinde",
-    "CPU aşırı ısınmış",
-    "Bellek dolu",
-    "Ağ bağlantısı kopmuş"
+    "CPU aşırı ısındığı için hızını kesiyor",
+    "Bellek tamamen dolmuş, takas devrede",
+    "Ağ bağlantısı kopmuş, paketler gelmiyor"
    ],
    "explain": "`wa` = I/O wait: CPU boşta ama G/Ç tamamlanmasını bekliyor."
   },
@@ -345,6 +350,16 @@
     "5, 15 ve 60 dakika"
    ],
    "explain": "Yük ortalamaları son 1, 5 ve 15 dakikadır."
+  },
+  "q9": {
+   "q": "Aynı `4.0` load average değeri neden 8 çekirdekli makinede normal, 2 çekirdekli makinede sorunludur?",
+   "options": [
+    "Çekirdek sayısı arttıkça load değeri otomatik düşer",
+    "Load yalnızca RAM kullanımını gösterir",
+    "2 çekirdekli makinelerde load average hiç hesaplanmaz",
+    "Load, çalışmak için sırada bekleyen iş sayısıdır; çekirdek sayısına bölünerek okunur"
+   ],
+   "explain": "Load average, çalışan ve çalışmayı bekleyen işlerin ortalamasıdır. 8 çekirdekte 4.0 yarı dolulukken, 2 çekirdekte işler sırada bekler; bu yüzden değer `nproc` ile birlikte yorumlanır."
   }
  },
  "summary": [

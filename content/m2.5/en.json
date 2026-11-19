@@ -234,7 +234,7 @@
   },
   "t17": {
    "text": "Ticket #2520: The audit team wants the size of `~/info/data.txt` in bytes in the file `~/size.txt`. Redirect the output into the file.",
-   "hint": "`wc -c ~/info/data.txt > ~/size.txt` (`>` redirects output to a file; details in module 3.2.)"
+   "hint": "`wc -c` (`>` redirects output to a file; details in module 3.2.)"
   }
  },
  "vm": {
@@ -389,6 +389,16 @@
     "Directory; blue"
    ],
    "explain": "If the target is deleted the link remains but points nowhere: a dangling link. `cat` reports \"No such file\"."
+  },
+  "q9": {
+   "q": "Why is a symbolic link only a few bytes in `ls -l` instead of the size of the target file?",
+   "options": [
+    "The link is a compressed copy of the target",
+    "The link only stores the path (name) of the target; the content stays in the target file",
+    "`ls -l` shows link sizes incorrectly",
+    "The link stores the first line of the file"
+   ],
+   "explain": "A symbolic link holds no data, only the target path; its size equals the path length. That is why it breaks when the target is deleted."
   }
  },
  "summary": [

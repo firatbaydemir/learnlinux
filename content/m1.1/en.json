@@ -274,7 +274,7 @@
   },
   "t14": {
    "text": "Mini project: go to the `~/projects/website/css` directory, list its contents, then go up two directories and finish in `~/projects`.",
-   "hint": "`cd ~/projects/website/css`, `ls -l`, `cd ../..`."
+   "hint": "`cd`, `ls -l`, `cd ../..`."
   },
   "t15": {
    "text": "Challenge: list the contents of both `~/Documents` and `~/projects/website`, including hidden files, with a single `ls` command.",
@@ -282,7 +282,7 @@
   },
   "t16": {
    "text": "TICKET #1101 — A colleague wants the full path of the `images` folder in the `website` project. Go to the folder, show the path with `pwd`, then return to your home directory.",
-   "hint": "`cd ~/projects/website/images`, `pwd`, `cd`."
+   "hint": "`cd`, `pwd`, `cd`."
   }
  },
  "vm": {
@@ -439,6 +439,16 @@
     "Empty files"
    ],
    "explain": "In every directory `.` is itself and `..` is the parent; `ls -a` shows them."
+  },
+  "q9": {
+   "q": "Outside `/etc`, `ls passwd` fails but `ls /etc/passwd` works. Why?",
+   "options": [
+    "`ls` only works inside /etc",
+    "`passwd` is a hidden file",
+    "The `/` character unlocks permissions",
+    "A relative path is searched from your current directory; an absolute path starts at `/` and works anywhere"
+   ],
+   "explain": "Relative paths depend on where you are; absolute paths start at the root `/` and do not."
   }
  },
  "summary": [
