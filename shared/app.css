@@ -252,7 +252,7 @@ h2{font-size:1.5rem}
 .retry-bar{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
 .recall summary{cursor:pointer;color:var(--ac2);font-weight:700}
 /*mobile*/
-html,body{overflow-x:hidden}
+html,body{overflow-x:clip}
 img,svg,video{max-width:100%}
 .content table{display:block;max-width:100%;overflow-x:auto}
 .content pre,.code pre,pre.out{max-width:100%;-webkit-overflow-scrolling:touch}
