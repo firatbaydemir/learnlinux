@@ -92,6 +92,15 @@
      "example": "curl -I http://127.0.0.1:8080",
      "nosim": true,
      "output": "HTTP/1.0 200 OK\nServer: SimpleHTTP/0.6 Python/3.12\nContent-type: text/html"
+    },
+    {
+     "cmd": "wget",
+     "what": "Lädt die Datei unter einer URL herunter und speichert sie (`curl` schreibt standardmäßig auf den Bildschirm).",
+     "where": "Beim Holen eines Pakets oder einer Datei in Skripten oder auf Servern.",
+     "why": "Kürzer als `curl -O`, um in eine Datei zu speichern; `-c` setzt einen abgebrochenen Download fort. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel. Probiere ihn auf einem echten Rechner.",
+     "example": "wget https://example.com/file.txt",
+     "nosim": true,
+     "output": "--2025-01-10 10:00:01--  https://example.com/file.txt\nConnecting to example.com... connected.\nHTTP request sent, awaiting response... 200 OK\nLength: 1256 (1.2K)\nSaving to: 'file.txt'\n\nfile.txt  100%[=====>]  1.23K  --.-KB/s  in 0s"
     }
    ],
    "tip": "Filtere die `ss`-Ausgabe: `ss -tln | grep LISTEN | wc -l` zählt, wie viele TCP-Ports lauschen.",
@@ -137,6 +146,24 @@
      "why": "Enthüllt den echten DNS-Server hinter `127.0.0.53`.",
      "example": "resolvectl status",
      "nosim": true
+    },
+    {
+     "cmd": "dig",
+     "what": "Fragt einen DNS-Server direkt ab; zeigt Antwort, TTL und den antwortenden Server.",
+     "where": "Um zu klären, ob ein Namensproblem im DNS oder woanders liegt.",
+     "why": "`getent` zeigt, was das System sieht, `dig` nur die DNS-Antwort; der Vergleich grenzt den Fehler ein. `dig +short example.com` gibt nur die IP aus. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel. Probiere ihn auf einem echten Rechner.",
+     "example": "dig example.com",
+     "nosim": true,
+     "output": "; <<>> DiG <<>> example.com\n;; ANSWER SECTION:\nexample.com.    300 IN  A   93.184.216.34\n;; SERVER: 192.168.1.1#53(192.168.1.1)"
+    },
+    {
+     "cmd": "nslookup",
+     "what": "Der einfachere Bruder von `dig`: fragt das DNS nach einem Namen und gibt die Adresse aus.",
+     "where": "Für einen schnellen Check auf Rechnern ohne `dig` (kein bind-utils/dnsutils).",
+     "why": "Es ist auf fast jedem System vorhanden und daher oft das erste DNS-Werkzeug. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel. Probiere ihn auf einem echten Rechner.",
+     "example": "nslookup example.com",
+     "nosim": true,
+     "output": "Server:         192.168.1.1\nAddress:        192.168.1.1#53\n\nName:   example.com\nAddress: 93.184.216.34"
     }
    ],
    "tip": "Vor Änderungen sichern: `sudo cp /etc/hosts /etc/hosts.bak`.",
@@ -212,6 +239,15 @@
      "where": "Wenn du eine saubere Liste lauschender Ports erstellst.",
      "why": "Liefert eine übersichtliche, duplikatfreie Liste für Berichte und Vergleiche.",
      "example": "sort -n ~/net/ports.txt | uniq"
+    },
+    {
+     "cmd": "traceroute",
+     "what": "Listet jeden Router (Hop) auf, den ein Paket zum Ziel passiert. `tracepath` tut dasselbe ohne root.",
+     "where": "Wenn eine Verbindung das Ziel nicht erreicht und du die Bruchstelle des Wegs suchst.",
+     "why": "`ping` sagt nur, ob es ankommt; `traceroute` zeigt, an welchem Hop es hängen bleibt. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel. Probiere ihn auf einem echten Rechner.",
+     "example": "traceroute example.com",
+     "nosim": true,
+     "output": "traceroute to example.com (93.184.216.34), 30 hops max\n 1  192.168.1.1  1.2 ms\n 2  10.20.0.1  8.9 ms\n 3  93.184.216.34  21.4 ms"
     }
    ],
    "tip": "Schreibe deine Ergebnisse in einen Bericht: `hostname > ~/net/report.txt`, dann mit `>>` anhängen. So lässt er sich leicht in ein Support-Ticket einfügen."
@@ -285,6 +321,10 @@
   "t17": {
    "text": "Ticket: Ein Sicherheits-Audit verlangt den Nachweis, dass PostgreSQL (Port 5432) nur auf der lokalen Adresse lauscht. Speichere die passende Zeile aus `ss.txt` in `~/net/audit.txt`.",
    "hint": "`grep`; die Zeile muss `127.0.0.1:5432` enthalten. (`grep` → Modul 3.4.)"
+  },
+  "t18": {
+   "text": "Frage den Namen `example.com` mit `dig` oder `nslookup` ab (Befehl tippen; der Simulator prüft nur die Syntax).",
+   "hint": "Eines der beiden Werkzeuge genügt; der Zielname ist `example.com`. (Siehe DNS-Abschnitt.)"
   }
  },
  "vm": {

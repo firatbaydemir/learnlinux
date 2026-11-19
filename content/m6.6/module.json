@@ -184,7 +184,8 @@
     "printf '#!/usr/bin/env bash\\ncheck_host() {\\n  local h=$1\\n  echo \"check $h\"\\n}\\nwhile IFS= read -r host; do\\n  [ -n \"$host\" ] || continue\\n  check_host \"$host\"\\ndone < ~/lab/servers.txt\\n' > ~/scripts/check_all.sh",
     "chmod 755 ~/scripts/check_all.sh"
    ]
-  }
+  },
+  {"id": "t18", "kind": "guided", "diff": 2, "check": {"cmd": "^expr\\s+\\d+\\s+[-+%/]\\s+\\d+$", "ok": true}, "solution": ["expr 10 - 3"]}
  ],
  "quiz": [
   {"id": "q1", "answer": 2},

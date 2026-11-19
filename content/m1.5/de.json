@@ -175,6 +175,15 @@
      "why": "Hält die Umgebung sauber.",
      "example": "unset GREETING",
      "nosim": true
+    },
+    {
+     "cmd": "PS1",
+     "what": "Eine Shell-Variable, die das Aussehen des Prompts festlegt: `\\u` Benutzer, `\\h` Rechner, `\\W` Verzeichnis.",
+     "where": "Wenn du am Prompt sehen willst, auf welchem Benutzer/Rechner du bist.",
+     "why": "Verhindert Befehle auf dem falschen Rechner bei vielen Servern; dauerhaft in `~/.bashrc` eintragen. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "PS1=\"\\u@\\h \\W\\$ \"",
+     "nosim": true,
+     "output": "[student@linux-lab ~]$"
     }
    ],
    "tip": "Schreibe nicht `NAME = alice` (mit Leerzeichen): Die Shell sucht dann einen Befehl namens `NAME` und scheitert."
@@ -380,6 +389,10 @@
   "t16": {
    "text": "Versuche, eine nicht existierende Datei (`nofile`) aufzulisten, und zeige danach den Exit-Code dieses Befehls.",
    "hint": "Nach einem Fehler ist `$?` eine Zahl ungleich null."
+  },
+  "t17": {
+   "text": "Setze einen Prompt, der den Benutzernamen zeigt: weise `PS1` einen Wert mit `\\u` zu.",
+   "hint": "Schreibe es als `PS1=\"...\"`; die Benutzer-Escape-Sequenz ist `\\u`."
   }
  },
  "vm": {

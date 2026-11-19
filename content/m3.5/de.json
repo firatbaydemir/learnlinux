@@ -93,6 +93,51 @@
      "where": "Wenn die Schreibweise von Text vereinheitlicht werden soll.",
      "why": "Zeichen lassen sich in einer Pipeline umwandeln.",
      "example": "echo hello | tr 'a-z' 'A-Z'"
+    },
+    {
+     "cmd": "paste",
+     "what": "Fügt Dateien zeilenweise nebeneinander zusammen (Standardtrenner TAB, `-d,` für Komma).",
+     "where": "Wenn du zwei Listen (Name + Alter) zu einer Tabelle vereinst.",
+     "why": "Das Gegenstück zu `cut`: es verbindet Spalten statt sie zu trennen. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "paste a.txt b.txt",
+     "nosim": true,
+     "output": "alice 30\nbob 25"
+    },
+    {
+     "cmd": "join",
+     "what": "Verbindet zwei sortierte Dateien über ein gemeinsames Feld (Standard Spalte 1).",
+     "where": "Wenn du zwei Tabellen über eine ID zusammenführst.",
+     "why": "`paste` verbindet nach Position, `join` nach Schlüssel; die Dateien müssen vorher mit `sort` sortiert sein. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "join a.txt b.txt",
+     "nosim": true,
+     "output": "1 alice 30\n2 bob 25"
+    },
+    {
+     "cmd": "column -t",
+     "what": "Ordnet Text in ausgerichtete Spalten (`-t` erzeugt eine Tabelle).",
+     "where": "Wenn du durch Leerzeichen getrennte Ausgabe lesbar als Tabelle darstellst.",
+     "why": "Macht unordentliche Ausgabe lesbar; ändert nur die Darstellung, nicht die Daten. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "column -t data.txt",
+     "nosim": true,
+     "output": "name   age\nalice  30\nbob    25"
+    },
+    {
+     "cmd": "nl",
+     "what": "Nummeriert Zeilen.",
+     "where": "Wenn du in einer Liste auf eine Zeilennummer verweisen willst.",
+     "why": "Ähnlich wie `cat -n`; hat Optionen wie das Nicht-Zählen leerer Zeilen. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "nl names.txt",
+     "nosim": true,
+     "output": "     1\talice\n     2\tbob"
+    },
+    {
+     "cmd": "base64",
+     "what": "Kodiert Daten als base64-Text; `-d` dekodiert zurück.",
+     "where": "Wenn du Binär- oder Sonderzeichendaten als Text transportierst (z. B. ein Konfigurationswert).",
+     "why": "Das ist KEINE Verschlüsselung; jeder kann es dekodieren, nutze es nicht für Passwörter. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "echo hello | base64",
+     "nosim": true,
+     "output": "aGVsbG8K"
     }
    ],
    "tip": "Bei Text mit wechselnden Mengen an Leerraum kann `awk` flexibler als `cut` sein; hier konzentrieren wir uns auf feste Trennzeichen."
@@ -175,6 +220,10 @@
   "t13": {
    "text": "Ticket: Schreibe die Anzahlen der Zugriffslog-Statuscodes in `reports/status_count.txt`.",
    "hint": "Extrahiere das zweite Feld, sortiere, verwende `uniq -c` und leite in den Bericht um."
+  },
+  "t14": {
+   "text": "Kodiere den Text `hello` mit base64 (tippen; der Simulator prüft nur die Syntax).",
+   "hint": "Erzeuge den Text mit `echo` und leite die Ausgabe per Pipe an den Kodierbefehl."
   }
  },
  "vm": {

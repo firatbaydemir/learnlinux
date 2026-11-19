@@ -48,6 +48,15 @@
      "why": "Avoids needless work and nested `if` blocks.",
      "example": "[ -n \"$line\" ] || continue",
      "nosim": true
+    },
+    {
+     "cmd": "expr",
+     "what": "Does integer arithmetic (`+ - \\* / %`); common in old scripts.",
+     "where": "When reading old scripts; prefer `$(( ))` in new code.",
+     "why": "Use `$(expr 3 + 4)` to store it in a variable; spaces around operators are required and `*` must be escaped. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "expr 3 + 4",
+     "nosim": true,
+     "output": "7"
     }
    ],
    "tip": "If a file pattern matches nothing, `./*.txt` stays literal. Put `[ -e \"$f\" ] || continue` at the start of the loop body."
@@ -319,6 +328,10 @@
   "t17": {
    "text": "Ticket: The team wants a script that checks every server in `~/lab/servers.txt`. Write `~/scripts/check_all.sh`: a `check_host()` function using `local`, a `while IFS= read -r host; do` loop, `done < ~/lab/servers.txt`; make it executable.",
    "hint": "Function first, then the loop; skip blank lines with `[ -n \"$host\" ] || continue`; `chmod 755` last."
+  },
+  "t18": {
+   "text": "Calculate 10 minus 3 with `expr` (type it; the simulator only checks the syntax).",
+   "hint": "Leave spaces between the numbers and the operator."
   }
  },
  "vm": {

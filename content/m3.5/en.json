@@ -93,6 +93,51 @@
      "where": "When standardizing the letter case of text.",
      "why": "Transforms characters within a pipeline.",
      "example": "echo hello | tr 'a-z' 'A-Z'"
+    },
+    {
+     "cmd": "paste",
+     "what": "Merges files side by side line by line (default separator TAB, `-d,` for comma).",
+     "where": "When combining two lists (name + age) into one table.",
+     "why": "It is the opposite of `cut`: it joins columns instead of splitting them. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "paste a.txt b.txt",
+     "nosim": true,
+     "output": "alice 30\nbob 25"
+    },
+    {
+     "cmd": "join",
+     "what": "Joins two sorted files on a common field (default column 1).",
+     "where": "When merging two tables that match on an ID.",
+     "why": "`paste` joins by position, `join` by key; the files must be sorted with `sort` first. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "join a.txt b.txt",
+     "nosim": true,
+     "output": "1 alice 30\n2 bob 25"
+    },
+    {
+     "cmd": "column -t",
+     "what": "Arranges text into aligned columns (`-t` makes a table).",
+     "where": "When turning space-separated output into a readable table.",
+     "why": "Makes messy output readable; it changes only the look, not the data. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "column -t data.txt",
+     "nosim": true,
+     "output": "name   age\nalice  30\nbob    25"
+    },
+    {
+     "cmd": "nl",
+     "what": "Numbers lines.",
+     "where": "When you want to refer to a line number in a list.",
+     "why": "Similar to `cat -n`; has options such as not counting empty lines. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "nl names.txt",
+     "nosim": true,
+     "output": "     1\talice\n     2\tbob"
+    },
+    {
+     "cmd": "base64",
+     "what": "Encodes data as base64 text; `-d` decodes it back.",
+     "where": "When carrying binary or special-character data as text (e.g. a config value).",
+     "why": "This is NOT encryption; anyone can decode it, so do not use it to store passwords. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "echo hello | base64",
+     "nosim": true,
+     "output": "aGVsbG8K"
     }
    ],
    "tip": "For text separated by variable amounts of whitespace, `awk` may be more flexible than `cut`; here we focus on fixed delimiters."
@@ -175,6 +220,10 @@
   "t13": {
    "text": "Ticket: write counts of access-log status codes to `reports/status_count.txt`.",
    "hint": "Extract the second field, sort, use `uniq -c`, then redirect to the report."
+  },
+  "t14": {
+   "text": "Encode the text `hello` with base64 (type it; the simulator only checks the syntax).",
+   "hint": "Produce the text with `echo` and pipe the output to the encoder command."
   }
  },
  "vm": {

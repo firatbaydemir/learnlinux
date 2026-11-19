@@ -304,6 +304,18 @@
    "solution": [
     "grep 5432 ~/net/ss.txt > ~/net/audit.txt"
    ]
+  },
+  {
+   "id": "t18",
+   "kind": "guided",
+   "diff": 2,
+   "check": {
+    "cmd": "^(dig|nslookup)\\s+(\\+short\\s+)?example\\.com$",
+    "ok": true
+   },
+   "solution": [
+    "dig example.com"
+   ]
   }
  ],
  "quiz": [

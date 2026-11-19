@@ -287,7 +287,8 @@
     "ls nofile",
     "echo $?"
    ]
-  }
+  },
+  {"id": "t17", "kind": "guided", "diff": 2, "check": {"cmd": "^PS1=['\\\"].*\\\\u.*['\\\"]$", "ok": true}, "solution": ["PS1=\"\\u@\\h \\W\\$ \""]}
  ],
  "vm": [
   {

@@ -25,7 +25,8 @@
     {"id": "t15", "kind": "challenge", "diff": 3, "check": [{"contains": ["~/distro.txt", "Red Hat Enterprise Linux 9\\.4"]}, {"cmd": "^grep", "ok": true}], "solution": ["grep PRETTY_NAME /etc/os-release | cut -d= -f2 > ~/distro.txt"]},
     {"id": "t16", "kind": "challenge", "diff": 3, "check": [{"equals": ["~/major.txt", "5\n"]}, {"cmd": "^uname -r", "ok": true}], "solution": ["uname -r | cut -d. -f1 > ~/major.txt"]},
     {"id": "t17", "kind": "ticket", "diff": 3, "check": [{"linesMin": ["~/sysinfo.txt", 4]}, {"contains": ["~/sysinfo.txt", "linux-lab"]}, {"contains": ["~/sysinfo.txt", "5\\.14\\.0"]}, {"contains": ["~/sysinfo.txt", "student"]}, {"contains": ["~/sysinfo.txt", "Filesystem"]}], "solution": ["hostname > ~/sysinfo.txt", "uname -r >> ~/sysinfo.txt", "whoami >> ~/sysinfo.txt", "df -h >> ~/sysinfo.txt"]},
-    {"id": "t18", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/admin_check.txt", "wheel"]}, {"cmd": "^id", "ok": true}], "solution": ["id | grep wheel > ~/admin_check.txt"]}
+    {"id": "t18", "kind": "ticket", "diff": 3, "check": [{"contains": ["~/admin_check.txt", "wheel"]}, {"cmd": "^id", "ok": true}], "solution": ["id | grep wheel > ~/admin_check.txt"]},
+   {"id": "t19", "kind": "guided", "diff": 1, "check": {"cmd": "^hostnamectl( status)?$", "ok": true}, "solution": ["hostnamectl"]}
   ],
   "quiz": [
     {"id": "q1", "answer": 1},

@@ -92,6 +92,15 @@
      "example": "curl -I http://127.0.0.1:8080",
      "nosim": true,
      "output": "HTTP/1.0 200 OK\nServer: SimpleHTTP/0.6 Python/3.12\nContent-type: text/html"
+    },
+    {
+     "cmd": "wget",
+     "what": "Downloads the file at a URL and saves it to disk (`curl` prints to the screen by default).",
+     "where": "When fetching a package or file in a script or on a server.",
+     "why": "A shorter way to save to a file than `curl -O`; `-c` resumes an interrupted download. Simulator note: this command does not run in the simulator; the output is shown as an example. Try it on a real machine.",
+     "example": "wget https://example.com/file.txt",
+     "nosim": true,
+     "output": "--2025-01-10 10:00:01--  https://example.com/file.txt\nConnecting to example.com... connected.\nHTTP request sent, awaiting response... 200 OK\nLength: 1256 (1.2K)\nSaving to: 'file.txt'\n\nfile.txt  100%[=====>]  1.23K  --.-KB/s  in 0s"
     }
    ],
    "tip": "Filter `ss` output: `ss -tln | grep LISTEN | wc -l` counts how many TCP ports listen.",
@@ -137,6 +146,24 @@
      "why": "Reveals the real DNS server behind `127.0.0.53`.",
      "example": "resolvectl status",
      "nosim": true
+    },
+    {
+     "cmd": "dig",
+     "what": "Queries a DNS server directly; shows the answer, TTL and which server replied.",
+     "where": "To tell whether a name problem is in DNS or elsewhere.",
+     "why": "`getent` shows what the system sees, `dig` only what DNS answers; comparing both narrows the fault. `dig +short example.com` prints only the IP. Simulator note: this command does not run in the simulator; the output is shown as an example. Try it on a real machine.",
+     "example": "dig example.com",
+     "nosim": true,
+     "output": "; <<>> DiG <<>> example.com\n;; ANSWER SECTION:\nexample.com.    300 IN  A   93.184.216.34\n;; SERVER: 192.168.1.1#53(192.168.1.1)"
+    },
+    {
+     "cmd": "nslookup",
+     "what": "The simpler sibling of `dig`: asks DNS for a name and prints the address.",
+     "where": "For a quick check on machines without `dig` (no bind-utils/dnsutils).",
+     "why": "It is on almost every system, so it is often the first DNS tool tried. Simulator note: this command does not run in the simulator; the output is shown as an example. Try it on a real machine.",
+     "example": "nslookup example.com",
+     "nosim": true,
+     "output": "Server:         192.168.1.1\nAddress:        192.168.1.1#53\n\nName:   example.com\nAddress: 93.184.216.34"
     }
    ],
    "tip": "Back up before changing: `sudo cp /etc/hosts /etc/hosts.bak`.",
@@ -212,6 +239,15 @@
      "where": "When producing a clean list of listening ports.",
      "why": "Gives a tidy, duplicate-free list for reports and comparison.",
      "example": "sort -n ~/net/ports.txt | uniq"
+    },
+    {
+     "cmd": "traceroute",
+     "what": "Lists every router (hop) a packet passes on its way to the target. `tracepath` does the same without root.",
+     "where": "When a connection does not reach the target and you need to find where the path breaks.",
+     "why": "`ping` only says whether it arrives; `traceroute` shows which hop it gets stuck at. Simulator note: this command does not run in the simulator; the output is shown as an example. Try it on a real machine.",
+     "example": "traceroute example.com",
+     "nosim": true,
+     "output": "traceroute to example.com (93.184.216.34), 30 hops max\n 1  192.168.1.1  1.2 ms\n 2  10.20.0.1  8.9 ms\n 3  93.184.216.34  21.4 ms"
     }
    ],
    "tip": "Write your findings into a report: `hostname > ~/net/report.txt`, then append with `>>`. It makes pasting into a support ticket easy."
@@ -285,6 +321,10 @@
   "t17": {
    "text": "Ticket: A security audit wants proof that PostgreSQL (port 5432) listens only on the local address. Save the relevant `ss.txt` line into `~/net/audit.txt`.",
    "hint": "`grep`; the line must contain `127.0.0.1:5432`. (`grep` → module 3.4.)"
+  },
+  "t18": {
+   "text": "Query the name `example.com` with `dig` or `nslookup` (type the command; the simulator only checks the syntax).",
+   "hint": "Either of the two tools is enough; the target name is `example.com`. (See the DNS section.)"
   }
  },
  "vm": {

@@ -183,6 +183,15 @@
      "why": "Findet den CPU-Fresser ohne interaktive Anzeige.",
      "example": "ps aux --sort=-%cpu | head",
      "nosim": true
+    },
+    {
+     "cmd": "watch",
+     "what": "Führt einen Befehl im Intervall (Standard 2 s) erneut aus und aktualisiert den Bildschirm. Beenden: Strg+C.",
+     "where": "Wenn du Werte wie Last, Speicher oder Platte live beobachtest.",
+     "why": "Du verfolgst Änderungen ohne erneutes Tippen; `-n 5` ändert das Intervall. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "watch -n 2 uptime",
+     "nosim": true,
+     "output": "Every 2.0s: uptime\n\n 10:15:02 up 3 days, 2:11, 1 user, load average: 0.15, 0.20, 0.18"
     }
    ],
    "tip": "In `top` zeigt `1` jeden Kern einzeln und `c` die vollständige Befehlszeile."
@@ -268,6 +277,10 @@
   "t17": {
    "text": "TICKET #5201 — Der Server linux-lab ist sehr langsam. In `~/lab/top_snapshot.txt` liegt die Ausgabe von `top -b -n 1`. Finde den Prozess mit der höchsten CPU-Last und schreibe seinen Namen und seinen Benutzer in `~/lab/culprit.txt`.",
    "hint": "Sieh dir mit `head -n` die erste Prozesszeile an, dann `echo \"name user\" > ~/lab/culprit.txt`. (`>` → Modul 3.2.)"
+  },
+  "t18": {
+   "text": "Beobachte die Lastdurchschnitte live alle 5 Sekunden (tippen; der Simulator prüft nur die Syntax).",
+   "hint": "Setze `watch` vor den Befehl; `-n` gibt das Intervall an, beobachtet wird der Befehl, der die Last zeigt."
   }
  },
  "quiz": {

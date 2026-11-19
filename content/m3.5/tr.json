@@ -93,6 +93,51 @@
      "where": "Metni standart bir harf biçimine getirirken.",
      "why": "Karakter dönüşümünü pipeline içinde yapar.",
      "example": "echo hello | tr 'a-z' 'A-Z'"
+    },
+    {
+     "cmd": "paste",
+     "what": "Dosyaları satır satır yan yana birleştirir (varsayılan ayraç TAB, `-d,` ile virgül).",
+     "where": "İki listeyi (isim + yaş) tek tabloda toplarken.",
+     "why": "`cut`'ın tersidir: sütunları ayırmak yerine birleştirir. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "paste a.txt b.txt",
+     "nosim": true,
+     "output": "alice 30\nbob 25"
+    },
+    {
+     "cmd": "join",
+     "what": "İki sıralı dosyayı ortak bir alana (varsayılan 1. sütun) göre birleştirir.",
+     "where": "Kimlik numarasıyla eşleşen iki tabloyu birleştirirken.",
+     "why": "`paste` sıraya göre, `join` anahtara göre birleştirir; dosyalar önce `sort` ile sıralı olmalı. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "join a.txt b.txt",
+     "nosim": true,
+     "output": "1 alice 30\n2 bob 25"
+    },
+    {
+     "cmd": "column -t",
+     "what": "Metni hizalı sütunlara dizer (`-t` tablo yapar).",
+     "where": "Boşlukla ayrılmış çıktıyı okunur bir tabloya çevirirken.",
+     "why": "Düzensiz çıktıyı gözle okunur hale getirir; veriyi değiştirmez, yalnızca görünümü. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "column -t data.txt",
+     "nosim": true,
+     "output": "name   age\nalice  30\nbob    25"
+    },
+    {
+     "cmd": "nl",
+     "what": "Satırları numaralandırır.",
+     "where": "Bir listede \"kaçıncı satır\" referansı vermek istediğinde.",
+     "why": "`cat -n`'e benzer; boş satırları saymama gibi seçenekleri vardır. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "nl names.txt",
+     "nosim": true,
+     "output": "     1\talice\n     2\tbob"
+    },
+    {
+     "cmd": "base64",
+     "what": "Veriyi base64 metnine kodlar; `-d` ile geri çözer.",
+     "where": "Ikili veya özel karakterli veriyi metin olarak taşırken (ör. yapılandırma değeri).",
+     "why": "Bu bir ŞİFRELEME değildir; herkes geri çözebilir, parola saklamak için kullanma. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "echo hello | base64",
+     "nosim": true,
+     "output": "aGVsbG8K"
     }
    ],
    "tip": "Düzenli aralıklarla ayrılmış metinde `cut` yerine `awk` daha esnek olabilir; bu modülde sabit ayraçlı satırlara odaklanıyoruz."
@@ -175,6 +220,10 @@
   "t13": {
    "text": "Ticket: Erişim kaydındaki durum kodu adetlerini `reports/status_count.txt` dosyasına yaz.",
    "hint": "İkinci alanı çıkar, sırala, `uniq -c` uygula ve rapora yönlendir."
+  },
+  "t14": {
+   "text": "`hello` metnini base64 ile kodla (komutu yaz; simülatör yalnızca yazımı denetler).",
+   "hint": "Metni `echo` ile üret, çıktıyı boru ile kodlayıcı komuta ver."
   }
  },
  "vm": {

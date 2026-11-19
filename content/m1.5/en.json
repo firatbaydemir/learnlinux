@@ -175,6 +175,15 @@
      "why": "Keeps the environment clean.",
      "example": "unset GREETING",
      "nosim": true
+    },
+    {
+     "cmd": "PS1",
+     "what": "A shell variable that defines how the prompt looks: `\\u` user, `\\h` host, `\\W` directory.",
+     "where": "When you want to see which user/machine you are on from the prompt.",
+     "why": "Prevents running commands on the wrong machine when working with many servers; make it permanent in `~/.bashrc`. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "PS1=\"\\u@\\h \\W\\$ \"",
+     "nosim": true,
+     "output": "[student@linux-lab ~]$"
     }
    ],
    "tip": "Don't write `NAME = alice` (with spaces): the shell looks for a command called `NAME` and fails."
@@ -380,6 +389,10 @@
   "t16": {
    "text": "Try listing a file that does not exist (`nofile`), then show the exit code of that command.",
    "hint": "After an error `$?` is a non-zero number."
+  },
+  "t17": {
+   "text": "Set a prompt that shows the user name: assign `PS1` a value containing `\\u`.",
+   "hint": "Write it as `PS1=\"...\"`; the user escape sequence is `\\u`."
   }
  },
  "vm": {

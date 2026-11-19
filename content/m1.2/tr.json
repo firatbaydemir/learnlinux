@@ -122,6 +122,15 @@
      "example": "hostname -I",
      "nosim": true,
      "output": "192.168.1.42"
+    },
+    {
+     "cmd": "hostnamectl",
+     "what": "Makinenin adını, işletim sistemini, çekirdeğini ve mimarisini tek ekranda gösterir.",
+     "where": "Bir sunucuya ilk girdiğinde \"bu hangi makine\" sorusunu yanıtlamak için.",
+     "why": "`hostname`, `uname` ve `os-release` bilgilerini toplar; `hostnamectl set-hostname` adı kalıcı değiştirir (sudo gerekir). Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "hostnamectl",
+     "nosim": true,
+     "output": " Static hostname: linux-lab\n  Operating System: Rocky Linux 9.4\n            Kernel: Linux 5.14.0\n      Architecture: x86-64"
     }
    ],
    "tip": "Prompt'taki `student@linux-lab` kısmı kullanıcı@makine'dir; `whoami` ve `hostname` aynı bilgiyi verir."
@@ -364,6 +373,10 @@
   "t18": {
    "text": "Ticket: Yönetici, `student` hesabının `wheel` grubunda olup olmadığını soruyor. Kanıt olarak yalnızca `wheel` geçen çıktıyı `~/admin_check.txt` dosyasına kaydet.",
    "hint": "`id`, `grep` (`|` çıktıyı sonraki komuta aktarır, `grep` süzer; ayrıntısı modül 3.2 ve 3.4'te.)"
+  },
+  "t19": {
+   "text": "Makinenin adını ve işletim sistemini tek komutla göster (komutu yaz; simülatör yalnızca yazımı denetler).",
+   "hint": "Adı `host` ile başlayıp `ctl` ile biten komut. (host bölümüne bak.)"
   }
  },
  "vm": {

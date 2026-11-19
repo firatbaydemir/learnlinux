@@ -175,6 +175,15 @@
      "why": "Ortamı temiz tutar.",
      "example": "unset GREETING",
      "nosim": true
+    },
+    {
+     "cmd": "PS1",
+     "what": "Komut isteminin (prompt) görünümünü belirleyen kabuk değişkenidir: `\\u` kullanıcı, `\\h` makine, `\\W` klasör.",
+     "where": "Hangi kullanıcı/makinede olduğunu isteminden görmek istediğinde.",
+     "why": "Çok sunuculu çalışmada yanlış makinede komut çalıştırmayı önler; kalıcı olması için `~/.bashrc`'ye yazılır. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "PS1=\"\\u@\\h \\W\\$ \"",
+     "nosim": true,
+     "output": "[student@linux-lab ~]$"
     }
    ],
    "tip": "`NAME = alice` (boşluklu) yazma: kabuk `NAME` adında bir komut arar ve hata verir."
@@ -380,6 +389,10 @@
   "t16": {
    "text": "Var olmayan bir dosyayı (`nofile`) listelemeyi dene, ardından o komutun çıkış kodunu göster.",
    "hint": "Hata sonrası `$?` sıfırdan farklı bir sayı verir."
+  },
+  "t17": {
+   "text": "Kullanıcı adını gösteren bir istem ayarla: `PS1` değişkenine `\\u` içeren bir değer ata.",
+   "hint": "`PS1=\"...\"` biçiminde yaz; kullanıcı kaçış dizisi `\\u`'dur."
   }
  },
  "vm": {

@@ -183,6 +183,15 @@
      "why": "Etkileşimli ekran olmadan CPU tüketicisini bulur.",
      "example": "ps aux --sort=-%cpu | head",
      "nosim": true
+    },
+    {
+     "cmd": "watch",
+     "what": "Bir komutu belirli aralıkla (varsayılan 2 sn) tekrar çalıştırıp ekranı yeniler. Çıkış: Ctrl+C.",
+     "where": "Yük, bellek veya disk gibi değerleri canlı izlerken.",
+     "why": "Komutu elle tekrar yazmadan değişimi izlersin; `-n 5` aralığı değiştirir. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "watch -n 2 uptime",
+     "nosim": true,
+     "output": "Every 2.0s: uptime\n\n 10:15:02 up 3 days, 2:11, 1 user, load average: 0.15, 0.20, 0.18"
     }
    ],
    "tip": "`top` içinde `1` her çekirdeği ayrı gösterir, `c` tam komut satırını gösterir."
@@ -268,6 +277,10 @@
   "t17": {
    "text": "TICKET #5201 — linux-lab sunucusu çok yavaş. `~/lab/top_snapshot.txt` içinde `top -b -n 1` çıktısı var. En yüksek CPU kullanan süreci bul ve adını ile kullanıcısını `~/lab/culprit.txt` dosyasına yaz.",
    "hint": "`head -n` ile ilk süreç satırına bak, sonra `echo \"name user\" > ~/lab/culprit.txt`. (`>` → modül 3.2.)"
+  },
+  "t18": {
+   "text": "Yük ortalamasını her 5 saniyede bir canlı izle (komutu yaz; simülatör yalnızca yazımı denetler).",
+   "hint": "Komutu `watch` ile sar; aralığı `-n` verir, izlenecek komut yük gösterendir."
   }
  },
  "quiz": {

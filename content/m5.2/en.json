@@ -183,6 +183,15 @@
      "why": "Finds the CPU hog without an interactive screen.",
      "example": "ps aux --sort=-%cpu | head",
      "nosim": true
+    },
+    {
+     "cmd": "watch",
+     "what": "Re-runs a command at an interval (default 2 s) and refreshes the screen. Exit: Ctrl+C.",
+     "where": "When watching values such as load, memory or disk live.",
+     "why": "You follow changes without retyping the command; `-n 5` changes the interval. Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "watch -n 2 uptime",
+     "nosim": true,
+     "output": "Every 2.0s: uptime\n\n 10:15:02 up 3 days, 2:11, 1 user, load average: 0.15, 0.20, 0.18"
     }
    ],
    "tip": "In `top` press `1` to see every core separately and `c` to see full command lines."
@@ -268,6 +277,10 @@
   "t17": {
    "text": "TICKET #5201 — The server linux-lab is very slow. In `~/lab/top_snapshot.txt` is the output of `top -b -n 1`. Find the process with the highest CPU use and write its name and its user into `~/lab/culprit.txt`.",
    "hint": "Look at the first process line with `head -n`, then `echo \"name user\" > ~/lab/culprit.txt`. (`>` → module 3.2.)"
+  },
+  "t18": {
+   "text": "Watch the load average live every 5 seconds (type it; the simulator only checks the syntax).",
+   "hint": "Wrap the command in `watch`; `-n` sets the interval, the watched command is the one that shows load."
   }
  },
  "quiz": {

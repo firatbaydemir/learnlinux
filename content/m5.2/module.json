@@ -164,7 +164,8 @@
     "head -n 9 ~/lab/top_snapshot.txt",
     "echo \"python3 alice\" > ~/lab/culprit.txt"
    ]
-  }
+  },
+  {"id": "t18", "kind": "guided", "diff": 2, "check": {"cmd": "^watch\\s+(-n\\s*\\d+\\s+)?(uptime|free(\\s+-h)?|df(\\s+-h)?)$", "ok": true}, "solution": ["watch -n 5 uptime"]}
  ],
  "quiz": [
   {"id": "q1", "answer": 2},

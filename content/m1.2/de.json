@@ -122,6 +122,15 @@
      "example": "hostname -I",
      "nosim": true,
      "output": "192.168.1.42"
+    },
+    {
+     "cmd": "hostnamectl",
+     "what": "Zeigt Rechnername, Betriebssystem, Kernel und Architektur auf einem Bildschirm.",
+     "where": "Wenn du dich erstmals auf einem Server anmeldest und fragst, welche Maschine das ist.",
+     "why": "Fasst `hostname`, `uname` und `os-release` zusammen; `hostnamectl set-hostname` ändert den Namen dauerhaft (sudo nötig). Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "hostnamectl",
+     "nosim": true,
+     "output": " Static hostname: linux-lab\n  Operating System: Rocky Linux 9.4\n            Kernel: Linux 5.14.0\n      Architecture: x86-64"
     }
    ],
    "tip": "Der Teil `student@linux-lab` im Prompt ist Benutzer@Rechner; `whoami` und `hostname` liefern dieselbe Information."
@@ -364,6 +373,10 @@
   "t18": {
    "text": "Ticket: Der Administrator fragt, ob das Konto `student` in der Gruppe `wheel` ist. Speichere als Beleg nur die Ausgabe, die `wheel` enthält, in `~/admin_check.txt`.",
    "hint": "`id`, `grep` (`|` reicht die Ausgabe an den nächsten Befehl weiter, `grep` filtert; Details in Modul 3.2 und 3.4.)"
+  },
+  "t19": {
+   "text": "Zeige Rechnernamen und Betriebssystem mit einem einzigen Befehl (tippen; der Simulator prüft nur die Syntax).",
+   "hint": "Der Befehl beginnt mit `host` und endet auf `ctl`. (Siehe Abschnitt host.)"
   }
  },
  "vm": {

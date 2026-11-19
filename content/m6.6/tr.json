@@ -48,6 +48,15 @@
      "why": "Gereksiz işi ve iç içe `if` karmaşasını önler.",
      "example": "[ -n \"$line\" ] || continue",
      "nosim": true
+    },
+    {
+     "cmd": "expr",
+     "what": "Tamsayı aritmetiği yapar (`+ - \\* / %`); eski betiklerde sık görülür.",
+     "where": "Eski betikleri okurken; yeni yazımda `$(( ))` tercih edilir.",
+     "why": "`$(expr 3 + 4)` ile bir değişkene aktarılır; işleçlerin çevresindeki boşluklar zorunludur ve `*` kaçırılmalıdır. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnektir.",
+     "example": "expr 3 + 4",
+     "nosim": true,
+     "output": "7"
     }
    ],
    "tip": "Dosya deseni eşleşmezse `./*.txt` olduğu gibi kalır. Döngü gövdesinin başına `[ -e \"$f\" ] || continue` koy."
@@ -319,6 +328,10 @@
   "t17": {
    "text": "Ticket: Ekip `~/lab/servers.txt` içindeki her sunucuyu kontrol eden bir script istiyor. `~/scripts/check_all.sh` yaz: `local` kullanan `check_host()` fonksiyonu, `while IFS= read -r host; do` döngüsü, `done < ~/lab/servers.txt`; çalıştırılabilir olsun.",
    "hint": "Önce fonksiyon, sonra döngü; boş satırı `[ -n \"$host\" ] || continue` ile atla; en son `chmod 755`."
+  },
+  "t18": {
+   "text": "`expr` ile 10 eksi 3'ü hesapla (komutu yaz; simülatör yalnızca yazımı denetler).",
+   "hint": "Sayılar ve işleç arasında boşluk bırak."
   }
  },
  "vm": {

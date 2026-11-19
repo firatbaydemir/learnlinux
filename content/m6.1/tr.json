@@ -92,6 +92,15 @@
      "example": "curl -I http://127.0.0.1:8080",
      "nosim": true,
      "output": "HTTP/1.0 200 OK\nServer: SimpleHTTP/0.6 Python/3.12\nContent-type: text/html"
+    },
+    {
+     "cmd": "wget",
+     "what": "Bir URL'deki dosyayı indirir ve diske kaydeder (`curl` ise varsayılan olarak ekrana yazar).",
+     "where": "Betikte veya sunucuda bir paket/dosya indirirken.",
+     "why": "Dosya olarak kaydetmek için `curl -O` yerine daha kısa bir yoldur; `-c` yarım kalan indirmeyi sürdürür. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnek olarak gösterilir. Gerçek makinede dene.",
+     "example": "wget https://example.com/file.txt",
+     "nosim": true,
+     "output": "--2025-01-10 10:00:01--  https://example.com/file.txt\nConnecting to example.com... connected.\nHTTP request sent, awaiting response... 200 OK\nLength: 1256 (1.2K)\nSaving to: 'file.txt'\n\nfile.txt  100%[=====>]  1.23K  --.-KB/s  in 0s"
     }
    ],
    "tip": "`ss` çıktısını süz: `ss -tln | grep LISTEN | wc -l` kaç TCP portunun dinlediğini sayar.",
@@ -137,6 +146,24 @@
      "why": "`127.0.0.53` arkasındaki gerçek DNS sunucusunu ortaya çıkarır.",
      "example": "resolvectl status",
      "nosim": true
+    },
+    {
+     "cmd": "dig",
+     "what": "DNS sunucusunu doğrudan sorgular; cevabı, TTL'i ve cevap veren sunucuyu gösterir.",
+     "where": "İsim çözülmüyorsa sorunun DNS'te mi başka yerde mi olduğunu ayırmak için.",
+     "why": "`getent` sistemin gördüğünü, `dig` yalnızca DNS'in cevabını gösterir; karşılaştırmak hatayı daraltır. `dig +short example.com` yalnızca IP verir. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnek olarak gösterilir. Gerçek makinede dene.",
+     "example": "dig example.com",
+     "nosim": true,
+     "output": "; <<>> DiG <<>> example.com\n;; ANSWER SECTION:\nexample.com.    300 IN  A   93.184.216.34\n;; SERVER: 192.168.1.1#53(192.168.1.1)"
+    },
+    {
+     "cmd": "nslookup",
+     "what": "`dig`'in daha yalın kardeşi: bir ismi DNS'e sorar ve adresi yazar.",
+     "where": "`dig` kurulu olmayan (bind-utils/dnsutils yok) makinelerde hızlı kontrol için.",
+     "why": "Her sistemde bulunması muhtemel olduğu için ilk denenen DNS aracıdır. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnek olarak gösterilir. Gerçek makinede dene.",
+     "example": "nslookup example.com",
+     "nosim": true,
+     "output": "Server:         192.168.1.1\nAddress:        192.168.1.1#53\n\nName:   example.com\nAddress: 93.184.216.34"
     }
    ],
    "tip": "Değiştirmeden önce yedek al: `sudo cp /etc/hosts /etc/hosts.bak`.",
@@ -212,6 +239,15 @@
      "where": "Dinleyen portların temiz bir listesini çıkarırken.",
      "why": "Rapor ve karşılaştırma için sade, tekrarsız liste verir.",
      "example": "sort -n ~/net/ports.txt | uniq"
+    },
+    {
+     "cmd": "traceroute",
+     "what": "Paketin hedefe giderken uğradığı her yönlendiriciyi (hop) sırayla listeler. `tracepath` aynısını root gerektirmeden yapar.",
+     "where": "Bağlantı hedefe ulaşmıyorsa yolun nerede koptuğunu bulmak için.",
+     "why": "`ping` yalnızca ulaşıp ulaşmadığını söyler; `traceroute` hangi atlamada takıldığını gösterir. Simülatör notu: bu komut simülatörde çalışmaz; çıktı örnek olarak gösterilir. Gerçek makinede dene.",
+     "example": "traceroute example.com",
+     "nosim": true,
+     "output": "traceroute to example.com (93.184.216.34), 30 hops max\n 1  192.168.1.1  1.2 ms\n 2  10.20.0.1  8.9 ms\n 3  93.184.216.34  21.4 ms"
     }
    ],
    "tip": "Sonuçlarını bir rapora yaz: `hostname > ~/net/report.txt`, sonra `>>` ile ekle. Destek biletine yapıştırmak kolaylaşır."
@@ -285,6 +321,10 @@
   "t17": {
    "text": "Ticket: Güvenlik denetimi, PostgreSQL'in (port 5432) yalnızca yerel adreste dinlediğinin kanıtını istiyor. İlgili `ss.txt` satırını `~/net/audit.txt` dosyasına kaydet.",
    "hint": "`grep`; satırda `127.0.0.1:5432` olmalı. (`grep` → modül 3.4.)"
+  },
+  "t18": {
+   "text": "`dig` veya `nslookup` ile `example.com` ismini sorgula (komutu yaz; simülatör yalnızca yazımı denetler).",
+   "hint": "İki araçtan biri yeter; hedef isim `example.com`. (DNS bölümüne bak.)"
   }
  },
  "vm": {

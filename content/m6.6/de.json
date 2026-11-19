@@ -48,6 +48,15 @@
      "why": "Vermeidet unnötige Arbeit und verschachtelte `if`.",
      "example": "[ -n \"$line\" ] || continue",
      "nosim": true
+    },
+    {
+     "cmd": "expr",
+     "what": "Rechnet mit ganzen Zahlen (`+ - \\* / %`); in alten Skripten häufig.",
+     "where": "Beim Lesen alter Skripte; in neuem Code besser `$(( ))`.",
+     "why": "Mit `$(expr 3 + 4)` in eine Variable übernehmen; Leerzeichen um Operatoren sind Pflicht und `*` muss maskiert werden. Simulator-Hinweis: Dieser Befehl läuft im Simulator nicht; die Ausgabe ist ein Beispiel.",
+     "example": "expr 3 + 4",
+     "nosim": true,
+     "output": "7"
     }
    ],
    "tip": "Passt ein Dateimuster auf nichts, bleibt `./*.txt` wörtlich stehen. Setze `[ -e \"$f\" ] || continue` an den Anfang des Schleifenrumpfs."
@@ -319,6 +328,10 @@
   "t17": {
    "text": "Ticket: Das Team möchte ein Skript, das jeden Server aus `~/lab/servers.txt` prüft. Schreibe `~/scripts/check_all.sh`: Funktion `check_host()` mit `local`, Schleife `while IFS= read -r host; do`, `done < ~/lab/servers.txt`; ausführbar.",
    "hint": "Erst die Funktion, dann die Schleife; leere Zeilen mit `[ -n \"$host\" ] || continue` überspringen; zuletzt `chmod 755`."
+  },
+  "t18": {
+   "text": "Berechne 10 minus 3 mit `expr` (tippen; der Simulator prüft nur die Syntax).",
+   "hint": "Lasse Leerzeichen zwischen den Zahlen und dem Operator."
   }
  },
  "vm": {

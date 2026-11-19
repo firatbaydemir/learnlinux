@@ -177,7 +177,8 @@
    "solution": [
     "cut -d' ' -f2 data/access.log | sort | uniq -c > reports/status_count.txt"
    ]
-  }
+  },
+  {"id": "t14", "kind": "guided", "diff": 2, "check": {"cmd": "^(echo\\s+\\S+\\s*\\|\\s*base64|base64\\s+\\S+)$", "ok": true}, "solution": ["echo hello | base64"]}
  ],
  "vm": [
   {

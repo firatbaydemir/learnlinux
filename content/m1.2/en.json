@@ -122,6 +122,15 @@
      "example": "hostname -I",
      "nosim": true,
      "output": "192.168.1.42"
+    },
+    {
+     "cmd": "hostnamectl",
+     "what": "Shows the machine name, OS, kernel and architecture on one screen.",
+     "where": "When you first log into a server and ask \"which machine is this\".",
+     "why": "It gathers `hostname`, `uname` and `os-release` info; `hostnamectl set-hostname` changes the name permanently (needs sudo). Simulator note: this command does not run in the simulator; the output is an example.",
+     "example": "hostnamectl",
+     "nosim": true,
+     "output": " Static hostname: linux-lab\n  Operating System: Rocky Linux 9.4\n            Kernel: Linux 5.14.0\n      Architecture: x86-64"
     }
    ],
    "tip": "The `student@linux-lab` part of the prompt is user@machine; `whoami` and `hostname` give the same information."
@@ -364,6 +373,10 @@
   "t18": {
    "text": "Ticket: The administrator asks whether the account `student` is in the `wheel` group. As evidence, save only the output containing `wheel` into `~/admin_check.txt`.",
    "hint": "`id`, `grep` (`|` passes output to the next command, `grep` filters; details in modules 3.2 and 3.4.)"
+  },
+  "t19": {
+   "text": "Show the machine name and OS with a single command (type it; the simulator only checks the syntax).",
+   "hint": "The command starts with `host` and ends with `ctl`. (See the host section.)"
   }
  },
  "vm": {
