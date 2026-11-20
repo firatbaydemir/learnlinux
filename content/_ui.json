@@ -1,6 +1,6 @@
 {
  "tr": {
-  "siteName": "Temel Linux Akademisi",
+  "siteName": "Temel Linux Rehberi",
   "tagline": "Tarayıcıda gerçek terminalle Linux öğren — kurulum yok, sunucu yok.",
   "heroKicker": "UYGULAMALI LINUX EĞİTİMİ",
   "heroTitle": "Linux'u yazarak öğren",
@@ -15,6 +15,7 @@
   "modules": "modül",
   "legacyLink": "Eski sürüm (v2)",
   "home": "Ana sayfa",
+  "upcomingNav": "Yeni Eklenecekler",
   "overview": "Öğrenme yolu",
   "objectives": "Bu modülde neler öğreneceksin?",
   "commands": "Komutlar",
@@ -90,7 +91,7 @@
   "more": "İleri okuma"
  },
  "de": {
-  "siteName": "Linux-Grundlagen-Akademie",
+  "siteName": "Linux-Grundlagen-Leitfaden",
   "tagline": "Linux im Browser mit echtem Terminal lernen — ohne Installation, ohne Server.",
   "heroKicker": "LINUX LERNEN MIT PRAXIS",
   "heroTitle": "Linux durch Tippen lernen",
@@ -105,6 +106,7 @@
   "modules": "Module",
   "legacyLink": "Alte Version (v2)",
   "home": "Startseite",
+  "upcomingNav": "Demnächst",
   "overview": "Lernpfad",
   "objectives": "Was lernst du in diesem Modul?",
   "commands": "Befehle",
@@ -180,7 +182,7 @@
   "more": "Zum Vertiefen"
  },
  "en": {
-  "siteName": "Linux Foundations Academy",
+  "siteName": "Foundational Linux Guide",
   "tagline": "Learn Linux in the browser with a real terminal — no install, no server.",
   "heroKicker": "HANDS-ON LINUX LEARNING",
   "heroTitle": "Learn Linux by typing",
@@ -195,6 +197,7 @@
   "modules": "modules",
   "legacyLink": "Old version (v2)",
   "home": "Home",
+  "upcomingNav": "Coming Soon",
   "overview": "Learning path",
   "objectives": "What will you learn in this module?",
   "commands": "Commands",

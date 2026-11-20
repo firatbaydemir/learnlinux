@@ -1,6 +1,6 @@
 {
-  "name": "Temel Linux Akademisi",
-  "short_name": "Linux Akademisi",
+    "name": "Temel Linux Rehberi",
+  "short_name": "Linux Rehberi",
   "description": "Linux temellerini uygulamalı öğren.",
   "lang": "tr",
   "start_url": "./",

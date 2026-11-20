@@ -112,9 +112,10 @@ KIND_ICON = {"warmup": "flame", "guided": "compass", "predict": "eye", "debug": 
 
 
 def topbar(lang, ui, page, extra=""):
+    upc_link = '<a href="upcoming.html" class="toplink">%s</a>' % esc(ui["upcomingNav"])
     return _ic('<header class="top"><a class="brand" href="index.html">' + linux_icon() + '<span>%s</span></a>'
-            '<div class="topr">%s%s<button type="button" class="ibtn" id="themebtn" title="%s" aria-label="%s">@@theme@@</button></div></header>\n'
-            % (esc(ui["siteName"]), extra, lang_switch(lang, page), esc(ui["theme"]), esc(ui["theme"])))
+            '<div class="topr">%s%s%s<button type="button" class="ibtn" id="themebtn" title="%s" aria-label="%s">@@theme@@</button></div></header>\n'
+            % (esc(ui["siteName"]), upc_link, extra, lang_switch(lang, page), esc(ui["theme"]), esc(ui["theme"])))
 
 
 def linux_icon():
@@ -353,6 +354,24 @@ def build_module(lang, ui, mods_meta, mid, built):
     return "".join(o)
 
 
+def build_upcoming_page(lang, ui, upcoming_data):
+    out = [head(lang, upcoming_data["title"] + " — " + ui["siteName"]), '<body class="page-index">\n',
+           topbar(lang, ui, "upcoming.html"),
+           '<main class="wrap">\n',
+           '<article class="card"><h1>%s</h1>\n' % esc(upcoming_data["title"]),
+           '<section><h2>%s</h2><p><strong>%s:</strong> %s (%d %s)</p><p>%s</p></section>\n'
+           % (esc(upcoming_data["current"]["label"]), esc(upcoming_data["current"]["project"]),
+              esc(upcoming_data["current"]["project"]), upcoming_data["current"]["modules"],
+              esc(ui["modules"]), esc(upcoming_data["info"]))]
+    out.append('<section><h2>%s</h2><ol class="upcoming-list">\n' % esc(upcoming_data["foundation"]["title"]))
+    for item in upcoming_data["foundation"]["items"]:
+        out.append('<li><strong>%s</strong><p>%s</p></li>\n' % (esc(item["title"]), esc(item["description"])))
+    out.append('</ol></section>\n')
+    out.append('<p class="muted">%s</p></article>\n' % esc(upcoming_data["note"]))
+    out.append('</main>\n</body>\n</html>\n')
+    return "".join(out)
+
+
 def build_root(ui_all):
     links = "".join('<a class="btn primary" href="%s/index.html" hreflang="%s" lang="%s">%s</a>' % (l, l, l, LANG_NAMES[l]) for l in LANGS)
     return ('<!doctype html>\n<html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -396,6 +415,7 @@ def main():
     build_css()
     mods_meta = load(CONTENT / "_modules.json")
     ui_all = load(CONTENT / "_ui.json")
+    upcoming_all = load(CONTENT / "_upcoming.json")
     built = built_modules()
     n = 0
     for lang in LANGS:
@@ -403,6 +423,8 @@ def main():
         d.mkdir(exist_ok=True)
         ui = ui_all[lang]
         (d / "index.html").write_text(build_index(lang, ui, mods_meta, built), encoding="utf-8")
+        n += 1
+        (d / "upcoming.html").write_text(build_upcoming_page(lang, ui, upcoming_all[lang]), encoding="utf-8")
         n += 1
         for mid in built:
             (d / mod_file(mid)).write_text(build_module(lang, ui, mods_meta, mid, built), encoding="utf-8")

@@ -1,0 +1,137 @@
+{
+ "tr": {
+  "title": "Yeni Eklenecekler",
+  "current": {
+   "label": "Şu Anda Mevcut",
+   "project": "Temel Linux Rehberi",
+   "modules": 47
+  },
+  "info": "Linux temelleriyle başlayan, sistem yönetimi, veritabanı, otomasyon ve altyapı becerilerini kapsayan eğitim yol haritası.",
+  "foundation": {
+   "title": "Faz 1: Temel Yeterlilik Eğitimleri",
+   "items": [
+    {
+     "id": 1,
+     "title": "İleri Seviye Linux Kullanımı",
+     "description": "Sistem yönetimi, güvenlik, performans optimizasyonu ve ileri bash kullanımı"
+    },
+    {
+     "id": 2,
+     "title": "Bash Script ve Otomasyon",
+     "description": "Kapsamlı bash scriptleme, sistem otomasyonu, hata yönetimi ve debugging"
+    },
+    {
+     "id": 3,
+     "title": "Temel SQL Eğitimi",
+     "description": "İlişkisel veritabanları, SQL sorguları, veritabanı tasarımı ve optimizasyon"
+    },
+    {
+     "id": 4,
+     "title": "Git ve Versiyon Kontrol",
+     "description": "Git temel ve ileri kullanım, iş akışları, branch stratejileri, ekip çalışması"
+    },
+    {
+     "id": 5,
+     "title": "Active Directory Temelleri",
+     "description": "Windows Active Directory kurulumu, kullanıcı ve grup yönetimi, politikalar"
+    },
+    {
+     "id": 6,
+     "title": "Hardware Temelleri",
+     "description": "Donanım bileşenleri, sistem mimarisi, performans metrikleri, troubleshooting"
+    }
+   ]
+  },
+  "note": "Her eğitim bağımsız bir platform olarak yayınlanacaktır. Sıralı ilerleme önerilir, ancak zorunlu değildir."
+ },
+ "de": {
+  "title": "Demnächst",
+  "current": {
+   "label": "Derzeit verfügbar",
+   "project": "Linux-Grundlagen-Leitfaden",
+   "modules": 47
+  },
+  "info": "Ein Lernpfad, der mit Linux-Grundlagen beginnt und Systemverwaltung, Datenbanken, Automatisierung und Infrastruktur-Fähigkeiten umfasst.",
+  "foundation": {
+   "title": "Phase 1: Grundlegende Kompetenzschulungen",
+   "items": [
+    {
+     "id": 1,
+     "title": "Fortgeschrittene Linux-Nutzung",
+     "description": "Systemverwaltung, Sicherheit, Leistungsoptimierung und fortgeschrittene Bash-Nutzung"
+    },
+    {
+     "id": 2,
+     "title": "Bash-Scripting und Automatisierung",
+     "description": "Umfassendes Bash-Scripting, Systemautomatisierung, Fehlerbehandlung und Debugging"
+    },
+    {
+     "id": 3,
+     "title": "Grundlegendes SQL-Training",
+     "description": "Relationale Datenbanken, SQL-Abfragen, Datenbankdesign und Optimierung"
+    },
+    {
+     "id": 4,
+     "title": "Git und Versionskontrolle",
+     "description": "Git Basis- und Fortgeschrittenennutzung, Workflows, Branch-Strategien, Teamarbeit"
+    },
+    {
+     "id": 5,
+     "title": "Active Directory Grundlagen",
+     "description": "Windows Active Directory-Einrichtung, Benutzer- und Gruppenverwaltung, Richtlinien"
+    },
+    {
+     "id": 6,
+     "title": "Hardware-Grundlagen",
+     "description": "Hardware-Komponenten, Systemarchitektur, Leistungsmetriken, Fehlerbehebung"
+    }
+   ]
+  },
+  "note": "Jede Schulung wird als eigenständige Plattform veröffentlicht. Eine sequentielle Reihenfolge wird empfohlen, ist aber nicht erforderlich."
+ },
+ "en": {
+  "title": "Coming Soon",
+  "current": {
+   "label": "Currently Available",
+   "project": "Foundational Linux Guide",
+   "modules": 47
+  },
+  "info": "A learning path starting with Linux fundamentals and covering system administration, databases, automation, and infrastructure skills.",
+  "foundation": {
+   "title": "Phase 1: Foundation Skill Trainings",
+   "items": [
+    {
+     "id": 1,
+     "title": "Advanced Linux Usage",
+     "description": "System administration, security, performance optimization, and advanced bash usage"
+    },
+    {
+     "id": 2,
+     "title": "Bash Scripting and Automation",
+     "description": "Comprehensive bash scripting, system automation, error handling, and debugging"
+    },
+    {
+     "id": 3,
+     "title": "Foundational SQL Training",
+     "description": "Relational databases, SQL queries, database design, and optimization"
+    },
+    {
+     "id": 4,
+     "title": "Git and Version Control",
+     "description": "Git basic and advanced usage, workflows, branch strategies, team collaboration"
+    },
+    {
+     "id": 5,
+     "title": "Active Directory Fundamentals",
+     "description": "Windows Active Directory setup, user and group management, policies"
+    },
+    {
+     "id": 6,
+     "title": "Hardware Fundamentals",
+     "description": "Hardware components, system architecture, performance metrics, troubleshooting"
+    }
+   ]
+  },
+  "note": "Each training will be published as an independent platform. Sequential progression is recommended but not required."
+ }
+}

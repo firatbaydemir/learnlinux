@@ -1,6 +1,8 @@
-# Temel Linux Akademisi 
+# Temel Linux Rehberi
 
-Linux temellerini tarayıcıda uygulamalı öğrenmek için hazırlanmış, bağımsız ve statik bir eğitim projesi. Sunucu tarafı veya çalışma zamanında internet bağlantısı gerektirmez.
+Linux temellerini tarayıcıda uygulamalı öğrenmek için hazırlanmış, bağımsız ve statik bir eğitim projesi. Bu proje, **Sistem Mühendisliği Rehberi** serisinin ilk eğitimidir.
+
+Sunucu tarafı veya çalışma zamanında internet bağlantısı gerektirmez.
 
 - **47 modül** · **686 simülatör görevi** · **232 VM görevi** · **188 öz test sorusu**
 - **Türkçe, Deutsch ve English**
@@ -81,14 +83,29 @@ Depoyu GitHub'a gönderdikten sonra **Settings → Pages → Build and deploymen
 
 Yeni modül ekleme ve içerik kuralları için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bak.
 
+## Gelecek Projeler
+
+Bu proje **Sistem Mühendisliği Rehberi** serisinin ilk eğitimidir. Faz 1 kapsamında planlanan temel yeterlilik eğitimleri:
+
+- İleri Seviye Linux Kullanımı
+- Bash Script ve Otomasyon
+- Temel SQL Eğitimi
+- Git ve Versiyon Kontrol
+- Active Directory Temelleri
+- Hardware Temelleri
+
+Her eğitim bağımsız bir platform olarak yayınlanacaktır. Detaylar için siteye gir ve "Yeni Eklenecekler" sayfasına bak.
+
 ## Lisans
 
 Bu projenin kodu ve eğitim içeriği MIT lisansı altındadır. Ayrıntılar için [LICENSE](LICENSE) dosyasına bak.
 
 
-# Linux-Grundlagenakademie
+# Linux-Grundlagen-Leitfaden
 
-Ein unabhängiges, statisches Lernprojekt, um Linux-Grundlagen praktisch im Browser zu erlernen. Es benötigt weder eine serverseitige Anwendung noch eine Internetverbindung zur Laufzeit.
+Ein unabhängiges, statisches Lernprojekt, um Linux-Grundlagen praktisch im Browser zu erlernen. Dieses Projekt ist der erste Kurs in der Serie **Systemtechnik-Leitfäden**.
+
+Es benötigt weder eine serverseitige Anwendung noch eine Internetverbindung zur Laufzeit.
 
 - **47 Module** · **686 Simulatoraufgaben** · **232 VM-Aufgaben** · **188 Fragen zur Selbstüberprüfung**
 - **Türkisch, Deutsch und Englisch**
@@ -165,14 +182,29 @@ node tests/test_terminal.js
 
 Nachdem du das Repository auf GitHub hochgeladen hast, wähle unter **Settings → Pages → Build and deployment** die Option **Deploy from a branch**. Lege den Branch `main` und den Ordner `/(root)` als Veröffentlichungsquelle fest. Der GitHub-Actions-Validierungsworkflow prüft bei jedem Push und Pull Request die Inhalte und Tests und kontrolliert, ob das generierte HTML aktuell ist.
 
+## Zukünftige Projekte
+
+Dieses Projekt ist der erste Kurs in der Serie **Systemtechnik-Leitfäden**. Geplante Grundkompetenzschulungen in Phase 1:
+
+- Fortgeschrittene Linux-Nutzung
+- Bash-Scripting und Automatisierung
+- Grundlegendes SQL-Training
+- Git und Versionskontrolle
+- Active Directory Grundlagen
+- Hardware-Grundlagen
+
+Jede Schulung wird als eigenständige Plattform veröffentlicht. Für Details besuche die Website und sieh dir die Seite "Demnächst" an.
+
 ## Mitwirken
 
 Informationen zum Hinzufügen neuer Module und zu den Inhaltsregeln findest du in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
-# Linux Fundamentals Academy
+# Foundational Linux Guide
 
-An independent, static educational project for learning Linux fundamentals through hands-on practice in the browser. It requires no server-side application or internet connection at runtime.
+An independent, static educational project for learning Linux fundamentals through hands-on practice in the browser. This project is the first course in the **Systems Engineering Guide** series.
+
+It requires no server-side application or internet connection at runtime.
 
 - **47 modules** · **686 simulator tasks** · **232 VM tasks** · **188 self-test questions**
 - **Turkish, German, and English**
@@ -248,6 +280,19 @@ node tests/test_terminal.js
 ```
 
 After pushing the repository to GitHub, select **Deploy from a branch** under **Settings → Pages → Build and deployment**. Set the `main` branch and the `/(root)` folder as the publishing source. The GitHub Actions validation workflow checks the content and runs the tests on every push and pull request, and verifies that the generated HTML is up to date.
+
+## Future Projects
+
+This project is the first course in the **Systems Engineering Guide** series. Planned foundation skill training courses in Phase 1:
+
+- Advanced Linux Usage
+- Bash Scripting and Automation
+- Foundational SQL Training
+- Git and Version Control
+- Active Directory Fundamentals
+- Hardware Fundamentals
+
+Each training will be published as an independent platform. For details, visit the site and check the "Coming Soon" page.
 
 ## Contributing
 
