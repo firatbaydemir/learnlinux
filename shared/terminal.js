@@ -125,6 +125,7 @@
     whoami: ['whoami', 'Geçerli kullanıcı adını yazar.', 'Gibt den aktuellen Benutzernamen aus.', 'Print the effective user name.'],
     groups: ['groups', 'Ait olduğun grupları yazar.', 'Gibt deine Gruppen aus.', 'Print the groups you belong to.'],
     hostname: ['hostname', 'Makine adını yazar.', 'Gibt den Rechnernamen aus.', 'Print the machine name.'],
+    hostnamectl: ['hostnamectl', 'Makine adını, işletim sistemini, çekirdeği ve mimariyi gösterir.', 'Zeigt Rechnername, Betriebssystem, Kernel und Architektur.', 'Show hostname, operating system, kernel, and architecture.'],
     uname: ['uname [-asrm]', 'Sistem bilgisi: -r kernel, -m mimari, -a hepsi.', 'Systeminfo: -r Kernel, -m Architektur, -a alles.', 'System info: -r kernel, -m architecture, -a all.'],
     date: ['date', 'Tarih ve saati yazar.', 'Gibt Datum und Uhrzeit aus.', 'Print date and time.'],
     clear: ['clear', 'Ekranı temizler.', 'Löscht den Bildschirm.', 'Clear the screen.'],
@@ -708,6 +709,12 @@
   COMMANDS.exit = function (a, io) { io.error('logout (simulator: oturum kapatılmaz)'); return 0; };
   COMMANDS.whoami = function (a, io) { io.write(this.user.name + '\n'); };
   COMMANDS.hostname = function (a, io) { io.write('linux-lab\n'); };
+  COMMANDS.hostnamectl = function (a, io) {
+    io.write('   Static hostname: linux-lab\n');
+    io.write('  Operating System: Rocky Linux 9.4\n');
+    io.write('            Kernel: Linux 5.14.0\n');
+    io.write('      Architecture: x86-64\n');
+  };
   COMMANDS.date = function (a, io) {
     var d = new Date(), D = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     io.write(D[d.getDay()] + ' ' + MON[d.getMonth()] + ' ' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ' CET ' + d.getFullYear() + '\n');
